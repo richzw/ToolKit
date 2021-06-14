@@ -34,6 +34,7 @@ Kafka fast consumer
 TimeWheel
 ======
 
+[Hashed and Hierarchical Timing Wheels](https://blog.acolyer.org/2015/11/23/hashed-and-hierarchical-timing-wheels/)
 
 
 gRPC internal
