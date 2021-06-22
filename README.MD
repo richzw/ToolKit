@@ -52,7 +52,43 @@ Delay Queue
 gRPC internal
 ======
 
-- grpc [default timeout](https://github.com/grpc-ecosystem/grpc-gateway/blob/6d2b64e3a9edc3d206345280e594703a7d4c5543/runtime/context.go#L39-L41)
+- gRPC [default timeout](https://github.com/grpc-ecosystem/grpc-gateway/blob/6d2b64e3a9edc3d206345280e594703a7d4c5543/runtime/context.go#L39-L41)
+
+- `gRPC` and `gRPC-gateway` debug with wireshark 
+
+```go
+        // grpc-gateway
+	mux := runtime.NewServeMux(
+		runtime.WithErrorHandler(CustomHTTPError),
+	)
+	opts := []grpc.DialOption{grpc.WithInsecure()}
+	err := gw.RegisterGreeterHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts)
+	if err != nil {
+		return err
+	}
+
+	runtime.DefaultContextTimeout = 8 * time.Second // RST_STREAM from grpc gate-way to grpc server with error code cancel
+	// 504 gate way timeout to client
+
+	// 408 request timeout for curl  curl  http://localhost:8081/say/benishere  -m 5  with 5 seconds
+	// client send fin-ack to grpc-gateway, and grpc-gateway forward RST_STREAM to grpc server
+	svr := http.Server{ReadTimeout: 3 * time.Second,
+		WriteTimeout: 3 * time.Second,
+		Addr:         ":8081",
+		Handler:      mux,
+	}
+	
+	// grpc server
+        s := grpc.NewServer(grpc.StatsHandler(&serverStats{}),
+            grpc.MaxRecvMsgSize(300000), // 429 Too Many Requests, received message larger than max
+            grpc.KeepaliveParams(keepalive.ServerParameters{
+                MaxConnectionIdle: time.Duration(15) * time.Second, // send GO_AWAY frame
+                Timeout:           time.Duration(3) * time.Second,  // timeout of send PING frame
+                Time:              time.Duration(5) * time.Second,  // send PING frame
+            }), 
+        )
+```
+
 
 
 
