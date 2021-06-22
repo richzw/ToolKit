@@ -26,6 +26,31 @@ Redis lock
 
 based on [doc](https://redis.io/topics/distlock)
 
+Redis `unlink` under the hook
+=========
+
+Both `DEL` and `UNLINK` free the key part in blocking mode. And the difference is the way they free the value part.
+
+`DEL` always frees the value part in **blocking** mode. However, if the value is too large, e.g. too many allocations for a large `LIST` or `HASH`, it blocks Redis for a long time. In order to solve the problem, Redis implements the `UNLINK` command, i.e. an 'non-blocking' delete.
+
+In fact, `UNLINK` is **NOT always non-blocking/async**. If the value is small, e.g. the size of `LIST` or `HASH` is less than __64__,
+the value will be freed immediately. In this way, `UNLINK` is almost the same as `DEL`, except that it costs a few more function calls than `DEL`. 
+However, if the value is large, Redis puts the value into a list, and the value will be freed by another thread i.e. the non-blocking free (`lazyfree.c`). 
+In this way, the main thread has to do some synchronization with the background thread (`bio dbAsyncDelete`), and that's also a cost.
+
+`dbAsyncDelete -->  BIO_LAZY_FREE list --> bioProcessBackgroundJobs --> delete key through signal broadcast`
+```
+bio job type:
+  - BIO_CLOSE_FILE    0 /* Deferred close(2) syscall. */
+  - BIO_AOF_FSYNC     1 /* Deferred AOF fsync. */
+  - BIO_LAZY_FREE     2 /* Deferred objects freeing. */
+
+```
+
+In a conclusion, if __the value is small__, `DEL` is at least, as good as `UNLINK`. If value is very large, e.g. LIST with thousands or millions of items, UNLINK is much better than DEL. You can always safely replace DEL with UNLINK. However, if you find the thread synchronization becomes a problem (multi-threading is always a headache), you can rollback to DEL.
+
+Since Redis 6.0, there's a new configuration: `lazyfree-lazy-user-del`. You can set it to be yes, and Redis will run the `DEL` command as if running a `UNLINK` command.
+
 Kafka fast consumer
 ======
 
@@ -34,7 +59,7 @@ Kafka fast consumer
 Time Wheel
 ======
 
-[Hashed and Hierarchical Timing Wheels  ](https://blog.acolyer.org/2015/11/23/hashed-and-hierarchical-timing-wheels/)
+[Hashed and Hierarchical Timing Wheels](https://blog.acolyer.org/2015/11/23/hashed-and-hierarchical-timing-wheels/)
 
 Delay Queue
 ======
