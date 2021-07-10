@@ -114,6 +114,59 @@ gRPC internal
         )
 ```
 
+- keepalive
+  - what
+    
+     gRPC sends http2 pings on the transport to detect if the connection is down.
+     If the ping is not acknowledged by the other side within a certain period, the connection will be closed.
+  - why
+    - fast to detect TCP connection failure. 
+    - keep the connection alive, some L4 proxies are configured to kill 'idle' connection
+  - how
+    - client side
+      ```go
+      keepalive.ClientParameters{
+        Time:                10 * time.Second, // send pings every 10 seconds if there is no activity
+        Timeout:             time.Second,      // wait 1 second for ping ack before considering the connection dead
+        PermitWithoutStream: true,             // send pings even without active streams
+      }
+      ```
+  
+    - server side
+      ```go
+      keepalive.EnforcementPolicy{
+        MinTime:             5 * time.Second, // If a client pings more than once every 5 seconds, terminate the connection
+        PermitWithoutStream: true,            // Allow pings even when there are no active streams
+      }
+      
+      var kasp = keepalive.ServerParameters{
+        MaxConnectionIdle:     15 * time.Second, // If a client is idle for 15 seconds, send a GOAWAY
+        MaxConnectionAge:      30 * time.Second, // If any connection is alive for more than 30 seconds, send a GOAWAY
+        MaxConnectionAgeGrace: 5 * time.Second,  // Allow 5 seconds for pending RPCs to complete before forcibly closing connections
+        Time:                  5 * time.Second,  // Ping the client if it is idle for 5 seconds to ensure the connection is still active
+        Timeout:               1 * time.Second,  // Wait 1 second for the ping ack before assuming the connection is dead
+      }
+      ```
+
+      `Enforcement policy` is a special setting on server side to protect server from malicious or misbehaving clients.
+
+       Server sends `GOAWAY` with `ENHANCE_YOUR_CALM` and close the connection when bad behaviors are detected:
+
+         - Client sends too frequent pings
+         - Client sends pings when there's no stream and this is disallowed by server config
+
+  
+  
+
+    
+
+
+
+
+
+
+
+
 
 
 
