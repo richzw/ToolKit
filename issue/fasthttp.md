@@ -2,7 +2,7 @@
 no free connections available to host
 -------
 
-原因： 连接数已经达到了 maxConns = DefaultMaxConnsPerHost = 512(默认值)。连接数达到最大值了
+- 原因： 连接数已经达到了 maxConns = DefaultMaxConnsPerHost = 512(默认值)。连接数达到最大值了
 
 ```go
 func (c *HostClient) acquireConn() (*clientConn, error) {
@@ -117,8 +117,23 @@ func (c *HostClient) DoTimeout(req *Request, resp *Response, timeout time.Durati
 }
 ```
 
-Solution：
+- Solution：
 
 需要设置 ReadTimeout 字段，达到 ReadTimeout 时间还没有得到返回值，客户端就会把连接断开（
+
+
+ErrConnectionClosed
+--------------
+
+fasthttp default idle timeout is 15 seconds. 如果对方默认keep-live 时间是8s。
+需要设置 IdleConnTimeout 小于 8s 
+
+原生http木有问题，是因为两个 协程 在 loop write read,所以对 server 端 FIN 是 及时响应的，也就是client 及时也关闭了链接
+
+
+Source
+-------
+
+- https://www.jianshu.com/p/12f3955c7e1c
 
 
