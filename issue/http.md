@@ -1,7 +1,8 @@
 Golang http
-=========
+==========
 
 Http 重用底层TCP链接
+---------------
 
 官方释疑
 
@@ -85,4 +86,50 @@ Http 重用底层TCP链接
             resp.Body.Close()
         }
     }
+```
+
+Timeout vs Deadline
+------------
+
+Go exposes to implement `timeouts`: `Deadlines`.
+
+Exposed by `net.Conn` with the Set [Read|Write]Deadline(time.Time) methods, Deadlines are an __absolute time__ which when reached makes all I/O operations fail with a timeout error.
+
+- Server Timeout
+
+![img.png](client_timeout.png)
+
+```go
+srv := &http.Server{
+    ReadTimeout: 5 * time.Second,
+    WriteTimeout: 10 * time.Second,
+}
+
+log.Println(srv.ListenAndServe())
+```
+
+  - ReadTimeout covers the time from when the connection is accepted to when the request body is fully read (if you do read the body, otherwise to the end of the headers). It's implemented in net/http by calling SetReadDeadline immediately after Accept.
+
+  - WriteTimeout normally covers the time from the end of the request header read to the end of the response write (a.k.a. the lifetime of the ServeHTTP), by calling SetWriteDeadline
+
+- Client Timeout
+
+![img_1.png](server_timeout.png)
+
+```go
+c := &http.Client{
+    Transport: &http.Transport{
+        Dial: (&net.Dialer{
+                Timeout:   30 * time.Second,
+                KeepAlive: 30 * time.Second,
+        }).Dial,
+        MaxIdleConns:          100,
+        IdleConnTimeout:       90 * time.Second,
+        TLSHandshakeTimeout:   10 * time.Second,
+        ResponseHeaderTimeout: 10 * time.Second,
+        ExpectContinueTimeout: 1 * time.Second,
+        ForceAttemptHTTP2:     true,
+    }
+}
+
 ```
