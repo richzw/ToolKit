@@ -133,3 +133,89 @@ c := &http.Client{
 }
 
 ```
+
+KeepAlive
+-----------
+
+- HTTP KeepAlive
+
+  - 原理
+    
+    HTTP 的 Keep-Alive，是由应用层（用户态） 实现的，称为 HTTP 长连接
+      - 客户端请求的包头中 `Connection: Keep-Alive`
+      - web 服务软件一般都会提供 `keepalive_timeout` 参数，用来指定 HTTP 长连接的超时时间
+   
+  -  线上存在网络问题，会导致 `GRPC HOL blocking`, 于是决定把 GRPC client改写成 HTTP client
+    
+  -  HTTP Client 存在 EOF 错误，EOF 一般是跟 IO 关闭有关系的, 网络 IO 的Keep-Alive 机制有关系
+    
+    Client side
+    ```go
+     c := &http.Client{
+        Transport: &http.Transport{
+           MaxIdleConnsPerHost: 1,
+           DialContext: (&net.Dialer{
+                Timeout:   time.Second * 2,
+                KeepAlive: time.Second * 60,
+           }).DialContext,
+           DisableKeepAlives: false,  // Enable keep-alive
+           IdleConnTimeout:   90 * time.Second,
+          },
+        Timeout: time.Second * 2,
+     }
+    ```
+    
+  - Doc
+    
+    ```go
+    type Dialer struct {
+    ...
+     // KeepAlive specifies the interval between keep-alive
+     // probes for an active network connection.
+     // If zero, keep-alive probes are sent with a default value
+     // (currently 15 seconds), if supported by the protocol and operating
+     // system. Network protocols or operating systems that do
+     // not support keep-alives ignore this field.
+     // If negative, keep-alive probes are disabled.
+     KeepAlive time.Duration
+    ...
+    }
+    ```
+
+- TCP KeepAlive
+
+  - 原理
+    
+    该功能是由「内核」实现的，当客户端和服务端长达一定时间没有进行数据交互时，内核为了确保该连接是否还有效，就会发送探测报文，来检测对方是否还在线，然后来决定是否要关闭该连接
+    需要通过 socket 接口设置 SO_KEEPALIVE 选项才能够生效，如果没有设置，那么就无法使用 TCP 保活机制
+  - 测试
+    ```shell
+    > redis-cli -h 172.24.213.39 -p 6380
+    > tcpdump -i eth0 -n host 172.24.213.39
+     # 会看到 client 每隔 15s 会发送空的 ACK 包给 server, 并收到 server 返回的 ACK, 实际上这就是 client 端的 tcp keepalive 在起作用。
+     # 然后我们在 server 设置 iptables, 人为制造网络隔离
+    > iptables -I INPUT -s 172.24.213.40 -j DROP;iptables -I OUTPUT -d 172.24.213.40 -j DROP;iptables -nvL
+    # client 172.24.213.40 每 5s 发送一个 ACK 三次，最后发一个 RST 包销毁连接。当然这个 RST redis-server 肯定也没有接收到。过一会将 server 防火墙删除
+    > iptables -D INPUT -s 172.24.213.40 -j DROP;iptables -D OUTPUT -d 172.24.213.40 -j DROP;iptables -nvL
+    > ss -a | grep 6380
+    ```
+  - 参数
+    ```shell
+    > cat /proc/sys/net/ipv4/tcp_keepalive_time
+    7200
+    > cat /proc/sys/net/ipv4/tcp_keepalive_probes
+    9
+    > cat /proc/sys/net/ipv4/tcp_keepalive_intvl
+    75
+    ```
+    
+  - Go TCP: 
+    
+    经过 net: enable TCP keepalives by default 和 net: add KeepAlive field to ListenConfig之后，从 go1.13 开始，默认都会开启 client 端与 server 端的 keepalive, 默认是 15s
+    
+    `func (ln *TCPListener) accept() (*TCPConn, error) `
+    
+    `func setKeepAlivePeriod(fd *netFD, d time.Duration) error`
+
+
+
