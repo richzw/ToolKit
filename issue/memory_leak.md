@@ -163,18 +163,92 @@ Memory Leak
 
 - 排查方法
 
-在业务服务的运行场景中，Goroutine 内导致的泄露，大多数处于生产、测试环境，因此更多的是使用 `PProf`：
+  在业务服务的运行场景中，Goroutine 内导致的泄露，大多数处于生产、测试环境，因此更多的是使用 `PProf`：
 
-```go
-import (
-"net/http"
-_ "net/http/pprof"
-)
+  ```go
+  import (
+  "net/http"
+  _ "net/http/pprof"
+  )
+  
+  http.ListenAndServe("localhost:6060", nil))
+  ```
 
-http.ListenAndServe("localhost:6060", nil))
-```
+  只要我们调用 `http://localhost:6060/debug/pprof/goroutine?debug=1`，PProf 会返回所有带有堆栈跟踪的 Goroutine 列表。
 
-只要我们调用 `http://localhost:6060/debug/pprof/goroutine?debug=1`，PProf 会返回所有带有堆栈跟踪的 Goroutine 列表。
+  case 2:
+  我们直接找一台能ping通容器并且装了golang的机器，直接用下面的命令看看当前服务的内存分配情况：
+  ```shell
+  $ go tool pprof -inuse_space http://ip:amdin_port/debug/pprof/heap
+  ```
+  `-inuse_space`参数就是当前服务使用的内存情况，还有一个`-alloc_space`参数是指服务启动以来总共分配的内存情况. 进入交互界面后我们用top命令看下当前占用内存最高的部分
+
+  再抓一下当前内存分配的详情：
+  ```shell
+  $ wget http://ip:admin_port/debug/pprof/heap?debug=1
+  ```
+
+  这个命令其实就是把当前内存分配的详情文件抓了下来，本地会生成一个叫heap?debug=1的文件，看一看服务内存分配的具体情况
+
+  说不定是goroutine泄漏呢！于是赶在内存暴涨结束之际，又火速敲下以下命令：
+  ```shell
+  $ wget http://ip:admin_port/debug/pprof/goroutine?debug=1
+  $ wget http://ip:admin_port/debug/pprof/goroutine?debug=2
+  ```
+
+  debug=1就是获取服务当前goroutine的数目和大致信息，debug=2获取服务当前goroutine的详细信息
+
+  再看看服务线程挂的子线程有多少：
+  ```shell
+  $ ps mp 3030923 -o THREAD,tid | wc -l
+  ```
+
+  - 原因1，channel堵塞导致goroutine泄漏
+  ```go
+   ch := make(chan struct{})
+  
+    go func () {
+      wg.Wait()
+      ch <- struct{}{}
+    }()
+  
+    // 接收完成或者超时
+    select {
+    case <- ch:
+      return
+    case <- time.After(time.Second * 10):
+      return
+    }
+  ```
+
+  - 原因2 http超时导致goroutine泄漏
+
+  ```go
+  // 默认的httpClient
+  var DefaultCli *http.Client
+  
+  func init() {
+    DefaultCli = &http.Client{
+      // --> should set timeout
+      Transport: &http.Transport{
+        DialContext: (&net.Dialer{
+          Timeout:   2 * time.Second,
+          KeepAlive: 30 * time.Second,
+        }).DialContext,
+    }}
+  }
+  ```
+  
+  - 原因3 go新版本内存管理问题
+
+    Go1.12中使用的新的MADV_FREE模式，这个模式会更有效的释放无用的内存，但可能会让RSS增高
+  ```shell
+    GODEBUG=madvdontneed=1
+  ```
+  
 
 
+
+
+  
 
