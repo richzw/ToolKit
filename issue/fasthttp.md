@@ -130,6 +130,15 @@ fasthttp default idle timeout is 15 seconds. 如果对方默认keep-live 时间�
 
 原生http木有问题，是因为两个 协程 在 loop write read,所以对 server 端 FIN 是 及时响应的，也就是client 及时也关闭了链接
 
+Context with sync.Pool
+-------------
+
+fasthttp 它几乎把所有的对象都用sync.Pool维护。
+
+但这样的复用不一定全是合理的。比如在fasthttp中，传递上下文相关信息的RequestCtx就是用sync.Pool维护的，这就导致了你不能把它传递给其他的goroutine。
+
+如果要在fasthttp中实现类似接受请求->异步处理的逻辑, **必须得拷贝一份RequestCtx再传递**。
+
 
 Source
 -------
