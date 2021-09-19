@@ -71,7 +71,17 @@
     - 通过使用automaxprocs库, 可根据分配给容器的cpu quota, 正确设置GOMAXPROCS以及P的数量, 减少线程数，使得GC停顿稳定在<1ms了. 且同等CPU消耗情况下, QPS可增大一倍，平均响应时间由200ms减少到100ms. 线程上下文切换减少为原来的1/6
     - 同时还简单分析了该库的原理. 找到容器的cgroup目录, 计算cpuacct,cpu下cpu.cfs_quota_us/cpu.cfs_period_us, 即为分配的cpu核数.
 
+- `free -m`查看free为零，而cache很大
 
+  ```shell
+  ps auxw|head -1;ps auxw|sort -rn -k4|head -10
+  
+  lsof -n|awk '{print $2}'|sort|uniq -c|sort -nr|more
+  ```
+
+  我们之前遇到过SLAB内存泄露的情况，某公司物理机写了个定时脚本 echo 1 > /proc/sys/vm/drop_caches，会跑满一个核，除此之外没有观测到明显影响，你可以考虑在业务不活跃的情况下试一下。
+
+  
 
 
 
