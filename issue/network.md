@@ -82,6 +82,60 @@
   - ![img.png](network_netpoll.png)
   - `tcpdump -S -nn -vvv -i lo0 port 8000` -vvv是为了打印更多的详细描述信息，-S 显示序列号绝对值
 
+- [Forcefully Close TCP Connections in Golang](https://itnext.io/forcefully-close-tcp-connections-in-golang-e5f5b1b14ce6)
+  - the traditional default close 
+
+    when we execute our `net.Conn.Close()` method, the TCP session we execute it against will start a connection termination sequence which includes handling (discarding) any outstanding data. That is, until we receive the final FIN-ACK packet
+    `tcpdump -n -vvv -i lo0 port 9000`
+  
+  - a forceful close using the `SetLinger()` method
+
+    This method is changing the SO_LINGER socket option value using system calls against the Operating System.
+    ```go
+    // Use SetLinger to force close the connection
+    // When set to exactly 0, the Operating System will immediately close the connection and drop any outstanding packets.
+    err := c.(*net.TCPConn).SetLinger(0)
+    if err != nil {
+        log.Printf("Error when setting linger: %s", err)
+    }
+    defer c.Close()
+    ```
+    A RST packet is a special type of packet used for “resetting” TCP connections. It is a way for the sender to tell the remote side that it will neither accept nor receive new data for this connection.
+
+- [SO_REUSEPORT](https://douglasmakey.medium.com/socket-sharding-in-linux-example-with-go-b0514d6b5d08)
+  
+  Linux 3.9 内核引入了 SO_REUSEPORT选项（实际在此之前有一个类似的选项 SO_REUSEADDR，但它没有做到真正的端口复用，详细可见参考链接1）。
+
+  SO_REUSEPORT 支持多个进程或者线程绑定到同一端口，用于提高服务器程序的性能。它的特性包含以下几点：
+
+  - 允许多个套接字 bind 同一个TCP/UDP 端口
+    - 每一个线程拥有自己的服务器套接字
+    - 在服务器套接字上没有了锁的竞争
+  - 内核层面实现负载均衡
+  - 安全层面，监听同一个端口的套接字只能位于同一个用户下（same effective UID）
+  - For TCP sockets, this option allows accept(2) load distribution in a multi-threaded server to be improved by using a distinct listener socket for each thread. This provides improved load distribution as compared to traditional techniques such using a single accept(2)ing thread that distributes connections, or having multiple threads that compete to accept(2) from the same socket.
+  - For UDP sockets, the use of this option can provide better distribution of incoming datagrams to multiple processes (or threads) as compared to the traditional technique of having multiple processes compete to receive datagrams on the same socket.
+
+  ```go
+  var lc = net.ListenConfig{
+      Control: func(network, address string, c syscall.RawConn) error {
+          var opErr error
+          if err := c.Control(func(fd uintptr) {
+              opErr = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
+          }); err != nil {
+              return err
+          }
+          return opErr
+      },
+  }
+  l, err := lc.Listen(context.Background(), "tcp", "127.0.0.1:8080")
+  ```
+  
+  - Security
+    
+    To prevent this “port hijacking,” Linux has special protections or mechanisms to prevent these problems, such as:
+    - Both sockets must have been created with the SO_REUSEPORT socket option. If there is a socket running without SO_REUSEPORT and we try to create another socket even with the SO_REUSEPORT socket option, it will fail with the error already in use.
+    - All sockets that want to listen to the same IP and port combination must have the same effective userID. For example, if you want to hijack the Nginx port and it is running under the ownership of the user Pepito, a new process can listen to the same port only if it is also owned by the user Pepito. So one user cannot “steal” ports of other users.
 
 
 
