@@ -93,7 +93,7 @@ Memory Leak
     }
     ```
     
-  -  互斥锁忘记解锁
+  - 互斥锁忘记解锁
     ```go
     var mutex sync.Mutex
     for i := 0; i < 10; i++ {
@@ -143,6 +143,30 @@ Memory Leak
     ```
     被遗弃的 `time.After` 定时任务还是在时间堆里面，定时任务未到期之前，是不会被 GC 清理的。
     在 `for` 循环里**不要**使用 `select + time.After` 的组合
+    
+    另外，从select 语义来看，每次执行select的时候，`time.After`总会执行一次。[参见](https://jishuin.proginn.com/p/763bfbd651ad)
+    ```go
+    func main() {
+     ch := make(chan int)
+     go func() {
+      select {
+      case ch <- getVal(1):
+       fmt.Println("in first case")
+      case ch <- getVal(2):
+       fmt.Println("in second case")
+      default:
+       fmt.Println("default")
+      }
+     }()
+    
+     fmt.Println("The val:", <-ch)
+    }
+    
+    func getVal(i int) int {
+     fmt.Println("getVal, i=", i)
+     return i
+    }
+    ```
     
     __Solution__
     ```go
