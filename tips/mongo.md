@@ -6,6 +6,17 @@
     - First, add those fields against which **Equality** queries are run.
     - The next fields to be indexed should reflect the **Sort** order of the query.
     - The last fields represent the **Range** of data to be accessed.
+    
+    Operator Type Check 
+    - Inequality - _$ne $nin_ belong to **Range**
+    - Regex - _/car/_ belong to **Range**
+    - _$in_ 
+      - Alone: a series of **Equality** matches
+      - Combined: possible a **Range**
+        - May optimize **blocking sort** with **Merge Sort**
+    
+    Exception
+      - check **totalDocsExamined**
   - Use Covered Queries When Possible
     - Covered queries return results from an index directly without having to access the source documents, and are therefore very efficient.
     - If the _explain()_ output displays **totalDocsExamined** as _0_, this shows the query is covered by an index.
