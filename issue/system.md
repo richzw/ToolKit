@@ -81,7 +81,22 @@
 
   我们之前遇到过SLAB内存泄露的情况，某公司物理机写了个定时脚本 echo 1 > /proc/sys/vm/drop_caches，会跑满一个核，除此之外没有观测到明显影响，你可以考虑在业务不活跃的情况下试一下。
 
-  
+- 定时器
+  - 定时器这块业务早有标准实现：_小顶堆_, _红黑树_ 和 _时间轮_
+    - Linux 内核和 Nginx 的定时器采用了 _红黑树_ 实现
+    - 长连接系统多采用 _时间轮_
+    - Go 使用 _小顶堆_, 四叉堆，比较矮胖，不是最朴素的二叉堆
 
+- [timeout](https://jishuin.proginn.com/p/763bfbd67c63)
+  - 案例
+    - 一个 python 服务与公网交互，request 库发出去的请求没有设置 timeout ... 而且还是个定时任务，占用了超多 fd
+    - 微服务场景下某下游的服务阻塞卡顿，这样会造成他的级联上下游都雪崩了
+  - HTTP timeout
+  - database
+    - Redis 服务端要注意两个参数：timeout 和 tcp-keepalive
+      - 其中 timeout 用于关闭 idle client conn, 默认是 0 不关闭，为了减少服务端 fd 占用，建议设置一个合理的值
+      - tcp-keepalive 在很早的 redis 版本是不开启的，这样经常会遇到因为网格抖动等原因，socket conn 一直存在，但实际上 client 早己经不存在的情况
+      - Redis Client 实现有一个重大问题，对于集群环境下，有些请求会做 Redirect 跳转，默认是 16 次，如果 tcp read timeout 设置了 100ms, 那总时间很可能超过了 1s
+    - MySQL 也同样服务端可以设置 MAX_EXECUTION_TIME 来控制 sql 执行时间
 
 
