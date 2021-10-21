@@ -71,5 +71,16 @@
     - Large request can OOM
       - Set a max request payload size
          `Grpc.NewServer(grpc.MaxRecvMsgSize(4096/*bytes*/))`
+  - Always re-use stubs and channels when possible.
+  - Use _keepalive pings_ to keep HTTP/2 connections alive during periods of inactivity to allow initial RPCs to be made quickly without a delay (i.e. C++ channel arg GRPC_ARG_KEEPALIVE_TIME_MS).
+  - Use _streaming RPCs_ when handling a long-lived logical flow of data from the client-to-server, server-to-client, or in both directions. Streams can avoid continuous RPC initiation, which includes connection load balancing at the client-side, starting a new HTTP/2 request at the transport layer, and invoking a user-defined method handler on the server side.
+  - Each gRPC channel uses 0 or more HTTP/2 connections and each connection usually has a limit on the number of concurrent streams. When the number of active RPCs on the connection reaches this limit, additional RPCs are queued in the client and must wait for active RPCs to finish before they are sent. Applications with high load or long-lived streaming RPCs might see performance issues because of this queueing. There are two possible solutions:
+    - Create a **separate channel** for each area of high load in the application.
+    - Use a **pool of gRPC channels** to distribute RPCs over multiple connections (channels must have different channel args to prevent re-use so define a use-specific channel arg such as channel number).
+      
+      _Side note_: The gRPC team has plans to add a feature to fix these performance issues [grpc/grpc#21386](https://github.com/grpc/grpc/issues/21386)
+
+
+
 
 
