@@ -114,16 +114,16 @@
           - keepalive 逻辑： 首先判断 activity 是否为 1, 如果不是则置 pingSent 为 true, 并且发送 ping 包, 接着重置定时器时间为 Timeout, 再次触发后如果 activity 不为 1（即未收到 ping 的回复） 并且 pingSent 为 true, 则调用 t.Close() 关闭连接
       ```go
       var kaep = keepalive.EnforcementPolicy{
-      	MinTime:             5 * time.Second, // If a client pings more than once every 5 seconds, terminate the connection
-      	PermitWithoutStream: true,            // Allow pings even when there are no active streams
+          MinTime:             5 * time.Second, // If a client pings more than once every 5 seconds, terminate the connection
+          PermitWithoutStream: true,            // Allow pings even when there are no active streams
       }
       
       var kasp = keepalive.ServerParameters{
-      	MaxConnectionIdle:     15 * time.Second, // If a client is idle for 15 seconds, send a GOAWAY
-      	MaxConnectionAge:      30 * time.Second, // If any connection is alive for more than 30 seconds, send a GOAWAY
-      	MaxConnectionAgeGrace: 5 * time.Second,  // Allow 5 seconds for pending RPCs to complete before forcibly closing connections
-      	Time:                  5 * time.Second,  // Ping the client if it is idle for 5 seconds to ensure the connection is still active
-      	Timeout:               1 * time.Second,  // Wait 1 second for the ping ack before assuming the connection is dead
+          MaxConnectionIdle:     15 * time.Second, // If a client is idle for 15 seconds, send a GOAWAY
+          MaxConnectionAge:      30 * time.Second, // If any connection is alive for more than 30 seconds, send a GOAWAY
+          MaxConnectionAgeGrace: 5 * time.Second,  // Allow 5 seconds for pending RPCs to complete before forcibly closing connections
+          Time:                  5 * time.Second,  // Ping the client if it is idle for 5 seconds to ensure the connection is still active
+          Timeout:               1 * time.Second,  // Wait 1 second for the ping ack before assuming the connection is dead
       }
       ```
       - keepalive.EnforcementPolicy：
@@ -135,6 +135,23 @@
         - MaxConnectionAgeGrace：在强制关闭连接之间, 允许有 5s 的时间完成 pending 的 rpc 请求
         - Time： 如果一个 client 空闲超过 5s, 则发送一个 ping 请求
         - Timeout： 如果 ping 请求 1s 内未收到回复, 则认为该连接已断开
+- [grpc网关使用连接池提吞吐量](http://xiaorui.cc/archives/6001)
+
+  在线程/协程竞争压力不大的情况下，单个grpc client 连接是可以干到 8-9w的qps。在8 cpu core, 16 cpu core, 48 cpu core都有试过，数据来看不会超过9w的qps吞吐。
+  
+  在网关层使用单个grpc client下，会出现cpu吃不满的情况。如果简单粗暴加大对单client的并发数，QPS反而会下降
+
+  影响gprc client吞吐的原因，主要是两个方面
+  - 一个是网络引起的队头阻塞
+    - client根据内核上的拥塞窗口状态，可以并发的发送10个tcp包，每个包最大不能超过mss。但因为各种网络链路原因，服务端可能先收到后面的数据包，那么该数据只能放在内核协议栈上，不能放在socket buf上。这个情况就是tcp的队头阻塞。
+    - http2.0虽然解决了应用层的队头阻塞，但是tcp传输层也是存在队头阻塞的。
+  - 另一个是golang grpc client的锁竞争问题
+    - golang标准库net/http由于单个连接池的限制会引起吞吐不足的问题
+      - net/http默认的连接池配置很尴尬。MaxIdleConns=100, MaxIdleConnsPerHost=2，在并发操作某host时，只有2个是长连接，其他都是短连接。
+      - net/http的连接池里加了各种的锁操作来保证连接状态安全，导致并发的协程概率拿不到锁，继而要把自己gopack到waitqueue，但是waitqueue也是需要拿semaRoot的futex锁。在data race竞争压力大的时候，你又拿不到锁来gopark自己，你不能玩命的自旋拿锁吧，那怎么办？ runtime/os_linux.go就是来解决该问题的。有兴趣的可以看下代码，简单说就是sleep再拿锁。
+      - grpc的http2.0组件是自己实现的，没有采用golang标准库里的net/http。在分析代码之前，先放一个go tool pprof的耗时分析图，我们会发现有个很大的消耗在withRetry这里，分析了代码确实有一些锁的操作，而且粒度不小
+  
+  - [gRPC client pool](https://github.com/rfyiamcool/grpc-client-pool)
 
 
 
