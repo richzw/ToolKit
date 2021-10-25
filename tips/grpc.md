@@ -80,6 +80,62 @@
       
       _Side note_: The gRPC team has plans to add a feature to fix these performance issues [grpc/grpc#21386](https://github.com/grpc/grpc/issues/21386)
 
+- [gRPC 客户端长连接机制](https://pandaychen.github.io/2020/09/01/GRPC-CLIENT-CONN-LASTING/)
+  - HTTP2 是一个全双工的流式协议, 服务端也可以主动 ping 客户端, 且服务端还会有一些检测连接可用性和控制客户端 ping 包频率的配置。gRPC 就是采用 HTTP2 来作为其基础通信模式的，所以默认的 gRPC 客户端都是长连接。
+  - HTTP2 使用 _GOAWAY_ 帧信号来控制连接关闭，_GOAWAY_ 用于启动连接关闭或发出严重错误状态信号。
+    _GOAWAY_ 语义为允许端点正常停止接受新的流，同时仍然完成对先前建立的流的处理，当 client 收到这个包之后就会主动关闭连接。下次需要发送数据时，就会重新建立连接。GOAWAY 是实现 _grpc.gracefulStop_ 机制的重要保证。
+  - 在 gRPC 中，对于已经建立的长连接，服务端异常重启之后，客户端一般会收到如下错误：`rpc error: code = Unavailable desc = transport is closing` 两种处理方法：
+    - 重试：在客户端调用失败时，选择以指数退避（Exponential Backoff ）来优雅进行重试
+    - 增加 keepalive 的保活策略
+  - gRPC [keepalive](https://github.com/grpc/grpc/blob/master/doc/keepalive.md)
+    - gRPC 客户端 keepalive
+      ```go
+      keepalive.ClientParameters{
+          Time:                10 * time.Second, // send pings every 10 seconds if there is no activity
+          Timeout:             time.Second,      // wait 1 second for ping ack before considering the connection dead
+          PermitWithoutStream: true,             // send pings even without active streams
+      }
+      ```
+      - keepalive.ClientParameters 参数的含义如下:
+        - Time：如果没有 activity， 则每隔 10s 发送一个 ping 包 
+        - Timeout： 如果 ping ack 1s 之内未返回则认为连接已断开 
+        - PermitWithoutStream：如果没有 active 的 stream， 是否允许发送 ping
+      - 在 grpc-go 的 newHTTP2Client 方法中，有下面的逻辑：
+        即在新建一个 HTTP2Client 的时候会启动一个 goroutine 来处理 keepalive
+    - [gRPC 服务端的 keepalive](https://github.com/grpc/grpc-go/blob/master/examples/features/keepalive/server/main.go)
+
+      服务端主要有两块逻辑
+      - 接收并相应客户端的 ping 包. 服务端处理客户端的 ping 包的 response 的逻辑在 handlePing 方法 中。
+        handlePing 方法会判断是否违反两条 policy, 如果违反则将 pingStrikes++, 当违反次数大于 maxPingStrikes(2) 时, 打印一条错误日志并且发送一个 goAway 包，断开这个连接
+      - 单独启动 goroutine 探测客户端是否存活
+        - keepalive 的实现，核心逻辑是启动 3 个定时器，分别为 maxIdle、maxAge 和 keepAlive，然后在 for select 中处理相关定时器触发事件：
+          - maxIdle 逻辑： 判断 client 空闲时间是否超出配置的时间, 如果超时, 则调用 t.drain, 该方法会发送一个 GOAWAY 包 
+          - maxAge 逻辑： 触发之后首先调用 t.drain 发送 GOAWAY 包, 接着重置定时器, 时间设置为 MaxConnectionAgeGrace, 再次触发后调用 t.Close() 直接关闭（有些 graceful 的意味）
+          - keepalive 逻辑： 首先判断 activity 是否为 1, 如果不是则置 pingSent 为 true, 并且发送 ping 包, 接着重置定时器时间为 Timeout, 再次触发后如果 activity 不为 1（即未收到 ping 的回复） 并且 pingSent 为 true, 则调用 t.Close() 关闭连接
+      ```go
+      var kaep = keepalive.EnforcementPolicy{
+      	MinTime:             5 * time.Second, // If a client pings more than once every 5 seconds, terminate the connection
+      	PermitWithoutStream: true,            // Allow pings even when there are no active streams
+      }
+      
+      var kasp = keepalive.ServerParameters{
+      	MaxConnectionIdle:     15 * time.Second, // If a client is idle for 15 seconds, send a GOAWAY
+      	MaxConnectionAge:      30 * time.Second, // If any connection is alive for more than 30 seconds, send a GOAWAY
+      	MaxConnectionAgeGrace: 5 * time.Second,  // Allow 5 seconds for pending RPCs to complete before forcibly closing connections
+      	Time:                  5 * time.Second,  // Ping the client if it is idle for 5 seconds to ensure the connection is still active
+      	Timeout:               1 * time.Second,  // Wait 1 second for the ping ack before assuming the connection is dead
+      }
+      ```
+      - keepalive.EnforcementPolicy：
+        - MinTime：如果客户端两次 ping 的间隔小于 5s，则关闭连接 
+        - PermitWithoutStream： 即使没有 active stream, 也允许 ping
+      - keepalive.ServerParameters：
+        - MaxConnectionIdle：如果一个 client 空闲超过 15s, 发送一个 GOAWAY, 为了防止同一时间发送大量 GOAWAY, 会在 15s 时间间隔上下浮动 15*10%, 即 15+1.5 或者 15-1.5 
+        - MaxConnectionAge：如果任意连接存活时间超过 30s, 发送一个 GOAWAY
+        - MaxConnectionAgeGrace：在强制关闭连接之间, 允许有 5s 的时间完成 pending 的 rpc 请求
+        - Time： 如果一个 client 空闲超过 5s, 则发送一个 ping 请求
+        - Timeout： 如果 ping 请求 1s 内未收到回复, 则认为该连接已断开
+
 
 
 
