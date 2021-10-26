@@ -270,7 +270,10 @@ Memory Leak
     GODEBUG=madvdontneed=1
   ```
   
-
+- [Deep Dive goroutine leak](https://mourya-g9.medium.com/deep-dive-on-goroutine-leaks-and-best-practices-to-avoid-them-a35021383f64)
+  - an unbuffered channel blocks write to channel until consumer consumes the message from that channel. 
+  - there are packages like https://github.com/uber-go/goleak which helps you to find goroutine leaks
+  
 
 
 
