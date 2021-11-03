@@ -90,7 +90,13 @@
   
   - a forceful close using the `SetLinger()` method
 
+    socket 缓冲区信息可通过执行 `netstat -nt` 命令查看
+
     This method is changing the SO_LINGER socket option value using system calls against the Operating System.
+    - If sec < 0 (the default), the operating system finishes sending the data in the background.
+    - If sec == 0, the operating system discards any unsent or unacknowledged data.
+    - If sec > 0, the data is sent in the background as with sec < 0. On some operating systems after sec seconds have elapsed any remaining unsent data may be discarded.
+
     ```go
     // Use SetLinger to force close the connection
     // When set to exactly 0, the Operating System will immediately close the connection and drop any outstanding packets.
