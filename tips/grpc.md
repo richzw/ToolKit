@@ -153,6 +153,92 @@
   
   - [gRPC client pool](https://github.com/rfyiamcool/grpc-client-pool)
 
+- [gRPC服务的响应设计](https://mp.weixin.qq.com/s/nGTrKBHLVmHLuRMffHcKfw)
+  - 探索
+    ```go
+    // SayHello implements helloworld.GreeterServer
+    func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) { 
+        log.Printf("Received: %v", in.GetName())
+        return &pb.HelloReply{Message: "Hello " + in.GetName()}, errors.New("test grpc error")
+    }
+    ```
+    返回值
+     ```shell
+       2021/09/20 17:04:35 could not greet: rpc error: code = Unknown desc = test grpc error
+     ```
+    grpc-go/status包
+    ```go
+    type Status = status.Status
+    
+    // New returns a Status representing c and msg.
+    func New(c codes.Code, msg string) *Status {
+        return status.New(c, msg)
+    }
+    ```
+    ```go
+    // internal/status
+    type Status struct {
+        s *spb.Status
+    }
+    
+    // New returns a Status representing c and msg.
+    func New(c codes.Code, msg string) *Status {
+        return &Status{s: &spb.Status{Code: int32(c), Message: msg}}
+    }
+    ```
+    internal/status包的Status结构体组合了一个*spb.Status类型(google.golang.org/genproto/googleapis/rpc/status包中的类型)的字段，继续追踪*spb.Status*
+    ```go
+    // https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc/status
+    type Status struct {
+     // The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+     Code int32 `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+     // A developer-facing error message, which should be in English. Any
+     // user-facing error message should be localized and sent in the
+     // [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+     Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+     // A list of messages that carry the error details.  There is a common set of
+     // message types for APIs to use.
+     Details []*anypb.Any `protobuf:"bytes,3,rep,name=details,proto3" json:"details,omitempty"`
+     // contains filtered or unexported fields
+    }
+    ```
+    ![img.png](grpc_code.png)
+  - 服务端如何构造error与客户端如何解析error
+    ```go
+    func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+        log.Printf("Received: %v", in.GetName())
+        return nil, status.Errorf(codes.InvalidArgument, "you have a wrong name: %s", in.GetName())
+    }
+    ```
+    ```go
+    ctx, _ := context.WithTimeout(context.Background(), time.Second)
+    r, err := c.SayHello(ctx, &pb.HelloRequest{Name: "tony")})
+    if err != nil {
+        errStatus := status.Convert(err)
+        log.Printf("SayHello return error: code: %d, msg: %s\n", errStatus.Code(), errStatus.Message())
+    }
+    log.Printf("Greeting: %s", r.GetMessage())
+    ```
+  - 空应答
+
+    gRPC的proto文件规范要求每个rpc方法的定义中都必须包含一个返回值，返回值不能为空
+    ```go
+    // https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/empty.proto
+    
+    // A generic empty message that you can re-use to avoid defining duplicated
+    // empty messages in your APIs. A typical example is to use it as the request
+    // or the response type of an API method. For instance:
+    //
+    //     service Foo {
+    //       rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);
+    //     }
+    //
+    // The JSON representation for `Empty` is empty JSON object `{}`.
+    message Empty {}
+    
+    ```
+
+
 
 
 
