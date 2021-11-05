@@ -461,13 +461,13 @@
 
     ```go
     var (
-    	MaxWorker = os.Getenv("MAX_WORKERS")
-    	MaxQueue  = os.Getenv("MAX_QUEUE")
+        MaxWorker = os.Getenv("MAX_WORKERS")
+        MaxQueue  = os.Getenv("MAX_QUEUE")
     )
     
     // Job represents the job to be run
     type Job struct {
-    	Payload Payload
+        Payload Payload
     }
     
     // A buffered channel that we can send work requests on.
@@ -475,118 +475,219 @@
     
     // Worker represents the worker that executes the job
     type Worker struct {
-    	WorkerPool  chan chan Job
-    	JobChannel  chan Job
-    	quit    	chan bool
+        WorkerPool  chan chan Job
+        JobChannel  chan Job
+        quit    	chan bool
     }
     
     func NewWorker(workerPool chan chan Job) Worker {
-    	return Worker{
-    		WorkerPool: workerPool,
-    		JobChannel: make(chan Job),
-    		quit:       make(chan bool)}
+        return Worker{
+            WorkerPool: workerPool,
+            JobChannel: make(chan Job),
+            quit:       make(chan bool)}
     }
     
     // Start method starts the run loop for the worker, listening for a quit channel in
     // case we need to stop it
     func (w Worker) Start() {
-    	go func() {
-    		for {
-    			// register the current worker into the worker queue.
-    			w.WorkerPool <- w.JobChannel
+        go func() {
+            for {
+                // register the current worker into the worker queue.
+                w.WorkerPool <- w.JobChannel
     
-    			select {
-    			case job := <-w.JobChannel:
-    				// we have received a work request.
-    				if err := job.Payload.UploadToS3(); err != nil {
-    					log.Errorf("Error uploading to S3: %s", err.Error())
-    				}
+                select {
+                case job := <-w.JobChannel:
+                    // we have received a work request.
+                    if err := job.Payload.UploadToS3(); err != nil {
+                        log.Errorf("Error uploading to S3: %s", err.Error())
+                    }
     
-    			case <-w.quit:
-    				// we have received a signal to stop
-    				return
-    			}
-    		}
-    	}()
+                case <-w.quit:
+                    // we have received a signal to stop
+                    return
+                }
+            }
+        }()
     }
     
     // Stop signals the worker to stop listening for work requests.
     func (w Worker) Stop() {
-    	go func() {
-    		w.quit <- true
-    	}()
+        go func() {
+            w.quit <- true
+        }()
     }
     
     // handler
     func payloadHandler(w http.ResponseWriter, r *http.Request) {
     
-    	if r.Method != "POST" {
-    		w.WriteHeader(http.StatusMethodNotAllowed)
-    		return
-    	}
+        if r.Method != "POST" {
+            w.WriteHeader(http.StatusMethodNotAllowed)
+            return
+        }
     
-    	// Read the body into a string for json decoding
-    	var content = &PayloadCollection{}
-    	err := json.NewDecoder(io.LimitReader(r.Body, MaxLength)).Decode(&content)
-    	if err != nil {
-    		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-    		w.WriteHeader(http.StatusBadRequest)
-    		return
-    	}
+        // Read the body into a string for json decoding
+        var content = &PayloadCollection{}
+        err := json.NewDecoder(io.LimitReader(r.Body, MaxLength)).Decode(&content)
+        if err != nil {
+            w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+            w.WriteHeader(http.StatusBadRequest)
+            return
+        }
     
-    	// Go through each payload and queue items individually to be posted to S3
-    	for _, payload := range content.Payloads {
+        // Go through each payload and queue items individually to be posted to S3
+        for _, payload := range content.Payloads {
     
-    		// let's create a job with the payload
-    		work := Job{Payload: payload}
+            // let's create a job with the payload
+            work := Job{Payload: payload}
     
-    		// Push the work onto the queue.
-    		JobQueue <- work
-    	}
+            // Push the work onto the queue.
+            JobQueue <- work
+        }
     
-    	w.WriteHeader(http.StatusOK)
+        w.WriteHeader(http.StatusOK)
     }
     
     dispatcher := NewDispatcher(MaxWorker)
     dispatcher.Run()
     
     type Dispatcher struct {
-    	// A pool of workers channels that are registered with the dispatcher
-    	WorkerPool chan chan Job
+        // A pool of workers channels that are registered with the dispatcher
+        WorkerPool chan chan Job
     }
     
     func NewDispatcher(maxWorkers int) *Dispatcher {
-    	pool := make(chan chan Job, maxWorkers)
-    	return &Dispatcher{WorkerPool: pool}
+        pool := make(chan chan Job, maxWorkers)
+        return &Dispatcher{WorkerPool: pool}
     }
     
     func (d *Dispatcher) Run() {
-    	// starting n number of workers
-    	for i := 0; i < d.maxWorkers; i++ {
-    		worker := NewWorker(d.pool)
-    		worker.Start()
-    	}
+        // starting n number of workers
+        for i := 0; i < d.maxWorkers; i++ {
+            worker := NewWorker(d.pool)
+            worker.Start()
+        }
     
-    	go d.dispatch()
+        go d.dispatch()
     }
     
     func (d *Dispatcher) dispatch() {
-    	for {
-    		select {
-    		case job := <-JobQueue:
-    			// a job request has been received
-    			go func(job Job) {
-    				// try to obtain a worker job channel that is available.
-    				// this will block until a worker is idle
-    				jobChannel := <-d.WorkerPool
+        for {
+            select {
+            case job := <-JobQueue:
+                // a job request has been received
+                go func(job Job) {
+                    // try to obtain a worker job channel that is available.
+                    // this will block until a worker is idle
+                    jobChannel := <-d.WorkerPool
     
-    				// dispatch the job to the worker job channel
-    				jobChannel <- job
-    			}(job)
-    		}
-    	}
+                    // dispatch the job to the worker job channel
+                    jobChannel <- job
+                }(job)
+            }
+        }
     }
     ```
+- [Go timer 是如何被调度的](https://mp.weixin.qq.com/s/zy354p9MQq10fpTL20uuCA)
+  - 概述
+    - 不管用 **NewTimer**, **timer.After**，还是 **timer.AfterFun** 来初始化一个 timer, 这个 timer 最终都会加入到一个全局 timer 堆中，由 Go runtime 统一管理。
+    - Go 1.9 版本之前，所有的计时器由全局唯一的四叉堆维护，协程间竞争激烈。
+    - Go 1.10 - 1.13，全局使用 64 个四叉堆维护全部的计时器，没有本质解决 1.9 版本之前的问题
+    - Go 1.14 版本之后，每个 P 单独维护一个四叉堆。
+  - 原理
+    - 四叉堆原理
+      - 四叉树顾名思义最多有四个子节点，为了兼顾四叉树插、删除、重排速度，所以四个兄弟节点间并不要求其按触发早晚排序。
+    - timer 是如何被调度的
+      - 调用 NewTimer，timer.After, timer.AfterFunc 生产 timer, 加入对应的 P 的堆上。
+      - 调用 timer.Stop, timer.Reset 改变对应的 timer 的状态。
+      - GMP 在调度周期内中会调用 checkTimers ，遍历该 P 的 timer 堆上的元素，根据对应 timer 的状态执行真的操作。
+    - timer 是如何加入到 timer 堆上的
+      - 通过 NewTimer, time.After, timer.AfterFunc 初始化 timer 后，相关 timer 就会被放入到对应 p 的 timer 堆上。
+      - timer 已经被标记为 timerRemoved，调用了 timer.Reset(d)，这个 timer 也会重新被加入到 p 的 timer 堆上
+      - timer 还没到需要被执行的时间，被调用了 timer.Reset(d)，这个 timer 会被 GMP 调度探测到，先将该 timer 从 timer 堆上删除，然后重新加入到 timer 堆上
+      - STW 时，runtime 会释放不再使用的 p 的资源，p.destroy()->timer.moveTimers，将不再被使用的 p 的 timers 上有效的 timer(状态是：timerWaiting，timerModifiedEarlier，timerModifiedLater) 都重新加入到一个新的 p 的 timer 上
+    - Reset 时 timer 是如何被操作的
+      - 被标记为 timerRemoved 的 timer，这种 timer 是已经从 timer 堆上删除了，但会重新设置被触发时间，加入到 timer 堆中
+      - 等待被触发的 timer，在 Reset 函数中只会修改其触发时间和状态（timerModifiedEarlier或timerModifiedLater）。这个被修改状态的 timer 也同样会被重新加入到 timer堆上，不过是由 GMP 触发的，由 checkTimers 调用 adjusttimers 或者 runtimer 来执行的。
+    - Stop 时 timer 是如何被操作的
+      - time.Stop 为了让 timer 停止，不再被触发，也就是从 timer 堆上删除。不过 timer.Stop 并不会真正的从 p 的 timer 堆上删除 timer，只会将 timer 的状态修改为 timerDeleted。然后等待 GMP 触发的 adjusttimers 或者 runtimer 来执行。
+    - Timer 是如何被真正执行的
+      - timer 的真正执行者是 GMP。GMP 会在每个调度周期内，通过 runtime.checkTimers 调用 timer.runtimer(). timer.runtimer 会检查该 p 的 timer 堆上的所有 timer，判断这些 timer 是否能被触发。
+      - 如果该 timer 能够被触发，会通过回调函数 sendTime 给 Timer 的 channel C 发一个当前时间，告诉我们这个 timer 已经被触发了。
+      - 如果是 ticker 的话，被触发后，会计算下一次要触发的时间，重新将 timer 加入 timer 堆中。
+  - Timer 使用中的坑
+    - 错误创建很多 timer，导致资源浪费
+      ```go
+      func main() {
+          for {
+              // xxx 一些操作
+              timeout := time.After(30 * time.Second)
+              select {
+              case <- someDone:
+                  // do something
+              case <-timeout:
+                  return
+              }
+          }
+      }
+      ```
+      因为 timer.After 底层是调用的 timer.NewTimer，NewTimer 生成 timer 后，会将 timer 放入到全局的 timer 堆中。
+      for 会创建出来数以万计的 timer 放入到 timer 堆中，导致机器内存暴涨，同时不管 GMP 周期 checkTimers，还是插入新的 timer 都会疯狂遍历 timer 堆，导致 CPU 异常。
+       ```go
+       func main() {
+           timer := time.NewTimer(time.Second * 5)    
+           for {
+               timer.Reset(time.Second * 5)
+       
+               select {
+               case <- someDone:
+                   // do something
+               case <-timer.C:
+                   return
+               }
+           }
+       }
+       ```
+    - 程序阻塞，造成内存或者 goroutine 泄露
+       ```go
+       func main() {
+           timer1 := time.NewTimer(2 * time.Second)
+           <-timer1.C
+           println("done")
+       }
+       ```
+      只有等待 timer 超时 "done" 才会输出，原理很简单：程序阻塞在 <-timer1.C 上，一直等待 timer 被触发时，回调函数 time.sendTime 才会发送一个当前时间到 timer1.C 上，程序才能继续往下执行。
+      ```go
+      func main() {
+          timer1 := time.NewTimer(2 * time.Second)
+          go func() {
+              timer1.Stop() // refer to doc
+          }()
+          <-timer1.C
+      
+          println("done")
+      }
+      ```
+      程序就会一直死锁了，因为 timer1.Stop 并不会关闭 channel C，使程序一直阻塞在 timer1.C 上。
+
+      Stop 的正确的使用方式：
+       ```go
+       func main() {
+           timer1 := time.NewTimer(2 * time.Second)
+           go func() {
+               if !timer1.Stop() {
+                   <-timer1.C
+               }
+           }()
+       
+           select {
+           case <-timer1.C:
+               fmt.Println("expired")
+           default:
+           }
+           println("done")
+       }
+       ```
+
 
 
 
