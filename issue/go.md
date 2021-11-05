@@ -54,3 +54,36 @@
       - <-c 从c 接收将永远阻塞
       - c <- v 发送值到c 会永远阻塞
       - close(c) 关闭c 引发panic
+
+- [InterfaceSlice](https://github.com/golang/go/wiki/InterfaceSlice)
+  Given that you can assign a variable of any type to an interface{}, often people will try code like the following.
+  ```go
+  var dataSlice []int = foo()
+  var interfaceSlice []interface{} = dataSlice
+  ```
+  
+  [This gets the error](https://mp.weixin.qq.com/s/rAIhapDHrA7jQVr_uvQpEg)
+  
+  `cannot use dataSlice (type []int) as type []interface { } in assignment`
+
+  A variable with type []interface{} has a specific memory layout, known at compile time.
+
+  Each interface{} takes up two words (one word for the type of what is contained, the other word for either the contained data or a pointer to it). As a consequence, a slice with length N and with type []interface{} is backed by a chunk of data that is N*2 words long.
+
+  This is different than the chunk of data backing a slice with type []MyType and the same length. Its chunk of data will be N*sizeof(MyType) words long.
+
+  - fix it
+    ```go
+    var dataSlice []int = foo()
+    var interfaceSlice []interface{} = make([]interface{}, len(dataSlice))
+    for i, d := range dataSlice {
+    	interfaceSlice[i] = d
+    }
+    ```
+  
+
+
+
+
+
+
