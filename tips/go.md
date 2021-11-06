@@ -687,6 +687,44 @@
            println("done")
        }
        ```
+- [panic](https://mp.weixin.qq.com/s/sGdTVSRxqxIezdlEASB39A)
+  - 什么时候会产生 panic
+    - 主动方式：
+      - 程序猿主动调用 panic 函数；
+    - 被动的方式：
+      - 编译器的隐藏代码触发
+        ```go
+        func divzero(a, b int) int {
+            c := a/b
+            return c
+        }
+        ```
+        用 dlv 调试断点到 divzero 函数，然后执行 disassemble ，你就能看到秘密了
+        编译器偷偷加上了一段 if/else 的判断逻辑，并且还给加了 runtime.panicdivide  的代码。
+      - 内核发送给进程信号触发
+      
+        最典型的是非法地址访问，比如， nil 指针 访问会触发 panic
+        
+        在 Go 进程启动的时候会注册默认的信号处理程序（ sigtramp ）
+
+        在 cpu 访问到 0 地址会触发 page fault 异常，这是一个非法地址，内核会发送 SIGSEGV 信号给进程，所以当收到 SIGSEGV 信号的时候，就会让 sigtramp 函数来处理，最终调用到 panic 函数 ：
+         ```
+         // 信号处理函数回
+         sigtramp （纯汇编代码）
+           -> sigtrampgo （ signal_unix.go ）
+             -> sighandler  （ signal_sighandler.go ）
+                -> preparePanic （ signal_amd64x.go ）
+         
+                   -> sigpanic （ signal_unix.go ）
+                     -> panicmem 
+                       -> panic (内存段错误)
+         ```
+        在进程初始化的时候，创建 M0（线程）的时候用系统调用 sigaction 给信号注册处理函数为 sigtramp
+    - Summary
+      - panic( ) 函数内部会产生一个关键的数据结构体 _panic ，并且挂接到 goroutine 之上；
+      - panic( ) 函数内部会执行 _defer 函数链条，并针对 _panic 的状态进行对应的处理；
+      - 循环执行 goroutine 上面的 _defer 函数链，如果执行完了都还没有恢复 _panic 的状态，那就没得办法了，退出进程，打印堆栈。
+      - 如果在 goroutine 的 _defer 链上，有个朋友 recover 了一下，把这个 _panic 标记成恢复，那事情就到此为止，就从这个 _defer 函数执行后续正常代码即可，走 deferreturn 的逻辑。
 
 
 
