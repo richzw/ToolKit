@@ -238,6 +238,99 @@
     
     ```
 
+- [gRPC client](https://tonybai.com/2021/09/17/those-things-about-grpc-client/)
+  - resolver
+    - passthrough
+      Dial服务端时传给DialContext的target参数是一个静态的服务地址：
+      ```go
+      const (
+      address     = "localhost:50051"
+      )
+      ```
+      
+      这个形式的target经过`google.golang.org/grpc/internal/grpcutil.ParseTarget`的解析后返回一个值为nil的resolver.Target。于是gRPC采用默认的scheme：”passthrough”(github.com/grpc/grpc-go/resolver/resolver.go)，默认的”passthrough” scheme下，gRPC将使用内置的passthrough resolver(google.golang.org/grpc/internal/resolver/passthrough)
+    - StaticResolver
+      ```go
+      // https://github.com/bigwhite/experiments/tree/master/grpc-client/demo2/greeter_client/main.go
+      
+      const (
+            address = "static:///localhost:50051,localhost:50052,localhost:50053"
+      )
+      
+      // github.com/grpc/grpc-go/resolver/resolver.go 
+      
+      // Builder creates a resolver that will be used to watch name resolution updates.
+      type Builder interface {
+      // Build creates a new resolver for the given target.
+      //
+      // gRPC dial calls Build synchronously, and fails if the returned error is
+      // not nil.
+      Build(target Target, cc ClientConn, opts BuildOptions) (Resolver, error)
+      // Scheme returns the scheme supported by this resolver.
+      // Scheme is defined at https://github.com/grpc/grpc/blob/master/doc/naming.md.
+      Scheme() string
+      }
+      ```
+      ![img.png](grpc_resolver.png)
+    - NacosResolver
+      ```go
+      // https://github.com/bigwhite/experiments/tree/master/grpc-client/demo3/greeter_client/main.go
+      
+      const (
+            address = "nacos:///localhost:8848/public/group-a/demo3-service" //no authority
+      )
+      
+      ```
+    - 自定义客户端balancer
+      ![img.png](grpc_balancer.png)
+      ```go
+      // https://github.com/bigwhite/experiments/tree/master/grpc-client/demo4/greeter_client/resolver.go
+      
+      func (r *NacosResolver) doResolve(opts resolver.ResolveNowOptions) {
+          instances, err := r.namingClient.SelectAllInstances(vo.SelectAllInstancesParam{
+              ServiceName: r.serviceName,
+              GroupName:   r.group,
+          })
+          if err != nil {
+              fmt.Println(err)
+              return
+          }
+      
+          if len(instances) == 0 {
+              fmt.Printf("service %s has zero instance\n", r.serviceName)
+              return
+          }
+      
+          // update cc.States
+          var addrs []resolver.Address
+          for i, inst := range instances {
+              if (!inst.Enable) || (inst.Weight == 0) {
+                  continue
+              }
+      
+              addr := resolver.Address{
+                  Addr:       fmt.Sprintf("%s:%d", inst.Ip, inst.Port),
+                  ServerName: fmt.Sprintf("instance-%d", i+1),
+              }
+              addr.Attributes = addr.Attributes.WithValues("weight", int(inst.Weight)) //考虑权重并纳入cc的状态中
+              addrs = append(addrs, addr)
+          }
+      
+          if len(addrs) == 0 {
+              fmt.Printf("service %s has zero valid instance\n", r.serviceName)
+          }
+      
+          newState := resolver.State{
+              Addresses: addrs,
+          }
+      
+          r.Lock()
+          r.cc.UpdateState(newState)
+          r.Unlock()
+      }
+      ```
+
+
 
 
 
