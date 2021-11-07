@@ -217,8 +217,7 @@ KeepAlive
     
     `func setKeepAlivePeriod(fd *netFD, d time.Duration) error`
   
-[`i/o timeout` caused by incorrect `setTimeout/setDeadline`](https://mp.weixin.qq.com/s/OI1TXa3JeSdMJV4aM19ZJw)
---------
+- [`i/o timeout` caused by incorrect `setTimeout/setDeadline`](https://mp.weixin.qq.com/s/OI1TXa3JeSdMJV4aM19ZJw)
 
   ```go
   tr = &http.Transport{
@@ -255,18 +254,191 @@ KeepAlive
 
   一个域名会建立一个连接，一个连接对应一个读goroutine和一个写goroutine。正因为是同一个域名，所以最后才会泄漏3个goroutine，如果不同域名的话，那就会泄漏 1+2*N 个协程，N就是域名数。
  
-  正确的姿势 - 
-  超时设置在http
+  正确的姿势 - **超时设置在http**
 
-```go
-    tr = &http.Transport{
-        MaxIdleConns: 100,
-    }
-    client := &http.Client{
-        Transport: tr,
-        Timeout: 3*time.Second,  // Timeout specifies a time limit for requests made by this Client.
-    }
-```
+  ```go
+      tr = &http.Transport{
+          MaxIdleConns: 100,
+      }
+      client := &http.Client{
+          Transport: tr,
+          Timeout: 3*time.Second,  // Timeout specifies a time limit for requests made by this Client.
+      }
+  ```
   ![img.png](netpoll.png)
-  
+
+- [如何正确设置保活](https://mp.weixin.qq.com/s/EmawKOftz0OAnMd2ydcOgQ)
+  - 前情
+    - 由于线上存在网络问题，会导致 GRPC HOL blocking, 于是决定把 GRPC client改写成 HTTP client
+    - 搜索日志里面会发现有极少数的 EOF 错误
+    - EOF 这个东西一般是跟 IO 关闭有关系的，就是 server 和 client 的 Keep-Alive 机制的问题
+  - Debug
+    - HTTP Client
+      ```go
+       c := &http.Client{
+        Transport: &http.Transport{
+         MaxIdleConnsPerHost: 1,
+         DialContext: (&net.Dialer{
+          Timeout:   time.Second * 2,
+          KeepAlive: time.Second * 60,
+         }).DialContext,
+         DisableKeepAlives: false,
+         IdleConnTimeout:   90 * time.Second,
+        },
+        Timeout: time.Second * 2,
+       }
+      ```
+      官方文档介绍是一个用于TCP Keep-Alive的probe指针，间隔一定的时间发送心跳包。每间隔60S进行一次Keep-Alive
+    - HTTP Server
+      ```go
+      s := http.Server{
+        Addr:        ":8080",
+        Handler:     http.HandlerFunc(Index),
+        ReadTimeout: 10 * time.Second,
+        // IdleTimeout: 10 * time.Second,
+       }
+       s.SetKeepAlivesEnabled(true)
+       s.ListenAndServe()
+      ```
+      Server的 KeepAlive 主要是通过 IdleTimeout 来进行控制的，IdleTimeout 如果为空则使用 ReadTimeout
+    - client 侧的 Keep-Alive 是60s，但是 server 侧的时间是间隔10s就去关掉空闲的连接。所以这里很容易就认为是：client 侧的 Keep-Alive 心跳间隔时间太长了，server 侧提前关闭了连接。修改参数，重新上线，持续观察一段时间发现还是有 EOF 错误
+    - Mock EOF
+      ```go
+      func test(w http.ResponseWriter, r *http.Request) {
+       log.Println("receive request from:", r.RemoteAddr, r.Header)
+       if count%2 == 1 {
+        conn, _, err := w.(http.Hijacker).Hijack()
+        if err != nil {
+         return
+        }
+      
+        conn.Close()
+        count++
+        return
+       }
+       w.Write([]byte("ok"))
+       count++
+      }
+      
+      func main() {
+       s := http.Server{
+        Addr:        ":8080",
+        Handler:     http.HandlerFunc(test),
+        ReadTimeout: 10 * time.Second,
+       }
+       // s.SetKeepAlivesEnabled(false)
+       s.ListenAndServe()
+      }
+      ```
+      在尝试复现 EOF 错误的时候，看到有 Hijack 这种东西，还是挺好用的。可以看到直接在 server 侧关掉连接, client 侧感知不到连接关闭确实是会有 EOF 错误发生的。
+    - Mock Keep-Alive
+      ```go
+      func sendRequest(c *http.Client) {
+       req, err := http.NewRequest("POST", "http://localhost:8080", nil)
+       if err != nil {
+        panic(err)
+       }
+       resp, err := c.Do(req)
+       if err != nil {
+        panic(err)
+       }
+       defer resp.Body.Close()
+      
+       buf := &bytes.Buffer{}
+       buf.ReadFrom(resp.Body)
+      
+      }
+      
+      func main() {
+       c := &http.Client{
+        Transport: &http.Transport{
+         MaxIdleConnsPerHost: 1,
+         DialContext: (&net.Dialer{
+          Timeout:   time.Second * 2,
+          KeepAlive: time.Second,
+         }).DialContext,
+         DisableKeepAlives: false,
+         IdleConnTimeout:   90 * time.Second,
+        },
+        Timeout: time.Second * 2,
+       }
+       // c := &http.Client{}
+       sendRequest(c)
+       time.Sleep(time.Second * 3)
+       sendRequest(c)
+      
+      }
+      ```
+      在本地开始尝试复现 Keep-Alive 的问题，client 侧使用 KeepAlive: time.Second, 每间隔一秒钟的 keep-alive, server 侧同样使用两秒 IdleTimeout: time.Second。
+    - Packet Capture
+      - Client 使用的基于TCP层面的Keep-alive协议，针对的是整条TCP连接
+      - Server 侧明显是基于应用层协议做的判断
+    - Source Code
+      - Client
+       ```go
+       func (d *Dialer) DialContext(ctx context.Context, network, address string) (Conn, error) {
+       ...
+        if tc, ok := c.(*TCPConn); ok && d.KeepAlive >= 0 {
+         setKeepAlive(tc.fd, true)
+         ka := d.KeepAlive
+         if d.KeepAlive == 0 {
+          ka = defaultTCPKeepAlive
+         }
+         setKeepAlivePeriod(tc.fd, ka)
+         testHookSetKeepAlive(ka)
+        }
+       ...
+       }
+       
+       func setKeepAlivePeriod(fd *netFD, d time.Duration) error {
+        // The kernel expects seconds so round to next highest second.
+        secs := int(roundDurationUp(d, time.Second))
+        if err := fd.pfd.SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_KEEPINTVL, secs); err != nil {
+         return wrapSyscallError("setsockopt", err)
+        }
+        err := fd.pfd.SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_KEEPIDLE, secs)
+        runtime.KeepAlive(fd)
+        return wrapSyscallError("setsockopt", err)
+       }
+       ```
+      最后调用的是 SetsockoptInt，这个函数就不在这具体的展开了，本质上来讲 Client 侧是在TCP 4层让 OS 来帮忙进行的 Keep-Alive。
+    - Server
+      ```go
+      func (c *conn) serve(ctx context.Context) {
+      ...
+          defer func() {
+              if !c.hijacked() {
+         c.close()
+         c.setState(c.rwc, StateClosed, runHooks)
+        }
+          }
+          
+          for {
+              w, err := c.readRequest(ctx)
+              ...
+              serverHandler{c.server}.ServeHTTP(w, w.req)
+              ...
+        if d := c.server.idleTimeout(); d != 0 {
+         c.rwc.SetReadDeadline(time.Now().Add(d))
+         if _, err := c.bufr.Peek(4); err != nil {
+          return
+         }
+        }
+          }
+      ...
+      }
+      ```
+      defer 就是关闭连接用的，当函数退出的时候server会关闭连接。 for循坏是处理连接请求用的，可以看出来HTTP server本身其实是不支持处理多个请求的，并没有实现HTTP 1.1协议中的Pipeline。
+      然后再看keep-alive的操作，先设置ReadDeadline，然后调用c.bufr.Peek这里的调用流程比较长，其实最后会落到conn.Read,本质上是一个阻塞操作。然后开始等待bufr里面的数据，如果client在这个时间段没有发送数据过来，则会退出for循环然后关闭连接
+  - conclusion
+    - 在上述的场景下想要reuse一个conn主要还是取决于server 侧的idleTimeout。如果没收到client发送的请求是会主动发送fin包进行close的。
+  - fix
+    - **Retry**
+      其实解决方案有很多种，在这里线上采用的是客户端进行重试。这里引申一下，像上面这种错误，如果是GET,HEAD等一些幂等操作的话，client代码库会自动进行重试。我们线上使用的是POST, 所以直接在业务侧进行重试
+    - **Increase IdleTimeout**
+      另外一个解决方案就是增加server的IdleTimeout，但是这样一来会消耗更多的server资源。
+
+
+
+
 
