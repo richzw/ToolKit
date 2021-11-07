@@ -150,6 +150,84 @@
   我们选择了以下常用的类型作为 value 进行测试：bool、int、interface{}、struct{}。
   - 从内存开销而言，struct{} 是最小的，反映在执行时间上也是最少的。由于 bool 类型仅占一个字节，它相较于空结构而言，相差的并不多。但是，如果使用 interface{} 类型，那差距就很明显了
 
-  
+- [优化 Golang 分布式行情推送的性能瓶颈](https://mp.weixin.qq.com/s?__biz=MjM5MDUwNTQwMQ==&mid=2257486432&idx=1&sn=dea96a7309a8228bed48c80c3d675957&chksm=a539e2b6924e6ba06cdd8be0c410a5c3e0eb400b681b7f1d90a9cb3b6aad9fcc90ea74d8d99c&cur_album_id=1680805216599736323&scene=190#rd)
+  - 并发操作map带来的锁竞争及时延
+    - 推送的服务需要维护订阅关系，一般是用嵌套的map结构来表示，这样造成map并发竞争下带来的锁竞争和时延高的问题。
+    - 解决方法：在每个业务里划分256个map和读写锁，这样锁的粒度降低到1/256。
+      ```go
+      sync.RWMutex
+      map[string]map[string]client
+      
+      改成这样
+      m *shardMap.shardMap
+      ```
+  - 串行消息通知改成并发模式
+    - 在推送服务维护了某个topic和1w个客户端chan的映射，当从mq收到该topic消息后，再通知给这1w个客户端chan
+      ```go
+      notifiers := []*mapping.StreamNotifier{}
+      // conv slice
+      for _, notifier := range notifierMap {
+          notifiers = append(notifiers, notifier)
+      }
+      
+      
+      // optimize: direct map struct
+      taskChunks := b.splitChunks(notifiers, batchChunkSize)
+      
+      
+      // concurrent send chan
+      wg := sync.WaitGroup{}
+      for _, chunk := range taskChunks {
+          chunkCopy := chunk // slice replica
+          wg.Add(1)
+          b.SubmitBlock(
+              func() {
+                  for _, notifier := range chunkCopy {
+                      b.directSendMesg(notifier, mesg)
+                  }
+                  wg.Done()
+              },
+          )
+      }
+      wg.Wait()
+      ```
+  - 过多的定时器造成cpu开销加大
+    - go在1.9之后把单个timerproc改成多个timerproc，减少了锁竞争，但四叉堆数据结构的时间复杂度依旧复杂，高精度引起的树和锁的操作也依然频繁。
+    - 改用[时间轮](https://github.com/rfyiamcool/go-timewheel)解决上述的问题。数据结构改用简单的循环数组和map，时间的精度弱化到秒的级别，业务上对于时间差是可以接受的。
+  - 多协程读写chan会出现send closed panic的问题
+    - 解决的方法很简单，就是不要直接使用channel，而是封装一个触发器，当客户端关闭时，不主动去close chan，而是关闭触发器里的ctx，然后直接删除topic跟触发器的映射。
+      ```go
+      // 触发器的结构
+      type StreamNotifier struct {
+          Guid  string
+          Queue chan interface{}
+      
+      
+          closed int32
+          ctx    context.Context
+          cancel context.CancelFunc
+      }
+      
+      
+      func (sc *StreamNotifier) IsClosed() bool {
+          if sc.ctx.Err() == nil {
+              return false
+          }
+          return true
+      }
+      ```
+  - 提高grpc的吞吐性能
+    - 内网的两个节点使用单连接就可以跑满网络带宽，无性能问题。但在golang里实现的grpc会有各种锁竞争的问题。
+    - 如何优化？多开grpc客户端，规避锁竞争的冲突概率。[测试](https://github.com/rfyiamcool/grpc_batch_test)下来qps提升很明显，从8w可以提到20w左右。
+  - 减少协程数量
+    - 有朋友认为等待事件的协程多了无所谓，只是占内存，协程拿不到调度，不会对runtime性能产生消耗。这个说法是错误的。虽然拿不到调度，看起来只是占内存，但是会对 GC 有很大的开销。所以，不要开太多的空闲的协程，比如协程池开的很大。
+    - 在推送的架构里，push-gateway到push-server不仅几个连接就可以，且几十个stream就可以。我们自己实现大量消息在十几个stream里跑，然后调度通知。在golang grpc streaming的实现里，每个streaming请求都需要一个协程去等待事件。所以，共享stream通道也能减少协程的数量。
+  - GC
+    - 对于频繁创建的结构体采用sync.Pool进行缓存。
+    - 有些业务的缓存先前使用list链表来存储，在不断更新新数据时，会不断的创建新对象，对 GC 造成影响，所以改用可复用的循环数组来实现热缓存。
+
+
+
+
 
 
