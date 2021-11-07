@@ -225,6 +225,77 @@
   - GC
     - 对于频繁创建的结构体采用sync.Pool进行缓存。
     - 有些业务的缓存先前使用list链表来存储，在不断更新新数据时，会不断的创建新对象，对 GC 造成影响，所以改用可复用的循环数组来实现热缓存。
+- [更快的时间解析](https://colobu.com/2021/10/10/faster-time-parsing/)
+    ```go
+    func BenchmarkParseRFC3339(b *testing.B) {
+        now := time.Now().UTC().Format(time.RFC3339Nano)
+        for i := 0; i < b.N; i++ {
+            if _, err := time.Parse(time.RFC3339, now); err != nil {
+                b.Fatal(err)
+            }
+        }
+    }
+    ```
+  如果我们采样 CPU profile,我们观察到很多时间都花费在调用strconv.Atoi上
+    ```go
+    > go test -run ^$ -bench BenchmarkParseRFC3339 -cpuprofile cpu.prof 
+    > go tool pprof cpu.prof
+    Type: cpu
+    Time: Oct 1, 2021 at 7:19pm (BST)
+    Duration: 1.22s, Total samples = 960ms (78.50%)
+    Entering interactive mode (type "help" for commands, "o" for options)
+    (pprof) top
+    Showing nodes accounting for 950ms, 98.96% of 960ms total
+    Showing top 10 nodes out of 24
+          flat  flat%   sum%        cum   cum%
+         380ms 39.58% 39.58%      380ms 39.58%  strconv.Atoi
+         370ms 38.54% 78.12%      920ms 95.83%  github.com/philpearl/blog/content/post.parseTime
+          60ms  6.25% 84.38%      170ms 17.71%  time.Date
+    ```
+  我们的大部分数字正好有2个字节长，或者正好有4个字节长。我们可以编写数字解析函数，针对我们的特殊情况做优化，不需要任何令人讨厌的慢循环:
+    ```go
+    func atoi2(in string) (int, error) {
+        a, b := int(in[0]-'0'), int(in[1]-'0')
+        if a < 0 || a > 9 || b < 0 || b > 9 {
+            return 0, fmt.Errorf("can't parse number %q", in)
+        }
+        return a*10 + b, nil
+    }
+    func atoi4(in string) (int, error) {
+        a, b, c, d := int(in[0]-'0'), int(in[1]-'0'), int(in[2]-'0'), int(in[3]-'0')
+        if a < 0 || a > 9 || b < 0 || b > 9 || c < 0 || c > 9 || d < 0 || d > 9 {
+            return 0, fmt.Errorf("can't parse number %q", in)
+        }
+        return a*1000 + b*100 + c*10 + d, nil
+    }
+    ```
+  让我们在看一眼现在的CPU profile, 并且看一些汇编代码。在atoi2中有两个slice长度检查(下面绿色的汇编代码,调用panicIndex之前)，不是有一个[边界检查](https://go101.org/article/bounds-check-elimination.html)的技巧吗？
+
+  以下是根据此技巧进行修正后的代码。函数开始处的_ = in[1]给了编译器充足的提示，这样我们在调用它的时候不用每次都检查是否溢出了:
+    ```go
+    func atoi2(in string) (int, error) {
+        _ = in[1] // This helps the compiler reduce the number of times it checks `in` is long enough
+        a, b := int(in[0]-'0'), int(in[1]-'0')
+        if a < 0 || a > 9 || b < 0 || b > 9 {
+            return 0, fmt.Errorf("can't parse number %q", in)
+        }
+        return a*10 + b, nil
+    }
+    ```
+  atoi2非常短。为什么它不被内联的？如果我们简化错误处理，是不是有效果？如果我们删除对fmt.Errorf的调用，并将其替换为一个简单的错误类型，这将降低atoi2函数的复杂性。这可能足以让Go编译器决定不作为单独的代码块而是直接在调用函数中内联这个函数。
+    ```go
+    var errNotNumber = errors.New("not a valid number")
+    func atoi2(in string) (int, error) {
+    	_ = in[1]
+    	a, b := int(in[0]-'0'), int(in[1]-'0')
+    	if a < 0 || a > 9 || b < 0 || b > 9 {
+    		return 0, errNotNumber
+    	}
+    	return a*10 + b, nil
+    }
+    ```
+
+
 
 
 
