@@ -77,10 +77,14 @@
     var dataSlice []int = foo()
     var interfaceSlice []interface{} = make([]interface{}, len(dataSlice))
     for i, d := range dataSlice {
-    	interfaceSlice[i] = d
+        interfaceSlice[i] = d
     }
     ```
-  
+- [golang redis pipeline管道引发乱序串读](http://xiaorui.cc/archives/7179)
+  - 在使用 golang redigo pipeline 模式下，错误使用会引发乱序串读的问题。简单说，发了一组 pipeline命 令，但由于只发送而没有去解析接收结果，那么后面通过连接池重用该连接时，会拿到了上次的请求结果，乱序串读了。
+  - 看源码可得知，Flush() 只是把buffer缓冲区的数据写到连接里，而没有从连接读取的过程。所以说，在redigo的pipeline里，有几次的写，就应该有几次的 Receive() 。Receive是从连接读缓冲区里读取解析数据。 receive() 是不可或缺的！ 不能多，也不能少，每个 send() 都对应一个 receive()。
+  - 使用了 pipeline 批量确实有效的减少了时延，也减少了 redis 压力。不要再去使用 golang redigo 这个库了，请直接选择 go-redis 库。
+
 
 
 
