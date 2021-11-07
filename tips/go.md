@@ -726,7 +726,47 @@
       - 循环执行 goroutine 上面的 _defer 函数链，如果执行完了都还没有恢复 _panic 的状态，那就没得办法了，退出进程，打印堆栈。
       - 如果在 goroutine 的 _defer 链上，有个朋友 recover 了一下，把这个 _panic 标记成恢复，那事情就到此为止，就从这个 _defer 函数执行后续正常代码即可，走 deferreturn 的逻辑。
 
+- [如何限定Goroutine数量](https://juejin.cn/post/7017286487502766093)
+  - 用有 buffer 的 channel 来限制
+  - channel 与 sync 同步组合方式实现控制 goroutine
+  - 利用无缓冲 channel 与任务发送/执行分离方式
+    ```go
+    var wg = sync.WaitGroup{}
+    
+    func doBusiness(ch chan int) {
+    
+        for t := range ch {
+            fmt.Println("go task = ", t, ", goroutine count = ", runtime.NumGoroutine())
+            wg.Done()
+        }
+    }
+    
+    func sendTask(task int, ch chan int) {
+        wg.Add(1)
+        ch <- task
+    }
+    
+    func main() {
+    
+        ch := make(chan int)   //无buffer channel
+    
+        goCnt := 3              //启动goroutine的数量
+        for i := 0; i < goCnt; i++ {
+            //启动go
+            go doBusiness(ch)
+        }
+    
+        taskCnt := math.MaxInt64 //模拟用户需求业务的数量
+        for t := 0; t < taskCnt; t++ {
+            //发送任务
+            sendTask(t, ch)
+        }
+    
+        wg.Wait()
+    }
+    ```
 
+- 
 
 
 
