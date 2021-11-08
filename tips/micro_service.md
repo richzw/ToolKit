@@ -251,3 +251,59 @@
   - lastEvent：上次发生限速器事件的时间（通过或者限制都是限速器事件）
 
   可以看到在 timer/rate 的限流器实现中，并没有单独维护一个 Timer 和队列去真的每隔一段时间向桶中放令牌，而是仅仅通过计数的方式表示桶中剩余的令牌。每次消费取 Token 之前会先根据上次更新令牌数的时间差更新桶中Token数。
+
+- [如何获取客户端真实 IP](https://mp.weixin.qq.com/s/C-Xf6haLrOWkmBm2lRTdEQ)
+  - background
+    - 通常我们可以通过 HTTP 协议 Request Headers 中 X-Forwarded-For 头来获取真实 IP。然而通过 X-Forwarded-For 头获取真实 IP 的方式真的可靠么？
+  - 方案
+    ```go
+    // ClientIP 方法可以获取到请求客户端的IP
+    func (c *Context) ClientIP() string {
+       // 1. ForwardedByClientIP 默认为 true，此处会优先取 X-Forwarded-For 值，
+       // 如果 X-Forwarded-For 为空，则会再尝试取 X-Real-Ip
+       if c.engine.ForwardedByClientIP {
+          clientIP := c.requestHeader("X-Forwarded-For")
+          clientIP = strings.TrimSpace(strings.Split(clientIP, ",")[0])
+          if clientIP == "" {
+             clientIP = strings.TrimSpace(c.requestHeader("X-Real-Ip"))
+          }
+          if clientIP != "" {
+             return clientIP
+          }
+       }
+       // 2. 如果我们手动配置 ForwardedByClientIP 为 false 且 X-Appengine-Remote-Addr 不为空，则取 X-Appengine-Remote-Addr 作为客户端IP
+       if c.engine.AppEngine {
+          if addr := c.requestHeader("X-Appengine-Remote-Addr"); addr != "" {
+             return addr
+          }
+       }
+       // 3. 最终才考虑取对端 IP 兜底
+       if ip, _, err := net.SplitHostPort(strings.TrimSpace(c.Request.RemoteAddr)); err == nil {
+          return ip
+    }
+       return ""
+    }
+    ```
+    Gin 框架到 1.7.2 后突然发现一个 『Bug』，升级后服务端无法获正确的客户端 IP，取而代之的是 Kubernetes 集群中 Nginx Ingress IP
+    https://github.com/gin-gonic/gin/issues/2697
+    
+  - X Forward For 伪造？
+    - 客户端是否能伪造 IP，取决于边缘节点（Edge Node）是如何处理 X-Forwarded-For 字段。客户端直接连接的首个 Proxy 节点都叫做边缘节点（Edge Node），无论是网关、CDN、LB 等，只要这一层是直接接入客户端访问的，那么它就是一个边缘节点。
+    - 不重写 X-Forwarded-For 的边缘节点 边缘节点如果是透传 HTTP 的 X-Forwarded-For 头，那么它就是不安全的，客户端可以在 HTTP 请求中伪造 X-Forwarded-For 值，且这个值会被向后透传。
+    - 重写 X-Forwarded-For 的边缘节点 边缘节点如果重写 $remote_addr 到 X-Forwarded-For ，那么这就是安全的。
+  - 继续尝试通过 X-Forwarded-For 获取客户端真实 IP
+    - 业务中需配置基础设施所有前置代理到 TrustedProxies 中，包含 CDN 地址池、WAF 地址池、Kunernetest Nginx Ingress 地址池，这种方案基本无法落地：
+    - 配置太过复杂，一旦获取 IP 不准，很难排查。
+    - 导致业务配置和基础设施耦合，基础设施如果对 CDN、WAF、Ingress 做变动，业务代码必须同步变更。
+    - 部分可信代理 IP 根本没法配置，比如 CDN 地址池
+  - 尝试通过自定义 Header 获取客户端真实 IP
+    - 基础设施团队提供自定义 Header 来获取客户端真实 IP，如 X-Client-Real-IP 或 X-Appengine-Remote-Addr 。这种方案需要基础设施团队在云厂商 CDN 或 WAF 终端上做好相应的配置。这种方案：
+    - 配置简单可靠，维护成本低，仅需在 CDN、WAF 终端配置自定义 Header 即可。
+    - 如果使用 X-Appengine-Remote-Addr，对于使用 Google Cloud 的 App Engine 的服务不需做任何修改。对于使用的国内云厂商的服务，则需要显式的配置 engine. AppEngine = true，然后继续通过 ctx.ClientIP() 方法即可。 
+    - 如果使用其他自定义 Header，如 X-Client-Real-IP 来获取客户端真实 IP，建议可以考虑自行封装 ClientIP(*gin.Context) string 函数，从 X-Client-Real-IP 中获取客户端 IP。
+
+
+
+
+
+
