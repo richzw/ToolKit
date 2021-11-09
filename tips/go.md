@@ -766,11 +766,84 @@
     }
     ```
 
-- 
-
-
-
-
+- [Sync Once Source Code](https://mp.weixin.qq.com/s/nkhZyKG4nrUulpliMKdgRw)
+  - 问题
+    - 为啥源码引入Mutex而不是CAS操作
+    - 为啥要有fast path, slow path 
+    - 加锁之后为啥要有done==0，为啥有double check，为啥这里不是原子读
+    - store为啥要加defer
+    - 为啥是atomic.store，不是直接赋值1
+  - 演进
+    - 开始
+      ```go
+      type Once struct {
+       m    Mutex
+       done bool
+      }
+      
+      func (o *Once) Do(f func()) {
+       o.m.Lock()
+       defer o.m.Unlock()
+       if !o.done {
+        o.done = true
+        f()
+       }
+      }
+      ```
+      缺点：每次都要执行Mutex加锁操作，对于Once这种语义有必要吗，是否可以先判断一下done的value是否为true，然后再进行加锁操作呢？
+    - 进化
+      ```go
+      type Once struct {
+       m    Mutex
+       done int32
+      }
+      
+      func (o *Once) Do(f func()) {
+       if atomic.AddInt32(&o.done, 0) == 1 {
+        return
+       }
+       // Slow-path.
+       o.m.Lock()
+       defer o.m.Unlock()
+       if o.done == 0 {
+        f()
+        atomic.CompareAndSwapInt32(&o.done, 0, 1)
+       }
+      }
+      ```
+      进化点
+      - 在slow-path加锁后，要继续判断done值是否为0，确认done为0后才要执行f()函数，这是因为在多协程环境下仅仅通过一次atomic.AddInt32判断并不能保证原子性，比如俩协程g1、g2，g2在g1刚刚执行完atomic.CompareAndSwapInt32(&o.done, 0, 1)进入了slow path，如果不进行double check，那g2又会执行一次f()。
+      - 用一个int32变量done表示once的对象是否已执行完，有两个地方使用到了atomic包里的方法对o.done进行判断，分别是，用AddInt32函数根据o.done的值是否为1判断once是否已执行过，若执行过直接返回；f()函数执行完后，对o.done通过cas操作进行赋值1。
+      - 问到atomic.CompareAndSwapInt32(&o.done, 0, 1)可否被o.done == 1替换， 答案是不可以
+        - 现在的CPU一般拥有多个核心，而CPU的处理速度快于从内存读取变量的速度，为了弥补这俩速度的差异，现在CPU每个核心都有自己的L1、L2、L3级高速缓存，CPU可以直接从高速缓存中读取数据，但是这样一来内存中的一份数据就在缓存中有多份副本，在同一时间下这些副本中的可能会不一样，为了保持缓存一致性，Intel CPU使用了MESI协议
+        - AddInt32方法和CompareAndSwapInt32方法(均为amd64平台 runtime/internal/atomic/atomic_amd64.s)底层都是在汇编层面调用了LOCK指令，LOCK指令通过总线锁或MESI协议保证原子性（具体措施与CPU的版本有关），提供了强一致性的缓存读写保证，保证LOCK之后的指令在带LOCK前缀的指令执行之后才执行，从而保证读到最新的o.done值。
+    - 小优化1
+      - 把done的类型由int32替换为uint32,用CompareAndSwapUint32替换了CompareAndSwapInt32, 用LoadUint32替换了AddInt32方法
+      - LoadUint32底层并没有LOCK指令用于加锁，我觉得能这么写的主要原因是进入slow path之后会继续用Mutex加锁并判断o.done的值，且后面的CAS操作是加锁的，所以可以这么改
+    - 小优化2
+      - 用StoreUint32替换了CompareAndSwapUint32操作，CAS操作在这里确实有点多余，因为这行代码最主要的功能是原子性的done = 1
+      - Store命令的底层是，其中关键的指令是XCHG，有的同学可能要问了，这源码里没有LOCK指令啊，怎么保证happen before呢，Intel手册有这样的描述: The LOCK prefix is automatically assumed for XCHG instruction.，这个指令默认带LOCK前缀，能保证Happen Before语义。
+    - 小优化3
+      - 在StoreUint32前增加defer前缀，增加defer是保证 即使f()在执行过程中出现panic，Once仍然保证f()只执行一次，这样符合严格的Once语义。
+      - 除了预防panic，defer还能解决指令重排的问题：现在CPU为了执行效率，源码在真正执行时的顺序和代码的顺序可能并不一样，比如这段代码中a不一定打印"hello, world"，也可能打印空字符串。
+        ```go
+        var a string
+        var done bool
+        
+        func setup() {
+         a = "hello, world"
+         done = true
+        }
+        
+        func main() {
+         go setup()
+         for !done {
+         }
+         print(a)
+        }
+        ```
+    - 小优化4
+      - 用函数区分开了fast path和slow path，对fast path做了内联优化
 
 
 
