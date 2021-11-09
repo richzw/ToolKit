@@ -845,6 +845,101 @@
     - 小优化4
       - 用函数区分开了fast path和slow path，对fast path做了内联优化
 
+- [Option Design](https://mp.weixin.qq.com/s/WUqpmyxWv_W5E6RtxazYAg)
+  - Good approach
+    ```go
+    func NewServer(addr string, options ...func(server *http.Server)) *http.Server {
+      server := &http.Server{Addr: addr, ReadTimeout: 3 * time.Second}
+      for _, opt := range options {
+        opt(server)
+      }
+      return server
+    }
+    ```
+    通过不定长度的方式代表可以给多个 options，以及每一个 option 是一个 func 型态，其参数型态为 *http. Server。那我们就可以在 NewServer 这边先给 default value，然后通过 for loop 将每一个 options 对其 Server 做的参数进行设置，这样 client 端不仅可以针对他想要的参数进行设置，其他没设置到的参数也不需要特地给 zero value 或是默认值，完全封装在 NewServer 就可以了
+     ```go
+     func main() {
+       readTimeoutOption := func(server *http.Server) {
+         server.ReadTimeout = 5 * time.Second
+       }
+       handlerOption := func(server *http.Server) {
+         mux := http.NewServeMux()
+         mux.HandleFunc("/health", func(writer http.ResponseWriter, request *http.Request) {
+           writer.WriteHeader(http.StatusOK)
+         })
+         server.Handler = http.NewServeMux()
+       }
+       s := server.NewServer(":8080", readTimeoutOption, handlerOption)
+     }
+     ```
+  - Good approach v2
+    ```go
+    type options struct {
+      cache  bool
+      logger *zap.Logger
+    }
+    
+    type Option interface {
+      apply(*options)
+    }
+    
+    type cacheOption bool
+    
+    func (c cacheOption) apply(opts *options) {
+      opts.cache = bool(c)
+    }
+    
+    func WithCache(c bool) Option {
+      return cacheOption(c)
+    }
+    
+    type loggerOption struct {
+      Log *zap.Logger
+    }
+    
+    func (l loggerOption) apply(opts *options) {
+      opts.logger = l.Log
+    }
+    
+    func WithLogger(log *zap.Logger) Option {
+      return loggerOption{Log: log}
+    }
+    
+    // Open creates a connection.
+    func Open(
+      addr string,
+      opts ...Option,
+    ) (*Connection, error) {
+      options := options{
+        cache:  defaultCache,
+        logger: zap.NewNop(),
+      }
+    
+      for _, o := range opts {
+        o.apply(&options)
+      }
+    
+      // ...
+    }
+    
+    ```
+    可以看到通过设计一个Option interface，里面用了 apply function，以及使用一个 options struct 将所有的 field 都放在这个 struct 里面，每一个 field 又会用另外一种 struct 或是 custom type 进行封装，并 implement apply function，最后再提供一个 public function：WithLogger 去给 client 端设值。
+
+    这样的做法好处是可以针对每一个 option 作更细的 custom function 设计，例如选项的 description 为何？可以为每一个 option 再去 implement Stringer interface，之后提供 option 描述就可以调用 toString 了，设计上更加的方便
+     ```go
+     func (l loggerOption) apply(opts *options) {
+       opts.logger = l.Log
+     }
+     func (l loggerOption) String() string {
+       return "logger description..."
+     }
+     ```
+
+
+
+
+
+
 
 
 
