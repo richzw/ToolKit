@@ -934,7 +934,32 @@
        return "logger description..."
      }
      ```
-
+- [schedule a task at a specific time](https://stephenafamo.com/blog/posts/how-to-schedule-task-at-specific-time-in-go)
+    ```go
+    func waitUntil(ctx context.Context, until time.Time) {
+    	timer := time.NewTimer(time.Until(until))
+    	defer timer.Stop()
+    
+    	select {
+    	case <-timer.C:
+    		return
+    	case <-ctx.Done():
+    		return
+    	}
+    }
+    func main() {
+        // our context, for now we use context.Background()
+        ctx := context.Background()
+        
+        // when we want to wait till
+        until, _ := time.Parse(time.RFC3339, "2023-06-22T15:04:05+02:00")
+        
+        // and now we wait
+        waitUntil(ctx, until)
+        
+        // Do what ever we want..... 🎉
+    }
+    ```
 
 
 
