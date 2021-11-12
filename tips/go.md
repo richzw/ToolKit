@@ -937,15 +937,15 @@
 - [schedule a task at a specific time](https://stephenafamo.com/blog/posts/how-to-schedule-task-at-specific-time-in-go)
     ```go
     func waitUntil(ctx context.Context, until time.Time) {
-    	timer := time.NewTimer(time.Until(until))
-    	defer timer.Stop()
+        timer := time.NewTimer(time.Until(until))
+        defer timer.Stop()
     
-    	select {
-    	case <-timer.C:
-    		return
-    	case <-ctx.Done():
-    		return
-    	}
+        select {
+        case <-timer.C:
+            return
+        case <-ctx.Done():
+            return
+        }
     }
     func main() {
         // our context, for now we use context.Background()
@@ -960,7 +960,125 @@
         // Do what ever we want..... 🎉
     }
     ```
-
+- [Better scheduling](https://stephenafamo.com/blog/posts/better-scheduling-in-go)
+  - [Kronika](https://github.com/stephenafamo/kronika)
+  - Using `time.After()`
+    ```go
+        // This will block for 5 seconds and then return the current time
+        theTime := <-time.After(time.Second * 5)
+        fmt.Println(theTime.Format("2006-01-02 15:04:05"))
+    ```
+  - Using time.Ticker
+    ```go
+        // This will print the time every 5 seconds
+        for theTime := range time.Tick(time.Second * 5) {
+            fmt.Println(theTime.Format("2006-01-02 15:04:05"))
+        }
+    ```
+    - Dangers of using time.Tick()
+      - When we use the time.Tick() function, we do not have direct access to the underlying time.Ticker and so we cannot close it properly.
+    - Limitations using time.Tick()
+      - Specify a start time
+      - Stop the ticker
+  - Extending time.Tick() using a custom function
+     ```go
+     func cron(ctx context.Context, startTime time.Time, delay time.Duration) <-chan time.Time {
+     	// Create the channel which we will return
+     	stream := make(chan time.Time, 1)
+     
+     	// Calculating the first start time in the future
+     	// Need to check if the time is zero (e.g. if time.Time{} was used)
+     	if !startTime.IsZero() {
+     		diff := time.Until(startTime)
+     		if diff < 0 {
+     			total := diff - delay
+     			times := total / delay * -1
+     
+     			startTime = startTime.Add(times * delay)
+     		}
+     	}
+     
+     	// Run this in a goroutine, or our function will block until the first event
+     	go func() {
+     
+     		// Run the first event after it gets to the start time
+     		t := <-time.After(time.Until(startTime))
+     		stream <- t
+     
+     		// Open a new ticker
+     		ticker := time.NewTicker(delay)
+     		// Make sure to stop the ticker when we're done
+     		defer ticker.Stop()
+     
+     		// Listen on both the ticker and the context done channel to know when to stop
+     		for {
+     			select {
+     			case t2 := <-ticker.C:
+     				stream <- t2
+     			case <-ctx.Done():
+     				close(stream)
+     				return
+     			}
+     		}
+     	}()
+     
+     	return stream
+     }
+     ```
+     - Run on Tuesdays by 2 pm
+       ```go
+       ctx := context.Background()
+       
+       startTime, err := time.Parse(
+           "2006-01-02 15:04:05",
+           "2019-09-17 14:00:00",
+       ) // is a tuesday
+       if err != nil {
+           panic(err)
+       }
+       
+       delay := time.Hour * 24 * 7 // 1 week
+       
+       for t := range cron(ctx, startTime, delay) {
+           // Perform action here
+           log.Println(t.Format("2006-01-02 15:04:05"))
+       }
+       ```
+     - Run every hour, on the hour
+       ```go
+       ctx := context.Background()
+       
+       startTime, err := time.Parse(
+           "2006-01-02 15:04:05",
+           "2019-09-17 14:00:00",
+       ) // any time in the past works but it should be on the hour
+       if err != nil {
+           panic(err)
+       }
+       
+       delay := time.Hour // 1 hour
+       
+       for t := range cron(ctx, startTime, delay) {
+           // Perform action here
+           log.Println(t.Format("2006-01-02 15:04:05"))
+       }
+       ```
+     - Run every 10 minutes, starting in a week
+       ```go
+       ctx := context.Background()
+       
+       startTime, err := time.Now().AddDate(0, 0, 7) // see https://golang.org/pkg/time/#Time.AddDate
+       if err != nil {
+       	panic(err)
+       }
+       
+       delay := time.Minute * 10 // 10 minutes
+       
+       for t := range cron(ctx, startTime, delay) {
+       	// Perform action here
+       	log.Println(t.Format("2006-01-02 15:04:05"))
+       }
+       ```
 
 
 
