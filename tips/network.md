@@ -243,6 +243,34 @@
       - 利用challenge ack获取seq
       - ![img.png](network_challenge_ack.png)
 
+- [TCP拥塞控制及谷歌的BBR算法](https://mp.weixin.qq.com/s/pmUdUvHgEhZzAhz2EP5Evg)
+  - 流量控制 Flow Control - 微观层面点到点的流量控制
+    - 在数据通信中，流量控制是管理两个节点之间数据传输速率的过程，以防止快速发送方压倒慢速接收方
+    - 它为接收机提供了一种控制传输速度的机制，这样接收节点就不会被来自发送节点的数据淹没
+    - 流量控制是通信双方之间约定数据量的一种机制，具体来说是借助于TCP协议的确认ACK机制和窗口协议来完成的。
+    ![img.png](network_flow_control.png)
+  - 拥塞控制 - 宏观层面的控去避免网络链路的拥堵
+    - 端到端流量控制算法也面临丢包、乱序、重传问题
+    - TCP拥塞控制算法的目的可以简单概括为：公平竞争、充分利用网络带宽、降低网络延时、优化用户体验
+    - TCP 传输层拥塞控制算法并不是简单的计算机网络的概念，也属于控制论范畴
+    - TCP连接的发送方一般是基于丢包来判断当前网络是否发生拥塞，丢包可以由重传超时RTO和重复确认来做判断
+      - 基于丢包策略的传统拥塞控制算法
+       ![img.png](network_congestion_control1.png)
+      - 基于RTT延时策略来进行控制的
+       ![img.png](network_congestion_control2.png)
+    - 拥塞窗口cwnd
+      - 流量控制可以知道接收方在header中给出了rwnd接收窗口大小，发送方不能自顾自地按照接收方的rwnd限制来发送数据，因为网络链路是复用的，需要考虑当前链路情况来确定数据量，这也是我们要提的另外一个变量cwnd
+      - Congestion Window (cwnd) is a TCP state variable that limits the amount of data the TCP can send into the network before receiving an ACK. 
+      - The Receiver Window (rwnd) is a variable that advertises the amount of data that the destination side can receive. 
+      - Together, the two variables are used to regulate data flow in TCP connections, minimize congestion, and improve network performance.
+      - cwnd是在发送方维护的，cwnd和rwnd并不冲突，发送方需要结合rwnd和cwnd两个变量来发送数据
+    - 策略
+      ![img.png](network_congestion_control.png)
+  - BBR算法
+    - BBR算法是个主动的闭环反馈系统，通俗来说就是根据带宽和RTT延时来不断动态探索寻找合适的发送速率和发送量。
+    - 该算法使用网络最近出站数据分组当时的最大带宽和往返时间来创建网络的显式模型。数据包传输的每个累积或选择性确认用于生成记录在数据包传输过程和确认返回期间的时间内所传送数据量的采样率。
+    - 分别采样估计极大带宽和极小延时，并用二者乘积作为发送窗口，并且BBR引入了Pacing Rate限制数据发送速率，配合cwnd使用来降低冲击。
+
 
 
 
