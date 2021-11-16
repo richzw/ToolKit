@@ -983,46 +983,46 @@
   - Extending time.Tick() using a custom function
      ```go
      func cron(ctx context.Context, startTime time.Time, delay time.Duration) <-chan time.Time {
-     	// Create the channel which we will return
-     	stream := make(chan time.Time, 1)
+         // Create the channel which we will return
+         stream := make(chan time.Time, 1)
      
-     	// Calculating the first start time in the future
-     	// Need to check if the time is zero (e.g. if time.Time{} was used)
-     	if !startTime.IsZero() {
-     		diff := time.Until(startTime)
-     		if diff < 0 {
-     			total := diff - delay
-     			times := total / delay * -1
+         // Calculating the first start time in the future
+         // Need to check if the time is zero (e.g. if time.Time{} was used)
+         if !startTime.IsZero() {
+             diff := time.Until(startTime)
+             if diff < 0 {
+                 total := diff - delay
+                 times := total / delay * -1
      
-     			startTime = startTime.Add(times * delay)
-     		}
-     	}
+                 startTime = startTime.Add(times * delay)
+             }
+         }
      
-     	// Run this in a goroutine, or our function will block until the first event
-     	go func() {
+         // Run this in a goroutine, or our function will block until the first event
+         go func() {
      
-     		// Run the first event after it gets to the start time
-     		t := <-time.After(time.Until(startTime))
-     		stream <- t
+             // Run the first event after it gets to the start time
+             t := <-time.After(time.Until(startTime))
+             stream <- t
      
-     		// Open a new ticker
-     		ticker := time.NewTicker(delay)
-     		// Make sure to stop the ticker when we're done
-     		defer ticker.Stop()
+             // Open a new ticker
+             ticker := time.NewTicker(delay)
+             // Make sure to stop the ticker when we're done
+             defer ticker.Stop()
      
-     		// Listen on both the ticker and the context done channel to know when to stop
-     		for {
-     			select {
-     			case t2 := <-ticker.C:
-     				stream <- t2
-     			case <-ctx.Done():
-     				close(stream)
-     				return
-     			}
-     		}
-     	}()
+             // Listen on both the ticker and the context done channel to know when to stop
+             for {
+                 select {
+                 case t2 := <-ticker.C:
+                     stream <- t2
+                 case <-ctx.Done():
+                     close(stream)
+                     return
+                 }
+             }
+         }()
      
-     	return stream
+         return stream
      }
      ```
      - Run on Tuesdays by 2 pm
@@ -1069,19 +1069,89 @@
        
        startTime, err := time.Now().AddDate(0, 0, 7) // see https://golang.org/pkg/time/#Time.AddDate
        if err != nil {
-       	panic(err)
+           panic(err)
        }
        
        delay := time.Minute * 10 // 10 minutes
        
        for t := range cron(ctx, startTime, delay) {
-       	// Perform action here
-       	log.Println(t.Format("2006-01-02 15:04:05"))
+           // Perform action here
+           log.Println(t.Format("2006-01-02 15:04:05"))
        }
        ```
+- [怎么使用 direct io](https://mp.weixin.qq.com/s/fr3i4RYDK9amjdCAUwja6A)
 
+  操作系统的 IO 过文件系统的时候，默认是会使用到 page cache，并且采用的是 write back 的方式，系统异步刷盘的。由于是异步的，如果在数据还未刷盘之前，掉电的话就会导致数据丢失。
+  写到磁盘有两种方式：
+  - 要么就每次写完主动 sync 一把
+  - 要么就使用 direct io 的方式，指明每一笔 io 数据都要写到磁盘才返回。
+  
+  O_DIRECT 的知识点
+  - direct io 也就是常说的 DIO，是在 Open 的时候通过 flag 来指定 O_DIRECT 参数，之后的数据的 write/read 都是绕过 page cache，直接和磁盘操作，从而避免了掉电丢数据的尴尬局面，同时也让应用层可以自己决定内存的使用（避免不必要的 cache 消耗）。
+  - direct io 模式需要用户保证对齐规则，否则 IO 会报错，有 3 个需要对齐的规则：
+    - IO 的大小必须扇区大小（512字节）对齐 
+    - IO 偏移按照扇区大小对齐； 
+    - 内存 buffer 的地址也必须是扇区对齐
 
-
+  为什么 Go 的 O_DIRECT 知识点值得一提
+  - O_DIRECT 平台不兼容 
+    - Go 标准库 os 中的是没有 O_DIRECT 这个参数的. 其实 O_DIRECT 这个 Open flag 参数本就是只存在于 linux 系统。// syscall/zerrors_linux_amd64.go
+      ```go
+      // +build linux
+      // 指明在 linux 平台系统编译
+      fp := os.OpenFile(name, syscall.O_DIRECT|flag, perm)
+      ```
+  - Go 无法精确控制内存分配地址
+    - direct io 必须要满足 3 种对齐规则：io 偏移扇区对齐，长度扇区对齐，内存 buffer 地址扇区对齐。前两个还比较好满足，但是分配的内存地址作为一个小程序员无法精确控制
+    - `buffer := make([]byte, 4096)` 那这个地址是对齐的吗？ 答案是：不确定。
+    - 方法很简单，**就是先分配一个比预期要大的内存块，然后在这个内存块里找对齐位置**。 这是一个任何语言皆通用的方法，在 Go 里也是可用的。
+    ```go
+    const (
+        AlignSize = 512
+    )
+    
+    // 在 block 这个字节数组首地址，往后找，找到符合 AlignSize 对齐的地址，并返回
+    // 这里用到位操作，速度很快；
+    func alignment(block []byte, AlignSize int) int {
+       return int(uintptr(unsafe.Pointer(&block[0])) & uintptr(AlignSize-1))
+    }
+    
+    // 分配 BlockSize 大小的内存块
+    // 地址按照 512 对齐
+    func AlignedBlock(BlockSize int) []byte {
+       // 分配一个，分配大小比实际需要的稍大
+       block := make([]byte, BlockSize+AlignSize)
+    
+       // 计算这个 block 内存块往后多少偏移，地址才能对齐到 512 
+       a := alignment(block, AlignSize)
+       offset := 0
+       if a != 0 {
+          offset = AlignSize - a
+       }
+    
+       // 偏移指定位置，生成一个新的 block，这个 block 将满足地址对齐 512；
+       block = block[offset : offset+BlockSize]
+       if BlockSize != 0 {
+          // 最后做一次校验 
+          a = alignment(block, AlignSize)
+          if a != 0 {
+             log.Fatal("Failed to align block")
+          }
+       }
+       
+       return block
+    }
+    ```
+  - 有开源的库吗
+    - https://github.com/ncw/directio
+      ```go
+      // 创建句柄
+      fp, err := directio.OpenFile(file, os.O_RDONLY, 0666)
+      // 创建地址按照 4k 对齐的内存块
+      buffer := directio.AlignedBlock(directio.BlockSize)
+      // 把文件数据读到内存块中
+      _, err := io.ReadFull(fp, buffer)
+      ```
 
 
 
