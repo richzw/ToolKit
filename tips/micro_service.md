@@ -358,7 +358,27 @@
       - IPVS 是工作在 INPUT 链上，会根据访问的 vip+port 判断请求是否 IPVS 服务，如果是则调用注册的 IPVS HOOK 函数，进行 IPVS 相关主流程，强行修改数据包的相关数据，并将数据包发往 POSTROUTING 链上。
       - POSTROUTING 上收到数据包后，根据目标 IP 地址（后端服务器），通过路由选路，将数据包最终发往后端的服务器上。
       
-
+- [微服务的超时传递](https://mp.weixin.qq.com/s/vZlFS7lkKplil5cyHirSmA)
+  ![img.png](micro_service_timeout.png)
+  当进行context传递的时候，比如上图中请求Redis，那么通过如下方式获取剩余时间，然后对比Redis设置的超时时间取较小的时间
+    ```go
+    dl, ok := ctx.Deadline()
+    timeout := time.Now().Add(time.Second * 3)
+    if ok := dl.Before(timeout); ok {
+        timeout = dl
+    }
+    ```
+  服务间超时传递主要是指 RPC 调用时候的超时传递，对于 gRPC 来说并不需要要我们做额外的处理，gRPC 本身就支持超时传递，原理和上面差不多，是通过 metadata 进行传递，最终会被转化为 grpc-timeout 的值，如下代码所示 grpc-go/internal/transport/handler_server.go:79
+    ```go
+    if v := r.Header.Get("grpc-timeout"); v != "" {
+      to, err := decodeTimeout(v)
+      if err != nil {
+       return nil, status.Errorf(codes.Internal, "malformed time-out: %v", err)
+      }
+      st.timeoutSet = true
+      st.timeout = to
+    }
+    ```
 
 
 
