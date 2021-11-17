@@ -274,7 +274,62 @@ Memory Leak
   - an unbuffered channel blocks write to channel until consumer consumes the message from that channel. 
   - there are packages like https://github.com/uber-go/goleak which helps you to find goroutine leaks
   
+- [切片使用不当会造成内存泄漏](https://gocn.vip/topics/17387)
+  
+  `100 Go Mistackes：How to Avoid Them`
+  
+  - 因切片容量而导致内存泄漏
+    ```go
+    func consumeMessages() {
+        for {
+            msg := receiveMessage() ①
+            storeMessageType(getMessageType(msg)) ②
+            // Do something with msg
+        }
+    }
+    
+    func getMessageType(msg []byte) []byte { ③
+        return msg[:5]
+    }
+    ```
+    我们使用 **msg[:5]** 对 msg 进行切分操作时，实际上是创建了一个长度为 5 的新切片。因为新切片和原切片共享同一个底层数据。所以它的容量依然是跟源切片 msg 的容量一样。即使实际的 msg 不再被引用，但剩余的元素依然在内存中
 
+    我们该如何解决呢？最简单的方法就是在 getMessageType 函数内部将消息类型拷贝到一个新的切片上，来替代对 msg 进行切分
+    ```go
+    func getMessageType(msg []byte) []byte {
+        msgType := make([]byte, 5)
+        copy(msgType, msg)
+        return msgType
+    }
+    ```
+  - 因指针类型导致内存泄露
+    ```go
+    func keepFirstElementOnly(ids []string) []string {
+        return string[:1]
+    }
+    ```
+    如果我们传递给 keepFirstElementOnly 函数一个有 100 个字符串的切片，那么，剩下的 99 个字符串会被 GC 回收吗？在该例子中是**会被回收的**。容量将保持为 100 个元素，但会收集剩余的 99 个字符串将减少所消耗的内存
+
+    我们通过指针的方式传递元素，看看会发生什么：
+    ```go
+    func keepFirstElementOnly(ids []*string) []*string {
+       return customers[:1]
+    }
+    ```
+    
+    现在剩余的 99 个元素还会被 GC 回收吗？在该示例中是不可以的。
+    
+    规则如下：**若切片的元素类型是指针或带指针字段的结构体，那么元素将不会被 GC 回收**。如果我们想返回一个容量为 1 的切片，我们可以使用 copy 函数或使用满切片表达式（s[:1:1]）。另外，如果我们想保持容量，则需要将剩余的元素填充为 nil：
+    ```go
+    func keepFirstElementOnly(ids []*string) []*string {
+        for i := 1; i < len(ids); i++ {
+            ids[i] = nil
+        }
+        return ids[:1]
+    }
+    ```
+    
+    对于剩余所有的元素，我们手动的填充为 nil。在本示例中，我们会返回一个具有和输入参数切片的容量大小一致的切片，但剩下的 *string 类型的元素会被 GC 自动回收。
 
 
   
