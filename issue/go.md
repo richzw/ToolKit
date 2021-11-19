@@ -85,7 +85,54 @@
   - 看源码可得知，Flush() 只是把buffer缓冲区的数据写到连接里，而没有从连接读取的过程。所以说，在redigo的pipeline里，有几次的写，就应该有几次的 Receive() 。Receive是从连接读缓冲区里读取解析数据。 receive() 是不可或缺的！ 不能多，也不能少，每个 send() 都对应一个 receive()。
   - 使用了 pipeline 批量确实有效的减少了时延，也减少了 redis 压力。不要再去使用 golang redigo 这个库了，请直接选择 go-redis 库。
 
+- [defer 坑过](https://mp.weixin.qq.com/s/1T6Z74Wri27Ap8skeJiyWQ)
+  - case 1
+     ```go
+     package main
+     
+     import (
+         "fmt"
+     )
+     
+     func a() (r int) {
+         defer func() {
+             r++
+         }()
+         return 0
+     }
+     
+     func b() (r int) {
+         t := 5
+         defer func() {
+             t = t + 5
+         }()
+         return t
+     }
+     
+     func c() (r int) {
+         defer func(r int) {
+             r = r + 5
+         }(r)
+         return 1
+     }
+     
+     func main() {
+         fmt.Println("a = ", a())
+         fmt.Println("b = ", b())
+         fmt.Println("c = ", c())
+     }
+     ```
+  - case 2
 
+  defer 表达式的函数如果在 panic 后面，则这个函数无法被执行。
+   ```go
+   func main() {
+       panic("a")
+       defer func() {
+           fmt.Println("b")
+       }()
+   }
+   ```
 
 
 
