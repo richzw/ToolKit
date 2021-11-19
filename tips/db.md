@@ -67,7 +67,14 @@
         - 1、主从服务器尽量部署在同一个机房，并保持服务器间的网络良好通畅
         - 2、监控主从库间的同步进度，通过`info replication`命令 ，查看主库接收写命令的进度信息（master_repl_offset），从库的复制写命令的进度信息（slave_repl_offset）
           `master_repl_offset - slave_repl_offset` 得到从库与主库间的复制进度差. 我们可以开发一个监控程序，定时拉取主从服务器的进度信息，计算进度差值。如果超过我们设置的阈值，则通知客户端断开从库的连接，全部访问主库，一定程度上减少数据不一致情况。
-
+- [Redis 用数据类型实现亿级数据统计](https://mp.weixin.qq.com/s?__biz=Mzg2NzYyNjQzNg==&mid=2247487680&idx=1&sn=7877648fac1fe8bf98b65bdeaf50a7ea&chksm=ceb9ec6bf9ce657df72a03491b2532d2c3bf3714a244459eb0609754a4f39ae496c1c9e0e584&scene=132#wechat_redirect)
+  
+  常见的场景如下：
+  - 给一个 userId ，判断用户登陆状态；
+  - 两亿用户最近 7 天的签到情况，统计 7 天内连续签到的用户总数；
+  - 统计每天的新增与第二天的留存用户数；
+  - 统计网站的对访客（Unique Visitor，UV）量
+  - 最新评论列表
 
 
 
