@@ -1173,6 +1173,64 @@
     ![img.png](go_float4.png)
   - IEEE754 浮点数分类小结
   ![img.png](go_float5.png)
+- [优雅的 Go 错误问题解决方案](https://mp.weixin.qq.com/s?__biz=MjM5ODYwMjI2MA==&mid=2649764790&idx=1&sn=fc63b1cf5071aa0324987d1e5b3cab71&scene=21#wechat_redirect)
+  
+  服务/系统的错误信息返回
+  - 传统方案
+    - 服务/系统层面的错误信息返回，大部分协议都可以看成是 code - message 模式或者是其变体
+    - 我们在使用 code - message 机制的时候，特别是业务初期，难以避免的是前后端的设计文案没能完整地覆盖所有的错误用例，或者是错误极其罕见。因此当出现错误时，提示暧昧不清（甚至是直接提示错误信息），导致用户从错误信息中找到解决方案
+  - New Solution
+    - 人的短期记忆对 4 个字符还是比较强的，因此我们可以考虑把错误代码缩短到 4 个字符
+    - 采用的是 MD5 作为例子。MD5 的输出是 128 位，理论上我可以取 MD5 的输出，模 1679616 就可以得到一个简易的结果。实际上为了减少除法运算，我采用的是取高 20 位（0xFFFFF）的简易方式（20 位二进制的最大值为 1048575），然后将这个数字转成 36 进制的字符串输出。
+    - 我们可以将 message 的提示信息如下展示：“未知错误，错误代码 30EV，如需协助，请联系 XXX”。顺带一提，30EV 是 "Access denied for user 'db_user'@'127.0.0.1'" 的计算结果，这样一来，我就对调用方隐藏了敏感信息。
+    ```go
+    import (
+        // ...
+        "github.com/martinlindhe/base36"
+    )
+    
+    var (
+        replacer = strings.NewReplacer(
+            " ", "0",
+            "O", "0",
+            "I", "1",
+        )
+    )
+    
+    // ...
+    
+    func Err2Hashcode(err error) (uint64, string) {
+        u64 := hash(err.Error())
+        codeStr := encode(u64)
+        u64, _ = decode(codeStr)
+        return u64, codeStr
+    }
+    
+    func encode(code uint64) string {
+        s := fmt.Sprintf("%4s", base36.Encode(code))
+        return replace.Replace(s)
+    }
+    
+    func decode(s string) (uint64, bool) {
+        if len(s) != 4 {
+            return 0, false
+        }
+        s = strings.Replace(s, "l", "1", -1)
+        s = strings.ToUpper(s)
+        s = replace.Replace(s)
+        code := base36.Decode(s)
+        return code, code > 0
+    }
+    
+    // hash 函数可以自定义
+    func hash(s string) uint64 {
+        h := md5.Sum([]byte(s))
+        u := binary.BigEndian.Uint32(h[0:16])
+        return uint64(u &amp; 0xFFFFF)
+    }
+    ```
+    
+
 
 
 
