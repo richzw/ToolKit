@@ -330,6 +330,36 @@ Memory Leak
     ```
     
     对于剩余所有的元素，我们手动的填充为 nil。在本示例中，我们会返回一个具有和输入参数切片的容量大小一致的切片，但剩下的 *string 类型的元素会被 GC 自动回收。
+- [定位并修复 Go 中的内存泄露](https://mp.weixin.qq.com/s/zcQxmqN0LT9L0qQsp2nypg)
+  [Source](https://dev.to/googlecloud/finding-and-fixing-memory-leaks-in-go-1k1h)
+  - Google Cloud Go 客户端库[1] 通常在后台使用 gRPC 来连接 Google Cloud API。创建 API 客户端时，库会初始化与 API 的连接，然后保持该连接处于打开状态，直到你调用 Client.Close。
+    ````go
+    client, err := api.NewClient()
+    // Check err.
+    defer client.Close()
+    ````
+  - 如果在应该 Close 的时候不 Close client 会发生什么呢？
+    - 通过向服务器添加 pprof.Index 处理程序开始调试： `mux.HandleFunc("/debug/pprof/", pprof.Index)`
+    - 然后向服务器发送一些请求：
+      ```go
+      for i in {1..5}; do
+        curl --header "Content-Type: application/json" --request POST --data '{"name": "HelloHTTP", "type": "testing", "location": "us-central1"}' localhost:8080/v0/cron
+        echo " -- $i"
+      done
+      ```
+    - 收集了一些初始pprof数据： `curl http://localhost:8080/debug/pprof/heap > heap.0.pprof`
+      ```shell
+      $ go tool pprof heap.0.pprof
+      (pprof) top10
+      ```
+    - google.golang.org/grpc/internal/transport.newBufWriter使用大量内存真的很突出！这是泄漏与什么相关的第一个迹象：gRPC
+    - 使用grep，我们可以获得包含NewClient样式调用的所有文件的列表，然后将该列表传递给另一个调用grep以仅列出不包含 Close 的文件，同时忽略测试文件：
+      `$ grep -L Close $(grep -El 'New[^(]*Client' **/*.go) | grep -v test`
+    - `$ grep -L Close $(grep -El 'New[^(]*Client' **/*.go) | grep -v test | xargs sed -i '/New[^(]*Client/,/}/s/}/}\ndefer client.Close()/'`
+
+
+
+
 
 
   
