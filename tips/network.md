@@ -7,7 +7,7 @@
   - 看 Linux 内核代码的在线网站：
     https://elixir.bootlin.com/linux/latest/source
 - [TCP 的三次握手、四次挥手](https://cloud.tencent.com/developer/article/1687824)
-  ![img.png](network_connect.png)
+  ![img.png](network_connect1.png)
   ![img.png](network_disconnect.png)
   TCP 进行握手初始化一个连接的目标是：分配资源、初始化序列号(通知 peer 对端我的初始序列号是多少)，知道初始化连接的目标
   .有可能出现四次握手来建立连接的
@@ -270,9 +270,76 @@
     - BBR算法是个主动的闭环反馈系统，通俗来说就是根据带宽和RTT延时来不断动态探索寻找合适的发送速率和发送量。
     - 该算法使用网络最近出站数据分组当时的最大带宽和往返时间来创建网络的显式模型。数据包传输的每个累积或选择性确认用于生成记录在数据包传输过程和确认返回期间的时间内所传送数据量的采样率。
     - 分别采样估计极大带宽和极小延时，并用二者乘积作为发送窗口，并且BBR引入了Pacing Rate限制数据发送速率，配合cwnd使用来降低冲击。
+- [连接一个 IP 不存在的主机时，握手过程是怎样的](https://mp.weixin.qq.com/s/BSU9j-TIpfFkHlZRLhLoYA)
+  - 连一个 IP 不存在的主机时，握手过程是怎样的
+    - 局域网内
+      ![img.png](network_localwork.png)
+      尝试测试一个不存在的ip
+       ```go
+           client, err := net.Dial("tcp", "192.168.31.7:8081")
+           if err != nil {
+               fmt.Println("err:", err)
+               return
+           }
+       
+           defer client.Close()
+           go func() {
+               input := make([]byte, 1024)
+               for {
+                   n, err := os.Stdin.Read(input)
+                   if err != nil {
+                       fmt.Println("input err:", err)
+                       continue
+                   }
+                   client.Write([]byte(input[:n]))
+               }
+           }()
+       
+           buf := make([]byte, 1024)
+           for {
+               n, err := client.Read(buf)
+               if err != nil {
+                   if err == io.EOF {
+                       return
+                   }
+                   fmt.Println("read err:", err)
+                   continue
+               }
+               fmt.Println(string(buf[:n]))
+           }
+       ```
+      尝试抓包，可以发现根本没有三次握手的包，只有一些 ARP 包，在询问“谁是 192.168.31.7，告诉一下 192.168.31.6”
+      - 为什么会发ARP请求？
+        - 因为目的地址是瞎编的，本地ARP表没有目的机器的MAC地址，因此发出ARP消息。
+      - 什么没有TCP握手包？
+        - 因为协议栈的数据到了网络层后，在数据链路层前，就因为没有目的MAC地址，没法发出。因此抓包软件抓不到相关数据。
+      - ARP本身是没有重试机制的，为什么ARP请求会发那么多遍？
+        - 因为 TCP 协议的可靠性，会重发第一次握手的消息，但每一次都因为没有目的 MAC 地址而失败，每次都会发出ARP请求
+      
+      ![img.png](network_connect1.png)
+      邻居子系统，它在网络层和数据链路层之间。可以通过ARP协议将目的IP转为对应的MAC地址，然后数据链路层就可以用这个MAC地址组装帧头
 
-
-
+      先到本地ARP表查一下有没有 192.168.31.7 对应的 mac地址 `arp -a`
+      ![img.png](networka_arp.png)
+    - 局域网外
+      - 瞎编一个不是  192.168.31.xx 形式的 IP 作为这次要用的局域网外IP， 比如 10.225.31.11。先抓包看一下, 这次的现象是能发出 TCP 第一次握手的 SYN包
+      - 这个问题的答案其实在上面 ARP 的流程里已经提到过了，如果目的 IP 跟本机 IP 不在同一个局域网下，那么会去获取默认网关的 MAC 地址，这里就是指获取家用路由器的MAC地址。 此时ARP流程成功返回家用路由器的 MAC 地址，数据链路层加入帧头，消息通过网卡发到了家用路由器上。
+  - 连IP 地址存在但端口号不存在的主机的握手过程
+    - 目的IP是回环地址
+      - 我们可以正常发消息到目的IP，因为对应的MAC地址和IP都是正确的，所以，数据从数据链路层到网络层都很OK。 直到传输层，TCP协议在识别到这个端口号对应的进程根本不存在时，就会把数据丢弃，响应一个RST消息给发送端。
+      ![img.png](network_rst_1.png)
+    - 目的IP在局域网内
+      ![img.png](network_connect_non_port.png)
+    - 目的IP在局域网外
+      - 现象却不一致。没有 RST 。而且触发了第一次握手的重试消息。这是为什么？
+      - 很多发到 8080端口的消息都在防火墙这一层就被拒绝掉了，根本到不了目的主机里，而RST是在目的主机的TCP/IP协议栈里发出的，都还没到这一层，就更不可能发RST了。
+  - Summary
+    - 连一个 IP 不存在的主机时
+      - 如果IP在局域网内，会发送N次ARP请求获得目的主机的MAC地址，同时不能发出TCP握手消息。
+      - 如果IP在局域网外，会将消息通过路由器发出，但因为最终找不到目的地，触发TCP重试流程。
+    - 连IP 地址存在但端口号不存在的主机时
+      - 不管目的IP是回环地址还是局域网内外的IP地址，目的主机的传输层都会在收到握手消息后，发现端口不正确，发出RST消息断开连接。
+      - 当然如果目的机器设置了防火墙策略，限制他人将消息发到不对外暴露的端口，那么这种情况，发送端就会不断重试第一次握手。
 
 
 
