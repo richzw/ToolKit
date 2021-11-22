@@ -286,16 +286,35 @@
     ```go
     var errNotNumber = errors.New("not a valid number")
     func atoi2(in string) (int, error) {
-    	_ = in[1]
-    	a, b := int(in[0]-'0'), int(in[1]-'0')
-    	if a < 0 || a > 9 || b < 0 || b > 9 {
-    		return 0, errNotNumber
-    	}
-    	return a*10 + b, nil
+        _ = in[1]
+        a, b := int(in[0]-'0'), int(in[1]-'0')
+        if a < 0 || a > 9 || b < 0 || b > 9 {
+            return 0, errNotNumber
+        }
+        return a*10 + b, nil
     }
     ```
-
-
+- [逃逸分析来提升程序性能](https://mp.weixin.qq.com/s/exQy5I7RQBVADFNe1wcbqw)
+  - 逃逸分析
+    - 在对变量放到堆上还是栈上进行分析，该分析在编译阶段完成。如果一个变量超过了函数调用的生命周期，也就是这个变量在函数外部存在引用，编译器会把这个变量分配到堆上，这时我们就说这个变量发生逃逸了。
+  - 如何确定是否逃逸
+    - `go run -gcflags '-m -l' main.go`
+  - 可能出现逃逸的场景
+    - **interface{}** 赋值，会发生逃逸，优化方案是将类型设置为固定类型
+      ```go
+      type Student struct {
+       Name interface{}  // ---> String
+      }
+      
+      func main()  {
+       stu := new(Student)
+       stu.Name = "tom"
+      
+      }
+      ```
+    - 返回指针类型，会发生逃逸
+      - 函数传递指针和传值哪个效率高吗？我们知道传递指针可以减少底层值的拷贝，可以提高效率，但是如果拷贝的数据量小，由于指针传递会产生逃逸，可能会使用堆，也可能会增加 GC 的负担，所以传递指针不一定是高效的
+    - 栈空间不足，会发生逃逸，优化方案尽量设置容量
 
 
 
