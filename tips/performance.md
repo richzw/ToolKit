@@ -315,6 +315,44 @@
     - 返回指针类型，会发生逃逸
       - 函数传递指针和传值哪个效率高吗？我们知道传递指针可以减少底层值的拷贝，可以提高效率，但是如果拷贝的数据量小，由于指针传递会产生逃逸，可能会使用堆，也可能会增加 GC 的负担，所以传递指针不一定是高效的
     - 栈空间不足，会发生逃逸，优化方案尽量设置容量
+- [Deep Dive into The Escape Analysis in Go](https://slides.com/jalex-chang/go-esc)
+  - The escape analysis is a mechanism to automatically decide whether a variable should be allocated in the heap or not in compile time.
+    - It tries to keep variables on the stack as much as possible.
+    - If a variable would be allocated in the heap, the variable is escaped (from the stack).
+    - ESC would consider assignment relationships between declared variables.
+    - Generally, a variable scapes if:
+      - its address has been captured by ​the address-of operand (&).
+      - and at least one of the related variables has already escaped.
+  - Basically, ESC determines whether variables escape or not by
+    - the data-flow analysis (shortest path analysis)
+      - Data-flow is a directed weighted graph
+      - Constructed from the abstract syntax tree (AST).
+      - It is used to represent relationships between variables.
+    - and other additional rules
+      - Huge Objects
+        - For explicit declarations (var or :=)  The variables escape if their sizes are over 10MB
+        - For implicit declarations (new or make). The variables escape if their sizes are over 64KB 
+      - A slice variable escapes if its size of the capacity is non-constant. 
+      - Map
+        - A variable escapes if it is referenced by a map's key or value.
+        - The escape happens no matter the map escape or not.
+      - Returning values is a backward behavior that
+        - the referenced variables escape if the return values are pointers
+        - the values escape if they are map or slice
+      - Passing arguments is a forward behavior that
+        - the arguments escape if input parameters have leaked (to heap)
+      - A variable escapes if
+        - the source variable is captured by a closure function
+        - and their relationship is address-of (derefs = -1 )
+  - Observations
+    - Through understanding the concept of ESC, we can find that
+      - variables usually escape
+        - when their addresses are captured by other variables.
+        - when ESC does not know their object sizes in compile time.
+      - And passing arguments to a function is safer than returning values from the function. 
+    - Initialize slice with constants
+    - Passing variables to closure as arguments instead of accessing the variables directly.
+    - Injecting changes to the passed parameters instead of return values back
 
 
 
