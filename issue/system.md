@@ -144,8 +144,61 @@
     - 启动一个协程去消费 ringbuffer 的数据，写入到日志文件里；
       - 当 ringbuffer 为空时，进行休眠百个毫秒；
       - 当 ringbuffer 满了时，直接覆盖写入。
-
-
+- [服务 go_cpu 占满如何处理](https://mp.weixin.qq.com/s/343ImRi82NCoLzDWm0iuwg)
+  - 如何测试服务连接 MySQL 的问题？在 pod 上，按照 MySQL 客户端连接并执行 SQL语句即可
+    ```shell
+    
+    // centos 使用yum安装mysql 客户端
+    yum install mysql-community-client.x86_64 -y
+    
+    // 登上mysql client
+    mysql -h ip -u root -p
+    
+    // 打开profile 开关
+    show variables like "%prof%”
+    set profiling = 1; // 0是off，1是on
+    
+    // 查看语句执行情况
+    select count(*) from c_consumer;
+    show profiles;
+    
+    set profiling = 0;
+    ```
+  - pprof 分析
+    - 导入  'net/http/pprof '，并运行   'http server '
+      ```go
+      import _ "net/http/pprof”
+      // 服务启动的时候，在main函数中，另起一个 goroutines 跑一下 http server
+      go func() {
+         if err := agent.Listen(agent.Options{Addr: "0.0.0.0:6061"}); err != nil {
+            log.Println(err)
+         }
+      }()
+      ```
+    - 两种方式查看 pprof 分析结果
+      - 应用中使用 pprof 中后，使用  ip:port 进入网址查看分析结果 `http://9.145.241.216:8080/debug/pprof/`
+      - 使用命令行查看分析结果
+        ```shell
+        1. 查看堆栈调用信息
+        go tool pprof http://9.xxx:8080/debug/pprof/heap
+        
+        2. 查看 60 秒内的 CPU 信息
+        go tool pprof http://9.xxx:8080/debug/pprof/profile?seconds=60
+        
+        3. 查看 goroutine 阻塞
+        go tool pprof http://9.xxx:8080/debug/pprof/block
+        
+        4. 收集 5 秒内的执行路径
+        go tool pprof http://9.xxx:8080/debug/pprof/trace?seconds=5
+        
+        5. 争用互斥持有者的堆栈跟踪
+        go tool pprof http://9.xxx:8080/debug/pprof/mutex
+        ```
+  - 排查 CPU 占满问题
+    - 查看完分析结果后，登录 IDC 环境，执行命令，得到相关日志文件。
+      `go tool pprof http://9.xxx:8080/debug/pprof/profile?seconds=60`
+    - select default 分支引起的问题。代码的 default 中，只有一个判断项，而且这个一直是 false，未见 true 的条件，所以一直没有 return ，导致 CPU 一直卡在 default 中，无法出去。
+  
 
 
 
