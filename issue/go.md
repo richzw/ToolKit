@@ -133,6 +133,96 @@
        }()
    }
    ```
+- [defer Close() 的风险](https://mp.weixin.qq.com/s?__biz=MzkyMzIyNjIxMQ==&mid=2247484680&idx=1&sn=5df7d6a7b410fcdec01982470ca2158d&chksm=c1e91c04f69e9512628968de16dd081582fea5aae45b17f0facdc33322c9d447d9c09529f36c&scene=21#wechat_redirect)
+  - 问题：
+    - `defer x.Close()` 会忽略它的返回值，但在执行 x.Close() 时，我们并不能保证 x 一定能正常关闭，万一它返回错误应该怎么办？这种写法，会让程序有可能出现非常难以排查的错误。
+  - Close() 方法会返回什么错误呢
+    - 在 POSIX 操作系统中，例如 Linux 或者 maxOS，关闭文件的 Close() 函数最终是调用了系统方法 close()，我们可以通过 man close 手册，查看 close() 可能会返回什么错误
+      - [EBADF]            fildes is not a valid, active file descriptor.
+      - [EINTR]            Its execution was interrupted by a signal.
+      - [EIO]              A previously-uncommitted write(2) encountered an input/output error.
+    - EIO 的错误是指未提交写。 EIO 错误的确是我们需要提防的错误。这意味着如果我们尝试将数据保存到磁盘，在 defer x.Close() 执行时，操作系统还并未将数据刷到磁盘，这时我们应该获取到该错误提示
+  - 改造方案
+    - 不使用 defer
+      ```go
+       1func solution01() error {
+       2    f, err := os.Create("/home/golangshare/gopher.txt")
+       3    if err != nil {
+       4        return err
+       5    }
+       6
+       7    if _, err = io.WriteString(f, "hello gopher"); err != nil {
+       8        f.Close()
+       9        return err
+      10    }
+      11
+      12    return f.Close()
+      13}
+      ```
+      需要在每个发生错误的地方都要加上关闭语句 f.Close()，如果对 f 的写操作 case 较多，容易存在遗漏关闭文件的风险。
+    - 通过命名返回值 err 和闭包来处理
+       ```go
+       1func solution02() (err error) {
+       2    f, err := os.Create("/home/golangshare/gopher.txt")
+       3    if err != nil {
+       4        return
+       5    }
+       6
+       7    defer func() {
+       8        closeErr := f.Close()
+       9        if err == nil {
+       10            err = closeErr
+       11        }
+       12    }()
+       13
+       14    _, err = io.WriteString(f, "hello gopher")
+       15    return
+       16}
+       ```
+      如果有更多 if err !=nil 的条件分支，这种模式可以有效降低代码行数。
+    - 在函数最后 return 语句之前，显示调用一次 f.Close()
+      ```go
+      1func solution03() error {
+       2    f, err := os.Create("/home/golangshare/gopher.txt")
+       3    if err != nil {
+       4        return err
+       5    }
+       6    defer f.Close()
+       7
+       8    if _, err := io.WriteString(f, "hello gopher"); err != nil {
+       9        return err
+      10    }
+      11
+      12    if err := f.Close(); err != nil {
+      13        return err
+      14    }
+      15    return nil
+      16}
+      ```
+      这种解决方案能在 io.WriteString 发生错误时，由于 defer f.Close() 的存在能得到 close 调用。也能在 io.WriteString 未发生错误，但缓存未刷新到磁盘时，得到 err := f.Close() 的错误，而且由于 defer f.Close() 并不会返回错误，所以并不担心两次 Close() 调用会将错误覆盖。
+    - 函数 return 时执行 f.Sync()
+      ```go
+      func solution04() error {
+       2    f, err := os.Create("/home/golangshare/gopher.txt")
+       3    if err != nil {
+       4        return err
+       5    }
+       6    defer f.Close()
+       7
+       8    if _, err = io.WriteString(f, "hello world"); err != nil {
+       9        return err
+      10    }
+      11
+      12    return f.Sync()
+      13}
+      ```
+      由于 fsync 的调用，这种模式能很好地避免 close 出现的 EIO。可以预见的是，由于强制性刷盘，这种方案虽然能很好地保证数据安全性，但是在执行效率上却会大打折扣。
+
+
+
+
+
+
 
 
 
