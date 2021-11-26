@@ -105,7 +105,199 @@
   - cadvisor 所提供的判别标准 container_memory_working_set_bytes 是不可变更的，也就是无法把判别标准改为 RSS
   - 使用类 sync.Pool 做多级内存池管理，防止申请到 “不合适”的内存空间，常见的例子： ioutil.ReadAll：
   - 核心是做好做多级内存池管理，因为使用多级内存池，就会预先定义多个 Pool，比如大小 100，200，300的 Pool 池，当你要 150 的时候，分配200，就可以避免部分的内存碎片和内存碎块
+- [一文搞懂 Kubernetes 中数据包的生命周期](https://mp.weixin.qq.com/s/SqCwa069y4dcVQ1fWNQ0Wg)
+  - Linux 命名空间
+    - Mount：隔离文件系统加载点；
+    - UTS：隔离主机名和域名；
+    - IPC：隔离跨进程通信（IPC）资源；
+    - PID：隔离 PID 空间；
+    - 网络：隔离网络接口；
+    - 用户：隔离 UID/GID 空间；
+    - Cgroup：隔离 cgroup 根目录。
+  - 容器网络（网络命名空间）
+    - 在主流 Linux 操作系统中都可以简单地用 ip 命令创建网络命名空间
+      ```shell
+      $ ip netns add client
+      $ ip netns add server
+      $ ip netns list
+      server
+      client
+      ```
+    - 创建一对 veth 将命名空间进行连接，可以把 veth 想象为连接两端的网线。
+      ```shell
+      $ ip link add veth-client type veth peer name veth-server
+      $ ip link list | grep veth
+      4: veth-server@veth-client: <BROADCAST,MULTICAST,M-DOWN> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+      5: veth-client@veth-server: <BROADCAST,MULTICAST,M-DOWN> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+      ```
+    - 这一对 veth 是存在于主机的网络命名空间的，接下来我们把两端分别置入各自的命名空间
+      ```shell
+      $ ip link set veth-client netns client
+      $ ip link set veth-server netns server
+      $ ip link list | grep veth # doesn’t exist on the host network namespace now
+      ```
+    - 检查一下命名空间中的 veth 状况
+      ```shell
+      $ ip netns exec client ip link
+      1: lo: <LOOPBACK> mtu 65536 qdisc noop state DOWN mode DEFAULT group default qlen 1    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+      5: veth-client@if4: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000    link/ether ca:e8:30:2e:f9:d2 brd ff:ff:ff:ff:ff:ff link-netnsid 1
+      $ ip netns exec server ip link
+      1: lo: <LOOPBACK> mtu 65536 qdisc noop state DOWN mode DEFAULT group default qlen 1    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+      4: veth-server@if5: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000    link/ether 42:96:f0:ae:f0:c5 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+      ```
+    - 接下来给这些网络接口分配 IP 地址并启用
+      ```shell
+      $ ip netns exec client ip address add 10.0.0.11/24 dev veth-client
+      $ ip netns exec client ip link set veth-client up
+      $ ip netns exec server ip address add 10.0.0.12/24 dev veth-server
+      $ ip netns exec server ip link set veth-server up
+      $
+      $ ip netns exec client ip addr
+      $ ip netns exec server ip addr
+      $ ip netns exec client ping 10.0.0.12  #使用 ping 命令检查一下两个网络命名空间的连接状况
+      ```
+    - 创建创建一个 Linux 网桥来连接这些网络命名空间。Docker 就是这样为同一主机内的容器进行连接的
+      ```shell
+      # All in one
+      # ip link add <p1-name> netns <p1-ns> type veth peer <p2-name> netns <p2-ns>
+      BR=bridge1
+      HOST_IP=172.17.0.33
+      # 新创建一对类型为veth peer的网卡
+      ip link add client1-veth type veth peer name client1-veth-br
+      ip link add server1-veth type veth peer name server1-veth-br
+      ip link add $BR type bridge
+      ip netns add client1
+      ip netns add server1
+      ip link set client1-veth netns client1
+      ip link set server1-veth netns server1
+      ip link set client1-veth-br master $BR
+      ip link set server1-veth-br master $BR
+      ip link set $BR up
+      ip link set client1-veth-br up
+      ip link set server1-veth-br up
+      ip netns exec client1 ip link set client1-veth up
+      ip netns exec server1 ip link set server1-veth up
+      ip netns exec client1 ip addr add 172.30.0.11/24 dev client1-veth
+      ip netns exec server1 ip addr add 172.30.0.12/24 dev server1-veth
+      ip netns exec client1 ping 172.30.0.12 -c 5
+      ip addr add 172.30.0.1/24 dev $BR
+      ip netns exec client1 ping 172.30.0.12 -c 5
+      ip netns exec client1 ping 172.30.0.1 -c 5
+      ```
+      ![img.png](docker_network1.png)
+      从命名空间中 ping 一下主机 IP
+       ```shell
+       $ ip netns exec client1 ping $HOST_IP -c 2
+       connect: Network is unreachable
+       ```
+      Network is unreachable 的原因是路由不通，加入一条缺省路由
+       ```shell
+       $ ip netns exec client1 ip route add default via 172.30.0.1
+       $ ip netns exec server1 ip route add default via 172.30.0.1
+       $ ip netns exec client1 ping $HOST_IP -c 5
+       ```
+  - 从外部服务器连接内网
+    - 机器已经安装了 Docker，也就是说已经创建了 docker0 网桥
+    - 运行一个 nginx 容器并进行观察
+      ```shell
+      $ docker run -d --name web --rm nginx
+      efff2d2c98f94671f69cddc5cc88bb7a0a5a2ea15dc3c98d911e39bf2764a556
+      $ WEB_IP=`docker inspect -f "{{ .NetworkSettings.IPAddress }}" web`
+      $ docker inspect web --format '{{ .NetworkSettings.SandboxKey }}'
+      /var/run/docker/netns/c009f2a4be71
+      ```
+    - Docker 创建的 netns 没有保存在缺省位置，所以 ip netns list 是看不到这个网络命名空间的。我们可以在缺省位置创建一个符号链接
+      ```shell
+      $ container_id=web
+      $ container_netns=$(docker inspect ${container_id} --format '{{ .NetworkSettings.SandboxKey }}')
+      $ mkdir -p /var/run/netns
+      $ rm -f /var/run/netns/${container_id}
+      $ ln -sv ${container_netns} /var/run/netns/${container_id}
+      '/var/run/netns/web' -> '/var/run/docker/netns/c009f2a4be71'
+      $ ip netns list
+      web (id: 3)
+      server1 (id: 1)
+      client1 (id: 0)
+      ```
+    - 看看 web 命名空间的 IP 地址
+      ```shell
+      $ ip netns exec web ip addr
+      $ WEB_IP=`docker inspect -f "{{ .NetworkSettings.IPAddress }}" web`
+      $ echo $WEB_IP   # 然后看看容器里的 IP 地址
+      $ curl $WEB_IP   # 从主机访问一下 web 命名空间的服务
+      ```
+    - 加入端口转发规则，其它主机就能访问这个 nginx 了
+      ```shell
+      $ iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination $WEB_IP:80
+      $ echo $HOST_IP
+      172.17.0.23
+      
+      $ curl 172.17.0.23 # 使用主机 IP 访问 Nginx
+      ```
+      ![img.png](docker_network2.png)
+  - CNI
+    - CNI 插件负责在容器网络命名空间中插入一个网络接口（也就是 veth 对中的一端）并在主机侧进行必要的变更（把 veth 对中的另一侧接入网桥）。然后给网络接口分配 IP，并调用 IPAM 插件来设置相应的路由。
+    - [CNI 规范](https://github.com/containernetworking/cni/blob/master/SPEC.md)
+    - 使用 CNI 插件而非 CLI 命令进行 IP 分配。完成 Demo 就会更好地理解 Kubernetes 中 Pod 的本质
+      - 下载 CNI 插件
+        ```shell
+        $ mkdir cni
+        $ cd cni
+        $ curl -O -L https://github.com/containernetworking/cni/releases/download/v0.4.0/cni-amd64-v0.4.0.tgz
+        $ tar -xvf cni-amd64-v0.4.0.tgz
+        ```
+      - 创建一个 JSON 格式的 CNI 配置（00-demo.conf）
+        ```shell
+        {
+            "cniVersion": "0.2.0",
+            "name": "demo_br",
+            "type": "bridge",
+            "bridge": "cni_net0",
+            "isGateway": true,
+            "ipMasq": true,
+            "ipam": {
+                "type": "host-local",
+                "subnet": "10.0.10.0/24",
+                "routes": [
+                    { "dst": "0.0.0.0/0" },
+                    { "dst": "1.1.1.1/32", "gw":"10.0.10.1"}
+                ]    
+            }
+        }
+        type: The name of the plugin you wish to use.  In this case, the actual name of the plugin executable
+        args: Optional additional parameters
+        ipMasq: Configure outbound masquerade (source NAT) for this network
+        ipam:
+            type: The name of the IPAM plugin executable
+            subnet: The subnet to allocate out of (this is actually part of the IPAM plugin)
+            routes:
+                dst: The subnet you wish to reach
+                gw: The IP address of the next hop to reach the dst.  If not specified the default gateway for the subnet is assumed
+        dns:
+            nameservers: A list of nameservers you wish to use with this network
+            domain: The search domain to use for DNS requests
+            search: A list of search domains
+            options: A list of options to be passed to the receiver
+        ```
+      - 创建一个网络为 none 的容器，这个容器没有网络地址。可以用任意的镜像创建该容器，这里我用 pause 来模拟 Kubernetes：
+        ````shell
+        docker run --name pause_demo -d --rm --network none kubernetes/pause
+        $ container_id=pause_demo
+        $ container_netns=$(docker inspect ${container_id} --format '{{ .NetworkSettings.SandboxKey }}')
+        $ mkdir -p /var/run/netns
+        $ rm -f /var/run/netns/${container_id}
+        $ ln -sv ${container_netns} /var/run/netns/${container_id}
+        '/var/run/netns/pause_demo' -> '/var/run/docker/netns/0297681f79b5'
+        $ ip netns list
+        pause_demo
+        $ ip netns exec $container_id ifconfig
+        ````
+      - 
 
-   
+
+
+
+
+
 
 
