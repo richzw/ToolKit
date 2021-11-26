@@ -51,39 +51,63 @@
 - Splitting a go array or slice in a defined number of chunks.
   ```go
   func SplitSlice(array []int, numberOfChunks int) [][]int {
-  	if len(array) == 0 {
-  		return nil
-  	}
-  	if numberOfChunks <= 0 {
-  		return nil
-  	}
+      if len(array) == 0 {
+          return nil
+      }
+      if numberOfChunks <= 0 {
+          return nil
+      }
   
-  	if numberOfChunks == 1 {
-  		return [][]int{array}
-  	}
+      if numberOfChunks == 1 {
+          return [][]int{array}
+      }
   
-  	result := make([][]int, numberOfChunks)
+      result := make([][]int, numberOfChunks)
   
-  	// we have more splits than elements in the input array.
-  	if numberOfChunks > len(array) {
-  		for i := 0; i < len(array); i++ {
-  			result[i] = []int{array[i]}
-  		}
-  		return result
-  	}
+      // we have more splits than elements in the input array.
+      if numberOfChunks > len(array) {
+          for i := 0; i < len(array); i++ {
+              result[i] = []int{array[i]}
+          }
+          return result
+      }
   
-  	for i := 0; i < numberOfChunks; i++ {
+      for i := 0; i < numberOfChunks; i++ {
   
-  		min := (i * len(array) / numberOfChunks)
-  		max := ((i + 1) * len(array)) / numberOfChunks
+          min := (i * len(array) / numberOfChunks)
+          max := ((i + 1) * len(array)) / numberOfChunks
   
-  		result[i] = array[min:max]
+          result[i] = array[min:max]
   
-  	}
+      }
   
-  	return result
+      return result
   }
   ```
+- [如何保留 Go 程序崩溃现场](https://mp.weixin.qq.com/s/RktnMydDtOZFwEFLLYzlCA)
+  - core dump
+    - 可以使用`ulimit -c [size]`命令指定记录 core dump 文件的大小
+    - GOTRACEBACK `GOTRACEBACK=system go run main.go`
+      - none，不显示任何 goroutine 堆栈信息
+      - single，默认级别，显示当前 goroutine 堆栈信息
+      - all，显示所有 user （不包括 runtime）创建的 goroutine 堆栈信息
+      - system，显示所有 user + runtime 创建的 goroutine 堆栈信息
+      - crash，和 system 打印一致，但会生成 core dump 文件（Unix 系统上，崩溃会引发 SIGABRT 以触发core dump）
+        如果想获取 core dump 文件，那么就应该把 GOTRACEBACK 的值设置为 crash 。当然，我们还可以通过 runtime/debug 包中的 SetTraceback 方法来设置堆栈打印级别
+    - dlv core 命令来调试 core dump
+      ```shell
+      go get -u github.com/go-delve/delve/cmd/dlv
+      ```
+      - 通过 dlv 调试器来调试 core 文件，执行命令格式 dlv core 可执行文件名 core文件
+      ```shell
+      (dlv) goroutines
+      (dlv) goroutine 1
+      (dlv) bt
+      (dlv) frame 5
+      ```
+
+
+
 
 
 
