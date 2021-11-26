@@ -48,7 +48,42 @@
   - 内存对齐
     - 对齐的作用和原因：CPU访问内存时，并不是逐个字节访问，而是以字长（word size)单位访问。比如32位的CPU，字长为4字节，那么CPU访问内存的单位也是4字节。这样设计可以减少CPU访问内存的次数，加大CPU访问内存的吞吐量。假设我们需要读取8个字节的数据，一次读取4个字节那么就只需读取2次就可以。内存对齐对实现变量的原子性操作也是有好处的，每次内存访问都是原子的，如果变量的大小不超过字长，那么内存对齐后，对该变量的访问就是原子的，这个特性在并发场景下至关重要。
     
-- 
+- Splitting a go array or slice in a defined number of chunks.
+  ```go
+  func SplitSlice(array []int, numberOfChunks int) [][]int {
+  	if len(array) == 0 {
+  		return nil
+  	}
+  	if numberOfChunks <= 0 {
+  		return nil
+  	}
+  
+  	if numberOfChunks == 1 {
+  		return [][]int{array}
+  	}
+  
+  	result := make([][]int, numberOfChunks)
+  
+  	// we have more splits than elements in the input array.
+  	if numberOfChunks > len(array) {
+  		for i := 0; i < len(array); i++ {
+  			result[i] = []int{array[i]}
+  		}
+  		return result
+  	}
+  
+  	for i := 0; i < numberOfChunks; i++ {
+  
+  		min := (i * len(array) / numberOfChunks)
+  		max := ((i + 1) * len(array)) / numberOfChunks
+  
+  		result[i] = array[min:max]
+  
+  	}
+  
+  	return result
+  }
+  ```
 
 
 
