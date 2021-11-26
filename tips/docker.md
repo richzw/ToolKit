@@ -292,7 +292,31 @@
         pause_demo
         $ ip netns exec $container_id ifconfig
         ````
-      - 
+      - 用前面的配置来调用 CNI 插件
+        ```go
+        $ CNI_CONTAINERID=$container_id CNI_IFNAME=eth10 CNI_COMMAND=ADD CNI_NETNS=/var/run/netns/$container_id CNI_PATH=`pwd` ./bridge </tmp/00-demo.conf
+        ```
+        运行上面的命令会返回一些内容。
+        - 首先是因为 IPAM 驱动在本地找不到保存 IP 信息的文件而报错。但是因为第一次运行插件时会创建这个文件，所以在其他命名空间再次运行这个命令就不会出现这个问题了。
+        - 其次是得到一个说明插件已经完成相应 IP 配置的 JSON 信息。在本例中，网桥的 IP 地址应该是 10.0.10.1/24，命名空间网络接口的地址则是 10.0.10.2/24。另外还会根据我们的 JSON 配置文件，加入缺省路由以及 1.1.1.1/32 路由
+      - Check
+        ```shell
+        $ ip netns exec pause_demo ifconfig
+        $ ip netns exec pause_demo ip route
+        # CNI 创建了网桥并根据 JSON 信息进行了相应配置
+        $ ifconfig
+        ```
+      - 启动 Web Server 并共享 pause 容器命名空间
+        ```shell
+        $ docker run --name web_demo -d --rm --network container:$container_id nginx8fadcf2925b779de6781b4215534b32231685b8515f998b2a66a3c7e38333e30
+        $ curl `cat /var/lib/cni/networks/demo_br/last_reserved_ip`
+        ```
+  - Pod 网络命名空间
+    - Pod 不等于容器，而是一组容器。这一组容器会共享同一个网络栈。每个 Pod 都会包含有 pause 容器，Kubernetes 通过这个容器来管理 Pod 的网络。所有其他容器都会附着在 pause 容器的网络命名空间中，而 pause 除了网络之外，再无其他作用。因此同一个 Pod 中的不同容器，可以通过 localhost 进行互访
+    - Master 和 Worker 节点上的路由表。每个节点都有一个容器，容器有一个 IP 地址和缺省的容器路由
+      ![img.png](docker_network3.png)
+      上面的路由表说明，Pod 能够通过 3 层网络进行互通。什么模块负责添加路由，如何获取远端路由呢？为什么这里缺省网关是 169.254.1.1 呢
+    - 
 
 
 
