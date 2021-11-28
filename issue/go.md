@@ -217,6 +217,18 @@
       13}
       ```
       由于 fsync 的调用，这种模式能很好地避免 close 出现的 EIO。可以预见的是，由于强制性刷盘，这种方案虽然能很好地保证数据安全性，但是在执行效率上却会大打折扣。
+- [字符串底层原理](https://mp.weixin.qq.com/s/1ozBAEYpf07aei0xh3_kNQ)
+  - 字符串
+    ```go
+    type stringStruct struct {
+        str unsafe.Pointer // 一个指向底层数据的指针. 使用 utf-8 编码方式
+        len int            // 字符串的字节长度，非字符个数
+    }
+    ```
+  - rune
+    - 在 unicode 字符集中，每一个字符都有一个对应的编号，我们称这个编号为 code point，而 Go 中的rune 类型就代表一个字符的 code point。
+    ![img.png](go_rune.png)
+
 
 
 
