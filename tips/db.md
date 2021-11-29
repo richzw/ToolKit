@@ -76,6 +76,152 @@
   - 统计网站的对访客（Unique Visitor，UV）量
   - 最新评论列表
 
+- [详谈水平分库分表](https://mp.weixin.qq.com/s/vqYRUEPnzFHExo4Ly7DPWw)
+  - 什么是一个好的分库分表方案
+    - 方案可持续性 - 业务数据量级和业务流量未来进一步升高达到新的量级的时候，我们的分库分表方案可以持续使用
+    - 数据偏斜问题 - 定义分库分表最大数据偏斜率为 ：（数据量最大样本 - 数据量最小样本）/ 数据量最小样本。一般来说，如果我们的最大数据偏斜率在5%以内是可以接受的
+  - 常见的分库分表方案
+    - Range分库分表
+      - TiDB数据库，针对TiKV中数据的打散，也是基于Range的方式进行，将不同范围内的[StartKey,EndKey)分配到不同的Region上
+      - 该方案的缺点：
+        - 最明显的就是数据热点问题
+        - 新库和新表的追加问题
+        - 业务上的交叉范围内数据的处理
+        - 通过年份进行分库分表，那么元旦的那一天，你的定时任务很有可能会漏掉上一年的最后一天的数据扫描
+    - Hash分库分表
+      - 几个常见的错误案例
+        - 非互质关系导致的数据偏斜问题
+          ```go
+          public static ShardCfg shard(String userId) {
+              int hash = userId.hashCode();
+              // 对库数量取余结果为库序号
+              int dbIdx = Math.abs(hash % DB_CNT);
+              // 对表数量取余结果为表序号
+              int tblIdx = Math.abs(hash % TBL_CNT);
+           
+              return new ShardCfg(dbIdx, tblIdx);
+          }
+          ```
+          发现，以10库100表为例，如果一个Hash值对100取余为0，那么它对10取余也必然为0。
+          事实上，只要库数量和表数量非互质关系，都会出现某些表中无数据的问题。
+          ![img.png](db_shard_table.png)
+          当然，如果分库数和分表数不仅互质，而且分表数为奇数(例如10库101表)，则理论上可以使用该方案
+        - 扩容难以持续
+
+          我们把10库100表看成总共1000个逻辑表，将求得的Hash值对1000取余，得到一个介于[0，999)中的数，然后再将这个数二次均分到每个库和每个表中，大概逻辑代码如下
+          ```go
+          public static ShardCfg shard(String userId) {
+                  // ① 算Hash
+                  int hash = userId.hashCode();
+                  // ② 总分片数
+                  int sumSlot = DB_CNT * TBL_CNT;
+                  // ③ 分片序号
+                  int slot = Math.abs(hash % sumSlot);
+                  // ④ 计算库序号和表序号的错误案例
+                  int dbIdx = slot % DB_CNT ;
+                  int tblIdx = slot / DB_CNT ;
+           
+                  return new ShardCfg(dbIdx, tblIdx);
+              }
+          ```
+          该方案确实很巧妙的解决了数据偏斜的问题，只要Hash值足够均匀，那么理论上分配序号也会足够平均. 但是该方案有个比较大的问题，那就是在计算表序号的时候，依赖了总库的数量，那么后续翻倍扩容法进行扩容时，会出现扩容前后数据不在同一个表中，从而无法实施
+      - 几种Hash分库分表的方案
+        - 标准的二次分片法
+          ```go
+          public static ShardCfg shard2(String userId) {
+                  // ① 算Hash
+                  int hash = userId.hashCode();
+                  // ② 总分片数
+                  int sumSlot = DB_CNT * TBL_CNT;
+                  // ③ 分片序号
+                  int slot = Math.abs(hash % sumSlot);
+                  // ④ 重新修改二次求值方案
+                  int dbIdx = slot / TBL_CNT ;
+                  int tblIdx = slot % TBL_CNT ;
+           
+                  return new ShardCfg(dbIdx, tblIdx);
+              }
+          ```
+          和错误案例二中的区别就是通过分配序号重新计算库序号和表序号的逻辑发生了变化. 那为何使用这种方案就能够有很好的扩展持久性呢？我们进行一个简短的证明：
+          ![img.png](db_table_part.png)
+          通过翻倍扩容后，我们的表序号一定维持不变，库序号可能还是在原来库，也可能平移到了新库中(原库序号加上原分库数)，完全符合我们需要的扩容持久性方案
+          
+          缺点：
+          - 翻倍扩容法前期操作性高，但是后续如果分库数已经是大几十的时候，每次扩容都非常耗费资源。
+          - 连续的分片键Hash值大概率会散落在相同的库中，某些业务可能容易存在库热点（例如新生成的用户Hash相邻且递增，且新增用户又是高概率的活跃用户，那么一段时间内生成的新用户都会集中在相邻的几个库中）。
+        - 关系表冗余
+
+          该方案还是通过常规的Hash算法计算表序号，而计算库序号时，则从路由表读取数据。因为在每次数据查询时，都需要读取路由表，故我们需要将分片键和库序号的对应关系记录同时维护在缓存中以提升性能。
+          ````go
+          public static ShardCfg shard(String userId) {
+                  int tblIdx = Math.abs(userId.hashCode() % TBL_CNT);
+                  // 从缓存获取
+                  Integer dbIdx = loadFromCache(userId);
+                  if (null == dbIdx) {
+                      // 从路由表获取
+                      dbIdx = loadFromRouteTable(userId);
+                      if (null != dbIdx) {
+                          // 保存到缓存
+                          saveRouteCache(userId, dbIdx);
+                      }
+                  }
+                  if (null == dbIdx) {
+                      // 此处可以自由实现计算库的逻辑
+                      dbIdx = selectRandomDbIdx();
+                      saveToRouteTable(userId, dbIdx);
+                      saveRouteCache(userId, dbIdx);
+                  }
+           
+                  return new ShardCfg(dbIdx, tblIdx);
+              }
+          ````
+          selectRandomDbIdx方法作用为生成该分片键对应的存储库序号，这边可以非常灵活的动态配置。例如可以为每个库指定一个权重，权重大的被选中的概率更高，权重配置成0则可以将关闭某些库的分配。当发现数据存在偏斜时，也可以调整权重使得各个库的使用量调整趋向接近。
+
+          该方案还有个优点，就是理论上后续进行扩容的时候，仅需要挂载上新的数据库节点，将权重配置成较大值即可，无需进行任何的数据迁移即可完成。
+
+          缺点：
+          - 每次读取数据需要访问路由表，虽然使用了缓存，但是还是有一定的性能损耗。
+          - 路由关系表的存储方面，有些场景并不合适。例如上述案例中用户id的规模大概是在10亿以内，我们用单库百表存储该关系表即可。但如果例如要用文件MD5摘要值作为分片键，因为样本集过大，无法为每个md5值都去指定关系（当然我们也可以使用md5前N位来存储关系）。
+          - 饥饿占位问题
+        - 基因法
+          - 我们发现案例一不合理的主要原因，就是因为库序号和表序号的计算逻辑中，有公约数这个因子在影响库表的独立性。
+          - 我们计算库序号的时候做了部分改动，我们使用分片键的前四位作为Hash值来计算库序号。
+            ```java
+            public static ShardCfg shard(String userId) {
+                int dbIdx = Math.abs(userId.substring(0, 4).hashCode() % DB_CNT );
+                int tblIdx = Math.abs(userId.hashCode() % TBL_CNT);
+                return new ShardCfg(dbIdx, tblIdx);
+            }
+            ```
+          - 我们发现该方案中，分库数为16，分表数为100，数量最小行数仅为10W不到，但是最多的已经达到了15W+，最大数据偏斜率高达61%。按这个趋势发展下去，后期很可能出现一台数据库容量已经使用满，而另一台还剩下30%+的容量。
+        - 剔除公因数法
+          - 在很多场景下我们还是希望相邻的Hash能分到不同的库中。就像N库单表的时候，我们计算库序号一般直接用Hash值对库数量取余
+            ```java
+            public static ShardCfg shard(String userId) {
+                    int dbIdx = Math.abs(userId.hashCode() % DB_CNT);
+                    // 计算表序号时先剔除掉公约数的影响
+                    int tblIdx = Math.abs((userId.hashCode() / TBL_CNT) % TBL_CNT);
+                    return new ShardCfg(dbIdx, tblIdx);
+            }
+            ```
+          - 经过测算，该方案的最大数据偏斜度也比较小，针对不少业务从N库1表升级到N库M表下，需要维护库序号不变的场景下可以考虑
+        - 一致性Hash法
+          - 正规的一致性Hash算法会引入虚拟节点，每个虚拟节点会指向一个真实的物理节点。这样设计方案主要是能够在加入新节点后的时候，可以有方案保证每个节点迁移的数据量级和迁移后每个节点的压力保持几乎均等。
+          - 但是用在分库分表上，一般大部分都只用实际节点，引入虚拟节点的案例不多，主要有以下原因：
+            - 应用程序需要花费额外的耗时和内存来加载虚拟节点的配置信息。如果虚拟节点较多，内存的占用也会有些不太乐观。
+            - 由于mysql有非常完善的主从复制方案，与其通过从各个虚拟节点中筛选需要迁移的范围数据进行迁移，不如通过从库升级方式处理后再删除冗余数据简单可控。
+            - 虚拟节点主要解决的痛点是节点数据搬迁过程中各个节点的负载不均衡问题，通过虚拟节点打散到各个节点中均摊压力进行处理。
+      - 常见扩容方案
+        - 翻倍扩容法
+        - 一致性Hash扩容
+
+
+
+
+
+
+
+
 
 
 
