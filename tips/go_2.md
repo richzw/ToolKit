@@ -105,7 +105,46 @@
       (dlv) bt
       (dlv) frame 5
       ```
-
+- [Make synchronous code asynchronous with context.Context and channels](https://pauldigian.hashnode.dev/advanced-go-make-synchronous-code-asynchronous-with-contextcontext-and-channels)
+  - The main point of this pattern is to wait, at the same time, for either the result of the blocking function, or for a context cancellation. If the context is cancelled, the result from the blocking function is not needed anymore, and we can gracefully and quickly shut down the code path and free valuable resources. If the result comes in time, we can move on with the default execution.
+    ```go
+    ctx := request.Context()
+    
+    r := io.SomeReader() // not important which reader
+    b := make([]byte, 1024)
+    type readResult struct {
+        readBytes int
+        err             error
+    }
+    resultCh := make(chan readResult)
+    
+    go func() {
+        if err := ctx.Err(); err != nil {
+            return
+        }
+        n, err := r.Read(b)
+        select {
+            case <-ctx.Done():
+                // do nothing
+            case resultCh <- readResult{readBytes: n, err: err}:
+                // do nothing
+        }
+    }()
+    
+    var result readResult
+    select {
+        case <-ctx.Done():
+            // do something in here
+            // likely return from the function with an error
+            return ctx.Err()
+        case result <- resultCh:
+            // great we go our result in time and we can move on
+            // from now on, `b` is populated, with the read bytes
+    }
+    
+    // here we can use `result` as `readResult` and the buffer `b`
+    
+    ```
 
 
 
