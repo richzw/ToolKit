@@ -225,10 +225,15 @@
         len int            // 字符串的字节长度，非字符个数
     }
     ```
-  - rune
+  - [rune](https://kvs-vishnu23.medium.com/what-exactly-is-a-rune-datatype-in-go-f652093a88eb)
     - 在 unicode 字符集中，每一个字符都有一个对应的编号，我们称这个编号为 code point，而 Go 中的rune 类型就代表一个字符的 code point。
     ![img.png](go_rune.png)
-
+    - rune is an alias for int32 value which represents a single Unicode point. From the above program to print the rune equivalent of 128513, we used Printf() function with %c control string
+     ```go
+     	oo := '中'
+     	fmt.Println("As an int value ", oo) // 20013, this is rune
+     	fmt.Printf("As a string: %s, %s and as a char: %c \n", oo, string(oo), oo)
+     ```
 
 
 
