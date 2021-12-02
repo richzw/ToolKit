@@ -145,6 +145,10 @@
     // here we can use `result` as `readResult` and the buffer `b`
     
     ```
+- [Golang GC Marker](https://mp.weixin.qq.com/s/n-4YxL_irIBqd2fxszmDeg)
+  - 每个P都有  Mark worker
+  - 三色标记
+  - 混合写屏障： 在栈外设置 加入写屏障 + 删除写屏障
 
 
 
