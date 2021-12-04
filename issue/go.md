@@ -230,10 +230,54 @@
     ![img.png](go_rune.png)
     - rune is an alias for int32 value which represents a single Unicode point. From the above program to print the rune equivalent of 128513, we used Printf() function with %c control string
      ```go
-     	oo := '中'
-     	fmt.Println("As an int value ", oo) // 20013, this is rune
-     	fmt.Printf("As a string: %s, %s and as a char: %c \n", oo, string(oo), oo)
+         oo := '中'
+         fmt.Println("As an int value ", oo) // 20013, this is rune
+         fmt.Printf("As a string: %s, %s and as a char: %c \n", oo, string(oo), oo)
      ```
+- [一个打点引发的事故](https://mp.weixin.qq.com/s?__biz=MjM5MDUwNTQwMQ==&mid=2257486531&idx=1&sn=a996f5932ca9018f78ce0049f3a7baa8&chksm=a539e215924e6b03ab2c6d2ab370ca184afa85d0f6fac0af644dc3bef4fbdd319d1f0a7a932e&cur_album_id=1690026440752168967&scene=189#wechat_redirect)
+  - 查到了 OOM 的实例 goroutine 数暴涨，接口 QPS 有尖峰，比正常翻了几倍。所以，得到的结论就是接口流量太多，超过服务极限，导致 OOM
+  - 由于 metrics 底层是用 udp 发送的，有文件锁，大量打点的情况下，会引起激烈的锁冲突，造成 goroutine 堆积、请求堆积，和请求关联的 model 无法释放，于是就 OOM 了
+  - 由于这个地方的打点非常多，几十万 QPS，一冲突，goroutine 都 gopark 去等锁了，持有的内存无法释放，服务一会儿就 gg 了
+- [mutex 出问题怎么办？强大的 goroutine 诊断工具](https://mp.weixin.qq.com/s/JadUu7odckhNfcXDULoXVA)
+  - 我们如何才能看到所有 goroutine 在任何给定时刻都在做什么
+    - 每个 Go 程序都带有[一个默认 SIGQUIT 信号处理程序](https://pkg.go.dev/os/signal#hdr-Default_behavior_of_signals_in_Go_programs)的开箱即用的解决方案 。收到此信号后，程序将堆栈转储打印到 stderr 并退出
+      ```go
+      func main() {
+          ch := make(chan (bool), 1)
+      
+          go func() {
+              readForever(ch)
+          }()
+      
+          writeForever(ch)
+      }
+      
+      func readForever(ch chan (bool)) {
+          for {
+              <-ch
+          }
+      }
+      
+      func writeForever(ch chan (bool)) {
+          for {
+              ch <- true
+          }
+      }
+      ```
+      - 运行这个程序并通过 `CTRL+\` 发送一个 SIGQUIT 来终止它.
+      - 我们可以使用以下 kill命令发送信号：
+       `kill -SIGQUIT <process id>`
+      - 对于 Docker，我们需要向正在运行的容器发送 SIGQUIT。没问题：
+        ```shell
+        docker kill --signal=SIGQUIT <container_id>
+        # Then, grab the stack dump from the container logs.
+        docker logs <container_id>
+        ```
+  - [goroutine-inspect](https://github.com/linuxerwang/goroutine-inspect)
+    - goroutine-inspect 的工具。它是一个 pprof 风格的交互式 CLI，它允许你操作堆栈转储、过滤掉不相关的跟踪或搜索特定功能
+    - 
+
+
 
 
 
