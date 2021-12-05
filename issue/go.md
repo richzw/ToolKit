@@ -277,7 +277,63 @@
     - goroutine-inspect 的工具。它是一个 pprof 风格的交互式 CLI，它允许你操作堆栈转储、过滤掉不相关的跟踪或搜索特定功能
     - 
 
-
+- [Go 程序自己监控自己](https://mp.weixin.qq.com/s?__biz=MzUzNTY5MzU2MA==&mid=2247490745&idx=1&sn=6a04327f98a734fd50e509362fc04d48&scene=21#wechat_redirect)
+  - 怎么用Go获取进程的各项指标
+    - 获取Go进程的资源使用情况使用[gopstuil库](github.com/shirou/gopsutil)
+      ```go
+      p, _ := process.NewProcess(int32(os.Getpid()))
+      // cpu
+      cpuPercent, err := p.Percent(time.Second)
+      cp := cpuPercent / float64(runtime.NumCPU())
+      // 获取进程占用内存的比例
+      mp, _ := p.MemoryPercent()
+      // 创建的线程数
+      threadCount := pprof.Lookup("threadcreate").Count()
+      // Goroutine数 
+      gNum := runtime.NumGoroutine()
+      ```
+    - 容器环境下获取进程指标
+      - Cgroups给用户暴露出来的操作接口是文件系统，它以文件和目录的方式组织在操作系统的/sys/fs/cgroup路径下，在 /sys/fs/cgroup下面有很多诸cpuset、cpu、 memory这样的子目录
+    ```go
+    cpuPeriod, err := readUint("/sys/fs/cgroup/cpu/cpu.cfs_period_us")
+    cpuQuota, err := readUint("/sys/fs/cgroup/cpu/cpu.cfs_quota_us")
+    cpuNum := float64(cpuQuota) / float64(cpuPeriod)
+    cpuPercent, err := p.Percent(time.Second)
+    // cp := cpuPercent / float64(runtime.NumCPU())
+    // 调整为
+    cp := cpuPercent / cpuNum
+    
+    // 容器的能使用的最大内存数，自然就是在memory.limit_in_bytes里指定
+    memLimit, err := readUint("/sys/fs/cgroup/memory/memory.limit_in_bytes")
+    memInfo, err := p.MemoryInfo
+    mp := memInfo.RSS * 100 / memLimit
+    // 上面进程内存信息里的RSS叫常驻内存，是在RAM里分配给进程，允许进程访问的内存量。而读取容器资源用的readUint，是containerd组织在cgroups实现里给出的方法。
+    func readUint(path string) (uint64, error) {
+        v, err := ioutil.ReadFile(path)
+        if err != nil {
+            return 0, err
+        }
+        return parseUint(strings.TrimSpace(string(v)), 10, 64)
+    }
+    
+    func parseUint(s string, base, bitSize int) (uint64, error) {
+        v, err := strconv.ParseUint(s, base, bitSize)
+        if err != nil {
+            intValue, intErr := strconv.ParseInt(s, base, bitSize)
+            // 1. Handle negative values greater than MinInt64 (and)
+            // 2. Handle negative values lesser than MinInt64
+            if intErr == nil && intValue < 0 {
+                return 0, nil
+            } else if intErr != nil &&
+                intErr.(*strconv.NumError).Err == strconv.ErrRange &&
+                intValue < 0 {
+                return 0, nil
+            }
+            return 0, err
+        }
+        return v, nil
+    }
+    ```
 
 
 
