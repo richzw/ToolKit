@@ -30,6 +30,27 @@
       - 最后这两个的估算过程是这样的：
         - 300 个 million * 10%* 1MB，1 MB 其实就是 6 个 0，相当于 million 要进化 2 次：million -> billion -> trillion，即从 M -> G -> T，于是结果等于 300 T * 10% = 30 T。
         - 30 TB * 365 * 5 = 30 TB * 1825 = 30 TB * 10^3 * 1.825，TB 进化一次变成 PB，于是等于 30 * 1.825 PB = 55 PB。
+- [Go map[int64]int64 写入 redis 占用多少内存](https://mp.weixin.qq.com/s?__biz=MjM5MDUwNTQwMQ==&mid=2257487941&idx=1&sn=80cee0d0f88d73f57a25c496eef90393&scene=21#wechat_redirect)
+  - 将内存中的一个超大的 map[int64]int64 写入到 redis，map 里的元素个数是千万级的。设计方案的时候，需要对 redis 的容量做一个估算。
+  - 错误的示例
+    - 如果不了解 redis 的话，可能你的答案是用元素个数直接乘以 16B（key 和 value 各占 8B）。我们假设元素个数是 5kw，那估算结果就是：5kw * 16B=50kk * 16B = 800MB
+  - redis说起
+    - Redis 中的一个 k-v 对用一个 entry 项表示，其中每个 entry 包含 key、value、next 三个指针，共 24 字节。由于 redis 使用 jemalloc 分配内存，因此一个 entry 需要申请 32 字节的内存。这里的 key, value 指针分别指向一个 RedisObject
+       ```c++
+       typedef struct redisObject {
+           unsigned type:4;
+           unsigned encoding:4;
+           unsigned lru:LRU_BITS; 
+           int refcount;
+           void *ptr;
+       } robj;
+       ```
+    - RedisObject 对应前面提到的各种数据类型，其中最简单的就是 redis 内部的字符串了。它有如下几种编码格式
+      ![img.png](system_design_redis.png)
+    - 当字符串是一个整型时，直接放在 ptr 位置，不用再分配新的内存了，非常高效
+    - 我们要写入 redis 的 map 中的 key 和 value 都是整数，因此直接将值写入 ptr 处即可。
+      于是 map 的一个 key 占用的内存大小为：32（entry）+16（key）+16（value）=64B。于是，5kw 个 key 占用的内存大小是 5kw*64B = 50 kk * 64B = 3200MB ≈ 3G
+    - 假如我们在 key 前面加上了前缀，那就会生成 SDS，占用的内存会变大，访问效率也会变差。
 - [高并发系统建设经验总结](https://mp.weixin.qq.com/s/TTn3YNwKKWn5IS8F6HJHIg)
   - 基础设施
     - 异地多活
