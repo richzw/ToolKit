@@ -239,6 +239,94 @@
   - 由于 metrics 底层是用 udp 发送的，有文件锁，大量打点的情况下，会引起激烈的锁冲突，造成 goroutine 堆积、请求堆积，和请求关联的 model 无法释放，于是就 OOM 了
   - 由于这个地方的打点非常多，几十万 QPS，一冲突，goroutine 都 gopark 去等锁了，持有的内存无法释放，服务一会儿就 gg 了
 - [mutex 出问题怎么办？强大的 goroutine 诊断工具](https://mp.weixin.qq.com/s/JadUu7odckhNfcXDULoXVA)
+    ```go
+    type Hub struct {
+        // Maps client IDs to clients.
+        clients map[string]*Client
+        // Maps streams to clients
+        // (stream -> client id -> struct{}).
+        streams map[string]map[string]struct{}
+        // A goroutine pool is used to do the actual broadcasting work.
+        pool *GoPool
+    
+        mu sync.RWMutex
+    }
+    
+    func NewHub() *Hub {
+        return &Hub{
+          clients: make(map[string]*Client),
+          streams: make(map[string]map[string]struct{}),
+          // Initialize a pool with 1024 workers.
+          pool: NewGoPool(1024),
+        }
+    }
+    
+    func (h *Hub) subscribeSession(c *Client, stream string) {
+        h.mu.Lock()
+        defer h.mu.Unlock()
+    
+        if _, ok := h.clients[c.ID]; !ok {
+            h.clients[c.ID] = c
+        }
+    
+        if _, ok := h.streams[stream]; !ok {
+            h.streams[stream] = make(map[string]map[string]bool)
+        }
+    
+        h.streams[stream][c.ID] = struct{}{}
+    }
+    
+    func (h *Hub) unsubscribeSession(c *Client, stream string) {
+        h.mu.Lock()
+        defer h.mu.Unlock()
+    
+        if _, ok := h.clients[c.ID]; !ok {
+            return
+        }
+    
+        delete(h.clients, c.ID)
+    
+        if _, ok := h.streams[stream]; !ok {
+            return
+        }
+    
+        delete(h.streams[stream], c.ID)
+    }
+    
+    func (h *Hub) broadcastToStream(stream string, msg string) {
+        // First, we check if we have a particular stream,
+        // if not, we return.
+        // Note that here we use a read lock here.
+        h.mu.RLock()
+        defer h.mu.RUnlock()
+    
+        if _, ok := h.streams[stream]; !ok {
+            return
+        }
+    
+        // If there is a stream, schedule a task.
+        h.pool.Schedule(func() {
+            // Here we need to acquire a lock again
+            // since we're reading from the map.
+            h.mu.RLock()
+            defer h.mu.RUnlock()
+    
+            if _, ok := h.streams[stream]; !ok {
+                return
+            }
+    
+            for id := range h.streams[stream] {
+                client, ok := h.clients[id]
+    
+                if !ok {
+                    continue
+                }
+    
+                client.Send(msg)
+            }
+        })
+    }
+    ```
   - 我们如何才能看到所有 goroutine 在任何给定时刻都在做什么
     - 每个 Go 程序都带有[一个默认 SIGQUIT 信号处理程序](https://pkg.go.dev/os/signal#hdr-Default_behavior_of_signals_in_Go_programs)的开箱即用的解决方案 。收到此信号后，程序将堆栈转储打印到 stderr 并退出
       ```go
@@ -275,7 +363,51 @@
         ```
   - [goroutine-inspect](https://github.com/linuxerwang/goroutine-inspect)
     - goroutine-inspect 的工具。它是一个 pprof 风格的交互式 CLI，它允许你操作堆栈转储、过滤掉不相关的跟踪或搜索特定功能
-    - 
+      ```
+      # First, we load a dump and store a reference to it in the 'a' variable.
+      > a = load("tmp/go-crash-1.dump")
+      
+      # The show() function prints a summary.
+      > a.show()
+      \# of goroutines: 4663
+      
+      # goroutine-inspect 最有用的功能之一 是 dedup()函数，它通过堆栈跟踪对 goroutine 进行分组
+      > a.dedup()
+      # of goroutines: 27
+      
+      #哇！我们最终只有 27 个独特的堆栈！现在我们可以扫描它们并删除不相关的：
+      > a.delete(...) # delete many routines by their ids
+      # of goroutines: 8
+      
+      #在删除了所有 安全的goroutine（HTTP 服务器、gRPC 客户端等）之后，我们得到了最后 8 个。我发现了多个包含broadcastToStream和 subscribeSesssion功能的痕迹
+      > a.search("contains(trace, 'subscribeSesssion')")
+      
+      goroutine 461 [semacquire, 14 minutes]: 820 times: [461,...]
+      ```
+    - 尽管在  broadcastSession 中使用 RLock，我们还引入了另一个潜在的阻塞调用—— pool.Schedule。这个调用发生在锁内！我们 defer 的好习惯在 Unlock 这里失败了
+      ```go
+      func (h *Hub) broadcastToStream(stream string, msg string) {
+          // First, we check if we have a particular stream,
+          // if not, we return.
+          // Note that here we use a read lock here.
+          h.mu.RLock()
+          defer h.mu.RUnlock()  --> unlock here
+      
+          if _, ok := h.streams[stream]; !ok {
+              return
+          }
+      
+          // If there is a stream, schedule a task.
+          h.pool.Schedule(func() {
+              // Here we need to acquire a lock again
+              // since we're reading from the map.
+              h.mu.RLock()          --> lock again...
+              defer h.mu.RUnlock()
+      
+              if _, ok := h.streams[stream]; !ok {
+                  return
+              }
+      ```
 
 - [Go 程序自己监控自己](https://mp.weixin.qq.com/s?__biz=MzUzNTY5MzU2MA==&mid=2247490745&idx=1&sn=6a04327f98a734fd50e509362fc04d48&scene=21#wechat_redirect)
   - 怎么用Go获取进程的各项指标
