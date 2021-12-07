@@ -192,8 +192,30 @@
         - 如果 Channel 上的 sendq 队列中存在挂起的 Goroutine，就会将recvx 索引所在的数据拷贝到接收变量所在的内存空间上并将 sendq 队列中 Goroutine 的数据拷贝到缓冲区中；
         - 如果 Channel 的缓冲区中包含数据就会直接从 recvx 所在的索引上进行读取；
         - 在默认情况下会直接挂起当前的 Goroutine，将 sudog 结构加入 recvq 队列并等待调度器的唤醒；
-
-
+- [如何高效的进行字符串拼接](https://mp.weixin.qq.com/s/TDU_lnxbQmlnGosN4Ss7Tw)
+  - string类型本质上就是一个byte类型的数组
+    ```go
+    //go:nosplit
+    func gostringnocopy(str *byte) string {
+     ss := stringStruct{str: unsafe.Pointer(str), len: findnull(str)}
+     s := *(*string)(unsafe.Pointer(&ss))
+     return s
+    }
+    ```
+  - 字符串拼接的6种方式
+    - 原生拼接方式"+"
+    - 字符串格式化函数fmt.Sprintf
+    - Strings.builder - 提供的String方法就是将[]]byte转换为string类型，这里为了避免内存拷贝的问题
+    - bytes.Buffer 
+    - strings.join - 基于strings.builder来实现的, join方法内调用了b.Grow(n)方法，这个是进行初步的容量分配
+    - 切片append 
+  - benchmark 比较
+    - 当进行少量字符串拼接时，直接使用+操作符进行拼接字符串，效率还是挺高的
+    - 当要拼接的字符串数量上来时，+操作符的性能就比较低了；函数fmt.Sprintf还是不适合进行字符串拼接，无论拼接字符串数量多少，性能损耗都很大
+    - strings.Builder无论是少量字符串的拼接还是大量的字符串拼接，性能一直都能稳定
+    - strings.join方法的benchmark就可以发现，因为使用了grow方法，提前分配好内存，在字符串拼接的过程中，不需要进行字符串的拷贝，也不需要分配新的内存
+    - bytes.Buffer方法性能是低于strings.builder的，bytes.Buffer 转化为字符串时重新申请了一块空间，存放生成的字符串变量
+    - strings.join ≈ strings.builder > bytes.buffer > []byte转换string > "+" > fmt.sprintf
 
 
 
