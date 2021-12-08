@@ -169,6 +169,62 @@
   - IP 层有粘包问题吗
     - 先说结论，不会。首先前文提到了，粘包其实是由于使用者无法正确区分消息边界导致的一个问题。
     - IP 层从按长度切片到把切片组装成一个数据包的过程中，都只管运输，都不需要在意消息的边界和内容，都不在意消息内容了，那就不会有粘包一说了。
+- [localhost 就一定是 localhost 么?](https://mp.weixin.qq.com/s/x0798dbodAxdyUIGYfEBjA)
+  - Issue
+    - 我们在本地测试或者本地通讯的时候经常使用 localhost 域名，但是访问 localhost 的对应的一定就是我们的本机地址么？
+    - 我们明明是配置的 localhost，为什么会出现这个地址？localhost 不应该指向的是 127.0.0.1 么？我们使用 dig 和 nslookup 之后发现 localhost 的确是 127.0.0.1
+    - 我们在机器上抓包之后发现 localhost 竟然走了域名解析! 并且 localhost 这个域名在我们内网还被注册了，解析出来的地址就是最开始发现的这个不知名的地址
+    - 我们下意识认为的域名解析流程应该是这样的，先去找 /etc/hosts 文件，localhost 找到了（默认是 127.0.0.1）就返回了
+    - 排查之后发现，实际上的流程是这样的，先做了 DNS 查询 DNS 没查到然后去查了 /etc/hosts 文件
+    - 直到有一天，我们的内网域名解析中添加了一个 localhost 的域名解析，就直接查询成功返回了
+  - 复现
+    ```go
+    func main() {
+     client := &http.Client{}
+     _, err := client.Get("http://localhost:8080")
+     fmt.Println(err)
+    }
+    
+    # GODEBUG="netdns=go+2" go run main.go 
+    go package net: GODEBUG setting forcing use of Go's resolver
+    go package net: hostLookupOrder(localhost) = files,dns
+    Get "http://localhost:8080": dial tcp [::1]:8080: connect: connection refused
+    上面显示的 files,dns 的意思就是先从 /etc/hosts 文件中查询，再去查询 dns 结果
+    ```
+    Docker模拟
+    ```shell
+    FROM golang:1.15 as builder
+    
+    WORKDIR /app
+    
+    COPY main.go main.go
+    COPY run.sh run.sh
+    
+    ENV CGO_ENABLED=0
+    ENV GOOS=linux
+    
+    RUN go build main.go
+    
+    FROM alpine:3
+    
+    WORKDIR /app
+    
+    COPY --from=builder /app /app
+    COPY run.sh run.sh
+    
+    RUN chmod +x run.sh
+    
+    ENV GODEBUG="netdns=go+2"
+    ENV CGO_ENABLED=0
+    ENV GOOS=linux
+    
+    CMD /app/run.sh
+    ```
+    使用这个容器运行的结果如下，可以看到已经变成了 dns,files 为什么会这样呢？
+  - 排查
+    - src/net/dnsclient_unix.go Go 中定义了下面几种 DNS 解析顺序，其中 files 表示查询 /etc/hosts 文件，dns 表示执行 dns 查询
+    - Go 会先根据一些初始条件判断查询的顺序，然后就查找 /etc/nsswitch.conf 文件中的 hosts 配置项，如果不存在就会走一些回退逻辑。这次的问题出现在这个回退逻辑上
+    - 当前系统如果是 linux 并且不存在 /etc/nsswitch.conf 文件的时候，会直接返回 dns,files 的顺序
 
 
 
