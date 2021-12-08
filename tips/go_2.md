@@ -255,7 +255,104 @@
     - 当怀疑我们的接口的耗时是由于 GC 的频繁触发引起的，我们需要怎么确定呢？
       - 首先你会想到周期性的抓取 pprof 的来分析，这种方案其实也可以，但是太麻烦了。
       - 其实可以根据 GC 的触发时间绘制这个曲线图，GC 的触发时间可以利用 runtime.Memstats 的 LastGC 来获取。
-     
+- [runtime.KeepAlive 有什么用](https://mp.weixin.qq.com/s/1KlMbvnflFwQS2e-SFG-IA)
+  - 有些同学喜欢利用 runtime.SetFinalizer 模拟析构函数，当变量被回收时，执行一些回收操作，加速一些资源的释放。在做性能优化的时候这样做确实有一定的效果，不过这样做是有一定的风险的。
+    ```go
+    type File struct { d int }
+    
+    func main() {
+        p := openFile("t.txt")
+        content := readFile(p.d)
+    
+        println("Here is the content: "+content)
+    }
+    
+    func openFile(path string) *File {
+        d, err := syscall.Open(path, syscall.O_RDONLY, 0)
+        if err != nil {
+          panic(err)
+        }
+    
+        p := &File{d}
+        runtime.SetFinalizer(p, func(p *File) {
+          syscall.Close(p.d)
+        })
+    
+        return p
+    }
+    
+    func readFile(descriptor int) string {
+        doSomeAllocation()
+    
+        var buf [1000]byte
+        _, err := syscall.Read(descriptor, buf[:])
+        if err != nil {
+          panic(err)
+        }
+    
+        return string(buf[:])
+    }
+    
+    func doSomeAllocation() {
+        var a *int
+    
+        // memory increase to force the GC
+        for i:= 0; i < 10000000; i++ {
+          i := 1
+          a = &i
+        }
+    
+        _ = a
+    }
+    ```
+    - doSomeAllocation 会强制执行 GC，当我们执行这段代码时会出现下面的错误。
+    - 因为 syscall.Open 产生的文件描述符比较特殊，是个 int 类型，当以值拷贝的方式在函数间传递时，并不会让 File.d 产生引用关系，于是 GC 发生时就会调用 runtime.SetFinalizer(p, func(p *File) 导致文件描述符被 close 掉
+  - 什么是 runtime.KeepAlive
+    - 我们如果才能让文件描述符不被 gc 给释放掉呢？其实很简单，只需要调用 runtime.KeepAlive 即可
+      ```go
+      func main() {
+          p := openFile("t.txt")
+          content := readFile(p.d)
+          
+          runtime.KeepAlive(p)
+      
+          println("Here is the content: "+content)
+      }
+      ```
+      runtime.KeepAlive 能阻止 runtime.SetFinalizer 延迟发生，保证我们的变量不被 GC 所回收
+- [Goroutine 泄漏检查器](https://mp.weixin.qq.com/s/eSa6B1Z1cnpUJ1Vn3bxhUA)
+  - 具有监控存活的 goroutine 数量功能的 APM (Application Performance Monitoring) 应用程序性能监控可以轻松查出 goroutine 泄漏。例如 NewRelic APM 中 goroutine 的监控
+  - [goroutine 泄漏检测器](https://github.com/uber-go/goleak)
+    ```go
+    func leak() error {
+     go func() {
+      time.Sleep(time.Minute)
+     }()
+    
+     return nil
+    }
+    
+    func TestLeakFunction(t *testing.T) {
+      defer goleak.VerifyNone(t)
+    
+      if err := leak(); err != nil {
+        t.Fatal("error not expected")
+      }
+    }
+    ```
+    从报错信息中我们可以提取出两个有用的信息：
+    - 报错信息顶部为泄漏的 goroutine 的堆栈信息，以及 goroutine 的状态，可以帮我们快速调试并了解泄漏的 goroutine
+    - 之后为 goroutineID，在使用 trace 可视化的时候很有用，以下是通过 go test -trace trace.out 生成的用例截图：
+  - 运行原理
+    - goleak 检测了所有的 goroutine 而不是只检测泄漏的 goroutine
+    - goroutine 的堆栈信息由 golang 标准库中的 runtime.Stack，它可以被任何人取到。不过，[Goroutine 的 ID 是拿不到的](https://groups.google.com/forum/#!topic/golang-nuts/0HGyCOrhuuI)
+    - 之后，goleak 解析所有的 goroutine 出并通过以下规则过滤 go 标准库中产生的 goroutine
+      - 由 go test 创建来运行测试逻辑的 goroutine。
+      - 由 runtime 创建的 goroutine，例如监听信号接收的 goroutine。想要了解更多相关信息，请参阅Go: [gsignal, Master of goroutine](https://medium.com/a-journey-with-go/go-gsignal-master-of-signals-329f7ff39391)
+      - 当前运行的 goroutine
+    - 经过此次过滤后，如果没有剩余的 goroutine，则表示没有发生泄漏。但是 goleak 还是存在一下缺陷：
+      - 三方库或者运行在后台中，遗漏的 goroutine 将会造成虚假的结果(无 goroutine 泄漏)
+      - 如果在其他未使用 goleak 的测试代码中使用了 goroutine，那么泄漏结果也是错误的。如果这个 goroutine 一直运行到下次使用 goleak 的代码， 则结果也会被这个 goroutine 影响，发生错误。
 
 
 
