@@ -485,6 +485,57 @@
     - 所以，Go 官方没有 ”修复“ sync.Pool 的这个 bug ，其上层的 dubbogo 还能稳定运行，当他们 ”修复“ 之后，上层的 dubbogo 运行反而出了问题。
   - Go 语言 另外一个比较著名的例子便是 `godebug=madvdontneed=1`。Go 1.12 对其内存分配算法做了改进：Go runtime 在释放内存时，使用了一个自认为更加高效的 MADV_FREE 而不是之前的 MADV_DONTNEED，其导致的后果是 Go 程序释放内存后，RSS 不会立刻下降。这影响了很多程序监控指标的准确性，在大家怨声载道的抱怨后，Go 1.16 又改回了默认的内存分配算法。
 
+- [线上偶现的panic问题](https://mp.weixin.qq.com/s/VOwlkkm_KC9FG_c2jQhcew)
+  - panic 
+    ```shell
+    runtime error: invalid memory address or nil pointer dereference
+    
+    panic(0xbd1c80, 0x1271710)
+            /root/.go/src/runtime/panic.go:969 +0x175
+    github.com/json-iterator/go.(*Stream).WriteStringWithHTMLEscaped(0xc00b0c6000, 0x0, 0x24)
+            /go/pkg/mod/github.com/json-iterator/go@v1.1.11/stream_str.go:227 +0x7b
+    github.com/json-iterator/go.(*htmlEscapedStringEncoder).Encode(0x12b9250, 0xc0096c4c00, 0xc00b0c6000)
+    ```
+  - source codes
+    ```go
+    func doReq() {
+        req := paramsPool.Get().(*model.Params)
+        // defer 1
+        defer func() {
+         reqBytes, _ := json.Marshal(req)
+         // 省略其他打印日志的代码
+        }()
+        // defer 2
+        defer paramsPool.Put(req)
+        // req初始化以及发起请求和其他操作
+    }
+    ```
+    上面代码中paramsPool是sync.Pool类型的变量，而sync.Pool想必大家都很熟悉。sync.Pool是为了复用已经使用过的对象(协程安全)，减少内存分配和降低GC压力。
+    ```go
+    type test struct {
+     a string
+    }
+    
+    var sp = sync.Pool{
+     New: func() interface{} {
+      return new(test)
+     },
+    }
+    
+    func main() {
+     t := sp.Get().(*test)
+     fmt.Println(unsafe.Pointer(t))
+     sp.Put(t)
+     t1 := sp.Get().(*test)
+     t2 := sp.Get().(*test)
+     fmt.Println(unsafe.Pointer(t1), unsafe.Pointer(t2))
+    }
+    
+    ```
+    根据上述代码和输出结果知，t1变量和t变量地址一致，因此他们是复用对象。此时再回顾上面的doReq函数就很容易发现问题的根因
+    - defer 2和defer 1顺序反了！！！
+    - sync.Pool提供的Get和Put方法是协程安全的，但是高并发调用doReq函数时json.Marshal(req)和请求初始化会存在并发问题，极有可能引起panic的并发调用时间线如下图所示。
+    ![img.png](go_panic.png)
 
 
 
