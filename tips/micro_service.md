@@ -437,6 +437,9 @@
   ![img.png](micro_service_circuit_break.png)
   - Hystrix 
   ![img.png](micro_service_hytrix.png)
+- [Raft 分布式共识算法讲义](https://mp.weixin.qq.com/s/JOzK15Y85FFwIuMwJifIAw)
+  - [Source](https://www.youtube.com/watch?v=vYp4LYbnnW8)
+
 
 
 
