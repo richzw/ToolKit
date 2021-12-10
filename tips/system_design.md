@@ -111,9 +111,53 @@
       - 消息队列模式
     - 幂等
     - 异步化
-
-
-
-
+- [Websocket 百万长连接技术实践](https://mp.weixin.qq.com/s/MUourpb0IqqFo5XlxRLE0w)
+  - GateWay
+    - 网关拆分为网关功能部分和业务处理部分，网关功能部分为 WS-Gateway：集成用户鉴权、TLS 证书验证和 WebSocket 连接管理等；业务处理部分为 WS-API：组件服务直接与该服务进行 gRPC 通信。可针对具体的模块进行针对性扩容；服务重构加上 Nginx 移除，整体硬件消耗显著降低；服务整合到石墨监控体系
+    ![img.png](system_design_gatewa.png)
+    - 网关 客户端连接流程：
+      - 客户端与 WS-Gateway 服务通过握手流程建立 WebSocket 连接；
+      - 连接建立成功后，WS-Gateway 服务将会话进行节点存储，将连接信息映射关系缓存到 Redis 中，并通过 Kafka 向 WS-API 推送客户端上线消息；
+      - WS-API 通过 Kafka 接收客户端上线消息及客户端上行消息；
+      - WS-API 服务预处理及组装消息，包括从 Redis 获取消息推送的必要数据，并进行完成消息推送的过滤逻辑，然后 Pub 消息到 Kafka；
+      - WS-Gateway 通过 Sub Kafka 来获取服务端需要返回的消息，逐个推送消息至客户端。
+  - TLS 内存消耗优化
+    - Go TLS 握手过程中消耗的内存 [issue](https://github.com/golang/go/issues/43563)
+    - 采用七层负载均衡，在七层负载上进行 TLS 证书挂载，将 TLS 握手过程移交给性能更好的工具完成
+  - Socket ID 设计
+    - K8S 场景中，采用注册下发的方式返回编号，WS-Gateway 所有副本启动后向数据库写入服务的启动信息，获取副本编号，以此作为参数作为 SnowFlake 算法的副本编号进行 Socket ID 生产，服务重启会继承之前已有的副本编号，有新版本下发时会根据自增 ID 下发新的副本编号
+  - 心跳机制
+    - 避免大量客户端同时进行心跳上报对 Redis 产生压力。
+      - 客户端建立 WebSocket 连接成功后，服务端下发心跳上报参数；
+      - 客户端依据以上参数进行心跳包传输，服务端收到心跳后会更新会话时间戳；
+      - 客户端其他上行数据都会触发对应会话时间戳更新；
+      - 服务端定时清理超时会话，执行主动关闭流程；
+    - 实现心跳正常情况下的动态间隔，每 x 次正常心跳上报，心跳间隔增加 a，增加上限为 y
+  - 消息接收与发送
+    - 发现每个 WebSocket 连接都会占用 3 个 goroutine，每个 goroutine 都需要内存栈，单机承载连十分有限，主要受制于大量的内存占用，而且大部分时间 c.writer() 是闲置状态，于是考虑，是否只启用 2 个 goroutine 来完成交互
+    - 保留 c.reader() 的 goroutine，如果使用轮询方式从缓冲区读取数据，可能会产生读取延迟或者锁的问题，c.writer() 操作调整为主动调用，不采用启动 goroutine 持续监听，降低内存消耗
+    - 调研了 gev 和 gnet 等基于事件驱动的轻量级高性能网络库，实测发现在大量连接场景下可能产生的消息延迟的问题，所以没有在生产环境下使用
+  - 核心对象缓存
+    - 网关部分的核心对象为 Connection 对象，围绕 Connection 进行了 run、read、write、close 等函数的开发
+    - 使用 sync.pool 来缓存该对象，减轻 GC 压力，创建连接时，通过对象资源池获取 Connection 对象，生命周期结束之后，重置 Connection 对象后 Put 回资源池
+      ```go
+      var ConnectionPool = sync.Pool{
+         New: func() interface{} {
+            return &Connection{}
+         },
+      }
+      
+      func GetConn() *Connection {
+         cli := ConnectionPool.Get().(*Connection)
+         return cli
+      }
+      
+      func PutConn(cli *Connection) {
+         cli.Reset()
+         ConnectionPool.Put(cli) // 放回连接池
+      }
+      ```
+  - 数据传输过程优化
+    - 消息流转过程中，需要考虑消息体的传输效率优化，采用 MessagePack 对消息体进行序列化，压缩消息体大小
 
 
