@@ -395,7 +395,12 @@
     - main函数也是个协程，栈底也是goexit
       - main函数也是由newproc创建的，只要通过newproc创建的goroutine，栈底就会有一个goexit
   - os.Exit() 指的是整个进程退出；而runtime.Goexit()指的是协程退出。
-
+- [gowatch监听文件变动](https://mp.weixin.qq.com/s/f3q5ryWvLonOKMOZEJnXNQ)
+  - 在linux内核中，有一种用于通知用户空间程序文件系统变化的机制—Inotify
+  - Golang的标准库syscall实现了该机制 [ref](github.com/silenceper/gowatch)
+  ![img.png](go_watcher.png)
+- [用 kqueue 实现一个简单的 TCP Server](https://dev.to/frosnerd/writing-a-simple-tcp-server-using-kqueue-cah)
+- [Golang 程序启动过程](https://juejin.cn/post/7035633561805783070)
 
 
 
