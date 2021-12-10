@@ -76,7 +76,7 @@
     Uber 的这个库 automaxprocs，大致原理是读取 CGroup 值识别容器的 CPU quota，计算得到实际核心数，并自动设置 GOMAXPROCS 线程数量
  
 - [为什么容器内存占用居高不下，频频 OOM](https://eddycjy.com/posts/why-container-memory-exceed/)
-  
+
   排查方向
   - 频繁申请重复对象
     - 怀疑是否在量大时频繁申请重复对象，而 Go 本身又没有及时释放内存，因此导致持续占用。
@@ -105,6 +105,17 @@
   - cadvisor 所提供的判别标准 container_memory_working_set_bytes 是不可变更的，也就是无法把判别标准改为 RSS
   - 使用类 sync.Pool 做多级内存池管理，防止申请到 “不合适”的内存空间，常见的例子： ioutil.ReadAll：
   - 核心是做好做多级内存池管理，因为使用多级内存池，就会预先定义多个 Pool，比如大小 100，200，300的 Pool 池，当你要 150 的时候，分配200，就可以避免部分的内存碎片和内存碎块
+- [Orphan process in docker](https://petermalmgren.com/orphan-children-handling-containerd/)
+  - PID 1 processes behave differently than other processes in a few different ways:
+    - They don’t get the default system signal handlers, so they are responsible for defining their own
+    - They are responsible for reaping zombie processes, or processes that have terminated but whose exit statuses haven’t been read
+    - Most importantly (for this scenario), they are responsible for adopting orphaned children and waiting on them to finish
+  - When writing code that runs in a Docker container, there are four questions you’ll want to answer:
+     - Does your process respond to SIGTERM signals and gracefully shutdown?
+     - If spawning child processes, does your parent forward signals to them?
+     - If spawning child processes, does your parent process call os.wait() to see if they unexpectedly die?
+     - If spawning child processes, do you wait on all of your processes to exit before exiting yourself?
+
 - [一文搞懂 Kubernetes 中数据包的生命周期](https://mp.weixin.qq.com/s/SqCwa069y4dcVQ1fWNQ0Wg)
   - Linux 命名空间
     - Mount：隔离文件系统加载点；
