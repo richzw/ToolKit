@@ -410,6 +410,123 @@
     - Then, when a signal reaches the program, the signal handler delegates it to a special goroutine called gsignal
     - Each thread (represented by M) has an internal gsignal goroutine to handle the signals. 
     - gsignal analyzes the signal to check if it processable, and wakes up the sleeping goroutine along with sending the signal to the queue
+- [Go 服务中 HTTP 请求的生命周期](https://mp.weixin.qq.com/s/8j-hzmxs9NlaPDptldHJDg)
+  - ListenAndServe 监听给定地址的 TCP 端口，之后循环接受新的连接。对于每一个新连接，它都会调度一个 goroutine 来处理这个连接（稍后详细说明）。处理连接涉及一个这样的循环：
+    - 从连接中解析 HTTP 请求；产生 http.Request
+    - 将这个 http.Request 传递给用户定义的 handler
+  - http.ServeMux 是一个实现了 http.Handler 接口的类
+    - ServeMux 维护了一个（根据长度）排序的 {pattern, handler} 的切片。
+    - Handle 或 HandleFunc 向该切片增加新的 handler。
+    - ServeHTTP：
+      - （通过查找这个排序好的 handler 对的切片）为请求的 path 找到对应的 handler
+      - 调用 handler 的 ServeHTTP 方法
+    - mux 可以被看做是一个转发 handler；这种模式在 HTTP 服务开发中极为常见，这就是中间件。
+  - 中间件只是另一个 HTTP handler
+    - 它包裹了一个其他的 handler。中间件 handler 通过调用 ListenAndServe 被注册进来
+    - 当调用的时候，它可以执行任意的预处理，调用自身包裹的 handler 然后可以执行任意的后置处理
+    - 中间件最大的优点是可以组合。被中间件所包裹“用户 handler” 也可以是另一个中间件，依次类推。这是一个互相包裹的 http.Handler 链
+      ```go
+      func politeGreeting(w http.ResponseWriter, req *http.Request) {
+       fmt.Fprintf(w, "Welcome! Thanks for visiting!\n")
+      }
+      
+      func loggingMiddleware(next http.Handler) http.Handler {
+       return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+        start := time.Now()
+        next.ServeHTTP(w, req)
+        log.Printf("%s %s %s", req.Method, req.RequestURI, time.Since(start))
+       })
+      }
+      
+      func main() {
+       lm := loggingMiddleware(http.HandlerFunc(politeGreeting))
+       log.Fatal(http.ListenAndServe(":8090", lm))
+      }
+      ```
+      loggingMiddleware 利用 http.HandlerFunc 和闭包使代码更加简洁，同时保留了相同的功能。更重要的是这个例子展示了中间件事实上的标准签名：一个函数传入一个 http.Handler，有时还有其他状态，之后返回一个不同的 http.Handler。返回的 handler 现在应该替换掉传入中间件的那个 handler，之后会“神奇地”执行它原有的功能，并且与中间件的功能包装在一起
+  - 并发和 panic 处理
+    - 每个连接由 http.Server.Serve 在一个新的 goroutine 中处理。
+    - net/http 包（在 conn.serve 方法中）内置对每个服务 goroutine 有 recovery
+- [Go error 处理最佳实践](https://mp.weixin.qq.com/s/XojOIIZfKm_wXul9eSU1tQ)
+  - https://github.com/pkg/errors
+    - Wrap 封装底层 error, 增加更多消息，提供调用栈信息，这是原生 error 缺少的
+    - WithMessage 封装底层 error, 增加更多消息，但不提供调用栈信息
+    - Cause 返回最底层的 error, 剥去层层的 wrap
+  - errors.Is 会递归的 Unwrap err
+    - Is 是做的指针地址判断，如果错误 Error() 内容一样，但是根 error 是不同实例，那么 Is 判断也是 false, 这点就很扯
+  - 官方库如何生成一个 wrapper error
+    - fmt.Errorf 格式化时使用 %w
+  - golang.org/x/sync/errgroup
+    - 适用如下场景：并发场景下，如果一个 goroutine 有错误，那么就要提前返回，并取消其它并行的请求
+  - 线上实践注意的几个问题
+    - 所有异步的 goroutine 都要用 recover 去兜底处理
+    - 数据传输和退出控制，需要用单独的 channel 不能混, 我们一般用 context 取消异步 goroutine, 而不是直接 close channels
+    - error 级联使用问题。 如果复用 err 变量的情况下， Call2 返回的 error 是自定义类型，此时 err 类型是不一样的，导致经典的 error is not nil, but value is nil
+      ```go
+      type myError struct {
+       string
+      }
+      
+      func (i *myError) Error() string {
+       return i.string
+      }
+      
+      func Call1() error {
+       return nil
+      }
+      
+      func Call2() *myError {
+       return nil
+      }
+      
+      func main() {
+       err := Call1()
+       if err != nil {
+        fmt.Printf("call1 is not nil: %v\n", err)
+       }
+      
+       err = Call2()
+       if err != nil {
+        fmt.Printf("call2 err is not nil: %v\n", err)
+       }
+      }
+      ```
+    - 并发问题
+      ```go
+      var FIRST error = errors.New("Test error")
+      var SECOND error = nil
+      
+      func main() {
+          var err error
+          go func() {
+              i := 1
+              for {
+                  i = 1 - i
+                  if i == 0 {
+                      err = FIRST
+                  } else {
+                      err = SECOND
+                  }
+                  time.Sleep(10)
+              }
+          }()
+          for {
+              if err != nil {
+                  fmt.Println(err.Error())
+              }
+              time.Sleep(10)
+          }
+      ```
+      go 内置类型除了 channel 大部分都是非线程安全的，error 也不例外
+    - 官方库无法 wrap 调用栈，所以 fmt.Errorf %w 不如 pkg/errors 库实用，但是errors.Wrap 最好保证只调用一次，否则全是重复的调用栈
+    - 如果 err 为 nil 的时候，也会返回 nil. 所以 Wrap 前最好做下判断
+
+
+
+
+
+
+
 
 
 
