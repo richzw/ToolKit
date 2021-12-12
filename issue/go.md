@@ -536,9 +536,30 @@
     - defer 2和defer 1顺序反了！！！
     - sync.Pool提供的Get和Put方法是协程安全的，但是高并发调用doReq函数时json.Marshal(req)和请求初始化会存在并发问题，极有可能引起panic的并发调用时间线如下图所示。
     ![img.png](go_panic.png)
-
-
-
+- [大内存 Go 服务性能优化](https://mp.weixin.qq.com/s?__biz=Mzg5MTYyNzM3OQ==&mid=2247484159&idx=1&sn=94a524d651aabdb9a42b2a5e1d5011ef&scene=21#wechat_redirect)
+  - 明明 call RPC 时设置了超时时间 timeout, 但是 Grafna 看到 P99 latency 很高
+    - 要么是 timeout 设置不合理，比如只设置了单次 socket timeout, 并没有设置 circuit breaker 外层超时
+    - GC 在捣乱，我们知道 Go GC 使用三色标记法，在 GC 压力大时用户态 goroutine 是要 assit 协助标记对象的，同时 GC STW 时间如果非常高，那么业务看起来 latency 就会得比 timeout 大很多
+  - 该服务使用 go1.7, 需要加载海量的机器学习词表，标准的 Go 大内存服务，优化前表现为 latency 非常高
+    - Pprof
+      ```shell
+      go tool pprof bin/dupsdc http://127.0.0.1:6060/debug/pprof/profile
+      ```
+      可以看到 runtime.greyobject, runtime.mallocgc, runtime.heapBitsForObject, runtime.scanobject, runtime.memmove 就些与 GC 相关的占据了 CPU 消耗的 TOP 6
+      ```shell
+      go tool pprof -inuse_objects http://127.0.0.1:6060/debug/pprof/heap
+      ```
+      再查看下常驻对像个数，发现 1kw 常驻内存对像
+    - 优化对像
+      - 词表主要使用两种类型，`map[int64][]float32` 和 `map[string]int`
+      - 三色标记，本质是递归扫描所有的指针类型，遍历确定有没有被引用
+      - 所有显示 *T 以及内部有 pointer 的对像都是指针类型，比如 map[int64][]float32 因为值是 slice, 内部包含了指针，如果 map 有 1kw 个元素，那么 GC 也要递归所描所有 key/value
+      - 优化方法就来了
+        - 把 map[int64][]float32 变成 map[int64][6]float32, 这里 slice 变成 6 个元素的数组，业务可以接受
+        - 同时把 map[string]int 里的 key 由 string 类型换成 int 枚举值
+    - 例外
+      - 比如 map 内部的实现，如果 key/value 值类型大小超过 128 字节，就会退化成指针
+      - Go 每个版本性能都会提升很多，go1.7 1kw 对像服务压力非常大，但是我司现在 go1.15 2kw 对像未优化也毫无压力
 
 
 
