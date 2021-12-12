@@ -401,6 +401,15 @@
   ![img.png](go_watcher.png)
 - [用 kqueue 实现一个简单的 TCP Server](https://dev.to/frosnerd/writing-a-simple-tcp-server-using-kqueue-cah)
 - [Golang 程序启动过程](https://juejin.cn/post/7035633561805783070)
+- [Go: gsignal, Master of Signals](https://medium.com/a-journey-with-go/go-gsignal-master-of-signals-329f7ff39391)
+  - Each `os.Signal` channel listens to their own set of events. Here is a diagram with the subscription workflow of the previous example:
+  ![img.png](go_signal.png)
+  - Go also gives the ability for a channel to stop being notified — function `Stop(os.Signal) `— or to ignore signals — function `Ignore(...os.Signal)`
+  - gsignal
+    - During the initialization phase, the signal spawns a goroutine that runs in a loop and act as a consumer to process the signals.
+    - Then, when a signal reaches the program, the signal handler delegates it to a special goroutine called gsignal
+    - Each thread (represented by M) has an internal gsignal goroutine to handle the signals. 
+    - gsignal analyzes the signal to check if it processable, and wakes up the sleeping goroutine along with sending the signal to the queue
 
 
 
