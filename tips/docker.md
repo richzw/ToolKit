@@ -327,7 +327,53 @@
     - Master 和 Worker 节点上的路由表。每个节点都有一个容器，容器有一个 IP 地址和缺省的容器路由
       ![img.png](docker_network3.png)
       上面的路由表说明，Pod 能够通过 3 层网络进行互通。什么模块负责添加路由，如何获取远端路由呢？为什么这里缺省网关是 169.254.1.1 呢
-    - 
+    - 第三方 CNI 插件，Calico 就是其中之一. Calico 的核心包括 Bird、Felix、ConfD、ETCD 以及 Kubernetes API Server
+      - BIRD (BGP)
+        - Bird 是一个 BGP 守护进程，运行在每个节点上，负责相互交换路由信息
+        - BIRD 实例负责向其它 BIRD 实例传递路由信息。缺省配置方式就是 BGP Mesh，适用于小规模部署。在大规模集群中，建议使用 Route Reflector 来克服这个缺点
+      - ConfD
+        - ConfD 是一个简单的配置管理工具，运行在 Calico Node 容器中。它会从 ETCD 中读取数据（Calico 的 BIRD 配置），并写入磁盘文件。它会循环读取网络和子网，并应用配置数据（CIDR 键），组装为 BIRD 能够使用的配置
+      - Felix
+        - Calico Felix 守护进程在 Calico Node 容器中运行
+        - 从 Kubernetes ETCD 中读取信息
+        - 构建路由表
+        - 配置 iptables 或者 IPVS
+        ![img.png](docker_network_cni2.png)
+        - 数据包如何被路由到 Peer 节点的？
+          - Master 上的 Pod 尝试 Ping 10.0.2.11
+          - Pod 向网关发送一个 ARP 请求
+          - 从 ARP 响应中得到 MAC 地址
+          - 但是谁响应的 ARP 请求？答案是 proxy-arp, `cat /proc/sys/net/ipv4/conf/cali123/proxy_arp`
+          ![img.png](docker_network_cni3.png)
+      - 路由模式
+        - IP-in-IP：
+          - 缺省，有封装行为；
+          - 传输中的数据包带有一个外层头部，其中描述了源主机和目的 IP，还有一个内层头部，包含源 Pod 和目标 IP
+        - Direct/NoEncapMode：
+          - 无封包（推荐）
+          - 用 Pod 发出时的原始格式发出来的。因为没有封包和解包的开销，这种模式比较有性能优势
+          - AWS 中要使用这种模式需要关闭源 IP 校验
+        - VxLan：
+          - 有封包（无 BGP）
+          - VXLAN 是 Virtual Extensible LAN 的缩写。VXLAN 是一种封包技术，二层数据帧被封装为 UDP 数据包。VXLAN 是一种网络虚拟化技术。当设备在软件定义的数据中心里进行通信时，会在这些设备之间建立 VXLAN 隧道。这些隧道能建立在物理或虚拟交换机之上
+          ![img.png](docker_network_cni4.png)
+  - kube-proxy kube-proxy 是如何使用 iptables 控制流量的
+    - Pod 到 Pod
+      - kube-proxy 不会介入 Pod 到 Pod 之间的通信过程。所有的容器都无需 NAT 就能互相通信；节点和容器之间的通信也是无需 NAT 的。
+      - Pod 的 IP 地址是不固定的（也有办法做成静态 IP，但是缺省配置是不提供这种保障的）。在 Pod 重启时 CNI 会给他分配新的 IP 地址，CNI 不负责维护 IP 地址和 Pod 的映射
+    - Pod 到外部
+      - Kubernetes 会使用 SNAT 完成从 Pod 向外发出的访问。SNAT 会将 Pod 的内部 IP:Port 替换为主机的 IP:Port。返回数据包到达节点时，IP:Port 又会换回 Pod。这个过程对于原始 Pod 是透明无感知的。
+    - Pod 到 Service
+      - Cluster IP
+        - Service 的对象，是一个通向 Pod 的 4 层负载均衡. Service 是一个 API 对象，它用一个虚拟 IP 映射到一组 Pod。另外 Kubernetes 为每个 Service 的名称及其虚拟 IP 建立了 DNS 记录，因此可以轻松地根据名称进行寻址。
+        - Service 对象有很多类型，最基本的类型叫做 ClusterIP，这种类型的 Service 有一个唯一的 VIP 地址，其路由范围仅在集群内部有效
+        - 虚拟 IP 到 Pod IP 的转换是通过每个节点上的 kube-proxy 完成的. 在 Pod 向外发起通信时，这个进程会通过 iptables 或者 IPVS 自动把 VIP 转为 Pod IP，每个连接都有跟踪，所以数据包返回时候，地址还能够被正确地转回原样
+        - IPVS 和 iptables 在 VIP 和 Pod IP 之间承担着负载均衡的角色，IPVS 能够提供更多的负载均衡算法。虚拟 IP 并不存在于网络接口上，而是在 iptable 中：
+        ![img.png](docker_network_proxy1.png)
+      - NodePort
+        - NodePort 类型的 Service 把 FrontEnd 服务开放给外部世界
+        ![img.png](docker_network_proxy2.png)
+      - 
 
 
 
