@@ -520,8 +520,40 @@
       go 内置类型除了 channel 大部分都是非线程安全的，error 也不例外
     - 官方库无法 wrap 调用栈，所以 fmt.Errorf %w 不如 pkg/errors 库实用，但是errors.Wrap 最好保证只调用一次，否则全是重复的调用栈
     - 如果 err 为 nil 的时候，也会返回 nil. 所以 Wrap 前最好做下判断
-
-
+- 切片拷贝
+  - `=、[:]`是浅拷贝，`copy()`拷贝是深拷贝
+- [Go语言也有隐式转型](https://mp.weixin.qq.com/s/NCM-RrzxYiAUlAAYshdAaQ)
+  - Question
+    ```go
+    type MyInt int
+    type MyMap map[string]int
+    
+    func main() {
+        var x MyInt
+        var y int 
+        x = y     // 会报错: cannot use y (type int) as type MyInt in assignment
+        _ = x 
+    
+        var m1 MyMap
+        var m2 map[string]int
+        m1 = m2 // 不会报错
+        m2 = m1 // 不会报错
+    }
+    ```
+  - Deep dive
+    - `type T1 int` 使用上述类型声明语句定义的类型T1、T2被称为defined type (named type)
+      - 所有数值类型都是defined type；(这里面就包含int)
+      - 字符串类型string是defined type；
+      - 布尔类型bool是defined type。
+      - map、数组、切片、结构体、channel等原生复合类型(composite type)都不是defined type
+    - Assignability
+      - x's type V and T have identical underlying types and at least one of V or T is not a defined type.
+      - 它和Go的[无类型常量隐式转型]()类似
+        ```go
+        type MyInt int
+        const a = 1234
+        var n MyInt = a
+        ```
 
 
 
