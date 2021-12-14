@@ -373,7 +373,27 @@
       - NodePort
         - NodePort 类型的 Service 把 FrontEnd 服务开放给外部世界
         ![img.png](docker_network_proxy2.png)
-      - 
+      - ExternalTrafficPolicy
+        - 表明所属 Service 对象会把来自外部的流量路由给本节点还是集群范围内的端点
+        - 如果为 Local，会保留客户端源 IP 同时避免 NodePort 类型服务的多余一跳，但是有流量分配不均匀的隐患
+          - kube-proxy 只会在存在目标 Pod 的节点上加入 NodePort 的代理规则。API Server 要求只有使用 LoadBalancer 或者 NodePort 类型的 Service 才能够使用这种策略。这是因为 Local 策略只跟外部访问相关。
+          - 在 Google GKE 上使用 Local 策略，由于健康检查的原因，会把不运行对应 Pod 的节点从负载均衡池中剔除，所以不会发生丢弃流量的问题
+          - 因为不需要进行 SNAT，从而让源 IP 得以保存。然而官方文档声明，这种策略存在不够均衡的短板
+        - 如果为 Cluster (缺省)，会抹掉客户端的源 IP，并导致到其它节点的一跳，但会获得相对较好的均衡效果。
+          - 客户端把数据包发送给 node2:31380；
+          - node2 替换源 IP 地址（SNAT）为自己的 IP 地址；
+          - node2 将目标地址替换为 Pod IP；
+          - 数据包被路由到 node1 或者 node3，然后到达 Pod；
+          - Pod 的响应返回到 node2
+          ![img.png](docker_network_cluster.png)
+  - Kube-Proxy（iptable）
+    - 负责 Service 对象的组件就是 kube-proxy.它在每个节点上运行，为 Pod 和 Service 生成复杂的 iptables 规则，完成所有的过滤和 NAT 工作
+      - 运行 iptables-save，会看到 Kubernetes 或者其它组件生成的规则
+      - KUBE-SERVICE 是 Service 包的入口。 它负责匹配 IP:Port，并把数据包发给对应的 KUBE-SVC-*。
+      - KUBE-SVC-* 担任负载均衡的角色，会平均分配数据包到 KUBE-SEP-*。 每个 KUBE-SVC-* 都有和 Endpoint 同样数量的 KUBE-SEP-*。
+      - KUBE-SEP-* 代表的是 Service 的 EndPoint，它负责的是 DNAT，会把 Service 的 IP:Port 替换为 Pod 的 IP:Port。
+    - Conntrack 会介入 DNAT 过程，使用状态机来跟踪连接状态. iptables 还可以根据 conntrack 状态（ctstate）来决定数据包的目标
+  - iptables
 
 
 
