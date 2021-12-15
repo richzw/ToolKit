@@ -329,7 +329,12 @@
           r.Unlock()
       }
       ```
-
+- [gRPC Performance Improvement](https://grpc.io/blog/grpc-go-perf-improvements/)
+  - Decoupling application reads from connection flow control
+  - Piggyback window updates
+  - BDP estimation and dynamic flow control window
+  - Reducing memory allocation
+  - Reducing flush syscalls
 
 
 
