@@ -1,5 +1,3 @@
-Golang http
-==========
 
 Http 重用底层TCP链接
 ---------------
@@ -266,6 +264,7 @@ KeepAlive
       }
   ```
   ![img.png](netpoll.png)
+  不要在 http.Transport中设置超时，那是连接的超时，不是请求的超时。否则可能会出现莫名 io timeout报错。
 
 - [如何正确设置保活](https://mp.weixin.qq.com/s/EmawKOftz0OAnMd2ydcOgQ)
   - 前情
