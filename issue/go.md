@@ -560,9 +560,58 @@
     - 例外
       - 比如 map 内部的实现，如果 key/value 值类型大小超过 128 字节，就会退化成指针
       - Go 每个版本性能都会提升很多，go1.7 1kw 对像服务压力非常大，但是我司现在 go1.15 2kw 对像未优化也毫无压力
-
-
-
+- [不执行resp.Body.Close()的情况下, 泄漏了多少个goroutine?](https://mp.weixin.qq.com/s?__biz=Mzg5NDY2MDk4Mw==&mid=2247486370&idx=1&sn=8b8bbd7ef43849ad71b72f7fddbb12b7&source=41#wechat_redirect)
+  - Question
+    ```go
+    func main() {
+     num := 6
+     for index := 0; index < num; index++ {
+      resp, _ := http.Get("https://www.baidu.com")
+      _, _ = ioutil.ReadAll(resp.Body)
+     }
+     fmt.Printf("此时goroutine个数= %d\n", runtime.NumGoroutine())
+    }
+    ```
+    在不执行resp.Body.Close()的情况下，泄漏了吗？如果泄漏，泄漏了多少个goroutine?
+  - Anwser
+    - 不进行resp.Body.Close()，泄漏是一定的。但是泄漏的goroutine个数就让我迷糊了。由于执行了6遍，每次泄漏一个读和写goroutine，就是12个goroutine，加上main函数本身也是一个goroutine，所以答案是13.
+      然而执行程序，发现答案是3
+  - Explanation
+    - http.Get 默认使用 DefaultTransport 管理连接
+    - DefaultTransport 的作用是根据需要建立网络连接并缓存它们以供后续调用重用
+    - 一次建立连接，就会启动一个读goroutine和写goroutine。这就是为什么一次http.Get()会泄漏两个goroutine的来源
+       ````go
+       func (t *Transport) RoundTrip(req *http.Request)
+       func (t *Transport) roundTrip(req *Request)
+       func (t *Transport) getConn(treq *transportRequest, cm connectMethod)
+       func (t *Transport) dialConn(ctx context.Context, cm connectMethod) (*persistConn, error) {
+           ...
+        go pconn.readLoop()  // 启动一个读goroutine
+        go pconn.writeLoop() // 启动一个写goroutine
+        return pconn, nil
+       }
+       ````
+    - 读goroutine 的 readLoop() 代码里. 简单来说readLoop就是一个死循环，只要alive为true，goroutine就会一直存在
+      select 里面是 goroutine 有可能退出的场景：
+      - body 被读取完毕或body关闭
+      - bodyEOF 来源于到一个通道 waitForBodyRead，这个字段的 true 和 false 直接决定了 alive 变量的值（alive=true那读goroutine继续活着，循环，否则退出goroutine
+        - 那么这个通道的值是从哪里过来的呢？
+          - 如果执行 earlyCloseFn ，waitForBodyRead 通道输入的是 false，alive 也会是 false，那 readLoop() 这个 goroutine 就会退出。
+          - 如果执行 fn ，其中包括正常情况下 body 读完数据抛出 io.EOF 时的 case，waitForBodyRead 通道输入的是 true，那 alive 会是 true，那么 readLoop() 这个 goroutine 就不会退出，同时还顺便执行了 tryPutIdleConn(trace) 
+          - tryPutIdleConn 将 pconn 添加到等待新请求的空闲持久连接列表中，也就是之前说的连接会复用。
+        - 那么问题又来了，什么时候会执行这个 fn 和 earlyCloseFn 呢？
+          - 上面这个其实就是我们比较熟悉的 resp.Body.Close() ,在里面会执行 earlyCloseFn，也就是此时 readLoop() 里的 waitForBodyRead 通道输入的是 false，alive 也会是 false，那 readLoop() 这个 goroutine 就会退出，goroutine 不会泄露
+             ```go
+             func (es *bodyEOFSignal) Read(p []byte) (n int, err error) 
+             func (es *bodyEOFSignal) condfn(err error) error
+             ```
+          - 这个其实就是我们比较熟悉的读取 body 里的内容。ioutil.ReadAll() ,在读完 body 的内容时会执行 fn，也就是此时 readLoop() 里的 waitForBodyRead 通道输入的是 true，alive 也会是 true，那 readLoop() 这个 goroutine 就不会退出，goroutine 会泄露，然后执行 tryPutIdleConn(trace) 把连接放回池子里复用
+      - request 主动 cancel
+      - request 的 context Done 状态 true
+      - 当前的 persistConn 关闭
+  - 总结
+    - 从另外一个角度说，正常情况下我们的代码都会执行 ioutil.ReadAll()，但如果此时忘了 resp.Body.Close()，确实会导致泄漏。但如果你调用的域名一直是同一个的话，那么只会泄漏一个 读goroutine 和一个写goroutine，这就是为什么代码明明不规范但却看不到明显内存泄漏的原因。
+    - 那么问题又来了，为什么上面要特意强调是同一个域名呢
 
 
 
