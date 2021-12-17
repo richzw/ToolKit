@@ -198,7 +198,29 @@
     - 查看完分析结果后，登录 IDC 环境，执行命令，得到相关日志文件。
       `go tool pprof http://9.xxx:8080/debug/pprof/profile?seconds=60`
     - select default 分支引起的问题。代码的 default 中，只有一个判断项，而且这个一直是 false，未见 true 的条件，所以一直没有 return ，导致 CPU 一直卡在 default 中，无法出去。
-  
 
+- [优化接口性能的办法](https://mp.weixin.qq.com/s/gmPiT_fe0hqfdT_Mjb77LA)
+  - 索引
+    - 没加索引
+    - 索引没生效
+      ![img.png](system_index_lost.png)
+    - 选错索引 - 使用 force index 来强制查询 SQL 走某个索引
+  - SQL 优化
+    ![img.png](system_sql_optimize.png)
+  - 远程调用
+    - 并行调用
+    - 数据异构 - 数据冗余一下
+  - 重复调用
+    - 循环查数据库 - 批量查询
+    - 死循环
+  - 数据库分布式锁
+  - 分页处理
+  - 锁粒度
+  - 异步处理
+    - 线程池
+    - MQ
+  - 缓存
+  - 分库分表
+  - 监控metric 以及 trace
 
 
