@@ -362,7 +362,11 @@
     - 但UDP本身不会分段，所以当数据量较大时，只能交给IP层去分片，然后传到底层进行发送。
   - TCP分段了，IP层就一定不会分片了吗
     - 如果链路上还有设备有更小的MTU，那么还会再分片，最后所有的分片都会在接收端处进行组装。
-  
+- [TCP 的这些内存开销](https://mp.weixin.qq.com/s?__biz=MjM5Njg5NDgwNA==&mid=2247484398&idx=1&sn=f2b0a9098673dad134a228ecf9a8ac9e&scene=21#wechat_redirect)
+  - ![img.png](network_memory.png)
+  - 1. 内核会尽量及时回收发送缓存区、接收缓存区，但高版本做的更好
+  - 2. 发送接收缓存区最小并一定不是 rmem 内核参数里的最小值，实际可能会更小
+  - 3. 其它状态下，例如对于TIME_WAIT还会回收非必要的 socket_alloc 等对象
   
 
 
