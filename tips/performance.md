@@ -353,6 +353,65 @@
     - Initialize slice with constants
     - Passing variables to closure as arguments instead of accessing the variables directly.
     - Injecting changes to the passed parameters instead of return values back
+- [TiDB TPS 提升 1000 倍的性能优化之旅](https://gocn.vip/topics/20825)
+  - TPS 从 1 到 30
+    - 第一个 SQL 优化例子是解决索引缺失的问题
+    - 第二个 SQL 优化的例子是解决有索引却用不上的问题
+  - TPS 从 30 到 320
+    - 测试环境是六台 ARM 服务器，每台 16 个 Numa，每个 Numa 是 8C 16GB。
+    - 我们对这个组网的方式做了调整，部署了 36 个 TiDB + 6 个 TiKV，每个 TiDB 会绑两个 Numa ，每个 TiKV 有四个 Numa
+  - TPS 从 320 到 600
+    - 我们对整体的火焰图和网络做了一些分析。由下方火焰图可见，整个系统的 CPU 20% 是消耗在一个叫 finish_task_switch 的，做进程切换，调度相关的系统调用上，说明系统在内核态存在资源争抢和串行点。
+    - 我们使用 `mpstat -P ALL 5` 命令对所有 CPU 的利用率进行确认，发现了一个比较有趣的现象 —— 所有的网卡的软中断（%soft），都打到了第一个 Numa（CPU 0-7）上
+    - 又因为我们在第一个 Numa 上面还跑着 TiDB、PD 和 Haproxy 等，用户 CPU（%usr）是 2% 到将近 40%，第一个 Numa 的 CPU 都被打满了（%idle 接近 0）。其他的 Numa 使用率仅 55% 左右。
+    - 对于没有绑核的程序 —— PD 和 Haproxy，我们在火焰图里面观察到关于内存的访问或者内存的加锁等系统调用占比非常高。对于开启 Numa 的系统，其实 CPU 访问内存的速度是不平等的。通常访问远端 Numa 的内存延迟是访问本地 Numa 内存的十倍。硬件厂商也推荐应用最好不要进行跨 Numa 部署
+    - 我们进行了组网方式的调整。对于六台机器
+      - 1）第一个 Numa 都空出来专门处理网络软中断，不跑任何的程序；
+      - 2）所有的程序都需要绑核，每个 TiDB 只绑一个 Numa，TiDB 的数据翻倍， PD 和 Haproxy 也进行绑核
+  - PS 从 600 到 880
+    - 数据库最大连接数稳定在 2000，应用加大并发连接数也没有提升。
+    - 使用 mysql 连接 Haproxy 地址会报错。因为 Haproxy 单个 proxy 后台 session 限制默认两千，通过把 Haproxy 从多线程模式改成了多进程的模式可以解除这个限制。
+  - TPS 抖动解决
+    - TPS 880 时应用出现明显的波动，事务处理延迟出现巨大的波动. 查看 P9999 延迟，发现波动巨大
+    - SQL 执行计划稳定性 - 永不准确的统计信息. 统计信息是否具有代表性，取决于统计信息更新时，数据的状态
+  - TPS 880 到 1200+
+    - 使用一台 ARM 服务器，同样是 16 个 Numa，部署 15 个应用，每个应用 jvm 绑定一个 Numa，连接到 TiDB 集群
+- [A 5x reduction in RAM usage with Zoekt memory optimizations](https://about.sourcegraph.com/blog/zoekt-memory-optimizations-for-sourcegraph-cloud/)
+  - Measure how a server’s RAM is being used
+    - you can set the GOGC environment variable to more aggressively reduce the maximum overhead. We run Zoekt with `GOGC=50` to reduce the likelihood that it will exceed its available memory.
+    - built-in profiling tools. Digging into the code, this turned out to be a function that builds a map from trigrams to the location of a posting list on disk. It’s building a big mapping from 64-bit trigrams (three 21-bit Unicode characters) to 32-bit offsets and lengths.
+  - Implement a more compact data structure for locating postings lists
+    - Go maps provide O(1) access times, but they consume a fair amount of memory per entry— roughly 40 bytes each.
+    - Storing these mappings as two slices instead of a map reduces its memory usage from 15GB to 5GB
+      ```go
+      type arrayNgramOffset struct {
+             ngrams []ngram
+             // offsets is values from simpleSection.off. simpleSection.sz is computed by subtracting adjacent offsets.
+             offsets []uint32
+      }
+      ```
+  - metadata optimizations
+    - you copy a slice that grew dynamically into a precisely sized one, you don’t waste the unused trailing capacity
+      ```go
+      // shrinkUint32Slice copies slices with excess capacity to precisely sized ones
+      // to avoid wasting memory. It should be used on slices with long static durations.
+      func shrinkUint32Slice(a []uint32) []uint32 {
+             if cap(a)-len(a) < 32 {
+                     return a
+             }
+             out := make([]uint32, len(a))
+             copy(out, a)
+             return out
+      }
+      ```
+
+
+
+
+
+
+
+
 
 
 
