@@ -554,7 +554,7 @@
         const a = 1234
         var n MyInt = a
         ```
-
+- [Zero down restart and deploy](https://bunrouter.uptrace.dev/guide/go-zero-downtime-restarts.html#systemd-socket)
 
 
 
