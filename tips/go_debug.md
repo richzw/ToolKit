@@ -28,6 +28,20 @@
     - User defined tasks：用户自定义任务
     - User defined regions：用户自定义区域
     - Minimum mutator utilization：最低 Mutator 利用率
+- [性能调优利器--火焰图](https://zhuanlan.zhihu.com/p/147875569)
+  - 火焰图类型
+  ![img.png](go_debug_frame.png)
+  - 如何绘制火焰图
+    - perf 相对更常用，多数 Linux 都包含了 perf 这个工具，可以直接使用；
+    - SystemTap 则功能更为强大，监控也更为灵活
+      - SystemTap 是动态追踪工具，它通过探针机制，来采集内核或者应用程序的运行信息，从而可以不用修改内核和应用程序的代码
+      - SystemTap 定义了一种类似的 DSL 脚本语言，方便用户根据需要自由扩展
+  - [Blazing Performance with Flame Graphs](https://www.usenix.org/conference/lisa13/technical-sessions/plenary/gregg)
+
+
+
+
+
 
 
 
