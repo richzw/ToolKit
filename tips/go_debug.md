@@ -37,6 +37,31 @@
       - SystemTap 是动态追踪工具，它通过探针机制，来采集内核或者应用程序的运行信息，从而可以不用修改内核和应用程序的代码
       - SystemTap 定义了一种类似的 DSL 脚本语言，方便用户根据需要自由扩展
   - [Blazing Performance with Flame Graphs](https://www.usenix.org/conference/lisa13/technical-sessions/plenary/gregg)
+- [如何使用 Kubernetes 监测定位慢调用](https://mp.weixin.qq.com/s/mOdn5eE0QtLfHuotpgacwg)
+  - 定位慢调用一般来说有什么样的步骤 - 黄金信号 + 资源指标 + 全局架构
+    - 黄金信号
+      - 延时--用来描述系统执行请求花费的时间。常见指标包括平均响应时间，P90/P95/P99 这些分位数，这些指标能够很好的表征这个系统对外响应的快还是慢，是比较直观的。
+      - 流量--用来表征服务繁忙程度，典型的指标有 QPS、TPS。
+      - 错误--也就是我们常见的类似于协议里 HTTP 协议里面的 500、400 这些，通常如果错误很多的话，说明可能已经出现问题了。
+      - 饱和度--就是资源水位，通常来说接近饱和的服务比较容易出现问题，比如说磁盘满了，导致日志没办法写入，进而导致服务响应。典型的那些资源有 CPU、 内存、磁盘、队列长度、连接数等等。
+    - 资源指标 - 对于每一个资源去检查 utilization（使用率），saturation （饱和度），error（错误） ，合起来就是 USE 了
+  - Case
+    - 网络性能差
+      - 指标 - 速率跟带宽，第二个是吞吐量，第三个是延时，第四个是 RTT。
+- [是什么影响了我的接口延迟](https://mp.weixin.qq.com/s/k69-rs64XSkOFOpvUwq9sw)
+  - 接口延迟大幅上升时
+    - 先去看看 pprof 里的 goroutine 页面，看看 goroutine 是不是阻塞在什么地方了(比如锁)
+  - USE 方法论，其中提到了一个 Saturation (饱和度)的概念，这个和 Utilization 有啥区别
+    - Util 一般指的是繁忙程度，繁忙程度指的是你的资源有多少正在被利用
+    - Sat 一般指的是饱和程度，而饱和度则指的是等待利用这些资源的队列有多长。
+    - 如果只有一个核，那么我们就可以通过 util 和 sat 指标推断出这样的结论：sat 越高，接口延迟越高。util 高，影响不是特别大。
+    - 现代 CPU 支持超线程(hyper thread)，你可以理解成一个窗口要排两个队，所以有时 CPU 的总 util 过了 50%，API 的延迟就比较高了
+  - Case
+    - 在 Go 的服务中，阻塞的 goroutine 数量变多，本质上还是这些 goroutine 发生了排队，了解底层的读者应该一想就知道 goroutine 是在哪里排队了。所以 goroutine 数量越多，说明队列也越拥挤
+    - 网络应用中的 send buffer，receiver buffer 本质上也是队列
+    - CPU 调度器本身也有执行队列，可以用 bcc 中的 runqlen 工具来查看
+    - 磁盘的读写也有相应的队列
+  - [Controlling Queue Delay](https://queue.acm.org/detail.cfm?id=2209336)
 
 
 
