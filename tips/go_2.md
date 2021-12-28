@@ -609,8 +609,18 @@
     - 在解锁上：可重入互斥锁一般都会记录被加锁的次数，只有执行相同次数的解锁操作才会真正解锁。
   - Go 显然是不支持可重入互斥锁的
     - Russ Cox 于 2010 年在《Experimenting with GO》就给出了答复，认为递归（又称：重入）互斥是个坏主意，这个设计并不好。
-
-
+- [用Go实现可重入锁](https://mp.weixin.qq.com/s/LFkPlsLVj24OWZKvanUNVA)
+  - 实现一个可重入锁需要这两点：
+    - 记住持有锁的线程
+    - 统计重入的次数
+   ```go
+   type ReentrantLock struct {
+    lock *sync.Mutex
+    cond *sync.Cond
+    recursion int32  //记录当前goroutine的重入次数
+    host     int64   // 记录当前持有锁的goroutine id
+   }
+   ```
 
 
  
