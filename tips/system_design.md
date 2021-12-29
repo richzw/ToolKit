@@ -221,6 +221,28 @@
       - 如果数据在FIFO队列中被再次访问，则将数据移到LRU队列头部；
       - 如果数据在LRU队列再次被访问，则将数据移到LRU队列头部；
       - LRU队列淘汰末尾的数据。
+- [动手实现一个localcache - 欣赏优秀的开源设计](https://mp.weixin.qq.com/s/KfxfRqTrFvt9K5dEVU94yw)
+  - 高效的并发访问
+    - 本地缓存的简单实现可以使用map[string]interface{} + sync.RWMutex的组合，使用sync.RWMutex对读进行了优化
+    - 当并发量上来以后，还是变成了串行读，等待锁的goroutine就会block住。为了解决这个问题我们可以进行分桶，每个桶使用一把锁，减少竞争。分桶也可以理解为分片，每一个缓存对象都根据他的key做hash(key)，然后在进行分片：hash(key)%N，N就是要分片的数量
+      - 分片的实现主要考虑两个点：
+        - hash算法的选择，哈希算法的选择要具有如下几个特点：
+          - 哈希结果离散率高，也就是随机性高
+          - 避免产生多余的内存分配，避免垃圾回收造成的压力
+          - 哈希算法运算效率高
+        - 分片的数量选择，分片并不是越多越好，根据经验，我们的分片数可以选择N的2次幂，分片时为了提高效率还可以使用位运算代替取余。
+    - 开源实现
+      - 开源的本地缓存库中 bigcache、go-cache、freecache都实现了分片功能
+        - bigcache的hash选择的是fnv64a算法、
+        - go-cache的hash选择的是djb2算法、
+        - freechache选择的是xxhash算法。
+        - 通过对比结果我们可以观察出来Fnv64a算法的运行效率还是很高
+  - 减少GC
+    - [bigcache](https://pengrl.com/p/35302/)做到避免高额GC的设计是基于Go语言垃圾回收时对map的特殊处理
+      - 如果map对象中的key和value不包含指针，那么垃圾回收器就会无视他，针对这个点们的key、value都不使用指针，就可以避免gc。bigcache使用哈希值作为key，然后把缓存数据序列化后放到一个预先分配好的字节数组中，使用offset作为value，
+    - freecache中的做法是自己实现了一个ringbuffer结构，通过减少指针的数量以零GC开销实现map
+      - key、value都保存在ringbuffer中，使用索引查找对象。freecache与传统的哈希表实现不一样，实现上有一个slot的概念
+  
 
 
 
