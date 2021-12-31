@@ -82,4 +82,21 @@
   ```
   对于 var b int8 = -128 / a，因为 a 是 int8 类型常量，所以 -128 / a 是常量表达式，在编译器计算，结果必然也是常量。因为 a 的类型是 int8，因此 -128 也会隐式转为 int8 类型，128 这个结果超过了 int8 的范围，但常量不允许溢出，因此编译报错。
 
+- [for select 时，如果通道已经关闭会怎么样](https://mp.weixin.qq.com/s/59qdNpqOzMXWY_jUOddNow)
+  - for循环select时，如果通道已经关闭会怎么样？如果select中的case只有一个，又会怎么样？
+    - for循环select时，如果其中一个case通道已经关闭，则每次都会执行到这个case。
+      - 返回的ok为false时，执行c = nil 将通道置为nil，相当于读一个未初始化的通道，则会一直阻塞。
+    - 如果select里边只有一个case，而这个case被关闭了，则会出现死循环。
+      - 那如果像上面一个case那样，把通道置为nil就能解决问题了吗
+      - 此时整个进程没有其他活动的协程了，进程deadlock
+- 对已经关闭的的 chan 进行读写，会怎么样
+  - 读已经关闭的 chan 能一直读到东西，但是读到的内容根据通道内关闭前是否有元素而不同。
+    - 如果 chan 关闭前，buffer 内有元素还未读 , 会正确读到 chan 内的值，且返回的第二个 bool 值（是否读成功）为 true。
+    - 如果 chan 关闭前，buffer 内有元素已经被读完，chan 内无值，接下来所有接收的值都会非阻塞直接成功，返回 channel 元素的零值，但是第二个 bool 值一直为 false。
+  - 写已经关闭的 chan 会 panic
+
+
+
+
+
 
