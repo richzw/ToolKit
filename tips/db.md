@@ -214,9 +214,30 @@
       - 常见扩容方案
         - 翻倍扩容法
         - 一致性Hash扩容
-
-
-
+- [一次不寻常的慢查调优经历](https://mp.weixin.qq.com/s/s1QmqB7Xf3IrgRebd3RFow)
+  - 索引失效
+    - 问题出在参数eq_range_index_dive_limit，关于这个参数
+    - The eq_range_index_dive_limit system variable enables you to configure the number of values at which the optimizer switches from one row estimation strategy to the other. To permit use of index dives for comparisons of up to N equality ranges, set eq_range_index_dive_limit to N + 1. To disable use of statistics and always use index dives regardless of N, set eq_range_index_dive_limit to 0.
+    - Even under conditions when index dives would otherwise be used, they are skipped for queries that satisfy all these conditions:
+      - A single-index FORCE INDEX index hint is present. The idea is that if index use is forced, there is nothing to be gained from the additional overhead of performing dives into the index.
+      - The index is nonunique and not a FULLTEXT index.
+      - No subquery is present.
+      - No DISTINCT, GROUP BY, or ORDER BY clause is present.
+  - eq_range_index_dive_limit 原本配置的就是200，我们直接设置成1来关闭index dive。
+  - 统计信息分为持久化统计和动态统计，由参数innodb_stats_persistent控制
+    - 持久化统计
+      - 启用持久化统计信息，修改超过10%数据就要更新
+      - 动态自动统计，修改1/16数据就要更新
+      - innodb_stats_method控制统计信息针对索引中NULL值的算法当设置为nulls_equal所有的NULL值都视为一个value group；当设置为nulls_unequal每一个NULL值被视为一个value group；设置为nulls_ignore时，NULL值被忽略
+      - 执行show table status、show index，访问I_S.TABLES/STATISTICS视图时更新统计信息
+    - 动态统计
+      - innodb_stats_persistent=0
+        - 统计信息不持久化，每次动态采集，存储在内存中，重启失效（需重新统计），不推荐
+      - innodb_stats_transient_sample_pages
+        - 动态采集page，默认8个
+      - 每个表设定统计模式
+        - CREATE/ALTER TABLE … STATS_PERSISTENT=1,STATS_AOTU_RECALC=1,STATS_SAMPLE_PAGES=200;
+      - mysql -auto-rehash
 
 
 

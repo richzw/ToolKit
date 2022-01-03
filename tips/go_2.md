@@ -659,6 +659,25 @@
     m3 := 1 - m - m
     fmt.Println(m3, m+m+m3)
     ```
+- [Shallow copy and Deep copy in Go](https://echorand.me/posts/go-values-references-etc/)
+  - Basic data types
+    - When it comes to the basic types, numbers and strings, it is always deep copy.
+    - There is no shallow copy when it comes to these types. Another way of saying that is that, when we want a shallow copy, use memory addresses for basic data types
+  - Slice of integers and strings
+    - When it comes to a slice, we are always working with shallow copies.
+    - If you want to create a deep copy, you will find the copy() function useful. 
+  - Arrays of strings and integers
+    - When it comes to arrays, we are always working with deep copies. 
+    - if we want to pass an array which we want to modify in another function and want the updated result to be reflected in the original array, we should pass the array by reference
+  - Elements in Maps and Struct types
+    - A map is by default call by reference and struct is by default call by value. 
+    - if you want call by value behavior:
+      - map: Create a deep copy by creating a new map and copying the key value pairs. Be careful of also ensuring that you deep copy the elements themselves
+      - struct: Create a deep copy by creating a new struct and copying the elements. Be careful of also ensuring that you deep copy the elements themselves
+
+
+
+
 
 
 
