@@ -238,6 +238,36 @@
       - 每个表设定统计模式
         - CREATE/ALTER TABLE … STATS_PERSISTENT=1,STATS_AOTU_RECALC=1,STATS_SAMPLE_PAGES=200;
       - mysql -auto-rehash
+- [SQL优化系列之 in与range 查询](https://mp.weixin.qq.com/s/LmBH5Acl-GxtRmEMuLITaw)
+  - 用in这种方式可以有效的替代一定的range查询，提升查询效率，因为在一条索引里面，range字段后面的部分是不生效的（ps.需要考虑 ICP）。MySQL优化器将in这种方式转化成 n*m 种组合进行查询，最终将返回值合并，有点类似union但是更高效。
+  - 这里的一定数在MySQL5.6.5以及以后的版本中是由eq_range_index_dive_limit这个参数控制 。默认设置是10，一直到5.7以后的版本默认修改为200
+    - eq_range_index_dive_limit = 0 只能使用index dive
+    - 0 < eq_range_index_dive_limit <= N 使用index statistics
+    - eq_range_index_dive_limit > N 只能使用index dive
+  - 估计方法有2种:
+    - dive到index中即利用索引完成元组数的估算,简称index dive;
+    - index statistics:使用索引的统计数值,进行估算;
+    - 对比这两种方式
+      - index dive: 速度慢,但能得到精确的值（MySQL的实现是数索引对应的索引项个数，所以精确）
+      - index statistics: 速度快,但得到的值未必精确
+  - range查询与索引使用
+    ```sql
+     SELECT * FROM pre_forum_post WHERE tid=7932552 AND invisible IN('0','-2') ORDER BY dateline DESC LIMIT 10;
+    ```
+    - 优化器认为这是一个range查询，那么(tid,invisible,dateline)这条索引中，dateline字段肯定用不上了，也就是说这个SQL最后的排序肯定会生成一个临时结果集，然后再结果集里面完成排序，而不是直接在索引中直接完成排序动作
+  - 如何使用optimize_trace
+    ```sql
+    set optimizer_trace='enabled=on';
+    select * from information_schema.optimizer_trace
+    ```
+  - 如何使用profile
+    ```sql
+    set profiling=ON;
+    执行sql;
+    show profiles;
+    show profile for query 2;
+    show profile block io,cpu for query 2;
+    ```
 
 
 
