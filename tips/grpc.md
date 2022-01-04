@@ -335,7 +335,16 @@
   - BDP estimation and dynamic flow control window
   - Reducing memory allocation
   - Reducing flush syscalls
-
+- [all SubConns are in TransientFailure, latest connection error: <nil>](https://github.com/grpc/grpc-go/issues/2636)
+  - There are 3 related/unrelated issues, but they (somehow) cause the same symptom.
+    - The backoff reset problem, fixed in client: reset backoff to 0 after a connection is established #2669
+    - lastest connection error: <nil> still happens
+      - when connection is closed by servers.
+      - This needs a broader change to propagate errors from transport layer to gRPC layer.
+      - We kept the issue open to track this problem, but lowered the priority to p2 because it shouldn't be noticeable when reconnecting happens immediately (after client: reset backoff to 0 after a connection is established #2669).
+    - GRPC_GO_REQUIRE_HANDSHAKE as in Implement new requirement of completing protocol handshaking before 'READY' #2406
+  - http2 handshake
+    ![img.png](grpc_http2_handshake.png)
 
 
 
