@@ -674,9 +674,41 @@
     - if you want call by value behavior:
       - map: Create a deep copy by creating a new map and copying the key value pairs. Be careful of also ensuring that you deep copy the elements themselves
       - struct: Create a deep copy by creating a new struct and copying the elements. Be careful of also ensuring that you deep copy the elements themselves
-
-
-
+- [并发编程指南](https://mp.weixin.qq.com/s/V0krCjWrndzz71cVOPBxdg)
+  - channel 特性
+  ![img.png](go_channel1.png)
+    ```go
+    v, ok := <-a  // 检查是否成功关闭(ok = false：已关闭)
+    ```
+    - 等待一个事件，也可以通过 close 一个 channel 就足够了
+    - 利用 channel 阻塞的特性和带缓冲的 channel 来实现控制并发数量
+    - singlelFlight - 一般系统重要的查询增加了缓存后，如果遇到缓存击穿，那么可以通过任务计划，加索等方式去解决这个问题，singleflight 这个库也可以很不错的应对这种问题
+    - 
+  - 有锁的地方就去用 channel 优化 [demo](https://github.com/LinkinStars/simple-chatroom)
+- [Go的内存布局和分配原理](https://mp.weixin.qq.com/s/gCDxWzslfPXayJ_RFQVb7g)
+  ![img.png](go_memory.png)
+  - mheap
+    - Go 在程序启动时，首先会向操作系统申请一大块内存，并交由mheap结构全局管理
+    - mheap 会将这一大块内存，切分成不同规格的小内存块，我们称之为 mspan，根据规格大小不同，mspan 大概有 70类左右，划分得可谓是非常的精细，足以满足各种对象内存的分配。
+  - mcentral
+    - 启动一个 Go 程序，会初始化很多的 mcentral ，每个 mcentral 只负责管理一种特定规格的 mspan
+    - 相当于 mcentral 实现了在 mheap 的基础上对 mspan 的精细化管理
+    - 但是 mcentral 在 Go 程序中是全局可见的，因此如果每次协程来 mcentral 申请内存的时候，都需要加锁
+  - mcache
+    - 每个P都会绑定一个叫 mcache 的本地缓存
+    - 当前运行的goroutine会从mcache中查找可用的mspan。从本地mcache里分配内存时不需要加锁，这种分配策略效率更高
+  - 对于那些超过 64KB 的内存申请，会直接从堆上(mheap)上分配对应的数量的内存页（每页大小是 8KB）给程序。
+- [逃逸分析](https://slides.com/jalex-chang/go-esc#/9)
+  - 根据变量的使用范围
+    - 通过 `go build -gcflags '-m -l' demo.go` 来查看逃逸分析的结果，其中 -m 是打印逃逸分析的信息，-l 则是禁止内联优化。
+    - 返回任意引用型的变量：Slice 和 Map
+    - 在闭包函数中使用外部变量
+  - 根据变量类型是否确定
+    - fmt.Println() 函数, 其接收的参数类型是 interface{} ，对于这种编译期不能确定其参数的具体类型，编译器会将其分配于堆上
+  - 根据变量的占用大小
+    - 以 64KB 为分界线，我们将内存块分为 小内存块 和 大内存块。 小内存块走常规的 mspan 供应链申请，而大内存块则需要直接向 mheap，在堆区申请。
+  - 根据变量长度是否确定
+    - 由于逃逸分析是在编译期就运行的，而不是在运行时运行的。因此避免有一些不定长的变量可能会很大，而在栈上分配内存失败，Go 会选择把这些变量统一在堆上申请内存，这是一种可以理解的保险的做法。
 
 
 
