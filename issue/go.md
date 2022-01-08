@@ -466,6 +466,59 @@
         return v, nil
     }
     ```
+- [Go 程序进行自动采样](https://mp.weixin.qq.com/s/oBhMwMx20QIlWq0_O7G32A)
+  - 工具
+    - Go的pprof工具集，提供了Go程序内部多种性能指标的采样能力
+  - 怎么获取采样信息
+    - 最常见的例子是在服务端开启端口让客户端通过HTTP访问指定的路由进行各种信息的采样
+    - 弊端就是
+      - 需要客户端主动请求特定路由进行采样，没法在资源出现尖刺的第一时间进行采样。
+      - 会注册多个/debug/pprof类的路由，相当于对 Web 服务有部分侵入。
+      - 对于非 Web 服务，还需在服务所在的节点上单独开 HTTP 端口，起 Web 服务注册 debug 路由才能进行采集，对原服务侵入性更大。
+    - Runtime pprof
+      - 使用runtime.pprof 提供的Lookup方法完成各资源维度的信息采样
+         ```go
+         pprof.Lookup("heap").WriteTo(some_file, 0)
+         pprof.Lookup("goroutine").WriteTo(some_file, 0)
+         pprof.Lookup("threadcreate").WriteTo(some_file, 0)
+         
+         // CPU的采样方式runtime/pprof提供了单独的方法在开关时间段内对 CPU 进行采样
+         bf, err := os.OpenFile('tmp/profile.out', os.O_RDWR | os.O_CREATE | os.O_APPEND, 0644)
+         err = pprof.StartCPUProfile(bf)
+         time.Sleep(2 * time.Second)
+         pprof.StopCPUProfile()
+         ```
+      - 这种方式是操作简单，把采样信息可以直接写到文件里，不需要额外开端口，再手动通过HTTP进行采样，但是弊端也很明显--不停的采样会影响性能
+    - 适合采样的时间点
+      - Go进程在自己占用资源突增或者超过一定的阈值时再用pprof对程序Runtime进行采样，才是最合适的
+  - 判断采样时间点的规则
+    - CPU 使用，内存占用和 goroutine 数，都可以用数值表示，所以无论是使用率慢慢上升直到超过阈值，还是突增之后迅速回落，都可以用简单的规则来表示，比如：
+      - cpu/mem/goroutine数 突然比正常情况下的平均值高出了一定的比例，比如说资源占用率突增25%就是出现了资源尖刺。- 比如进程的内存使用率，我们可以以每 10 秒为一个周期，运行一次采集，在内存中保留最近 5 ~ 10 个周期的内存使用率，并持续与之前记录的内存使用率均值进行比较
+      - cpu/mem/goroutine数 超过了程序正常运行情况下的阈值，比如说80%就定义为服务资源紧张。
+  - 开源的自动采样库
+    - [holmes](github.com/mosn/holmes)
+- [无人值守的自动 dump](https://mp.weixin.qq.com/s?__biz=MjM5MDUwNTQwMQ==&mid=2257484360&idx=2&sn=70316f266b7b7c27afab9cdb021a7120&scene=21#wechat_redirect)
+  - Go 内置的 pprof 虽然是问题定位的神器，但是没有办法让你恰好在出问题的那个时间点，把相应的现场保存下来进行分析。特别是一些随机出现的内存泄露、CPU 抖动，等你发现有泄露的时候，可能程序已经 OOM 被 kill 掉了。而 CPU 抖动，你可以蹲了一星期都不一定蹲得到
+  - CPU 使用，内存占用和 goroutine 数，都可以用数值表示，所以不管是“暴涨”还是抖动，都可以用简单的规则来表示：
+     - xx 突然比正常情况下的平均值高出了 25%
+     - xx 超过了模块正常情况下的最高水位线
+  - 比如 goroutine 的数据，我们可以每 x 秒运行一次采集，在内存中保留最近 N 个周期的 goroutine 计数，并持续与之前记录的 goroutine 数据均值进行 diff
+- [生产环境Issue](https://mp.weixin.qq.com/s?__biz=MjM5MDUwNTQwMQ==&mid=2257484360&idx=2&sn=70316f266b7b7c27afab9cdb021a7120&scene=21#wechat_redirect)
+  - OOM 类问题
+    - RPC decode 未做防御性编程
+      - 一些私有协议 decode 工程中会读诸如 list len 之类的字段，如果外部编码实现有问题，发生了字节错位，就可能会读出一个很大的值。
+    - tls 开启后线上进程占用内存上涨
+      - 老版本的 Go 代码，发现其 TLS 的 write buffer 会随着写出的数据包大小增加而逐渐扩容
+      - 在 Go1.12 之后已经进行了优化, 变成了需要多少，分配多少的朴实逻辑
+  - goroutine 暴涨类问题
+    - 本地 app GC hang 死，导致 goroutine 卡 channel send
+      - 在我们的程序中有一段和本地进程通信的逻辑，write goroutine 会向一个 channel 中写数据，按常理来讲，同物理机的两个进程通过网络通信成本比较低
+      - 当前憋了 5w 个 goroutine，有 4w 个卡在 channel send 上，这个 channel 的对面还是一条本地连接，令人难以接受
+      - 对我们的程序进行保护是必要的，修改起来也很简单，给 channel send 加一个超时就可以了。
+    - 应用逻辑死锁，导致连接不可用，大量 goroutine 阻塞在 lock 上
+  - CPU 尖刺问题
+    - 应用逻辑导致死循环问题
+      - 从夏令时切换到冬令时，会将时钟向前拔一个月，但天级日志轮转时，会根据轮转前的时间计算 24 小时后的时间，并按与 24:00 的差值来进行 time.Sleep，这时会发现整个应用的 CPU 飚高。自动采样结果发现一直在循环计算时间和重命名文件。
 - [Go 系统可能遇到的锁问题](https://xargin.com/lock-contention-in-go/)
   - 底层依赖 sync.Pool 的场景
     - 有一些开源库，为了优化性能，使用了官方提供的 sync.Pool，比如我们使用的 https://github.com/valyala/fasttemplate
