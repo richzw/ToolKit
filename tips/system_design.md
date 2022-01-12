@@ -242,7 +242,78 @@
       - 如果map对象中的key和value不包含指针，那么垃圾回收器就会无视他，针对这个点们的key、value都不使用指针，就可以避免gc。bigcache使用哈希值作为key，然后把缓存数据序列化后放到一个预先分配好的字节数组中，使用offset作为value，
     - freecache中的做法是自己实现了一个ringbuffer结构，通过减少指针的数量以零GC开销实现map
       - key、value都保存在ringbuffer中，使用索引查找对象。freecache与传统的哈希表实现不一样，实现上有一个slot的概念
-  
+- [优先级队列](https://mp.weixin.qq.com/s/eXJcjPnXiy733k79Y1vbBg)
+  - 三个重要的角色，分别是优先级队列、工作单元Job、消费者worker (队列-消费者模式)
+    - 队列
+      ```go
+      type JobQueue struct {
+        mu sync.Mutex //队列的操作需要并发安全
+        jobList *list.List //List是golang库的双向队列实现，每个元素都是一个job
+        noticeChan chan struct{} //入队一个job就往该channel中放入一个消息，以供消费者消费
+      }
+      func (queue *JobQueue) PushJob(job Job) {
+        queue.jobList.PushBack(job) //将job加到队尾
+        queue.noticeChan <- struct{}{}
+      }
+      func (queue *JobQueue) PopJob() Job {
+        queue.mu.Lock()
+        defer queue.mu.Unlock()
+      
+        if queue.jobList.Len() == 0 {
+        return nil
+        }
+      
+        elements := queue.jobList.Front() //获取队列的第一个元素
+        return queue.jobList.Remove(elements).(Job) //将元素从队列中移除并返回
+      }
+      
+      func (queue *JobQueue) WaitJob() <-chan struct{} {
+        return queue.noticeChan
+      }
+      ```
+    - 工作单元Job
+      ```go
+      type BaseJob struct {
+        Err error
+        DoneChan chan struct{} //当作业完成时，或者作业被取消时，通知调用者
+        Ctx context.Context
+        cancelFunc context.CancelFunc
+      }
+      ```
+      ![img.png](system_design_queue.png)
+    - 
+  - 消费者Worker
+    ```go
+    type WorkerManager struct {
+        queue *JobQueue
+        closeChan chan struct{}
+    }
+    func (m *WorkerManager) StartWork() error {
+        fmt.Println("Start to Work")
+        for {
+            select {
+            case <-m.closeChan:
+              return nil
+    
+            case <-m.queue.noticeChan:
+              job := m.queue.PopJob()
+              m.ConsumeJob(job)
+            }
+        }
+    
+        return nil
+    }
+    
+    func (m *WorkerManager) ConsumeJob(job Job) {
+      defer func() {
+          job.Done()
+      }()
+    
+      job.Execute()
+    }
+    ```
+
+
 
 
 
