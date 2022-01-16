@@ -742,6 +742,77 @@
   - Debug
     - cat /proc/30376/status
     - cat /proc/31086/maps
+- [Json.Unmarshal精度丢失](https://mp.weixin.qq.com/s/36CqC1U54LUd4-izt4iZ1g)
+  - demo
+    ```go
+    var request = `{"id":7044144249855934983,"name":"demo"}`
+    
+     var test interface{}
+     err := json.Unmarshal([]byte(request), &test)
+     if err != nil {
+      fmt.Println("error:", err)
+     }
+    
+     obj := test.(map[string]interface{})
+     dealStr, err := json.Marshal(test)
+     if err != nil {
+      fmt.Println("error:", err)
+     }
+    
+     id := obj["id"]
+    
+     // 反序列化之后重新序列化打印
+     fmt.Println(string(dealStr))
+     fmt.Printf("%+v\n", reflect.TypeOf(id).Name())
+     fmt.Printf("%+v\n", id.(float64))
+    ```
+    ```shell
+    {"id":7044144249855935000,"name":"demo"}
+    float64
+    7.044144249855935e+18
+    ```
+    - 原来是这样的：
+      - 在json的规范中，对于数字类型是不区分整形和浮点型的。
+      - 在使用json.Unmarshal进行json的反序列化的时候，如果没有指定数据类型，使用interface{}作为接收变量，其默认采用的float64作为其数字的接受类型
+      - 当数字的精度超过float能够表示的精度范围时就会造成精度丢失的问题
+    - 解决方案有两种：
+      - 上游将id改为string传给下游
+      - 下游使用json.number类型来避免对float64的使用
+       ```go
+        var request = `{"id":7044144249855934983}`
+       
+        var test interface{}
+        decoder := json.NewDecoder(strings.NewReader(request))
+        decoder.UseNumber()
+        err := decoder.Decode(&test)
+        if err != nil {
+         fmt.Println("error:", err)
+        }
+       
+        objStr, err := json.Marshal(test)
+        if err != nil {
+         fmt.Println("error:", err)
+        }
+       
+        fmt.Println(string(objStr))
+       ```
+  - 探究
+    - 为什么json.unmarshal使用float64来处理就可能出现精度缺失呢？ 缺失的程度是怎样的？
+      - int64是将64bit的数据全部用来存储数据，但是float64需要表达的信息更多，因此float64单纯用于数据存储的位数将小于64bit，这就导致了float64可存储的最大整数是小于int64的。
+    - 什么时候出现精度缺失？ 里面有什么规律吗？
+      - ![img.png](go_float7.png)
+      - 尾数部分全部为1时就已经拉满了，再多1位尾数就要向指数发生进位，此时就会出现精度缺失，因此对于float64来说：
+        - 最大的安全整数是52位尾数全为1且指数部分为最小 0x001F FFFF FFFF FFFF
+        - float64可以存储的最大整数是52位尾数全位1且指数部分为最大 0x07FEF FFFF FFFF FFFF
+      - 也就是理论上数值超过9007199254740991就可能会出现精度缺失
+      - 10进制数值的有效数字是16位，一旦超过16位基本上缺失精度是没跑了，回过头看我处理的id是20位长度，所以必然出现精度缺失。
+    - [反序列化时decoder和unmarshal如何选择呢？](https://stackoverflow.com/questions/21197239/decoding-json-using-json-unmarshal-vs-json-newdecoder-decode)
+      - float64存在精度缺失的问题，因此go单独对此给出了一个解决方案：
+        - 使用 json.Decoder 来代替 json.Unmarshal 方法
+        - 该方案首先创建了一个 jsonDecoder，然后调用了 UseNumber 方法
+        - 使用 UseNumber 方法后，json 包会将数字转换成一个内置的 Number 类型（本质是string），Number类型提供了转换为 int64、float64 等多个方法
+      - json.NewDecoder是从一个流里面直接进行解码，代码更少，可以用于http连接与socket连接的读取与写入，或者文件读取
+      - json.Unmarshal是从已存在与内存中的json进行解码
 
 
 
