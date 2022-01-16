@@ -439,6 +439,36 @@
   ![img.png](micro_service_hytrix.png)
 - [Raft 分布式共识算法讲义](https://mp.weixin.qq.com/s/JOzK15Y85FFwIuMwJifIAw)
   - [Source](https://www.youtube.com/watch?v=vYp4LYbnnW8)
+- [eBPF 代替 iptables 优化服务网格数据面性能](https://mp.weixin.qq.com/s/U6-wcBsBC-Khffb7kTBtjA)
+  - iptables 实现流量劫持
+    - 一个 Pod 的创建过程，sidecar injector 会向 Pod 中注入两个容器，istio-init 和 istio-proxy
+    - istio-init 是一个 init container，负责创建流量劫持相关的 iptables 规则，在创建完成后会退出
+    - istio-proxy 中运行着 envoy，负责代理 Pod 的网络流量，iptables 会将请求劫持到 istio-proxy 处理
+    ![img.png](micro_service_network_iptable.png)
+  - eBPF
+    - eBPF(extended Berkeley Packet Filter) 是一种可以在 Linux 内核中运行用户编写的程序，而不需要修改内核代码或加载内核模块的技术
+    - Inbound
+      - eBPF 程序会劫持 bind 系统调用并修改地址，例如应用程序 bind 0.0.0.0:80 会被修改为 127.0.0.1:80，应用程序还有可能 bind ipv6 的地址，所以这里有两个 eBPF 程序分别处理 ipv4 和 ipv6 的 bind。
+      - 和 iptables 不同，iptables 可以针对每个 netns 单独设置规则，eBPF 程序 attach 到指定 hook 点后，会对整个系统都生效，例如 attach 到 bind 系统调用后，所有 Pod 内以及节点上进程调用 bind 都会触发 eBPF 程序，我们需要区分哪些调用是来自需要由 eBPF 完成流量劫持的 Pod。
+      ![img.png](micro_service_ebpf_inbound.png)
+    - Outbound
+      - TCP
+        - _coonect4 通过劫持 connect 系统调用将目的地址修改为127.0.0.1:15001，也就是 envoy 的 VirtualOutboundListerer，同时将连接的原始目的地址保存在 sk_storage_map
+        - 在 TCP 连接建立完成后，sockops 会读取 sk_storage_map 中的数据，并以四元组（源IP、目的IP、源端口、目的端口）为 key 将原始目的地址保存在 origin_dst_map
+        - _getsockopt通过劫持 getsockopt 系统调用，读取 origin_dst_map 中的数据将原始目的地址返回给 envoy
+        ![img.png](micro_service_ebpf_tcp.png)
+      - UDP
+        - _connect4 和 _sendmsg4 都是负责修改 UDP 的目的地址为 127.0.0.1:15053 并保存原始的目的地址到 sk_storage_map，因为 Linux 提供两种发送 UDP 数据的方式
+        - 先调用 connect 再调用 send，这种情况由 _connect4 处理
+        - 直接调用 sendto，这种情况由 _sendmsg4 处理
+        - recvmsg4 通过读取 sk_storage_map 将回包的源地址改为原始的目的地址，这是因为有些应用程序，例如 nslookup 会校验回包的源地址。
+        ![img.png](micro_service_ebpf_udp.png)
+
+
+
+
+
+
 
 
 
