@@ -813,6 +813,33 @@
         - 使用 UseNumber 方法后，json 包会将数字转换成一个内置的 Number 类型（本质是string），Number类型提供了转换为 int64、float64 等多个方法
       - json.NewDecoder是从一个流里面直接进行解码，代码更少，可以用于http连接与socket连接的读取与写入，或者文件读取
       - json.Unmarshal是从已存在与内存中的json进行解码
+- [HttpClient读取Body超时](https://juejin.cn/post/7051451783909998623)
+  - HttpClient 请求有 30%概率超时， 报context deadline exceeded (Client.Timeout or context cancellation while reading body) 异常
+    ![img.png](go_http_read_timeout.png)
+  - 吐槽iotil.ReadAll的性能了。
+    客户端使用 iotil.ReadAll 读取大的响应体，会不断申请内存(源码显示会从 512B->50M)，耗时较长，性能较差、并且有内存泄漏的风险， [针对大的响应体替换iotil.ReadAll的方案](https://stackoverflow.com/questions/52539695/alternative-to-ioutil-readall-in-go)
+  - 替换ioutil ReadAll
+    - a much more efficient way of parsing JSON, which is to simply use the Decoder type.
+      ```go
+      err := json.NewDecoder(r).Decode(&v)
+      if err != nil {
+         return err
+      }
+      ```
+    - Writing data to a file
+      ```go
+      f, err := os.Create("file")
+      if err != nil {
+          return err 
+      }
+      defer f.Close()
+      
+      // Copy will put all the data from Body into f, without creating a huge buffer in memory
+      // (moves chunks at a time)
+      io.Copy(f, resp.Body)
+      ```
+
+
 
 
 
