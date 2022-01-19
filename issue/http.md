@@ -238,14 +238,14 @@ KeepAlive
   golang服务在发起http调用时，虽然`http.Transport`设置了3s超时，会偶发出现i/o timeout的报错
 
   分析 -
-  抓包发现， 从刚开始三次握手，到最后出现超时报错 i/o timeout。
-  间隔3s。原因是客户端发送了一个一次Reset请求导致的。
+  抓包发现， 从刚开始三次握手，到最后出现超时报错 i/o timeout。 间隔3s。原因是客户端发送了一个一次Reset请求导致的。
+  就是客户端3s超时主动断开链接的
 
   查看 - SetDeadline是对于链接级别
   SetDeadline sets the read and write deadlines associated with the connection.
 
   原理 -
-  HTTP协议从1.1之后就默认使用长连接。golang标准库里也兼容这种实现。
+  HTTP协议从1.1之后就默认使用`长连接`。golang标准库里也兼容这种实现。
   通过建立一个连接池，针对每个域名建立一个TCP长连接
   
   ![img.png](http_connection.png)
