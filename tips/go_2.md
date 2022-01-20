@@ -838,10 +838,30 @@
       // (moves chunks at a time)
       io.Copy(f, resp.Body)
       ```
-
-
-
-
+- [动态调整 GOGC 优化 Go 的 GC 标记 CPU 占用](https://mp.weixin.qq.com/s/XR1KAeCW930i-Qxv6N2kaA)
+  - [在核心服务上动态调整 GOGC 来降低 GC 的 mark 阶段 CPU 占用](https://eng.uber.com/how-we-saved-70k-cores-across-30-mission-critical-services/)
+  - 起因
+    - 经过一段时间的线上 profile 采集发现 GC 是很多核心服务的一个很大的 CPU 消耗点，比如 runtime.scanobject 方法消耗了很大比例的计算资源
+  - GOGC Tuner
+    - Go 的 runtime 会间隙性地调用垃圾收集器来并发进行垃圾回收。这个启动是由内存的压力反馈来决定何时启动 GC 的。所以 Go 的服务可以通过增加内存的用量来降低 GC 的频率以降低 GC 的总 CPU 占用
+    - Go 的 GC 触发算法可以简化成下面这样的公式： `hard_target = live_dataset + live_dataset * (GOGC / 100).` 由 pacer 算法来计算每次最合适触发的 heap 内存占用
+    - 固定的 GOGC 值没法满足 Uber 内部所有的服务。具体的挑战包括：
+      - 对于容器内的可用最大内存并没有进行考虑，理论上存在 OOM 的可能性。
+      - 不同的微服务对内存的使用情况完全不同。
+  - 自动化
+    - Uber 内部搞了一个叫 GOGCTuner 的库。这个库简化了 Go 的 GOGC 参数调整流程，并且能够可靠地自动对其进行调整。
+    - 默认的 GOGC 参数是 100%，这个值对于 GO 的开发者来说并不明确，其本身还是依赖于活跃的堆内存。GOGCTuner 会限制应用使用 70% 的内存。并且能够将内存用量严格限制住。
+    - 可以保护应用不发生 OOM：该库会读取 cgroup 下的应用内存限制，并且强制限制只能使用 70% 的内存，从我们的经验来看这样还是比较安全的。
+    - 使用 MADV_FREE 内存策略会导致错误的内存指标。所以使用 Go 1.12-Go 1.15 的同学注意设置 madvdontneed 的环境变量
+  - 可观测性 - 对垃圾回收的一些关键指标进行了监控
+    - 垃圾回收触发的时间间隔：_可以知道是否还需要进一步的优化。比如 Go 每两分钟强制触发一次垃圾回收。
+    - GC 的 CPU 使用量: 使我们能知道哪些服务受 GC 影响最大
+    - 活跃的对象大小: 帮我们来诊断内存泄露
+    - GOGC 的动态值: 能知道 tuner 是不是在干活。
+  - 实现
+    - Go 有一个 finalizer 机制，在对象被 GC 时可以触发用户的回调方法。Uber 实现了一个自引用的 finalizer 能够在每次 GC 的时候进行 reset，这样也可以降低这个内存检测的 CPU 消耗
+    - 在 finalizerHandler 里调用 runtime.SetFinalizer(f, finalizerHandler) 能让这个 handler 在每次 GC 期间被执行；这样就不会让引用真的被干掉了，这样使该对象存活也并不需要太高的成本，只是一个指针而已
+    ![img.png](go_finalizer.png)
 
 
 
