@@ -433,7 +433,10 @@
     - 要解决这个问题，我们可以：
       - 调大 accpet 队列的最大长度，调大的方式是通过调大 backlog 以及 somaxconn 参数。
       - 检查系统或者代码为什么调用 accept() 不及时
-
+- [Optimizing HTTP/2 prioritization with BBR and tcp_notsent_lowat](https://blog.cloudflare.com/http-2-prioritization-with-nginx/)
+  - Adjust the configuration
+  - `net.ipv4.tcp_notsent_lowat = 16384`
+  - `net.core.default_qdisc = fq net.ipv4.tcp_congestion_control = bbr`
 
 
 
