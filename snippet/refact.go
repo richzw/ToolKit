@@ -5,17 +5,17 @@ package snippet
 // 开车去商店
 shopper, err := shopper.Drive(FuelNeededToGetToStore)
 if nil != err {
-log.Fatalf("could not complete shopping: %s", err)
+	log.Fatalf("could not complete shopping: %s", err)
 }
 // 买鸡蛋
 shopper, err = shopper.BuyEggs(EggsRequired)
 if nil != err {
-log.Fatalf("could not complete shopping: %s", err)
+	log.Fatalf("could not complete shopping: %s", err)
 }
 // 买完鸡蛋开车回家
 shopper, err = shopper.Drive(FuelNeededToGetHome)
 if nil != err {
-log.Fatalf("could not complete shopping: %s", err)
+	log.Fatalf("could not complete shopping: %s", err)
 }
 
 // refact 1: err集中判断
@@ -47,7 +47,7 @@ func ErrorHandled(err) bool {
 		return true
 	}
 	// 也可以对error进行其他判断操作
-	...
+
 	return false
 }
 
@@ -85,7 +85,7 @@ func Drive(s Shopper, fuelRequired int) (Shopper, error) {
 	if nil != err {
 		return s, err
 	}
-	...
+
 }
 
 func ErrCheckFunc(f func(Shopper, int) (Shopper, error)) func(error, Shopper, int) (error, Shopper) {
