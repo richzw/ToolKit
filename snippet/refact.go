@@ -66,7 +66,8 @@ func (s Shopper) Drive(fuelRequired int, err error) (Shopper, error) {
 		return s, err
 	}
 	// 业务逻辑处理
-	...
+
+	return s, nil
 }
 
 // refact 4: 使用函数对err分解
@@ -86,6 +87,7 @@ func Drive(s Shopper, fuelRequired int) (Shopper, error) {
 		return s, err
 	}
 
+	return s, nil
 }
 
 func ErrCheckFunc(f func(Shopper, int) (Shopper, error)) func(error, Shopper, int) (error, Shopper) {
@@ -123,9 +125,9 @@ func ErrCheckFunc(f func(Shopper, int) (Shopper, error), arg int) func(error, Sh
 
 // refact 6: 迭代变换
 func main(){
-	driveToStore := Flavorize(Drive, FuelNeededToGetToStore)
-	buyEggs := Flavorize(BuyEggs, EggsRequired)
-	driveHome := Flavorize(Drive, FuelNeededToGetHome)
+	driveToStore := Flavor(Drive, FuelNeededToGetToStore)
+	buyEggs := Flavor(BuyEggs, EggsRequired)
+	driveHome := Flavor(Drive, FuelNeededToGetHome)
 
 	shopper, err := ProcessSteps(shopper,
 		driveToStore,
@@ -148,7 +150,7 @@ func ProcessSteps(s Shopper, steps ...func(Shopper) (Shopper, error)) (Shopper, 
 	return s, nil
 }
 
-func Flavorize(f func(Shopper, int) (Shopper, error), arg int) func(Shopper) (Shopper, error) {
+func Flavor(f func(Shopper, int) (Shopper, error), arg int) func(Shopper) (Shopper, error) {
 	return func(s Shopper) (Shopper, error) {
 		return f(s, arg)
 	}
