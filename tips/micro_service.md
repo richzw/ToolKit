@@ -493,6 +493,116 @@
     - cron/crontab
     - Netty 封装的时间轮：HashedWheelTimer - 采用了单轮+round 的模式
     - Kafka 中的时间轮：TimingWheel - 多轮的模式
+- [Redis分布式锁使用不当](https://mp.weixin.qq.com/s?__biz=MzA5OTAyNzQ2OA==&mid=2649742999&idx=1&sn=dd34f34d916297023c1ab338b2d0d989&chksm=8893e1f4bfe468e27e49c2204b77218d56e34c417820581849ca1d5083c85977c9b6e04ab671&scene=21#wechat_redirect)
+  - 案例
+     ```java
+     public SeckillActivityRequestVO seckillHandle(SeckillActivityRequestVO request) {
+     SeckillActivityRequestVO response;
+         String key = "key:" + request.getSeckillId;
+         try {
+             Boolean lockFlag = redisTemplate.opsForValue().setIfAbsent(key, "val", 10, TimeUnit.SECONDS);
+             if (lockFlag) {
+                 // HTTP请求用户服务进行用户相关的校验
+                 // 用户活动校验
+                 
+                 // 库存校验
+                 Object stock = redisTemplate.opsForHash().get(key+":info", "stock");
+                 assert stock != null;
+                 if (Integer.parseInt(stock.toString()) <= 0) {
+                     // 业务异常
+                 } else {
+                     redisTemplate.opsForHash().increment(key+":info", "stock", -1);
+                     // 生成订单
+                     // 发布订单创建成功事件
+                     // 构建响应VO
+                 }
+             }
+         } finally {
+             // 释放锁
+             stringRedisTemplate.delete("key");
+             // 构建响应VO
+         }
+         return response;
+     }
+     ```
+    抢购活动开始的一瞬间，大量的用户校验请求打到了用户服务。导致用户服务网关出现了短暂的响应延迟，有些请求的响应时长超过了10s，但由于HTTP请求的响应超时我们设置的是30s，这就导致接口一直阻塞在用户校验那里，10s后，分布式锁已经失效了，此时有新的请求进来是可以拿到锁的，也就是说锁被覆盖了。这些阻塞的接口执行完之后，又会执行释放锁的逻辑，这就把其他线程的锁释放了，导致新的请求也可以竞争到锁~这真是一个极其恶劣的循环。 这个时候只能依赖库存校验，但是偏偏库存校验不是非原子性的，采用的是get and compare的方式，超卖的悲剧就这样发生了
+  - 事故分析
+    - 没有其他系统风险容错处理 ，由于用户服务吃紧，网关响应延迟，但没有任何应对方式，这是超卖的导火索。
+    - 看似安全的分布式锁其实一点都不安全，虽然采用了set key value [EX seconds] [PX milliseconds] [NX|XX]的方式，但是如果线程A执行的时间较长没有来得及释放，锁就过期了，此时线程B是可以获取到锁的。当线程A执行完成之后，释放锁，实际上就把线程B的锁释放掉了。这个时候，线程C又是可以获取到锁的，而此时如果线程B执行完释放锁实际上就是释放的线程C设置的锁。这是超卖的直接原因。
+    - 非原子性的库存校验，非原子性的库存校验导致在并发场景下，库存校验的结果不准确。这是超卖的根本原因。
+  - 解决方案
+    - 实现相对安全的分布式锁
+      - 实现相对安全的分布式锁，必须依赖key的value值。在释放锁的时候，通过value值的唯一性来保证不会勿删。
+    - 实现安全的库存校验
+      - 可以不用基于LUA脚本实现而是基于redis本身的原子性
+    - 改进之后的代码
+     ```java
+     public SeckillActivityRequestVO seckillHandle(SeckillActivityRequestVO request) {
+     SeckillActivityRequestVO response;
+         String key = "key:" + request.getSeckillId();
+         String val = UUID.randomUUID().toString();
+         try {
+             Boolean lockFlag = distributedLocker.lock(key, val, 10, TimeUnit.SECONDS);
+             if (!lockFlag) {
+                 // 业务异常
+             }
+     
+             // 用户活动校验
+             // 库存校验，基于Redis本身的原子性来保证
+             Long currStock = stringRedisTemplate.opsForHash().increment(key + ":info", "stock", -1);
+             if (currStock < 0) { // 说明库存已经扣减完了。
+                 // 业务异常。
+                 log.error("[抢购下单] 无库存");
+             } else {
+                 // 生成订单
+                 // 发布订单创建成功事件
+                 // 构建响应
+             }
+         } finally {
+             distributedLocker.safedUnLock(key, val);
+             // 构建响应
+         }
+         return response;
+     }
+     ```
+    - 深度思考
+      - 分布式锁有必要么
+      - 分布式锁的选型，有人提出用RedLock来实现分布式锁。RedLock的可靠性更高
+      - 网关层基于用户ID做hash算法来决定请求到哪一台服务器。这样就可以基于应用缓存来实现库存的扣减和判断
+      ```java
+      // 通过消息提前初始化好，借助ConcurrentHashMap实现高效线程安全
+      private static ConcurrentHashMap<Long, Boolean> SECKILL_FLAG_MAP = new ConcurrentHashMap<>();
+      // 通过消息提前设置好。由于AtomicInteger本身具备原子性，因此这里可以直接使用HashMap
+      private static Map<Long, AtomicInteger> SECKILL_STOCK_MAP = new HashMap<>();
+      
+      ...
+      
+      public SeckillActivityRequestVO seckillHandle(SeckillActivityRequestVO request) {
+      SeckillActivityRequestVO response;
+      
+          Long seckillId = request.getSeckillId();
+          if(!SECKILL_FLAG_MAP.get(requestseckillId)) {
+              // 业务异常
+          }
+           // 用户活动校验
+           // 库存校验
+          if(SECKILL_STOCK_MAP.get(seckillId).decrementAndGet() < 0) {
+              SECKILL_FLAG_MAP.put(seckillId, false);
+              // 业务异常
+          }
+          // 生成订单
+          // 发布订单创建成功事件
+          // 构建响应
+          return response;
+      }
+      ```
+      此方案没有考虑到机器的动态扩容、缩容等复杂场景，如果还要考虑这些话，则不如直接考虑分布式锁的解决方案
+
+
+
+
+
+
 
 
 
