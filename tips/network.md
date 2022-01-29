@@ -191,7 +191,7 @@
       非 LISTEN 状态中 Recv-Q 表示 receive queue 中的 bytes 数量；Send-Q 表示 send queue 中的 bytes 数值。
       ```
 
-- 一个已经建立的 TCP 连接，客户端中途宕机了，而服务端此时也没有数据要发送，一直处于 establish 状态，客户端恢复后，向服务端建立连接，此时服务端会怎么处理？
+- [一个已经建立的 TCP 连接，客户端中途宕机了，而服务端此时也没有数据要发送，一直处于 establish 状态，客户端恢复后，向服务端建立连接，此时服务端会怎么处理？](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247498170&idx=1&sn=8016a3ae1c7453dfa38062d84af820a9&chksm=f98dbd10cefa3406a5ccfad61c00c4d310d436a1bcfe8d464d94678ab195e013b2296498ac50&scene=21#wechat_redirect)
   - 客户端的 SYN 报文里的**端口号与历史连接不相同**
 
     如果客户端恢复后发送的 SYN 报文中的源端口号跟上一次连接的源端口号**不一样**，此时服务端会认为是新的连接要建立，于是就会通过三次握手来建立新的连接。那旧连接里处于 establish 状态的服务端最后会怎么样呢？
@@ -437,8 +437,54 @@
   - Adjust the configuration
   - `net.ipv4.tcp_notsent_lowat = 16384`
   - `net.core.default_qdisc = fq net.ipv4.tcp_congestion_control = bbr`
-
-
+- [Latency Spike](https://blog.cloudflare.com/the-story-of-one-latency-spike/)
+  - Scenario
+    - We ran thousands of HTTP queries against one server over a couple of hours. Almost all the requests finished in milliseconds, but, as you can clearly see, 5 requests out of thousands took as long as 1000ms to finish
+  - Blame the network
+    - They may indicate packet loss since the SYN packets are usually retransmitted at times 1s, 3s, 7s, 15, 31s.
+    - ping test
+      ```shell
+      --- ping statistics ---
+      114931 packets transmitted, 114805 received, 0% packet loss
+      rtt min/avg/max/mdev = 10.434/11.607/1868.110/22.703 ms
+      ```
+  - tcpdump
+      ```shell
+      $ tcpdump -ttt -n -i eth2 icmp
+      00:00.000000 IP x.x.x.a > x.x.x.b: ICMP echo request, id 19283
+      00:01.296841 IP x.x.x.b > x.x.x.a: ICMP echo reply, id 19283
+      ```
+  - System Trap
+    - we chose System Tap (stap). With a help of a flame graph we identified a function of interest: **net_rx_action**.
+    - The net_rx_action function is responsible for handling packets in Soft IRQ mode. It will handle up to netdev_budget packets in one go
+      ```shell
+      sysctl net.core.netdev_budget
+      net.core.netdev_budget = 300
+      
+      $ stap -v histogram-kernel.stp 'kernel.function("net_rx_action)"' 30
+      Duration min:0ms avg:0ms max:23ms count:3685271
+      ```
+  - collapse the TCP
+    - the receive buffer size value on a socket is a hint to the operating system of how much total memory it could use to handle the received data.
+    - Most importantly, this includes not only the payload bytes that could be delivered to the application, but also the metadata around it.
+    - a TCP socket structure contains a doubly-linked list of packets—the sk_buff structures. Each packet contains not only the data, but also the sk_buff metadata (sk_buff is said to take 240 bytes).
+  - Tune the rmem
+    - There are two ways to control the TCP socket receive buffer on Linux:
+      - You can set setsockopt(SO_RCVBUF) explicitly.
+      - Or you can leave it to the operating system and allow it to auto-tune it, using the tcp_rmem sysctl as a hint.
+    - Since the receive buffer sizes are fairly large, garbage collection could take a long time. To test this we reduced the max rmem size to 2MiB and repeated the latency measurements
+      ```shell
+      $ sysctl net.ipv4.tcp_rmem
+      net.ipv4.tcp_rmem = 4096 1048576 2097152
+      
+      $ stap -v histogram-kernel.stp 'kernel.function("tcp_collapse")' 300
+      Duration min:0ms avg:0ms max:3ms count:592
+      
+      $ stap -v histogram-kernel.stp 'kernel.function("net_rx_action")'
+      Duration min:0ms avg:0ms max:3ms count:3567235
+      ```
+- [Sync Packet Handling](https://blog.cloudflare.com/syn-packet-handling-in-the-wild/)
+  - 
 
 
 
