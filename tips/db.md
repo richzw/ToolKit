@@ -273,7 +273,120 @@
     - B-tree indexes are the most common type of index and would be the default if you create an index and don’t specify the type. B-tree indexes are great for general purpose indexing on information you frequently query.
     - BRIN indexes are block range indexes, specially targeted at very large datasets where the data you’re searching is in blocks, like timestamps and date ranges. They are known to be very performant and space efficient.
     - GIST indexes build a search tree inside your database and are most often used for spatial databases and full-text search use cases.
-    - GIN indexes are useful when you have multiple values in a single column which is very common when you’re storing array or json data. 
+    - GIN indexes are useful when you have multiple values in a single column which is very common when you’re storing array or json data.
+- Redis 为什么变慢了
+  - 使用复杂度过高的命令
+    - 分析
+      - slowlog 命令
+      - 使用聚合命令 - sort sunion
+      - O(N)命令，但是N很大
+      - 命令排队
+    - 规避
+      - 聚合操作在客户端
+      - O(N)命令，N尽量小 （N <= 300）
+  - 操作bigkey
+    - bigkey申请、释放内存，耗时比较久
+    - 规避
+      - 避免bigkey （10KB以下）
+      - UNLINK代替 DEL
+  - 集中过期
+    - 现象
+      - 整点变慢，时间间隔固定， slowlog没有记录， expire keys突增
+    - 过期策略
+      - 被动 （惰性）
+      - 主动 （定期清理，主线程）
+    - 规避
+      - 过期时间打散
+      - lazyfree-lazy-expire=yes (后台进程)
+  - 内存达到maxmemory
+    - 现象
+      - 满容之后写请求变慢
+      - 写OPS越大越明显
+      - 淘汰bigkey耗时久
+    - 规避
+      - no bigkey
+      - 选择合适的淘汰策略
+      - 拆分实例，分摊压力
+      - lazyfree-lazy-eviction = yes
+  - rehash - 翻倍扩容
+    - 现象
+      - 写入新key，偶发性延迟
+      - rehash + maxmemory 触发大量key淘汰
+    - 规避
+      - key的数量在1亿以下
+      - 升级 6.0 - 即将超过maxmemory，不做rehash
+  - 持久化
+    - RDB AOF - fork子进程
+    - 规避
+      - 单个实例在10G以下
+      - slave节点备份
+      - 关闭AOF AOF rewrite - 纯缓存case
+      - 不要部署虚拟机
+      - 避免全量同步：调大 repl-backlog-size
+  - 内存大页
+    - 现象
+      - RDB AOF rewrite期间写请求变慢
+    - 分析
+      - 默认内存页4KB
+      - 内存大页2MB
+      - COW： fork的时候调用
+    - 关闭内存大页
+      - `echo never > /sys/kernel/mm/transparent_hugepage/enabled`
+  - AOF
+    - 现象
+      - AOF everysec
+      - 主线程阻塞
+      - 主线程 写入到 page cache，当磁盘负载高的时候，导致AOF子线程fsync卡住
+    - 规避
+      - `no-appendfsync-on-rewrite = yes` AOF rewrite 期间，appendfsync = no
+  - 绑定CPU
+    - 现象
+      - Redis进程绑定固定一个CPU核心
+      - RDB AOF rewrite期间慢
+    - Redis server
+      - 主线程 - 处理请求
+      - 后台线程 - 异步释放fd，异步AOF刷盘，lazyfree
+      - 子进程 - RDB AOF rewrite
+    - 分析
+      - 子进程集成父进程CPU偏好，竞争关系
+    - 缓解
+      - 绑定多个CPU核心
+      - 同一个物理核心
+    - 规避
+      - 不同进程，不同CPU
+      - ```shell
+        server_cpulist 
+        bio_cpulist
+        aof_cpulist
+        bgsave_publist
+        ```
+      - 绑定CPU需谨慎
+  - 使用SWAP
+    - 现象
+      - 所有请求变慢
+      - 响应延迟- 几百毫秒，秒级
+    - 分析
+      - 内存数据放到磁盘
+    - 规避
+      - 足够内存，避免swap
+       ```shell
+       cat /proc/$pid/smaps | egrep '^(Swap|Size)'
+       ```
+      - 监控
+  - 内存碎片
+    - 现象
+      - 开启内存碎片整理
+      - 请求变慢 - 碎片整理在主线程
+    - 规避
+      - 合理调整阈值 `activefrag`
+  - 网络负载高
+    - 现象
+      - 丢包，重传
+    - 规避
+      - 扩容，迁移
+  - 监控
+    - 配置有问题，脚本有bug：connection 数量
+  
 
 
 
