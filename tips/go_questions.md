@@ -140,7 +140,10 @@
   fmt.Println(len(s), cap(s))
   }
   ```
-
+- [Context携带数据是线程安全的吗](https://mp.weixin.qq.com/s/cNmEnYUB07OWICcNu7wGfA)
+  - context本身就是线程安全的，所以context携带value也是线程安全的
+  - 添加键值对不是在原context结构体上直接添加，而是以此context作为父节点，重新创建一个新的valueCtx子节点，将键值对添加在子节点上，由此形成一条context链。
+  - context添加的键值对一个链式的，会不断衍生新的context，所以context本身是不可变的，因此是线程安全的。
 
 
 
