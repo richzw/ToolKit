@@ -58,6 +58,9 @@ func (j *BaseJob) Execute() {
 
 func (j *BaseJob) Done() {
 	close(j.done)
+	if j.CancelFunc != nil {
+		j.CancelFunc()
+	}
 }
 
 func (j *BaseJob) WaitDone() {
@@ -130,7 +133,6 @@ func TestJobFunc() {
 	go workerManger.StartWork()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(3)*time.Second)
-	defer cancel()
 	job := &SquareJob{
 		BaseJob: &BaseJob{
 			done:       make(chan struct{}, 1),
