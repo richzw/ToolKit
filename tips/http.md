@@ -1,6 +1,25 @@
 
 - [RSA 握手的过程](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247487650&idx=1&sn=dfee83f6773a589c775ccd6f40491289&scene=21#wechat_redirect)
 - [ECDHE 算法](https://www.cnblogs.com/xiaolincoding/p/14318338.html)
-- 
-
-
+- [C10K到C10M高性能网络的探索与实践](https://mp.weixin.qq.com/s/Jap26lIutqpYSwbFfhb8eQ)
+  - IO模型的优化 
+    - epoll、kqueue、iocp，[io_ring](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247562787&idx=1&sn=471a0956249ca789afad774978522717&chksm=c1850172f6f28864474f9832bfc61f723b5f54e174417d570a6b1e3f9f04bda7b539662c0bed&scene=21#wechat_redirect) 就是IO模型优化的一些最佳实践
+    - 以epoll为例，在它的基础上抽象了一些开发框架和库. libevent、libev
+  - CPU亲和性&内存局域性
+    - 当前x86服务器以NUMA架构为主，这种平台架构下，每个CPU有属于自己的内存，如果当前CPU需要的数据需要到另外一颗CPU管理的内存获取，必然增加一些延时。
+    - Linux提供了sched_set_affinity函数，我们可以在代码中，将我们的任务绑定在指定的CPU核心上。
+    - 一些Linux发行版也在用户态中提供了numactl和taskset工具，通过它们也很容易让我们的程序运行在指定的节点上。
+  - [RSS、RPS、RFS、XPS](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247561718&idx=1&sn=f93ad69bff3ab80665e4b9d67265e6bd&chksm=c18506a7f6f28fb12341c3e439f998d09c4b1d93f8bf59af6b1c6f4427cea0c48b51244a3e53&scene=21#wechat_redirect)
+    - RSS需要硬件的支持，目前主流的网卡都已支持，即俗称的多队列网卡，充分利用多个CPU核心，让数据处理的压力分布到多个CPU核心上去。
+    - RPS和RFS在linux2.6.35的版本被加入，一般是成对使用的，在不支持RSS特性的网卡上，用软件来模拟类似的功能，并且将相同的数据流绑定到指定的核心上，尽可能提升网络方面处理的性能。
+    - XPS特性在linux2.6.38的版本中被加入，主要针对多队列网卡在发送数据时的优化，当你发送数据包时，可以根据CPU MAP来选择对应的网卡队列，低于指定的kernel版本可能无法使用相关的特性，但是发行版已经backport这些特性。
+  - IRQ 优化
+    - 中断合并. 一次中断触发后，接下来用轮循的方式读取后续的数据包，以降低中断产生的数量，进而也提升了处理的效率
+    - IRQ亲和性. 将不同的网卡队列中断处理绑定到指定的CPU核心上去，适用于拥有RSS特性的网卡。
+  - 网络卸载的优化
+    - TSO，以太网MTU一般为1500，减掉TCP/IP的包头，TCP的MaxSegment Size为1460，通常情况下协议栈会对超过1460的TCP Payload进行分段，保证最后生成的IP包不超过MTU的大小，对于支持TSO/GSO的网卡来说，协议栈就不再需要这样了，可以将更大的TCPPayload发送给网卡驱动，然后由网卡进行封包操作。通过这个手段，将需要在CPU上的计算offload到网卡上，进一步提升整体的性能
+    - GSO为TSO的升级版，不在局限于TCP协议。
+    - LRO和TSO的工作路径正好相反，在频繁收到小包时，每次一个小包都要向协议栈传递，对多个TCPPayload包进行合并，然后再传递给协议栈，以此来提升协议栈处理的效率。
+    - GRO为LRO的升级版本，解决了LRO存在的一些问题。
+  - Kernel 优化
+    - 内核网络参数的调整在以下两处：net.ipv4.*参数和net.core.*参数
