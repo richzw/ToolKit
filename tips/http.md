@@ -44,4 +44,5 @@
     - 内核协议栈优化 - 网络数据包处理
       - 在收到数据包之后不进协议栈，把数据包的内存直接映射到用户态，让我们的程序在用户态直接可以看到这些数据。这样就绕过了kernel的处理
       - 利用了linuxUIO，这个特性叫UIO，比如当前流行的DPDK，通过这个模块框架我们可以在驱动程序收到数据包之后，直接放到用户态的内存空间中，也同样达到了绕过协议栈的目的。
-  
+- [io_ring解析]()
+  - [io_ring worker pool](https://blog.cloudflare.com/missing-manuals-io_uring-worker-pool/)
