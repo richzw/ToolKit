@@ -863,6 +863,57 @@
     - 在 finalizerHandler 里调用 runtime.SetFinalizer(f, finalizerHandler) 能让这个 handler 在每次 GC 期间被执行；这样就不会让引用真的被干掉了，这样使该对象存活也并不需要太高的成本，只是一个指针而已
     ![img.png](go_finalizer.png)
 
+- [空结构体struct{}](https://mp.weixin.qq.com/s/YU45CYk7Q-Na2WISMrUYCQ)
+  - 空结构体类型的变量占用的空间为0
+     ```go
+     var s struct{}
+     fmt.Println(unsafe.Sizeof(s)) // prints 0
+     typ := reflect.TypeOf(s)
+     fmt.Println(typ.Size()) // 0
+     ```
+  - 所有空结构体类型的变量地址都是一样的 - zerobase 的地址
+    ```go
+        a := struct{}{}
+        b := struct{}{}
+     
+        c := emptyStruct{}
+     
+        fmt.Println(a)
+        fmt.Printf("%pn", &a) //0x116be80
+        fmt.Printf("%pn", &b) //0x116be80
+        fmt.Printf("%pn", &c) //0x116be80
+     
+        fmt.Println(a == b) //true
+    ```
+  - 空结构体的应用场景
+    - 基于map实现集合功能
+      ```go
+      var CanSkipFuncs = map[string]struct{}{
+          "Email":   {},
+          "IP":      {},
+          "Mobile":  {},
+          "Tel":     {},
+          "Phone":   {},
+          "ZipCode": {},
+      }
+      ```
+    - 与channel组合使用，实现一个信号 - 基于缓冲channel实现并发限速
+      ```go
+      var limit = make(chan struct{}, 3)
+      
+      func main() {
+          // …………
+          for _, w := range work {
+              go func() {
+                  limit <- struct{}{}
+                  w()
+                  <-limit
+              }()
+          }
+          // …………
+      }
+      ```
+
 
 
 
