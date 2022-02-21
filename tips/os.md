@@ -71,6 +71,51 @@
     - jemalloc最大的优势还是其强大的多核/多线程分配能力. CPU的核心数量越多, 程序线程数越多, jemalloc的分配速度越快
     - jemalloc 按照内存分配请求的尺寸，分了 small object (例如 1 – 57344B)、 large object (例如 57345 – 4MB )、 huge object (例如 4MB以上)。jemalloc同样有一层线程缓存的内存名字叫tcache，当分配的内存大小小于tcache_maxclass时，jemalloc会首先在tcache的small object以及large object中查找分配，tcache不中则从arena中申请run，并将剩余的区域缓存到tcache。若arena找不到合适大小的内存块， 则向系统申请内存。当申请大小大于tcache_maxclass且大小小于huge大小的内存块时，则直接从arena开始分配。而huge object的内存不归arena管理， 直接采用mmap从system memory中申请，并由一棵与arena独立的红黑树进行管理。
     ![img.png](os_gemalloc.png)
+- [Tunes EC2](https://www.brendangregg.com/blog/2017-12-31/reinvent-netflix-ec2-tuning.html)
+  - for Ubuntu Xenial instances on EC2.
+    - CPU
+      `schedtool –B PID`
+    - Virtual Memory
+      ```shell
+      vm.swappiness = 0       # from 60
+      ```
+    - Huge Pages
+      ```shell
+      # echo madvise > /sys/kernel/mm/transparent_hugepage/enabled
+      ```
+    - NUMA
+      ```shell
+      kernel.numa_balancing = 0
+      ```
+    - File System
+      ```shell
+      vm.dirty_ratio = 80                     # from 40
+      vm.dirty_background_ratio = 5           # from 10
+      vm.dirty_expire_centisecs = 12000       # from 3000
+      mount -o defaults,noatime,discard,nobarrier …
+      ```
+    - Storage I/O
+      ```shell
+      /sys/block/*/queue/rq_affinity  2
+      /sys/block/*/queue/scheduler        noop
+      /sys/block/*/queue/nr_requests  256
+      /sys/block/*/queue/read_ahead_kb    256
+      mdadm –chunk=64 ...
+      ```
+    - Networking
+      ```shell
+      net.core.somaxconn = 1000
+      net.core.netdev_max_backlog = 5000
+      net.core.rmem_max = 16777216
+      net.core.wmem_max = 16777216
+      net.ipv4.tcp_wmem = 4096 12582912 16777216
+      net.ipv4.tcp_rmem = 4096 12582912 16777216
+      net.ipv4.tcp_max_syn_backlog = 8096
+      net.ipv4.tcp_slow_start_after_idle = 0
+      net.ipv4.tcp_tw_reuse = 1
+      net.ipv4.ip_local_port_range = 10240 65535
+      net.ipv4.tcp_abort_on_overflow = 1    # maybe
+      ```
 
 
 
