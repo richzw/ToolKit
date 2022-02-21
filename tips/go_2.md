@@ -913,7 +913,9 @@
           // …………
       }
       ```
-
+- [slice tricks](https://mp.weixin.qq.com/s/IQRHWNUnxiaCDleayNVRVg)
+  - [slice tricks official](https://github.com/golang/go/wiki/SliceTricks)
+  - [slice tricks legend](https://ueokande.github.io/go-slice-tricks/)
 
 
 
