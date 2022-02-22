@@ -957,7 +957,9 @@
       }
       wg.Wait()
      ```
-
+- [API Design](https://go-talks.appspot.com/github.com/matryer/golanguk/building-apis.slide#10)
+  - OK pattern
+  - Public pattern / Adapter
 
 
 
