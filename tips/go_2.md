@@ -916,10 +916,47 @@
 - [slice tricks](https://mp.weixin.qq.com/s/IQRHWNUnxiaCDleayNVRVg)
   - [slice tricks official](https://github.com/golang/go/wiki/SliceTricks)
   - [slice tricks legend](https://ueokande.github.io/go-slice-tricks/)
-
-
-
-
+- [线程安全的map](https://mp.weixin.qq.com/s/H5HDrwhxZ_4v6Vf5xXUsIg)
+  - sync.map
+    - 使用场景
+      - sync.Map更适合读多更新多而插入新值少的场景, 因为在key存在的情况下读写删操作可以不用加锁直接访问readOnly
+      - 不适合反复插入与读取新值的场景，因为这种场景会频繁操作dirty，需要频繁加锁和更新read
+    - 设计点:expunged
+      - entry.p取值有3种，nil、expunged和指向真实值
+      - 当用Store方法插入新key时，会加锁访问dirty，并把readOnly中的未被标记为删除的所有entry指针复制到dirty，此时之前被Delete方法标记为软删除的entry（entry.p被置为nil）都变为expunged，那这些被标记为expunged的entry将不会出现在dirty中。
+      - 如果没有expunged，只有nil会出现什么结果呢？
+        - 直接删掉entry==nil的元素，而不是置为expunged：在用Store方法插入新key时，readOnly数据拷贝到dirty时直接把为ni的entry删掉。但这要对readOnly加锁，sync.map设计理念是读写分离，所以访问readOnly不能加锁。
+        - 不删除entry==nil的元素，全部拷贝：在用Store方法插入新key时，readOnly中entry.p为nil的数据全部拷贝到dirty中。那么在dirty提升为readOnly后这些已被删除的脏数据仍会保留，也就是说它们会永远得不到清除，占用的内存会越来越大。
+        - 不拷贝entry.p==nil的元素：在用Store方法插入新key时，不把readOnly中entry.p为nil的数据拷贝到dirty中，那在用Store更新值时，就会出现readOnly和dirty不同步的状态，即readOnly中存在dirty中不存在的key，那dirty提升为readOnly时会出现数据丢失的问题。
+  - orcanman/concurrent-map
+    - orcaman/concurrent-map的适用场景是：反复插入与读取新值，
+    - 其实现思路是:对go原生map进行分片加锁，降低锁粒度，从而达到最少的锁等待时间(锁冲突)。
+- [Use buffered channel as mutex](https://mp.weixin.qq.com/s/DRE38mOYYqURMFVkqYPu3w)
+  - 通过 channel 和通信更好地完成更高级别的同步
+  - 无缓冲 channel 及其不足之处
+    - 如果没有接收方，发送者将会阻塞；相同地，如果没有发送方，接收者将会阻塞。基于这种特性，所以我们不能将无缓冲的 channel 作为锁来使用。
+  - 缓冲为 1 的 channel 的特性及其可取之处
+    - 缓冲大小为 1 的 channel 具有如下的特性：如果缓冲满了，发送时将会阻塞；如果缓存腾空，发送时就会解除阻塞。
+    - 缓冲满时 <--> 上锁
+    - 缓冲腾空 <--> 解锁
+  - sample
+     ```go
+      chanLock := make(chan int, 1) //1
+      var wg sync.WaitGroup
+      for _, str := range ss { //2
+       wg.Add(1) 
+       go func(aString string) {
+     
+        chanLock <- 1 //3
+        for i := 0; i < 1000; i++ {
+         file.WriteString(aString + "\n")
+        }
+        <-chanLock //4
+        wg.Done() //5
+       }(str) //pass by value
+      }
+      wg.Wait()
+     ```
 
 
 
