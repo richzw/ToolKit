@@ -960,6 +960,73 @@
 - [API Design](https://go-talks.appspot.com/github.com/matryer/golanguk/building-apis.slide#10)
   - OK pattern
   - Public pattern / Adapter
+- [流处理场景下的最小化内存使用](https://mp.weixin.qq.com/s/RWDyDmeI1YhstAh-rHd2-A)
+  - [Source](https://engineering.be.com.vn/large-stream-processing-in-golang-with-minimal-memory-usage-c1f90c9bf4ce)
+  - Multipart 文件转发
+    - io.Copy 从 src 复制副本到 dst，直到在 src 上到达 EOF 或发生错误。它返回复制的字节数和复制时遇到的第一个错误(如果有的话)
+    - 在文件离线处理时，你可以打开一个带缓冲的 writer 然后完全复制 reader 中内容，并且不用担心任何其他影响。然而，Copy 操作将持续地将数据复制到 Writer，直到 Reader 读完数据。但这是一个无法控制的过程，如果你处理 writer 中数据的速度不能与复制操作一样快，那么它将很快耗尽你的缓冲区资源
+    - Pipe 提供一对 writer 和 reader，并且读写操作都是同步的。利用内部缓冲机制，直到之前写入的数据被完全消耗掉才能写到一个新的 writer 数据快。这样你就可以完全控制如何读取和写入数据。现在，数据吞吐量取决于处理器读取文本的方式，以及 writer 更新数据的速度。
+        ```go
+        r, w := io.Pipe()
+        m := multipart.NewWriter(w)
+        go func() {
+           defer w.Close()
+           defer m.Close()
+           part, err := m.CreateFormFile("file", "textFile.txt")
+           if err != nil {
+              return
+           }
+           file, err := os.Open(name)
+           if err != nil {
+              return
+           }
+           defer file.Close()
+           if _, err = io.Copy(part, file); err != nil {
+              return
+           }
+        }()
+        http.Post(url, m.FormDataContentType(), r)
+        ```
+  - 预取和补偿文件流
+    - 一个可行的解决方案是使用 io.TeeReader，它会将从 reader 读取的数据写入另一个 writer 中。TeeReader 最常见的用例是将一个流克隆成一个新的流，在保持流不被破坏的情况下为 reader 提供服务
+    - 但问题是，如果在将其传递给 GCP 文件处理程序之前同步运行它，它最终还是会将所有数据复制到准备好的缓冲区。一个可行的方法是再次使用 Pipe 来操作它，达到无本地缓存效果。但另一个问题是，TeeReader 要求在完成读取过程之前必须完成写入过程，而 Pipe则相反。
+     ```go
+     type prefetchReader struct {
+        reader   io.Reader
+        prefetch []byte
+        size     int
+     }
+     
+     func newPrefetchReader(reader io.Reader, prefetch []byte) *prefetchReader {
+        return &prefetchReader{
+           reader:   reader,
+           prefetch: prefetch,
+        }
+     }
+     
+     func (r *prefetchReader) Read(p []byte) (n int, err error) {
+        if len(p) == 0 {
+           return 0, fmt.Errorf("empty buffer")
+        }
+        defer func() {
+           r.size += n
+        }()
+        if len(r.prefetch) > 0 {
+           if len(p) >= len(r.prefetch) {
+              copy(p, r.prefetch)
+              n := len(r.prefetch)
+              r.prefetch = nil
+              return n, nil
+           } else {
+              copy(p, r.prefetch[:len(p)])
+              r.prefetch = r.prefetch[len(p):]
+              return len(p), nil
+           }
+        }
+        return r.reader.Read(p)
+     }
+     ```
+
 
 
 
