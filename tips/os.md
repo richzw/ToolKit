@@ -116,6 +116,89 @@
       net.ipv4.ip_local_port_range = 10240 65535
       net.ipv4.tcp_abort_on_overflow = 1    # maybe
       ```
+- [Network Overview](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247563566&idx=1&sn=26156d79dffb3f0f10b6a26931f993cc&chksm=c1850e7ff6f28769b6ff3358366e917d3d54fc0f0563131422da4bed201768c958262b5d5a99&scene=21#wechat_redirect)
+  - 协议
+    - TCP UDP QUIC
+  - 网络编程
+    - Reactor是基于同步IO,事件驱动机制，reactor实现了一个被动事件接收和分发的模型，同步等待事件到来，并作出响应，Reactor实现相对简单，对于耗时短的处理场景处理高效，同时接收多个服务请求，并且依次同步的处理它们的事件驱动程序
+      - redis - level trigger
+      - nginx - edge trigger
+    - Proactor基于异步IO，异步接收和同时处理多个服务请求的事件驱动程序，处理速度快，Proactor性能更高，能够处理耗时长的并发场景
+  - Linux内核协议栈
+    - [TCP/IP协议栈](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247510568&idx=1&sn=79f335aaab5c0a36c0a66c5bfb1619ae&chksm=c1845d79f6f3d46f81b6fd24335eb8994c9daf21b6846d80af2cad73d9f638c5dda48b02892c&scene=21#wechat_redirect)
+    - [Linux网络子系统](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247532046&idx=2&sn=04ffe282ce1278297d124f0c382ba665&chksm=c184895ff6f300497eb2bcc63d352b6d6b374606399cb7dd5b5bb59a773e674a368f9f4c9169&scene=21#wechat_redirect)
+  - [新技术基石 | eBPF and XDP](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247511570&idx=1&sn=18d5f1045b7ed6e27e1c8fb36302c3f9&chksm=c1845943f6f3d055c2533d580acb2d4258daf2a84ffba30e2cc6376b3ffdb1687773ed4c19a3&scene=21#wechat_redirect)
+    - 传统Linux网络驱动的问题
+      - 中断开销突出，大量数据到来会触发频繁的中断（softirq）开销导致系统无法承受，
+      - 需要把包从内核缓冲区拷贝到用户缓冲区，带来系统调用和数据包复制的开销，
+      - 对于很多网络功能节点来说，TCP/IP协议并非是数据转发环节所必需的，
+      - NAPI/Netmap等虽然减少了内核到用户空间的数据拷贝，但操作系统调度带来的cache替换也会对性能产生负面影响。
+    - 改善iptables/netfilter的规模瓶颈，提高Linux内核协议栈IO性能，内核需要提供新解决方案，那就是eBPF/XDP框架
+    - BPF 是 Linux内核中高度灵活和高效的类似虚拟机的技术，允许以安全的方式在各个挂钩点执行字节码。它用于许多Linux内核子系统，最突出的是网络、跟踪和安全（例如沙箱）。
+    - XDP的全称是：eXpress DataPath，XDP 是Linux内核中提供高性能、可编程的网络数据包处理框架。
+      - 直接接管网卡的RX数据包（类似DPDK用户态驱动）处理
+      - 通过运行BPF指令快速处理报文；
+      - 和Linux协议栈无缝对接；
+  - 容器网络
+    - Kubernetes本身并没有自己实现容器网络，而是通过插件化的方式自由接入进来。在容器网络接入进来需要满足如下基本原则：
+      - Pod无论运行在任何节点都可以互相直接通信，而不需要借助NAT地址转换实现。
+      - Node与Pod可以互相通信，在不限制的前提下，Pod可以访问任意网络。
+      - Pod拥有独立的网络栈，Pod看到自己的地址和外部看见的地址应该是一样的，并且同个Pod内所有的容器共享同个网络栈。
+    - 目前流行插件：Flannel、Calico、Weave、Contiv
+    - Overlay模式：Flannel（UDP、vxlan）、Weave、Calico（IPIP）
+    - 三层路由模式：Flannel（host-gw）、Calico（BGP）
+    - Underlay网络：Calico（BGP）
+  - [网络性能优化](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247505264&idx=1&sn=0735027d6e20ca7bd2bdc7a7c04477f1&chksm=c1842221f6f3ab371d64032b5bae6e5cc65d8f0265745150f76794932c4d3ac8bf4058d60090&scene=21#wechat_redirect)
+    - APP性能优化：空间局部性和时间局部性
+    - 协议栈调优：numa亲和，中断亲和，软中断亲和，软中断队列大小，邻居表大小，连接跟踪表大小，TCP队列调整，协议栈内存分配，拥塞控制算法优化
+    - Bypass内核协议栈：DPDK,RDMA.
+    - 网卡优化：驱动配置，offload，网卡队列，智能网卡，高性能网卡。
+    - 硬件加速器：ASIC、FPGA,网络处理器,多核处理器
+  - 高性能网络
+    - DPDK网络优化
+      - PMD用户态驱动•CPU亲缘性和独占•内存大页和降低内存访问开销•避免False Sharing•内存对齐•cache对齐•NUMA•减少进程上下文切换•分组预测机制•利用流水线并发•为了利用空间局部性•充分挖掘网卡的潜能
+    - RDMA 作为一种旁路内核的远程内存直接访问技术，被广泛应用于数据密集型和计算密集型场景中，是高性能计算、机器学习、数据中心、海量存储等领域的重要解决方案。
+      - RDMA 具有零拷贝、协议栈卸载的特点。RDMA 将协议栈的实现下沉至RDMA网卡(RNIC)，绕过内核直接访问远程内存中的数据
+  - [排障](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247505250&idx=1&sn=a854ee9a456e27e3bd4202380e4782c8&chksm=c1842233f6f3ab251f1a686e4f4bbeaa305a73ff3b09d5846b3ae536153ed22ba716c99f0ae5&scene=21#wechat_redirect)
+
+- [Linux问题分析与性能优化](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247529939&idx=2&sn=f193d1ea112482945d8be3d97d1eba85&chksm=c1848282f6f30b94a2b1851d2a18a8ce0e026cc79b5ace4076909389704aaab185ccdc9c5bef&scene=21#wechat_redirect) 
+  - 整体情况：
+    - top/htop/atop命令查看进程/线程、CPU、内存使用情况，CPU使用情况；
+    - dstat 2查看CPU、磁盘IO、网络IO、换页、中断、切换，系统I/O状态;
+    - vmstat 2查看内存使用情况，内存状态；
+    - iostat -d -x 2查看所有磁盘的IO情况，系统I/O状态；
+    - iotop查看IO靠前的进程，系统的I/O状态；
+    - perf top查看占用CPU最多的函数，CPU使用情况；
+    - perf record -ag -- sleep 15;perf report查看CPU事件占比，调用栈，CPU使用情况；
+    - sar -n DEV 2查看网卡的吞吐，网卡状态；
+    - /usr/share/bcc/tools/filetop -C查看每个文件的读写情况，系统的I/O状态；
+    - /usr/share/bcc/tools/opensnoop显示正在被打开的文件，系统的I/O状态；
+    - mpstat -P ALL 1 单核CPU是否被打爆；
+    - ps aux --sort=-%cpu 按CPU使用率排序，找出CPU消耗最多进程；
+    - ps -eo pid,comm,rss | awk '{m=$3/1e6;s["*"]+=m;s[$2]+=m} END{for (n in s) printf"%10.3f GB  %s\n",s[n],n}' | sort -nr | head -20 统计前20内存占用；
+    - awk 'NF>3{s["*"]+=s[$1]=$3*$4/1e6} END{for (n in s) printf"%10.1f MB  %s\n",s[n],n}' /proc/slabinfo | sort -nr | head -20  统计内核前20slab的占用；
+  - 进程分析，进程占用的资源：
+    - pidstat 2 -p 进程号查看可疑进程CPU使用率变化情况；
+    - pidstat -w -p 进程号 2查看可疑进程的上下文切换情况；
+    - pidstat -d -p 进程号 2查看可疑进程的IO情况；
+    - lsof -p 进程号查看进程打开的文件；
+    - strace -f -T -tt -p 进程号显示进程发起的系统调用；
+  - 协议栈分析，连接/协议栈状态：
+    - ethtool -S 查看网卡硬件情况；
+    - cat /proc/net/softnet_stat/ifconfig eth1 查看网卡驱动情况；
+    - netstat -nat|awk '{print awk $NF}'|sort|uniq -c|sort -n查看连接状态分布；
+    - ss -ntp或者netstat -ntp查看连接队列；
+    - netstat -s 查看协议栈情况；
+  - 方法论
+    - RED方法：监控服务的请求数（Rate）、错误数（Errors）、响应时间（Duration）
+    - USE方法：监控系统资源的使用率（Utilization）、饱和度（Saturation）、错误数（Errors）。
+  - Tools
+    - ![img.png](os_cpu_cmd.png)
+    - ![img_1.png](os_memory_cmd.png)
+    - ![img.png](os_file_cmd.png)
+    - ![img_2.png](img_2.png)
+
+    
 
 
 
