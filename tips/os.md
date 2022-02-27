@@ -197,11 +197,57 @@
     - ![img_1.png](os_memory_cmd.png)
     - ![img.png](os_file_cmd.png)
     - ![img_2.png](img_2.png)
-
-    
-
-
-
+- [服务器性能优化之网络性能优化](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247561718&idx=1&sn=f93ad69bff3ab80665e4b9d67265e6bd&chksm=c18506a7f6f28fb12341c3e439f998d09c4b1d93f8bf59af6b1c6f4427cea0c48b51244a3e53&scene=21#wechat_redirect)
+  - 以前
+    - 网卡很慢，只有一个队列。当数据包到达时，网卡通过DMA复制数据包并发送中断，Linux内核收集这些数据包并完成中断处理。随着网卡越来越快，基于中断的模型可能会因大量传入数据包而导致 IRQ 风暴。
+    - 为了解决这个问题，NAPI(中断+轮询)被提议。当内核收到来自网卡的中断时，它开始轮询设备并尽快收集队列中的数据包
+    - ![img_1.png](os_performance_network.png)
+  - RSS：接收端缩放 Receive Side Scaling
+    - 具有多个RX / TX队列过程的数据包。当带有RSS 的网卡接收到数据包时，它会对数据包应用过滤器并将数据包分发到RX 队列。过滤器通常是一个哈希函数，可以通过“ethtool -X”进行配置
+    - CPU 亲和性也很重要。最佳设置是分配一个 CPU 专用于一个队列。首先通过检查/proc/interrupt找出IRQ号，然后将CPU位掩码设置为/proc/irq/<IRQ_NUMBER>/smp_affinity来分配专用CPU。为避免设置被覆盖，必须禁用守护进程irqbalance。
+  - RPS：接收数据包控制
+    - RSS提供硬件队列，一个称为软件队列机制Receive Packet Steering （RPS）在Linux内核实现
+    - 当驱动程序接收到数据包时，它会将数据包包装在套接字缓冲区 ( sk_buff ) 中，其中包含数据包的u32哈希值。散列是所谓的第 4 层散列（l4 散列），它基于源 IP、源端口、目的 IP 和目的端口，由网卡或__skb_set_sw_hash() 计算。由于相同 TCP/UDP 连接（流）的每个数据包共享相同的哈希值，因此使用相同的 CPU 处理它们是合理的。
+    - RPS 的基本思想是根据每个队列的 rps_map 将同一流的数据包发送到特定的 CPU。这是 rps_map 的结构：映射根据 CPU 位掩码动态更改为`/sys/class/net/<dev>/queues/rx-<n>/rps_cpus`。
+    - ![img.png](os_network_rps.png)
+  - RFS: Receive Flow Steering
+    - 尽管 RPS 基于流分发数据包，但它没有考虑用户空间应用程序。应用程序可能在 CPU A 上运行，而内核将数据包放入 CPU B 的队列中。由于 CPU A 只能使用自己的缓存，因此 CPU B 中缓存的数据包变得无用。
+    - 代替每个队列的哈希至CPU地图，RFS维护全局flow-to-CPU的表，rps_sock_flow_table：该掩模用于将散列值映射成所述表的索引。
+    - ![img.png](os_network_rfs.png)
+  - aRFS: Accelerated Receive Flow Steering
+    - aRFS）进一步延伸RFS为RX队列硬件过滤。要启用 aRFS，它需要具有可编程元组过滤器和驱动程序支持的网卡。要启用ntuple 过滤器。
+  - SO_REUSEPORT
+    - SO_REUSEPORT支持多个进程或者线程绑定到同一端口，用以提高服务器程序的性能
+      - 允许多个套接字 bind()/listen() 同一个TCP/UDP端口
+        - 1.每一个线程拥有自己的服务器套接字。
+        - 2.在服务器套接字上没有了锁的竞争。
+      - 内核层面实现负载均衡。
+      - 安全层面，监听同一个端口的套接字只能位于同一个用户下面。
+    - 其核心的实现主要有三点：
+      - 扩展socket option，增加 SO_REUSEPORT选项，用来设置 reuseport。
+      - 修改 bind 系统调用实现，以便支持可以绑定到相同的 IP 和端口。
+      - 修改处理新建连接的实现，查找 listener 的时候，能够支持在监听相同 IP 和端口的多个 sock 之间均衡选择
+    - 带来意义
+      - CPU之间平衡处理，水平扩展，模型简单，维护方便了，进程的管理和应用逻辑解耦，进程的管理水平扩展权限下放给程序员/管理员，可以根据实际进行控制进程启动/关闭，增加了灵活性。
+      - 针对对客户端而言，表面上感受不到其变动，因为这些工作完全在服务器端进行。
+      - 服务器无缝重启/切换，热更新，提供新的可能性
+    - 已知问题
+      - SO_REUSEPORT分为两种模式，即热备份模式和负载均衡模式，在早期的内核版本中，即便是加入对reuseport选项的支持，也仅仅为热备份模式，而在3.9内核之后，则全部改为了负载均衡模式
+      - SO_REUSEPORT根据数据包的四元组{src ip, src port, dst ip, dst port}和当前绑定同一个端口的服务器套接字数量进行数据包分发。若服务器套接字数量产生变化，内核会把本该上一个服务器套接字所处理的客户端连接所发送的数据包（比如三次握手期间的半连接，以及已经完成握手但在队列中排队的连接）分发到其它的服务器套接字上面，可能会导致客户端请求失败。
+    - 如何预防以上已知问题，一般解决思路：
+      - 使用固定的服务器套接字数量，不要在负载繁忙期间轻易变化。
+      - 允许多个服务器套接字共享TCP请求表(Tcp request table)。
+      - 不使用四元组作为Hash值进行选择本地套接字处理，比如选择 会话ID或者进程ID，挑选隶属于同一个CPU的套接字。
+      - 使用一致性hash算法。
+    - 演进
+      - 3.9之前内核，能够让多个socket同时绑定完全相同的ip+port，但不能实现负载均衡，实现是热备。
+      - Linux 3.9之后，能够让多个socket同时绑定完全相同的ip+port，可以实现负载均衡。
+      - Linux4.5版本后，内核引入了reuseport groups，它将绑定到同一个IP和Port，并且设置了SO_REUSEPORT选项的socket组织到一个group内部。目的是加快socket查询
+    - 与其他特性关系
+      - SO_REUSEADDR：主要是地址复用
+        - 让处于time_wait状态的socket可以快速复用原ip+port
+        - 使得0.0.0.0（ipv4通配符地址）与其他地址（127.0.0.1和10.0.0.x）不冲突
+        - SO_REUSEADDR 的缺点在于，没有安全限制，而且无法保证所有连接均匀分配。
 
 
 
