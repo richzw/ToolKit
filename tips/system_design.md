@@ -312,7 +312,24 @@
       job.Execute()
     }
     ```
-
+- [HTTP Server](https://pace.dev/blog/2018/05/09/how-I-write-http-services-after-eight-years.html)
+  - Return the handler
+    ```go
+    func (s *server) handleSomething() http.HandlerFunc {
+        thing := prepareThing()
+        return func(w http.ResponseWriter, r *http.Request) {
+            // use thing        
+        }
+    }
+    ```
+  - HandlerFunc over Handler
+    ```go
+    func (s *server) handleSomething() http.HandlerFunc {
+        return func(w http.ResponseWriter, r *http.Request) {
+            ...
+        }
+    }
+    ```
 
 
 
