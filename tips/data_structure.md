@@ -27,6 +27,8 @@
   - 为什么越来越多“唱衰” LSM 的声音呢
     - SSD 多通道并发、超高的随机性能是变革的核心因素。
     - 《WiscKey: Separating Keys from Values in SSD-Conscious Storage》就讨论了在 SSD 时代，LSM 架构的优化思路
+- [BitMap Index](https://github.com/mkevac/gopherconrussia2019)
+  - [Details](https://medium.com/bumble-tech/bitmap-indexes-in-go-unbelievable-search-speed-bb4a6b00851)
 - [Introducing Serialized Roaring Bitmaps in Golang](https://dgraph.io/blog/post/serialized-roaring-bitmaps-golang/)
   - [Roaring Bitmap](https://github.com/RoaringBitmap/roaring)
   - 
