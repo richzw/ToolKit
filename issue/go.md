@@ -671,6 +671,7 @@
     ![img.png](go_slice.png)
   - `[]interface{}` an interface{} itself looks in memory. occupies two quadwords (on a 64-bit machine), because it holds two pointers: the first points to the dispatch table for the methods of the value (itable), and the second points to the runtime value itself
     ![img.png](go_slice_interface.png)
+- [pprof快速定位Go程序内存泄露](https://mp.weixin.qq.com/s/PEpvCqpi9TPhVuPdn3nyAg)
 
 
 
