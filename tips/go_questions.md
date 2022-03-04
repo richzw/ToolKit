@@ -159,7 +159,88 @@
     - 如果指向底层数组的指针被覆盖或者修改（copy、重分配、append触发扩容），此时函数内部对数据的修改将不再影响到外部的切片，代表长度的len和容量cap也均不会被修改。
   - range遍历切片有什么要注意的？
     - 使用range遍历切片时会先拷贝一份，然后在遍历拷贝数据
-
+- [Common mistaks with Slice](https://medium.com/@nsspathirana/common-mistakes-with-go-slices-95f2e9b362a9#19e8)
+  - Re-slice a slice and refer to elements
+    ```go
+    a := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
+    
+        b := a[4:7]
+        fmt.Printf("before sorting a, b = %v\n", b) // before sorting a, b = [5 6 7]
+    
+        sort.Slice(a, func(i, j int) bool {
+            return a[i]> a[j]
+        })
+        // b is not [5,6,7] anymore. If we code something to use [5,6,7] in b, then
+        // there can be some unpredicted behaviours
+        fmt.Printf("after sorting a, b = %v\n", b) // after sorting a, b = [5 4 3]
+    ```
+  - Iterate and put the reference to elements
+    ```go
+        a := make([]*int, 0)
+        // simplest scenario of the mistake. create *int slice and
+        // put elements in a loop using iterator variable's pointer
+        for i := 0; i < 3; i++ {
+            a = append(a, &i)
+        }
+    
+        // all elements have same pointer value and value is the last value of
+        // the iterator variable because i is the same variable throughout the loop
+    
+        fmt.Printf("a = %v\n", a) // a = [0xc000018058 0xc000018058 0xc000018058]
+        fmt.Printf("a[0] = %v, a[1] = %v, a[2] = %v\n\n", *a[0], *a[1], *a[2])
+        // a[0] = 3, a[1] = 3, a[2] = 3
+    
+        type A struct {
+            a int
+        }
+        b := []A{
+            {a: 2},
+            {a: 4},
+            {a: 6},
+        }
+    
+        // append pointer to iteration variable a and it's memory address is same
+        // through out the loop so all the elements will append same pointer and value
+        // is the last value of the loop because a is the same variable throughout
+        // the loop
+        aa := make([]*A, 0)
+        for _, a := range b {
+            aa = append(aa, &a)
+        }
+        fmt.Printf("aa = %v\n", a) // aa = [0xc000018058 0xc000018058 0xc000018058]
+        fmt.Printf("aa[0] = %v, aa[1] = %v, aa[2] = %v\n\n", *aa[0], *aa[1], *aa[2])
+        // aa[0] = {6}, aa[1] = {6}, aa[2] = {6}
+    
+        // Fix:
+        // To avoid that iteration value should be copied to a different variable
+        // and pointer to that should be appended
+    
+        bb := make([]*A, 0)
+        for _, a := range b {
+            a := a
+            bb = append(bb, &a)
+        }
+    
+        fmt.Printf("bb = %v\n", a) // bb = [0xc000018058 0xc000018058 0xc000018058]
+        fmt.Printf("bb[0] = %v, bb[1] = %v, bb[2] = %v\n", *bb[0], *bb[1], *bb[2])
+        // bb[0] = {2}, bb[1] = {4}, bb[2] = {6}
+    ```
+  - Append to a slice in a different function
+  - Changing slice’s elements while iterating with a range loop
+  - Create a new slice by appending different values to the same slice
+    ```go
+    	a := make([]int, 3, 10)
+    	a[0], a[1], a[2] = 1, 2, 3
+    
+    	b := append(a, 4)
+    	c := append(a, 5)
+    	
+    	// c == b because both refer to same underlying array and capacity of that is 10
+    	// so appending to a will not create new array.
+    	fmt.Printf("b = %v \n", b) // b = [1 2 3 5]
+    	fmt.Printf("c = %v \n\n", c) // c = [1 2 3 5]
+    ```
+  - Copy a slice using the copy built-in function to an empty slice
 
 
 
