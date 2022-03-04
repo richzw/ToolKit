@@ -62,7 +62,9 @@
     - CPU 调度器本身也有执行队列，可以用 bcc 中的 runqlen 工具来查看
     - 磁盘的读写也有相应的队列
   - [Controlling Queue Delay](https://queue.acm.org/detail.cfm?id=2209336)
-
+- [pprof快速定位Go程序内存泄露](https://mp.weixin.qq.com/s/PEpvCqpi9TPhVuPdn3nyAg)
+- [Analyze Current Goroutines in Go](https://trstringer.com/analyze-goroutines/)
+- [Advent of Go Profiling](https://felixge.de/2021/12/01/advent-of-go-profiling-2021-day-1-1/)
 
 
 
