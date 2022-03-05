@@ -29,6 +29,25 @@
     - 《WiscKey: Separating Keys from Values in SSD-Conscious Storage》就讨论了在 SSD 时代，LSM 架构的优化思路
 - [BitMap Index](https://github.com/mkevac/gopherconrussia2019)
   - [Details](https://medium.com/bumble-tech/bitmap-indexes-in-go-unbelievable-search-speed-bb4a6b00851)
+  - Indexing approach
+    - Hierarchical division - *-trees
+    - Hash Mapping - hash maps, reverse indexes
+    - Instantly - Bloom filter, Cuckoo filter
+    - Bitmap index
+  - Bitmap Index
+    - bitmap/bitset AND OR
+    - high-performance for low cardinality
+  - Bitmap Index Problems
+    - High-cardinality problem
+      - Solution 1: Roaring bitmap - bitmaps, arrays, bit runs
+      - Solution 2: Binning
+    - High-throughput problem
+      - it can be expensive to update bitmaps.
+      - Solution 1: Sharding
+      - Solution 2: Versioned Indexes
+    - Non-trivial queries
+      - range query
+      - geo query
 - [Introducing Serialized Roaring Bitmaps in Golang](https://dgraph.io/blog/post/serialized-roaring-bitmaps-golang/)
   - [Roaring Bitmap](https://github.com/RoaringBitmap/roaring)
   - 
