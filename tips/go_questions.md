@@ -263,6 +263,70 @@
     ```
   - json.Unmarshal: 要将一个 JSON 数组解码到切片（slice）中，Unmarshal 将切片长度重置为零，然后将每个元素 append 到切片中。特殊情况，如果将一个空的 JSON 数组解码到一个切片中，Unmarshal 会用一个新的空切片替换该切片。
   - slice: 执行第二次 json 解析. 底层数组从索引 0 位置开始依次被 3、4、5、7 填充。因为 aa 的 len 是 3，所以即使底层数组变成了 3、4、5、7，aa 看到却是 3、4、5. 当再继续解析时，底层数组容量不够，因此进行扩容，cap 变成 6，将原底层数组的元素拷贝一份到新的数组中。所以最后 a.Child 的底层数组是这个新的底层数组：[3 4 5 7 8 9]，cap = 6。而 aa 的底层数组还是原来的
+- [for..range slice issue](https://mp.weixin.qq.com/s?__biz=MzkyNzI1NzM5NQ==&mid=2247484755&idx=1&sn=5e3f8405dc8244875614cc936fbfd601&scene=21#wechat_redirect)
+    ```go
+    u := []user{
+    {"asong", 23},
+    {"song", 19},
+    {"song2020", 18},
+    }
+    n := make([]*user, 0, len(u))
+    // 在for range中，变量v是用来保存迭代切片所得的值，因为v只被声明了一次，每次迭代的值都是赋值给v，该变量的内存地址始终未变，这样讲他的地址追加到新的切片中，
+    // 该切片保存的都是同一个地址，这肯定无法达到预期效果的。
+    // 这里还需要注意一点，变量v的地址也并不是指向原来切片u[2]的，因我在使用range迭代的时候，变量v的数据是切片的拷贝数据，所以直接copy了结构体数据。
+    // This is because in the for loop you operate with a copy and not with the slice/array element itself.
+    // The for ... range makes a copy of the elements it loops over.
+    // In Go there are pointer types and non-pointer types, but no "references" (in the meaning it is used in C++ and Java). Given the fact that there are no "reference" types in Go, this is not an unexpected behavior. The loop variable is just an "ordinary" local variable, it can only hold a value (which may be a pointer or non-pointer), but not a reference.
+    for _, v := range u {
+    n = append(n, &v)
+    }
+    
+    fmt.Println(n)
+    for _, v := range n {
+    fmt.Println(v)
+    }
+    
+    // fix method 1
+    n = n[:0]
+    for _, v := range u {
+    o := v
+    n = append(n, &o)
+    }
+    fmt.Println(n)
+    for _, v := range n {
+    fmt.Println(v)
+    }
+    
+    // fix method 2: 直接引用数据的内存，这个方法比较好，不需要开辟新的内存空间
+    n = n[:0]
+    for k, _ := range u {
+    n = append(n, &u[k])
+    }
+    fmt.Println(n)
+    
+    // try to change value of slice element
+    for _, v := range u {
+    if v.age != 18 {
+    v.age = 20
+    }
+    }
+    fmt.Println(u)
+    
+    // fix
+    for k, v := range u {
+    if v.age != 18 {
+    u[k].age = 18
+    }
+    }
+    fmt.Println(u)
+    
+    // infinite loop? NO
+    v := []int{1, 2, 3}
+    for i := range v {
+    v = append(v, i)
+    }
+    fmt.Println(v)
+    ```
 - [空切片分配了底层数组?](https://mp.weixin.qq.com/s/NMz4PMtFYqkYb5oUo1-FzA)
   - 空切片(empty slice)与nil切片
     ```go
