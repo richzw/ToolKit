@@ -98,6 +98,60 @@
     - The EPOLLEXCLUSIVE flag is used to prevent the "thundering heard" behavior, so only a single epoll_wait caller is woken up for each fd wake-up event.
     - As I pointed out before, for edge-triggered states, an fd wake-up event is a change in the fd state. So all EPOLLIN events will be raised until all data was read (the listening socket's backlog was emptied).
     - On the other hand, for level triggered events, each EPOLLIN will invoke a wake up event. If no one is waiting, these events will be merged.
-
-
-
+- [异步I/O框架 io_uring](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247562787&idx=1&sn=471a0956249ca789afad774978522717&chksm=c1850172f6f28864474f9832bfc61f723b5f54e174417d570a6b1e3f9f04bda7b539662c0bed&scene=21#wechat_redirect)
+  - Source [1](How io_uring and eBPF Will Revolutionize Programming in Linux), [2](An Introduction to the io_uring Asynchronous I/O Framework)
+  - 概述
+  - io_uring 是在Linux 5.1 内核首次引入的高性能异步 I/O 框架, 但如果你的应用 已经在使用 传统 Linux AIO 了， 并且使用方式恰当， 那 io_uring  并不会带来太大的性能提升
+  - 统一了 Linux 异步 I/O 框架
+    - Linux AIO  只支持 direct I/O 模式的 存储文件（storage file），而且主要用在 数据库这一细分领域
+    - io_uring 支持存储文件和网络文件（network sockets），也支持更多的异步系统调用 （accept/openat/stat/.
+  - 设计上是真正的异步 I/O
+  - 灵活性和可扩展性非常好，甚至能基于 io_uring 重写所有系统调用
+  - eBPF 也算是异步框架（事件驱动），但与 io_uring 没有本质联系，二者属于不同子系统， 并且在模型上有一个本质区别
+    - eBPF 对用户是透明的，只需升级内核（到合适的版本）， 应用程序无需任何改造；
+    - io_uring 提供了 新的系统调用和用户空间 API，因此 需要应用程序做改造。
+  - Linux I/O 系统调用演进
+    - 基于 fd 的阻塞式 I/O：read()/write()
+    - 非阻塞式 I/O：select()/poll()/epoll() - 只支持 network sockets 和 pipes
+    - 线程池方式 - 线程上下文切换开销可能非常大
+    - Direct I/O（数据库软件）- 绕过 page cache
+      - 需要指定  O_DIRECT flag；
+      - 需要 应用自己管理自己的缓存 —— 这正是数据库软件所希望的；
+      - 是  zero-copy I/O，因为应用的缓冲数据直接发送到设备，或者直接从设备读取
+    - 异步 IO（AIO）
+      - Linux  2.6 内核引入了异步 I/O（asynchronous I/O）接口
+      - 用户通过 io_submit() 提交 I/O 请求，
+      - 过一会再调用 io_getevents() 来检查哪些 events 已经 ready 了
+  - io_uring
+    - Design
+      - 在设计上是真正异步的（truly asynchronous）。只要 设置了合适的 flag，它在 系统调用上下文中就只是将请求放入队列， 不会做其他任何额外的事情， 保证了应用永远不会阻塞。
+      - 支持任何类型的 I/O：cached files、direct-access files 甚至 blocking sockets
+      - 灵活、可扩展：基于 io_uring 甚至能重写（re-implement）Linux 的每个系统调用
+    - 原理及核心数据结构：SQ/CQ/SQE/CQE
+      - 每个 io_uring 实例都有 两个环形队列（ring），在内核和应用程序之间共享：
+        - 提交队列：submission queue (SQ)
+        - 完成队列：completion queue (CQ)
+        ![img.png](socket_io_uring_sq.png)
+        - 都是 单生产者、单消费者，size 是 2 的幂次；
+        - 提供 无锁接口（lock-less access interface），内部使用 **内存屏障**做同步（coordinated with memory barriers）。
+      - 带来的好处
+        - 原来需要多次系统调用（读或写），现在变成批处理一次提交
+      - 三种工作模式
+        - 中断驱动模式（interrupt driven）
+          - 默认模式。可通过 io_uring_enter() 提交 I/O 请求，然后直接检查 CQ 状态判断是否完成。
+        - 轮询模式（polled）
+          - Busy-waiting for an I/O completion，而不是通过异步 IRQ（Interrupt Request）接收通知
+          - 这种模式需要文件系统（如果有）和块设备（block device）支持轮询功能
+        - 内核轮询模式（kernel polled）
+          - 这种模式中，会创建一个内核线程（kernel thread）来执行 SQ 的轮询工作。
+      - io_uring 系统调用 API
+         - io_uring_setup(2)
+         - io_uring_register(2)
+         - io_uring_enter(2)
+- [Linux 网络包发送过程](https://mp.weixin.qq.com/s?__biz=MjM5Njg5NDgwNA==&mid=2247485146&idx=1&sn=e5bfc79ba915df1f6a8b32b87ef0ef78&scene=21#wechat_redirect)
+- [Linux网络包接收过程](https://mp.weixin.qq.com/s?__biz=MjM5Njg5NDgwNA==&mid=2247484058&idx=1&sn=a2621bc27c74b313528eefbc81ee8c0f&scene=21#wechat_redirect)
+- [127.0.0.1 之本机网络通信过程](https://mp.weixin.qq.com/s/_yRC90iThCsP_zlLA6J12w)
+  - 127.0.0.1 本机网络 IO 需要经过网卡吗？
+    - 不需要经过网卡。即使了把网卡拔了本机网络是否还可以正常使用的。
+  - 数据包在内核中是个什么走向，和外网发送相比流程上有啥差别？
+    - 总的来说，本机网络 IO 和跨机 IO 比较起来，确实是节约了一些开销。发送数据不需要进 RingBuffer 的驱动队列，直接把 skb 传给接收协议栈（经过软中断）。但是在内核其它组件上，可是一点都没少，系统调用、协议栈（传输层、网络层等）、网络设备子系统、邻居子系统整个走了一个遍。连“驱动”程序都走了（虽然对于回环设备来说只是一个纯软件的虚拟出来的东东）。所以即使是本机网络 IO，也别误以为没啥开销。
