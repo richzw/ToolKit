@@ -1030,6 +1030,18 @@
   - To keep the amount of GC work down you essentially have two choices as follows.
     - Make sure the memory you allocate contains no pointers. That means no slices, no strings, no time.Time, and definitely no pointers to other allocations. If an allocation has no pointers it gets marked as such and the GC does not scan it.
     - Allocate the memory off-heap by directly calling the mmap syscall yourself. Then the GC knows nothing about the memory. This has upsides and downsides. The downside is that this memory can’t really be used to reference objects allocated normally, as the GC may think they are no longer in-use and free them.
-
+- [Implementing Graceful Shutdown in Go](https://dev.to/rudderstack/implementing-graceful-shutdown-in-go-1a1b)
+  - Anti-patterns
+    - Block artificially
+    - os.Exit(): Calling os.Exit(1) while other go routines are still running is essentially equal to SIGKILL, no chance for closing open connections and finishing inflight requests and processing.
+  - How to make it graceful in Go
+    - How to wait for all the running go routines to exit
+      - Channel: This is mostly useful when waiting on a single go routine.
+      - WaitGroup: Waiting multiple go routines
+      - errgroup
+        - The two errgroup's methods .Go and .Wait are more readable and easier to maintain in comparison to WaitGroup.
+        - In addition, as its name suggests it does error propagation and cancels the context in order to terminate the other go-routines in case of an error.
+    - How to propagate the termination signal to multiple go routines
+      - channel failed to do that, whereas context could done. Refer to snippet
 
 
