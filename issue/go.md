@@ -673,6 +673,36 @@
     ![img.png](go_slice_interface.png)
 - [Deadlocks: the dark side of concurrency](https://www.craig-wood.com/nick/articles/deadlocks-in-go/)
   - [Source](https://www.youtube.com/watch?v=9j0oQkqzhAE)
+- [select 死锁](https://mp.weixin.qq.com/s/Ov1FvLsLfSaY8GNzfjfMbg)
+  - Sample. [Source](https://stackoverflow.com/questions/51167940/chained-channel-operations-in-a-single-select-case。)
+    ```go
+    func main() {
+     var wg sync.WaitGroup
+     foo := make(chan int)
+     bar := make(chan int)
+     wg.Add(1)
+     go func() {
+      defer wg.Done()
+      select {
+      case foo <- <-bar:
+      default:
+       println("default")
+      }
+     }()
+     wg.Wait()
+    }
+    ```
+  - For all the cases in the statement, the channel operands of receive operations and the channel and right-hand-side expressions of send statements are evaluated exactly once, in source order, upon entering the “select” statement. The result is a set of channels to receive from or send to, and the corresponding values to send. Any side effects in that evaluation will occur irrespective of which (if any) communication operation is selected to proceed. Expressions on the left-hand side of a RecvStmt with a short variable declaration or assignment are not yet evaluated.
+  - 对于 select 语句，在进入该语句时，会按源码的顺序对每一个 case 子句进行求值：这个求值只针对发送或接收操作的额外表达式。
+    ```go
+    select {
+    case ch <- <-input1:
+    case ch <- <-input2:
+    }
+    ```
+  - <-input1 和 <-input2 都会执行，相应的值是：A x 和 B x（其中 x 是 0-5）。但每次 select 只会选择其中一个 case 执行，所以 <-input1 和 <-input2 的结果，必然有一个被丢弃了，也就是不会被写入 ch 中。因此，一共只会输出 5 次，另外 5 次结果丢掉了。（你会发现，输出的 5 次结果中，x 比如是 0 1 2 3 4）
+  - 而 main 中循环 10 次，只获得 5 次结果，所以输出 5 次后，报死锁。
+
 
 
 
