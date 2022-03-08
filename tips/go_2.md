@@ -1043,5 +1043,32 @@
         - In addition, as its name suggests it does error propagation and cancels the context in order to terminate the other go-routines in case of an error.
     - How to propagate the termination signal to multiple go routines
       - channel failed to do that, whereas context could done. Refer to snippet
+- [基于channel实现的并发安全的字节池](https://mp.weixin.qq.com/s/91_FxpV5qbR-XNqh0Dh8EA)
+  - MinIO
+    ```go
+    type BytePoolCap struct {
+        c    chan []byte
+        w    int
+        wcap int
+    }
+    ```
+     ```go
+     func (bp *BytePoolCap) Get() (b []byte) {
+         select {
+         case b = <-bp.c:
+         // reuse existing buffer
+         default:
+             // create new buffer
+             if bp.wcap > 0 {
+                 b = make([]byte, bp.w, bp.wcap)
+             } else {
+                 b = make([]byte, bp.w)
+             }
+         }
+         return
+     }
+     ```
+
+
 
 
