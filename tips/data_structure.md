@@ -51,7 +51,7 @@
 - [Introducing Serialized Roaring Bitmaps in Golang](https://dgraph.io/blog/post/serialized-roaring-bitmaps-golang/)
   - [Roaring Bitmap](https://github.com/RoaringBitmap/roaring)
   - 
-
+- [When Bloom filters don't bloom](https://blog.cloudflare.com/when-bloom-filters-dont-bloom/)
 
 
 
