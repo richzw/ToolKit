@@ -407,7 +407,40 @@
 - [简单的服务响应时长优化方法](https://mp.weixin.qq.com/s/YP06ErRfydZ1R6-_J5-fcQ)
   - 如果是串行调用的话响应时间会随着 rpc 调用次数呈线性增长，所以我们要优化性能一般会将串行改并行. 简单的场景下使用 waitGroup 也能够满足需求，但是如果我们需要对 rpc 调用返回的数据进行校验、数据加工转换、数据汇总呢？继续使用 waitGroup 就有点力不从心了
   - 通过 MapReduce 把正交（不相关）的请求并行化，你就可以大幅降低服务响应时长
-
+- [优化redis写入而降低cpu使用率](https://mp.weixin.qq.com/s/16Fn7LahXSadTHS0NXcapQ)
+  - 背景
+    - 项目中基于redis记录实时请求量的一个功能，因流量上涨造成redis服务器的CPU高于80%而触发了自动报警机制，经分析将实时写入redis的方式变更成批量写入的方式，从而将CPU使用率降低了30%左右的经历
+  - v1
+    - 第一个版本很简单，就是将最大值存放在redis中，然后按天的维度记录每个国家流量的实时请求数量。每次流量来了之后，先查询出该国家流量的最大值，以及当天的实时请求数，然后做比较，如果实时数已经超过了最大值，就直接返回，否则就对实时数进行+1操作即可。
+     ```go
+         maxReq := redis.Get(key)
+     
+         day := time.Now().Format("20060102")
+         dailyKey := "CN:"+day+":req"
+         dailyReq := redis.Get(dailyKey)
+     
+         if dailyReq > maxReq {
+             return true
+         }
+     
+         redis.Incr(dailyKey, dailyReq)
+         redis.Expire(dailyKey, 7*24*time.Hour)
+     ```
+  - v2
+    - 我们通过使用一个hasUpdateExpire的map类型，来记录某个key是否已经被设置了有效期的标识. 减少Expire的执行次数
+  - v3 异步批量写入
+    - 我们的技术不直接写入redis，而是写在内存缓存中，即一个全局变量中，同时启动一个定时器，每隔一段时间就将内存中的数据批量写入到redis中
+      ```go
+      type CounterCache struct {
+         rwMu        sync.RWMutex
+         redisClient redis.Cmdable
+      
+         countCache   map[string]int64
+         hasUpdateExpire map[string]struct{}
+      }
+      ```
+  - v4 maybe
+    - redis 多个命令采用pipeline方式执行
 
 
 
