@@ -406,7 +406,14 @@
       - BASE：表示基础AOF，它一般由子进程通过重写产生，该文件最多只有一个。
       - INCR：表示增量AOF，它一般会在AOFRW开始执行时被创建，该文件可能存在多个。
       - HISTORY：表示历史AOF，它由BASE和INCR AOF变化而来，每次AOFRW成功完成时，本次AOFRW之前对应的BASE和INCR AOF都将变为HISTORY，HISTORY类型的AOF会被Redis自动删除。
-
+- [mysql主库更新后，从库都读到最新值了，主库还有可能读到旧值吗](https://mp.weixin.qq.com/s/EaTI063DJSH3gDNQhi-OZg)
+  - 主从同步
+    ![img.png](db_mysql_relay_log.png)
+  - 主库更新后，主库都读到最新值了，从库还有可能读到旧值吗？
+    - 如果此时主从延迟过大，这时候读从库，同步可能还没完成，因此读到的就是旧值
+  - 主库更新后，从库都读到最新值了，主库还有可能读到旧值吗？
+    - 假设当前的数据库事务隔离级别是可重复读
+    - ![img.png](db_mysql_isolation.png)
 
 
 
