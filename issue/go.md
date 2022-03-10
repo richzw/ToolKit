@@ -702,6 +702,35 @@
     ```
   - <-input1 和 <-input2 都会执行，相应的值是：A x 和 B x（其中 x 是 0-5）。但每次 select 只会选择其中一个 case 执行，所以 <-input1 和 <-input2 的结果，必然有一个被丢弃了，也就是不会被写入 ch 中。因此，一共只会输出 5 次，另外 5 次结果丢掉了。（你会发现，输出的 5 次结果中，x 比如是 0 1 2 3 4）
   - 而 main 中循环 10 次，只获得 5 次结果，所以输出 5 次后，报死锁。
+- [不可被取地址的情况](https://gfw.go101.org/article/unofficial-faq.html#unaddressable-values)
+  - 字符串中的字节元素
+    ```go
+        s := "hello"
+        println(&s[1]) // invalid operation: cannot take address of s[1] (value of type byte)
+    ```
+  - map键值对中的值元素
+    ```go
+        m := make(map[string]int)
+        m["hello"] = 5
+        println(&m["hello"]) // invalid operation: cannot take address of m["hello"] (map index expression of type int)
+        for k, v := range m {
+           println(&k) // ok, 键元素是可以取地址的
+           _ = v
+        }
+    ```
+  - 接口值的动态值（类型断言的结果）
+    ```go
+    var a int = 5
+    var i interface{} = a
+    println(&(i.(int))) // invalid operation: cannot take address of i.(int) (comma, ok expression of type int)
+    ```
+  - 常量（包括具名常量和字面量）
+    ```go
+    const s = "hello" // 具名常量
+    
+    println(&s) // invalid operation: cannot take address of s (untyped string constant "hello")
+    println(&("golang")) // invalid ope
+    ```
 
 
 
