@@ -1,5 +1,6 @@
 package snippet
 
+// Sample: https://vincent.composieux.fr/article/dependency-injection-in-go-with-uber-go-fx
 // Doc: https://pmihaylov.com/shared-components-go-microservices/
 // Source: https://github.com/preslavmihaylov/fxappexample/tree/v2-fx-example
 // fx module: https://github.com/preslavmihaylov/fxappexample/tree/v3-fx-modules
