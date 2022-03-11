@@ -354,6 +354,37 @@
      }
     ```
     `生成go源码对应汇编代码的主要方法有：go tool compile -S xxx.go和针对编译后的二进制文件使用go tool objdump -S exe_file。`
+- [defer](https://mp.weixin.qq.com/s/yM5iX-5VRELAqb0qy4c8Yg)
+  - defer 注册的函数，执行 return 语句之后，对应执行三个操作序列：
+    ```
+    1. 设置返回值
+    2. 执行 defered 链表
+    3. ret 指令跳转到 caller 函数
+    ```
+  - Question
+    ```go
+    func f1 () (r int) {
+     t := 1
+     defer func() {
+      t = t +5
+     }()
+     return t
+    }
+    
+    func f2() (r int) {
+     defer func(r int) {
+      r = r + 5
+     }(r)
+     return 1
+    }
+    
+    func f3() (r int) {
+     defer func () {
+      r = r + 5
+     } ()
+     return 1
+    }
+    ```
 
 
 
