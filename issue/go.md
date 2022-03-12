@@ -731,9 +731,38 @@
     println(&s) // invalid operation: cannot take address of s (untyped string constant "hello")
     println(&("golang")) // invalid ope
     ```
-
-
-
+- [有必要内存对齐](https://ms2008.github.io/2019/08/01/golang-memory-alignment/)
+  - 为什么要做对齐，主要考虑下面两个原因：
+    - 平台（移植性: 不是所有的硬件平台都能够访问任意地址上的任意数据。例如：特定的硬件平台只允许在特定地址获取特定类型的数据，否则会导致异常情况
+    - 性能: 若访问未对齐的内存，将会导致 CPU 进行两次内存访问，并且要花费额外的时钟周期来处理对齐及运算。而本身就对齐的内存仅需要一次访问就可以完成读取动作，这显然高效很多，是标准的空间换时间做法
+  - 在 x86_64 平台上，int64 的对齐系数为 8，而在 x86 平台上其对齐系数就是 4。
+  - 在 x86 平台上原子操作 64bit 指针。之所以要强制对齐，是因为在 32bit 平台下进行 64bit 原子操作要求必须 8 字节对齐，[否则程序会 panic](https://pkg.go.dev/sync/atomic#pkg-note-bug)。
+    ```go
+    type T3 struct {
+        b int64
+        c int32
+        d int64
+    }
+    
+    func main() {
+        a := T3{}
+        atomic.AddInt64(&a.d, 1)
+    }
+    
+    $ GOARCH=386 go build aligned.go  panic
+    ```
+    - solve
+    ```go
+    我们必须手动 padding T3，让其 “看起来” 像是 8 字节对齐的：
+    
+    type T3 struct {
+        b int64
+        c int32
+        _ int32
+        d int64
+    }
+    ```
+  - 用 golangci-lint 做静态检测 `golangci-lint run --disable-all -E maligned`
 
 
 
