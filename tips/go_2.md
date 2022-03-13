@@ -1070,6 +1070,28 @@
      ```
 - [Understanding Allocations in Go](https://medium.com/eureka-engineering/understanding-allocations-in-go-stack-heap-memory-9a2631b5035d)
 - [A visual guide to Go Memory Allocator from scratch ](https://medium.com/@ankur_anand/a-visual-guide-to-golang-memory-allocator-from-ground-up-e132258453ed)
+  - [Chinese](https://www.linuxzen.com/go-memory-allocator-visual-guide.html)
+  - 内存分配器
+    - 如果堆上有足够的空间的满足我们代码的内存申请，内存分配器可以完成内存申请无需内核参与，否则将通过操作系统调用（brk）进行扩展堆，通常是申请一大块内存。
+    - 内存分配器除了更新 brk address 还有其他职责, 如何减少 内部（internal）和外部（external）碎片和如何快速分配当前块
+    - Go 内存分配器建模相近的内存分配器： TCMalloc。核心思想是将内存分为多个级别缩小锁的粒度。在 TCMalloc 内存管理内部分为两个部分：线程内存（thread memory)和页堆（page heap）
+  - Go 内存分配器
+    - Go 实现的 TCMalloc 将内存页（Memory Pages）分为 67 种不同大小规格的块, 这些页通过 mspan 结构体进行管理
+    - mspan: 是一个包含页起始地址、页的 span 规格和页的数量的双端链表
+    - mcache: 一个本地线程缓存（Local Thread Cache）称作 mcache
+      - mcache 包含所有大小规格的 mspan 作为缓存
+      - 由于每个 P 都拥有各自的 mcache，所以从 mcache 分配内存无需持有锁
+      - <=32K 字节的对象直接使用相应大小规格的 mspan 通过 mcache 分配
+      - 当 mcache 没有可用空间时会从 mcentral 的 mspans 列表获取一个新的所需大小规格的 mspan
+    - mcentral: mcentral 对象收集所有给定规格大小的 span。
+      - 每一个 mcentral 都包含两个 mspan 的列表
+        - empty mspanList -- 没有空闲对象或 span 已经被 mcache 缓存的 span 列表
+        - nonempty mspanList -- 有空闲对象的 span 列表
+      - 对齐填充（Padding）用于确保 mcentrals 以 CacheLineSize 个字节数分隔，所以每一个 MCentral.lock 都可以获取自己的缓存行（cache line），以避免伪共享（false sharing）问题。
+      - 每一个 mcentral 结构体都维护在 mheap 结构体内
+    - mheap: Go 使用 mheap 对象管理堆，只有一个全局变量。持有虚拟地址空间。
+      - 由于我们有各个规格的 span 的 mcentral，当一个 mcache 从 mcentral 申请 mspan 时，只需要在独立的 mcentral 级别中使用锁，所以其它任何 mcache 在同一时间申请不同大小规格的 mspan 将互不受影响可以正常申请。
+      - 大于 32K 的对象被定义为大对象，直接通过 mheap 分配。这些大对象的申请是以一个全局锁为代价的，因此任何给定的时间点只能同时供一个 P 申请。
 - [Mutex vs Atomic](https://ms2008.github.io/2019/05/12/golang-data-race/)
   - Mutexes do no scale. Atomic loads do.
   - mutex 由操作系统实现，而 atomic 包中的原子操作则由底层硬件直接提供支持。在 CPU 实现的指令集里，有一些指令被封装进了 atomic 包，这些指令在执行的过程中是不允许中断（interrupt）的，因此原子操作可以在 lock-free 的情况下保证并发安全，并且它的性能也能做到随 CPU 个数的增多而线性扩展。

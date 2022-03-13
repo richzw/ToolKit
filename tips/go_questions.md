@@ -385,8 +385,24 @@
      return 1
     }
     ```
-
-
+- [常见知识点](https://mp.weixin.qq.com/s/7rCsaGy8B2lwbZ4duEC7Nw)
+  - Go 是传值还是传引用？
+  - Go 面试官问我如何实现面向对象？
+  - Go 结构体和结构体指针调用有什么区别吗？
+  - Go new 和 make 是什么，差异在哪？
+  - 什么是协程，协程和线程的区别和联系？
+  - GMP 模型，为什么要有 P？
+  - Go 结构体是否可以比较，为什么？
+  - 单核 CPU，开两个 Goroutine，其中一个死循环，会怎么样？
+  - 进程、线程都有 ID，为什么 Goroutine 没有 ID？
+  - Goroutine 数量控制在多少合适，会影响 GC 和调度？
+  - 详解 Go 程序的启动流程，你知道 g0，m0 是什么吗？
+  - Goroutine 泄露的情况有哪些？
+  - Go 在什么时候会抢占 P？
+  - 会诱发 Goroutine 挂起的 27 个原因
+  - 为什么 Go map 和 slice 是非线程安全的？
+  - Go sync.map 和原生 map 谁的性能好，为什么？
+  - 为什么 Go map 的负载因子是 6.5？
 
 
 
