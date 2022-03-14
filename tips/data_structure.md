@@ -50,7 +50,8 @@
       - geo query
 - [Introducing Serialized Roaring Bitmaps in Golang](https://dgraph.io/blog/post/serialized-roaring-bitmaps-golang/)
   - [Roaring Bitmap](https://github.com/RoaringBitmap/roaring)
-  - 
+  - [Serialized Roaring Bitmaps](https://github.com/dgraph-io/sroar)
+    - Sroar operates on 64-bit integers and uses a single byte slice to store all the keys and containers. This byte slice can then be stored on disk, operated on directly in memory, or transmitted over the wire. There’s no encoding/decoding step required. For all practical purposes, sroar can be treated just like a byte slice.
 - [When Bloom filters don't bloom](https://blog.cloudflare.com/when-bloom-filters-dont-bloom/)
 
 
