@@ -215,7 +215,7 @@
     - 代替每个队列的哈希至CPU地图，RFS维护全局flow-to-CPU的表，rps_sock_flow_table：该掩模用于将散列值映射成所述表的索引。
     - ![img.png](os_network_rfs.png)
   - aRFS: Accelerated Receive Flow Steering
-    - aRFS）进一步延伸RFS为RX队列硬件过滤。要启用 aRFS，它需要具有可编程元组过滤器和驱动程序支持的网卡。要启用ntuple 过滤器。
+    - aRFS 进一步延伸RFS为RX队列硬件过滤。要启用 aRFS，它需要具有可编程元组过滤器和驱动程序支持的网卡。要启用ntuple 过滤器。
   - SO_REUSEPORT
     - SO_REUSEPORT支持多个进程或者线程绑定到同一端口，用以提高服务器程序的性能
       - 允许多个套接字 bind()/listen() 同一个TCP/UDP端口
@@ -248,6 +248,17 @@
         - 让处于time_wait状态的socket可以快速复用原ip+port
         - 使得0.0.0.0（ipv4通配符地址）与其他地址（127.0.0.1和10.0.0.x）不冲突
         - SO_REUSEADDR 的缺点在于，没有安全限制，而且无法保证所有连接均匀分配。
+- [文件的 io 栈](https://mp.weixin.qq.com/s/IrZF9lWweEs1rhxuvMUCKA)
+  - IO 从用户态走系统调用进到内核，内核的路径：`VFS → 文件系统 → 块层 → SCSI 层 `
+    - VFS 负责通用的文件抽象语义，管理并切换文件系统；
+    - 文件系统负责抽象出“文件的概念”，维护“文件”数据到块层的位置映射，怎么摆放数据，怎么抽象文件都是文件系统说了算；
+    - 块层对底层硬件设备做一层统一的抽象，最重要的是做一些 IO 调度的策略。比如，尽可能收集批量 IO 聚合下发，让 IO 尽可能的顺序，合并 IO 请求减少 IO 次数等等；
+    - SCSI 层则是负责最后对硬件磁盘的对接，驱动层，本质就是个翻译器
+  - page cache 是发生在文件系统这里。通常我们确保数据落盘有两种方式：
+    - Writeback 回刷数据的方式：write 调用 + sync 调用；
+    - Direct IO 直刷数据的方式；
+  
+
 
 
 
