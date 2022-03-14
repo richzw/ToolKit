@@ -436,6 +436,7 @@ KeepAlive
       其实解决方案有很多种，在这里线上采用的是客户端进行重试。这里引申一下，像上面这种错误，如果是GET,HEAD等一些幂等操作的话，client代码库会自动进行重试。我们线上使用的是POST, 所以直接在业务侧进行重试
     - **Increase IdleTimeout**
       另外一个解决方案就是增加server的IdleTimeout，但是这样一来会消耗更多的server资源。
+- [Dive into go http timeout](https://adam-p.ca/blog/2022/01/golang-http-server-timeouts/)
 
 
 
