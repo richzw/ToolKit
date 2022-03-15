@@ -242,6 +242,23 @@
     - 为什么reuseport没有惊群？ 首先我们要知道惊群发生的原因，就是同时唤醒了多个进程处理一个事件，导致了不必要的CPU空转。为什么会唤醒多个进程，因为发生事件的文件描述符在多个进程之间是共享的。而reuseport呢，侦听同一个IP地址端口对的多个socket本身在socket层就是相互隔离的，在它们之间的事件分发是TCP/IP协议栈完成的，所以不会再有惊群发生。
 - [io_ring解析]()
   - [io_ring worker pool](https://blog.cloudflare.com/missing-manuals-io_uring-worker-pool/)
+- [RSS, RPS and RFS](https://stackoverflow.com/questions/44958511/what-is-the-main-difference-between-rss-rps-and-rfs)
+  - RSS: Receive Side Scaling 
+    - it is hardware implemented and hashes some bytes of packets ("hash function over the network and/or transport layer headers-- for example, a 4-tuple hash over IP addresses and TCP ports of a packet"). Implementations are different, some may not filter most useful bytes or may be limited in other ways. This filtering and queue distribution is fast (only several additional cycles are needed in hw to classify packet), but not portable between some network cards or can't be used with tunneled packets or some rare protocols. And sometimes your hardware have no support of number of queues enough to get one queue per logical CPU core.
+    - RSS should be enabled when latency is a concern or whenever receive interrupt processing forms a bottleneck. Spreading load between CPUs decreases queue length.
+  - Receive Packet Steering (RPS) 
+    - it is logically a software implementation of RSS. Being in software, it is necessarily called later in the datapath. So, this is software alternative to hardware RSS (still parses some bytes to hash them into queue id), when you use hardware without RSS or want to classify based on more complex rule than hw can or have protocol which can't be parsed in HW RSS classifier. But with RPS more CPU resources are used and there is additional inter-CPU traffic.
+    - RPS has some advantages over RSS: 1) it can be used with any NIC, 2) software filters can easily be added to hash over new protocols, 3) it does not increase hardware device interrupt rate (although it does introduce inter-processor interrupts (IPIs)).
+  - RFS: Receive Flow Steering 
+    - it is like RSS (software mechanism with more CPU overhead), but it not just hashing into pseudo-random queue id, but takes "into account application locality." (so, packet processing will probably be faster due to good locality). Queues are tracked to be more local to the thread which will process received data, and packets are delivered to correct CPU core.
+    - The goal of RFS is to increase datacache hitrate by steering kernel processing of packets to the CPU where the application thread consuming the packet is running. RFS relies on the same RPS mechanisms to enqueue packets onto the backlog of another CPU and to wake up that CPU. ... In RFS, packets are not forwarded directly by the value of their hash, but the hash is used as index into a flow lookup table. This table maps flows to the CPUs where those flows are being processed.
+  - Accelerated RFS
+    - RFS with hw support. (Check your network driver for ndo_rx_flow_steer) "Accelerated RFS is to RFS what RSS is to RPS: a hardware-accelerated load balancing mechanism that uses soft state to steer flows based on where the application thread consuming the packets of each flow is running.".
+  - Note: it would be smart to use RSS and RPS together in order to avoid CPU utilization bottlenecks on the receiving side
+    - RSS controls the selected HW queue for receiving a stream of packets. Once certain conditions are met, an interrupt would be issued to the SW. The interrupt handler, which is defined by the NIC's driver, would be the SW starting point for processing received packets. The code there would poll the packets from the relevant receive queue, might perform initial processing and then move the packets for higher level protocol processing.
+
+
+
 
 
 
