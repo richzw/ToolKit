@@ -93,7 +93,14 @@
       - mheap.sysAlloc 里其实有调用 sysReserve 方法，而 sysReserve 方法又正正是从 OS 系统中保留内存的地址空间的特定方法
   - 小结
     - VSZ（进程虚拟内存大小）与共享库等没有太大的关系，主要与 Go Runtime 存在直接关联，也就是在前图中表示的运行时堆（malloc）。转换到 Go Runtime 里，就是在 mallocinit 这个内存分配器的初始化阶段里进行了一定量的虚拟空间的保留
-
+- [When Bloom filters don't bloom](https://blog.cloudflare.com/when-bloom-filters-dont-bloom/)
+  - profiler
+    - strace: `strace -cf PROGRAM`
+    - perf: `perf record PROGRAM`, then check result var `perf record | head -n 20`
+    - google-perftools with kcachegrind
+    - check cache miss: `perf stat -d PROGRAM`
+    - 
+    
 
 
 
