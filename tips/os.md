@@ -257,8 +257,21 @@
   - page cache 是发生在文件系统这里。通常我们确保数据落盘有两种方式：
     - Writeback 回刷数据的方式：write 调用 + sync 调用；
     - Direct IO 直刷数据的方式；
-  
-
+- [零拷贝](https://mp.weixin.qq.com/s/K-5HJCxDzjZuHhWk1SPEQQ)
+  - 零拷贝是指计算机执行IO操作时，CPU不需要将数据从一个存储区域复制到另一个存储区域，从而可以减少上下文切换以及CPU的拷贝时间。它是一种I/O操作优化技术。
+  - 传统的IO流程，包括read和write的过程。4次数据拷贝（两次CPU拷贝以及两次的DMA拷贝)
+    - read：把数据从磁盘读取到内核缓冲区，再拷贝到用户缓冲区
+    - write：先把数据写入到socket缓冲区，最后写入网卡设备。
+    ![img.png](os_write_read.png)
+    - DMA，英文全称是Direct Memory Access，即直接内存访问。DMA本质上是一块主板上独立的芯片，允许外设设备和内存存储器之间直接进行IO数据传输，其过程不需要CPU的参与。
+  - 零拷贝并不是没有拷贝数据，而是减少用户态/内核态的切换次数以及CPU拷贝的次数。零拷贝实现有多种方式，分别是
+    - mmap+write：2次DMA拷贝和1次CPU拷贝
+      ![img.png](os_mmap_write.png)
+    - sendfile： 2次DMA拷贝和1次CPU拷贝
+      ![img.png](os_sendfile.png)
+    - 带有DMA收集拷贝功能的sendfile: 2次数据拷贝都是包DMA拷贝
+      - linux 2.4版本之后，对sendfile做了优化升级，引入SG-DMA技术，其实就是对DMA拷贝加入了scatter/gather操作，它可以直接从内核空间缓冲区中将数据读取到网卡。使用这个特点搞零拷贝，即还可以多省去一次CPU拷贝
+      ![img.png](os_sendfile_scattergatter.png)
 
 
 
