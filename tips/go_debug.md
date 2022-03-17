@@ -99,7 +99,10 @@
     - perf: `perf record PROGRAM`, then check result var `perf record | head -n 20`
     - google-perftools with kcachegrind
     - check cache miss: `perf stat -d PROGRAM`
-    - 
+  - bloom filter
+    - To get the same false positive guarantees we either must use many hashes in Bloom filter (like 8) and therefore many memory operations, or we can have 1 hash function, but enormous memory requirements.
+    - Bloom filters optimize for memory usage, not for memory access.
+  - start profiling with 'perf stat -d' and look at the "Instructions per cycle" (IPC) counter. If it's below 1, it generally means the program is stuck on waiting for memory. Values above 2 would be great, it would mean the workload is mostly CPU-bound.
     
 
 
