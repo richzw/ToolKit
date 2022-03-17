@@ -515,8 +515,53 @@
     - When the client application quits, the (127.0.0.1:some-port, 127.0.0.1:5000) socket enters the FIN_WAIT_1 state and then quickly transitions to FIN_WAIT_2. The FIN_WAIT_2 state should move on to TIME_WAIT if the client received FIN packet, but this never happens. The FIN_WAIT_2 eventually times out. On Linux this is 60 seconds, controlled by net.ipv4.tcp_fin_timeout sysctl.
     - This is where the problem starts. The (127.0.0.1:5000, 127.0.0.1:some-port) socket is still in CLOSE_WAIT state, while (127.0.0.1:some-port, 127.0.0.1:5000) has been cleaned up and is ready to be reused. When this happens the result is a total mess. One part of the socket won't be able to advance from the SYN_SENT state, while the other part is stuck in CLOSE_WAIT. The SYN_SENT socket will eventually give up failing with ETIMEDOUT.
 - [Sync Packet Handling](https://blog.cloudflare.com/syn-packet-handling-in-the-wild/)
-  - 
-
+  - The SYN queue
+    - The SYN Queue stores inbound SYN packets (specifically: struct inet_request_sock). 
+    - It's responsible for sending out SYN+ACK packets and retrying them on timeout.
+    - `net.ipv4.tcp_synack_retries = 5`
+  - The Accept queue
+    - The Accept Queue contains fully established connections: ready to be picked up by the application. 
+    - When a process calls accept(), the sockets are de-queued and passed to the application.
+  - Queue size limits
+    - The maximum allowed length of both the Accept and SYN Queues is taken from the backlog parameter passed to the listen(2) syscall by the application
+      `listen(sfd, 1024)` Note: In kernels before 4.3 the SYN Queue length was counted differently.
+    - This SYN Queue cap used to be configured by the `net.ipv4.tcp_max_syn_backlog` toggle, but this isn't the case anymore. 
+    - Nowadays `net.core.somaxconn` caps both queue sizes. 
+  - Perfect backlog value
+    - The answer is: it depends
+    - before version 1.11 Golang famously didn't support customizing backlog value
+      - When the rate of incoming connections is really large, even with a performant application, the inbound SYN Queue may need a larger number of slots.
+      - The backlog value controls the SYN Queue size. This effectively can be read as "ACK packets in flight". The larger the average round trip time to the client, the more slots are going to be used. In the case of many clients far away from the server, hundreds of milliseconds away, it makes sense to increase the backlog value.
+      - The TCP_DEFER_ACCEPT option causes sockets to remain in the SYN-RECV state longer and contribute to the queue limits.
+    - Overshooting the backlog is bad as well
+      - Each slot in SYN Queue uses some memory. During a SYN Flood it makes no sense to waste resources on storing attack packets. Each struct inet_request_sock entry in SYN Queue takes 256 bytes of memory on kernel 4.14.
+  - Slow application
+    - What happens if the application can't keep up with calling accept() fast enough?
+    - This is when the magic happens! When the Accept Queue gets full
+      - Inbound SYN packets to the SYN Queue are dropped.
+      - Inbound ACK packets to the SYN Queue are dropped.
+      - The TcpExtListenOverflows / LINUX_MIB_LISTENOVERFLOWS counter is incremented.
+      - The TcpExtListenDrops / LINUX_MIB_LISTENDROPS counter is incremented.
+    - There is a strong rationale for dropping inbound packets: it's a push-back mechanism.
+    - For completeness: it can be adjusted with the global net.ipv4.tcp_abort_on_overflow toggle, but better not touch it.
+    - You can trace the Accept Queue overflow stats by looking at nstat counters:
+      `$ nstat -az TcpExtListenDrops` This is a global counter
+    - The first step should always be to print the Accept Queue sizes with ss:
+      `$ ss -plnt sport = :6443|cat` The column Recv-Q shows the number of sockets in the Accept Queue, and Send-Q shows the backlog parameter.
+  - SYN Flood
+    - The solution is SYN Cookies. 
+    - SYN Cookies are a construct that allows the SYN+ACK to be generated statelessly, without actually saving the inbound SYN and wasting system memory. SYN Cookies don't break legitimate traffic. When the other party is real, it will respond with a valid ACK packet including the reflected sequence number, which can be cryptographically verified.
+    - When a SYN cookie is being sent out:
+      - TcpExtTCPReqQFullDoCookies / LINUX_MIB_TCPREQQFULLDOCOOKIES is incremented.
+      - TcpExtSyncookiesSent / LINUX_MIB_SYNCOOKIESSENT is incremented.
+      - Linux used to increment TcpExtListenDrops but doesn't from kernel 4.7.
+    - When an inbound ACK is heading into the SYN Queue with SYN cookies engaged:
+      - TcpExtSyncookiesRecv / LINUX_MIB_SYNCOOKIESRECV is incremented when crypto validation succeeds.
+      - TcpExtSyncookiesFailed / LINUX_MIB_SYNCOOKIESFAILED is incremented when crypto fails.
+  - SYN Cookies and TCP Timestamps
+    - The main problem is that there is very little data that can be saved in a SYN Cookie. 
+    - With the MSS setting truncated to only 4 distinct values, Linux doesn't know any optional TCP parameters of the other party. Information about Timestamps, ECN, Selective ACK, or Window Scaling is lost, and can lead to degraded TCP session performance.
+    - Fortunately Linux has a work around. If TCP Timestamps are enabled, the kernel can reuse another slot of 32 bits in the Timestamp field
 
 
 
