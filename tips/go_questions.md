@@ -385,6 +385,19 @@
      return 1
     }
     ```
+    ```go
+    func hello(i *int) int {
+    	defer func() {
+    		*i = 19
+    	}()
+    	return *i
+    }
+    
+    func main() {
+    	i := 10
+    	j := hello(&i)
+    	fmt.Println(i, j)
+    ```
 - [常见知识点](https://mp.weixin.qq.com/s/7rCsaGy8B2lwbZ4duEC7Nw)
   - Go 是传值还是传引用？
   - Go 面试官问我如何实现面向对象？
