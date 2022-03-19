@@ -155,6 +155,8 @@
     - 不需要经过网卡。即使了把网卡拔了本机网络是否还可以正常使用的。
   - 数据包在内核中是个什么走向，和外网发送相比流程上有啥差别？
     - 总的来说，本机网络 IO 和跨机 IO 比较起来，确实是节约了一些开销。发送数据不需要进 RingBuffer 的驱动队列，直接把 skb 传给接收协议栈（经过软中断）。但是在内核其它组件上，可是一点都没少，系统调用、协议栈（传输层、网络层等）、网络设备子系统、邻居子系统整个走了一个遍。连“驱动”程序都走了（虽然对于回环设备来说只是一个纯软件的虚拟出来的东东）。所以即使是本机网络 IO，也别误以为没啥开销。
+  - [Loopback congestion](https://blog.cloudflare.com/this-is-strictly-a-violation-of-the-tcp-specification/)
+    - The loopback works magically: when an application sends packets to it, it immediately, still within the send syscall handling, gets delivered to the appropriate target. There is no buffering over loopback. Calling send over loopback triggers iptables, network stack delivery mechanisms and delivers the packet to the appropriate queue of the target application.
 - [epoll背后的原理](https://mp.weixin.qq.com/s/jM8uUmlvzgGaJ60Q7zVVcA)
   - 初识 epoll
     - epoll 是 Linux 内核的可扩展 I/O 事件通知机制，其最大的特点就是性能优异
@@ -256,13 +258,50 @@
     - RFS with hw support. (Check your network driver for ndo_rx_flow_steer) "Accelerated RFS is to RFS what RSS is to RPS: a hardware-accelerated load balancing mechanism that uses soft state to steer flows based on where the application thread consuming the packets of each flow is running.".
   - Note: it would be smart to use RSS and RPS together in order to avoid CPU utilization bottlenecks on the receiving side
     - RSS controls the selected HW queue for receiving a stream of packets. Once certain conditions are met, an interrupt would be issued to the SW. The interrupt handler, which is defined by the NIC's driver, would be the SW starting point for processing received packets. The code there would poll the packets from the relevant receive queue, might perform initial processing and then move the packets for higher level protocol processing.
-
-
-
-
-
-
-
+- [Why does one NGINX worker take all the load](https://blog.cloudflare.com/the-sad-state-of-linux-socket-balancing/)
+  - There are generally three ways of designing a TCP server with regard to performance:
+    - (a) Single listen socket, single worker process.
+    - (b) Single listen socket, multiple worker processes. - Nginx
+    - (c) Multiple worker processes, each with separate listen socket. - By using the SO_REUSEPORT socket option it's possible to create a dedicated kernel data structure (the listen socket) for each worker process. 
+  - Spreading the accept() load
+    - blocking-accept
+      ```c 
+      sd = bind(('127.0.0.1', 1024))
+      for i in range(3):
+          if os.fork () == 0:
+              while True:
+                  cd, _ = sd.accept()
+                  cd.close()
+                  print 'worker %d' % (i,)
+      ```
+      - Linux will do proper FIFO-like round robin load balancing. Each process waiting on accept() is added to a queue and they will be served connections in order.
+    - epoll-and-accept
+      ```c++
+      sd = bind(('127.0.0.1', 1024))
+      sd.setblocking(False)
+      for i in range(3):
+          if os.fork () == 0:
+              ed = select.epoll()
+              ed.register(sd, EPOLLIN | EPOLLEXCLUSIVE) // We can avoid the usual thundering-herd issue by using the EPOLLEXCLUSIVE flag.
+              while True:
+                  ed.poll()
+                  cd, _ = sd.accept()
+                  cd.close()
+                  print 'worker %d' % (i,)
+      ```
+      - Linux seems to choose the last added process, a LIFO-like behavior. The process added to the waiting queue most recently will get the new connection. 
+  - SO_REUSEPORT to the rescue
+    - Linux supports a feature to work around this balancing problem - the SO_REUSEPORT socket option. We explained this in the (c) model, where the incoming connections are split into multiple separate accept queues. Usually it's one dedicated queue for each worker process.
+    - However, the separated queue cause delay issue
+      - "combined queue model" is better at reducing the maximum latency. A single clogged cashier will not significantly affect the latency of whole system. 
+      - The shared queue will be drained relatively promptly.
+  - Conclusion
+    - Balancing the incoming connections across multiple application workers is far from a solved problem. 
+      - The single queue approach (b) scales well and keeps the max latency in check, 
+      - but due to the epoll LIFO behavior the worker processes won't be evenly load balanced.
+    - For workloads that require even balancing it might be beneficial to use the SO_REUSEPORT pattern (c). Unfortunately in high load situations the latency distribution might degrade.
+    - Of course comparing blocking accept() with a full featured epoll() event loop is not fair. Epoll is more powerful and allows us to create rich event driven programs. Using blocking accept is rather cumbersome or just not useful at all. To make any sense, blocking accept programs would require careful multi-threading programming, with a dedicated thread per request
+    - There are a couple of things you need to take into account when using NGINX reuseport implementation. First make sure you run 1.13.6+ or have this patch applied. Then, remember that due to a defect in Linux TCP REUSEPORT implementation reducing number of REUSEPORT queues will cause some waiting TCP connections to be dropped
 
 
 
