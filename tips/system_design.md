@@ -330,7 +330,14 @@
         }
     }
     ```
-
+- [高并发下如何设计秒杀系统](https://mp.weixin.qq.com/s/Qoo5yPa5Mmzgb3_kIoTXbw)
+  - 瞬时高并发
+    - 页面静态化
+    - CDN加速
+    - 缓存
+    - mq异步处理
+    - 限流
+    - 分布式锁
 
 
 
