@@ -272,7 +272,7 @@
     - 带有DMA收集拷贝功能的sendfile: 2次数据拷贝都是包DMA拷贝
       - linux 2.4版本之后，对sendfile做了优化升级，引入SG-DMA技术，其实就是对DMA拷贝加入了scatter/gather操作，它可以直接从内核空间缓冲区中将数据读取到网卡。使用这个特点搞零拷贝，即还可以多省去一次CPU拷贝
       ![img.png](os_sendfile_scattergatter.png)
-
+- [进程和线程19个问题](https://mp.weixin.qq.com/s/NCl17jrOwP_A017nUqOkJQ)
 
 
 
