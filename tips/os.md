@@ -273,6 +273,64 @@
       - linux 2.4版本之后，对sendfile做了优化升级，引入SG-DMA技术，其实就是对DMA拷贝加入了scatter/gather操作，它可以直接从内核空间缓冲区中将数据读取到网卡。使用这个特点搞零拷贝，即还可以多省去一次CPU拷贝
       ![img.png](os_sendfile_scattergatter.png)
 - [进程和线程19个问题](https://mp.weixin.qq.com/s/NCl17jrOwP_A017nUqOkJQ)
+- [Linux 性能优化全景指南](https://mp.weixin.qq.com/s/6_utyj1kCyC5ZWpveDZQIQ)
+  - 性能优化
+    - 高并发和响应快对应着性能优化的两个核心指标：吞吐和延时
+    - 平均负载：单位时间内，系统处于可运行状态和不可中断状态的平均进程数，也就是平均活跃进程数。
+    - 平均负载高时可能是CPU密集型进程导致，也可能是I/O繁忙导致。具体分析时可以结合`mpstat/pidstat`工具辅助分析负载来源
+  - CPU
+    - CPU上下文切换分为：
+      - 进程上下文切换: 一次系统调用过程其实进行了两次CPU上下文切换
+      - 线程上下文切换
+      - 中断上下文切换: 中断上下文只包括内核态中断服务程序执行所必须的状态
+    - 通过vmstat可以查看系统总体的上下文切换情况
+    - 使用pidstat来查看每个进程上下文切换情况
+      ```shell
+      vmstat 1 1    #首先获取空闲系统的上下文切换次数
+      sysbench --threads=10 --max-time=300 threads run #模拟多线程切换问题
+      
+      vmstat 1 1    #新终端观察上下文切换情况
+      此时发现cs数据明显升高，同时观察其他指标：
+      r列： 远超系统CPU个数，说明存在大量CPU竞争
+      us和sy列：sy列占比80%，说明CPU主要被内核占用
+      in列： 中断次数明显上升，说明中断处理也是潜在问题
+      
+      说明运行/等待CPU的进程过多，导致大量的上下文切换，上下文切换导致系统的CPU占用率高
+      
+      pidstat -w -u 1  #查看到底哪个进程导致的问题, 分析sysbench模拟的是线程的切换，因此需要在pidstat后加-t参数查看线程指标。
+      
+      另外对于中断次数过多，我们可以通过/proc/interrupts文件读取 `watch -d cat /proc/interrupts`
+      ```
+    - 某个应用的CPU使用率达到100%，怎么办？
+      - CPU使用率 - 除了空闲时间以外的其他时间占总CPU时间的百分比。可以通过/proc/stat中的数据来计算出CPU使用率。
+      - 分析进程的CPU问题可以通过perf，它以性能事件采样为基础 `perf top / perf record / perf report `
+        ```shell
+        sudo docker run --name nginx -p 10000:80 -itd feisky/nginx
+        sudo docker run --name phpfpm -itd --network container:nginx feisky/php-fpm
+        
+        ab -c 10 -n 100 http://XXX.XXX.XXX.XXX:10000/ #测试Nginx服务性能
+        发现此时每秒可承受请求给长少，此时将测试的请求数从100增加到10000。在另外一个终端运行top查看每个CPU的使用率。发现系统中几个php-fpm进程导致CPU使用率骤升。
+        
+        接着用perf来分析具体是php-fpm中哪个函数导致该问题。`perf top -g -p XXXX #对某一个php-fpm进程进行分析`
+        ```
+    - 系统的CPU使用率很高，为什么找不到高CPU的应用？
+       ```shell
+       sudo docker run --name nginx -p 10000:80 -itd feisky/nginx:sp
+       sudo docker run --name phpfpm -itd --network container:nginx feisky/php-fpm:sp
+       ab -c 100 -n 1000 http://XXX.XXX.XXX.XXX:10000/ #并发100个请求测试
+       
+       此时用top和pidstat发现系统CPU使用率过高，但是并没有发现CPU使用率高的进程。
+       出现这种情况一般时我们分析时遗漏的什么信息，重新运行top命令并观察一会。发现就绪队列中处于Running状态的进行过多，超过了我们的并发请求次数5. 再仔细查看进程运行数据，发现nginx和php-fpm都处于sleep状态，真正处于运行的却是几个stress进程。
+       ```
+      - 此时有可能时以下两种原因导致：
+        - 进程不停的崩溃重启（如段错误/配置错误等），此时进程退出后可能又被监控系统重启；
+        - 短时进程导致，即其他应用内部通过exec调用的外面命令，这些命令一般只运行很短时间就结束，很难用top这种间隔较长的工具来发现
+      - 可以通过pstree来查找 stress的父进程，找出调用关系。 `pstree | grep stress`
+    - 系统中出现大量不可中断进程和僵尸进程怎么办？
+      - 大量的僵尸进程会用尽PID进程号，导致新进程无法建立
+
+
+
 
 
 
