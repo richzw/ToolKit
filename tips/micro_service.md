@@ -637,10 +637,43 @@
     - 读多写少的场景下，可以选择采用 Cache-Aside 结合消费数据库日志做补偿”的方案
     - 写多的场景下，可以选择采用 Write-Through 结合分布式锁”的方案
     - 写多的极端场景下，可以选择采用 Write-Behind 的方案
-
-
-
-
+- [分布式锁](https://mp.weixin.qq.com/s/35aCS_5GqLyzZS3VobL6fg)
+  - 分布式锁
+    - 属于分布式互斥问题(distributed mutual exclusion)，实际上 Lamport 在那篇经典论文 "Time, clocks, and the ordering of events in a distributed system" 中早就证明了使用状态机能够去中心化解决多进程互斥问题，而共识算法就能实现这样的状态机。但大多时候我们还是会使用一个分布式锁而不是构建一个共识库
+  - 分布式锁服务有三个必备的性质
+    - 互斥（Mutual Exclusion），这是锁最基本的功能，同一时刻只能有一个客户端持有锁
+    - 避免死锁（Dead lock free）. 最常见的是通过设置一个 TTL(Time To Live，存活时间) 来避免死锁
+    - 容错（Fault tolerance）. 为避免单点故障，锁服务需要具有一定容错性
+      - 一种是锁服务本身是一个集群，能够自动故障切换(ZooKeeper、etcd)
+      - 另一种是客户端向多个独立的锁服务发起请求，其中某个锁服务故障时仍然可以从其他锁服务读取到锁信息(Redlock).代价是一个客户端要获取多把锁，并且要求每台机器的时钟都是一样的
+  - 分布式锁分为两大类：自旋类和监听类。
+    - 自旋类包括基于数据库的实现和基于 Redis 的实现，这类实现需要客户端不停反复请求锁服务查看是否能够获取到锁；
+    - 监听类主要包括基于 ZooKeeper 或 etcd 实现的分布式锁，这类实现客户端只需监听(watch) 某个 key，当锁可用时锁服务会通知客户端，无需客户端不停请求锁服务。
+  - 基于数据库的实现
+    | 字段  | 作用 |
+    | ---- | ---- |
+    | id	| 自增 id，唯一标识锁 |
+    | key	| 锁名称 |
+    | value	 | 自定义字段 |
+    | ttl	| 存活时间，定时清理，避免死锁 |
+  - 基于 Redis 的实现
+    - 基于单节点 Redis 的分布式锁 `set key value nx px 10000`
+    - 基于多节点 Redis 的分布式锁 Redlock
+  - 基于 ZooKeeper 实现
+    - 基于 ZooKeeper 实现的分布式锁依赖以下两个节点属性：
+      - sequence：顺序节点，ZooKeeper 会将一个10位带有0填充的序列号附加到客户端设置的 znode 路径之后。例如 locknode/guid-lock- 会返回 locknode/guid-lock-0000000001；
+      - ephemeral：临时节点，当客户端和 ZooKeeper 连接断开时，临时节点会被删除，能够避免死锁。但这个断开检测依然有一定心跳延迟，所以仍然需要自增 id 来避免互斥性被破坏。
+    - ZooKeeper 官方文档有提供现成的分布式锁实现方法：
+      - 首先调用 create()，锁路径例如 locknode/guid-lock-，并设置 sequence 和 ephemeral 标志。guid 是客户端的唯一标识，如果 create() 创建失败可以通过 guid 来进行检查，下面会提到；
+      - 调用 getChildren() 获取子节点列表，不要设置 watch 标志（很重要，可以避免 Herd Effect，即惊群效应）；
+      - 检查 2 中的子节点列表，如果步骤 1 中创建成功并且返回的序列号后缀是最小的，则客户端持有该分布式锁，到此结束；
+      - 如果发现序列不是最小的，则从子节点列表中选择比当前序列号小一位的节点记为 p，客户端调用 exist(p, watch=true)，即监听 p，当 p 被删除时收到通知（该节点只有比自己小一位的节点释放时才能获得锁）；
+      - 如果 exist() 返回 null，即前一个分布式锁被释放了，转到步骤 2；否则需要一直等待步骤 4 中 watch 的通知。
+  - etcd
+    - 我们来看下 etcd 是如何解决分布式锁“三大问题”的：
+      - 互斥：etcd 支持事务，通过事务创建 key 和检查 key 是否存在，可以保证互斥性；
+      - 容错：etcd 基于 Raft 共识算法，写 key 成功至少需要超过半数节点确认，这就保证了容错性；
+      - 死锁：etcd 支持租约(Lease)机制，可以对 key 设置租约存活时间(TTL)，到期后该 key 将失效删除，避免死锁；etc 也支持租约续期，如果客户端还未处理完可以继续续约；同时 etcd 也有自增 id，在下文介绍。
 
 
 
