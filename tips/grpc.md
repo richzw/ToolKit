@@ -136,21 +136,17 @@
         - Time： 如果一个 client 空闲超过 5s, 则发送一个 ping 请求
         - Timeout： 如果 ping 请求 1s 内未收到回复, 则认为该连接已断开
 - [grpc网关使用连接池提吞吐量](http://xiaorui.cc/archives/6001)
-
-  在线程/协程竞争压力不大的情况下，单个grpc client 连接是可以干到 8-9w的qps。在8 cpu core, 16 cpu core, 48 cpu core都有试过，数据来看不会超过9w的qps吞吐。
-  
-  在网关层使用单个grpc client下，会出现cpu吃不满的情况。如果简单粗暴加大对单client的并发数，QPS反而会下降
-
-  影响gprc client吞吐的原因，主要是两个方面
-  - 一个是网络引起的队头阻塞
-    - client根据内核上的拥塞窗口状态，可以并发的发送10个tcp包，每个包最大不能超过mss。但因为各种网络链路原因，服务端可能先收到后面的数据包，那么该数据只能放在内核协议栈上，不能放在socket buf上。这个情况就是tcp的队头阻塞。
-    - http2.0虽然解决了应用层的队头阻塞，但是tcp传输层也是存在队头阻塞的。
-  - 另一个是golang grpc client的锁竞争问题
-    - golang标准库net/http由于单个连接池的限制会引起吞吐不足的问题
-      - net/http默认的连接池配置很尴尬。MaxIdleConns=100, MaxIdleConnsPerHost=2，在并发操作某host时，只有2个是长连接，其他都是短连接。
-      - net/http的连接池里加了各种的锁操作来保证连接状态安全，导致并发的协程概率拿不到锁，继而要把自己gopack到waitqueue，但是waitqueue也是需要拿semaRoot的futex锁。在data race竞争压力大的时候，你又拿不到锁来gopark自己，你不能玩命的自旋拿锁吧，那怎么办？ runtime/os_linux.go就是来解决该问题的。有兴趣的可以看下代码，简单说就是sleep再拿锁。
-      - grpc的http2.0组件是自己实现的，没有采用golang标准库里的net/http。在分析代码之前，先放一个go tool pprof的耗时分析图，我们会发现有个很大的消耗在withRetry这里，分析了代码确实有一些锁的操作，而且粒度不小
-  
+  - 在线程/协程竞争压力不大的情况下，单个grpc client 连接是可以干到 8-9w的qps。在8 cpu core, 16 cpu core, 48 cpu core都有试过，数据来看不会超过9w的qps吞吐。
+  - 在网关层使用单个grpc client下，会出现cpu吃不满的情况。如果简单粗暴加大对单client的并发数，QPS反而会下降
+  - 影响gprc client吞吐的原因，主要是两个方面
+    - 一个是网络引起的队头阻塞
+      - client根据内核上的拥塞窗口状态，可以并发的发送10个tcp包，每个包最大不能超过mss。但因为各种网络链路原因，服务端可能先收到后面的数据包，那么该数据只能放在内核协议栈上，不能放在socket buf上。这个情况就是tcp的队头阻塞。
+      - http2.0虽然解决了应用层的队头阻塞，但是tcp传输层也是存在队头阻塞的。
+    - 另一个是golang grpc client的锁竞争问题
+      - golang标准库net/http由于单个连接池的限制会引起吞吐不足的问题
+        - net/http默认的连接池配置很尴尬。MaxIdleConns=100, MaxIdleConnsPerHost=2，在并发操作某host时，只有2个是长连接，其他都是短连接。
+        - net/http的连接池里加了各种的锁操作来保证连接状态安全，导致并发的协程概率拿不到锁，继而要把自己gopack到waitqueue，但是waitqueue也是需要拿semaRoot的futex锁。在data race竞争压力大的时候，你又拿不到锁来gopark自己，你不能玩命的自旋拿锁吧，那怎么办？ runtime/os_linux.go就是来解决该问题的。有兴趣的可以看下代码，简单说就是sleep再拿锁。
+        - grpc的http2.0组件是自己实现的，没有采用golang标准库里的net/http。在分析代码之前，先放一个go tool pprof的耗时分析图，我们会发现有个很大的消耗在withRetry这里，分析了代码确实有一些锁的操作，而且粒度不小
   - [gRPC client pool](https://github.com/rfyiamcool/grpc-client-pool)
 
 - [gRPC服务的响应设计](https://mp.weixin.qq.com/s/nGTrKBHLVmHLuRMffHcKfw)
@@ -345,8 +341,14 @@
     - GRPC_GO_REQUIRE_HANDSHAKE as in Implement new requirement of completing protocol handshaking before 'READY' #2406
   - http2 handshake
     ![img.png](grpc_http2_handshake.png)
-
-
+- [HTTP2 Spec](https://httpwg.org/specs/rfc7540.html#PROTOCOL_ERROR)
+- [secure gRPC connection with SSL/TLS](https://dev.to/techschoolguru/how-to-secure-grpc-connection-with-ssl-tls-in-go-4ph)
+  - [Repo](https://github.com/techschool/pcbook-go)
+- [gRPC Debug Tool]()
+  - [grpcdebug](https://github.com/grpc-ecosystem/grpcdebug)
+  - `GODEBUG=http2debug=2 `
+  - `export GRPC_GO_LOG_VERBOSITY_LEVEL=99
+      export GRPC_GO_LOG_SEVERITY_LEVEL=info`
 
 
 
