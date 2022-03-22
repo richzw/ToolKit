@@ -349,6 +349,12 @@
   - `GODEBUG=http2debug=2 `
   - `export GRPC_GO_LOG_VERBOSITY_LEVEL=99
       export GRPC_GO_LOG_SEVERITY_LEVEL=info`
-
-
+- [Be careful gRPC keepalive]()
+  - MaxConnectionAge on server side
+    - We can see every 10 seconds the server side send a GOAWAY to client connection and client reconnect after that, but since the previous request hasn’t finished the connection itself is still alive.
+  - Max age on client keepalive
+    - may face is grpc connection was force closed by transport closing before MaxAge , usually it was caused by Client Side Keepalive
+    - the client pinging the server it throw a `ENHANCE_YOUR_CALM` error and send a GOAWAY to the client, it make all the rpcs force closed and this was ignoring the Grace Period.
+    - This is because there was a hidden restriction for ping interval, in the [proposal](https://github.com/grpc/grpc/blob/master/doc/keepalive.md#faq) it said within MinTime 
+      - The EnforcementPolicy in Golang
 
