@@ -357,4 +357,4 @@
     - the client pinging the server it throw a `ENHANCE_YOUR_CALM` error and send a GOAWAY to the client, it make all the rpcs force closed and this was ignoring the Grace Period.
     - This is because there was a hidden restriction for ping interval, in the [proposal](https://github.com/grpc/grpc/blob/master/doc/keepalive.md#faq) it said within MinTime 
       - The EnforcementPolicy in Golang
-
+- [Protobuf FieldMask](https://mp.weixin.qq.com/s?__biz=Mzg4NzczNzA2OQ==&mid=2247483912&idx=1&sn=445880d786a849c7c52b6ae2398a037d&chksm=cf849d8af8f3149c52b4a7de03cdf293c99fb87e62d5f0272c3d16fd1a6e31912ff4cf2ea49f&scene=21#wechat_redirect)
