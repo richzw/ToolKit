@@ -414,8 +414,26 @@
   - 主库更新后，从库都读到最新值了，主库还有可能读到旧值吗？
     - 假设当前的数据库事务隔离级别是可重复读
     - ![img.png](db_mysql_isolation.png)
-
-
+- [Understanding EXPLAIN on Postgresql](http://www.louisemeta.com/blog/explain/)
+  - [What are costs and actual times](https://www.youtube.com/watch?v=IwahVdNboc8)
+    - Cost - The part cost=0.00..205.01 has two numbers, the first one indicates the cost of retrieving the first row, and the second one, the estimated cost of retrieving all the rows.
+    - Actual time - (actual time=1.945..1.946 rows=1 loops=1) means that the seq scan was executed once (loops=1), retrieved one row rows=1 and took 1.946ms.
+  - Scan
+    - Sequential Scan
+    - Index Scan
+    - Bitmap heap Scan
+      - In this algorithm, the tuple-pointer from index are ordered by physical memory into a map. The goal is to limit the “jumps” of the reading head between rows. When you think about it, a encyclopaedia’s index is close from the structure of this map. For the word that you are looking for, the pages are ordered.
+  - Join
+    - Nested Loop
+    - Hash Join - This is much more efficient than the nested loop isn’t it? So why isn’t it used all the time ?
+      - For small tables, the complexity of building the hash table makes it less efficient than a nested loop.
+      - The hash table has to fit in memory (you can see it with Memory Usage: 9kB in the EXPLAIN), so for a big set of data, it can’t be used
+    - Merge Join
+      - If neither Nested Loop or Hash Join can be used for joining big tables
+  - Ordering and a word on offset
+    - QuickSort
+    - Top N heap Sort
+    - A word on offset - Ordering is often used in order to paginate results.
 
 
 
