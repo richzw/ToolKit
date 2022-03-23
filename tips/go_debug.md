@@ -67,6 +67,8 @@
 - [Advent of Go Profiling](https://felixge.de/2021/12/01/advent-of-go-profiling-2021-day-1-1/)
 - [Go程序内存泄露问题快速定位](https://www.hitzhangjie.pro/blog/2021-04-14-go%E7%A8%8B%E5%BA%8F%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E9%97%AE%E9%A2%98%E5%BF%AB%E9%80%9F%E5%AE%9A%E4%BD%8D/)
 - [Go 系统监控函数 gopsutil](https://github.com/shirou/gopsutil)
+- [Go Profile Notes](https://github.com/DataDog/go-profiler-notes)
+- [Heap Profiling 原理解析](https://pingcap.com/zh/blog/an-explanation-of-the-heap-profiling-principle)
 - [gops](https://github.com/google/gops)
   - gops is a command to list and diagnose Go processes currently running on your system.
 - [应用内存占用太多](https://eddycjy.com/posts/go/talk/2019-09-24-why-vsz-large/)
