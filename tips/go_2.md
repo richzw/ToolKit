@@ -1095,5 +1095,48 @@
 - [Mutex vs Atomic](https://ms2008.github.io/2019/05/12/golang-data-race/)
   - Mutexes do no scale. Atomic loads do.
   - mutex 由操作系统实现，而 atomic 包中的原子操作则由底层硬件直接提供支持。在 CPU 实现的指令集里，有一些指令被封装进了 atomic 包，这些指令在执行的过程中是不允许中断（interrupt）的，因此原子操作可以在 lock-free 的情况下保证并发安全，并且它的性能也能做到随 CPU 个数的增多而线性扩展。
+- [The Escape Analysis in Go](https://slides.com/jalex-chang/go-esc)
+  - Introduction
+    - Allocating objects on the stack is faster than in the heap.
+    - The escape analysis is a mechanism to automatically decide whether a variable should be allocated in the heap or not in compile time
+  - When does ESC happen
+  - ESC - concept - Generally, a variable scapes if:
+    - its address has been captured by the address-of operand (&).
+    - and at least one of the related variables has already escaped.
+  - How does ESC work - Basically, ESC determines whether variables escape or not by
+    - the data-flow analysis (shortest path analysis)
+    - and other additional rules
+      - Huge objects
+        - For explicit declarations (var or :=)
+          - The variables escape if their sizes are over 10MB
+        - For implicit declarations (new or make)
+          - The variables escape if their sizes are over 64KB 
+      - Slice
+        - A slice variable escapes if its size of the capacity is non-constant
+      - Map
+        - A variable escapes if it is referenced by a map's key or value.
+        - The escape happens no matter the map escape or not
+      - Return values - Returning values is a backward behavior that
+        - the referenced variables escape if the return values are pointers
+        - the values escape if they are map or slice 
+      - Input parameters -  Passing arguments is a forward behavior that
+        - the arguments escape if input parameters have leaked (to heap)
+      - Closure function - A variable escapes if
+        - the source variable is captured by a closure function
+        - and their relationship is address-of (derefs = -1 )
+  - How to utilize ESC to benefit our programs
+    - Observations - Through understanding the concept of ESC, we can find that
+      - variables usually escape
+        - when their addresses are captured by other variables.
+        - when ESC does not know their object sizes in compile time.
+      - And passing arguments to a function is safer than returning values from the function. 
+    - the first and most important suggestion is: try not to use pointers as much as possible
+    - Initialize slice with constants
+    - Passing variables to closure functions
+    - Argument injection 
+      - Injecting changes to the passed parameters instead of return values back - For exmaple: Reader.Read in pkg bufio
+
+
+
 
 
