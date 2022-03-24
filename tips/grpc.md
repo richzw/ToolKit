@@ -32,7 +32,6 @@
     - Flow control From End to End - gRPC has built-in Flow control
 
 - [Best Practice](https://www.youtube.com/watch?v=Z_yD7YPL2oE)
-
   - API Design - Idempotency   
     - Request should include timestamp/guid to make idempotency
   - API Design - Performance
@@ -358,3 +357,58 @@
     - This is because there was a hidden restriction for ping interval, in the [proposal](https://github.com/grpc/grpc/blob/master/doc/keepalive.md#faq) it said within MinTime 
       - The EnforcementPolicy in Golang
 - [Protobuf FieldMask](https://mp.weixin.qq.com/s?__biz=Mzg4NzczNzA2OQ==&mid=2247483912&idx=1&sn=445880d786a849c7c52b6ae2398a037d&chksm=cf849d8af8f3149c52b4a7de03cdf293c99fb87e62d5f0272c3d16fd1a6e31912ff4cf2ea49f&scene=21#wechat_redirect)
+- [stream.SendMsg timeout](https://github.com/grpc/grpc-go/issues/1229)
+  - timeout directly
+    ```go
+    // DoWithTimeout runs f and returns its error.  If the deadline d elapses first,
+    // it returns a grpc DeadlineExceeded error instead.
+    func DoWithTimeout(f func() error, d time.Duration) error {
+      errChan := make(chan error, 1)
+      go func () {
+        errChan <- f()
+        close(errChan)
+      }()
+      t := time.NewTimer(d)
+      select {
+        case <-t.C:
+          return status.Errorf(codes.DeadlineExceeded, "too slow")
+        case err := <-errChan:
+          if !t.Stop() {
+            <-t.C
+          }
+          return err
+      }
+    }
+    
+    func (s *server) MyHandler(stream pb.Service_MyHandlerServer) error {
+      for <work to do> {
+        if err := DoWithTimeout(func() error { return stream.SendMsg(<data>) }, 5*time.Second); err != nil {
+          return err
+        }
+      }
+      return nil
+    }
+    
+    ```
+  - context timeout
+    ```go
+    // DoWithContext runs f and returns its error.  If the context is cancelled or
+    // times out first, it returns the context's error instead.
+    func DoWithContext(ctx context.Context, f func() error) error {
+      errChan := make(chan error, 1)
+      go func () {
+        errChan <- f()
+        close(errChan)
+      }()
+      select {
+        case <-ctx.Done():
+          return ctx.Err()
+        case err := <-errChan:
+          if !t.Stop() {
+            <-t.C
+          }
+          return err
+      }
+    }
+    ```
+
