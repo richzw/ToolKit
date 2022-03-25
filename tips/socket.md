@@ -346,5 +346,5 @@
     - 当 udp 服务端程序关闭，但系统还存在时，对方系统通过 icmp ECONNREFUSE 返回错误，客户端会报错。
     - 当对方有操作 iptables udp port drop 时，客户端也会显示成功。
     - 客户端和服务端互通数据，当服务进程挂了时，UDP 客户端不能立马感知关闭状态，只有当再次发数据时才会被对方系统回应 icmp ECONNREFUSE 异常报文，客户端才能感知对方挂了。)
-
+- [WebSocket 1M](https://github.com/eranyanay/1m-go-websockets)
 
