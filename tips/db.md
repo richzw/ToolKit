@@ -434,12 +434,48 @@
     - QuickSort
     - Top N heap Sort
     - A word on offset - Ordering is often used in order to paginate results.
-
-
-
-
-
-
+- [Mysql数据库查询好慢原因](https://mp.weixin.qq.com/s?__biz=Mzg5NDY2MDk4Mw==&mid=2247488052&idx=1&sn=b0e197b837be4af0e3f2ddd72fccf3cd&scene=21#wechat_redirect)
+  - 数据库查询流程
+    - 分析器,
+    - 优化器，在这里会根据一定的规则选择该用什么索引
+    - 执行器去调用存储引擎的接口函数
+    - buffer pool - InnoDB中，因为直接操作磁盘会比较慢，所以加了一层内存提提速，叫buffer pool，这里面，放了很多内存页，每一页16KB，有些内存页放的是数据库表里看到的那种一行行的数据，有些则是放的索引信息。
+    - 会根据前面优化器里计算得到的索引，去查询相应的索引页，
+    - 如果不在buffer pool里则从磁盘里加载索引页。再通过索引页加速查询，得到数据页的具体位置。
+  - 慢查询分析
+    - 通过开启profiling看到流程慢在哪
+      ```sql
+      set profiling=ON;
+      show variables like 'profiling';
+      show profiles;
+      show profile for query 1;
+      ```
+  - 索引相关原因
+    - 一般能用explain命令帮助分析。通过它能看到用了哪些索引，大概会扫描多少行之类的信息
+    - 在优化器阶段里看下选择哪个索引，一般主要考虑几个因素，比如：
+      - 选择这个索引大概要扫描多少行（rows）
+      - 为了把这些行取出来，需要读多少个16kb的页
+      - 走普通索引需要回表，主键索引则不需要，回表成本大不大
+    - explain 
+      - 使用的type为ALL，意味着是全表扫描，possible_keys是指可能用得到的索引，这里可能使用到的索引是为age建的普通索引，但实际上数据库使用的索引是在key那一列，是NULL
+    - 不用索引或者索引不符合预期
+      - 比如用了不等号，隐式转换
+      - 可以通过force index指定索引
+    - 走了索引还是很慢
+      - 第一种是索引区分度太低
+        - 比如网页全路径的url链接，这拿来做索引，一眼看过去全都是同一个域名，如果前缀索引的长度建得不够长，那这走索引跟走全表扫描似的，正确姿势是尽量让索引的区分度更高
+      - 第二种是索引中匹配到的数据太大 
+        - 这时候需要关注的是explain里的rows字段了, 用于预估这个查询语句需要查的行数的
+  - 除了索引之外，还有哪些因素会限制我们的查询速度的
+    - 客户端连接数过小
+      - 客户端与server层如果只有一条连接，那么在执行sql查询之后，只能阻塞等待结果返回，如果有大量查询同时并发请求，那么后面的请求都需要等待前面的请求执行完成后，才能开始执行
+    - 数据库连接数过小
+    - 应用侧连接数过小 - 使用连接池
+    - buffer pool太小
+      - 如果我的buffer pool 越大，那我们能放的数据页就越多，相应的，sql查询时就更可能命中buffer pool，那查询速度自然就更快了
+      - 怎么知道buffer pool是不是太小了？
+        - buffer pool的缓存命中率 - 通过 show status like 'Innodb_buffer_pool_%';
+        - 一般情况下buffer pool命中率都在99%以上，如果低于这个值，才需要考虑加大innodb buffer pool的大小。
 
 
 
