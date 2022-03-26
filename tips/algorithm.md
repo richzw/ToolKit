@@ -64,7 +64,66 @@
     - 由于 n = t * (b – a ) / L 。
     - 则 n 越小越合适，也就是希望 t * (b – a ) 越小，希望 b – a 越小，因为 b 和 a 才是我们可以控制的。
     - 由此 b – a = 1 是一个最小的答案，即 fast 和 slow 相差一步最合理。
-
+- [重排链表]
+  - 给定一个单链表 L：L0→L1→…→Ln-1→Ln， 将其重新排列后变为：`L0→Ln→L1→Ln-1→L2→Ln-2→...
+  - 找链表的中点
+  - 反转链表
+  - 合并链表
+    ```c++
+    public void reorderList(ListNode head) {
+        if (head == null || head.next == null) {
+            return;
+        }
+    
+        // 步骤 1: 通过快慢指针找到链表中点
+        // 通过调节快慢指针的起始位置，可以保证前半部分的长度大于等于后半部分
+        ListNode slow = head, fast = head.next;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+    
+        // 步骤 2: 反转后半部分的链表
+        // 在反转之前需要的一个操作是将前后半部分断开
+        ListNode second = slow.next;
+        slow.next = null;
+        second = reverseList(second);
+    
+        // 步骤 3: 合并前半部分链表以及反转后的后半部分链表
+        mergeList(head, second);
+    }
+    
+    private ListNode reverseList(ListNode head) {
+        ListNode prev = null, tmp = null, pointer = head;
+        while (pointer != null) {
+            tmp = pointer.next;
+            pointer.next = prev;
+            prev = pointer;
+            pointer = tmp;
+        }
+    
+        return prev;
+    }
+    
+    private void mergeList(ListNode first, ListNode second) {
+        ListNode dummy = new ListNode(0);
+        ListNode pointer = dummy;
+    
+        while (first != null && second != null) {
+            pointer.next = first;
+            first = first.next;
+            pointer.next.next = second;
+            second = second.next;
+            pointer = pointer.next.next;
+        }
+    
+        // 因为我们之前找中点的时候保证了前半部分的长度不小于后半部分的长度
+        // 因此交叉后，多出来的部分只可能是前半部分，判断前半部分即可
+        if (first != null) {
+            pointer.next = first;
+        }
+    }
+    ```
 
 
 
