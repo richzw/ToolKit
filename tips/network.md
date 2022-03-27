@@ -1,5 +1,5 @@
 
-- [在 FIN_WAIT_2 状态下，是如何处理收到的乱序到 FIN 报文，然后 TCP 连接又是什么时候才进入到 TIME_WAIT 状态?](https://mp.weixin.qq.com/s/6euF1TQMP36AEurS44Casg)
+~~- [在 FIN_WAIT_2 状态下，是如何处理收到的乱序到 FIN 报文，然后 TCP 连接又是什么时候才进入到 TIME_WAIT 状态?](https://mp.weixin.qq.com/s/6euF1TQMP36AEurS44Casg)
 
   - 在 FIN_WAIT_2 状态时，如果收到乱序的 FIN 报文，那么就被会加入到「乱序队列」，并不会进入到 TIME_WAIT 状态。
   - 等再次收到前面被网络延迟的数据包时，会判断乱序队列有没有数据，然后会检测乱序队列中是否有可用的数据，如果能在乱序队列中找到与当前报文的序列号保持的顺序的报文，就会看该报文是否有 FIN 标志，如果发现有 FIN 标志，这时才会进入 TIME_WAIT 状态。
@@ -562,7 +562,25 @@
     - The main problem is that there is very little data that can be saved in a SYN Cookie. 
     - With the MSS setting truncated to only 4 distinct values, Linux doesn't know any optional TCP parameters of the other party. Information about Timestamps, ECN, Selective ACK, or Window Scaling is lost, and can lead to degraded TCP session performance.
     - Fortunately Linux has a work around. If TCP Timestamps are enabled, the kernel can reuse another slot of 32 bits in the Timestamp field
-
+- [网络框架netpoll的源码实现](https://mp.weixin.qq.com/s?__biz=MzI2NDU4OTExOQ==&mid=2247534884&idx=1&sn=e66b4574dafc9b54b3aa194a41cbd903&scene=21#wechat_redirect)
+  - [netpoll](https://github.com/cloudwego/netpoll/blob/develop/README_CN.md)是一款开源的golang编写的高性能网络框架(基于Multi-Reactor模型)，旨在用于处理rpc场景
+  - net库问题
+    - RPC 通常有较重的处理逻辑，因此无法串行处理 I/O。而 Go 的标准库 net 设计了 BIO(Blocking I/O) 模式的 API，使得 RPC 框架设计上只能为每个连接都分配一个 goroutine。 这在高并发下，会产生大量的 goroutine，大幅增加调度开销。
+    - net.Conn 没有提供检查连接活性的 API，因此 RPC 框架很难设计出高效的连接池，池中的失效连接无法及时清理。
+  - Reactor模型 - Multi-Reactor
+    ![img.png](socket_reacotr.png)
+    - Multi-Reactor模型的原理如下：
+      - mainReactor主要负责接收客户端的连接请求，建立新连接，接收完连接后mainReactor就会按照一定的负载均衡策略分发给其中一个subReactor进行管理。~~
+      - subReactor会将新的客户端连接进行管理，负责后续该客户端的请求处理。
+      - 通常Reactor线程主要负责IO的操作(数据读写)、而业务逻辑的处理会由专门的工作线程来执行。
+    - 此处所指的Reactor，以epoll为例可以简单理解成一个Reactor对应于一个epoll对象，由一个线程进行处理，Reactor线程又称为IO线程。
+  - netpoll server端内部结构
+    ![img.png](socket_netpoll_server.png)
+    - Listener:主要用来初始化Listener，内部调用标准库的net.Listen()，然后再封装了一层。具体的实现则是调用socket()、bind()、listen()等系统调用。
+    - EventLoop:框架对外提供的接口，对外暴露Serve()方法来创建server端程序。
+    - Poll: 是抽象出的一套接口，屏蔽底层不同操作系统平台接口的差异，linux下采用epoll来实现、bsd平台下则采用kqueue来实现。
+    - pollmanager:Poll的管理器，可以理解成一个Poll池，也就是一组epoll或者kqueue集合。
+    - loadbalance:负责均衡封装，主要用来从pollmanager按照一定的策略(随机、轮询、最小连接等)选择出来一个Poll实例，一般在客户端初始化完成后，server会调用该接口拿到一个Poll实例，并将新建立的客户端加入到Poll管理。 
 
 
 
