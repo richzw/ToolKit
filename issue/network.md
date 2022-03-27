@@ -293,6 +293,35 @@
     }
     ```
   - redigo 也提供了一个更安全的获取连接的接口：GetContext()，通过显式传入一个 context 来控制 Get() 的超时：
+- [CLOSE WAIT 分析](https://gocn.vip/topics/yQ0XrZH0Qd)
+  - 背景
+    - telnet这个ip port端口是通的，说明四层以下网络是通的。
+    - 但是当我们curl到对应服务的时候，发现服务被连接重置 RST
+  - 分析问题机器
+    - 查看网络问题
+      - `netstat -tunp | grep CLOSE_WAIT | wc -l`
+      - 我们发现CLOSE WAIT的客户端的端口号，在服务端机器上有，但在客户端机器上早就消失。CLOSE WAIT就死在了这台机器上。
+      - RECVQ这么大，为什么服务还能正常响应200
+      - 为什么上面curl会超时，但是telnet可以成功
+      - 为什么CLOSE WAIT没有pid
+    - 线上调试
+      - 我们使用了`sudo strace -p pid`，发现主进程卡住了，想当然的认为自己发现了问题。但实际过程中，这是正常现象，我们框架使用了 golang.org/x/net/netutil 里的 LimitListener ，当你的goroutine达到最大值，那么就会出现这个阻塞现象，因为没有可用的goroutine了，主进程就卡住了。
+      - 查看全部线程trace指令为`sudo strace -f -p pid` ，当然也可以查看单个线程的 `ps -T -p pid` ，然后拿到spid，在执行 `sudo strace -p spid`
+    - 线下模拟
+      - 我们将服务端代码的 `server.Serve(netutil.LimitListener(listener, 1))` 里面的限制设置为1。然后客户端代码的http长连接开启，先做http请求，然后再做tcp请求。
+      - `netstat -ntlpa | grep 8080 |grep LISTEN`
+      - `netstat -ntlpa | grep 8080 | grep CLOSE | wc -l`
+    - 分析
+      - 当我们在服务端设置了limit为1的时候，意味这我们服务端的最大连接数只能为1。我们客户端在使用http keepalive，会将这个连接占满，如果这个时候又进行了tcp探活，那么这个探活的请求就会被堵到backlog里，也就是上面我们看到3.3.2中第一个图，里面的RECVQ为513。
+      - [CLOSE WAIT不消失的情况](https://blog.cloudflare.com/this-is-strictly-a-violation-of-the-tcp-specification/)
+  - 产生线上问题的可能原因
+    - 线上的nginx到后端go配置的keepalive，当GO的HTTP连接数达到系统默认1024值，那么就会出现Goroutine无法让出，这个时候使用TCP的探活，将会堵在队列里，服务端出现CLOSE WAIT情况，然后由于一直没有释放goroutine，导致服务端无法发出fin包，一直保持CLOSE WAIT。
+    - 而客户端的端口在此期间可能会被重用，一旦重用后，就造成了混乱。（如果在混乱后，Goroutine恢复后，服务端过了好久响应了fin包，客户端被重用的端口收到这个包是返回RST，还是丢弃？这个太不好验证）。个人猜测是丢弃了，导致服务端的CLOSE WAIT一直无法关闭，造成RECVQ的一直阻塞。
+  - 其他问题
+    - GO服务端的HTTP Keepalive是使用的客户端的Keepalive的时间，如果客户端的Keepalive存在问题，比如客户端的http keepalive泄露，也会导致服务端无法关闭Keepalive，从而无法回收goroutine，当然go前面挡了一层nginx，所以应该不会有这种泄露问题。但保险起见，go的服务端应该加一个keepalive的最大值。例如120s，避免这种问题。
+    - GO服务端的HTTP chucked编码时候，如果客户端没有正确将response的body内容取走，会导致数据仍然在服务端的缓冲区，从而导致无法响应fin包，但这个理论上不会出现，并且客户端会自动的进行rst，不会影响业务。
+    - 如过写的http服务存在业务问题，例如里面有个死循环，无法响应客户端，也会导致http服务出现CLOSE WAIT问题，但这个是有pid号的
+    - 如果我们的业务调用某个服务的时候，由于没发心跳包给服务，会被服务关闭，但我们这个时候没正确处理这个场景，那么我们的业务处就会出现CLOSE WAIT。
 
 
 
