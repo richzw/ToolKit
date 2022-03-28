@@ -347,4 +347,20 @@
     - 当对方有操作 iptables udp port drop 时，客户端也会显示成功。
     - 客户端和服务端互通数据，当服务进程挂了时，UDP 客户端不能立马感知关闭状态，只有当再次发数据时才会被对方系统回应 icmp ECONNREFUSE 异常报文，客户端才能感知对方挂了。)
 - [WebSocket 1M](https://github.com/eranyanay/1m-go-websockets)
+  - Resource limit
+    - The kernel enforces the soft limit for the corresponding resource
+    - The hard limit acts as a ceiling for the soft limit
+    - Unprivileged process can only raise up to the hard limit
+    - Privileged process can make any arbitrary change
+    - RLIMIT_NOFILE is the resource enforcing max number of open files
+  - Optimizations
+    - Optimize goroutine - epoll
+    - Optimize net/http objects allocations
+    - Reuse allocated buffers across websockets read/write
+      - gorilla/websocket keeps a reference to the underlying buffers given by Hijack()
+      - github.com/gobwas/ws - an alternative websockets lib for GO
+        - No intermediate allocation during I/O
+        - Low-level API which allows building logic of packet handling and buffers
+        - Zero-copy upgrades
+    - Conntrack table - increase the cap of total concurrent connections in the OS
 
