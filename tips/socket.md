@@ -363,4 +363,21 @@
         - Low-level API which allows building logic of packet handling and buffers
         - Zero-copy upgrades
     - Conntrack table - increase the cap of total concurrent connections in the OS
+- [大端、小端](https://github.com/asong2020/Golang_Dream/blob/master/article/golang/%E8%AF%A6%E8%A7%A3%E5%A4%A7%E7%AB%AF%E5%B0%8F%E7%AB%AF.md)
+  - 大端模式：高位字节排放在内存的低地址端，低位字节排放在内存的高地址端;
+  - 小端模式：低位字节排放在内存的低地址端，高位字节排放在内存的高地址端；
+    ```go
+    func IsLittleEndian()  bool{
+        var value int32 = 1 // 占4byte 转换成16进制 0x00 00 00 01 
+      // 大端(16进制)：00 00 00 01
+      // 小端(16进制)：01 00 00 00
+        pointer := unsafe.Pointer(&value)
+        pb := (*byte)(pointer)
+        if *pb != 1{
+            return false
+        }
+        return true
+    }
+    ```
+  - go官方库encoding/binary中已经提供了大小端使用的库
 
