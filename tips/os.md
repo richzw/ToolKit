@@ -273,6 +273,13 @@
       - linux 2.4版本之后，对sendfile做了优化升级，引入SG-DMA技术，其实就是对DMA拷贝加入了scatter/gather操作，它可以直接从内核空间缓冲区中将数据读取到网卡。使用这个特点搞零拷贝，即还可以多省去一次CPU拷贝
       ![img.png](os_sendfile_scattergatter.png)
 - [进程和线程19个问题](https://mp.weixin.qq.com/s/NCl17jrOwP_A017nUqOkJQ)
+- [进程调度](https://mp.weixin.qq.com/s/uBa65Vd3WsZsIv2uQy3cHQ)
+  - O(n)调度器采用全局runqueue，导致多cpu加锁问题和cache利用率低的问题
+  - O(1)调度器为每个cpu设计了一个runqueue，并且采用MLFQ算法思想设置140个优先级链表和active/expire两个双指针结构
+  - CFS调度器采用红黑树来实现O(logn)复杂度的pick-next算法，摒弃固定时间片机制，采用调度周期内的动态时间机制
+  - O(1)和O(n)都在交互进程的识别算法上下了功夫，但是无法做的100%准确
+  - CFS另辟蹊径采用完全公平思想以及虚拟运行时间来实现进行的调度
+  - CFS调度器也并非银弹，在某些方面可能不如O(1)
 - [Linux 性能优化全景指南](https://mp.weixin.qq.com/s/6_utyj1kCyC5ZWpveDZQIQ)
   - 性能优化
     - 高并发和响应快对应着性能优化的两个核心指标：吞吐和延时
