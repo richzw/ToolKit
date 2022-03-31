@@ -1135,6 +1135,38 @@
     - Passing variables to closure functions
     - Argument injection 
       - Injecting changes to the passed parameters instead of return values back - For exmaple: Reader.Read in pkg bufio
+- [golang本地缓存(bigcache/freecache/fastcache等)选型对比](https://zhuanlan.zhihu.com/p/487455942)
+  - 本地缓存需求
+    - 需要较高的读写性能 + 命中率
+    - 支持按写入时间过期
+    - 支持淘汰策略
+    - 解决GC问题，否则大量对象写入会引起STW扫描标记时间过长，CPU毛刺严重
+  - 可选的开源本地缓存组件汇总
+    ![img.png](go_local_cache.png)
+    - 上述本地缓存组件中，实现零GC的方案主要就两种：
+      - 无GC：分配堆外内存(Mmap)
+      - 避免GC：map非指针优化(map[uint64]uint32)或者采用slice实现一套无指针的map
+      - 避免GC：数据存入[]byte slice(可考虑底层采用环形队列封装循环使用空间)
+    - 实现高性能的关键在于：
+      - 数据分片(降低锁的粒度)
+  - 主流缓存组件实现原理剖析
+    - freecache实现原理
+      - 在freecache中它通过segment来进行对数据分片，freecache内部包含256个segment，每个segment维护一把互斥锁，每一条kv数据进来后首先会根据k进行计算其hash值，然后根据hash值决定当前的这条数据落入到哪个segment中。
+      - 每个segment而言，它由索引、数据两部分构成。
+        - 索引：其中索引最简单的方式采用map来维护，例如map[uint64]uint32这种。而freecache并没有采用这种做法，而是通过采用slice来底层实现一套无指针的map，以此避免GC扫描。
+        - 数据：数据采用环形缓冲区来循环使用，底层采用[]byte进行封装实现。数据写入环形缓冲区后，记录写入的位置index作为索引，读取时首先读取数据header信息，然后再读取kv数据。
+      - ![img.png](go_local_cache_freecache.png)
+    - [bigcache实现原理](https://blog.allegro.tech/2016/03/writing-fast-cache-service-in-go.html)
+      - bigcache同样是采用分片的方式构成，一个bigcache对象包含2^n 个cacheShard对象，默认是1024个。每个cacheShard对象维护着一把sync.RWLock锁(读写锁)。所有的数据会分散到不同的cacheShard中。
+      - 每个cacheShard同样由索引和数据构成。索引采用map[uint64]uint32来存储，数据采用entry([]byte)环形队列存储。索引中存储的是该条数据在entryBuffer写入的位置pos。每条kv数据按照TLV的格式写入队列。
+      - 和bigcache和freecache不同的一点在于它的环形队列可以自动扩容。同时bigcache中数据的过期是通过全局的时间窗口维护的，每个单独的kv无法设置不同的过期时间。
+      - ![img.png](go_local_cache_bigcace.png)
+    - fastcache实现原理
+      - 它的灵感来自于bigcache。所以整体的思路和bigcache很类似，数据通过bucket进行分片。fastcache由512个bucket构成。每个bucket维护一把读写锁。
+      - 在bucket内部数据同理是索引、数据两部分构成。索引用map[uint64]uint64存储。数据采用chunks二维的切片(二维数组)存储。
+      - 它的内存分配是在堆外分配的，而不是在堆上分配的。堆外分配的内存。这样做也就避免了golang GC的影响。
+      - ![img.png](go_local_cache_fastcache.png)
+
 
 
 
