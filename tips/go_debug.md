@@ -69,6 +69,15 @@
 - [Go 系统监控函数 gopsutil](https://github.com/shirou/gopsutil)
 - [Go Profile Notes](https://github.com/DataDog/go-profiler-notes)
 - [Heap Profiling 原理解析](https://pingcap.com/zh/blog/an-explanation-of-the-heap-profiling-principle)
+- [Go程序性能瓶颈实战分析](https://mp.weixin.qq.com/s?__biz=Mzg2MDU4MTg0NA==&mid=2247484960&idx=1&sn=da58a3edeb3af781a483550683eb8f7c&scene=21#wechat_redirect)
+  - 内存分配
+  - 垃圾回收
+  - 协程与线程数量
+  - pprof查看程序整体运行情况
+  - 同步写日志的磁盘问题
+  - 并发导致的锁问题
+  - MARK ASSIST辅助标记解释
+  - 本质是内存使用的不合理，当触发GC之后，在负载高的情况下，内存分配的速度超过了GC扫描的速度，从而一直在执行辅助标记，大大减慢了程序运行的速度。这会导致调度延迟等各方面情况发生恶化。通过优化代码逻辑和复用内存分配，消除瓶颈，节约线上千台容器。
 - [gops](https://github.com/google/gops)
   - gops is a command to list and diagnose Go processes currently running on your system.
 - [应用内存占用太多](https://eddycjy.com/posts/go/talk/2019-09-24-why-vsz-large/)
