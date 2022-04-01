@@ -476,8 +476,28 @@
       - 怎么知道buffer pool是不是太小了？
         - buffer pool的缓存命中率 - 通过 show status like 'Innodb_buffer_pool_%';
         - 一般情况下buffer pool命中率都在99%以上，如果低于这个值，才需要考虑加大innodb buffer pool的大小。
-
-
+- [两个事务并发写，能保证数据唯一吗](https://mp.weixin.qq.com/s/jfo_iov-ubPFF1bwTVPMmw)
+  - 我们假设有这么一个用户注册的场景。用户并发请求注册新用户
+    ```sql
+    begin;
+    select user where phone_no =2;  // 查询sql
+    if (user 存在) {
+            return 
+    } else {
+      insert user;   // 插入sql
+    }
+    commit;
+    ```
+    - 这段逻辑，并发执行，能保证数据唯一？ 当然是不能。
+    - 事务是并发执行的，第一个事务执行查询用户，并不会阻塞另一个事务查询用户，所以都有可能查到用户不存在，此时两个事务逻辑都判断为用户不存在，然后插入数据库。
+  - 怎么保证数据唯一？
+    - 唯一索引
+      - 可以为数据库user表的phone_no字段加入唯一索引。 `ALTER TABLE `user` ADD unique(`phone_no`);`
+      - 为什么唯一索引能保证数据唯一？
+        - 数据库通过引入一层buffer pool内存来提升读写速度，普通索引可以利用change buffer提高数据插入的性能。
+        - 唯一索引会绕过buffer pool的change buffer，确保把磁盘数据读到内存后再判断数据是否存在，不存在才能插入数据，否则报错，以此来保证数据是唯一的。 
+    - 更改隔离级别
+      - 串行化（serializable）隔离级别
 
 
 
