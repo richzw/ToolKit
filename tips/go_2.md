@@ -1166,7 +1166,26 @@
       - 在bucket内部数据同理是索引、数据两部分构成。索引用map[uint64]uint64存储。数据采用chunks二维的切片(二维数组)存储。
       - 它的内存分配是在堆外分配的，而不是在堆上分配的。堆外分配的内存。这样做也就避免了golang GC的影响。
       - ![img.png](go_local_cache_fastcache.png)
-
+- [Goroutine 数量控制在多少合适，会影响 GC 和调度](https://mp.weixin.qq.com/s?__biz=MzUxMDI4MDc1NA==&mid=2247487250&idx=1&sn=3004324a9d2ba99233c4af48843dba64&scene=21#wechat_redirect)
+  - M 的限制
+    - 第一，要知道在协程的执行中，真正干活的是 GPM 中的哪一个？
+      - 那势必是 M（系统线程） 了，因为 G 是用户态上的东西，最终执行都是得映射，对应到 M 这一个系统线程上去运行。
+    - 那么 M 有没有限制呢？
+      - 答案是：有的。在 Go 语言中，M 的默认数量限制是 10000, 可以通过 debug.SetMaxThreads 方法进行设置
+    - [GPM 模型的 M 实际数量受什么影响](https://mp.weixin.qq.com/s/q9fafsQlhm-CLUsDYQAhbg)
+      - 本质上与 M 是否空闲和是否忙碌有关。
+      - 如果在调度时，发现没有足够的 M 来绑定 P，P 中又有需要就绪的任务，就会创建新的 M 来绑定。
+      - 如果有空闲的 M，自然也就不会创建全新的 M 了，会优先使用。
+  - G 的限制
+    - 第二，那 G 呢，Goroutine 的创建数量是否有限制？
+      - 答案是：没有。但理论上会受内存的影响，假设一个 Goroutine 创建需要 4k（via @GoWKH）：
+  - P 的限制
+    - 第三，那 P 呢，P 的数量是否有限制，受什么影响？
+      - 答案是：有限制。P 的数量受环境变量 GOMAXPROCS 的直接影响。
+    - 环境变量 GOMAXPROCS 又是什么？
+      - 在 Go 语言中，通过设置 GOMAXPROCS，用户可以调整调度中 P（Processor）的数量。
+      - 另一个重点在于，与 P 相关联的的 M（系统线程），是需要绑定 P 才能进行具体的任务执行的，因此 P 的多少会影响到 Go 程序的运行表现。
+  
 
 
 
