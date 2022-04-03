@@ -13,40 +13,30 @@
   }
   ```
 - sync.Pool
-
   - 临时对象池应该是对可读性影响最小且优化效果显著的手段
   - 还有一种利用sync.Pool特性，来减少锁竞争的优化手段，也非常巧妙。另外，在优化前要善用go逃逸检查分析对象是否逃逸到堆上，防止负优化
 - goroutine pool
-  
   - 可以限制goroutine数量，避免无限制的增长。
   - 减少栈扩容的次数。
-  - 频繁创建goroutine的场景下，资源复用，节省内存。（需要一定规模。一般场景下，效果不太明显。）
-
+  - 频繁创建goroutine的场景下，资源复用，节省内存。（需要一定规模。一般场景下，效果不太明显）
 - reflect
-
   - 缓存反射结果，减少不必要的反射次数。例如[json-iterator]（https://github.com/json-iterator/go）
   - 直接使用unsafe.Pointer根据各个字段偏移赋值。
   - 消除一般的struct反射内存消耗go-reflect（https://github.com/goccy/go-reflect）
   - 避免一些类型转换，如interface->[]byte。
-
 - lock
- 
   - 减小锁粒度:
      go标准库当中，math.rand就有这么一处隐患。当我们直接使用rand库生成随机数时，实际上由全局的globalRand对象负责生成。globalRand加锁后生成随机数，会导致我们在高频使用随机数的场景下效率低下。
   - atomic: 适当场景下，用原子操作代替互斥锁也是一种经典的lock-free技巧
-
 - golink
-
-  golink（https://golang.org/cmd/compile/）使用格式：
+  - golink（https://golang.org/cmd/compile/）使用格式：
   ```go
   //go:linkname FastRand runtime.fastrand
   func FastRand() uint32
   ```
-  主要功能就是让编译器编译的时候，把当前符号指向到目标符号。上面的函数FastRand被指向到runtime.fastrand,runtime包生成的也是伪随机数，和math包不同的是，它的随机数生成使用的上下文是来自当前goroutine的，所以它不用加锁。正因如此，一些开源库选择直接使用runtime的随机数生成函数。
-
-  另外，标准库中的`time.Now()`，这个库在会有两次系统调用runtime.walltime1和runtime.nanotime，分别获取时间戳和程序运行时间。大部分场景下，我们只需要时间戳，这时候就可以直接使用`runtime.walltime1`。
-  
-  系统调用在go里面相对来讲是比较重的。runtime会切换到g0栈中去执行这部分代码，time.Now方法在go<=1.16中有两次连续的系统调用
+  - 主要功能就是让编译器编译的时候，把当前符号指向到目标符号。上面的函数FastRand被指向到runtime.fastrand,runtime包生成的也是伪随机数，和math包不同的是，它的随机数生成使用的上下文是来自当前goroutine的，所以它不用加锁。正因如此，一些开源库选择直接使用runtime的随机数生成函数。
+  - 另外，标准库中的`time.Now()`，这个库在会有两次系统调用runtime.walltime1和runtime.nanotime，分别获取时间戳和程序运行时间。大部分场景下，我们只需要时间戳，这时候就可以直接使用`runtime.walltime1`。
+  - 系统调用在go里面相对来讲是比较重的。runtime会切换到g0栈中去执行这部分代码，time.Now方法在go<=1.16中有两次连续的系统调用
   ```go
   //go:linkname nanotime1 runtime.nanotime1
   func nanotime1() int64
@@ -59,16 +49,11 @@
       time.Sleep(time.Second)
   }
   ```
-
 - log-函数名称行号的获取
-
-  在runtime中，函数行号和函数名称的获取分为两步：
-
-  - runtime回溯goroutine栈，获取上层调用方函数的的程序计数器（pc）。
-  - 根据pc，找到对应的funcInfo,然后返回行号名称。
-  
-  经过pprof分析。第二步性能占比最大，约60%。针对第一步，我们经过多次尝试，并没有找到有效的办法。但是第二步很明显，我们不需要每次都调用runtime函数去查找pc和函数信息的，我们可以把第一次的结果缓存起来，后面直接使用。这样，第二步约60%的消耗就可以去掉。
-
+  - 在runtime中，函数行号和函数名称的获取分为两步：
+    - runtime回溯goroutine栈，获取上层调用方函数的的程序计数器（pc）。
+    - 根据pc，找到对应的funcInfo,然后返回行号名称。
+  - 经过pprof分析。第二步性能占比最大，约60%。针对第一步，我们经过多次尝试，并没有找到有效的办法。但是第二步很明显，我们不需要每次都调用runtime函数去查找pc和函数信息的，我们可以把第一次的结果缓存起来，后面直接使用。这样，第二步约60%的消耗就可以去掉。
   ```go
   var(
       m sync.Map
@@ -95,44 +80,32 @@
       return frame.PC,frame.File,frame.Line,frame.PC!=0
   }
   ```
-
 - epoll
-
-  runtime对网络io，以及定时器的管理，会放到自己维护的一个epoll里，具体可以参考runtime/netpool。在一些高并发的网络io中，有以下几个问题：
-
-  - 需要维护大量的协程去处理读写事件。
-  - 对连接的状态无感知，必须要等待read或者write返回错误才能知道对端状态，其余时间只能等待。
-  - 原生的netpool只维护一个epoll，没有充分发挥多核优势。
-  
-  基于此，有很多项目用x/unix扩展包实现了自己的基于epoll的网络库，比如gnet, 还有字节跳动的netpoll。
-
-  在我们的项目中，也有尝试过使用。最终我们还是觉得基于标准库的实现已经足够。理由如下：
-
-  - 用户态的goroutine优先级没有gonetpool的调度优先级高。带来的问题就是毛刺多了。近期字节跳动也开源了自己的netpool，并且通过优化扩展包内epoll的使用方式来优化这个问题，具体效果未知。
-  - 效果不明显，我们绝大部分业务的QPS主要受限于其他的RPC调用，或者CPU计算。收发包的优化效果很难体现。
-  - 增加了系统复杂性，虽然标准库慢一点点，但是足够稳定和简单。
-
+  - runtime对网络io，以及定时器的管理，会放到自己维护的一个epoll里，具体可以参考runtime/netpool。在一些高并发的网络io中，有以下几个问题：
+    - 需要维护大量的协程去处理读写事件。
+    - 对连接的状态无感知，必须要等待read或者write返回错误才能知道对端状态，其余时间只能等待。
+    - 原生的netpool只维护一个epoll，没有充分发挥多核优势。
+  - 基于此，有很多项目用x/unix扩展包实现了自己的基于epoll的网络库，比如gnet, 还有字节跳动的netpoll。
+  - 在我们的项目中，也有尝试过使用。最终我们还是觉得基于标准库的实现已经足够。理由如下：
+    - 用户态的goroutine优先级没有gonetpool的调度优先级高。带来的问题就是毛刺多了。近期字节跳动也开源了自己的netpool，并且通过优化扩展包内epoll的使用方式来优化这个问题，具体效果未知。
+    - 效果不明显，我们绝大部分业务的QPS主要受限于其他的RPC调用，或者CPU计算。收发包的优化效果很难体现。
+    - 增加了系统复杂性，虽然标准库慢一点点，但是足够稳定和简单。
 - [如何高效地拼接字符串](https://mp.weixin.qq.com/s/9328Ju9pF80djNtRXqfSXQ)
   - **+** 操作符，也叫级联符
-
     拼接过程：
     - 1.编译器将字符串转换成字符数组后调用 runtime/string.go 的 concatstrings() 函数
     - 2.在函数内遍历字符数组，得到总长度
     - 3.如果字符数组总长度未超过预留 buf(32字节)，使用预留，反之，生成新的字符数组，根据总长度一次性分配内存空间
     - 4.将字符串逐个拷贝到新数组，并销毁旧数组
   - **+=** 追加操作符
-
-    与 + 操作符相同，也是通过 runtime/string.go的concatstrings() 函数实现拼接，区别是它通常用于循环中往字符串末尾追加，每追加一次，生成一个新的字符串替代旧的，效率极低
+    - 与 + 操作符相同，也是通过 runtime/string.go的concatstrings() 函数实现拼接，区别是它通常用于循环中往字符串末尾追加，每追加一次，生成一个新的字符串替代旧的，效率极低
   - strings.Builder 在 Golang 1.10 更新后，替代了byte.Buffer，成为号称效率最高的拼接方法。
-
     拼接过程：
     - 1.创建 []byte，用于缓存需要拼接的字符串
     - 2.通过 append 将数据填充到前面创建的 []byte 中
     - 3.append 时，如果字符串超过初始容量 8 且小于 1024 字节时，按乘以 2 的容量创建新的字节数组，超过 1024 字节时，按 1/4 增加
     - 4.将老数据复制到新创建的字节数组中 5.追加新数据并返回
-
   - strings.Join() 主要适用于以指定分隔符方式连接成一个新字符串，分隔符可以为空，在字符串一次拼接操作中，性能仅次于 + 操作符。
-
     拼接过程：
     - 1.接收的是一个字符切片
     - 2.遍历字符切片得到总长度，据此通过 builder.Grow 分配内存
@@ -142,14 +115,10 @@
   结论：
   - 在待拼接字符串确定，可一次完成字符串拼接的情况下，推荐使用 + 操作符，即便 strings.Builder 用 Grow() 方法预先扩容，其性能也是不如 + 操作符的，另外，Grow()也不可设置过大。
   - 在拼接字符串不确定、需要循环追加字符串时，推荐使用 strings.Builder。但在使用时，必须使用 Grow() 预先扩容，否则性能不如 strings.Join()。
-
 - [Set 的最佳实现方案](https://mp.weixin.qq.com/s/pcwCW7jtr2_CJ_k58He-6Q)
-
-  使用 map 来实现 Set，意味着我们只关心 key 的存在，其 value 值并不重要
-
-  我们选择了以下常用的类型作为 value 进行测试：bool、int、interface{}、struct{}。
+  - 使用 map 来实现 Set，意味着我们只关心 key 的存在，其 value 值并不重要
+  - 我们选择了以下常用的类型作为 value 进行测试：bool、int、interface{}、struct{}。
   - 从内存开销而言，struct{} 是最小的，反映在执行时间上也是最少的。由于 bool 类型仅占一个字节，它相较于空结构而言，相差的并不多。但是，如果使用 interface{} 类型，那差距就很明显了
-
 - [优化 Golang 分布式行情推送的性能瓶颈](https://mp.weixin.qq.com/s?__biz=MjM5MDUwNTQwMQ==&mid=2257486432&idx=1&sn=dea96a7309a8228bed48c80c3d675957&chksm=a539e2b6924e6ba06cdd8be0c410a5c3e0eb400b681b7f1d90a9cb3b6aad9fcc90ea74d8d99c&cur_album_id=1680805216599736323&scene=190#rd)
   - 并发操作map带来的锁竞争及时延
     - 推送的服务需要维护订阅关系，一般是用嵌套的map结构来表示，这样造成map并发竞争下带来的锁竞争和时延高的问题。
@@ -441,14 +410,82 @@
       ```
   - v4 maybe
     - redis 多个命令采用pipeline方式执行
-
-
-
-
-
-
-
-
+- [Golang simple optimization notes](https://medium.com/scum-gazeta/golang-simple-optimization-notes-70bc64673980)
+  - Arrays and slices
+    - Don’t forget to use “copy” 
+      - We try not to use append when copying or, for example, when merging two or more slices.
+    - We iterate correctly
+      - If we have a slice with many elements, or with large elements, we try to use “for” or range with a single element. With this approach, we will avoid unnecessary copying.
+    - Reusing slices
+      - If we need to carry out some kind of manipulation with the incoming slice and return the result, we can return it, but already modified. This way we avoid new memory allocations.
+    - We do not leave unused slices
+      - If we need to cut off a small piece from a slice and use only it, remember that the main part will also remain with you forever. We use copy for a new piece to send the old one to the GC.
+  - strings
+    - Doing concatenation correctly
+      - If gluing strings can be done in one statement, then we use “+”, if we need to do this in a loop, then we use string.Builder. Specify the size for the builder in advance through “Grow”
+    - Using transformation optimization
+      - Since strings under the hood consist of a slice of bytes, sometimes conversions between these two types allow you to avoid memory allocation.
+    - Using Internment
+      - We can pool strings, thereby helping the compiler store identical strings only once.
+    - Avoiding Allocations
+      - We can use a map (concatenation) instead of a composite key, we can use a slice of bytes. We try not to use the fmt package, because all of its functions use reflection.
+  - structures
+    - Avoid copying large structures
+      - Standard copy cases
+        - cast to interface
+        - receiving and sending to channels
+        - replacing an entry in a map
+        - adding an element to a slice
+        - iteration (range)
+    - Avoid accessing struct fields through pointers
+      - Dereferencing is expensive, we can do it as little as possible especially in a loop. We also lose the ability to use fast registers.
+    - Work with small structures
+      - This work is optimized by the compiler, which means it is cheap.
+    - Reduce structure size with alignment
+      - We can align our structures (arrange the fields in the right order, depending on their size) and thus we can reduce the size of the structure itself.
+  - func
+    - Use inline functions or inline them yourself
+      - We try to write small functions available for inlining by the compiler — it’s fast, but it’s even faster to embed code from functions yourself. This is especially true for hot path functions.
+      - What won’t inlined?
+        - recovery func
+        - select blocks
+        - type declarations
+        - defer
+        - goroutine
+        - for-range
+    - Choose your function arguments wisely
+      - We try to use “small” arguments, as their copying will be specially optimized. We also try to keep a balance between copying and growing the stack with a load on the GC.
+      - Avoid a large number of arguments — let your program use super fast registers (there are a limited number of them)
+    - Use “defer” carefully
+      - Try not to use defer, or at least not use it in a loop.
+    - Facilitating the “hot path”
+      - Avoid allocating memory in these places, especially for short-lived objects. Make the most common branches first (if, switch).
+  - map
+    - Using an empty structure as values
+      - struct{} is nothing, so using this approach for example for signal values is very beneficial.
+    - Clearing the map
+      - The map can only grow and cannot shrink. We need to control this — reset the maps completely and explicitly, because. deleting all of its elements won’t help.
+    - We try not to use pointers in keys and values
+      - If the map does not contain pointers, then the GC will not waste its precious time on it. And know that strings are also pointers — use an array of bytes instead of strings for keys.
+    - Reducing the number of changes
+      - Again, we do not want to use a pointer, but we can use a composite of a map and a slice and store the keys in the map, and in the slice the values ​​that we can already change without restrictions.
+  - interface
+    - Counting memory allocations
+      - Remember, to assign a value to an interface, you first need to copy it somewhere and then paste a pointer to it. The keyword is copy. And it turns out that the cost of boxing and unboxing will be approximate to the size of the structure and one allocation
+    - Choosing the optimal types
+      - There are some cases when there will be no allocations during boxing / unboxing. For example, small and boolean values of variables and constants, structures with one simple field, pointers (map, chan, func including)
+    - Avoiding memory allocation
+      - As elsewhere, we try to avoid unnecessary allocations. For example, to assign an interface to an interface, instead of boxing twice.
+    - Use only when needed
+      - Avoid using interfaces in the parameters and results of small, frequently called functions. We do not need extra packing and unpacking.
+      - Use interface method calls less frequently, if only because it prevents inlining.
+  - Pointers, channels, BCE
+    - Avoid unnecessary dereferences
+      - Especially in a loop, because it turns out to be too expensive. Dereferencing is a whole complex of necessary actions that we do not want to perform at our expense.
+    - Channel usage is inefficient
+      - Channels are slower than other synchronization methods. In addition, the more cases in select, the slower our program. But select, case + default are optimized.
+    - Try to avoid unnecessary boundary checks
+      - This is also expensive and we should avoid it in every possible way. For example, it is more correct to check (get) the maximum slice index once, instead of several checks. It is better to immediately try to get extreme options.
 
 
 
