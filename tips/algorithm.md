@@ -124,6 +124,73 @@
         }
     }
     ```
+- [数组遍历题](https://mp.weixin.qq.com/s/57lf24oMyNIwBxV2kuW9cg)
+  - 给定一个包含 n + 1 个整数的数组 nums，其数字都在 1 到 n 之间（包括 1 和 n），可知至少存在一个重复的整数。假设只有一个重复的整数，找出这个重复的数。
+    - 不能更改原数组（假设数组是只读的）。
+    - 只能使用额外的 O(1) 的空间。
+    - 时间复杂度小于 O(n^2) 。
+    - 数组中只有一个重复的数字，但它可能不止重复出现一次。
+  - 解析
+    - 不能改变数组 导致无法排序，也无法用 index 和元素建立关系；
+    - 只能使用 O(1) 的空间 意味着使用哈希表去计数这条路也走不通；
+    - 时间复杂度必须小于 O(n^2) 表示暴力求解也不行；
+    - 重复的元素可重复多次 这一条加上后，本来可以通过累加求和然后做差 sum(array) - sum(1,2,...,n) 的方式也变得不可行。
+  - Deep dive
+    - 什么样的算法可以不使用额外的空间解决数组上面的搜索问题？ - 二分查找
+    - 二分法的使用 并不一定 需要在排序好的数组上面进行，不要让常见的例题限制了你的思路，二分法还有一个比较高级的用法叫做 按值二分。
+      - 如果选中的数 小于 我们要找的答案，那么整个数组中小于或等于该数的元素个数必然小于或等于该元素的值;
+      - 如果选中的数 大于或等于 我们要找的答案，那么整个数组中小于或等于该数的元素个数必然 大于 该元素的值
+    - 另外一种 O(n) 的解法借鉴快慢指针找交点的思想
+  - Code
+    ```c++
+    //二分查找
+    class Solution {
+        public int findDuplicate(int[] nums) {
+             int len = nums.length;
+            int start = 1;
+            int end = len - 1;
+    
+            while (start < end) {
+                int mid = start + (end - start) / 2;
+                int counter = 0;
+                for (int num:nums) {
+                    if (num <= mid) {
+                        counter++;
+                    }
+                }
+                if (counter > mid) {
+                    end = mid;
+                } else {
+                    start = mid + 1;
+                }
+            }
+            return start;
+        }
+    }
+    ```
+    ```c
+    //快慢指针
+    public int findDuplicate(int[] nums) {        
+        int fast = nums[nums[0]];
+        int slow = nums[0];
+    
+        while (fast != slow) {
+            fast = nums[nums[fast]];
+            slow = nums[slow];
+        }
+    
+        slow = 0;
+        while (fast != slow) {
+            fast = nums[fast];
+            slow = nums[slow];
+        }
+    
+        return slow;
+    }
+    ```
+
+
+
 
 
 
