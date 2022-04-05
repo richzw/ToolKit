@@ -103,6 +103,74 @@
   - The idea of it is: If we have a vertex in open such that its cost is minimal - by adding any positive number to any vertex - the minimality will never change.
   - Without the constraint on positive numbers - the above assumption is not true.
   - Since we do "know" each vertex which was "closed" is minimal - we can safely do the relaxation step - without "looking back". If we do need to "look back" - Bellman-Ford offers a recursive-like (DP) solution of doing so.
+- [一致性 Hash 算法原理总结](https://mp.weixin.qq.com/s/b9wRO3q-9XW4yQYDtbJyvQ)
+  - 算法详述
+    - 一致性哈希解决了简单哈希算法在分布式哈希表（Distributed Hash Table，DHT）中存在的动态伸缩等问题
+    - 一致性 hash 是对固定值 2^32 取模. 使用服务器 IP 地址进行 hash 计算，用哈希后的结果对2^32取模，结果一定是一个 0 到2^32-1之间的整数；
+    - 一致性 Hash 就是：将原本单个点的 Hash 映射，转变为了在一个环上的某个片段上的映射
+  - [数据偏斜&服务器性能平衡问题](https://github.com/JasonkayZK/consistent-hashing-demo)
+    - 引入虚拟节点来解决负载不均衡的问题 
+      - 即将每台物理服务器虚拟为一组虚拟服务器，将虚拟服务器放置到哈希环上，如果要确定对象的服务器，需先确定对象的虚拟服务器，再由虚拟服务器确定物理服务器；
+    - 分配的虚拟节点个数越多，映射在 hash 环上才会越趋于均匀，节点太少的话很难看出效果；
+    - 引入虚拟节点的同时也增加了新的问题，要做虚拟节点和真实节点间的映射，对象key->虚拟节点->实际节点之间的转换；
+  - [含有负载边界值的一致性 Hash](https://ai.googleblog.com/2017/04/consistent-hashing-with-bounded-loads.html)
+    - 如果很多的热点数据都落在了同一台缓存服务器上，则可能会出现性能瓶颈
+    - Google 提出了含有[负载边界值的一致性 Hash 算法](https://arxiv.org/abs/1608.01350)，此算法主要应用于在实现一致性的同时，实现负载的平均性；
+    - 这个算法将缓存服务器视为一个含有一定容量的桶（可以简单理解为 Hash 桶），将客户端视为球，则平均性目标表示为：所有约等于平均密度（球的数量除以桶的数量）
+- [一致性哈希算法](https://writings.sh/post/consistent-hashing-algorithms-part-1-the-problem-and-the-concept)
+  - 问题的提出
+    ![img.png](ds_consistent_hash.png)
+  - [哈希环法](https://writings.sh/post/consistent-hashing-algorithms-part-2-consistent-hash-ring)
+    - 实现哈希环的方法一般叫做 ketama 或 hash ring。 核心的逻辑在于如何在环上找一个和目标值 z 相近的槽位， 我们把环拉开成一个自然数轴， 所有的槽位在环上的哈希值组成一个有序表。 在有序表里做查找， 这是二分查找可以解决的事情， 所以哈希环的映射函数的时间复杂度是
+    - 带权重的一致性哈希环
+      - 采用影子节点可以减少真实节点之间的负载差异。
+      - 影子节点是一个绝妙的设计，不仅提高了映射结果的均匀性， 而且为实现加权映射提供了方式。 但是，影子节点增加了内存消耗和查找时间
+    - 一致性哈希环下的热扩容和容灾 
+      - 对于增删节点的情况，哈希环法做到了增量式的重新映射， 不再需要全量数据迁移的工作。 但仍然有部分数据出现了变更前后映射不一致， 技术运营上仍然存在如下问题：
+        - 扩容：当增加节点时，新节点需要对齐下一节点的数据后才可以正常服务。
+        - 缩容：当删除节点时，需要先把数据备份到下一节点才可以停服移除。
+        - 故障：节点突然故障不得不移除时，面临数据丢失风险。
+      - 如果我们要实现动态扩容和缩容，即所谓的热扩容，不停止服务对系统进行增删节点， 可以这样做：
+        - 数据备份(双写)： 数据写入到某个节点时，同时写一个备份(replica)到顺时针的邻居节点。
+        - 请求中继(代理)： 新节点刚加入后，数据没有同步完成时，对读取不到的数据，可以把请求中继(replay)到顺时针方向的邻居节点。
+  - [跳跃一致性哈希法](https://writings.sh/post/consistent-hashing-algorithms-part-3-jump-consistent-hash)
+    ```cgo
+    int32_t JumpConsistentHash(uint64_t key, int32_t num_buckets) {
+      int64_t b = -1, j = 0;
+      while (j < num_buckets) {
+        b = j;
+        key = key * 2862933555777941757ULL + 1;
+        j = (b + 1) * (double(1LL << 31) / double((key >> 33) + 1));
+      }
+      return b;
+    }
+    ```
+    - 用随机数来决定一个 k 每次要不要跳到新槽位中去。 但是请注意，这里所说的「随机数」是指伪随机数，即只要种子不变，随机序列就不变。
+    - 跳跃一致性哈希算法的设计非常精妙， 我认为最美的部分是利用了伪随机数的一致性和分布均匀性。
+    - 跳跃一致性哈希在执行速度、内存消耗、映射均匀性上都比经典的哈希环法要好。
+    - 跳跃一致性哈希算法有两个显著缺点：
+      - 无法自定义槽位标号
+        - 跳跃一致性哈希算法中， 因为我们没有存储任何数据结构， 所以我们无法自定义槽位标号， 标号是从 0 开始数过来的。
+      - 只能在尾部增删节点
+    - 跳跃一致性哈希下的热扩容和容灾 
+      - 热扩容 -  可以采用和一致性哈希环法类似的办法， 即请求中继： 新加入的节点对于读取不到的数据，可以把请求中继(relay)到老节点，并把这个数据迁移过来。
+      - 容灾 - 在执行数据写操作时，同时写一份数据到备份节点。 备份节点这样选定：
+         - 尾部节点备份一份数据到老节点。
+         - 非尾部节点备份一份数据到右侧邻居节点。
+  - [Maglev一致性哈希法](https://writings.sh/post/consistent-hashing-algorithms-part-4-maglev-consistent-hash)
+    - Maglev一致性哈希的思路是查表： 建立一个槽位的查找表(lookup table)， 对输入 k 做哈希再取余，即可映射到表中一个槽位。
+    - 为每个槽位生成一个大小为 M 的序列 permutation 叫做「偏好序列」吧。 然后， 按照偏好序列中数字的顺序，每个槽位轮流填充查找表。 将偏好序列中的数字当做查找表中的目标位置，把槽位标号填充到目标位置。 如果填充的目标位置已经被占用，则顺延该序列的下一个填
+    - 这是一种类似「二次哈希」的方法， 使用了两个独立无关的哈希函数来减少映射结果的碰撞次数，提高随机性。
+    - 查找表的长度 M 必须是一个质数。 和「哈希表的槽位数量最好是质数」是一个道理， 这样可以减少哈希值的聚集和碰撞，让分布更均匀
+    - Maglev一致性哈希的算法的内容， 简单来说：
+      - 为每个槽位生成一个偏好序列， 尽量均匀随机。
+      - 建表：每个槽位轮流用自己的偏好序列填充查找表。
+      - 查表：哈希后取余数的方法做映射。
+    - 难以实现后端节点的数据备份逻辑，因此工程上更适合弱状态后端的场景
+  - ![img.png](data_structure_consistent_hash_summary.png)
+
+
+
 
 
 
