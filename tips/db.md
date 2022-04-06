@@ -528,6 +528,46 @@
   - 在 MySQL 5.7.x，在查询/匹配 varchar 或者 char 类型时，会忽略尾部的空格（数据和查询条件）进行匹配；
   - 在 MySQL 8.0.x 中，对于 varchar 的查询的逻辑不再去除尾部空格，而是采用精确匹配的方式
   - 在 MySQL 8.0.x 中，对于 char 类型的查询会直接认为尾部不存在空格，并且仅会匹配尾部无空格的查询条件！
+  - 原因分析
+    - CHAR和VARCHAR在底层数据存储上的区别
+      - CHAR 类型的存储长度固定在创建表时声明的长度, 当存储 CHAR 值时，会在字符串的右侧填充到指定长度的空格！而在查询 CHAR 值时，除非启用 PAD_CHAR_TO_FULL_LENGTH SQL模式，否则将会删除尾部的所有空格！
+      - VARCHAR 类型存储长度是动态变化的（长度在 0～65535之间,VARCHAR 类型并不会在字符串尾部插入空格来填充长度
+    - CHAR和VARCHAR在数据写入上的区别
+      - 在非严格SQL模式（strict SQL mode）下，当对 CHAR 和 VARCHAR 类型的字段插入超过声明长度的字符串时，字符串将会被截断；
+      - 而在严格模式下，插入超过声明长度的数据会报错！
+      - 对于尾部为空格的数据来说：
+        - 对于 VARCHAR 类型而言，尾部的空格将会被截断，同时提示 WARNING（无论是否处于严格SQL模式下）；
+        - 对于 CHAR 类型而言，尾部的空格会被截断，并且不会有任何提示（无论是否处于严格SQL模式下）；
+    - CHAR和VARCHAR在数据比较上的区别
+      - 对于 MySQL 而言，所有的字符集类型都是“填充空格”(All MySQL collations are of type PAD SPACE)；
+      - 即：无论对于 CHAR、 VARCHAR、 还是 TEXT 类型而言，在比较时，都会忽略尾部的空格！
+      - 唯一需要区别的是，LIKE 关键字，因为这个场景下尾部空格的匹配对其非常重要！
+    - MySQL 8.0.x中新增内容
+      - NO PAD类型
+        - 上面提到在老的 MySQL 版本中，所有的字符集类型都是“填充空格”(All MySQL collations are of type PAD SPACE)；
+        - 而在新的版本中，存在 NO PAD 类型，如：UCA 9.0.0 或更高版本的 Unicode；
+        - 可以通过 INFORMATION_SCHEMA.COLLATIONS 表查看具体数据的类型
+      - 非二进制字符串(nonbinary strings)比较变更
+        - 对于非二进制字符串(包括，CHAR, VARCHAR 和 TEXT 类型)而言，字符串的校对填充属性(collation pad attribute) 决定了在比较时是否处理字符串在尾部的空格：
+          - NO PAD 类型会在比较时计入尾部的空格；
+          - 而 PAD SPACE 则不会在比较时计入尾部的空格；
+  - 解决方案
+    - 业务代码层面
+      - 首先，在业务代码中建议使用 Trim、TrimSpace 等相关函数先对参数进行处理，避免出现尾部存在空格的数据；
+    - 数据集声明层面
+      - 需要根据实际需求，结合INFORMATION_SCHEMA.COLLATIONS 表判断具体使用 PAD SPACE 还是 NO PAD类型
+    - 查询层面
+      - 如果一定要查询含有尾部空格的数据，则可以使用两种方法：
+        - 使用 like 匹配；
+        - 查询条件中增加 binary；binary 是MySQL中的一个类型转换运算符：用来强制它后面的字符串为一个二进制字符串，可以理解成精确匹配
+          - BINARY 关键字要放在 = 的后边，以便有效利用该字段的索引
+  - 小结
+    - MySQL 中字符串尾部存在空格的问题和两个条件相关：
+      - 字段类型：CHAR 或者 VARCHAR；
+      - 字符集类型：PAD SPACE 或者 NO PAD;
+    - CHAR 类型在存储字符串时会截断尾部的空格，而 VARCHAR 则会保留；
+    - PAD SPACE 类型在比较时会忽略字符串尾部的空格，而 NO PAD 会保留；
+    - 同时，我们可以通过 LIKE 或 BINARY 关键字将针对 PAD SPACE 类型的查询转化为类似于 NO PAD 的查询
 
 
 
