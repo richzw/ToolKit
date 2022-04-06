@@ -763,6 +763,14 @@
     }
     ```
   - 用 golangci-lint 做静态检测 `golangci-lint run --disable-all -E maligned`
-
+- [Memory Leaking Scenarios](https://go101.org/article/memory-leaking.html)
+  - Kind-of Memory Leaking Caused by Substrings
+  - Kind-of Memory Leaking Caused by Subslices
+  - Kind-of Memory Leaking Caused by Not Resetting Pointers in Lost Slice Elements
+  - Real Memory Leaking Caused by Hanging Goroutines
+  - Real Memory Leaking Caused by Not Stopping time.Ticker Values Which Are Not Used Any More
+  - Real Memory Leaking Caused by Using Finalizers Improperly
+  - Kind-of Resource Leaking by Deferring Function Calls
+  
 
 
