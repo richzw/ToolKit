@@ -114,7 +114,20 @@
     - To get the same false positive guarantees we either must use many hashes in Bloom filter (like 8) and therefore many memory operations, or we can have 1 hash function, but enormous memory requirements.
     - Bloom filters optimize for memory usage, not for memory access.
   - start profiling with 'perf stat -d' and look at the "Instructions per cycle" (IPC) counter. If it's below 1, it generally means the program is stuck on waiting for memory. Values above 2 would be great, it would mean the workload is mostly CPU-bound.
-    
-
+- [How we tracked down (what seemed like) a memory leak in one of our Go microservices](https://blog.detectify.com/2019/09/05/how-we-tracked-down-a-memory-leak-in-one-of-our-go-microservices/)
+  - `curl https://myservice/debug/pprof/heap > heap.out`
+    – heap: A sampling of memory allocations of live objects in the heap.
+    – goroutine: Stack traces of all current goroutines.
+    – allocs: A sampling of all past memory allocations.
+    – threadcreate: Stack traces that led to the creation of new OS threads.
+    – block: Stack traces that led to blocking on synchronization primitives.
+    – mutex: Stack traces of holders of contended mutexes.
+  - `go tool pprof heap.out` or `go tool pprof - heap.out`
+    - the most common command to run is `top`, which shows the top memory consumers
+      – flat: Represents the memory allocated by a function and still held by that function.
+      – cum: Represents the memory allocated by a function or any other function that is called down the stack.
+  - It turns out that there was a change in Go 1.12 regarding how the runtime signals the operating system that it can take unused memory. 
+    - Before Go 1.12, the runtime sends a MADV_DONTNEED signal on unused memory and the operating system immediately reclaims the unused memory pages. 
+    - Starting with Go 1.12, the signal was changed to MADV_FREE, which tells the operating system that it can reclaim some unused memory pages if it needs to, meaning it doesn’t always do that unless the system is under memory pressure from different processes.
 
 
