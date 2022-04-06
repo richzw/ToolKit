@@ -771,6 +771,33 @@
   - Real Memory Leaking Caused by Not Stopping time.Ticker Values Which Are Not Used Any More
   - Real Memory Leaking Caused by Using Finalizers Improperly
   - Kind-of Resource Leaking by Deferring Function Calls
-  
+  - [Avoiding Memory Leak From Unclosed Response’s Body](https://hackernoon.com/avoiding-memory-leak-in-golang-api-1843ef45fca8)
+    ```go
+    req, err:= http.NewRequest("GET","http://example.com?q=one",nil)
+    if err != nil {
+      return err
+    }
+    resp, err:= client.Do(req)
+    //=================================================
+    // CLOSE THE RESPONSE BODY
+    //=================================================
+    if resp != nil {
+        defer resp.Body.Close() // MUST CLOSED THIS 
+    }
+    if err != nil {
+      return err
+    }
+    //=================================================
+    // READ THE BODY EVEN THE DATA IS NOT IMPORTANT
+    // THIS MUST TO DO, TO AVOID MEMORY LEAK WHEN REUSING HTTP 
+    // CONNECTION
+    //=================================================
+    _, err = io.Copy(ioutil.Discard, resp.Body) // WE READ THE BODY
+    if err != nil { 
+       return err
+    }
+    ```
+    
+
 
 
