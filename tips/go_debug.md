@@ -129,5 +129,40 @@
   - It turns out that there was a change in Go 1.12 regarding how the runtime signals the operating system that it can take unused memory. 
     - Before Go 1.12, the runtime sends a MADV_DONTNEED signal on unused memory and the operating system immediately reclaims the unused memory pages. 
     - Starting with Go 1.12, the signal was changed to MADV_FREE, which tells the operating system that it can reclaim some unused memory pages if it needs to, meaning it doesn’t always do that unless the system is under memory pressure from different processes.
+- [Go程序内存泄露问题快速定位](https://www.hitzhangjie.pro/blog/2021-04-14-go%E7%A8%8B%E5%BA%8F%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E9%97%AE%E9%A2%98%E5%BF%AB%E9%80%9F%E5%AE%9A%E4%BD%8D/)
+  - Go内存泄漏
+    - Go中垃圾回收器采用的是“并发三色标记清除”算法，see:
+      - Garbage Collection In Go : Part I - Semantics
+      - Garbage Collection In Go : Part II - GC Traces
+      - Garbage Collection In Go : Part III - GC Pacing
+    - 内存泄漏场景
+      - Kind of memory leaking caused by substrings
+      - Kind of memory leaking caused by subslices
+      - Kind of memory leaking caused by not resetting pointers in lost slice elements
+      - Real memory leaking caused by hanging goroutines
+      - real memory leadking caused by not stopping time.Ticker values which are not used any more
+      - Real memory leaking caused by using finalizers improperly
+      - Kind of resource leaking by deferring function calls
+  - 内存泄露排查
+    - 借助pprof排查
+      - go tool pprof进行采样 `go tool pprof -seconds=10 -http=:9999 http://localhost:6060/debug/pprof/heap`
+      - `curl http://localhost:6060/debug/pprof/heap?seconds=30 > heap.ou  go tool pprof heap.out`
+      - go tool pprof可以收集两类采样数据：
+        - in_use，收集进程当前仍在使用中的内存；
+        - alloc，收集自进程启动后的总的内存分配情况，包括已经释放掉的内存；
+        - go tool pprof展示采样信息时，申请内存以“红色”显示，释放内存以“绿色”显示
+      - pprof提供了另外一个有用的选项-diff_base 
+        `go tool pprof -http=':8081'           \
+        -diff_base heap-new-16:22:04:N.out \
+        heap-new-17:32:38:N.out`
+      - 原来当前协程因为ticker.C这个chan read操作阻塞了，需要注意的是time.Ticker.Stop()之后，ticker.C这个chan不会被关闭，最好在执行ticker.Stop()的时候，同时设置一个通知chan，close该chan来表示ticker停止
+    - 借助bcc排查
+    - 借助pmap/gdb排查
+
+
+
+
+
+
 
 
