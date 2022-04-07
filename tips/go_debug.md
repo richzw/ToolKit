@@ -159,8 +159,25 @@
     - 借助bcc排查
     - 借助pmap/gdb排查
 - [golang pprof 实战](https://blog.wolfogre.com/posts/go-ppof-practice/)
-
-
+- [Go 内存泄漏排查实战](https://mp.weixin.qq.com/s/7bpzvGLPd0MiOL6w-AdYHw)
+  - Goroutine 泄漏
+    - `curl http://「ip:port」/debug/pprof/goroutine?debug=2`
+    - 本次 case http 服务为例，做简单介绍：
+      - 上游服务作为客户端使用了 http1.1 并且将连接设置为 keepalive；
+      - 本服务作为服务端未设置 idletimeout 与 readtimeout；
+    - 这个 Goroutine 泄漏问题不止在 http 下会发生，在 thrift、grpc 中也是同样的道理，如果服务端不对连接设置 timeout，某些情况下就会被上游拖死。
+  - 内存居高不下
+    - 问题来自于 GO 在将内存归还给操作系统时的[内存释放策略](https://github.com/golang/go/issues/42330)
+    - 不同策略的释放机制
+      - MADV_DONTNEED：内核将会在合适的时机去释放内存，但进程的 RSS（常驻内存）将会立即减少。如果再次申请内存，内核会重新分配一块新的空间。
+      - MADV_FREE：只能在 linux 内核版本 4.5 以上才能使用，此操作理论上只是打了一个标记位，只有在内核感觉到内存压力的时候才会将这些打标记的内存回收掉，分配给其他进程使用。这个策略下进程的 RSS 不会立即减少。
+    - 不同策略的实际差别
+      - 理论上 MADV_FREE 效率要高一些，通过在页表中做标记的方式，延迟内存的分配和回收，可以提高内存管理的效率，毕竟内存的回收和分配都是会消耗系统性能的；
+      - 导致的 RSS 指标变化 MADV_DONTNEED 会导致进程 RSS 会有明显的下降；MADV_FREE 会导致进程 RSS 平稳在高峰，不会得到立即释放；
+    - 不同 GO 版本的释放策略
+      - 在 GO1.12 之前，默认均选择的 MADV_DONTNEED 策略进行内存回收；
+      - 在 GO1.12~GO1.15，官方默认选择 MADV_FREE 策略进行内存回收；
+      - 在 GO1.16 及之后，又改回了 MADV_DONTNEED 策略进行回收内存。
 
 
 
