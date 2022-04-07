@@ -146,7 +146,7 @@
   - 内存泄露排查
     - 借助pprof排查
       - go tool pprof进行采样 `go tool pprof -seconds=10 -http=:9999 http://localhost:6060/debug/pprof/heap`
-      - `curl http://localhost:6060/debug/pprof/heap?seconds=30 > heap.ou  go tool pprof heap.out`
+      - `curl -sK -v http://localhost:6060/debug/pprof/heap > heap.out  go tool pprof heap.out`
       - go tool pprof可以收集两类采样数据：
         - in_use，收集进程当前仍在使用中的内存；
         - alloc，收集自进程启动后的总的内存分配情况，包括已经释放掉的内存；
