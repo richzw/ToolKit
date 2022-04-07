@@ -74,8 +74,19 @@
       - 连接迁移
         - QUIC协议基于UDP实现摒弃了五元组的概念，使用64位的随机数作为连接的ID，并使用该ID表示连接
 - [体验 http3: 基于 nginx quic 分支](https://mp.weixin.qq.com/s/ynqqlSOIOSyp6USynEtrEg)
-
-
+- [HTTP服务优雅关闭中出现的小插曲](https://mp.weixin.qq.com/s/HY82uS2eYzt7cHqvdHKF-Q)
+  - ListenAndServe 总是返回一个非空错误，在调用Shutdown或者Close方法后，返回的错误是ErrServerClosed。
+    ```go
+    go func() {
+      if err := h.server.ListenAndServe(); nil != err {
+       if err == http.ErrServerClosed {
+        h.logger.Infof("[HTTPServer] http server has been close, cause:[%v]", err)
+       }else {
+        h.logger.Fatalf("[HTTPServer] http server start fail, cause:[%v]", err)
+       }
+      }
+    }()
+    ```
 
 
 
