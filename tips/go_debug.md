@@ -157,7 +157,11 @@
         heap-new-17:32:38:N.out`
       - 原来当前协程因为ticker.C这个chan read操作阻塞了，需要注意的是time.Ticker.Stop()之后，ticker.C这个chan不会被关闭，最好在执行ticker.Stop()的时候，同时设置一个通知chan，close该chan来表示ticker停止
     - 借助bcc排查
+      - `/usr/share/bcc/tools/memleak -p $(pidof c-so)`
+      - `/usr/share/bcc/tools/memleak -p $(pidof c-so) -t`
     - 借助pmap/gdb排查
+      - `pmap -p <pid>      # /proc/<pid>/maps`
+      - `pmap -x -p <pid>   # /proc/<pid>/smaps`
 - [golang pprof 实战](https://blog.wolfogre.com/posts/go-ppof-practice/)
 - [Go 内存泄漏排查实战](https://mp.weixin.qq.com/s/7bpzvGLPd0MiOL6w-AdYHw)
   - Goroutine 泄漏
