@@ -486,6 +486,67 @@
       - Channels are slower than other synchronization methods. In addition, the more cases in select, the slower our program. But select, case + default are optimized.
     - Try to avoid unnecessary boundary checks
       - This is also expensive and we should avoid it in every possible way. For example, it is more correct to check (get) the maximum slice index once, instead of several checks. It is better to immediately try to get extreme options.
+- [计算密集型服务 性能优化实战始末](https://mp.weixin.qq.com/s/aIKNqQAaI37iJPEEi9z8YQ)
+  - 面对问题
+    - worker 服务消费上游数据（工作日高峰期产出速度达近 200 MB/s，节假日高峰期可达 300MB/s 以上）。基于快慢隔离的思想，以三个不同的 consumer group 消费同一 Topic，隔离三种数据处理链路
+    - worker 服务在高峰期时 CPU Idle 会降至 60%，因其属于数据处理类计算密集型服务，CPU Idle 过低会使服务吞吐降低，在数据处理上产生较大延时，且受限于 Kafka 分区数，无法进行横向扩容；
+  - 性能优化
+    - 服务与存储之间置换压力
+      - 背景
+        - 对于 Apollo 有较严重的大 Key 问题，再结合 RocksDB 特有的写放大问题，会进一步加剧存储压力。在这个背景下，我们采用 zlib 压缩算法，对消息体先进行压缩后再写入 Apollo，减缓读写大 Key 对 Apollo 的压力。
+      - 优化
+        - 在 CPU 的优化过程中，我们发现服务在压缩操作上占用了较多的 CPU，于是对压缩等级进行调整，以减小压缩率、增大下游存储压力为代价，减少压缩操作对服务 CPU 的占用，提升服务 CPU 。
+      - 关于压缩等级
+        - 在压缩等级的设置上可能存在较为严重的边际效用递减问题。
+        - 在进行基准测试时发现，将zlib压缩等级由 BestCompression 调整为 DefaultCompression 后，压缩率只有近 1‱ 的下降，但压缩方面的 CPU 占用却相对提高近 **50%**。
+    - 使用更高效的序列化库
+      - 背景
+        - worker 服务在设计之初基于快慢隔离的思想，使用三个不同的 consumer group 进行分开消费，导致对同一份数据会重复消费三次，而上游产出的数据是在 PB 序列化之后写入 Kafka，消费侧亦需要进行 PB 反序列化方能使用，因此导致了 PB 反序列化操作在 CPU 上的较大开销。
+      - 优化
+        - 采用 gogo/protobuf 库替换掉原生的 golang/protobuf 库
+        - gogo/protobuf 为什么快？
+          - 通过对每一个字段都生成代码的方式，取消了对反射的使用；
+          - 采用预计算方式，在序列化时能够减少内存分配次数，进而减少了内存分配带来的系统调用、锁和 GC 等代价。
+        - [用过去或未来换现在的时间](https://mp.weixin.qq.com/s/S8KVnG0NZDrylenIwSCq8g)
+          - 页面静态化、池化技术、预编译、代码生成等都是提前做一些事情，用过去的时间，来降低用户在线服务的响应时间；
+          - 另外对于一些在线服务非必须的计算、存储的耗时操作，也可以异步化延后进行处理，这就是用未来的时间换现在的时间
+    - 数据攒批 减少调用
+      - 背景
+        - 在观察 pprof 图后发现写 hbase 占用了近 50% 的相对 CPU，经过进一步分析后，发现每次在序列化一个字段时 Thrift 都会调用一次 socket->syscall，带来频繁的上下文切换开销。
+      - 优化
+        - 原代码中使用了 Thrift 的 TTransport 实现，其功能是包装 TSocket，裸调 Syscall，每次 Write 时都会调用 socket 写入进而调用 Syscall。
+        - 发现其中有多种 Transport 实现，而 TTBufferedTransport 是符合我们编码习惯的。
+        - 数据攒批：将数据先写入用户态内存中，而后统一调用 syscall 进行写入，常用在数据落盘、网络传输中，可降低系统调用次数、利用磁盘顺序写特性等，是一种空间换时间的做法。有时也会牺牲一定的数据实时性
+    - 语法调整
+      - slice、map 预初始化，减少频繁扩容导致的内存拷贝与分配开销
+      - 字符串连接使用 strings.builder(预初始化) 代替 fmt.Sprintf()
+      - buffer 修改返回 string([]byte) 操作为 []byte，减少内存 []byte -> string 的内存拷贝开销
+      - string <-> []byte 的另一种优化，需确保 []byte 内容后续不会被修改
+    - GC 调优
+      - 背景
+        - 在上次优化完成之后，系统已经基本稳定，CPU Idle 高峰期也可以维持在 80% 左右，但后续因业务诉求对上游数据采样率调整至 100%，CPU.Idle 高峰期指标再次下降至近 70%，且由于定时任务的问题，存在 CPU.Idle 掉 0 风险；
+      - 优化
+        - 经过对 pprof 的再次分析，发现 runtime.gcMarkWorker 占用不合常理，达到近 30%，于是开始着手对 GC 进行优化
+        - 方法一：使用 sync.pool()
+          - 我们在项目中使用其对 bytes.buffer 对象进行缓存复用，意图减少 GC 开销，但实际上线后 CPU Idle 却略微下降，且 GC 问题并无缓解。原因有二：
+          - sync.pool 是全局对象，读写存在竞争问题，因此在这方面会消耗一定的 CPU，但之所以通常用它优化后 CPU 会有提升，是因为它的对象复用功能对 GC 带来的优化，因此 sync.pool 的优化效果取决于锁竞争增加的 CPU 消耗与优化 GC 减少的 CPU 消耗这两者的差值；
+          - GC 压力的大小通常取决于 inuse_objects，与 inuse_heap 无关，也就是说与正在使用的对象数有关，与正在使用的堆大小无关；
+          - 本次优化时选择对 bytes.buffer 进行复用，是想做到减少堆大小的分配，出发点错了，对 GC 问题的理解有误，对 GC 的优化因从 pprof heap 图 inuse_objects 与 alloc_objects 两个指标出发。
+        - 方法二：设置 GOGC
+          - GOGC 默认值是 100，也就是下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍，通过调大 GOGC 值（gcpercent）的方式，达到减少 GC 次数的目的
+          - 问题：GOGC 参数不易控制，设置较小提升有限，设置较大容易有 OOM 风险，因为堆大小本身是在实时变化的，在任何流量下都设置一个固定值，是一件有风险的事情。这个问题目前已经有解决方案，Uber 发表的文章中提到了一种自动调整 GOGC 参数的方案，用于在这种方式下优化 GO 的 GC CPU 占用
+            `debug.SetGCPercent(1000)`
+        - 方法三：[GO ballast 内存控制](https://blog.twitch.tv/en/2019/04/10/go-memory-ballast-how-i-learnt-to-stop-worrying-and-love-the-heap/)
+          - 仍然是从利用了下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍这一原理，初始化一个生命周期贯穿整个 Go 应用生命周期的超大 slice，用于内存占位，增大 heap_marked 值降低 GC 频率；实际操作有以下两种方式
+          - `stub = make([]byte, 100MB)  stub[0]=1` - 会实际占用物理内存，在可观测性上会更舒服一点
+          - `ballast = make([]byte, 100MB)  runtime.KeepAlive(ballast)` - 并不会实际占用物理内存
+      - 关于 GC 调优
+        - GC 优化手段的优先级：设置 GOGC、GO ballast 内存控制等操作是一种治标不治本略显 trick 的方式，在做 GC 优化时还应先从对象复用、减少对象分配角度着手，在确无优化空间或优化成本较大时，再选择此种方式；
+        - 设置 GOGC、GO ballast 内存控制等操作本质上也是一种空间换时间的做法，在内存与 CPU 之间进行压力置换；
+        - 在 GC 调优方面，还有很多其他优化方式，如 bigcache 在堆内定义大数组切片自行管理、fastcache 直接调用 syscall.mmap 申请堆外内存使用、offheap 使用 cgo 管理堆外内存等等。
+
+
+
 
 
 
