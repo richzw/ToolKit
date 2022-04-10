@@ -568,7 +568,50 @@
     - CHAR 类型在存储字符串时会截断尾部的空格，而 VARCHAR 则会保留；
     - PAD SPACE 类型在比较时会忽略字符串尾部的空格，而 NO PAD 会保留；
     - 同时，我们可以通过 LIKE 或 BINARY 关键字将针对 PAD SPACE 类型的查询转化为类似于 NO PAD 的查询
-
+- [Redis 实现分布式锁](https://mp.weixin.qq.com/s/NOcT9PBEKFVaafIVkbULzA)
+  - 在 Redission 中的脚本，为了保证锁的可重入，又对 Lua 脚本做了一定的修改。
+  - 获取锁的 Lua 脚本
+     ```go
+     if (redis.call('exists', KEYS[1]) == 0) then
+       redis.call('hincrby', KEYS[1], ARGV[2], 1);
+       redis.call('pexpire', KEYS[1], ARGV[1]);
+       return nil;
+     end;
+     
+     if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then
+       redis.call('hincrby', KEYS[1], ARGV[2], 1);
+       redis.call('pexpire', KEYS[1], ARGV[1]);
+       return nil;
+     end;
+     
+     return redis.call('pttl', KEYS[1]);
+     ```
+  - 刷新锁超时时间的脚本
+     ```go
+     if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then 
+      redis.call('pexpire', KEYS[1], ARGV[1]); 
+       return 1; 
+     end;  
+     return 0;
+     ```
+  - 释放锁的脚本
+     ```go
+     if (redis.call('hexists', KEYS[1], ARGV[3]) == 0) then
+      return nil;
+     end;
+     
+     local counter = redis.call('hincrby', KEYS[1], ARGV[3], -1); 
+     
+     if (counter > 0) then
+      redis.call('pexpire', KEYS[1], ARGV[2]);
+     return 0;
+     else
+      redis.call('del', KEYS[1]);
+      redis.call('publish', KEYS[2], ARGV[1]);
+     return 1;
+     end;
+     return nil;
+     ```
 
 
 
