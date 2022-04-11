@@ -182,7 +182,7 @@
       - 在 GO1.12 之前，默认均选择的 MADV_DONTNEED 策略进行内存回收；
       - 在 GO1.12~GO1.15，官方默认选择 MADV_FREE 策略进行内存回收；
       - 在 GO1.16 及之后，又改回了 MADV_DONTNEED 策略进行回收内存。
-
+- [Benchmark Profiling](https://github.com/ardanlabs/gotraining/tree/master/topics/go/profiling/memcpu)
 
 
 
