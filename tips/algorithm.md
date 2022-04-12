@@ -243,6 +243,95 @@
           找到以 s[i] 和 s[i+1] 为中心的回文串
           更新答案
       ```
+- [nSum问题](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247485789&idx=1&sn=efc1167b85011c019e05d2c3db1039e6&scene=21#wechat_redirect)
+  - twoSum 问题
+    - 暴力
+    - hashmap
+    - 先对 nums 排序，然后利用前文「双指针技巧汇总」写过的左右双指针技巧，从两端相向而行就行了
+  - 魔改题目
+    - nums 中可能有多对儿元素之和都等于 target，请你的算法返回所有和为 target 的元素对儿，其中不能出现重复。
+      比如说输入为 nums = [1,3,1,2,2,3], target = 4，那么算法返回的结果就是：[[1,3],[2,2]]
+      ```c++
+      vector<vector<int>> twoSumTarget(vector<int>& nums, int target) {
+          // nums 数组必须有序
+          sort(nums.begin(), nums.end());
+          int lo = 0, hi = nums.size() - 1;
+          vector<vector<int>> res;
+          while (lo < hi) {
+              int sum = nums[lo] + nums[hi];
+              int left = nums[lo], right = nums[hi];
+              if (sum < target) {
+                  while (lo < hi && nums[lo] == left) lo++;
+              } else if (sum > target) {
+                  while (lo < hi && nums[hi] == right) hi--;
+              } else {
+                  res.push_back({left, right});
+                  while (lo < hi && nums[lo] == left) lo++;
+                  while (lo < hi && nums[hi] == right) hi--;
+              }
+          }
+          return res;
+      }
+      ```
+  - 3Sum 4Sum nSum
+    ```go
+    /* 注意：调用这个函数之前一定要先给 nums 排序 */
+    vector<vector<int>> nSumTarget(
+        vector<int>& nums, int n, int start, int target) {
+    
+        int sz = nums.size();
+        vector<vector<int>> res;
+        // 至少是 2Sum，且数组大小不应该小于 n
+        if (n < 2 || sz < n) return res;
+        // 2Sum 是 base case
+        if (n == 2) {
+            // 双指针那一套操作
+            int lo = start, hi = sz - 1;
+            while (lo < hi) {
+                int sum = nums[lo] + nums[hi];
+                int left = nums[lo], right = nums[hi];
+                if (sum < target) {
+                    while (lo < hi && nums[lo] == left) lo++;
+                } else if (sum > target) {
+                    while (lo < hi && nums[hi] == right) hi--;
+                } else {
+                    res.push_back({left, right});
+                    while (lo < hi && nums[lo] == left) lo++;
+                    while (lo < hi && nums[hi] == right) hi--;
+                }
+            }
+        } else {
+            // n > 2 时，递归计算 (n-1)Sum 的结果
+            for (int i = start; i < sz; i++) {
+                vector<vector<int>> 
+                    sub = nSumTarget(nums, n - 1, i + 1, target - nums[i]);
+                for (vector<int>& arr : sub) {
+                    // (n-1)Sum 加上 nums[i] 就是 nSum
+                    arr.push_back(nums[i]);
+                    res.push_back(arr);
+                }
+                while (i < sz - 1 && nums[i] == nums[i + 1]) i++;
+            }
+        }
+        return res;
+    }
+    ```
+- [单链表的六大解题套路](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247492022&idx=1&sn=35f6cb8ab60794f8f52338fab3e5cda5&scene=21#wechat_redirect)
+  - 合并两个有序链表
+  - 合并k个有序链表 
+    - 用到 优先级队列（二叉堆） 这种数据结构，把链表节点放入一个最小堆，就可以每次获得k个节点中的最小节点
+    - 优先队列pq中的元素个数最多是k，所以一次poll或者add方法的时间复杂度是O(logk)；所有的链表节点都会被加入和弹出pq，所以算法整体的时间复杂度是O(Nlogk)，其中k是链表的条数，N是这些链表的节点总数。
+  - 寻找单链表的倒数第k个节点
+  - 寻找单链表的中点
+  - 判断单链表是否包含环并找出环起点
+    - 我们假设快慢指针相遇时，慢指针slow走了k步，那么快指针fast一定走了2k步：
+    - fast一定比slow多走了k步，这多走的k步其实就是fast指针在环里转圈圈，所以k的值就是环长度的「整数倍」。
+    - 假设相遇点距环的起点的距离为m，那么结合上图的 slow 指针，环的起点距头结点head的距离为k - m，也就是说如果从head前进k - m步就能到达环起点。
+    - 巧的是，如果从相遇点继续前进k - m步，也恰好到达环起点。因为结合上图的 fast 指针，从相遇点开始走k步可以转回到相遇点，那走k - m步肯定就走到环起点了：
+  - 判断两个单链表是否相交并找出交点
+    - 直接的想法可能是用HashSet记录一个链表的所有节点，然后和另一条链表对比，但这就需要额外的空间。
+    - 我们可以让p1遍历完链表A之后开始遍历链表B，让p2遍历完链表B之后开始遍历链表A，这样相当于「逻辑上」两条链表接在了一起。
+
 
 
 
