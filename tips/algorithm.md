@@ -188,6 +188,61 @@
         return slow;
     }
     ```
+- [数组双指针](https://mp.weixin.qq.com/s/Z-oYzx9O1pjiym6HtKqGIQ)
+  - 双指针技巧在处理数组和链表相关问题时经常用到，主要分为两类：左右指针和快慢指针。
+  - 数组问题中比较常见且难度不高的的快慢指针技巧，是让你原地修改数组
+    - 删除有序数组中的重复项（简单）
+    - 删除排序链表中的重复元素（简单）
+    - 移除元素（简单）
+      ```shell
+      int removeElement(int[] nums, int val) {
+          int fast = 0, slow = 0;
+          while (fast < nums.length) {
+              if (nums[fast] != val) {
+                  nums[slow] = nums[fast];
+                  slow++;
+              }
+              fast++;
+          }
+          return slow;
+      }
+      ```
+    - 移动零（简单）- 题目让我们将所有 0 移到最后，其实就相当于移除nums中的所有 0，然后再把后面的元素都赋值为 0 即可。
+    - [滑动窗口算法核心框架详解](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247485141&idx=1&sn=0e4583ad935e76e9a3f6793792e60734&scene=21#wechat_redirect)
+      ```shell
+      /* 滑动窗口算法框架 */
+      void slidingWindow(string s, string t) {
+          unordered_map<char, int> need, window;
+          for (char c : t) need[c]++;
+      
+          int left = 0, right = 0;
+          int valid = 0; 
+          while (right < s.size()) {
+              char c = s[right];
+              // 右移（增大）窗口
+              right++;
+              // 进行窗口内数据的一系列更新
+      
+              while (window needs shrink) {
+                  char d = s[left];
+                  // 左移（缩小）窗口
+                  left++;
+                  // 进行窗口内数据的一系列更新
+              }
+          }
+      }
+      ```
+  - 左右指针的常用算法
+    - 二分查找
+    - 反转字符串（简单）
+    - 两数之和 II - 输入有序数组（中等）
+    - 最长回文子串（中等）
+      ```shell
+      for 0 <= i < len(s):
+          找到以 s[i] 为中心的回文串
+          找到以 s[i] 和 s[i+1] 为中心的回文串
+          更新答案
+      ```
 
 
 
