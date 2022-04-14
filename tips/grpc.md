@@ -147,7 +147,6 @@
         - net/http的连接池里加了各种的锁操作来保证连接状态安全，导致并发的协程概率拿不到锁，继而要把自己gopack到waitqueue，但是waitqueue也是需要拿semaRoot的futex锁。在data race竞争压力大的时候，你又拿不到锁来gopark自己，你不能玩命的自旋拿锁吧，那怎么办？ runtime/os_linux.go就是来解决该问题的。有兴趣的可以看下代码，简单说就是sleep再拿锁。
         - grpc的http2.0组件是自己实现的，没有采用golang标准库里的net/http。在分析代码之前，先放一个go tool pprof的耗时分析图，我们会发现有个很大的消耗在withRetry这里，分析了代码确实有一些锁的操作，而且粒度不小
   - [gRPC client pool](https://github.com/rfyiamcool/grpc-client-pool)
-
 - [gRPC服务的响应设计](https://mp.weixin.qq.com/s/nGTrKBHLVmHLuRMffHcKfw)
   - 探索
     ```go
@@ -157,11 +156,11 @@
         return &pb.HelloReply{Message: "Hello " + in.GetName()}, errors.New("test grpc error")
     }
     ```
-    返回值
+    - 返回值
      ```shell
        2021/09/20 17:04:35 could not greet: rpc error: code = Unknown desc = test grpc error
      ```
-    grpc-go/status包
+    - grpc-go/status包
     ```go
     type Status = status.Status
     
@@ -181,7 +180,7 @@
         return &Status{s: &spb.Status{Code: int32(c), Message: msg}}
     }
     ```
-    internal/status包的Status结构体组合了一个*spb.Status类型(google.golang.org/genproto/googleapis/rpc/status包中的类型)的字段，继续追踪*spb.Status*
+    - internal/status包的Status结构体组合了一个*spb.Status类型(google.golang.org/genproto/googleapis/rpc/status包中的类型)的字段，继续追踪*spb.Status*
     ```go
     // https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc/status
     type Status struct {
@@ -215,8 +214,7 @@
     log.Printf("Greeting: %s", r.GetMessage())
     ```
   - 空应答
-
-    gRPC的proto文件规范要求每个rpc方法的定义中都必须包含一个返回值，返回值不能为空
+    - gRPC的proto文件规范要求每个rpc方法的定义中都必须包含一个返回值，返回值不能为空
     ```go
     // https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/empty.proto
     
@@ -230,9 +228,7 @@
     //
     // The JSON representation for `Empty` is empty JSON object `{}`.
     message Empty {}
-    
     ```
-
 - [gRPC client](https://tonybai.com/2021/09/17/those-things-about-grpc-client/)
   - resolver
     - passthrough
@@ -411,4 +407,17 @@
       }
     }
     ```
+- [gRPC stream]
+  - 注意处理 `stream.Send\Recv` 返回的 `io.EOF`
+    ````go
+    svr := grpc.NewServer(
+    	grpc.MaxRecvMsgSize(300000), // 429 Too Many Requests, received message larger than max
+    	grpc.KeepaliveParams(keepalive.ServerParameters{
+    		MaxConnectionIdle: time.Duration(15) * time.Second, // send GO_AWAY frame
+    		Timeout:           time.Duration(3) * time.Second,  // timeout of send PING frame
+    		Time:              time.Duration(5) * time.Second,  // send PING frame
+    	}),
+    )
+    ````
+
 
