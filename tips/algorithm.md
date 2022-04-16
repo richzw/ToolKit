@@ -369,6 +369,51 @@
     - 二分思路主要是对t进行预处理，用一个字典index将每个字符出现的索引位置按顺序存储下来
       - 现在借助index中记录的信息，可以二分搜索index[c]中比 j 大的那个索引，寻找左侧边界的二分搜索就可以做到
     - ![img.png](algorithm_bs.png)
+- [正则表达式匹配](https://mp.weixin.qq.com/s/kxVGNAc3UDt9VjsNodgBug)
+  - 给你一个字符串 s 和一个字符规律 p，请你来实现一个支持 '.' 和'*' 的正则表达式匹配。
+    - 两个隐含条件
+    - 一个就是 * 不会出现在字符串的开头
+    - 另外一个是 * 前面不能是 *，比如 "a * * b" 就不行
+  - 递归暴力求解
+    - 递归方式的暴力深度优先搜索求解方法往往是搜索问题的万金油，这里你只需要简单的考虑两件事情，一是这个问题是否可以划分为子问题，二是每个子问题有几种状态，就是在当前考虑的问题下，一共有多少种可能性。
+    - 当前的子问题是 s[i,…n] 和 p[j…m]:
+    - s[i] == p[j]，子问题成立与否取决于子问题 s[i+1,…n] 和 p[j+1,…m]
+    - p[j] == '.'，子问题成立与否取决于子问题 s[i+1,…n] 和 p[j+1,…m]
+    - p[j+1] == '*'，s[i] != p[j]，子问题成立与否取决于子问题 s[i,…n] 和 p[j+2,…m]
+    - p[j+1] == '*'，s[i] == p[j]，子问题成立与否取决于子问题 s[i+1,…n] 和 p[j,…m]
+      ```go
+          public boolean isMatch(String s, String p) {
+          if (s.equals(p)) {
+              return true;
+          }
+      
+          boolean isFirstMatch = false;
+          if (!s.isEmpty() && !p.isEmpty() && (s.charAt(0) == p.charAt(0) || p.charAt(0) == '.')) {
+              isFirstMatch = true;
+          }
+      
+          if (p.length() >= 2 && p.charAt(1) == '*') {
+              // 看 s[i,...n] 和 p[j+2,...m] 或者是 s[i+1,...n] 和 p[j,...m]
+              return isMatch(s, p.substring(2))
+                       || (isFirstMatch && isMatch(s.substring(1), p));
+          }
+      
+          // 看 s[i+1,...n] 和 p[j+1,...m]
+          return isFirstMatch && isMatch(s.substring(1), p.substring(1));
+         }
+      ```
+  - 记忆化搜索
+    - 我们假设当前问题是考虑 s 的第 i 个字母，p 的第 j 个字母，所以这时的子问题是 s[0…i] 和 p[0…j] 是否匹配：
+    - p[j] 是字母，并且 s[i] == p[j]，当前子问题成立与否取决于子问题 s[0…i-1] 和 p[0…j-1] 是否成立
+    - p[j] 是 '.'，当前子问题成立与否取决于子问题 s[0…i-1] 和 p[0…j-1] 是否成立
+    - p[j] 是字母，并且 s[i] != p[j]，当前子问题不成立
+    - p[j] 是 '*'，s[i] == p[j - 1]，或者 p[j - 1] == '.'， 当前子问题成立与否取决于子问题 s[0…i-1] 和 p[0…j] 是否成立
+    - p[j] 是 '*'，s[i] != p[j - 1]，当前子问题正确与否取决于子问题 s[0…i] 是否匹配 p[0,…j-2]
+  - 动态规划
+
+
+
+
 
 
 
