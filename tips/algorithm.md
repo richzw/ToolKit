@@ -331,8 +331,44 @@
   - 判断两个单链表是否相交并找出交点
     - 直接的想法可能是用HashSet记录一个链表的所有节点，然后和另一条链表对比，但这就需要额外的空间。
     - 我们可以让p1遍历完链表A之后开始遍历链表B，让p2遍历完链表B之后开始遍历链表A，这样相当于「逻辑上」两条链表接在了一起。
-
-
+- [二分查找的妙用]()
+  - [最长递增子序列](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247484498&idx=1&sn=df58ef249c457dd50ea632f7c2e6e761&source=41#wechat_redirect)
+    - 最长递增子序列（Longest Increasing Subsequence，简写 LIS）
+    - 比较容易想到的是动态规划解法(动态规划的核心设计思想是数学归纳法)，时间复杂度 O(N^2)
+      - dp[i] 表示以 nums[i] 这个数结尾的最长递增子序列的长度
+      - dp 数组应该全部初始化为 1，因为子序列最少也要包含自己，所以长度最小为 1
+        ```go
+        for i := 0; i < len(nums); i++ {
+            for j := 0; i < i; j++ {
+                if nums[j] < nums[i] {
+                    dp[i] = max(dp[i], dp[j] + 1)
+                }   
+            }
+        }
+        ```
+    - [二分查找解法](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247484507&idx=1&sn=36b8808fb8fac0e1906493347d3c96e6&source=41#wechat_redirect)
+      - patience game 的纸牌游戏有关，甚至有一种排序方法就叫做 patience sorting
+        - 只能把点数小的牌压到点数比它大的牌上。如果当前牌点数较大没有可以放置的堆，则新建一个堆，把这张牌放进去。如果当前牌有多个堆可供选择，则选择最左边的堆放置。
+        - 按照上述规则执行，可以算出最长递增子序列，牌的堆数就是我们想求的最长递增子序列的长度
+      - 我们只要把处理扑克牌的过程编程写出来即可。每次处理一张扑克牌不是要找一个合适的牌堆顶来放吗，牌堆顶的牌不是有序吗，这就能用到二分查找了：用二分查找来搜索当前牌应放置的位置
+      ![img.png](algorithm_LIS.png)
+  - [判定子序列](https://mp.weixin.qq.com/s?__biz=MzAxODQxMDM0Mw==&mid=2247484479&idx=1&sn=31a3fc4aebab315e01ea510e482b186a&source=41#wechat_redirect)
+    - 如何判定字符串s是否是字符串t的子序列
+    - 利用双指针i, j分别指向s, t，一边前进一边匹配子序列
+      ```go
+      bool isSubsequence(string s, string t) {
+          int i = 0, j = 0;
+          while (i < s.size() && j < t.size()) {
+              if (s[i] == t[j]) i++;
+              j++;
+          }
+          return i == s.size();
+      }
+      ```
+    - 如果给你一系列字符串s1,s2,...和字符串t，你需要判定每个串s是否是t的子序列（可以假定s相对较短，t很长）
+    - 二分思路主要是对t进行预处理，用一个字典index将每个字符出现的索引位置按顺序存储下来
+      - 现在借助index中记录的信息，可以二分搜索index[c]中比 j 大的那个索引，寻找左侧边界的二分搜索就可以做到
+    - ![img.png](algorithm_bs.png)
 
 
 
