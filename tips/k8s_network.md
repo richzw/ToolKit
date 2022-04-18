@@ -20,6 +20,59 @@
     | Summary | Pods Communicate using L2 | Pods traffic is routed in underlay network | Pod traffic is encapsulated and use underlay for reachability | Pod traffic is routed in cloud virtual network |
     | Underlying Tech | L2 ARP, broadcast | - Routing protocoal - BGP | VxLan, UDP encapluation in user space | Pre-programmed fabric using controller |
     | Ex. | Pod 2 Pod on the same node | - Calico - Flannel(HostGW) | - Flannel - Weave | - GKE - EKS |
+    - [AWS](https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/cni-proposal.md)
+      ![img.png](k8s_network_aws_pod2pod.png)
+    - Inside Pod
+      ```shell
+      IP address
+      
+      # ip addr show
+      1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1
+         link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+         inet 127.0.0.1/8 scope host lo
+            valid_lft forever preferred_lft forever
+         inet6 ::1/128 scope host 
+            valid_lft forever preferred_lft forever
+      3: eth0@if231: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue state UP 
+         link/ether 56:41:95:26:17:41 brd ff:ff:ff:ff:ff:ff
+         inet 10.0.97.30/32 brd 10.0.97.226 scope global eth0 <<<<<<< ENI's secondary IP address
+            valid_lft forever preferred_lft forever
+         inet6 fe80::5441:95ff:fe26:1741/64 scope link 
+            valid_lft forever preferred_lft forever
+      routes
+      
+      # ip route show
+      default via 169.254.1.1 dev eth0 
+      169.254.1.1 dev eth0 
+      static arp
+      
+      # arp -a
+      ? (169.254.1.1) at 2a:09:74:cd:c4:62 [ether] PERM on eth0
+      ```
+    - On the Node
+      ```shell
+      - There are multiple routing tables used to route incoming/outgoing Pod's traffic.
+      
+      - main (toPod) route table is used to route to Pod traffic
+      # ip route show
+      default via 10.0.96.1 dev eth0 
+      10.0.96.0/19 dev eth0  proto kernel  scope link  src 10.0.104.183 
+      10.0.97.30 dev aws8db0408c9a8  scope link  <------------------------Pod's IP
+      10.0.97.159 dev awsbcd978401eb  scope link 
+      10.0.97.226 dev awsc2f87dc4cdd  scope link 
+      10.0.102.98 dev aws4914061689b  scope link 
+      ...
+      - Each ENI has its own route table which is used to route pod's outgoing traffic, where pod is allocated with one of the ENI's secondary IP address
+      # ip route show table eni-1
+      default via 10.0.96.1 dev eth1 
+      10.0.96.1 dev eth1  scope link 
+      - Here is the routing rules to enforce policy routing
+      # ip rule list
+      0:	from all lookup local 
+      512:	from all to 10.0.97.30 lookup main <---------- to Pod's traffic
+      1025:	not from all to 10.0.0.0/16 lookup main 
+      1536:	from 10.0.97.30 lookup eni-1 <-------------- from Pod's traffic
+      ```
   - Pod to Server network
     - Pod IP address - are mutable and will appear and disappear due to scaling up or down
     - Service assign a single VIP for loadbalance between a group of pods
@@ -29,9 +82,16 @@
         - userland TCP/UDP proxy
       - IPtables
         - User IPtables to load-balance traffic
-      - IPVS
+      - IPVS - IPVS (IP Virtual Server) implements transport-layer load balancing, usually called Layer 4 LAN switching, as part of Linux kernel.
         - User kernel LVS
         - Faster than IPtables
+      - [IPVS vs. IPTABLES](https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/ipvs/README.md)
+        - Both IPVS and IPTABLES are based on netfilter. 
+        - Differences between IPVS mode and IPTABLES mode are as follows:
+          - IPVS provides better scalability and performance for large clusters.
+          - IPVS supports more sophisticated load balancing algorithms than IPTABLES (least load, least connections, locality, weighted, etc.).
+          - IPVS supports server health checking and connection retries, etc.
+      - `iptables -t nat -nL`
   - Internet to Server network
     - Layer 4
       - NodePort
@@ -41,6 +101,40 @@
         - Each service needs to have own external IP
         - Typically implemented as NLB
     - Layer 7
+      ```shell
+      > kc get svc -n beta -o wide
+      NAME             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE    SELECTOR
+      word-v5-beta     NodePort    10.100.68.182    <none>        80:32723/TCP   283d   app=word-v5,env=be
+      
+      > kc get endpoints -n beta -o wide
+      NAME             ENDPOINTS                                AGE
+      word-v5-beta     172.20.254.146:3021                      283d
+      
+      > kc get po -n beta -o wide
+      NAME                                  READY   STATUS    RESTARTS   AGE     IP               NODE                             NOMINATED NODE   READINESS GATES
+      word-v5-beta-8555cc6dcd-7vbkl         1/1     Running   0          7d4h    172.20.254.146   ip-172-20-254-241.ec2.internal   <none>           <none>
+      ```
+      ```shell
+      > iptables -t nat -nL
+      
+      Chain KUBE-NODEPORTS (1 references)
+      target     prot opt source               destination
+      KUBE-MARK-MASQ  tcp  --  0.0.0.0/0            0.0.0.0/0            /* beta/word-v5-beta:http */ tcp dpt:32723
+      KUBE-SVC-7EUSQI7QIASQWEEM  tcp  --  0.0.0.0/0            0.0.0.0/0            /* beta/word-v5-beta:http */ tcp dpt:32723
+      
+      Chain KUBE-SERVICES (2 references)
+      target     prot opt source               destination
+      KUBE-SVC-7EUSQI7QIASQWEEM  tcp  --  0.0.0.0/0            10.100.68.182        /* beta/word-v5-beta:http cluster IP */ tcp dpt:80
+      
+      Chain KUBE-SVC-7EUSQI7QIASQWEEM (2 references)
+      target     prot opt source               destination
+      KUBE-SEP-W5KHKXQHUD4WIQCU  all  --  0.0.0.0/0            0.0.0.0/0            /* beta/word-v5-beta:http */
+      
+      Chain KUBE-SEP-W5KHKXQHUD4WIQCU (1 references)
+      target     prot opt source               destination
+      KUBE-MARK-MASQ  all  --  172.20.254.146       0.0.0.0/0            /* beta/word-v5-beta:http */
+      DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* beta/word-v5-beta:http */ tcp to:172.20.254.146:3021
+      ```
 
 
 
