@@ -544,7 +544,23 @@
         - GC 优化手段的优先级：设置 GOGC、GO ballast 内存控制等操作是一种治标不治本略显 trick 的方式，在做 GC 优化时还应先从对象复用、减少对象分配角度着手，在确无优化空间或优化成本较大时，再选择此种方式；
         - 设置 GOGC、GO ballast 内存控制等操作本质上也是一种空间换时间的做法，在内存与 CPU 之间进行压力置换；
         - 在 GC 调优方面，还有很多其他优化方式，如 bigcache 在堆内定义大数组切片自行管理、fastcache 直接调用 syscall.mmap 申请堆外内存使用、offheap 使用 cgo 管理堆外内存等等。
-
+- [80x caching improvement in Go](https://www.ksred.com/80x-caching-improvement-in-go/)
+  - By moving away from JSON and using [gob](https://pkg.go.dev/encoding/gob) instead, I made an 84x improvement on reads, and a 20x improvement on writes.
+    ```go
+    // Using JSON
+    err = json.Unmarshal(obj, result)
+    if err != nil {
+        return
+    }
+    
+    // Using gob
+    buf := bytes.NewBuffer(obj)
+    dec := gob.NewDecoder(buf)
+    err = dec.Decode(&result)
+    if err != nil {
+        return
+    }
+    ```
 
 
 
