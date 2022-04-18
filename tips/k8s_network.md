@@ -1,7 +1,14 @@
 
-- K8S network 101
-  - Summary
-    ![img.png](k8s_network_summary.png)
+- [K8S network 101](https://sookocheff.com/post/kubernetes/understanding-kubernetes-networking-model/)
+  - K8S Basic
+    - API Server
+      - everything is an API call served by the Kubernetes API server (kube-apiserver). 
+      - The API server is a gateway to an etcd datastore that maintains the desired state of your application cluster.
+    - Controllers
+      - Once you’ve declared the desired state of your cluster using the API server, controllers ensure that the cluster’s current state matches the desired state by continuously watching the state of the API server and reacting to any changes.
+      - Ex. when you create a new Pod using the API server, the Kubernetes scheduler (a controller) notices the change and makes a decision about where to place the Pod in the cluster. It then writes that state change using the API server (backed by etcd). 
+      - The kubelet (a controller) then notices that new change and sets up the required networking functionality to make the Pod reachable within the cluster.
+        ![img.png](k8s_network_summary.png)
     - K8S network requirement
       - all pods can communicate with all other pods without using network address translation (NAT)
       - all Nodes can communicate with all Pods without NAT
