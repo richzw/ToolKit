@@ -8,7 +8,16 @@
       - Once you’ve declared the desired state of your cluster using the API server, controllers ensure that the cluster’s current state matches the desired state by continuously watching the state of the API server and reacting to any changes.
       - Ex. when you create a new Pod using the API server, the Kubernetes scheduler (a controller) notices the change and makes a decision about where to place the Pod in the cluster. It then writes that state change using the API server (backed by etcd). 
       - The kubelet (a controller) then notices that new change and sets up the required networking functionality to make the Pod reachable within the cluster.
-        ![img.png](k8s_network_summary.png)
+    - CNI
+      - Some CNI plugins do a lot more than just ensuring Pods have IP addresses and that they can talk to each other
+      ![img.png](k8s_network_summary.png)
+    - Services
+      - because of the ephemeral nature of Pods, it is almost never a good idea to directly use Pod IP addresses. Pod IP addresses are not persisted across restarts and can change without warning, in response to events that cause Pod restarts (such as application failures, rollouts, rollbacks, scale-up/down, etc.).
+      - Kubernetes Service objects allow you to assign a single virtual IP address to a set of Pods. It works by keeping track of the state and IP addresses for a group of Pods and proxying / load-balancing traffic to them
+      - Pods can also use internally available DNS names instead of Service IP addresses. This DNS system is powered by CoreDNS
+    - Endpoints
+      - how do Services know which Pods to track, and which Pods are ready to accept traffic? The answer is Endpoints
+      - ![img.png](k8s_network_endpoint.png)
     - K8S network requirement
       - all pods can communicate with all other pods without using network address translation (NAT)
       - all Nodes can communicate with all Pods without NAT
@@ -27,7 +36,7 @@
     | Summary | Pods Communicate using L2 | Pods traffic is routed in underlay network | Pod traffic is encapsulated and use underlay for reachability | Pod traffic is routed in cloud virtual network |
     | Underlying Tech | L2 ARP, broadcast | - Routing protocoal - BGP | VxLan, UDP encapluation in user space | Pre-programmed fabric using controller |
     | Ex. | Pod 2 Pod on the same node | - Calico - Flannel(HostGW) | - Flannel - Weave | - GKE - EKS |
-    - [AWS](https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/cni-proposal.md)
+    - [AWS CNI](https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/cni-proposal.md)
       ![img.png](k8s_network_aws_pod2pod.png)
     - Inside Pod
       ```shell
@@ -83,8 +92,8 @@
   - Pod to Server network
     - Pod IP address - are mutable and will appear and disappear due to scaling up or down
     - Service assign a single VIP for loadbalance between a group of pods
-    - Kube-Proxy
-      - a network proxy that runs on each node in your cluster
+    - [Kube-Proxy](https://mayankshah.dev/blog/demystifying-kube-proxy/)
+      - a network proxy that runs on each node in your cluster. It watches Service and Endpoints objects and accordingly updates the routing rules on its host nodes to allow communicating over Services.
       - User Model
         - userland TCP/UDP proxy
       - IPtables
@@ -92,7 +101,7 @@
       - IPVS - IPVS (IP Virtual Server) implements transport-layer load balancing, usually called Layer 4 LAN switching, as part of Linux kernel.
         - User kernel LVS
         - Faster than IPtables
-      - [IPVS vs. IPTABLES](https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/ipvs/README.md)
+      - [IPVS vs IPTABLES](https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/ipvs/README.md)
         - Both IPVS and IPTABLES are based on netfilter. 
         - Differences between IPVS mode and IPTABLES mode are as follows:
           - IPVS provides better scalability and performance for large clusters.
