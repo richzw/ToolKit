@@ -561,8 +561,41 @@
         return
     }
     ```
-
-
+- [IO 密集型服务 性能优化实战记录](https://mp.weixin.qq.com/s/83M0j8lIALdF-eOdD5GukA)
+  - 背景
+    - 项目背景
+      - Feature 服务作为特征服务，产出特征数据供上游业务使用。服务压力：高峰期 API 模块 10wQPS，计算模块 20wQPS。服务本地缓存机制
+    - 面对问题
+      - 服务 API 侧存在较严重的 P99 耗时毛刺问题（固定出现在每分钟第 0-10s），导致上游服务的访问错误率达到 1‰ 以上，影响到业务指标；
+      - 目标：解决耗时毛刺问题，将 P99 耗时整体优化至 15ms 以下；
+  - 解决方案
+    - 服务 CPU 优化
+      - 从提高服务 CPU Idle 角度入手，对服务耗时毛刺问题展开优化
+      - 通过减少反序列化操作、更换 JSON 序列化库（json-iterator）两种方式进行了优化
+        - 反序列化时的开销减少，使单个请求中的计算时间得到了减少；
+        - 单个请求的处理时间减少，使同时并发处理的请求数得到了减少，减轻了调度切换、协程/线程排队、资源竞争的开销
+      - [json-iterator 库为什么快](https://cloud.tencent.com/developer/article/1064753)
+        - 标准库 json 库使用 reflect.Value 进行取值与赋值，但 reflect.Value 不是一个可复用的反射对象，每次都需要按照变量生成 reflect.Value 结构体，因此性能很差。
+        - json-iterator 实现原理是用 reflect.Type 得出的类型信息通过「对象指针地址+字段偏移」的方式直接进行取值与赋值，而不依赖于 reflect.Value，reflect.Type 是一个可复用的对象，同一类型的 reflect.Type 是相等的，因此可按照类型对 reflect.Type 进行 cache 复用。
+        - 总的来说其作用是减少内存分配和反射调用次数，进而减少了内存分配带来的系统调用、锁和 GC 等代价，以及使用反射带来的开销。
+    - 调用方式优化 - 对冲请求
+      - Feature 服务 API 模块访问计算模块 P99 显著高于 P95
+      - 经观察计算模块不同机器之间毛刺出现时间点不同，单机毛刺呈偶发现象，所有机器聚合看呈规律性毛刺
+      - 优化 - [The Tail at Scale](https://mp.weixin.qq.com/s/BKMPNix-zn64-0MP3XVLeA)
+        - 针对 P99 高于 P95 现象，提出对冲请求方案，对毛刺问题进行优化
+        - 对冲请求(Hedged requests.)：把对下游的一次请求拆成两个，先发第一个，n毫秒超时后，发出第二个，两个请求哪个先返回用哪个
+    - 语言 GC 优化
+      - 观察现象，初步定位原因对 Feature 服务早高峰毛刺时的 Trace 图进行耗时分析后发现，在毛刺期间程序 GC pause 时间（GC 周期与任务生命周期重叠的总和）长达近 50+ms（见左图），绝大多数 goroutine 在 GC 时进行了长时间的辅助标记（mark assist，见右图中浅绿色部分），GC 问题严重，因此怀疑耗时毛刺问题是由 GC 导致
+      - 从原因出发，进行针对性分析
+        - 根据观察计算模块服务平均每 10 秒发生 2 次 GC，GC 频率较低，但在每分钟前 10s 第一次与第二次的 GC 压力大小（做 mark assist 的 goroutine 数）呈明显差距，因此怀疑是在每分钟前 10s 进行第一次 GC 时的压力过高导致了耗时毛刺。
+        - 根据 Golang GC 原理分析可知，G 被招募去做辅助标记是因为该 G 分配堆内存太快导致，而 计算模块每分钟缓存失效机制会导致大量的下游访问，从而引入更多的对象分配，两者结合互相印证了为何在每分钟前 10s 的第一次 GC 压力超乎寻常；
+      - 按照分析结论，设计优化操作从减少对象分配数角度出发，对 Pprof heap 图进行观察
+        - 在 inuse_objects 指标下 cache 库占用最大；
+        - 在 alloc_objects 指标下 json 序列化占用最大；
+      - 通过对业界开源的 [json 和 cache 库调研后](https://segmentfault.com/a/1190000041591284)，采用性能较好、低分配的 GJSON 和 0GC 的 BigCache 对原有库进行替换；
+      - Golang GC
+        - 在通俗意义上常认为，GO GC 触发时机为堆大小增长为上次 GC 两倍时。但在 GO GC 实际实践中会按照 [Pacer 调频算法](https://golang.design/under-the-hood/zh-cn/part2runtime/ch08gc/pacing/)根据堆增长速度、对象标记速度等因素进行预计算，使堆大小在达到两倍大小前提前发起 GC，最佳情况下会只占用 25% CPU 且在堆大小增长为两倍时，刚好完成 GC。
+        - 但 Pacer 只能在稳态情况下控制 CPU 占用为 25%，一旦服务内部有瞬态情况，例如定时任务、缓存失效等等，Pacer 基于稳态的预判失效，导致 GC 标记速度小于分配速度，为达到 GC 回收目标（在堆大小到达两倍之前完成 GC），会导致大量 Goroutine 被招募去执行 Mark Assist 操作以协助回收工作，从而阻碍到 Goroutine 正常的工作执行。因此目前 GO GC 的 Marking 阶段对耗时影响时最为严重的。
 
 
 
