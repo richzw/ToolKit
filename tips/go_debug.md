@@ -183,6 +183,45 @@
       - 在 GO1.12~GO1.15，官方默认选择 MADV_FREE 策略进行内存回收；
       - 在 GO1.16 及之后，又改回了 MADV_DONTNEED 策略进行回收内存。
 - [Benchmark Profiling](https://github.com/ardanlabs/gotraining/tree/master/topics/go/profiling/memcpu)
+- [golang 内存问题排查指北](https://mp.weixin.qq.com/s/HdSIC93HMbqvbQisCr186Q)
+  - Issue: 发现了某微服务有一些实例内存过高
+  - 问题定位
+    - 怀疑是 goroutine 逃逸
+    - 怀疑代码出现了内存泄露 - 通过 pprof 进行实时内存采集，对比问题实例和正常实例的内存使用状况
+    - 怀疑是 RSS 的问题 - 在 pprof 里看到 metrics 总共只是占用了 72MB，而总的 heap 内存只有 170+MB 而我们的实例是 2GB 内存配置，占用 80%内存就意味着 1.6GB 左右的 RSS 占用，这两个严重不符
+  - 问题解决
+    - 一种是在环境变量里指定GODEBUG=madvdontneed=1
+    - 升级 go 编译器版本到 1.16 以上
+  - 遇到的其他坑
+    - 在服务发现时，kitc 里建立了一个缓存池 asyncache 来进行 instance 的存放。这个缓存池每 3 秒会刷新一次，刷新时调用 fetch，fetch 会进行服务发现。在服务发现时会根据实例的 host、port、tags(会根据环境 env 进行改变)不断地新建 instance，然后将 instance 存入缓存池 asyncache，这些 instance 没有进行清理也就没有进行内存的释放。所以这是造成内存泄露的原因。
+  - 常见场景
+    - goroutine 导致内存泄露
+      - goroutine 申请过多 - 一次请求就新建一个 client，业务请求量大时 client 建立过多，来不及释放。
+    - goroutine 阻塞
+      - I/O 连接未设置超时时间，导致 goroutine 一直在等待
+        - 在请求第三方网络连接接口时，因网络问题一直没有接到返回结果，如果没有设置超时时间，则代码会一直阻塞。
+      - 互斥锁未释放
+        - 假设有一个共享变量，goroutineA 对共享变量加锁但未释放，导致其他 goroutineB、goroutineC、...、goroutineN 都无法获取到锁资源，导致其他 goroutine 发生阻塞。
+      - waitgroup 使用不当
+        - waitgroup 的 Add、Done 和 wait 数量不匹配，会导致 wait 一直在等待
+    - select 阻塞
+      - 使用 select 但 case 未覆盖全面，导致没有 case 就绪，最终 goroutine 阻塞。
+    - channel 阻塞
+      - 写阻塞
+        - 无缓冲 channel 的阻塞通常是写操作因为没有读而阻塞
+        - 有缓冲的 channel 因为缓冲区满了，写操作阻塞
+      - 读阻塞
+        - 期待从 channel 读数据，结果没有 goroutine 往进写
+    - 定时器使用不当
+      - time.after()使用不当
+        - 默认的 time.After()是会有内存泄漏问题的，因为每次 time.After(duratiuon x)会产生 NewTimer()，在 duration x 到期之前，新创建的 timer 不会被 GC，到期之后才会 GC。
+      - time.ticker 未 stop
+    - slice 引起内存泄露
+      - 两个 slice 共享地址，其中一个为全局变量，另一个也无法被 gc；
+      - append slice 后一直使用，未进行清理。
+
+
+
 
 
 
