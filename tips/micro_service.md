@@ -682,7 +682,36 @@
   - timing wheel
     - reduces the maintenance of tasks from priority queue O(nlog(n)) to bidirectional linked table O(1), 
     - and the execution of tasks also requires only polling for tasks at one point in time O(N), without putting in and removing elements O(nlog(n)), as in the case of the priority queue.
-
+- [Distributed Lock](https://www.youtube.com/watch?v=VnbC5RG1fEo)
+  - Concurrent transaction need be synchronized
+    - DB lock is fine, but the Optimistic Lock is great
+      - Shared Lock - `SELECT ... LOCK IN SHARE MODE`
+      - Exclusive Lock  - `SELECT ... FOR UPDATE`
+      - Version Optimistic Lock
+    - Sharding the data cannot solve the all of problem
+      - Using the shard data solution
+      - Consistency can be easy to be guaranteed 
+        - Consistent Hash
+        - Gossip the indices
+      - The issue of Shard
+        - Hotspot - Load is not balanced
+        - Multiple Entities Transaction
+        - Node Failed - Data Replication cause more consistent issue - CAP
+  - Redlock
+    - the algorithm makes dangerous assumption about timing and system clock
+    - Lock expired and deadlock issue
+    - Is readlock safe
+      - Fencing is great, with this no need distributed lock
+      - Clock jump is one big issue, readlock cannnot work correctly under this problem
+  - Zookeeper lock
+    - Create lock with Sequence and Ephemeral flag
+  - Google Chubby
+  - Distributed Lock Service need the following features
+    - High Availability
+      - Data Replicas - strong consistent protocol - Pasox, Raft, zab
+      - Master Failover - Leader election
+    - Deadlock Detection
+      - Keepalive & Lease Timeout
 
 
 
