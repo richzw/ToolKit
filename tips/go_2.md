@@ -1185,7 +1185,20 @@
     - 环境变量 GOMAXPROCS 又是什么？
       - 在 Go 语言中，通过设置 GOMAXPROCS，用户可以调整调度中 P（Processor）的数量。
       - 另一个重点在于，与 P 相关联的的 M（系统线程），是需要绑定 P 才能进行具体的任务执行的，因此 P 的多少会影响到 Go 程序的运行表现。
-  
+- [GO 1.17调用规约到底优化了多少](https://mp.weixin.qq.com/s/7T3Gh4H-qyUrv-WBxT9jcg)
+  - 什么是调用规约
+    - 当函数A带着3个int类型的实参调用函数B的时候，3个参数放在哪
+    - 基于寄存器/平台的调用规约又分为Caller-saved registers 和 Callee-saved registers两种：
+      - Caller-saved registers：也叫易失性寄存器，用来保存不需要跨函数传递的参数,比如A(q, w) -> B(q, w int) -> C(w int)，也就是说寄存器保存的值在保证程序正确的情况下会发生变化
+      - Callee-saved registers：也叫持久性寄存器，调用方调用函数之后存储在寄存器的值不会变（不会让被调用方改掉），因为需要持久保存对于带GC的语言又是一个挑战。
+    - Go目前实现的是Caller-saved registers，为什么要有 Callee-saved registers呢，最典型的就是保存调用栈
+  - 为什么Go要从基于栈的调用规约切换为基于寄存器的调用规约 
+    - 官网说优化了5%
+    - 可能还不如intel优化栈操作来的实际，所有好多人吐槽，“要只提升5%，不如考虑考虑将所有代码内内联吧”
+  - Go如何实现的
+    - 函数参数和返回值对于int类型只用了9个寄存器分别是： RAX, RBX, RCX, RDI, RSI, R8, R9, R10, R11
+    - 那到底什么是stack spill/register spill呢？ 一个寄存器（比如AX），如果长时间存放某个值不适用就会被踢栈上。
+
 
 
 
