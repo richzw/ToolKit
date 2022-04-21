@@ -1198,9 +1198,86 @@
   - Go如何实现的
     - 函数参数和返回值对于int类型只用了9个寄存器分别是： RAX, RBX, RCX, RDI, RSI, R8, R9, R10, R11
     - 那到底什么是stack spill/register spill呢？ 一个寄存器（比如AX），如果长时间存放某个值不适用就会被踢栈上。
-
-
-
-
+- [JSON 与 Cache 库 调研与选型](https://mp.weixin.qq.com/s/2WVBYJjeDkTBr9dDkbouqg)
+  - JSON
+    - GO 1.14 标准库 JSON大量使用反射获取值，首先 go 的反射本身性能较差，其次频繁分配对象，也会带来内存分配和 GC 的开销
+    - valyala/fastjson star: 1.4k
+      - 通过遍历 json 字符串找到 key 所对应的 value，返回其值 []byte，由业务方自行处理。同时可以返回一个 parse 对象用于多次解析；
+      - 只提供了简单的 get 接口，不提供 Unmarshal 到结构体或 map 的接口；
+    - tidwall/gjson star: 9.5k
+      - 原理与 fastjson 类似，但不会像 fastjson 一样将解析的内容保存在一个 parse 对象中，后续可以反复的利用，所以当调用 GetMany 想要返回多个值的时候，需要遍历 JSON 串多次，因此效率会比较低；
+      - 提供了 get 接口和 Unmarshal 到 map 的接口，但没有提供 Unmarshal 到 struct 的接口；
+    - buger/jsonparser star: 4.4k
+      - 原理与 gjson 类似，有一些更灵活的 api；
+      - 只提供了简单的 get 接口，不提供 Unmarshal 到结构体或 map 的接口；
+    - json-iterator star: 10.3k
+      - 兼容标准库；
+      - 其之所以快，一个是尽量减少不必要的内存复制，另一个是减少 reflect 的使用——同一类型的对象，jsoniter 只调用 reflect 解析一次之后即缓存下来。
+      - 不过随着 go 版本的迭代，原生 json 库的性能也越来越高，jsonter 的性能优势也越来越窄，但仍有明显优势。
+    - [sonic](https://mp.weixin.qq.com/s?__biz=MzI1MzYzMjE0MQ==&mid=2247491325&idx=1&sn=e8799316d55c0951b0b54b404a3d87b8&scene=21#wechat_redirect) star: 2k
+      - 兼容标准库；
+      - 通过JIT（即时编译）和SIMD（单指令-多数据）加速；需要 go 1.15 及以上的版本，提供完成的 json 操作的 API，是一个比 json-iterator 更优的选择。
+      - 已经在抖音内部大范围使用，且 github 库维护给力，issues 解决积极，安全性有保证。
+      - sonic ：基于 JIT 技术的开源全场景高性能 JSON 库
+    - easyjson star: 3.5k
+      - 支持序列化和反序列化;
+      - 通过代码生成的方式，达到不使用反射的目的；
+    - 业务场景
+      - 需要 Unmarshal map；
+      - json 导致的 GC 与 CPU 压力较大；
+      - 业务较为重要，需要一个稳定的序列化库；
+    - 选型思路
+      - easyjson 需要生成代码，丧失了 json 的灵活性，增加维护成本，因此不予考虑；
+      - sonic 需要 go 1.15 及以上的版本，且业务场景无 Unmarshal 到结构体的操作，因此暂时不做选择；
+      - json-iterator 的优势在于兼容标准库接口，但因为使用到了反射，性能相对较差，且业务场景没有反序列化结构体的场景，因此不予考虑；
+      - fastjson、gjson、jsonparser 由于没有用到反射，因此性能要高于 json-iterator。所以着重在这三个中选择；
+      - fastjson 实现了 0 分配的开销，但是 star 数较少，不予考虑；
+      - gjson 与 jsonparser 类似，速度及内存分配上各擅胜场，灵活性上也各有长处，比较难抉择，但业务场景下不需要使用到其提供的灵活 API，而有 json 序列化到 map 的场景，所以 gjson 会有一些优势，再结合 star 数后选择 gjson；
+  - Cache
+    - go-cache star: 5.7k
+      - 最简单的 cache，可以直接存储指针，下面的部分 Cache 都需要先把对象序列化为 []byte，会引入一定的序列化开销，但可以用高效的序列化库减少开销；
+      - 可以对每个 key 设置 TTL；
+      - 无淘汰机制；
+    - freecache star: 3.6k
+      - 0 GC;
+      - 可以对每个 key 设置 TTL；
+      - 近 LRU 淘汰；
+    - bigcache star: 5.4k
+      - 0 GC；
+      - 只有全局 TTL，不能对每个 key 设置 TTL；
+      - 如果超过内存最大值（也可以不设置，内存使用无上限），采用的是 FIFO 策略；
+      - 产生 hash 冲突会导致旧值被覆盖；
+      - 会在内存中分配大数组用以达到 0 GC 的目的，一定程度上会影响到 GC 频率；
+    - fastcache star: 1.3k
+      - 0 GC；
+      - 不支持 TTL；
+      - 如果超过设置最大值，底层是 ring buffer，缓存会被覆盖掉， 采用的是 FIFO 策略；
+      - 调用 mmap 分配堆外内存，因此不会影响到 gc 频率；
+    - groupcache star: 11k
+      - 一个较为复杂的 cache 实现，本质上是个 LRU cache；
+      - 是一个lib库形式的进程内的分布式缓存，也可以认为是本地缓存，但不是简单的单机缓存，不过也可以作为单机缓存；
+      - 特性如下：单机缓存和基于HTTP的分布式缓存；最近最少访问（LRU，Least Recently Used）缓存策略；使用Golang锁机制防止缓存击穿；使用一致性哈希选择节点以实现负载均衡；使用Protobuf优化节点间二进制通信；
+    - goburrow star: 468
+      - Go 中 Guava Cache 的部分实现；
+      - 没有对 GC 做优化，内部使用 sync.map；
+      - 支持淘汰策略：LRU、Segmented LRU (default)、TinyLFU (experimental)；
+    - ristretto star: 3.6k
+      - 在 GC 方面做了少量优化；
+      - 可以对每个 key 设置 TTL；
+      - 在吞吐方面做了较多优化，使得在复杂的淘汰策略下仍具有较好的吞吐水平；
+      - 在命中率方面，具备出色的准入政策和 SampledLFU 驱逐政策，因此高于其他 cache 库；
+    - 业务场景 - Feature 服务
+      - key 分钟固定窗口失效，且 key 中自带分钟级时间戳；
+      - 内存容量足够，有全局 TTL 即可，不需要额外的淘汰机制；
+      - 缓存 Key 数量较多，对 GC 压力较大；
+      - Value 是 string，另外可以通过不安全方式无开销转换为 []byte；
+      - 业务较为重要，需要一个稳定的 cache 库；
+    - 选型思路
+      - goburrow、ristretto 两个 cache 的主打的是固定内存情况下的命中率，对 GC 无优化，且 Feature 服务的 Cache 是分钟固定窗口失效，机器内存容量远大于窗口内的缓存 value 之和，因此不需要用到更好的淘汰机制，而且 Feature 服务本次更换 cahce 要解决的是缓存中对象数量太多，导致的 GC 问题，因此不考虑这两种；
+      - groupcache 是一个 LRU Cache，且功能较重，Feature 服务只需要一个本地 Cache 库，不需要用到这些特性，因此不考虑这个 Cahce；
+      - fastcache 最大的问题是不支持 TTL，这个是 Feature 服务所不能接受的，因此不考虑这个Cahce；
+      - go-cache 类似于 Feature 服务中的 beego/cache 库，最简单的 Cache 库，对 GC 无优化，且 Feature 服务的 value 本身就为 string 类型，不会引入序列化开销，且可以通过不安全的方式实现 string 与 []byte 之间 0 开销转换；
+      - freecache、bigcache 比较适合 Feature 服务，freecache 的优势在于近 LRU 的淘汰，并且可以对每个 Key 设置 TTL，但 Feature 服务内存空间足够无需进行缓存淘汰，且 key 名中自带分钟级时间戳，key 有效期都为 1min，因此无需使用 freecache；
+      - bigcache 相对于 freecache 的优势之一是您不需要提前知道缓存的大小，因为当 bigcache 已满时，它可以为新条目分配额外的内存，而不是像 freecache 当前那样覆盖现有的。摘自：bigcache[7]
 
 
