@@ -177,6 +177,24 @@
       ```
 
 
+- [CNI](https://platform9.com/blog/the-ultimate-guide-to-using-calico-flannel-weave-and-cilium/)
+  - flannel
+    - Flannel runs a simple overlay network across all the nodes of the Kubernetes cluster. 
+    - It provides networking at Layer 3, the Network Layer of the OSI networking model. 
+    - Flannel supports [VXLAN](https://support.huawei.com/enterprise/zh/doc/EDOC1100087027) as its default backend, although you can also configure it to use UDP and host-gw. 
+    - Some experimental backends like AWS VPC, AliVPC, IPIP, and IPSec are also available, but not officially supported at present.
+    - One of the drawbacks of Flannel is its lack of advanced features, such as the ability to configure network policies and firewalls.
+  - Calico
+    - Calico operates on Layer 3 of the OSI model and uses the BGP protocol to move network packets between nodes in its default configuration with IP in IP for encapsulation. 
+    - Using BGP, Calico directs packets natively, without needing to wrap them in additional layers of encapsulation. 
+    - This approach improves performance and simplifies troubleshooting network problems compared with more complex backends, like VXLAN.
+    - Calico’s most valuable feature is its support for network policies. By defining and enforcing network policies, you can prescribe which pods can send and receive traffic and manage security within the network.
+  - Weave
+    - Weave creates a mesh overlay between all nodes of a Kubernetes cluster and uses this in combination with a routing component on each node to dynamically route traffic throughout the cluster. By default, Weave routes packets using the fast datapath method, which attempts to send traffic between nodes along the shortest path.
+    - Weave includes features such as creating and enforcing network policies and allows you to configure encryption for your entire network. If configured, Weave uses NaCl encryption for sleeve traffic and IPsec ESP encryption for fast datapath traffic.
+  - Cilium
+    - A relative newcomer to the land of Kubernetes CNI plugins is Cilium. Cilium and its observability tool, Hubble, take advantage of eBPF.
+
 
 - [LVS](https://new.qq.com/omn/20200718/20200718A05H2H00.html)： 
   - LVS是Linux Virtual Server的简写，也就是Linux 虚拟服务器，是一个虚拟的服务器集群系统.
