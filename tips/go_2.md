@@ -1279,5 +1279,6 @@
       - go-cache 类似于 Feature 服务中的 beego/cache 库，最简单的 Cache 库，对 GC 无优化，且 Feature 服务的 value 本身就为 string 类型，不会引入序列化开销，且可以通过不安全的方式实现 string 与 []byte 之间 0 开销转换；
       - freecache、bigcache 比较适合 Feature 服务，freecache 的优势在于近 LRU 的淘汰，并且可以对每个 Key 设置 TTL，但 Feature 服务内存空间足够无需进行缓存淘汰，且 key 名中自带分钟级时间戳，key 有效期都为 1min，因此无需使用 freecache；
       - bigcache 相对于 freecache 的优势之一是您不需要提前知道缓存的大小，因为当 bigcache 已满时，它可以为新条目分配额外的内存，而不是像 freecache 当前那样覆盖现有的。摘自：bigcache[7]
+- [Go AST](https://mp.weixin.qq.com/s/pCcNtUykXAwb-BN_prPGpA)
 
 
