@@ -639,6 +639,8 @@
       - 大表ALTER TABLE非常耗时，MySQL执行大部分修改表结果操作的方法是用新的结构创建一个张空表，从旧表中查出所有的数据插入新表，然后再删除旧表。尤其当内存不足而表又很大，而且还有很大索引的情况下，耗时更久。当然有一些奇淫技巧可以解决这个问题，有兴趣可自行查阅。
     - 创建高性能索引
 - [Write-Ahead Log](https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html)
+  - The unique log identifier helps in implementing certain other operations on the log like `Segmented Log` or cleaning the log with `Low-Water Mark` etc. 
+  - The log updates can be implemented with `Singular Update Queue`
 - [Prometheus TSDB](https://ganeshvernekar.com/blog/prometheus-tsdb-the-head-block/)
 
 
