@@ -1280,5 +1280,60 @@
       - freecache、bigcache 比较适合 Feature 服务，freecache 的优势在于近 LRU 的淘汰，并且可以对每个 Key 设置 TTL，但 Feature 服务内存空间足够无需进行缓存淘汰，且 key 名中自带分钟级时间戳，key 有效期都为 1min，因此无需使用 freecache；
       - bigcache 相对于 freecache 的优势之一是您不需要提前知道缓存的大小，因为当 bigcache 已满时，它可以为新条目分配额外的内存，而不是像 freecache 当前那样覆盖现有的。摘自：bigcache[7]
 - [Go AST](https://mp.weixin.qq.com/s/pCcNtUykXAwb-BN_prPGpA)
+  - uber-go 的 gopatch 也非常强大，假如你的代码有很多 go func 开启的 goroutine, 你想批量加入 recover 逻辑，如果数据特别多人工加很麻烦，这时可以用 gopatcher
+    ```go
+    var patchTemplateString = `@@
+    @@
+    + import "runtime/debug"
+    + import "{{ Logger }}"
+    + import "{{ Statsd }}"
+    
+    go func(...) {
+    +    defer func(){
+    +        if err := recover(); err != nil {
+    +            statsd.Count1("{{ StatsdTag }}", "{{ FileName }}")
+    +            logging.Error("{{ LoggerTag }}", "{{ FileName }} recover from panic, err=%+v, stack=%v", err, string(debug.Stack()))
+    +        }
+    +    }()
+    ...
+    }()
+    `
+    ```
+  - 大部分 linter 工具都是用 go ast 实现的，比如对于大写的 Public 函数，如果没有注释报错
+    ```go
+    // BuildArgs write a
+    func BuildArgs() {
+        var a int
+        a = a + bbb.c
+        return a
+    }
+    
+    29  .  .  1: *ast.FuncDecl {
+    30  .  .  .  Doc: *ast.CommentGroup {
+    31  .  .  .  .  List: []*ast.Comment (len = 1) {
+    32  .  .  .  .  .  0: *ast.Comment {
+    33  .  .  .  .  .  .  Slash: foo:7:1
+    34  .  .  .  .  .  .  Text: "// BuildArgs write a"
+    35  .  .  .  .  .  }
+    36  .  .  .  .  }
+    37  .  .  .  }
+    38  .  .  .  Recv: nil
+    39  .  .  .  Name: *ast.Ident {
+    40  .  .  .  .  NamePos: foo:8:6
+    41  .  .  .  .  Name: "BuildArgs"
+    42  .  .  .  .  Obj: *ast.Object {
+    43  .  .  .  .  .  Kind: func
+    44  .  .  .  .  .  Name: "BuildArgs"
+    45  .  .  .  .  .  Decl: *(obj @ 29)
+    46  .  .  .  .  .  Data: nil
+    47  .  .  .  .  .  Type: nil
+    48  .  .  .  .  }
+    49  .  .  .  }
+    ```
+    - linter 只需要检查 FuncDecl 的 Name 如果是可导出的，同时 Doc.CommentGroup 不存在，或是注释不以函数名开头，报错即可
+
+
+
+
 
 
