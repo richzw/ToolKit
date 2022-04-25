@@ -611,11 +611,11 @@
     var serverInit sync.Once
     
     func (pd *pollDesc) init(fd *FD) error {
-    	serverInit.Do(runtime_pollServerInit)
-    	ctx, errno := runtime_pollOpen(uintptr(fd.Sysfd))
+        serverInit.Do(runtime_pollServerInit)
+        ctx, errno := runtime_pollOpen(uintptr(fd.Sysfd))
     ```
     这里用了 sync.Once 来确保初始化一次 epoll 实例，这就表示一个 listener 只持有一个 epoll 实例来管理网络连接，既然只有一个 epoll 实例，当然就不存在『惊群效应』了
-
+- [TCP/IP协议精华指南](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247513631&idx=1&sn=9d1feccc4770cfe3ae1db1866b9a3ada&chksm=c184414ef6f3c858cf99b478473e716dd75a5304c8fbf2d28ac36e0071ad8693cd5469e8a727&scene=21#wechat_redirect)
 
 
 
