@@ -5,7 +5,7 @@ func bsearch(nums []int, target int) int {
 	var right = len(nums) - 1
 
 	for left <= right {
-		mid := (left + right) / 2
+		mid := left + (right-left)/2
 		if nums[mid] == target {
 			return mid
 		} else if nums[mid] < target {
@@ -23,7 +23,7 @@ func left_bound(nums []int, target int) int {
 	var right = len(nums)
 
 	for left < right {
-		mid := (left + right) / 2
+		mid := left + (right-left)/2
 		if nums[mid] == target {
 			right = mid
 		} else if nums[mid] < target {
@@ -41,7 +41,7 @@ func right_bound(nums []int, target int) int {
 	var right = len(nums)
 
 	for left < right {
-		mid := (left + right) / 2
+		mid := left + (right-left)/2
 		if nums[mid] == target {
 			left = mid + 1
 		} else if nums[mid] < target {
