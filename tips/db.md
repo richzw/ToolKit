@@ -638,6 +638,56 @@
       - schema的列不要太多。原因是存储引擎的API工作时需要在服务器层和存储引擎层之间通过行缓冲格式拷贝数据，然后在服务器层将缓冲内容解码成各个列，这个转换过程的代价是非常高的。如果列太多而实际使用的列又很少的话，有可能会导致CPU占用过高。
       - 大表ALTER TABLE非常耗时，MySQL执行大部分修改表结果操作的方法是用新的结构创建一个张空表，从旧表中查出所有的数据插入新表，然后再删除旧表。尤其当内存不足而表又很大，而且还有很大索引的情况下，耗时更久。当然有一些奇淫技巧可以解决这个问题，有兴趣可自行查阅。
     - 创建高性能索引
+      - MySQL不会使用索引的情况：非独立的列 - 独立的列”是指索引列不能是表达式的一部分，也不能是函数的参数
+      - 前缀索引
+      - 多列索引和索引顺序
+        - 索引选择性是指不重复的索引值和数据表的总记录数的比值，选择性越高查询效率越高，因为选择性越高的索引可以让MySQL在查询时过滤掉更多的行。
+        - 理解索引选择性的概念后，就不难确定哪个字段的选择性较高了，查一下就知道了，比如：
+          `SELECT * FROM payment where staff_id = 2 and customer_id = 584  `
+        - 是应该创建(staff_id,customer_id)的索引还是应该颠倒一下顺序？执行下面的查询，哪个字段的选择性更接近1就把哪个字段索引前面就好。
+          ```sql
+          select count(distinct staff_id)/count(*) as staff_id_selectivity,  
+          count(distinct customer_id)/count(*) as customer_id_selectivity,  
+          count(*) from payment
+          ```
+      - 避免多个范围条件
+      - 覆盖索引
+        - 如果一个索引包含或者说覆盖所有需要查询的字段的值，那么就没有必要再回表查询，这就称为覆盖索引。
+      - 使用索引扫描来排序
+        - MySQL有两种方式可以生产有序的结果集，
+          - 其一是对结果集进行排序的操作，
+          - 其二是按照索引顺序扫描得出的结果自然是有序的。如果explain的结果中type列的值为index表示使用了索引扫描来做排序。
+        - 只有当索引的列顺序和ORDER BY子句的顺序完全一致，并且所有列的排序方向也一样时，才能够使用索引来对结果做排序。
+        - 如果查询需要关联多张表，则只有ORDER BY子句引用的字段全部为第一张表时，才能使用索引做排序。
+      - 冗余和重复索引
+      - 删除长期未使用的索引
+    - 特定类型查询优化
+      - 优化COUNT()查询
+        - COUNT()可能是被大家误解最多的函数了，它有两种不同的作用，其一是统计某个列值的数量，其二是统计行数。
+        - 有时候某些业务场景并不需要完全精确的COUNT值，可以用近似值来代替，EXPLAIN出来的行数就是一个不错的近似值，而且执行EXPLAIN并不需要真正地去执行查询，所以成本非常低。
+      - 优化关联查询
+        - 确保ON和USING字句中的列上有索引。在创建索引的时候就要考虑到关联的顺序。当表A和表B用列c关联的时候，如果优化器关联的顺序是A、B，那么就不需要在A表的对应列上创建索引。没有用到的索引会带来额外的负担，一般来说，除非有其他理由，只需要在关联顺序中的第二张表的相应列上创建索引（具体原因下文分析）。
+        - 确保任何的GROUP BY和ORDER BY中的表达式只涉及到一个表中的列，这样MySQL才有可能使用索引来优化。
+      - 优化LIMIT分页
+        - 优化这种查询一个最简单的办法就是尽可能的使用覆盖索引扫描，而不是查询所有的列。
+          ```sql
+          SELECT film_id,description FROM film ORDER BY title LIMIT 50,5;  
+          如果这张表非常大，那么这个查询最好改成下面的样子：
+          
+          SELECT film.film_id,film.description  
+          FROM film INNER JOIN (  
+              SELECT film_id FROM film ORDER BY title LIMIT 50,5  
+          ) AS tmp USING(film_id);  
+          
+          ```
+        - 有时候如果可以使用书签记录上次取数据的位置，那么下次就可以直接从该书签记录的位置开始扫描，这样就可以避免使用OFFSET
+          ```sql
+          SELECT id FROM t LIMIT 10000, 10;  
+          改为：
+          
+          SELECT id FROM t WHERE id > 10000 LIMIT 10;  
+          ```
+
 - [Write-Ahead Log](https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html)
   - The unique log identifier helps in implementing certain other operations on the log like `Segmented Log` or cleaning the log with `Low-Water Mark` etc. 
   - The log updates can be implemented with `Singular Update Queue`
