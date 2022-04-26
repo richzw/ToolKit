@@ -168,7 +168,37 @@
       - 查表：哈希后取余数的方法做映射。
     - 难以实现后端节点的数据备份逻辑，因此工程上更适合弱状态后端的场景
   - ![img.png](data_structure_consistent_hash_summary.png)
-
+- [Go 语言高性能哈希表的设计与实现](https://mp.weixin.qq.com/s/KB-VwshP7FlzO-OutuT-2w)
+  - 碰撞处理
+    - 链地址法（chaining）
+      - 实现最简单直观
+      - 空间浪费较少
+    - 开放寻址法（open-addressing）
+      - 每次插入或查找操作只有一次指针跳转，对CPU缓存更友好
+      - 所有数据存放在一块连续内存中，内存碎片更少
+      - 当max load factor较大时，性能不如链地址法。
+      - 然而当我们主动牺牲内存，选择较小的max load factor时（例如0.5），形势就发生逆转，开放寻址法反而性能更好。因为这时哈希碰撞的概率大大减小，缓存友好的优势得以凸显。
+      - 空闲桶探测方法
+        - 线性探测（linear probing）：对i = 0, 1, 2...，依次探测第H(k, i) = H(k) + ci mod |T|个桶。
+        - 平方探测（quadratic probing）：对i = 0, 1, 2...，依次探测H(k, i) = H(k) + c1i + c2i2 mod |T|。其中c2不能为0，否则退化成线性探测。
+        - 双重哈希（double hashing）：使用两个不同哈希函数，依次探测H(k, i) = (H1(k) + i * H2(k)) mod |T|
+  - Max load factor
+    - 对链地址法哈希表，指平均每个桶所含元素个数上限。 
+    - 对开放寻址法哈希表，指已填充的桶个数占总的桶个数的最大比值。 
+    - max load factor越小，哈希碰撞的概率越小，同时浪费的空间也越多。
+  - Growth factor
+    - 指当已填充的桶达到max load factor限定的上限，哈希表需要rehash时，内存扩张的倍数。growth factor越大，哈希表rehash的次数越少，但是内存浪费越多。
+  - 基本设计与参数选择 [Source](https://github.com/matrixorigin/matrixone/tree/main/pkg/container/hashtable)
+    - 我们照搬了ClickHouse的如下设计：
+      - 开放寻址
+      - 线性探测
+      - max load factor = 0.5，growth factor = 4
+      - 整数哈希函数基于CRC32指令
+    - 具体原因前面已经提到，当max load factor不大时，开放寻址法要优于链地制法，同时线性探测法又优于其他的探测方法。
+    - 并做了如下修改（优化）：
+      - 字符串哈希函数基于AESENC指令
+      - 插入、查找、扩张时批量计算哈希函数
+      - 扩张时直接遍历旧表插入新表
 
 
 
