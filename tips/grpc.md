@@ -411,13 +411,29 @@
   - 注意处理 `stream.Send\Recv` 返回的 `io.EOF`
     ````go
     svr := grpc.NewServer(
-    	grpc.MaxRecvMsgSize(300000), // 429 Too Many Requests, received message larger than max
-    	grpc.KeepaliveParams(keepalive.ServerParameters{
-    		MaxConnectionIdle: time.Duration(15) * time.Second, // send GO_AWAY frame
-    		Timeout:           time.Duration(3) * time.Second,  // timeout of send PING frame
-    		Time:              time.Duration(5) * time.Second,  // send PING frame
-    	}),
+        grpc.MaxRecvMsgSize(300000), // 429 Too Many Requests, received message larger than max
+        grpc.KeepaliveParams(keepalive.ServerParameters{
+            MaxConnectionIdle: time.Duration(15) * time.Second, // send GO_AWAY frame
+            Timeout:           time.Duration(3) * time.Second,  // timeout of send PING frame
+            Time:              time.Duration(5) * time.Second,  // send PING frame
+        }),
     )
     ````
-
-
+- [gRPC Retry Design](https://github.com/grpc/proposal/blob/master/A6-client-retries.md#hedging-policy)
+  - Summary of Retry and Hedging Logic
+  - There are five possible types of server responses. The list below enumerates the behavior of retry and hedging policies for each type of response. In all cases, if the maximum number of retry attempts or the maximum number of hedged requests is reached, no further RPCs are sent. Hedged RPCs are returned to the client application when all outstanding and pending requests have either received a response or been canceled.
+    - OK
+      - Retry policy: Successful response, return success to client application
+      - Hedging policy: Successful response, cancel previous and pending hedges
+    - Fatal Status Code
+      - Retry policy: Don't retry, return failure to client application
+      - Hedging policy: Cancel previous and pending hedges
+    - Retryable/Non-Fatal Status Code without Server Pushback
+      - Retry policy: Retry according to policy
+      - Hedging policy: Immediately send next scheduled hedged request, if any. Subsequent hedged requests will resume at hedgingDelay
+    - Pushback: Don't Retry
+      - Retry policy: Don't retry, return failure to client application
+      - Hedging policy: Don’t send any more hedged requests.
+    - Pushback: Retry in n ms
+      - Retry policy: Retry in n ms. If this attempt also fails, retry delay will reset to initial backoff for the following retry (if applicable)
+      - Hedging policy: Send next hedged request in n ms. Subsequent hedged requests will resume at n + hedgingDelay
