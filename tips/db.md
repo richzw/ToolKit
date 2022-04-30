@@ -687,11 +687,41 @@
           
           SELECT id FROM t WHERE id > 10000 LIMIT 10;  
           ```
-
 - [Write-Ahead Log](https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html)
   - The unique log identifier helps in implementing certain other operations on the log like `Segmented Log` or cleaning the log with `Low-Water Mark` etc. 
   - The log updates can be implemented with `Singular Update Queue`
 - [Prometheus TSDB](https://ganeshvernekar.com/blog/prometheus-tsdb-the-head-block/)
+- [都是同样条件的 mysql select 语句，为什么读到的内容却不一样](https://mp.weixin.qq.com/s/w26rmI3wCgXs_Zz8QQFakQ)
+  - 以下内容还是默认发生在innodb引擎的可重复读隔离级别下。
+  - 事务的回滚是怎么实现的
+    - undo日志了，它记录了某一行数据，在执行事务前是怎么样的.日志里加入事务的id（trx_id）字段，用于标明这是哪个事务下产生的undo日志
+    - 同时将它们用链表的形式组织起来，在undo日志里加入一个指针（roll_pointer），指向上一个undo日志，于是就形成了一条版本链
+  - 当前读和快照读是什么
+    - 当前读，读的就是版本链的表头，也就是最新的数据。- 特殊的select语句，比如在select后面加上lock in share mode或for update，都属于当前读。
+    - 快照读，读的就是版本链里的其中一个快照，当然如果这个快照正好就是表头，那此时快照读和当前读的结果一样。
+  - read view
+    - 所有的活跃事务的id，组成m_ids。而这其中最小的事务id就是read view的下边界，叫min_trx_id。
+    - 产生read view的那一刻，所有事务里最大的事务id，加个1，就是这个read view的上边界，叫max_trx_id。
+    - 事务能读哪些快照
+      - 事务只能读到自己产生的undo日志数据（事务提不提交都行），或者是其他事务已经提交完成的数据。
+    - 事务会读哪个快照
+      - 事务会从表头开始遍历这个undo日志版本链，它会拿每个undo日志里的trx_id去跟自己的read view的上下边界去做判断。第一个出现的小于max_trx_id的快照。
+        - 如果快照是自己产生，那提不提交都行，就决定是读它了。
+        - 如果快照是别人产生的，且已经提交完成了，那也行，决定读它了。
+    - MVCC是什么
+      - 维护一个多快照的undo日志版本链，事务根据自己的read view去决定具体读那个undo日志快照，最理想的情况下是每个事务都读自己的一份快照，然后在这个快照上做自己的逻辑，只有在写数据的时候，才去操作最新的行数据，这样读和写就被分开了，比起单行数据没有快照的方式，它能更好的解决读写冲突，所以数据库并发性能也更好。
+  - 四个隔离级别是怎么实现的
+    - 读提交和可重复读隔离级别都是基于MVCC的read view实现的
+    - 读未提交，每次读到的都是最新的数据，也不管数据行所在的事务是否提交。实现也很简单，只需要每次都读undo日志版本链的链表头（最新的快照）就行了。
+    - 读已提交隔离级别，每次执行普通select，都会重新生成一个新的read view，然后拿着这个最新的read view到某行数据的版本链上挨个遍历，找到第一个合适的数据。这样就能做到每次都读到其他事务最新已提交的数据。
+    - 可重复读隔离级别下的事务只会在第一次执行普通select时生成read view，后续不管执行几次普通select，都会复用这个 read view。这样就能保持每次读的时候都是在同一标准下进行读取，那读到的数据也会是一样的。
+    - 串行化目的就是让并发事务看起来就像单线程执行一样，那实现也很简单，和读未提交隔离级别一样，串行化隔离界别下事务只读undo日志链的链表头，也就是最新版本的快照，并且就算是普通select，也会在版本链的最新快照上加入读锁。
+
+
+
+
+
+
 
 
 
