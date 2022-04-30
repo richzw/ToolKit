@@ -1331,7 +1331,43 @@
     49  .  .  .  }
     ```
     - linter 只需要检查 FuncDecl 的 Name 如果是可导出的，同时 Doc.CommentGroup 不存在，或是注释不以函数名开头，报错即可
-
+- [Uber工程师对真实世界并发问题的研究](https://mp.weixin.qq.com/s/AOTSLMXpdD9R7YuHdDQCXA)
+  - [Doc](https://arxiv.org/abs/2204.00764)
+  - Go标准库常见并发原语不允许在使用后Copy, go vet也能检查出来. 比如下面的代码，两个goroutine想共享mutex,需要传递&mutex,而不是mutex。
+     ```go
+      var a int
+      // CriticalSection receives a copy of mutex .
+      func CriticalSection ( m sync . Mutex ) {
+      m.Lock ()
+       a ++
+      m.Unlock ()
+      }
+      func main () {
+      mutex := sync . Mutex {}
+      // passes a copy of m to A .
+      go CriticalSection ( mutex )
+      go CriticalSection ( mutex )
+      }
+     ```
+  - 混用消息传递和共享内存两种并发方式. 如果context因为超时或者主动cancel被取消的话，Start中的goroutine中的f.ch <- 1可能会被永远阻塞，导致goroutine泄露。
+    ```go
+    func ( f * Future ) Start () {
+     go func () {
+     resp , err := f.f () // invoke a registered function
+      f.response = resp
+      f.err = err
+      f.ch <- 1 // may block forever !
+     }()
+     }
+     func ( f * Future ) Wait ( ctx context . Context ) error {
+     select {
+     case <-f.ch :
+     return nil
+     case <- ctx.Done () :
+      f.err = ErrCancelled
+     return ErrCancelled
+     }
+    ```
 
 
 
