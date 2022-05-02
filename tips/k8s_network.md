@@ -8,6 +8,11 @@
       - Once you’ve declared the desired state of your cluster using the API server, controllers ensure that the cluster’s current state matches the desired state by continuously watching the state of the API server and reacting to any changes.
       - Ex. when you create a new Pod using the API server, the Kubernetes scheduler (a controller) notices the change and makes a decision about where to place the Pod in the cluster. It then writes that state change using the API server (backed by etcd). 
       - The kubelet (a controller) then notices that new change and sets up the required networking functionality to make the Pod reachable within the cluster.
+    - Pod
+      - A Pod is the atom of Kubernetes — the smallest deployable object for building applications.
+      - A single Pod represents a running workload in your cluster and encapsulates one or more Docker containers, any required storage, and a unique IP address.
+    - Node
+      - Nodes are the machines running the Kubernetes cluster. These can be bare metal, virtual machines, or anything else.
     - CNI
       - Some CNI plugins do a lot more than just ensuring Pods have IP addresses and that they can talk to each other
       ![img.png](k8s_network_summary.png)
@@ -20,10 +25,10 @@
     - Endpoints
       - how do Services know which Pods to track, and which Pods are ready to accept traffic? The answer is Endpoints
       - ![img.png](k8s_network_endpoint.png)
-    - K8S network requirement
-      - all pods can communicate with all other pods without using network address translation (NAT)
-      - all Nodes can communicate with all Pods without NAT
-      - the IP that a Pod sees itself as is the same IP that others see it as
+  - K8S network requirement
+    - all pods can communicate with all other pods without using network address translation (NAT)
+    - all Nodes can communicate with all Pods without NAT
+    - the IP that a Pod sees itself as is the same IP that others see it as
   - Container to Container network
     ![img.png](k8s_network_pod.png)
     - Containers in a pod has the same network namespace
@@ -32,6 +37,12 @@
     - network accessing via loopback or eth0 interface
     - package are always handled in the network namespace
   - Pod to Pod network
+    - every Pod has a real IP address and each Pod communicates with other Pods using that IP address.
+    - namespaces can be connected using a Linux `Virtual Ethernet Device` or `veth pair` consisting of two virtual interfaces that can be spread over multiple namespaces.
+    - A Linux Ethernet bridge is a virtual Layer 2 networking device used to unite two or more network segments, working transparently to connect two networks together.
+    - Bridges implement the ARP protocol to discover the link-layer MAC address associated with a given IP address.
+    ![img.png](k8s_network_pod2pod.png)
+    ![img.png](k8s_network_pod2pod_acrossnode.png)
 
     |  | L2 | Route | Overlay | Cloud |
     | --- | --- | --- | --- | --- |
@@ -91,7 +102,7 @@
       ```
   - Pod to Service network
     - Pod IP address - are mutable and will appear and disappear due to scaling up or down
-    - Service assign a single VIP for loadbalance between a group of pods
+    - Service assign a single VIP for load balance between a group of
     - [Kube-Proxy](https://mayankshah.dev/blog/demystifying-kube-proxy/)
       - a network proxy that runs on each node in your cluster. It watches Service and Endpoints objects and accordingly updates the routing rules on its host nodes to allow communicating over Services.
       - User Model
@@ -107,6 +118,13 @@
           - IPVS provides better scalability and performance for large clusters.
           - IPVS supports more sophisticated load balancing algorithms than IPTABLES (least load, least connections, locality, weighted, etc.).
           - IPVS supports server health checking and connection retries, etc.
+    - Using DNS
+      - Kubernetes can optionally use DNS to avoid having to hard-code a Service’s cluster IP address into your application.
+      - It configures the kubelets running on each Node so that containers use the DNS Service’s IP to resolve DNS names.
+      - A DNS Pod consists of three separate containers:
+        - kubedns: watches the Kubernetes master for changes in Services and Endpoints, and maintains in-memory lookup structures to serve DNS requests.
+        - dnsmasq: adds DNS caching to improve performance.
+        - sidecar: provides a single health check endpoint to perform healthchecks for dnsmasq and kubedns.
     - Service
         ```shell
         
@@ -140,6 +158,7 @@
       - Loadbalance
         - Each service needs to have own external IP
         - Typically implemented as NLB
+    ![img.png](k8s_network_alb.png)
     - Layer 7
       ```shell
       > kc get svc -n beta -o wide
