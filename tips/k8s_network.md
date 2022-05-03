@@ -1,6 +1,7 @@
 
 - [K8S network 101](https://sookocheff.com/post/kubernetes/understanding-kubernetes-networking-model/)
   - K8S Basic
+    ![img.png](k8s_network_arch.png)
     - API Server
       - everything is an API call served by the Kubernetes API server (kube-apiserver). 
       - The API server is a gateway to an etcd datastore that maintains the desired state of your application cluster.
@@ -8,6 +9,9 @@
       - Once you’ve declared the desired state of your cluster using the API server, controllers ensure that the cluster’s current state matches the desired state by continuously watching the state of the API server and reacting to any changes.
       - Ex. when you create a new Pod using the API server, the Kubernetes scheduler (a controller) notices the change and makes a decision about where to place the Pod in the cluster. It then writes that state change using the API server (backed by etcd). 
       - The kubelet (a controller) then notices that new change and sets up the required networking functionality to make the Pod reachable within the cluster.
+    - Scheduler
+      - 调度程序是一个控制平面进程，它将 pod 分配给节点。它监视没有分配节点的新创建的 pod，并且对于调度程序发现的每个 pod，调度程序负责为该 pod 找到运行的最佳节点。
+      - 调度程序不会指示所选节点运行 pod。Scheduler 所做的只是通过 API Server 更新 pod 定义。API server 通过 watch 机制通知 Kubelet pod 已经被调度。然后目标节点上的 kubelet 服务看到 pod 已被调度到它的节点，它创建并运行 pod 的容器。
     - Pod
       - A Pod is the atom of Kubernetes — the smallest deployable object for building applications.
       - A single Pod represents a running workload in your cluster and encapsulates one or more Docker containers, any required storage, and a unique IP address.
@@ -25,6 +29,16 @@
     - Endpoints
       - how do Services know which Pods to track, and which Pods are ready to accept traffic? The answer is Endpoints
       - ![img.png](k8s_network_endpoint.png)
+    - Kubelet
+      - Kubelet 是在集群中的每个节点上运行的代理，是负责在工作节点上运行的所有内容的组件。它确保容器在 Pod 中运行。
+      - 通过在 API Server 中创建节点资源来注册它正在运行的节点。
+      - 持续监控 API Server 上已调度到节点的 Pod。
+      - 使用配置的容器运行时启动 pod 的容器。
+      - 持续监控正在运行的容器并将其状态、事件和资源消耗报告给 API Server。
+      - 运行容器活性探测，在探测失败时重新启动容器，在容器的 Pod 从 API Server 中删除时终止容器，并通知服务器 Pod 已终止。
+    - Kube-proxy
+      - 它负责监视 API Server 以了解Service和 pod 定义的更改，以保持整个网络配置的最新状态。当一个Service由多个 pod 时，proxy会在这些 pod 之间负载平衡。
+      - kube-proxy 之所以得名，是因为它是一个实际的代理服务器，用于接受连接并将它们代理到 Pod，当前的实现使用 iptables 或 ipvs 规则将数据包重定向到随机选择的后端 Pod，而不通过实际的代理服务器传递它们。
   - K8S network requirement
     - all pods can communicate with all other pods without using network address translation (NAT)
     - all Nodes can communicate with all Pods without NAT
