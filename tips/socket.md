@@ -403,7 +403,20 @@
     net.core.wmem_max = 8388608
     ```
     - net.ipv4.tcp_wmem"中的第一个值是发送缓存区的最小值，默认也是 4K。当然了如果数据很大的话，该缓存区实际分配的也会比默认值大
-  
+- [socket的IP_TRANSPARENT选项实现代理](https://blog.51cto.com/dog250/1268969)
+  - socket有一个IP_TRANSPARENT选项，其含义就是可以使一个服务器程序侦听所有的IP地址，哪怕不是本机的IP地址，这个特性在实现透明代理服务器时十分有用，而其使用也很简单
+    `setsockopt(server_socket,SOL_IP, IP_TRANSPARENT,&opt,sizeof(opt))`
+  - TCP可以绑定0.0.0.0，这个都知道，那么到底用哪一个地址何时确定呢
+    - 答案是“根据连接源的地址反向做路由查找后确定的”。如果有一个地址A连接该服务器，那么在服务器收到syn后，就会查找目的地址为A的路由，进而确定源地址，然而如果不设置IP_TRANSPARENT选项，则这个被连接的地址必须在local路由表中被找到，否则一切都免谈。
+  - [IP_TRANSPARENT usage](https://stackoverflow.com/questions/42738588/ip-transparent-usage)
+    - In order to use IP_TRANSPARENT for this purpose, you need to have a single listening socket bound to some port X. Then you need to setup the following rules, assuming you want to redirect ALL traffic going through any (I believe) interface, excluding traffic generated for/by the proxy itself. Here the proxy's IP is 192.168.1.100 and we redirect TCP to port 82 and UDP to port 83.
+      ```shell
+      iptables -t mangle -A PREROUTING ! -d 192.168.1.100 -p tcp -j TPROXY --on-port 82 --on-ip 0.0.0.0 --tproxy-mark 0x1/0x1
+      iptables -t mangle -A PREROUTING ! -d 192.168.1.100 -p udp -j TPROXY --on-port 83 --on-ip 0.0.0.0 --tproxy-mark 0x1/0x1
+      ip rule add fwmark 1 lookup 100
+      ip route add local 0.0.0.0/0 dev lo table 100
+      ```
+      Linux has a special mechanism called tproxy for this.
 
 
 
