@@ -712,8 +712,14 @@
       - Master Failover - Leader election
     - Deadlock Detection
       - Keepalive & Lease Timeout
-
-
+- [Circuit Breakers](https://sirupsen.com/napkin/problem-11-circuit-breakers)
+  - There are at least five configuration parameters relevant for circuit breakers:
+    - error_threshold. The amount of errors to encounter for the worker before opening the circuit, that is, to start rejecting requests instantly. In our example, it’s been hard-coded to 3.
+    - error_timeout. The amount of time in seconds until trying to query the resource again. That’s the time the circuit is open. 15 seconds in our example.
+    - success_threshold. The amount of successes on the circuit until closing it again, that is to start accepting all requests to the circuit. In our example above, this is just hard-coded to 1. This requires a bit more logic to have a number > 1, which better implementations like Semian will take care of.
+    - resource_timeout. The timeout to the resource/data-store protected by the circuit breaker. 5 seconds in our example.
+    - half_open_resource_timeout. Timeout for the resource in seconds when the circuit is checking whether the resource might be back to normal, after the error_timeout. This state is called half_open. Most circuit breaker implementations (including our simple one above) assume that this is the same as the ‘normal’ timeout for the resource. The bet Semian makes is that during steady-state we can tolerate a higher resource timeout, but during failure, we want it to be lower.
+  - [Your Circuit Breaker is Misconfigured](https://shopify.engineering/circuit-breaker-misconfigured)
 
 
 
