@@ -50,6 +50,7 @@
       - sharing the same Pod IP address
     - network accessing via loopback or eth0 interface
     - package are always handled in the network namespace
+    ![img.png](k8s_network_container.png)
   - Pod to Pod network
     - every Pod has a real IP address and each Pod communicates with other Pods using that IP address.
     - namespaces can be connected using a Linux `Virtual Ethernet Device` or `veth pair` consisting of two virtual interfaces that can be spread over multiple namespaces.
