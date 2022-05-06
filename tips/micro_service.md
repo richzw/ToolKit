@@ -720,7 +720,23 @@
     - resource_timeout. The timeout to the resource/data-store protected by the circuit breaker. 5 seconds in our example.
     - half_open_resource_timeout. Timeout for the resource in seconds when the circuit is checking whether the resource might be back to normal, after the error_timeout. This state is called half_open. Most circuit breaker implementations (including our simple one above) assume that this is the same as the ‘normal’ timeout for the resource. The bet Semian makes is that during steady-state we can tolerate a higher resource timeout, but during failure, we want it to be lower.
   - [Your Circuit Breaker is Misconfigured](https://shopify.engineering/circuit-breaker-misconfigured)
-
+  - Hystrix-Go 熔断算法
+    - 当请求失败比率达到一定阈值之后，熔断器开启，并休眠一段时间（由配置决定），这段休眠期过后，熔断器将处于半开状态，在此状态下将试探性的放过一部分流量，如果这部分流量调用成功后，再次将熔断器关闭，否则熔断器继续保持开启并进入下一轮休眠周期。
+    - 但这个熔断算法有一个问题，过于一刀切。是否可以做到在熔断器开启状态下（但是后端未 Shutdown）仍然可以放行少部分流量呢?
+  - 自适应限流 Google
+    - 客户端自行限制请求速度，限制生成请求的数量, 超过这个数量的请求直接在本地回复失败，而不会真是发送到服务端
+    - 每个客户端记录过去两分钟内的以下信息（一般代码中以滑动窗口实现）：
+      - requests（客户端请求总量）： The number of requests attempted by the application layer(at the client, on top of the adaptive throttling system)
+      - accepts（成功的请求总量 - 被 accepted的量）： The number of requests accepted by the backend
+    - 该算法的通用描述如下：
+      - 在通常情况下（无错误发生时） requests==accepts
+      - 当后端出现异常情况时，accepts 的数量会逐渐小于 requests
+      - 当后端持续异常时，客户端可以继续发送请求直到 requests=K∗accepts，一旦超过这个值，客户端就启动自适应限流机制，新产生的请求在本地会以 p 概率（下面描述的 Client request rejection probability 定义）被拒绝
+      - 当客户端主动丢弃请求时，requests 值会一直增大，在某个时间点会超过 K∗accepts，使概率 p 计算出来的值大于 0，此时客户端会以此概率对请求做主动丢弃
+      - 当后端逐渐恢复时，accepts 增加，（同时 requests 值也会增加，但是由于 K 的关系，K×accepts 的放大倍数更快），使得 (requests−K×accepts)/(requests+1) 变为负数，从而概率 p==0，客户端自适应限流结束
+    - K 值
+      - 降低 K 值会使自适应限流算法更加激进（允许客户端在算法启动时拒绝更多本地请求）
+      - 增加 K 值会使自适应限流算法不再那么激进（允许服务端在算法启动时尝试接收更多的请求，与上面相反）
 
 
 
