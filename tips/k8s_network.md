@@ -15,6 +15,10 @@
     - Pod
       - A Pod is the atom of Kubernetes — the smallest deployable object for building applications.
       - A single Pod represents a running workload in your cluster and encapsulates one or more Docker containers, any required storage, and a unique IP address.
+    - [Container](https://www.docker.com/resources/what-container/)
+      - A container is a standard unit of software that packages up code and all its dependencies so the application runs quickly and reliably from one computing environment to another.
+      - Cgroups - Limits and accounting of CPU memory network - configured by container runtime
+      - Namespace - Isolation of process, CPU mount user network .. - configured by container runtime
     - Node
       - Nodes are the machines running the Kubernetes cluster. These can be bare metal, virtual machines, or anything else.
     - CNI
