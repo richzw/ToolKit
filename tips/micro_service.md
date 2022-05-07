@@ -678,6 +678,7 @@
 - [微服务架构设计模式](https://mp.weixin.qq.com/s/NpQIgh2VWVXqA6ab_Bo3TA)
 - [API Design Google](https://www.bookstack.cn/read/API-design-guide/API-design-guide-01-%E7%AE%80%E4%BB%8B.md)
 - [API Improvement Proposal Google](https://google.aip.dev/1)
+- [API Desgin Guild](https://cloud.google.com/apis/design)
 - [Implement a timing wheel for millions of concurrent tasks](https://faun.pub/implement-a-timing-wheel-for-millions-of-concurrent-tasks-942c8d9e4abe)
   - timing wheel
     - reduces the maintenance of tasks from priority queue O(nlog(n)) to bidirectional linked table O(1), 
