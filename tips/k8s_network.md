@@ -303,6 +303,20 @@
     - 个服务器上的连接数，而 Ui 是第 i 个服务器的固定服务速率（权重） 。
     - 永不排队调度：NQ，从不队列调度算法采用两速模型。当有空闲服务器可用时，请求会发送到空闲服务器，而不是等待快速响应的服务器。如果没有可用的空闲服务器，则请求将被发送到服务器，以使其预期延迟最小化（最短预期延迟调度算法）
 
+- [tunneling](https://wiki.linuxfoundation.org/networking/tunneling)
+  - Tunneling is a way to transform data frames to allow them pass networks with incompatible address spaces or even incompatible protocols.
+  - Linux kernel supports 3 tunnel types: 
+    - IPIP (IPv4 in IPv4)
+      - It has the lowest overhead, but can incapsulate only IPv4 unicast traffic, so you will not be able to setup OSPF, RIP or any other multicast-based protocol.
+      - You can setup only one tunnel for unique tunnel endpoints pair
+    - GRE (IPv4/IPv6 over IPv4) 
+      - GRE tunnels can incapsulate IPv4/IPv6 unicast/multicast traffic, so it is de-facto tunnel standard for dynamic routed networks.
+      - You can setup up to 64K tunnels for an unique tunnel endpoints pair
+    - SIT (IPv6 over IPv4)
+      - SIT stands for Simple Internet Transition. Its main purpose is to interconnect isolated IPv6 networks, located in global IPv4 Internet.
+      - SIT works like IPIP. Once loaded, ipv6 module can't be unloaded.
+      - You can get your own IPv6 prefix and a SIT tunnel from a tunnel broker.
+
 - [X.509 Encodings and Conversions](https://www.ssl.com/guide/pem-der-crt-and-cer-x-509-encodings-and-conversions/)
   - You may have seen digital certificate files with a variety of filename extensions, such as .crt, .cer, .pem, or .der. These extensions generally map to two major encoding schemes for X.509 certificates and keys: PEM (Base64 ASCII), and DER (binary). 
   - PEM
