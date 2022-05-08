@@ -720,9 +720,27 @@
   - LRU 优先淘汰最近未被使用，无法应对冷数据，比如热 keys 短时间没有访问，就会被只使用一次的冷数据冲掉，无法反应真实的使用情况
   - LFU 能避免上述情况，但是朴素 LFU 实现无法应对突发流量，无法驱逐历史热 keys
   - W-TinyLFU, 其中 W 是 windows 的意思，即一定时间窗口后对频率进行减半，如果不减的话，cache 就成了对历史数据的统计，而不是缓存
-
-
-
+- [MySQL的零拷贝技术](https://mp.weixin.qq.com/s/IwYzijLfdlrtxQuyTgopsw)
+  - Buffer 与 Cache 
+    - 在硬件这一层看，Buffer应该为内存，Cache为CPU集成的告诉缓存
+      - Buffer为了让不同速度的设备能够同步，建立的一个缓冲区域，写进Buffer的数据是为了从中拿出写入其他设备。
+      - Cache是为了提高读取速度，将经常或马上需要的数据预读到缓存中，写进Cache的数据是为了其他设备从中去读取。
+    - 从软件这一层来说，Buffer是块设备的缓冲，Cache是文件系统的缓存。以Linux为例，
+      - Buffer(Buffer Cache)以块形式缓冲了块设备的操作，定时或手动的同步到硬盘，它是为了缓冲写操作然后一次性将很多改动写入硬盘，避免频繁写硬盘，提高写入效率。
+      - Cache(Page Cache)以页面形式缓存了文件系统的文件，给需要使用的程序读取，它是为了给读操作提供缓冲，避免频繁读硬盘，提高读取效率。
+  - MySQL 缓冲区设计
+    ![img.png](mysql_cache.png)
+    - 应用层：
+      - Redo Log Buffer：对写操作进行缓存，用于实现 MySQL InnoDB 的事务性；
+      - InnoDB Buffer Pool：用于对 MySQL table 的数据进行缓存。读内存而不是磁盘，通过减少磁盘读操的方式提高读操作性能；写内存而不是磁盘，通过减少磁盘写操的方式提高写操作性能；
+    - 操作系统的 VFS（Virtual file system，虚拟文件系统）层：
+      - Page Cache：操作系统通过缓存以及预读机制对文件系统中的 block 基于 page 进行缓存管理；
+      - Direct Buffer：当使用 Direct I/O 提供的相关 API 时，操作系统不再提供基于 Page Cache 机制的缓存，而是直接使用 Direct Buffer；
+    - 磁盘的 Disk Buffer：磁盘也可以提供磁盘缓存，通常在 MySQL 中会关闭磁盘缓存，我们仅仅需要了解有 Disk Buffer 这一概念即可。
+    - MySQL 日志刷新策略通过 sync_binlog 参数进行配置，其有 3 个可选配置：
+      - sync_binlog=0：MySQL 应用将完全不负责日志同步到磁盘，将缓存中的日志数据刷新到磁盘全权交给操作系统来完成；
+      - sync_binlog=1：MySQL 应用在事务提交前将缓存区的日志刷新到磁盘；
+      - sync_binlog=N：当 N 不为 0 与 1 时，MySQL 在收集到 N 个日志提交后，才会将缓存区的日志同步到磁盘。
 
 
 
