@@ -741,7 +741,27 @@
       - sync_binlog=0：MySQL 应用将完全不负责日志同步到磁盘，将缓存中的日志数据刷新到磁盘全权交给操作系统来完成；
       - sync_binlog=1：MySQL 应用在事务提交前将缓存区的日志刷新到磁盘；
       - sync_binlog=N：当 N 不为 0 与 1 时，MySQL 在收集到 N 个日志提交后，才会将缓存区的日志同步到磁盘。
-
+- [Tips and Tricks++ for Querying and Indexing MongoDB](https://www.youtube.com/watch?v=5mBY27wVau0&list=PL4RCxklHWZ9u_xtprouvxCvzq2m6q_0_E&index=10)
+  - ESR rule
+    - A good starting place applicable to most user cases
+    - Place keys in the following order
+      - Equality first
+      - Sort next
+      - Range last
+    - Remember
+      - Some operators may be range instead of equality
+      - Having consecutive keys used in the index is important
+  - Operator Type Check
+    - Inequality: $ne, $nin -> Range
+    - Regex Operator: /car/, /^car/i -> Range
+    - $in 
+      - it depends with respect to key ordering
+      - Alone: a series of Equality matches
+      - Combines: possible a Range
+      - Mongo optimize it as Merge Sort instead of Blocking Sort
+  - Consecutive Index keys
+  - Is the ESR rule always optimal? Nope
+    - Check total keys examined from excute plan
 
 
 
