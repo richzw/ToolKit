@@ -341,6 +341,33 @@
   - Which Chains are Implemented in Each Table
     ![img.png](k8s_network_iptable_chain.png)
 
+- [Node Proxy](https://cloudnative.to/blog/k8s-node-proxy/)
+  - Netfilter
+    - 主机上的所有数据包都将通过 netfilter 框架
+    - 在 netfilter 框架中有 5 个钩子点：PRE_ROUTING, INPUT, FORWARD, OUTPUT, POST_ROUTING
+    - 命令行工具 iptables 可用于动态地将规则插入到钩子点中
+    - 可以通过组合各种 iptables 规则来操作数据包
+      - filter：做正常的过滤，如接受，拒绝/删，跳
+      - nat：网络地址转换，包括 SNAT（源 nat) 和 DNAT（目的 nat)
+      - mangle：修改包属性，例如 TTL
+      - raw：最早的处理点，连接跟踪前的特殊处理 (conntrack 或 CT，也包含在上图中，但这不是链）
+      - security
+  - Cross-host 网络模型
+    - 主机 A 上的实例（容器、VM 等）如何与主机 B 上的另一个实例通信？有很多解决方案：
+      - 直接路由：BGP 等
+      - 隧道：VxLAN, IPIP, GRE 等
+      - NAT：例如 docker 的桥接网络模式
+  - Service
+    - Service 是一种抽象，它定义了一组 pod 的逻辑集和访问它们的策略。
+      - ClusterIP：通过 VIP 访问 Service，但该 VIP 只能在此集群内访问
+        - 对 ClusterIP 的一个常见误解是，ClusterIP 是可访问的——它们不是通过定义访问的。如果 ping 一个 ClusterIP，可能会发现它不可访问。
+        - 根据定义，<Protocol,ClusterIP,Port> 元组独特地定义了一个服务（因此也定义了一个拦截规则）。例如，如果一个服务被定义为 <tcp,10.7.0.100,80>，那么代理只处理 tcp:10.7.0.100:80 的流量，其他流量，例如。tcp:10.7.0.100:8080, udp:10.7.0.100:80 将不会被代理。因此，也无法访问 ClusterIP（ICMP 流量）。
+        - 但是，如果你使用的是带有 IPVS 模式的 kube-proxy，那么确实可以通过 ping 访问 ClusterIP。这是因为 IPVS 模式实现比定义所需要的做得更多。
+      - NodePort：通过 NodeIP:NodePort 访问 Service，这意味着该端口将暴露在集群内的所有节点上
+      - ExternalIP：与 ClusterIP 相同，但是这个 VIP 可以从这个集群之外访问
+      - LoadBalancer
+    - 一个 Service 有一个 VIP（本文中的 ClusterIP）和多个端点（后端 pod）。每个 pod 或节点都可以通过 VIP 直接访问应用程序。要做到这一点，节点代理程序需要在每个节点上运行，它应该能够透明地拦截到任何 ClusterIP:Port的流量，并将它们重定向到一个或多个后端 pod。
+
 - [Docker网络原理](https://mp.weixin.qq.com/s/jJiX47kRTfX-3UnbN8cvtQ)
   - Linux veth pair
     - veth pair 是成对出现的一种虚拟网络设备接口，一端连着网络协议栈，一端彼此相连
