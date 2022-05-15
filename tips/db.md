@@ -761,7 +761,30 @@
       - Mongo optimize it as Merge Sort instead of Blocking Sort
   - Consecutive Index keys
   - Is the ESR rule always optimal? Nope
-    - Check total keys examined from excute plan
+    - Check total keys examined from execute plan
+- [mysql查询 limit 1000,10 和limit 10 速度一样快吗](https://mp.weixin.qq.com/s/LJwC-AT_sTVGazE9m4BiYw)
+  - 我们经常会遇到需要分页查询的场景
+    - 为了实现分页, 很容易联想到下面这样的sql语句 `select * from page order by id limit offset, size;`
+  - 两种limit的执行过程
+    - 对应 limit offset, size 和 limit size (即 limit 0, size) 两种方式
+      - 如果是主键索引，它的叶子节点会存放完整的行数据信息。
+      - 如果是非主键索引，那它的叶子节点则会存放主键，如果想获得行数据信息，则需要再跑到主键索引去拿一次数据，这叫回表。
+    - mysql查询中 limit 1000,10 会比 limit 10 更慢。原因是 limit 1000,10 会取出1000+10条数据，并抛弃前1000条，这部分耗时更大
+  - 优化
+    - 主键索引
+      - `select * from page  where id >=(select id from page  order by id limit 6000000, 1) order by id limit 10;`
+    - 非主键索引
+      - `select * from page t1, (select id from page order by user_name limit 6000000, 100) t2  WHERE t1.id = t2.id;`
+  - 深度分页问题
+    - 取出全表的数据 - 如果能从产品的形式上就做成不支持跳页会更好，比如只支持上一页或下一页
+      ```sql
+      datas = [select * from page where id > start_id order by id limit 100;]
+      
+      start_id = get_max_id_from(datas)
+      ```
+    - 如果数据量很少，比如1k的量级，且长期不太可能有巨大的增长，还是用limit offset, size 的方案吧，整挺好，能用就行
+
+
 
 
 
