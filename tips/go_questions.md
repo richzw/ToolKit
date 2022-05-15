@@ -387,16 +387,16 @@
     ```
     ```go
     func hello(i *int) int {
-    	defer func() {
-    		*i = 19
-    	}()
-    	return *i
+        defer func() {
+            *i = 19
+        }()
+        return *i
     }
     
     func main() {
-    	i := 10
-    	j := hello(&i)
-    	fmt.Println(i, j)
+        i := 10
+        j := hello(&i)
+        fmt.Println(i, j)
     ```
 - [常见知识点](https://mp.weixin.qq.com/s/7rCsaGy8B2lwbZ4duEC7Nw)
   - Go 是传值还是传引用？
@@ -416,6 +416,29 @@
   - 为什么 Go map 和 slice 是非线程安全的？
   - Go sync.map 和原生 map 谁的性能好，为什么？
   - 为什么 Go map 的负载因子是 6.5？
-
+- [Question](https://mp.weixin.qq.com/s?__biz=MzUxMDI4MDc1NA==&mid=2247494443&idx=1&sn=5e3e0e1bb3df21c9fb42651c937e8e25&chksm=f907fe76ce7077604ce65cf9e068030a6d3fc8ad0715612ae64b1ffd9e8b42c0eced84b16eca&scene=21#wechat_redirect)
+  - Question
+     ```go
+     func aaa() (done func(), err error) {
+      return func() { 
+        print("aaa: done") 
+      }, nil
+     }
+     
+     func bbb() (done func(), _ error) {
+      done, err := aaa()
+      return func() { 
+        print("bbb: surprise!"); 
+        done() 
+      }, err
+     }
+     
+     func main() {
+      done, _ := bbb()
+      done()
+     }
+     ```
+  - 本质上在函数 bbb 执行完毕后， 变量 done 已经变成了一个递归函数。
+  - 函数 bbb 调用变量 done 后，会输出 bbb: surprise! 字符串，然后又调用变量 done。而变量 done 又是这个闭包（匿名函数），从而实现不断递归调用和输出
 
 
