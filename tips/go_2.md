@@ -1368,6 +1368,29 @@
      return ErrCancelled
      }
     ```
+- [Go 处理大数组：使用 for range 还是 for 循环](https://mp.weixin.qq.com/s/dHjGn3gwxnYqlrsUkgc0dg)
+  - 既然 for range 使用的是副本数据，那 for range 会比经典的 for 循环消耗更多的资源并且性能更差吗
+  - 我们使用 for 循环和 for range 分别遍历一个包含 10 万个 int 类型元素的数组。
+    - for range 的确会稍劣于 for 循环，当然这其中包含了编译器级别优化的结果（通常是静态单赋值，或者 SSA 链接）
+    - 让我们关闭优化开关 `go test -c -gcflags '-N -l'`，再次运行压力测试. 两种循环的性能都明显下降， for range 下降得更为明显，性能也更加比经典 for 循环差。
+  - 遍历结构体数组
+    - 不管是什么类型的结构体元素数组，经典的 for 循环遍历的性能比较一致，但是 for range 的遍历性能会随着结构字段数量的增加而降低。
+  - 由于在 Go 中切片的底层都是通过数组来存储数据，尽管有 for range 的副本复制问题，但是切片副本指向的底层数组与原切片是一致的。这意味着，当我们将数组通过切片代替后，不管是通过 for range 或者 for 循环均能得到一致的稳定的遍历性能
+- [为什么 Go 用起来会难受](https://mp.weixin.qq.com/s/qDJAOYy6kYrELHuL-MHlrg)
+  - 浅拷贝和泄露
+    - 我们经常要用到 slice、map 等基础类型。但有一个比较麻烦的点，就是会涉及到浅拷贝。
+  - nil 接口不是 nil
+    - 强行将一段 Go 程序的变量值赋为 nil，并进行 nil 与 nil 的判断
+  - 垃圾回收
+    - 垃圾回收唯一的可调节的是 GC 频率，可以通过 GOGC 变量设置初始垃圾收集器的目标百分比值
+    - GOGC 的值设置的越大，GC 的频率越低，但每次最终所触发到 GC 的堆内存也会更大。
+  - [依赖管理](https://xargin.com/go-mod-hurt-gophers/)
+- [Go 语言中的一些非常规优化](https://xargin.com/unusual-opt-in-go/)
+  - 网络方面
+    - 当前 Go 的网络抽象在效率上有些低，每一个连接至少要有一个 goroutine 来维护，有些协议实现可能有两个。因此 goroutine 总数 = 连接数 * 1 or 连接数 * 2。当连接数超过 10w 时，goroutine 栈本身带来的内存消耗就有几个 GB。
+    - 大量的 goroutine 也会给调度和 GC 均带来很大压力
+    - 由于用户的 syscall.EpollWait 是运行在一个没有任何优先级的 goroutine 中，当 CPU idle 较低时，系统整体的延迟不可控，比标准库的延迟还要高很多。
+
 
 
 
