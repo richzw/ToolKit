@@ -249,7 +249,22 @@
           - 在 GO1.12 之前，默认均选择的 MADV_DONTNEED 策略进行内存回收；
           - 在 GO1.12~GO1.15，官方默认选择 MADV_FREE 策略进行内存回收；
           - 在 GO1.16 及之后，又改回了 MADV_DONTNEED 策略进行回收内存。
-
+- [一个死锁bug的排查始末](https://mp.weixin.qq.com/s/f46xUA8Bxv66wH_cMYf9Ig)
+  - 问题现象
+    - 上游服务访问超时数量显著上升，初步排查访问某一容器的链接全部超时，摘流后上游访问恢复。发现摘流后 cpu 仍居高不下，本地发起链接仍无法访问。
+  - 分析
+    - perf
+      - 因为 cpu 一直比较高，首先使用`perf record -p 进程号 -F 99 --call-graph dwarf -- sleep 10` 对目标进程采样分析，随后`perf report`
+      - 获不大，runtime.osyield 和 runtime.morestack 占用了大部分时间，但仍然看不到调用源头。
+    - dlv
+      - 执行 `dlv attach 进程号` 将 dlv 挂到目标进程上，成功后执行 `goroutines -with running` 获得到当前正在运行的 goroutine
+      - go 1.14 开始引入了通过发信号实现的抢占式调度，按理说所有 p（gmp 模型中的 p) 应该都会在有限时间内被抢占然后停住，但实际上确实没有，一直卡在这个循环里，导致 gc 的 stw 阶段无法完成，也就不能正常对外提供服务
+  - 排查结论
+    - 在 g 10 执行修改当前 p 的 timer 的链路中，准备执行 runtime.wakeNetPoller 时触发了 g 的抢占，此时 timer 的修改没有完成，转而接下来去执行 morestack （这个是协作式抢占，复用了 newstack 去实现），在 morestack 内通过汇编把执行栈切换为了当前 m 的 g0 上，接下来的 morestack 链路中会重新执行 go 的调度函数 runtime.schedule() ，而在这个函数中需要等待当前 p 的 timer 都修改完毕，然而此时整个程序处于 gc 的 stw 阶段，其他所有 p 已经全部暂停，也就导致 g 10 无法继续执行，从而形成了死锁，进而导致程序无法正常对外服务。
+    - issue https://github.com/golang/go/issues/38023
+    - 直观的来看问题出在 timer 的更新上，不应该允许 timer 未修改完就被打断或者 curg 为 nil 也应该发信号
+  
+     
 
 
 
