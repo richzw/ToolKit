@@ -257,6 +257,46 @@
   - page cache 是发生在文件系统这里。通常我们确保数据落盘有两种方式：
     - Writeback 回刷数据的方式：write 调用 + sync 调用；
     - Direct IO 直刷数据的方式；
+- [Linux 的 Page Cache](https://spongecaptain.cool/SimpleClearFileIO/1.%20page%20cache.html)
+  - Page Cache
+    - Page Cache 是什么
+      - ![img.png](os_filesystem_pagecache.png)
+      - Page Cache 的本质是由 Linux 内核管理的内存区域。
+      - 我们通过 mmap 以及 buffered I/O 将文件读取到内存空间实际上都是读取到 Page Cache 中。
+    - 如何查看系统的 Page Cache
+      - 读取 /proc/meminfo 文件 `cat /proc/meminfo`
+      - `Buffers + Cached + SwapCached = Active(file) + Inactive(file) + Shmem + SwapCached`
+      - `Page Cache = Buffers + Cached + SwapCached`
+    - page 与 Page Cache
+      - page 是内存管理分配的基本单位， Page Cache 由多个 page 构成. 并不是所有 page 都被组织为 Page Cache
+      - Linux 系统上供用户可访问的内存分为两个类型，即：
+        - File-backed pages：文件备份页也就是 Page Cache 中的 page，对应于磁盘上的若干数据块；对于这些页最大的问题是脏页回盘
+        - Anonymous pages：匿名页不对应磁盘上的任何磁盘数据块，它们是进程的运行是内存空间（例如方法栈、局部变量表等属性）
+    - Swap 与缺页中断
+      - Swap 机制指的是当物理内存不够用，内存管理单元（Memory Mangament Unit，MMU）需要提供调度算法来回收相关内存空间，然后将清理出来的内存空间给当前内存申请方
+      - 操作系统以 page 为单位管理内存，当进程发现需要访问的数据不在内存时，操作系统可能会将数据以页的方式加载到内存中。上述过程被称为缺页中断
+    - Page Cache 与 buffer cache
+      - 执行 free 命令，注意到会有两列名为 buffers 和 cached，也有一行名为 “-/+ buffers/cache”
+      - cached 列表示当前的页缓存（Page Cache）占用量，buffers 列表示当前的块缓存（buffer cache）占用量
+      - Page Cache 用于缓存文件的页数据，buffer cache 用于缓存块设备（如磁盘）的块数据。
+      - 页是逻辑上的概念，因此 Page Cache 是与文件系统同级的；块是物理上的概念，因此 buffer cache 是与块设备驱动程序同级的。
+      - Page Cache 与 buffer cache 的共同目的都是加速数据 I/O：写数据时首先写到缓存，将写入的页标记为 dirty，然后向外部存储 flush，也就是缓存写机制中的 write-back
+      - Linux 在 2.4 版本内核之后，两块缓存近似融合在了一起：如果一个文件的页加载到了 Page Cache，那么同时 buffer cache 只需要维护块指向页的指针就可以了。
+      - Page Cache 中的每个文件都是一棵基数树（radix tree，本质上是多叉搜索树），树的每个节点都是一个页。根据文件内的偏移量就可以快速定位到所在的页
+    - Page Cache 与预读
+      - 应用程序利用 read 系统调动读取 4KB 数据，实际上内核使用 readahead 机制完成了 16KB 数据的读取
+  - Page Cache 与文件持久化的一致性&可靠性
+    - 文件 = 数据 + 元数据。元数据用来描述文件的各种属性，也必须存储在磁盘上。因此，我们说保证文件一致性其实包含了两个方面：数据一致+元数据一致
+    - Linux 下以两种方式实现文件一致性：
+      - Write Through（写穿）：向用户层提供特定接口，应用程序可主动调用接口来保证文件一致性；
+      - Write back（写回）：系统中存在定期任务（表现形式为内核线程），周期性地同步文件系统中文件脏数据块，这是默认的 Linux 一致性方案；
+  - Page Cache 的优劣势
+    - Page Cache 的优势
+      - 加快数据访问
+      - 减少 I/O 次数，提高系统磁盘 I/O 吞吐量
+    - Page Cache 的劣势
+      - 最直接的缺点是需要占用额外物理内存空间，物理内存在比较紧俏的时候可能会导致频繁的 swap 操作，最终导致系统的磁盘 I/O 负载的上升
+      - 对应用层并没有提供很好的管理 API，几乎是透明管理。应用层即使想优化 Page Cache 的使用策略也很难进行. 一些应用选择在用户空间实现自己的 page 管理，而不使用 page cache，例如 MySQL InnoDB 存储引擎以 16KB 的页进行管理。
 - [零拷贝](https://mp.weixin.qq.com/s/K-5HJCxDzjZuHhWk1SPEQQ)
   - 零拷贝是指计算机执行IO操作时，CPU不需要将数据从一个存储区域复制到另一个存储区域，从而可以减少上下文切换以及CPU的拷贝时间。它是一种I/O操作优化技术。
   - 传统的IO流程，包括read和write的过程。4次数据拷贝（两次CPU拷贝以及两次的DMA拷贝)
