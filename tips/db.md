@@ -783,6 +783,46 @@
       start_id = get_max_id_from(datas)
       ```
     - 如果数据量很少，比如1k的量级，且长期不太可能有巨大的增长，还是用limit offset, size 的方案吧，整挺好，能用就行
+- [Memory Optimization for Redis](https://docs.redis.com/latest/ri/memory-optimizations/)
+  - Developer best practices
+    - Avoid dynamic Lua script
+      - Remember to track your Lua memory consumption and flush the cache periodically with a SCRIPT FLUSH.
+      - Do not hardcode and/or programmatically generate key names in your Lua scripts because it makes them useless in a clustered Redis setup.
+    - Switch to 32-bits
+      - 64-bit has more memory available as compared to a 32-bit machine. But if you are sure that your data size does not exceed 3 GB then storing in 32 bits is a good option.
+      - 64-bit systems use considerably more memory than 32-bit systems to store the same keys, especially if the keys and values are small. This is because small keys are allocated full 64 bits resulting in the wastage of the unused bits.
+      - trade offs
+        - For the 32-bit Redis variant, any key name larger than 32 bits requires the key to span to multiple bytes, thereby increasing the memory usage.
+    - Reclaim expired keys memory faster
+      - When you set an expiry on a key, redis does not expire it at that instant. Instead, it uses a randomized algorithm to find out keys that should be expired. 
+      - How to detect if memory is not reclaimed after expiry
+        - Run the INFO command and find the total_memory_used and sum of all the keys for all the databases.
+        - Then take a Redis Dump(RDB) and find out the total memory and total number of keys.
+      - How to reclaim expired keys memory faster 
+        - Increase memorysamples in redis conf. (default is 5, max is 10) so that expired keys are reclaimed faster.
+        - You can set up a cron job that runs the scan command after an interval which helps in reclaiming the memory of the expired keys.
+          - Passively: when you try to access it and the key is found to be timed out. This is how doing a full SCAN would help you, it forces a passive removal across all the keyspace.
+        - Alternatively, Increasing the expiry of keys also helps.
+      - Trade offs
+        - If we increase the memorysamples config, it expires the keys faster, but it costs more CPU cycles, which increases latency of commands. 
+        - Secondly, increasing the expiry of keys helps but that requires significant changes to application logic.
+    - Use better serializer
+      - Instead of default serializer of your programming language (java serialzed objects, python pickle, PHP serialize etc), switch to a better library. There are various libraries like - Protocol Buffers, MessagePack etc.
+  - Data modeling recommendations
+    - Combine smaller strings to hashes
+      - Strings data type has an overhead of about 90 bytes on a 64 bit machine. In other words, calling set foo bar uses about 96 bytes, of which 90 bytes is overhead. You should use the String data type only if:
+        - The value is at least greater than 100 bytes
+        - You are storing encoded data in the string - JSON encoded or Protocol buffer
+        - You are using the string data type as an array or a bitset
+      - If you are not doing any of the above, then use Hashes
+    - Convert hashtable to ziplist for hashes
+      - Hashes have two types of encoding- HashTable and Ziplist. The decision of storing in which of the data structures in done based on the two configurations Redis provides - hash-max-ziplist-entries and hash-max-ziplist-values.
+    - Switch from set to intset
+      - Sets that contain only integers are extremely efficient memory wise. If your set contains strings, try to use integers by mapping string identifiers to integers.
+    - Use smaller keys
+      - Redis keys can play a devil in increasing the memory consumption for your Redis instances. In general, you should always prefer descriptive keys but if you have a large dataset having millions of keys then these large keys can eat a lot of your money.
+    - Convert to a list instead of hash
+
 
 
 
