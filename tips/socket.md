@@ -417,6 +417,61 @@
       ip route add local 0.0.0.0/0 dev lo table 100
       ```
       Linux has a special mechanism called tproxy for this.
+- [Reactor vs Proactor](https://cloud.tencent.com/developer/article/1769945)
+  - 针对传统阻塞 I/O 服务模型的 2 个缺点，比较常见的有如下解决方案：
+    - 1）基于 I/O 复用模型：多个连接共用一个阻塞对象，应用程序只需要在一个阻塞对象上等待，无需阻塞等待所有连接。当某条连接有新的数据可以处理时，操作系统通知应用程序，线程从阻塞状态返回，开始进行业务处理；
+    - 2）基于线程池复用线程资源：不必再为每个连接创建线程，将连接完成后的业务处理任务分配给线程进行处理，一个线程可以处理多个连接的业务。
+  - Reactor 模式
+    - Reactor 模式，是指通过一个或多个输入同时传递给服务处理器的服务请求的事件驱动处理模式. I/O 复用结合线程池，这就是 Reactor 模式基本设计思想
+      ![img.png](socket_reactor_basic.png)
+    - Reactor 模式中有 2 个关键组成：
+      - 1）Reactor：Reactor 在一个单独的线程中运行，负责监听和分发事件，分发给适当的处理程序来对 IO 事件做出反应。 它就像公司的电话接线员，它接听来自客户的电话并将线路转移到适当的联系人；
+      - 2）Handlers：处理程序执行 I/O 事件要完成的实际事件，类似于客户想要与之交谈的公司中的实际官员。Reactor 通过调度适当的处理程序来响应 I/O 事件，处理程序执行非阻塞操作
+    - 根据 Reactor 的数量和处理资源池线程的数量不同，有 3 种典型的实现
+      - 1）单 Reactor 单线程；
+        ![img.png](socket_single_reactor.png)
+        - Reactor 对象通过 Select 监控客户端请求事件，收到事件后通过 Dispatch 进行分发；
+        - 如果是建立连接请求事件，则由 Acceptor 通过 Accept 处理连接请求，然后创建一个 Handler 对象处理连接完成后的后续业务处理；
+        - 如果不是建立连接事件，则 Reactor 会分发调用连接对应的 Handler 来响应；
+        - Handler 会完成 Read→业务处理→Send 的完整业务流程。
+        - 优点：模型简单，没有多线程、进程通信、竞争的问题，全部都在一个线程中完成
+        - 缺点：性能问题，只有一个线程，无法完全发挥多核 CPU 的性能。Handler 在处理某个连接上的业务时，整个进程无法处理其他连接事件，很容易导致性能瓶颈。
+        - 使用场景：客户端的数量有限，业务处理非常快速，比如 Redis，业务处理的时间复杂度 O(1)。
+      - 2）单 Reactor 多线程；
+        ![img.png](socket_reactor_multi_worker.png)
+        - 1）Reactor 对象通过 Select 监控客户端请求事件，收到事件后通过 Dispatch 进行分发；
+        - 2）如果是建立连接请求事件，则由 Acceptor 通过 Accept 处理连接请求，然后创建一个 Handler 对象处理连接完成后续的各种事件；
+        - 3）如果不是建立连接事件，则 Reactor 会分发调用连接对应的 Handler 来响应；
+        - 4）Handler 只负责响应事件，不做具体业务处理，通过 Read 读取数据后，会分发给后面的 Worker 线程池进行业务处理；
+        - 5）Worker 线程池会分配独立的线程完成真正的业务处理，如何将响应结果发给 Handler 进行处理；
+        - 6）Handler 收到响应结果后通过 Send 将响应结果返回给 Client。
+        - 优点：可以充分利用多核 CPU 的处理能力。
+        - 缺点：多线程数据共享和访问比较复杂；Reactor 承担所有事件的监听和响应，在单线程中运行，高并发场景下容易成为性能瓶颈。
+      - 3）主从 Reactor 多线程。
+        ![img.png](socket_multi_reactor.png)
+        - 1）Reactor 主线程 MainReactor 对象通过 Select 监控建立连接事件，收到事件后通过 Acceptor 接收，处理建立连接事件；
+        - 2）Acceptor 处理建立连接事件后，MainReactor 将连接分配 Reactor 子线程给 SubReactor 进行处理；
+        - 3）SubReactor 将连接加入连接队列进行监听，并创建一个 Handler 用于处理各种连接事件；
+        - 4）当有新的事件发生时，SubReactor 会调用连接对应的 Handler 进行响应；
+        - 5）Handler 通过 Read 读取数据后，会分发给后面的 Worker 线程池进行业务处理；
+        - 6）Worker 线程池会分配独立的线程完成真正的业务处理，如何将响应结果发给 Handler 进行处理；
+        - 7）Handler 收到响应结果后通过 Send 将响应结果返回给 Client。
+        - 优点：父线程与子线程的数据交互简单职责明确，父线程只需要接收新连接，子线程完成后续的业务处理
+        - 这种模型在许多项目中广泛使用，包括 Nginx 主从 Reactor 多进程模型，Memcached 主从多线程，Netty 主从多线程模型的支持。
+  - 异步网络模型 Proactor
+    ![img.png](socket_proactor.png)
+    - 1）Proactor Initiator 创建 Proactor 和 Handler 对象，并将 Proactor 和 Handler 都通过 AsyOptProcessor（Asynchronous Operation Processor）注册到内核；
+    - 2）AsyOptProcessor 处理注册请求，并处理 I/O 操作；
+    - 3）AsyOptProcessor 完成 I/O 操作后通知 Proactor；
+    - 4）Proactor 根据不同的事件类型回调不同的 Handler 进行业务处理；
+    - 5）Handler 完成业务处理。
+  - Proactor 和 Reactor 的区别：
+    - Reactor 是在事件发生时就通知事先注册的事件（读写在应用程序线程中处理完成）；
+    - Proactor 是在事件发生时基于异步 I/O 完成读写操作（由内核完成），待 I/O 操作完成后才回调应用程序的处理器来进行业务处理。
+    - 理论上 Proactor 比 Reactor 效率更高，异步 I/O 更加充分发挥 DMA(Direct Memory Access，直接内存存取)的优势
+
+
+
 
 
 
