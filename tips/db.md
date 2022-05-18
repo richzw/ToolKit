@@ -822,7 +822,34 @@
     - Use smaller keys
       - Redis keys can play a devil in increasing the memory consumption for your Redis instances. In general, you should always prefer descriptive keys but if you have a large dataset having millions of keys then these large keys can eat a lot of your money.
     - Convert to a list instead of hash
-
+      - A Redis Hash stores field names and values. If you have thousands of small hash objects with similar field names, the memory used by field names adds up. To prevent this, consider using a list instead of a hash. The field names become indexes into the list.
+      - How does NamedTuple work
+        - A NamedTuple is simply a read-only list, but with some magic to make that list look like a dictionary. Your application needs to maintain a mapping from field names to indexes,like "firstname" => 0, "lastname" => 1 and so on
+    - Shard big hashes to small hashes
+    - Switch to bloom filter or hyperloglog
+      - storing every unique item you want want to count may use a prohibitive amount of memory. If this is the case, consider using a HyperLogLog instead
+      - Bloom filters help when your set contains a high number of elements and you use the set to determine existence or to eliminate duplicates.
+      - Trade Offs of using HyperLogLog:
+        - The results that are achieved from HyperLogLog are not 100% accurate, they have an approximate standard error of 0.81%.
+        - Hyperloglog only tells you the unique count. It cannot tell you the elements in the set.
+  - Data compression methods
+    - Compress field names 
+      - Redis Hash consists of Fields and their values. Like values, field name also consumes memory, so it is required to keep in mind while assigning field names. If you have a large number of hashes with similar field names, the memory adds up significantly. To reduce memory usage, you can use smaller field names.
+    - Compress values
+      - Redis and clients are typically IO bound and the IO costs are typically at least 2 orders of magnitude in respect to the rest of the request/reply sequence. Redis by default does not compress any value that is stored in it, hence it becomes important to compress your data before storing in Redis.
+      - How to compress strings
+        - Snappy aims for high speed and reasonable compression.
+        - LZO compresses fast and decompresses faster.
+        - Others such as Gzip are more widely available.
+        - GZIP compression uses more CPU resources than Snappy or LZO, but provides a higher compression ratio
+        - GZip is often a good choice for cold data, which is accessed infrequently. 
+        - Snappy or LZO are a better choice for hot data, which is accessed frequently.
+    - Enable compression for list
+      - List is just a link list of arrays, where none of the arrays are compressed. By default, redis does not compress elements inside a list. However, if you use long lists, and mostly access elements from the head and tail only, then you can enable compression.
+      - What is compression-depth
+        - List-compression-depth=1 compresses every list node except the head and tail of the list.
+        - List-compression-depth=2 never compresses the head or head->next or the tail or tail->prev.
+        - List-compression-depth=3 starts compression after the head->next->next and before the tail->prev->prev, etc.
 
 
 
