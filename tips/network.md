@@ -616,6 +616,15 @@
     ```
     这里用了 sync.Once 来确保初始化一次 epoll 实例，这就表示一个 listener 只持有一个 epoll 实例来管理网络连接，既然只有一个 epoll 实例，当然就不存在『惊群效应』了
 - [TCP/IP协议精华指南](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247513631&idx=1&sn=9d1feccc4770cfe3ae1db1866b9a3ada&chksm=c184414ef6f3c858cf99b478473e716dd75a5304c8fbf2d28ac36e0071ad8693cd5469e8a727&scene=21#wechat_redirect)
+  - 关于TCP option扩展为什么最大是40字节。
+    - Data offset占4位，所以是2^4-1=15。每个单位代表4字节，所以是15*4=60字节，也就是TCP头部最大可以到60字节。
+    - 基本TCP头部要20字节，所以TCP options是最大40字节。
+  - 关于为什么最多只能放4个SACK块：
+    - SACK是这样的:
+       - 1个字节的kind:SACK
+       - 1个字节的SACK长度
+       - 8个字节的SACK块
+    - 40-1-1=38, 而38mod8=4，所以最多放4个SACK块。
 - [彻底弄懂TCP协议](https://mp.weixin.qq.com/s/_h2YPloSh3TQcAccHVc8Rg)
   - TCP 的三次握手、四次挥手
     - TCP 进行握手初始化一个连接的目标是：分配资源、初始化序列号(通知 peer 对端我的初始序列号是多少)，知道初始化连接的目标
