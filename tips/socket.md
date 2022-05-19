@@ -469,7 +469,29 @@
     - Reactor 是在事件发生时就通知事先注册的事件（读写在应用程序线程中处理完成）；
     - Proactor 是在事件发生时基于异步 I/O 完成读写操作（由内核完成），待 I/O 操作完成后才回调应用程序的处理器来进行业务处理。
     - 理论上 Proactor 比 Reactor 效率更高，异步 I/O 更加充分发挥 DMA(Direct Memory Access，直接内存存取)的优势
-
+- [Socket Tracer](https://developer.aliyun.com/article/786083)
+  - Socket维度信息采集
+    - 流量(tx/rx)、延迟(srtt)，待重传包数量、总重传次数、收发队列长度，Accept队列长度。
+    - TCP 生命周期监控：监听TCP Close事件，统计连接时长，收发包总字节数。
+    - TCP Reset异常监控：收到或者发送Reset的异常，及异常时刻的TCP State。
+  - 指标选取原理
+    - TCP Retransmit
+      - 包重传的超时时间是RTO，通常是200ms左右，当我们观察到一段时间出现了TCP包重传，后续又恢复正常了，可以判断这个时间段出现了网络抖动
+    - TCP SRTTRTT
+      - 通过srtt历史曲线图或柱状图，观察出来延迟的区间变化，就可以知道网络连接的srtt是否抖动
+    - TCP Tx/Rx
+      - 传输层收到数据，但堆积在rcv_queue中，可能是应用层处理代码阻塞。
+      - 传输层Rx没有增加，则很可能是对端没有发送数据。
+    - TCP reset reasons
+      - Non-Existence TCP endpoint: Port or IP（Restrict Local IP address）：服务端不存在。(SYN -> Server reset)
+      - TCP SYN matches existing sessions：服务端、或者防火墙已存在相同5元组连接。(SYN -> Server reset)
+      - Listening endPoint Queue Full ：应用层没有及时accept，导致服务端Accept队列满（全链接队列满），分两种情况：
+         - 对于新来握手请求 SYN -> SYN包会被Server默默丢弃，不会触发reset；
+         - 碰巧在Client 回 ACK(握手第三个包)时，accept 队列满了，Server 会根据 tcp_abort_on_overflow sysctl 配置，决定是否发送 reset。
+      - Half-Open Connections：服务端程序重启，导致链接信息丢失。(中间数据-> Server reset)
+      - RESET by Firewalls in transit：在防火墙维护session状态的场景（NAT网关），防火墙Session TTL过期。(中间数据-> FW reset)
+      - Time-Wait Assassination：Client Time-Wait 期间，收到 Server 端迟到的数据包，回送Ack给Server，导致Server发送Rst包。(Server 迟到数据 -> Client Ack-> Server Reset)
+      - Aborting Connection：客户端Abort，内核发送reset给服务端。(Client Reset)
 
 
 
