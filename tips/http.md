@@ -87,6 +87,62 @@
       }
     }()
     ```
+- [QUIC 是如何解决TCP性能瓶颈的](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247541229&idx=1&sn=1179980ab7817614ebd57a741b2326d2&chksm=c184d6bcf6f35faa7d4682f7e69c55e5bec603b3f2d2fa0dd3f0ce932019f7b3d336a7ddb6a4&scene=178&cur_album_id=1843108380194750466#rd)
+  - ![img.png](http_http2_quic.png)
+  - 一、QUIC 如何解决TCP的队头阻塞问题？
+    ![img.png](http_https_http2_quic.png)
+    - 1.1 TCP 为何会有队头阻塞问题
+      - TCP 采用ACK确认和超时重传机制来保证数据包的可靠交付
+      - 逐个发送数据包，等待确认应答到来后再发送下一个数据包，效率太低了，TCP 采用滑动窗口机制来提高数据传输效率
+      - TCP 因为超时确认或丢包引起的滑动窗口阻塞问题
+      - HTTP/2 在应用协议层通过多路复用解决了队头阻塞问题(使用Stream ID 来标识当前数据流属于哪个资源请求，这同时也是数据包多路复用传输到接收端后能正常组装的依据)，但TCP 在传输层依然存在队头阻塞问题，这是TCP 协议的一个主要性能瓶颈
+    - 1.2 QUIC 如何解决队头阻塞问题
+      - TCP 队头阻塞的主要原因是数据包超时确认或丢失阻塞了当前窗口向右滑动，我们最容易想到的解决队头阻塞的方案是不让超时确认或丢失的数据包将当前窗口阻塞在原地
+      - QUIC 同样是一个可靠的协议，它使用 Packet Number 代替了 TCP 的 Sequence Number，并且每个 Packet Number 都严格递增，也就是说就算 Packet N 丢失了，重传的 Packet N 的 Packet Number 已经不是 N，而是一个比 N 大的值，比如Packet N+
+      - QUIC 支持乱序确认，当数据包Packet N 丢失后，只要有新的已接收数据包确认，当前窗口就会继续向右滑动
+      - 重传的数据包Packet N+M 和丢失的数据包Packet N 单靠Stream ID 的比对一致仍然不能判断两个数据包内容一致，还需要再新增一个字段Stream Offset，标识当前数据包在当前Stream ID 中的字节偏移量。有了Stream Offset 字段信息，属于同一个Stream ID 的数据包也可以乱序传输了
+      - ![img.png](http_quic_packet_offset.png)
+      - QUIC 通过单向递增的Packet Number，配合Stream ID 与 Offset 字段信息，可以支持非连续确认应答Ack而不影响数据包的正确组装，摆脱了TCP 必须按顺序确认应答Ack 的限制（也即不能出现非连续的空位），解决了TCP 因某个数据包重传而阻塞后续所有待发送数据包的问题（也即队头阻塞问题）
+    - 1.3 QUIC 没有队头阻塞的多路复用
+      - ![img.png](http_quic_frame.png)
+      - 同一个Connection ID 可以同时传输多个Stream ID，由于QUIC 支持非连续的Packet Number 确认，某个Packet N 超时确认或丢失，不会影响其它未包含在该数据包中的Stream Frame 的正常传输。
+      - HTTP/2 中如果TCP 出现丢包，TLS 也会因接收到的数据不完整而无法对其进行处理，也即HTTP/2 中的TLS 协议层也存在队头阻塞问题，该问题如何解决呢？
+      - 既然TLS 协议是因为接收数据不完整引起的阻塞，我们只需要让TLS 加密认证过程基于一个独立的Packet，不对多个Packet 同时进行加密认证，就能解决TLS 协议层出现的队头阻塞问题
+  - 二、QUIC 如何优化TCP 的连接管理机制？
+    - 2.1 TCP连接的本质是什么
+      - TCP 连接主要是双方记录并同步维护的状态组成的。一般来说，建立连接是为了维护前后分组数据的承继关系，维护前后承继关系最常用的方法就是对其进行状态记录和管理。
+      - TCP 的状态管理可以分为连接状态管理和分组数据状态管理两种，连接状态管理用于双方同步数据发送与接收状态，分组数据状态管理用于保证数据的可靠传输。
+    - 2.2 QUIC 如何减少TCP 建立连接的开销
+      - ![img.png](http_tfo.png)
+      - TCP 建立连接需要三次握手过程，第三次握手报文发出后不需要等待应答回复就可以发送数据报文了，所以TCP 建立连接的开销为 1-RTT
+      - TLS 简短握手过程是将之前完整握手过程协商的信息记录下来，以Session Ticket 的形式传输给客户端，如果想恢复之前的会话连接，可以将Session Ticket 发送给服务器，就能通过简短的握手过程重建或者恢复之前的连接，通过复用之前的握手信息可以节省 1-RTT 的连接建立开销
+      - TCP 也提供了快速建立连接的方案 TFO (TCP Fast Open)，原理跟TLS 类似，也是将首次建立连接的状态信息记录下来，以Cookie 的形式传输给客户端，如果想复用之前的连接，可以将Cookie 发送给服务器，如果服务器通过验证就能快速恢复之前的连接，TFO 技术可以通过复用之前的连接将连接建立开销缩短为 0-RTT
+      - QUIC 可以理解为”TCP + TLS 1.3“（QUIC 是基于UDP的，可能使用的是DTLS 1.3），QUIC 自然也实现了首次建立连接的开销为 1-RTT，快速恢复先前连接的开销为 0-RTT 的效率。
+    - 2.3 QUIC 如何实现连接的无感迁移
+      - 每个网络连接都应该有一个唯一的标识，用来辨识并区分特定的连接。TCP 连接使用<Source IP, Source Port, Target IP, Target Port> 这四个信息共同标识
+      - QUIC 数据包结构中有一个Connection ID 字段专门标识连接，Connection ID 是一个64位的通用唯一标识UUID (Universally Unique IDentifier)。借助Connection ID，QUIC 的连接不再绑定IP 与 Port 信息，即便因为网络迁移或切换导致Source IP 和Source Port 发生变化，只要Connection ID 不变就仍是同一个连接
+  - 三、QUIC 如何改进TCP 的拥塞控制机制？
+    - 3.1 TCP 拥塞控制机制的瓶颈在哪？
+      - ![img.png](http_cwnd.png)
+      - 一个是目前接收窗口的大小，通过接收端的实际接收能力来控制发送速率的机制称为流量控制机制；
+      - 另一个是目前拥塞窗口的大小，通过慢启动和拥塞避免算法来控制发送速率的机制称为拥塞控制机制，TCP 发送窗口大小被限制为不超过接收窗口和拥塞窗口的较小值。
+    - 3.2 QUIC 如何降低重传概率
+      - QUIC 采用单向递增的Packet Number 来标识数据包，原始请求的数据包与重传请求的数据包编号并不一样，自然也就不会引起重传的歧义性，采样RTT 的测量更准确
+      - ![img.png](http_quic_rtt.png)
+      - QUIC 计算RTT 时除去了接收端的应答延迟时间，更准确的反映了网络往返时间，进一步提高了RTT 测量的准确性，降低了数据包超时重传的概率
+      - QUIC 引入了前向冗余纠错码（FEC: Fowrard Error Correcting），如果接收端出现少量（不超过FEC的纠错能力）的丢包或错包，可以借助冗余纠错码恢复丢失或损坏的数据包，这就不需要再重传该数据包了，降低了丢包重传概率，自然就减少了拥塞控制机制的触发次数，可以维持较高的网络利用效率。
+    - 3.3 QUIC 如何改进拥塞控制机制
+      - TCP 的拥塞控制实际上包含了四个算法：慢启动、拥塞避免、快速重传、快速恢复. 由于TCP 内置于操作系统，拥塞控制算法的更新速度太过缓慢，跟不上网络环境改善速度，TCP 落后的拥塞控制算法自然会降低网络利用效率
+      - QUIC 协议当前默认使用了 TCP 的 Cubic 拥塞控制算法，同时也支持 CubicBytes、Reno、RenoBytes、[BBR](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247540557&idx=1&sn=958c13feee4aa384cdac8435eff55c5e&chksm=c184a81cf6f3210a7c3f309d054592e99a2845e9cf93f58aeefa58001304c7c0268283da684d&scene=21#wechat_redirect)、PCC 等拥塞控制算法
+      - QUIC 是处于应用层的，可以随浏览器更新，QUIC 的拥塞控制算法就可以有较快的迭代速度，在TCP 的拥塞控制算法基础上快速迭代，可以跟上网络环境改善的速度，尽快提高拥塞恢复的效率。
+
+
+
+
+
+
+
+
 
 
 
