@@ -850,7 +850,20 @@
         - List-compression-depth=1 compresses every list node except the head and tail of the list.
         - List-compression-depth=2 never compresses the head or head->next or the tail or tail->prev.
         - List-compression-depth=3 starts compression after the head->next->next and before the tail->prev->prev, etc.
-
+- [mysql插入数据会失败?](https://mp.weixin.qq.com/s/Tmbqr7RMHiMbUHRQWYZX4w)
+  - 字符串里含有emoji表情，插入就会报错
+  - 编码和字符集的关系
+    - utf-8字符集就是所有utf-8编码格式的字符的合集
+  - mysql的字符集
+    - `show charset;`
+    - utf8和utf8mb4的区别
+      - utf8mb4编码，mb4就是most bytes 4的意思，从上图最右边的Maxlen可以看到，它最大支持用4个字节来表示字符
+        - 通过SHOW COLLATION WHERE Charset = 'utf8mb4';可以查看到utf8mb4下支持什么比较规则。
+      - utf8，它是数据库的默认字符集. 它最多支持用3个字节去表示字符，按utf8mb4的命名方式，准确点应该叫它utf8mb3。
+  - 如何查看数据库表的字符集
+    - `show table status from database like tabelname;`
+  - 加入了emoji表情这种utf8mb4才能支持的字符，mysql识别到这是utf8mb3不支持的字符，于是忍痛报错
+  - Fix: `ALTER TABLE user CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;`
 
 
 
