@@ -1308,7 +1308,66 @@
     - struct内字段如果填充过多，可以尝试重排，使字段排列更紧密，减少内存浪费
     - 零大小字段要避免作为struct最后一个字段，会有内存浪费
     - 32位系统上对64位字的原子访问要保证其是8bytes对齐的；当然如果不必要的话，还是用加锁（mutex）的方式更清晰简单
-
+- [全局变量加锁的优化](https://mp.weixin.qq.com/s/DBa0UEBtOVpKtlz38R1VTA)
+  - 改变锁的类型 - 读写锁
+  - 降低锁住的代码块长度
+  - 对数据切片
+    - 假设我们的全局变量是一个map，我们可以对key做一个哈希后取模的操作，将原来一个map的数据分开写到多个map中。这样同一个大集合中的数据便支持了同时对多个数据进行写入而互不影响。
+    ```go
+    const (
+     defaultStripSize = 1 << 16
+     defaultStripMask = defaultStripSize - 1
+    )
+    
+    type stripLock struct {
+     sync.RWMutex
+     _ [40]byte
+    }
+    
+    type StripMap struct {
+     locks   []stripLock
+     buckets []map[uint64]interface{}
+    }
+    
+    func DefaultStripMap() *StripMap {
+     s := &StripMap{
+      locks:   make([]stripLock, defaultStripSize),
+      buckets: make([]map[uint64]interface{}, defaultStripSize),
+     }
+    
+     for i := range s.buckets {
+      s.buckets[i] = make(map[uint64]interface{})
+     }
+    
+     return s
+    }
+    
+    func (s *StripMap) Set(key uint64, value interface{}) {
+     s.locks[key&defaultStripMask].RLock()
+     defer s.locks[key&defaultStripMask].RUnlock()
+    
+     s.buckets[key&defaultStripMask][key] = value
+    }
+    
+    func (s *StripMap) Get(key uint64) (interface{}, bool) {
+     s.locks[key&defaultStripMask].RLock()
+     defer s.locks[key&defaultStripMask].RUnlock()
+    
+     v, ok := s.buckets[key&defaultStripMask][key]
+     return v, ok
+    }
+    
+    func (s *StripMap) Remove(key uint64) {
+     s.locks[key&defaultStripMask].Lock()
+     defer s.locks[key&defaultStripMask].Unlock()
+    
+     delete(s.buckets[key&defaultStripMask], key)
+    }
+    ```
+    - 使用位运算代替取模操作
+      - `a % b = a & (b-1)` 当且仅当`b = 2^n`时成立
+    - Cache Line 是为了解决不同变量之在多个CPU核心之间共享的问题
+    - 内存对齐是为了解决同一个结构体内部访问效率等问题
 
 
 
