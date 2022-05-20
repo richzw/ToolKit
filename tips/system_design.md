@@ -363,7 +363,7 @@
     - 增加专门的 data validation 服务，类似 Google 在应对机器学习数据问题时的一个方案：https://blog.acolyer.org/2019/06/05/data-validation-for-machine-learning/
     - 如果公司内有 mono repo，那么在有 mono repo + schema 描述的前提下，适当开发一些静态分析工具，来阻止上游程序员犯错
     - 耦合实在解除不了的情况下，让下游的计算和查询模块做好分离，重点保障查询模块的稳定性，不要拖累主流程
-
+- [超大规模分布式存储系统架构设计](https://mp.weixin.qq.com/s/IJhXKZSa5SBiBgXg0dJkHg)
 
 
 
