@@ -676,7 +676,7 @@
     - /proc/interrupts——/proc实际上是linux的虚拟文件系统用于内核空间和用户空间的通信，/proc/interrupts是这种通信机制的一部分，提供了一个只读的中断使用情况。
       `$ watch -d cat /proc/interrupts`
     - perf stat  可以统计很多和CPU相关核心数据，比如cache' miss，上下文切换，CPI等。
-
+- [深入理解TLB原理](https://mp.weixin.qq.com/s/KSf4GT3vI4ABHp9jvTqa2A)
 
 
 
