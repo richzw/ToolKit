@@ -864,7 +864,39 @@
     - `show table status from database like tabelname;`
   - 加入了emoji表情这种utf8mb4才能支持的字符，mysql识别到这是utf8mb3不支持的字符，于是忍痛报错
   - Fix: `ALTER TABLE user CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;`
-
+- [sql优化的15个小技巧](https://mp.weixin.qq.com/s/Vv6IB9toAJ2AThdJxIOgqA)
+  - 避免使用`select *` - select *不会走覆盖索引，会出现大量的回表操作，而从导致查询sql的性能很低。
+  - 用union all代替union 
+    - union关键字后，可以获取排重后的数据
+    - union all关键字，可以获取所有数据，包含重复的数据
+  - 小表驱动大表
+    - in 适用于左边大表，右边小表 - 如果sql语句中包含了in关键字，则它会优先执行in里面的子查询语句，然后再执行in外面的语句。如果in里面的数据量很少，作为条件查询速度更快
+    - exists 适用于左边小表，右边大表 - 如果sql语句中包含了exists关键字，它优先执行exists左边的语句（即主查询语句）
+  - 批量操作
+  - 高效的分页
+    - 先找到上次分页最大的id，然后利用id上的索引查询
+    - 还能使用between优化分页
+  - 用连接查询代替子查询
+    - mysql中如果需要从两张以上的表中查询出数据的话，一般有两种实现方式：子查询 和 连接查询 join。
+    - mysql执行子查询时，需要创建临时表，查询完毕后，需要再删除这些临时表，有一些额外的性能消耗。
+  - join时要注意
+    - 如果两张表使用inner join关联，mysql会自动选择两张表中的小表，去驱动大表，所以性能上不会有太大的问题。
+    - 使用left join关联，mysql会默认用left join关键字左边的表，去驱动它右边的表。如果左边的表数据很多时，就会出现性能问题
+  - 选择合理的字段类型
+    - 能用数字类型，就不用字符串，因为字符的处理往往比数字要慢。
+    - 尽可能使用小的类型，比如：用bit存布尔值，用tinyint存枚举值等。
+    - 长度固定的字符串字段，用char类型。
+    - 长度可变的字符串字段，用varchar类型。
+    - 金额字段用decimal，避免精度丢失问题
+  - 提升group by的效率 - Where 之后再 group by
+  - 索引优化
+    - [Explain](https://mp.weixin.qq.com/s?__biz=MzkwNjMwMTgzMQ==&mid=2247490262&idx=1&sn=a67f610afa984ecca130a54a3be453ab&source=41#wechat_redirect)
+      - key（查看有没有使用索引）
+      - key_len（查看索引使用是否充分）
+      - type（查看索引类型）
+        - system > const > eq_ref > ref > range > index > ALL
+      - Extra（查看附加信息：排序、临时表、where条件为false等）
+    ![img.png](db_index_invalid.png)
 
 
 
