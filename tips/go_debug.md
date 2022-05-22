@@ -263,8 +263,22 @@
     - 在 g 10 执行修改当前 p 的 timer 的链路中，准备执行 runtime.wakeNetPoller 时触发了 g 的抢占，此时 timer 的修改没有完成，转而接下来去执行 morestack （这个是协作式抢占，复用了 newstack 去实现），在 morestack 内通过汇编把执行栈切换为了当前 m 的 g0 上，接下来的 morestack 链路中会重新执行 go 的调度函数 runtime.schedule() ，而在这个函数中需要等待当前 p 的 timer 都修改完毕，然而此时整个程序处于 gc 的 stw 阶段，其他所有 p 已经全部暂停，也就导致 g 10 无法继续执行，从而形成了死锁，进而导致程序无法正常对外服务。
     - issue https://github.com/golang/go/issues/38023
     - 直观的来看问题出在 timer 的更新上，不应该允许 timer 未修改完就被打断或者 curg 为 nil 也应该发信号
-  
-     
+- [pprof 统计的内存总是偏小?](https://mp.weixin.qq.com/s/wA_wyVYhPir-00KUFn-azw)
+  - [golang 内存管理分析](https://mp.weixin.qq.com/s?__biz=Mzg3NTU3OTgxOA==&mid=2247486735&idx=1&sn=a855d4198ee87d1db3da9029ae2c3bc9&chksm=cf3e1dcaf84994dc2966238034e585c58a9bf9e49b8330caaa8ec85c3617435bc6165d715ae5&scene=21#wechat_redirect)
+  - pprof 统计到的比 top 看到的要小？
+    - pprof 有采样周期，
+      - 采样的频率间隔导致的. 采样是有性能消耗的。 毕竟是多出来的操作，每次还要记录堆栈开销是不可忽视的。所以只能在采样的频率上有个权衡，mallocgc 采样默认是 512 KiB，也就是说，进程每分配满 512 KiB 的数据才会记录一次分配路径。
+    - 管理内存+内存碎片，
+      - Go 使用的是 tcmalloc 的内存分配的模型，把内存 page 按照固定大小划分成小块。这种方式解决了外部碎片，但是小块内部还是有碎片的，这个 gap 也是内存差异的一部分。tcmalloc 内部碎片率整体预期控制在 12.5% 左右。
+    - cgo 分配的内存 
+      - go 分配的内存无法被统计到，这个很容易理解。因为 Go 程序的统计是在 malloc.go 文件 mallocgc 这个函数中，cgo 调用的是 c 程序的代码，八杆子都打不到，它的内存用的 libc 的 malloc ，free 来管理，go 程序完全感知不到，根本没法统计。
+    - runtime 管理内存
+      - ![img.png](go_debug_memstat.png)
+      - 内存的 gap 主要来源于：
+        - heap 上 Idle span，分配了但是未使用的（往往出现这种情况是一波波的请求峰值导致的，冲上去就一时半会不下来）；
+        - stack 的内存占用；
+        - OS 分配但是是 reserved 的；
+        - runtime 的 Gc 元数据，mcache，mspan 等管理内存
 
 
 
