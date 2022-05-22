@@ -701,7 +701,86 @@
     - 微分区。服务中的多个实例可以组成一个小型的分区，当分区中一个实例出现耗时抖动，可以往该实例中其他实例转移流量。比如实例A所在分区中有20个实例，当A出现耗时抖动，将流量转移到其他19个实例上。对于其他19个实例来说增加了大概5%的流量负载，却有效保证了分区内的耗时维持在一个较低的水位。
     - 分区状态探测与预测。在上面优化的前提下，可以探测每个分区的服务耗时情况以及预测出耗时抖动，及时的做流量的转移。
     - 实例监测与流量摘除。如果一个服务实力状态异常，可以把实例的流量摘掉，分摊到分区中别的实例上面去，这样做可以提高集群的整体健康状态。
-
+- [优化redis写入而降低cpu使用率的一次经历](https://mp.weixin.qq.com/s/ntNGz6mjlWE7gb_ZBc5YeA)
+  - 异步批量写入
+    ```go
+    type CounterCache struct {
+       rwMu        sync.RWMutex
+       redisClient redis.Cmdable
+    
+       countCache   map[string]int64
+       hasUpdateExpire map[string]struct{}
+    }
+    
+    func NewCounterCache(redisClient redis.Cmdable) *CounterCache {
+       c := &CounterCache{
+          redisClient: redisClient,
+          countCache:    make(map[string]int64),
+       }
+       go c.startFlushTicker()
+       return c
+    }
+    
+    func (c *CounterCache) IncrBy(key string, value int64) int64 {
+       val := c.incrCacheBy(key, value)
+       redisCount, _ := c.redisClient.Get(key).Int64()
+       return val + redisCount
+    }
+    
+    func (c *CounterCache) incrCacheBy(key string, value int64) int64 {
+       c.rwMu.Lock()
+       defer c.rwMu.Unlock()
+        
+       count := c.countCache[key]
+       count += value
+       c.countCache[key] = count
+       return count
+    }
+    
+    func (c *CounterCache) Get(key string) (int64, error) {
+       cacheVal := c.get(key)
+       redisValue, err := c.redisClient.Get(key).Int64()
+       if err != nil && err != redis.Nil {
+          return cacheVal, err
+       }
+    
+       return redisValue + cacheVal, nil
+    }
+    
+    func (c *CounterCache) get(key string) int64 {
+       c.rwMu.RLock()
+       defer c.rwMu.RUnlock()
+       return c.countCache[key]
+    }
+    
+    func (c *CounterCache) startFlushTicker() {
+       ticker := time.NewTicker(time.Second * 5)
+       for {
+          select {
+          case <-ticker.C:
+             c.flush()
+          }
+       }
+    }
+    
+    func (c *CounterCache) flush() {
+       var oldCountCache map[string]int64
+       c.rwMu.Lock()
+       oldCountCache = c.countCache
+       c.countCache = make(map[string]int64)
+       c.rwMu.Unlock()
+    
+       for key, value := range oldCountCache {
+          c.redisClient.IncrBy(key, value)
+           if _, ok := c.hasUpdateExpire[key]; !ok {
+             err := c.redisClient.Expire(key, DefaultExpiration)
+             if err == nil {
+                 c.hasUpdateExpire[key] = struct{}{}
+             }
+          }
+       }
+    }
+    ```
 
 
 
