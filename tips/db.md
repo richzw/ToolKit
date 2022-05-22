@@ -3,20 +3,15 @@
   - Issue
     - 我们日常做分页需求时，一般会用limit实现，但是当偏移量特别大的时候，查询效率就变得低下
   - Why
-
-    深分页的执行SQL如下：
-
+    - 深分页的执行SQL如下：
     `select id,name,balance from account where update_time> '2020-09-19' limit 100000,10;`
-
-    我们先来看下这个SQL的执行流程：
-    - 通过普通二级索引树idx_update_time，过滤update_time条件，找到满足条件的记录ID。
-    - 通过ID，回到主键索引树，找到满足记录的行，然后取出展示的列（回表）
-    - 扫描满足条件的100010行，然后扔掉前100000行，返回。
-    
-    SQL变慢原因有两个：
-    - limit语句会先扫描offset+n行，然后再丢弃掉前offset行，返回后n行数据。也就是说limit 100000,10，就会扫描100010行，而limit 0,10，只扫描10行。
-    - limit 100000,10 扫描更多的行数，也意味着回表更多的次数。
-
+    - 我们先来看下这个SQL的执行流程：
+      - 通过普通二级索引树idx_update_time，过滤update_time条件，找到满足条件的记录ID。
+      - 通过ID，回到主键索引树，找到满足记录的行，然后取出展示的列（回表）
+      - 扫描满足条件的100010行，然后扔掉前100000行，返回。
+    - SQL变慢原因有两个：
+      - limit语句会先扫描offset+n行，然后再丢弃掉前offset行，返回后n行数据。也就是说limit 100000,10，就会扫描100010行，而limit 0,10，只扫描10行。
+      - limit 100000,10 扫描更多的行数，也意味着回表更多的次数。
   - Solution
     - 通过子查询优化, 可以通过减少回表次数来优化, 把条件转移到主键索引树
       ```sql
@@ -45,7 +40,6 @@
       - 这种方式有局限性：需要一种类似连续自增的字段。
     - 使用between...and...
       - 可以将limit查询转换为已知位置的查询，这样MySQL通过范围扫描between...and，就能获得到对应的结果
-      
 - [Redis主节点的Key已过期，但从节点依然读到过期数据](https://mp.weixin.qq.com/s?__biz=Mzg2NzYyNjQzNg==&mid=2247487738&idx=1&sn=e7e6b10b81736ba9775f485ce39585a6&chksm=ceb9ec51f9ce6547ce6378692b11cc09d3c46ded964bddf5052373b1c8cbf5b02a2327f4d23e&scene=132#wechat_redirect)
   - 大部分的业务场景都是读多写少，为了利用好这个特性，提升Redis集群系统的吞吐能力，通常会采用主从架构、读写分离
   - 主从架构的风险
@@ -68,14 +62,12 @@
         - 2、监控主从库间的同步进度，通过`info replication`命令 ，查看主库接收写命令的进度信息（master_repl_offset），从库的复制写命令的进度信息（slave_repl_offset）
           `master_repl_offset - slave_repl_offset` 得到从库与主库间的复制进度差. 我们可以开发一个监控程序，定时拉取主从服务器的进度信息，计算进度差值。如果超过我们设置的阈值，则通知客户端断开从库的连接，全部访问主库，一定程度上减少数据不一致情况。
 - [Redis 用数据类型实现亿级数据统计](https://mp.weixin.qq.com/s?__biz=Mzg2NzYyNjQzNg==&mid=2247487680&idx=1&sn=7877648fac1fe8bf98b65bdeaf50a7ea&chksm=ceb9ec6bf9ce657df72a03491b2532d2c3bf3714a244459eb0609754a4f39ae496c1c9e0e584&scene=132#wechat_redirect)
-  
-  常见的场景如下：
+  - 常见的场景如下：
   - 给一个 userId ，判断用户登陆状态；
   - 两亿用户最近 7 天的签到情况，统计 7 天内连续签到的用户总数；
   - 统计每天的新增与第二天的留存用户数；
   - 统计网站的对访客（Unique Visitor，UV）量
   - 最新评论列表
-
 - [详谈水平分库分表](https://mp.weixin.qq.com/s/vqYRUEPnzFHExo4Ly7DPWw)
   - 什么是一个好的分库分表方案
     - 方案可持续性 - 业务数据量级和业务流量未来进一步升高达到新的量级的时候，我们的分库分表方案可以持续使用
@@ -910,6 +902,37 @@
     - 行锁可能会升级为表锁，有哪些场景呢
       - 如果一个表批量更新，大量使用行锁，可能导致其他事务长时间等待，严重影响事务的执行效率。此时，MySQL会将 行锁 升级为 表锁
       - 行锁是针对索引加的锁，如果 条件索引失效，那么 行锁 也会升级为 表锁
+- [事务还没提交的时候，redolog 能不能被持久化到磁盘呢](https://mp.weixin.qq.com/s/quory0k_bcwrm9UyTrqd8g)
+  - binlog 持久化
+    - binlog cache 
+      - 每个线程都有自己 binlog cache 区域，在事务运行的过程中，MySQL 会先把日志写到 binlog cache 中，等到事务真正提交的时候，再统一把 binlog cache 中的数据写到 binlog 文件中。
+      - 这个从 binlog cache 写到 binlog 文件中的操作，并不就是落盘操作了，这里仅仅是把 binlog 写到了文件系统的 page cache 
+      - 最后需要把 page cache 中的数据同步到磁盘上，才算真正完成了 binlog 的持久化（这一步对应下图中的 fsync 操作）。一般情况下，我们认为 fsync 才占磁盘的 IOPS (Input/Output Operations Per Second)
+    - write 和 fsync 的时机，是由参数 sync_binlog 控制的：
+      - sync_binlog = 0，每次提交事务的时候，只进行 write，不进行 fsync
+      - sync_binlog = 1候，每次提交事务的时候，执行 write 和 fsync
+      - sync_binlog = N(N>1)，每次提交事务的时候，执行 write，累积 N 个事务后再执行 fsyn
+  - redolog 持久化
+    - redolog buffer
+      - 在事务运行的过程中，MySQL 会先把日志写到 redolog buffer 中，等到事务真正提交的时候，再统一把 redolog buffer 中的数据写到 redolog 文件中
+      - 这个从 redolog buffer 写到 redolog 文件中的操作，并不就是落盘操作了，这里仅仅是把 redolog 写到了文件系统的 page cache 上，最后还需要执行 fsync 才能够实现真正的落盘。
+      - 不同于 binlog cache 每个线程都有一个，redolog buffer 只有那么一个
+    - 日志写到 redolog buffer 是很快的，wirte 到 page cache 也差不多，但是 fsync 持久化到磁盘的速度就慢多了，为了控制 redo log 的写入策略，InnoDB 提供了 innodb_flush_log_at_trx_commit 参数，它有三种可能取值：
+      - innodb_flush_log_at_trx_commit = 0，每次事务提交的时候，都只是把 redolog 留在 redolog buffer 中
+      - innodb_flush_log_at_trx_commit = 1，每次事务提交的时候，都执行 fsync 将 redolog 直接持久化到磁盘
+      - innodb_flush_log_at_trx_commit = 2，每次事务提交的时候，都只执行 write 将 redolog 写到文件系统的 page cache 中
+  - 事务还没有提交的时候，redo log 是有可能被持久化到磁盘的
+    - redolog 的具体落盘操作是这样的：在事务运行的过程中，MySQL 会先把日志写到 redolog buffer 中，等到事务真正提交的时候，再统一把 redolog buffer 中的数据写到 redolog 文件中。不过这个从 redolog buffer 写到 redolog 文件中的操作也就是 write 并不就是落盘操作了，这里仅仅是把 redolog 写到了文件系统的 page cache 上，最后还需要执行 fsync 才能够实现真正的落盘。
+    - 也就是说，redolog 其实存在三种状态：
+      - 事务执行过程中，存在 MySQL 的进程内存中的 redolog buffer 中
+      - 事务提交，执行 write 操作存在文件系统的 page cache 中，但是没有执行 fsync 操作持久化到磁盘
+      - 事务提交，执行 fsync 操作持久化到磁盘
+    - 为什么说事务还没提交的时候，redolog 也有可能被持久化到磁盘呢？
+      - 主要有三种可能的原因：
+        - 第一种情况：InnoDB 有一个后台线程，每隔 1 秒轮询一次，具体的操作是这样的：调用 write 将 redolog buffer 中的日志写到文件系统的 page cache，然后调用 fsync 持久化到磁盘。而在事务执行中间过程的 redolog 都是直接写在 redolog buffer 中的，也就是说，一个没有提交的事务的 redolog，也是有可能会被后台线程一起持久化到磁盘的。
+        - 第二种情况：innodb_flush_log_at_trx_commit 设置是 1，这个参数的意思就是，每次事务提交的时候，都执行 fsync 将 redolog 直接持久化到磁盘（还有 0 和 2 的选择，0 表示每次事务提交的时候，都只是把 redolog 留在 redolog buffer 中；2 表示每次事务提交的时候，都只执行 write 将 redolog 写到文件系统的 page cache 中）。举个例子，假设事务 A 执行到一半，已经写了一些 redolog 到 redolog buffer 中，这时候有另外一个事务 B 提交，按照 innodb_flush_log_at_trx_commit = 1 的逻辑，事务 B 要把 redolog buffer 里的日志全部持久化到磁盘，这时候，就会带上事务 A 在 redolog buffer 里的日志一起持久化到磁盘
+        - 第三种情况：redo log buffer 占用的空间达到 redolog buffer 大小（由参数 innodb_log_buffer_size 控制，默认是 8MB）一半的时候，后台线程会主动写盘。不过由于这个事务并没有提交，所以这个写盘动作只是 write 到了文件系统的 page cache，仍然是在内存中，并没有调用 fsync 真正落盘
+  - [redo log vs undo log vs  binlog](https://developer.aliyun.com/article/781018)
 
 
 
