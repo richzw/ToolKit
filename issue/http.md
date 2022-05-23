@@ -216,55 +216,45 @@ KeepAlive
     `func setKeepAlivePeriod(fd *netFD, d time.Duration) error`
   
 - [`i/o timeout` caused by incorrect `setTimeout/setDeadline`](https://mp.weixin.qq.com/s/OI1TXa3JeSdMJV4aM19ZJw)
-
-  ```go
-  tr = &http.Transport{
-      MaxIdleConns: 100,
-      Dial: func(netw, addr string) (net.Conn, error) {
-          conn, err := net.DialTimeout(netw, addr, time.Second*2) //设置建立连接超时
-          if err != nil {
-              return nil, err
-          }
-          err = conn.SetDeadline(time.Now().Add(time.Second * 3)) //设置发送接受数据超时
-          if err != nil {
-              return nil, err
-          }
-          return conn, nil
-      },
-  }
-  ```
-
-  现象 -
-  golang服务在发起http调用时，虽然`http.Transport`设置了3s超时，会偶发出现i/o timeout的报错
-
-  分析 -
-  抓包发现， 从刚开始三次握手，到最后出现超时报错 i/o timeout。 间隔3s。原因是客户端发送了一个一次Reset请求导致的。
-  就是客户端3s超时主动断开链接的
-
-  查看 - SetDeadline是对于链接级别
-  SetDeadline sets the read and write deadlines associated with the connection.
-
-  原理 -
-  HTTP协议从1.1之后就默认使用`长连接`。golang标准库里也兼容这种实现。
-  通过建立一个连接池，针对每个域名建立一个TCP长连接
-  
-  ![img.png](http_connection.png)
-
-  一个域名会建立一个连接，一个连接对应一个读goroutine和一个写goroutine。正因为是同一个域名，所以最后才会泄漏3个goroutine，如果不同域名的话，那就会泄漏 1+2*N 个协程，N就是域名数。
- 
-  正确的姿势 - **超时设置在http**
-
-  ```go
-      tr = &http.Transport{
-          MaxIdleConns: 100,
-      }
-      client := &http.Client{
-          Transport: tr,
-          Timeout: 3*time.Second,  // Timeout specifies a time limit for requests made by this Client.
-      }
-  ```
-  ![img.png](netpoll.png)
-  不要在 http.Transport中设置超时，那是连接的超时，不是请求的超时。否则可能会出现莫名 io timeout报错。
+  - Source
+    ```go
+    tr = &http.Transport{
+        MaxIdleConns: 100,
+        Dial: func(netw, addr string) (net.Conn, error) {
+            conn, err := net.DialTimeout(netw, addr, time.Second*2) //设置建立连接超时
+            if err != nil {
+                return nil, err
+            }
+            err = conn.SetDeadline(time.Now().Add(time.Second * 3)) //设置发送接受数据超时
+            if err != nil {
+                return nil, err
+            }
+            return conn, nil
+        },
+    }
+    ```
+  - 现象
+    - golang服务在发起http调用时，虽然`http.Transport`设置了3s超时，会偶发出现i/o timeout的报错
+  - 分析 
+    - 抓包发现， 从刚开始三次握手，到最后出现超时报错 i/o timeout。 间隔3s。原因是客户端发送了一个一次Reset请求导致的。 就是客户端3s超时主动断开链接的
+  - 查看 
+    - SetDeadline是对于链接级别 SetDeadline sets the read and write deadlines associated with the connection.
+  - 原理
+    - HTTP协议从1.1之后就默认使用`长连接`。golang标准库里也兼容这种实现。通过建立一个连接池，针对每个域名建立一个TCP长连接
+     ![img.png](http_connection.png)
+    - 一个域名会建立一个连接，一个连接对应一个读goroutine和一个写goroutine。正因为是同一个域名，所以最后才会泄漏3个goroutine，如果不同域名的话，那就会泄漏 1+2*N 个协程，N就是域名数。
+  - 正确的姿势 - **超时设置在http**
+    ```go
+        tr = &http.Transport{
+            MaxIdleConns: 100,
+        }
+        client := &http.Client{
+            Transport: tr,
+            Timeout: 3*time.Second,  // Timeout specifies a time limit for requests made by this Client.
+        }
+    ```
+    ![img.png](netpoll.png)
+    不要在 http.Transport中设置超时，那是连接的超时，不是请求的超时。否则可能会出现莫名 io timeout报错。
 
 - [如何正确设置保活](https://mp.weixin.qq.com/s/EmawKOftz0OAnMd2ydcOgQ)
   - 前情
