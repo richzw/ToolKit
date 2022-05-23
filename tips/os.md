@@ -677,7 +677,22 @@
       `$ watch -d cat /proc/interrupts`
     - perf stat  可以统计很多和CPU相关核心数据，比如cache' miss，上下文切换，CPI等。
 - [深入理解TLB原理](https://mp.weixin.qq.com/s/KSf4GT3vI4ABHp9jvTqa2A)
-
+- [SSD 的基本原理](https://mp.weixin.qq.com/s?__biz=Mzg3NTU3OTgxOA==&mid=2247497987&idx=1&sn=ab77ef0debfe5a978b23056db45da795&chksm=cf3de9c6f84a60d039412b3c086a29f58cc9317672f0040e3b90761df327318f7049e973de7c&scene=132#wechat_redirect)
+  - SSD 的闪存介质就是由成千上万个上面的浮栅晶体管组成的，由它们组成 0101010 这样的一系列数据，从而形成我们想要的存储数据
+  - SSD 盘内部按照 LUN，Plane，Block，Page，存储单元（浮栅管） 这样的层次。不同的层次共用了不同的资源
+    - ![img.png](os_ssd.png)
+    - LUN 是接收和执行闪存的基本单元，换句话说，不同的 LUN 之间可以并发执行命令。一个 LUN 内，同一时间只能有一个命令在执行。
+    - 每个 Plane 有自己独立的缓存，这个缓存是读写数据的时候用的。举个例子，写数据的时候，先把数据从主控传输到这个 Cache ，然后再把 Cache 写到闪存阵列，读的时候则是把 Page 的数据从闪存介质读取到 Cache ，然后传输主控。
+    - 擦除的粒度是 Block ， Block 里所有的存储单元共用衬底。
+    - SSD 盘 IO 的单元是 Page 。也就是说，无论是从闪存介质中读数据到 Cache ，还是把 Cache 的数据写到闪存介质，都是以 Page 为单位。
+  - 闪存的持久化状态体现在浮栅层捕获的电子，通过这个影响浮栅管的导通性来表示标识 0 和 1 的状态；
+  - 浮栅层是否能关住电子就决定了 SSD 的寿命，如果它总是关不住电子，那说明它差不多到期了；
+  - 对浮栅晶体管的反复读写会影响它的寿命；
+  - SSD 盘内部擦除的单元是 Block ，因为 Block 内部的存储单元共用衬底；
+  - SSD 盘 IO 读写的单元是 Page ，如果 IO 大小不对齐，那么会导致 IO 的放大，影响性能；
+  - SSD 盘没有覆盖写，永远都是写新的位置。这些新的位置都会是初始状态（全 1 数据）；
+  - SSD 内部的垃圾回收来保证持续有新的 Block 可写；
+  - SSD 的随机和顺序 IO 写影响更多的是 GC 的效率，从而影响寿命和性能
 
 
 
