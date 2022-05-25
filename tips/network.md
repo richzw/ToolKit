@@ -550,7 +550,6 @@
       - Poll: 是抽象出的一套接口，屏蔽底层不同操作系统平台接口的差异，linux下采用epoll来实现、bsd平台下则采用kqueue来实现。
       - pollmanager:Poll的管理器，可以理解成一个Poll池，也就是一组epoll或者kqueue集合。
       - loadbalance:负责均衡封装，主要用来从pollmanager按照一定的策略(随机、轮询、最小连接等)选择出来一个Poll实例，一般在客户端初始化完成后，server会调用该接口拿到一个Poll实例，并将新建立的客户端加入到Poll管理。 
-      
 
 - [golang 中是如何对 epoll 进行封装的](https://mp.weixin.qq.com/s/ey9Xb8B0WTg0nXAtya3SLQ)
   - 在 golang net 的 listen 中，会完成如下几件事：
@@ -596,7 +595,6 @@
    ```
 - Q: golang的net如何对于epoll进行封装，使用上看似通过过程呢
   - 所有的网络操作以网络描述符netFD为中心实现，netFD与底层PollDesc结构绑定，当在一个netFD上读写遇到EAGAIN的错误的时候，把当前goroutine存储到这个netFD对应的PollDesc中，同时把goroutine给park 直到这个netFD发生读写事件，才将该goroutine激活重新开始。在底层通知goroutine再次发生读写事件的方式就是epoll事件驱动机制。
-
 - Q: 为什么 gnet 会比 Go 原生的 net 包更快？
   - Multi-Reactors 模型相较于 Go 原生模型在以下场景具有性能优势：
     - 1. 高频创建新连接：我们从源码里可以知道 Go 模式下所有事件都是在一个 epoll 实例来管理的，接收新连接和 IO 读写；而在 Reactors 模式下，accept 新连接和 IO 读写分离，它们在各自独立的 goroutines 里用自己的 epoll 实例来管理网络事件。
@@ -703,6 +701,32 @@
       - accept 连接队列的大小是由 backlog 参数和（/proc/sys/net/core/somaxconn）内核参数共同决定，取值为两个中的最小值。当 accept 连接队列满了，协议栈的行为根据（/proc/sys/net/ipv4/tcp_abort_on_overflow）内核参数而定
       - 如果 tcp_abort_on_overflow=1，server 在收到 SYN_ACK 的 ACK 包后，协议栈会丢弃该连接并回复 RST 包给对端，这个是 Client 会出现(connection reset by peer)错误。
       - 如果 tcp_abort_on_overflow=0，server 在收到 SYN_ACK 的 ACK 包后，直接丢弃该 ACK 包。这个时候 Client 认为连接已经建立了，一直在等 Server 的数据，直到超时出现 read timeout 错误。
+- [TCP两次挥手，你见过吗？那四次握手呢](https://mp.weixin.qq.com/s/Z0EqSihRaRbMscrZJl-zxQ)
+  - TCP是个面向连接的、可靠的、基于字节流的传输层通信协议
+  - TCP四次挥手
+    - FIN一定要程序执行close()或shutdown()才能发出吗？
+      - 不一定。一般情况下，通过对socket执行 close() 或 shutdown() 方法会发出FIN。
+      - 但实际上，只要应用程序退出，不管是主动退出，还是被动退出（因为一些莫名其妙的原因被kill了）, 都会发出 FIN。
+      - FIN 是指"我不再发送数据"，因此shutdown() 关闭读不会给对方发FIN, 关闭写才会发FIN
+    - 如果机器上FIN-WAIT-2状态特别多，是为什么
+      - 当机器上FIN-WAIT-2状态特别多，那一般来说，另外一台机器上会有大量的 CLOSE_WAIT. 一般是因为对端一直不执行close()方法发出第三次挥手。
+    - 主动方在close之后收到的数据，会怎么处理
+      - 如果当前连接对应的socket的接收缓冲区有数据，会发RST。
+      - 如果发送缓冲区有数据，那会等待发送完，再发第一次挥手的FIN
+    - [close vs shutdown](https://stackoverflow.com/a/51528639/3011380)
+      - Close()的含义是，此时要同时关闭发送和接收消息的功能
+      - ![img.png](network_close_tcp_connection.png)
+      - shutdown is a flexible way to block communication in one or both directions. When the second parameter is SHUT_RDWR, it will block both sending and receiving
+      - 如果能做到只关闭发送消息，不关闭接收消息的功能，那就能继续收消息了。这种 half-close 的功能，通过调用shutdown() 方法就能做到
+      - ![img.png](network_shutdown_tcp_connection.png)
+      - [Some opinion of rules would be:](https://stackoverflow.com/questions/4160347/close-vs-shutdown-socket)
+        - Consider shutdown before close when possible
+        - If you finished receiving (0 size data received) before you decided to shutdown, close the connection after the last send (if any) finished.
+        - If you want to close the connection normally, shutdown the connection (with SHUT_WR, and if you don't care about receiving data after this point, with SHUT_RD as well), and wait until you receive a 0 size data, and then close the socket.
+        - In any case, if any other error occurred (timeout for example), simply close the socket.
+    - 怎么知道对端socket执行了close还是shutdown
+      - 
+
 
 
 
