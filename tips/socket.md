@@ -492,7 +492,14 @@
       - RESET by Firewalls in transit：在防火墙维护session状态的场景（NAT网关），防火墙Session TTL过期。(中间数据-> FW reset)
       - Time-Wait Assassination：Client Time-Wait 期间，收到 Server 端迟到的数据包，回送Ack给Server，导致Server发送Rst包。(Server 迟到数据 -> Client Ack-> Server Reset)
       - Aborting Connection：客户端Abort，内核发送reset给服务端。(Client Reset)
-
+- [Graceful shutdown of a TCP server in Go](https://eli.thegreenplace.net/2020/graceful-shutdown-of-a-tcp-server-in-go/)
+  - 1: waiting for client connections to shut down
+  - 2: actively closing open client connections
+- [TCP option SO_LINGER](https://stackoverflow.com/questions/3757289/when-is-tcp-option-so-linger-0-required)
+  - To solve the issue lots of sockets in TIME_WAIT state. I have seen many suggesting to set the SO_LINGER socket option with timeout 0 before calling close(). However, this is a bad solution as it causes the TCP connection to be terminated with an error.
+  - When to use SO_LINGER with timeout 0 - SO_LINGER socket option to 0. This causes pending data to be discarded and the connection to be aborted with an RST rather than for the pending data to be transmitted and the connection closed cleanly with a FIN.
+    - If a client of your server application misbehaves (times out, returns invalid data, etc.) an abortive close makes sense to avoid being stuck in CLOSE_WAIT or ending up in the TIME_WAIT state.
+    - If you must restart your server application which currently has thousands of client connections you might consider setting this socket option to avoid thousands of server sockets in TIME_WAIT (when calling close() from the server end) as this might prevent the server from getting available ports for new client connections after being restarted.
 
 
 
