@@ -500,6 +500,9 @@
   - When to use SO_LINGER with timeout 0 - SO_LINGER socket option to 0. This causes pending data to be discarded and the connection to be aborted with an RST rather than for the pending data to be transmitted and the connection closed cleanly with a FIN.
     - If a client of your server application misbehaves (times out, returns invalid data, etc.) an abortive close makes sense to avoid being stuck in CLOSE_WAIT or ending up in the TIME_WAIT state.
     - If you must restart your server application which currently has thousands of client connections you might consider setting this socket option to avoid thousands of server sockets in TIME_WAIT (when calling close() from the server end) as this might prevent the server from getting available ports for new client connections after being restarted.
+- [Go tcp shutdown() 和 close() 的区别](https://www.dawxy.com/article/golang-tcp-shutdown-%E5%92%8C-close-%E7%9A%84%E5%8C%BA%E5%88%AB/)
+  - 在 go 中 syscall.shutdown 其实是在TCPConn.CloseRead 和 CloseWrite 中调用的，
+  - 而 TCPConn.Close 调用的是 syscall.close
 
 
 
