@@ -331,6 +331,15 @@
       - 但UDP本身不会分段，所以当数据量较大时，只能交给IP层去分片，然后传到底层进行发送。
     - TCP分段了，IP层就一定不会分片了吗
       - 如果链路上还有设备有更小的MTU，那么还会再分片，最后所有的分片都会在接收端处进行组装。
+    - IP层怎么做到不分片
+      - PMTU - 整个链路上，最小的MTU
+      - 有一个获得这个PMTU的方法，叫 Path MTU Discovery `cat /proc/sys/net/ipv4/ip_no_pmtu_disc`
+    - 总结
+      - 数据在TCP分段，在IP层就不需要分片，同时发生重传的时候只重传分段后的小份数据
+      - TCP分段时使用MSS，IP分片时使用MTU
+      - MSS是通过MTU计算得到，在三次握手和发送消息时都有可能产生变化。
+      - IP分片是不得已的行为，尽量不在IP层分片，尤其是链路上中间设备的IP分片。因此，在IPv6中已经禁止中间节点设备对IP报文进行分片，分片只能在链路的最开头和最末尾两端进行。
+      - 建立连接后，路径上节点的MTU值改变时，可以通过PMTU发现更新发送端MTU的值。这种情况下，PMTU发现通过浪费N次发送机会来换取的PMTU，TCP因为有重传可以保证可靠性，在UDP就相当于消息直接丢了。
   - [TCP 的这些内存开销](https://mp.weixin.qq.com/s?__biz=MjM5Njg5NDgwNA==&mid=2247484398&idx=1&sn=f2b0a9098673dad134a228ecf9a8ac9e&scene=21#wechat_redirect)
     - ![img.png](network_memory.png)
     - 1. 内核会尽量及时回收发送缓存区、接收缓存区，但高版本做的更好
@@ -725,10 +734,34 @@
         - If you want to close the connection normally, shutdown the connection (with SHUT_WR, and if you don't care about receiving data after this point, with SHUT_RD as well), and wait until you receive a 0 size data, and then close the socket.
         - In any case, if any other error occurred (timeout for example), simply close the socket.
     - 怎么知道对端socket执行了close还是shutdown
-      - 
-
-
-
+      - 不管主动关闭方调用的是close()还是shutdown()，对于被动方来说，收到的就只有一个FIN
+      - 第二次挥手和第三次挥手之间，如果被动关闭方想发数据，那么在代码层面上，就是执行了 send() 方法. send() 会把数据拷贝到本机的发送缓冲区。如果发送缓冲区没出问题，都能拷贝进去，所以正常情况下，send()一般都会返回成功
+      - 然后被动方内核协议栈会把数据发给主动关闭方。
+        - 如果上一次主动关闭方调用的是shutdown(socket_fd, SHUT_WR)。那此时，主动关闭方不再发送消息，但能接收被动方的消息，一切如常，皆大欢喜。
+        - 如果上一次主动关闭方调用的是close()。那主动方在收到被动方的数据后会直接丢弃，然后回一个RST。
+          - 被动方内核协议栈收到了RST，会把连接关闭。但内核连接关闭了，应用层也不知道（除非被通知）
+          - 此时被动方应用层接下来的操作，无非就是读或写。
+            - 如果是读，则会返回RST的报错，也就是我们常见的Connection reset by peer。
+            - 如果是写，那么程序会产生SIGPIPE信号，应用层代码可以捕获并处理信号，如果不处理，则默认情况下进程会终止，异常退出。
+      - 总结
+        - 当被动关闭方 recv() 返回EOF时，说明主动方通过 close()或 shutdown(fd, SHUT_WR) 发起了第一次挥手。
+        - 如果此时被动方执行两次 send()。
+          - 第一次send(), 一般会成功返回。
+          - 第二次send()时。如果主动方是通过 shutdown(fd, SHUT_WR) 发起的第一次挥手，那此时send()还是会成功。如果主动方通过 close()发起的第一次挥手，那此时会产生SIGPIPE信号，进程默认会终止，异常退出。不想异常退出的话，记得捕获处理这个信号。
+    - 如果被动方一直不发第三次挥手，会怎么样
+      - 第三次挥手，是由被动方主动触发的，比如调用close()。如果由于代码错误或者其他一些原因，被动方就是不执行第三次挥手
+      - 主动方会根据自身第一次挥手的时候用的是 close() 还是 shutdown(fd, SHUT_WR) ，有不同的行为表现
+        - 如果是 shutdown(fd, SHUT_WR) ，说明主动方其实只关闭了写，但还可以读，此时会一直处于 FIN-WAIT-2， 死等被动方的第三次挥手。
+        - 如果是 close()， 说明主动方读写都关闭了，这时候会处于 FIN-WAIT-2一段时间，这个时间由 net.ipv4.tcp_fin_timeout 控制，一般是 60s，这个值正好跟2MSL一样 。超过这段时间之后，状态不会变成 `TIME-WAIT`，而是直接变成`CLOSED`。
+      ![img.png](network_no_passive_fin.png)
+  - TCP三次挥手
+    - 在第一次挥手之后，如果被动方没有数据要发给主动方。第二和第三次挥手是有可能合并传输的。这样就出现了三次挥手
+    - 如果有数据要发，就不能是三次挥手了吗
+      - 并不是。TCP中还有个特性叫延迟确认。可以简单理解为：接收方收到数据以后不需要立刻马上回复ACK确认包
+      - 不是每一次发送数据包都能对应收到一个 ACK 确认包，因为接收方可以合并确认。而这个合并确认，放在四次挥手里，可以把第二次挥手、第三次挥手，以及他们之间的数据传输都合并在一起发送。因此也就出现了三次挥手
+  - TCP两次挥手
+    - 但如果TCP连接的两端，IP+端口是一样的情况下，那么在关闭连接的时候，也同样做到了一端发出了一个FIN，也收到了一个 ACK，只不过正好这两端其实是同一个socket
+    - 这种两端IP+端口都一样的连接，叫TCP自连接
 
 
 
