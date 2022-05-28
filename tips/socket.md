@@ -280,6 +280,12 @@
         - EPOLLEXCLUSIVE 带来的问题
           - 所有worker像是在一个栈（LIFO）中等着任务处理，在压力不大的时候会导致连接总是在少数几个worker上（栈底的worker没什么机会出栈）
           - 如果并发任务多，导致worker栈经常空掉，这个问题就不存在了
+- [epoll 的本质](https://mp.weixin.qq.com/s/bRkbrJ4GJSBMio8YLXJGOw)
+  - 调用 epoll_create 建立一个 epoll 对象（在epoll文件系统中给这个句柄分配资源）
+    - 内核除了帮我们在 epoll 文件系统里建了个 file 结点，在内核 cache 里建了个红黑树用于存储以后 epoll_ctl 传来的 socket 外，
+    - 还会再建立一个 rdllist 双向链表，用于存储准备就绪的事件，当 epoll_wait 调用时，仅仅观察这个 rdllist 双向链表里有没有数据即可。
+  - 调用 epoll_ctl 如果增加 socket 句柄，则检查在红黑树中是否存在，存在立即返回，不存在则添加到树干上，然后向内核注册回调函数，用于当中断事件来临时向准备就绪链表中插入数据；
+  - 调用 epoll_wait 检查eventpoll对象中的rdllist双向链表是否有epitem元素而已，如果rdllist链表不为空，则这里的事件复制到用户态内存（使用共享内存提高效率）中，同时将事件数量返回给用户。
 - [io_ring解析]()
   - [io_ring worker pool](https://blog.cloudflare.com/missing-manuals-io_uring-worker-pool/)
 - [RSS, RPS and RFS](https://stackoverflow.com/questions/44958511/what-is-the-main-difference-between-rss-rps-and-rfs)
