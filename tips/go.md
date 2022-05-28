@@ -1368,6 +1368,21 @@
       - `a % b = a & (b-1)` 当且仅当`b = 2^n`时成立
     - Cache Line 是为了解决不同变量之在多个CPU核心之间共享的问题
     - 内存对齐是为了解决同一个结构体内部访问效率等问题
+- [Go 的 TryLock 实现](https://mp.weixin.qq.com/s/nS-72MLogNmwUBcvC2Xq6g)
+  - 在某些情况下，或许我们希望在获取锁失败时，并不想停止执行，而是可以进入其他的逻辑。
+  - 当锁被其他 goroutine 占有，或者当前锁正处于饥饿模式，它将立即返回 false
+  - 正如 TryLock() 方法的注释一样，它的应用场景并不常见，并且也不被鼓励使用
+- [如何阅读 Go 源码](https://mp.weixin.qq.com/s/Hj9q9MQD6tQIX6mpj7y9pA)
+  - 查看标准库源代码
+    - 使用IDE提供的调试器或者GDB都可以达到目的，写一个简单的demo，断点一打，单步调试走起来
+  - 查看Go语言底层实现
+    - 分析汇编代码 plan9 assembly
+      ```go
+       1. go tool compile -S -N -l main.go -- 是将源代码编译成.o文件，并输出汇编代码
+       2. go build main.go && go tool objdump ./main -- 反汇编
+      ```
+    - 在线调试
+      - Go语言支持GDB、LLDB、Delve调试器
 
 
 
