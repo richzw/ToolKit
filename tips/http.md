@@ -135,8 +135,66 @@
       - TCP 的拥塞控制实际上包含了四个算法：慢启动、拥塞避免、快速重传、快速恢复. 由于TCP 内置于操作系统，拥塞控制算法的更新速度太过缓慢，跟不上网络环境改善速度，TCP 落后的拥塞控制算法自然会降低网络利用效率
       - QUIC 协议当前默认使用了 TCP 的 Cubic 拥塞控制算法，同时也支持 CubicBytes、Reno、RenoBytes、[BBR](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247540557&idx=1&sn=958c13feee4aa384cdac8435eff55c5e&chksm=c184a81cf6f3210a7c3f309d054592e99a2845e9cf93f58aeefa58001304c7c0268283da684d&scene=21#wechat_redirect)、PCC 等拥塞控制算法
       - QUIC 是处于应用层的，可以随浏览器更新，QUIC 的拥塞控制算法就可以有较快的迭代速度，在TCP 的拥塞控制算法基础上快速迭代，可以跟上网络环境改善的速度，尽快提高拥塞恢复的效率。
-
-
+- [服务端不想接收 http 的 body 的时候，该怎么优雅的拒绝呢](https://mp.weixin.qq.com/s/J1vcjMdnbFY-jPP5KoiwLw)
+  - 为什么会出现服务端不想接收客户端的 body
+    - S3 服务的鉴权可以放在 header 里，数据放在 body 里。如果客户端的参数鉴权不过，或者参数非法。这种的请求服务端根本不想多看 body 一眼
+  - 什么叫做优雅的拒绝
+    - 优雅指的是，客户端发请求数据的过程不会有任何异常，服务端回响应的过程也不会有任何异常
+    - 最常见的异常：
+      - 客户端发数据的时候，发现连接已经不在，那么就会导致服务端发送 Reset 包给客户端。客户端的感知就会出现 write broken，connection close by peer 等等异常。
+      - 服务端收数据的时候，还没收够呢，就读到 EOF，这种体现的就是 Unexpected EOF ；
+  - 怎么解决呢
+    - TCP 层（ socket ）能解决 ：使用 linger close 的特性
+      - `setsockopt(fd, SOL_SOCKET, SO_LINGER, (void *)&st_linger, &sizeof(st_linger));`
+      - Linux 操作系统就提供了一个叫做延迟关闭的特性。当调用 close() 来关闭一个 TCP 连接的时候，如果 socket fd 设置了 linger close 的特性，那么这条 TCP 连接并不会立即关闭连接，内核会延迟一段时间。会继续读 TCP 连接里的数据，直到读完或者超时时间到了之后。
+    - http 协议层解决：使用 100 continue 特性
+      - 就是在发送 body 之前，再加一个协商的确认，服务端确认会处理这个 body，客户端才发送。这样就不存在 body 发送了又被拒绝的问题了
+      - 100-continue 有两个局限性：
+        - 小请求会带来很大的开销，之前只需要交互 1 次即可。加入了 100-continue 机制，那么一定会放大成 2 次。开销翻倍。
+        - 并不是所有的 server 支持 100-continue 协议，这个对服务端来说是非强制的。
+    - 业务层自己解决：比如 S3 服务端，自己掏空 body ，再断开连接
+      - 原理很简单：数据你可以不存，但是不能不读 `_, err := io.CopyN(ioutil.Discard, w.reqBody, maxPostHandlerReadBytes+1)`
+      - 但要考量几个因素：
+        - 难道客户端发 10G 的数据在路上，我也要读完？ - 读的数据量有约束，比如不超过 1M
+        - 难道客户端发 24 个小时都发不完的数据，我也要读完？ - 读的时间有约束，比如不超过 30 秒 
+  - 来看看 nginx 的实现
+    - 不是使用操作系统 socket 的 linger close ，而是 nginx 自己实现的，nginx 自己掏的数据。lingering_close 有三个选项。
+      ```shell
+      // 默认行为。试着读完剩余的数据。
+      lingering_close on
+      // 不管三七二十一，总是要掏空连接的数据
+      lingering_close always
+      // 关闭延迟关闭的特性
+      lingering_close off
+      ```
+    - 还有另外两个跟时间相关的开关：
+      - lingering_time ：请求关闭的时间超过一个阈值，那么无论还有没有数据，都要关闭；
+      - lingering_timeout ：一段时间内，一点数据都没有？那关闭连接
+- [Linux 网络延迟排查方法](https://mp.weixin.qq.com/s/vIKK47YvW37cQ9PSm_JgRQ)
+  - 在 Linux 服务器中，可以通过内核调优、DPDK 以及 XDP 等多种方式提高服务器的抗攻击能力，降低 DDoS 对正常服务的影响。
+  - 在应用程序中，可以使用各级缓存、WAF、CDN 等来缓解 DDoS 对应用程序的影响。
+  - DDoS 导致的网络延迟增加，我想你一定见过很多其他原因导致的网络延迟，例如：
+    - 网络传输慢导致的延迟。
+    - Linux 内核协议栈数据包处理速度慢导致的延迟。
+    - 应用程序数据处理速度慢造成的延迟等。
+  - Linux 网络延迟
+    - 网络延迟（Network Latency. 数据从源发送到目的地，然后从目的地地址返回响应的往返时间：RTT（Round-Trip Time）。
+    - 使用 traceroute 或 hping3 的 TCP 和 UDP 模式来获取网络延迟。
+      ```shell
+      # -c: 3 requests  
+      # -S: Set TCP SYN  
+      # -p: Set port to 80  
+      $ hping3 -c 3 -S -p 80 google.com  
+      HPING google.com (eth0 142.250.64.110): S set, 40 headers + 0 data bytes  
+      
+      $ traceroute --tcp -p 80 -n google.com  
+      traceroute to google.com (142.250.190.110), 30 hops max, 60 byte packets 
+      -- traceroute 会在路由的每一跳（hop）发送三个数据包，并在收到响应后输出往返延迟。如果没有响应或响应超时（默认 5s），将输出一个星号 *。
+      ```
+  - Sample
+    - 案例中的客户端发生了 40ms 延迟，我们有理由怀疑客户端开启了延迟确认机制（Delayed Acknowledgment Mechanism）。这里的客户端其实就是之前运行的 wrk
+    - 根据 TCP 文档，只有在 TCP 套接字专门设置了 TCP_QUICKACK 时才会启用快速确认模式（Fast Acknowledgment Mode）；否则，默认使用延迟确认机制：
+    - ` strace -f wrk --latency -c 100 -t 2 --timeout 2 http://192.168.0.30:8080/ `
 
 
 
