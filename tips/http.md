@@ -170,31 +170,6 @@
     - 还有另外两个跟时间相关的开关：
       - lingering_time ：请求关闭的时间超过一个阈值，那么无论还有没有数据，都要关闭；
       - lingering_timeout ：一段时间内，一点数据都没有？那关闭连接
-- [Linux 网络延迟排查方法](https://mp.weixin.qq.com/s/vIKK47YvW37cQ9PSm_JgRQ)
-  - 在 Linux 服务器中，可以通过内核调优、DPDK 以及 XDP 等多种方式提高服务器的抗攻击能力，降低 DDoS 对正常服务的影响。
-  - 在应用程序中，可以使用各级缓存、WAF、CDN 等来缓解 DDoS 对应用程序的影响。
-  - DDoS 导致的网络延迟增加，我想你一定见过很多其他原因导致的网络延迟，例如：
-    - 网络传输慢导致的延迟。
-    - Linux 内核协议栈数据包处理速度慢导致的延迟。
-    - 应用程序数据处理速度慢造成的延迟等。
-  - Linux 网络延迟
-    - 网络延迟（Network Latency. 数据从源发送到目的地，然后从目的地地址返回响应的往返时间：RTT（Round-Trip Time）。
-    - 使用 traceroute 或 hping3 的 TCP 和 UDP 模式来获取网络延迟。
-      ```shell
-      # -c: 3 requests  
-      # -S: Set TCP SYN  
-      # -p: Set port to 80  
-      $ hping3 -c 3 -S -p 80 google.com  
-      HPING google.com (eth0 142.250.64.110): S set, 40 headers + 0 data bytes  
-      
-      $ traceroute --tcp -p 80 -n google.com  
-      traceroute to google.com (142.250.190.110), 30 hops max, 60 byte packets 
-      -- traceroute 会在路由的每一跳（hop）发送三个数据包，并在收到响应后输出往返延迟。如果没有响应或响应超时（默认 5s），将输出一个星号 *。
-      ```
-  - Sample
-    - 案例中的客户端发生了 40ms 延迟，我们有理由怀疑客户端开启了延迟确认机制（Delayed Acknowledgment Mechanism）。这里的客户端其实就是之前运行的 wrk
-    - 根据 TCP 文档，只有在 TCP 套接字专门设置了 TCP_QUICKACK 时才会启用快速确认模式（Fast Acknowledgment Mode）；否则，默认使用延迟确认机制：
-    - ` strace -f wrk --latency -c 100 -t 2 --timeout 2 http://192.168.0.30:8080/ `
 
 
 

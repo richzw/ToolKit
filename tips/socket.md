@@ -510,6 +510,73 @@
   - 在 go 中 syscall.shutdown 其实是在TCPConn.CloseRead 和 CloseWrite 中调用的，
   - 而 TCPConn.Close 调用的是 syscall.close
 - [TIME_WAIT and its design implications for protocols](http://www.serverframework.com/asynchronousevents/2011/01/time-wait-and-its-design-implications-for-protocols-and-scalable-servers.html)
+- [Linux 网络延迟排查方法](https://mp.weixin.qq.com/s/vIKK47YvW37cQ9PSm_JgRQ)
+  - 在 Linux 服务器中，可以通过内核调优、DPDK 以及 XDP 等多种方式提高服务器的抗攻击能力，降低 DDoS 对正常服务的影响。
+  - 在应用程序中，可以使用各级缓存、WAF、CDN 等来缓解 DDoS 对应用程序的影响。
+  - DDoS 导致的网络延迟增加，我想你一定见过很多其他原因导致的网络延迟，例如：
+    - 网络传输慢导致的延迟。
+    - Linux 内核协议栈数据包处理速度慢导致的延迟。
+    - 应用程序数据处理速度慢造成的延迟等。
+  - Linux 网络延迟
+    - 网络延迟（Network Latency. 数据从源发送到目的地，然后从目的地地址返回响应的往返时间：RTT（Round-Trip Time）。
+    - 使用 traceroute 或 hping3 的 TCP 和 UDP 模式来获取网络延迟。
+      ```shell
+      # -c: 3 requests  
+      # -S: Set TCP SYN  
+      # -p: Set port to 80  
+      $ hping3 -c 3 -S -p 80 google.com  
+      HPING google.com (eth0 142.250.64.110): S set, 40 headers + 0 data bytes  
+      
+      $ traceroute --tcp -p 80 -n google.com  
+      traceroute to google.com (142.250.190.110), 30 hops max, 60 byte packets 
+      -- traceroute 会在路由的每一跳（hop）发送三个数据包，并在收到响应后输出往返延迟。如果没有响应或响应超时（默认 5s），将输出一个星号 *。
+      ```
+  - Sample
+    - 案例中的客户端发生了 40ms 延迟，我们有理由怀疑客户端开启了延迟确认机制（Delayed Acknowledgment Mechanism）。这里的客户端其实就是之前运行的 wrk
+    - 根据 TCP 文档，只有在 TCP 套接字专门设置了 TCP_QUICKACK 时才会启用快速确认模式（Fast Acknowledgment Mode）；否则，默认使用延迟确认机制：
+    - ` strace -f wrk --latency -c 100 -t 2 --timeout 2 http://192.168.0.30:8080/ `
+- [Linux下TCP延迟确认(Delayed Ack)机制导致的时延问题分析](https://cloud.tencent.com/developer/article/1004356)
+  - Case
+    - 写个压力测试程序，其实现逻辑为：每秒钟先连续发N个132字节的包，然后连续收N个由后台服务回显回来的132字节包。
+    - 当N大于等于3的情况，第2秒之后，每次第三个recv调用，总会阻塞40毫秒左右，但在分析Server端日志时，发现所有请求在Server端处理时耗均在2ms以下
+    - 先试图用strace跟踪客户端进程，但奇怪的是：一旦strace attach上进程，所有收发又都正常，不会有阻塞现象，一旦退出strace，问题重现 - ???
+    - 解决办法如下：在recv系统调用后，调用一次setsockopt函数，设置`TCP_QUICKACK`
+      ```go
+          for (int i = 0; i < N; i++) {
+              send(fd, sndBuf, 132, 0);
+              ...    
+          }
+      
+          for (int i = 0; i < N; i++) {
+              recv(fd, rcvBuf, 132, 0); 
+              setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, (int[]){1}, sizeof(int)); 
+          }
+      ```
+  - 延迟确认机制
+    - TCP在处理交互数据流(即Interactive Data Flow，区别于Bulk Data Flow，即成块数据流，典型的交互数据流如telnet、rlogin等)时，采用了Delayed Ack机制以及Nagle算法来减少小分组数目。
+    - 为什么TCP延迟确认会导致延迟
+      - 一般来说，只有当该机制与Nagle算法或拥塞控制(慢启动或拥塞避免)混合作用时，才可能会导致时耗增长
+      - Nagle算法的规则(可参考tcp_output.c文件里tcp_nagle_check函数注释)：
+        - 1)如果包长度达到MSS，则允许发送；
+        - 2)如果该包含有FIN，则允许发送；
+        - 3)设置了TCP_NODELAY选项，则允许发送；
+        - 4)未设置TCP_CORK选项时，若所有发出去的包均被确认，或所有发出去的小数据包(包长度小于MSS)均被确认，则允许发送。
+        - 对于规则4)，就是说要求一个TCP连接上最多只能有一个未被确认的小数据包，在该分组的确认到达之前，不能发送其他的小数据包。如果某个小分组的确认被延迟了(案例中的40ms)，那么后续小分组的发送就会相应的延迟。也就是说延迟确认影响的并不是被延迟确认的那个数据包，而是后续的应答包。
+  - 为什么是40ms？这个时间能不能调整呢？
+    - `echo 1 > /proc/sys/net/ipv4/tcpdelackmin`
+    - Linux内核每隔固定周期会发出timer interrupt(IRQ 0)，HZ是用来定义每秒有几次timer interrupts的。举例来说，HZ为1000，代表每秒有1000次timer interrupts。HZ可在编译内核时设置。在我们现有服务器上跑的系统，HZ值均为250. 以此可知，最小的延迟确认时间为40ms
+  - 为什么TCP_QUICKACK需要在每次调用recv后重新设置
+    - linux下socket有一个pingpong属性来表明当前链接是否为交互数据流，如其值为1，则表明为交互数据流，会使用延迟确认机制。但是pingpong这个值是会动态变化的
+  - 为什么不是所有包都延迟确认
+    - TCP实现里，用tcp_in_quickack_mode(linux-2.6.39.1/net/ipv4/tcp_input.c, Line 197)这个函数来判断是否需要立即发送ACK。`icsk->icsk_ack.quick && !icsk->icsk_ack.pingpong;` 
+    - quick这个属性其代码中的注释为：scheduled number of quick acks，即快速确认的包数量，每次进入quickack模式，quick被初始化为接收窗口除以2倍MSS值(linux-2.6.39.1/net/ipv4/tcp_input.c, Line 174)，每次发送一个ACK包，quick即被减1。
+  - 关于TCP_CORK选项
+    - 打开TCP_NODELAY选项，则意味着无论数据包是多么的小，都立即发送(不考虑拥塞窗口)。
+    - 如果将TCP连接比喻为一个管道，那TCP_CORK选项的作用就像一个塞子。设置TCP_CORK选项，就是用塞子塞住管道，而取消TCP_CORK选项，就是将塞子拔掉。
+    - 当TCP_CORK选项被设置时，TCP链接不会发送任何的小包，即只有当数据量达到MSS时，才会被发送。当数据传输完成时，通常需要取消该选项，以便被塞住，但是又不够MSS大小的包能及时发出去。
+    - Nginx，在使用sendfile模式的情况下，可以设置打开TCP_CORK选项: 将nginx.conf配置文件里的tcp_nopush配置为on. 
+
+
 
 
 
