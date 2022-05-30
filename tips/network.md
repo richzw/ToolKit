@@ -710,6 +710,13 @@
       - accept 连接队列的大小是由 backlog 参数和（/proc/sys/net/core/somaxconn）内核参数共同决定，取值为两个中的最小值。当 accept 连接队列满了，协议栈的行为根据（/proc/sys/net/ipv4/tcp_abort_on_overflow）内核参数而定
       - 如果 tcp_abort_on_overflow=1，server 在收到 SYN_ACK 的 ACK 包后，协议栈会丢弃该连接并回复 RST 包给对端，这个是 Client 会出现(connection reset by peer)错误。
       - 如果 tcp_abort_on_overflow=0，server 在收到 SYN_ACK 的 ACK 包后，直接丢弃该 ACK 包。这个时候 Client 认为连接已经建立了，一直在等 Server 的数据，直到超时出现 read timeout 错误。
+- [全网显示 IP 归属地](https://mp.weixin.qq.com/s/GhMshlpjqLsZmEES8wDRHA)
+  - 如何通过 IP 找到地址 - 通过自治系统（Autonomous System）
+    - IP地址 -> 地址块 -> 自治网络编码（ASN） -> 组织 -> 国家。
+    - 可以根据 IP 地址定位到 ASN 所属组织，而 ASN 所属组织在进行 IP 地址分配的时候，都是会进行 IP 地址分配记录的。
+  - IP 地址的隐私问题
+    - 百度地图会一直用 App SDK 以及网页的方式记录 IP 和地址位置的关联，并允许反向查询，也就是可以根据 IP 地址反向查询到某个位置，这个数据精度可能精确到几百米。
+    - 可以用 VPN 改变 IP，那是不是某些 App 就不知道我的精确位置了呀？其实并不是的，因为你的邻居可以出卖了你
 - [TCP两次挥手，你见过吗？那四次握手呢](https://mp.weixin.qq.com/s/Z0EqSihRaRbMscrZJl-zxQ)
   - TCP是个面向连接的、可靠的、基于字节流的传输层通信协议
   - TCP四次挥手
