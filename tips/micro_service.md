@@ -824,5 +824,20 @@
       - 系统 A 本地事务执行完之后，发送个消息到 MQ；
       - 这里会有个专门消费 MQ 的服务，这个服务会消费 MQ 并调用系统 B 的接口；
     - Sagas 事务模型
+- [延时消息的方案](https://mp.weixin.qq.com/s/jurYbCZ5NJMt4RYYtaSnHw)
+  - 基于外部存储实现的方案
+    - 将 MQ 和 延时模块 区分开来，延时消息模块是一个独立的服务/进程。延时消息先保留到其他存储介质中，然后在消息到期时再投递到 MQ。
+  - 基于 数据库（如MySQL）
+    - 通过定时线程定时扫描到期的消息，然后进行投递。定时线程的扫描间隔理论上就是你延时消息的最小时间精度。
+    - B+Tree索引不适合消息场景的大量写入
+  - 基于 RocksDB
+    - RocksDB 使用的是LSM Tree，LSM 树更适合大量写入的场景
+  - 基于Redis
+    - Messages Pool 所有的延时消息存放，结构为KV结构，key为消息ID，value为一个具体的message（这里选择Redis Hash结构主要是因为hash结构能存储较大的数据量，数据较多时候会进行渐进式rehash扩容，并且对于HSET和HGET命令来说时间复杂度都是O(1)）
+    - Delayed Queue是16个有序队列（队列支持水平扩展），结构为ZSET，value 为 messages pool中消息ID，score为过期时间（分为多个队列是为了提高扫描的速度）
+    - Worker 代表处理线程，通过定时任务扫描 Delayed Queue 中到期的消息
+
+
+
 
 
