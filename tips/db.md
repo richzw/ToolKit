@@ -908,6 +908,9 @@
       - 每个线程都有自己 binlog cache 区域，在事务运行的过程中，MySQL 会先把日志写到 binlog cache 中，等到事务真正提交的时候，再统一把 binlog cache 中的数据写到 binlog 文件中。
       - 这个从 binlog cache 写到 binlog 文件中的操作，并不就是落盘操作了，这里仅仅是把 binlog 写到了文件系统的 page cache 
       - 最后需要把 page cache 中的数据同步到磁盘上，才算真正完成了 binlog 的持久化（这一步对应下图中的 fsync 操作）。一般情况下，我们认为 fsync 才占磁盘的 IOPS (Input/Output Operations Per Second)
+      - ![img.png](db_mysql_binlog_cache.png)
+      - 上图的 write，是指把日志写入到文件系统的 page cache，并没有把数据持久化到磁盘，所以速度比较快
+      - 上图的 fsync，才是将数据持久化到磁盘的操作
     - write 和 fsync 的时机，是由参数 sync_binlog 控制的：
       - sync_binlog = 0，每次提交事务的时候，只进行 write，不进行 fsync
       - sync_binlog = 1候，每次提交事务的时候，执行 write 和 fsync
@@ -919,7 +922,9 @@
       - 不同于 binlog cache 每个线程都有一个，redolog buffer 只有那么一个
     - 日志写到 redolog buffer 是很快的，wirte 到 page cache 也差不多，但是 fsync 持久化到磁盘的速度就慢多了，为了控制 redo log 的写入策略，InnoDB 提供了 innodb_flush_log_at_trx_commit 参数，它有三种可能取值：
       - innodb_flush_log_at_trx_commit = 0，每次事务提交的时候，都只是把 redolog 留在 redolog buffer 中
+        - ![img.png](db_redo_log_commit1.png)
       - innodb_flush_log_at_trx_commit = 1，每次事务提交的时候，都执行 fsync 将 redolog 直接持久化到磁盘
+        - ![img.png](db_redo_log_commit2.png)
       - innodb_flush_log_at_trx_commit = 2，每次事务提交的时候，都只执行 write 将 redolog 写到文件系统的 page cache 中
   - 事务还没有提交的时候，redo log 是有可能被持久化到磁盘的
     - redolog 的具体落盘操作是这样的：在事务运行的过程中，MySQL 会先把日志写到 redolog buffer 中，等到事务真正提交的时候，再统一把 redolog buffer 中的数据写到 redolog 文件中。不过这个从 redolog buffer 写到 redolog 文件中的操作也就是 write 并不就是落盘操作了，这里仅仅是把 redolog 写到了文件系统的 page cache 上，最后还需要执行 fsync 才能够实现真正的落盘。
@@ -933,6 +938,24 @@
         - 第二种情况：innodb_flush_log_at_trx_commit 设置是 1，这个参数的意思就是，每次事务提交的时候，都执行 fsync 将 redolog 直接持久化到磁盘（还有 0 和 2 的选择，0 表示每次事务提交的时候，都只是把 redolog 留在 redolog buffer 中；2 表示每次事务提交的时候，都只执行 write 将 redolog 写到文件系统的 page cache 中）。举个例子，假设事务 A 执行到一半，已经写了一些 redolog 到 redolog buffer 中，这时候有另外一个事务 B 提交，按照 innodb_flush_log_at_trx_commit = 1 的逻辑，事务 B 要把 redolog buffer 里的日志全部持久化到磁盘，这时候，就会带上事务 A 在 redolog buffer 里的日志一起持久化到磁盘
         - 第三种情况：redo log buffer 占用的空间达到 redolog buffer 大小（由参数 innodb_log_buffer_size 控制，默认是 8MB）一半的时候，后台线程会主动写盘。不过由于这个事务并没有提交，所以这个写盘动作只是 write 到了文件系统的 page cache，仍然是在内存中，并没有调用 fsync 真正落盘
   - [redo log vs undo log vs  binlog](https://developer.aliyun.com/article/781018)
+- [MySQL三大日志(binlog、redo log和undo log)的作用](https://mp.weixin.qq.com/s/GN6bqp69wFQYbIUoKbv6Ew)
+  - 二进制日志 binlog（归档日志）和事务日志 redo log（重做日志）和 undo log（回滚日志）
+    - redo log
+      - redo log（重做日志）是InnoDB存储引擎独有的，它让MySQL拥有了崩溃恢复能力
+      - MySQL 中数据是以页为单位，你查询一条记录，会从硬盘把一页的数据加载出来，加载出来的数据叫数据页，会放入到 Buffer Pool 中。
+      - 后续的查询都是先从 Buffer Pool 中找，没有命中再去硬盘加载，减少硬盘 IO 开销，提升性能。
+      - 更新表数据的时候，也是如此，发现 Buffer Pool 里存在要更新的数据，就直接在 Buffer Pool 里更新
+    - binlog
+      - binlog 是逻辑日志，记录内容是语句的原始逻辑 属于MySQL Server 层
+    - undo log
+      - MVCC 的实现依赖于：隐藏字段、Read View、undo log
+    - 两阶段提交
+      - 在执行更新语句过程，会记录redo log与binlog两块日志，以基本的事务为单位，redo log在事务执行过程中可以不断写入，而binlog只有在提交事务时才写入，所以redo log与binlog的写入时机不一样。
+      - 为了解决两份日志之间的逻辑一致问题，InnoDB存储引擎使用两阶段提交方案。原理很简单，将redo log的写入拆成了两个步骤prepare和commit，这就是两阶段提交。
+      - ![img.png](db_mysql_binlog_redo_log_trx.png)
+  - 总结
+    - MySQL InnoDB 引擎使用 redo log(重做日志) 保证事务的持久性，使用 undo log(回滚日志) 来保证事务的原子性。
+    - MySQL数据库的数据备份、主备、主主、主从都离不开binlog，需要依靠binlog来同步数据，保证数据一致性。
 - [MySQL Question](https://mp.weixin.qq.com/s/CbpU9IVTqDkQlZ5V6c_Txw)
   - 为什么推荐使用自增 id 作为主键
     - 普通索引的 B+ 树上存放的是主键索引的值，如果该值较大，会「导致普通索引的存储空间较大」
