@@ -713,10 +713,218 @@
         - CPU 密集型进程，使用大量 CPU 会导致平均负载升高，此时这两者是一致的
         - I/O 密集型进程，等待 I/O 也会导致平均负载升高，但 CPU 使用率不一定很高
         - 大量等待 CPU 的进程调度也会导致平均负载升高，此时的 CPU 使用率也会比较高
+    - CPU 上下文切换
+      - 进程上下文切换 - 进程的运行空间可以分为内核空间和用户空间，当代码发生系统调用时（访问受限制的资源），CPU 会发生上下文切换，系统调用结束时，CPU 则再从内核空间换回用户空间。一次系统调用，两次 CPU 上下文切换
+      - 线程上下文切换 - 同一进程里的线程，它们共享相同的虚拟内存和全局变量资源，线程上下文切换时，这些资源不变
+      - 中断上下文切换 - 为了快速响应硬件的事件，中断处理会打断进程的正常调度和执行，转而调用中断处理程序，响应设备事件
+    - 查看系统的上下文切换情况 
+      - vmstat 可查看系统总体的指标
+        ```shell
+        $ vmstat 2 1   
+        procs --------memory--------- --swap-- --io--- -system-- ----cpu-----   
+        r b swpd free    buff   cache  si so  bi bo in cs us sy id wa st   
+        1 0    0 3498472 315836 3819540 0 0   0  1  2  0  3  1  96 0  0  
+          
+        --------  
+        cs（context switch）是每秒上下文切换的次数  
+        in（interrupt）则是每秒中断的次数  
+        r（Running or Runnable）是就绪队列的长度，也就是正在运行和等待 CPU 的进程数.当这个值超过了CPU数目，就会出现CPU瓶颈  
+        b（Blocked）则是处于不可中断睡眠状态的进程数  
+        ```
+      - pidstat则详细到每一个进程服务的指标
+        ```shell
+        # pidstat -w  
+        Linux 3.10.0-862.el7.x86_64 (8f57ec39327b)      07/11/2021      _x86_64_        (6 CPU)  
+          
+        06:43:23 PM   UID       PID   cswch/s nvcswch/s  Command  
+        06:43:23 PM     0         1      0.00      0.00  java  
+        06:43:23 PM     0       102      0.00      0.00  bash  
+        06:43:23 PM     0       150      0.00      0.00  pidstat  
+          
+        ------各项指标解析---------------------------  
+        PID       进程id  
+        Cswch/s   每秒主动任务上下文切换数量  
+        Nvcswch/s 每秒被动任务上下文切换数量。大量进程都在争抢 CPU 时，就容易发生非自愿上下文切换  
+        Command   进程执行命令  
+        ```
+    - 怎么排查 CPU 过高问题
+      - 先使用 top 命令，查看系统相关指标。如需要按某指标排序则 使用 top -o 字段名 如：top -o %CPU。-o 可以指定排序字段，顺序从大到小
+        ```shell
+        # top -o %MEM  
+        top - 18:20:27 up 26 days,  8:30,  2 users,  load average: 0.04, 0.09, 0.13  
+        Tasks: 168 total,   1 running, 167 sleeping,   0 stopped,   0 zombie  
+        %Cpu(s):  0.3 us,  0.5 sy,  0.0 ni, 99.1 id,  0.0 wa,  0.0 hi,  0.1 si,  0.0 st  
+        KiB Mem:  32762356 total, 14675196 used, 18087160 free,      884 buffers  
+        KiB Swap:  2103292 total,        0 used,  2103292 free.  6580028 cached Mem  
+          
+        PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND           
+        2323 mysql     20   0 19.918g 4.538g   9404 S 0.333 14.52 352:51.44 mysqld     
+        1260 root      20   0 7933492 1.173g  14004 S 0.333 3.753  58:20.74 java     
+        1520 daemon    20   0  358140   3980    776 S 0.333 0.012   6:19.55 httpd      
+        1503 root      20   0   69172   2240   1412 S 0.333 0.007   0:48.05 httpd                         
+                             
+        ---------各项指标解析---------------------------------------------------  
+        第一行统计信息区  
+            18:20:27                     当前时间  
+            up 25 days, 17:29             系统运行时间，格式为时:分  
+            1 user                     当前登录用户数  
+            load average: 0.04, 0.09, 0.13  系统负载，三个数值分别为 1分钟、5分钟、15分钟前到现在的平均值  
+          
+        Tasks：进程相关信息  
+            running   正在运行的进程数  
+            sleeping  睡眠的进程数  
+            stopped   停止的进程数  
+            zombie    僵尸进程数  
+        Cpu(s)：CPU相关信息  
+            %us：表示用户空间程序的cpu使用率（没有通过nice调度）  
+            %sy：表示系统空间的cpu使用率，主要是内核程序  
+            %ni：表示用户空间且通过nice调度过的程序的cpu使用率  
+            %id：空闲cpu  
+            %wa：cpu运行时在等待io的时间  
+            %hi：cpu处理硬中断的数量  
+            %si：cpu处理软中断的数量  
+        Mem  内存信息    
+            total 物理内存总量  
+            used 使用的物理内存总量  
+            free 空闲内存总量  
+            buffers 用作内核缓存的内存量  
+        Swap 内存信息    
+            total 交换区总量  
+            used 使用的交换区总量  
+            free 空闲交换区总量  
+            cached 缓冲的交换区总量  
+        ```
+      - 找到相关进程后，我们则可以使用 top -Hp pid 或 pidstat -t -p pid 命令查看进程具体线程使用 CPU 情况，从而找到具体的导致 CPU 高的线程
+        - %us 过高，则可以在对应 java 服务根据线程ID查看具体详情，是否存在死循环，或者长时间的阻塞调用。java 服务可以使用 jstack
+        - 如果是 %sy 过高，则先使用 strace 定位具体的系统调用，再定位是哪里的应用代码导致的
+        - 如果是 %si 过高，则可能是网络问题导致软中断频率飙高
+        - %wa 过高，则是频繁读写磁盘导致的。
   - linux内存
+    - 查看内存使用情况
+      - 使用 top 或者 free、vmstat 命令
+      - bcc-tools 软件包里的 cachestat 和 cachetop、memleak
+        - achestat 可查看整个系统缓存的读写命中情况
+        - cachetop 可查看每个进程的缓存命中情况
+        - memleak 可以用检查 C、C++ 程序的内存泄漏问题
+    - free 命令内存指标
+      - shared 是共享内存的大小, 一般系统不会用到，总是0
+      - buffers/cache 是缓存和缓冲区的大小，buffers 是对原始磁盘块的缓存，cache 是从磁盘读取文件系统里文件的页缓存
+      - available 是新进程可用内存的大小
+    - 内存 swap 过高
   - 磁盘IO
+    - 磁盘性能指标
+      - 使用率，是指磁盘处理 I/O 的时间百分比。过高的使用率（比如超过 80%），通常意味着磁盘 I/O 存在性能瓶颈。
+      - 饱和度，是指磁盘处理 I/O 的繁忙程度。过高的饱和度，意味着磁盘存在严重的性能瓶颈。当饱和度为 100% 时，磁盘无法接受新的 I/O 请求。
+      - IOPS（Input/Output Per Second），是指每秒的 I/O 请求数
+      - 吞吐量，是指每秒的 I/O 请求大小
+      - 响应时间，是指 I/O 请求从发出到收到响应的间隔时间
+    - IO 过高怎么找问题，怎么调优
+      - 查看系统磁盘整体 I/O
+        ```shell
+        # iostat -x -k -d 1 1  
+        Linux 4.4.73-5-default (ceshi44)        2021年07月08日  _x86_64_        (40 CPU)  
+          
+        Device:  rrqm/s   wrqm/s  r/s    w/s    rkB/s   wkB/s  avgrq-sz avgqu-sz await r_await w_await  svctm  %util  
+        sda      0.08     2.48    0.37   11.71  27.80   507.24  88.53   0.02     1.34   14.96    0.90   0.09   0.10  
+        sdb      0.00     1.20    1.28   16.67  30.91   647.83  75.61   0.17     9.51    9.40    9.52   0.32   0.57  
+        ------   
+        rrqm/s:   每秒对该设备的读请求被合并次数，文件系统会对读取同块(block)的请求进行合并  
+        wrqm/s:   每秒对该设备的写请求被合并次数  
+        r/s:      每秒完成的读次数  
+        w/s:      每秒完成的写次数  
+        rkB/s:    每秒读数据量(kB为单位)  
+        wkB/s:    每秒写数据量(kB为单位)  
+        avgrq-sz: 平均每次IO操作的数据量(扇区数为单位)  
+        avgqu-sz: 平均等待处理的IO请求队列长度  
+        await:    平均每次IO请求等待时间(包括等待时间和处理时间，毫秒为单位)  
+        svctm:    平均每次IO请求的处理时间(毫秒为单位)  
+        %util:    采用周期内用于IO操作的时间比率，即IO队列非空的时间比率  
+        ```
+      - 查看进程级别 I/O
+        ```shell
+        # pidstat -d  
+        Linux 3.10.0-862.el7.x86_64 (8f57ec39327b)      07/11/2021      _x86_64_        (6 CPU)  
+          
+        06:42:35 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s  Command  
+        06:42:35 PM     0         1      1.05      0.00      0.00  java  
+        06:42:35 PM     0       102      0.04      0.05      0.00  bash  
+        ------  
+        kB_rd/s   每秒从磁盘读取的KB  
+        kB_wr/s   每秒写入磁盘KB  
+        kB_ccwr/s 任务取消的写入磁盘的KB。当任务截断脏的pagecache的时候会发生  
+        Command   进程执行命令  
+        ```
+      - 当使用 pidstat -d 定位到哪个应用服务时，接下来则需要使用 strace 和 lsof 定位是哪些代码在读写磁盘里的哪些文件，导致IO高的原因
+      - `strace -p` 命令输出可以看到进程18940 正在往文件 /tmp/logtest.txt.1 写入300m
+      - `lsof -p `也可以看出进程18940 以每次 300MB 的速度往 /tmp/logtest.txt 写入
   - 网络IO
-
+    - 当一个网络帧到达网卡后，网卡会通过 DMA 方式，把这个网络包放到收包队列中；然后通过硬中断，告诉中断处理程序已经收到了网络包。
+    - 网卡中断处理程序会为网络帧分配内核数据结构（sk_buff），并将其拷贝到 sk_buff 缓冲区中；然后再通过软中断，通知内核收到了新的网络帧。内核协议栈从缓冲区中取出网络帧，并通过网络协议栈，从下到上逐层处理这个网络帧
+    - 网络I/O指标
+      - 带宽，表示链路的最大传输速率，单位通常为 b/s （比特 / 秒）
+      - 吞吐量，表示单位时间内成功传输的数据量，单位通常为 b/s（比特 / 秒）或者 B/s（字节 / 秒）吞吐量受带宽限制，而吞吐量 / 带宽，也就是该网络的使用率
+      - 延时，表示从网络请求发出后，一直到收到远端响应，所需要的时间延迟。在不同场景中，这一指标可能会有不同含义。比如，它可以表示，建立连接需要的时间（比如 TCP 握手延时），或一个数据包往返所需的时间（比如 RTT）
+      - PPS，是 Packet Per Second（包 / 秒）的缩写，表示以网络包为单位的传输速率。PPS 通常用来评估网络的转发能力，比如硬件交换机，通常可以达到线性转发（即 PPS 可以达到或者接近理论最大值）。而基于 Linux 服务器的转发，则容易受网络包大小的影响
+      - 网络的连通性
+      - 并发连接数（TCP 连接数量）
+      - 丢包率（丢包百分比）
+    - 查看网络I/O指标
+      - 查看网络配置
+         ```shell
+         # ifconfig em1  
+         em1       Link encap:Ethernet  HWaddr 80:18:44:EB:18:98    
+                   inet addr:192.168.0.44  Bcast:192.168.0.255  Mask:255.255.255.0  
+                   inet6 addr: fe80::8218:44ff:feeb:1898/64 Scope:Link  
+                   UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1  
+                   RX packets:3098067963 errors:0 dropped:5379363 overruns:0 frame:0  
+                   TX packets:2804983784 errors:0 dropped:0 overruns:0 carrier:0  
+                   collisions:0 txqueuelen:1000   
+                   RX bytes:1661766458875 (1584783.9 Mb)  TX bytes:1356093926505 (1293271.9 Mb)  
+                   Interrupt:83  
+         -----  
+         TX 和 RX 部分的 errors、dropped、overruns、carrier 以及 collisions 等指标不为 0 时，  
+         通常表示出现了网络 I/O 问题。  
+         errors 表示发生错误的数据包数，比如校验错误、帧同步错误等  
+         dropped 表示丢弃的数据包数，即数据包已经收到了 Ring Buffer，但因为内存不足等原因丢包  
+         overruns 表示超限数据包数，即网络 I/O 速度过快，导致 Ring Buffer 中的数据包来不及处理（队列满）而导致的丢包  
+         carrier 表示发生 carrirer 错误的数据包数，比如双工模式不匹配、物理电缆出现问题等  
+         collisions 表示碰撞数据包数  
+         ```
+      - 网络吞吐和 PPS
+        ```shell
+        # sar -n DEV 1  
+        Linux 4.4.73-5-default (ceshi44)        2022年03月31日  _x86_64_        (40 CPU)  
+          
+        15时39分40秒     IFACE   rxpck/s   txpck/s    rxkB/s    txkB/s   rxcmp/s   txcmp/s  rxmcst/s   %ifutil  
+        15时39分41秒       em1   1241.00   1022.00    600.48    590.39      0.00      0.00    165.00      0.49  
+        15时39分41秒        lo    636.00    636.00   7734.06   7734.06      0.00      0.00      0.00      0.00  
+        15时39分41秒       em4      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00  
+        15时39分41秒       em3      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00  
+        15时39分41秒       em2     26.00     20.00      6.63      8.80      0.00      0.00      0.00      0.01  
+        ----  
+        rxpck/s 和 txpck/s 分别是接收和发送的 PPS，单位为包 / 秒  
+        rxkB/s 和 txkB/s 分别是接收和发送的吞吐量，单位是 KB/ 秒  
+        rxcmp/s 和 txcmp/s 分别是接收和发送的压缩数据包数，单位是包 / 秒  
+        ```
+      - 宽带 - `ethtool em1 | grep Speed`
+      - 连通性和延迟 - ping
+      - 统计 TCP 连接状态工具 ss 和 netstat
+        - ss -ant | awk '{++S[$1]} END {for(a in S) print a, S[a]}'  
+        - #netstat -n | awk '/^tcp/ {++S[$NF]} END {for(a in S) print a, S[a]}'  
+    - 网络请求变慢，怎么调优
+      - 高并发下 TCP 请求变多，会有大量处于 TIME_WAIT 状态的连接，它们会占用大量内存和端口资源。此时可以优化与 TIME_WAIT 状态相关的内核选项
+        - 增大处于 TIME_WAIT 状态的连接数量 net.ipv4.tcp_max_tw_buckets ，并增大连接跟踪表的大小 net.netfilter.nf_conntrack_max
+        - 减小 net.ipv4.tcp_fin_timeout 和 net.netfilter.nf_conntrack_tcp_timeout_time_wait ，让系统尽快释放它们所占用的资源
+        - 开启端口复用 net.ipv4.tcp_tw_reuse。这样，被 TIME_WAIT 状态占用的端口，还能用到新建的连接中
+        - 增大本地端口的范围 net.ipv4.ip_local_port_range 。这样就可以支持更多连接，提高整体的并发能力
+        - 增加最大文件描述符的数量。可以使用 fs.nr_open 和 fs.file-max ，分别增大进程和系统的最大文件描述符数
+      - SYN FLOOD 攻击，利用 TCP 协议特点进行攻击而引发的性能问题，可以考虑优化与 SYN 状态相关的内核选项
+        - 增大 TCP 半连接的最大数量 net.ipv4.tcp_max_syn_backlog ，或者开启 TCP SYN Cookies net.ipv4.tcp_syncookies ，来绕开半连接数量限制的问题
+        - 减少 SYN_RECV 状态的连接重传 SYN+ACK 包的次数 net.ipv4.tcp_synack_retries
+      - 加快 TCP 长连接的回收，优化与 Keepalive 相关的内核选项
+        - 缩短最后一次数据包到 Keepalive 探测包的间隔时间 net.ipv4.tcp_keepalive_time
+        - 缩短发送 Keepalive 探测包的间隔时间 net.ipv4.tcp_keepalive_intvl
+        - 减少 Keepalive 探测失败后，一直到通知应用程序前的重试次数 net.ipv4.tcp_keepalive_probes
 
 
 
