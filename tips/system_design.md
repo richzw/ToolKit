@@ -448,5 +448,5 @@
     - 集群抗攻击
 - [超大规模分布式存储系统架构设计](https://mp.weixin.qq.com/s/IJhXKZSa5SBiBgXg0dJkHg)
 - [超大规模分布式存储系统架构设计——浅谈B站对象存储](https://mp.weixin.qq.com/s/0FL8WbsBSg9hsqUil3C6KA)
-
+- [超大规模分布式存储系统架构设计——浅谈B站对象存储(BOSS)实现（下）](https://mp.weixin.qq.com/s/0FL8WbsBSg9hsqUil3C6KA)
 
