@@ -1383,7 +1383,10 @@
       ```
     - 在线调试
       - Go语言支持GDB、LLDB、Delve调试器
-
+- [直观地理解 Go 调度过程](https://mp.weixin.qq.com/s/0c7emt54ayCrm1K16lk2SQ)
+  - GODEBUG 的两个参数 schedtrace 与 scheddetail。
+    - schedtrace=n：设置运行时在每 n 毫秒输出一行调度器的概要信息。`GOMAXPROCS=4 GODEBUG=schedtrace=1000`
+    - scheddetail: 输出更详细的调度信息。`GOMAXPROCS=4 GODEBUG=schedtrace=1000,scheddetail=1 `
 
 
 
