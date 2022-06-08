@@ -1387,6 +1387,35 @@
   - GODEBUG 的两个参数 schedtrace 与 scheddetail。
     - schedtrace=n：设置运行时在每 n 毫秒输出一行调度器的概要信息。`GOMAXPROCS=4 GODEBUG=schedtrace=1000`
     - scheddetail: 输出更详细的调度信息。`GOMAXPROCS=4 GODEBUG=schedtrace=1000,scheddetail=1 `
-
-
+- [Sync 包的分析应用](https://mp.weixin.qq.com/s?__biz=MzAxMTA4Njc0OQ==&mid=2651452906&idx=2&sn=41d63da59e2ec2072a546732f8475e91&scene=21#wechat_redirect)
+  - Sync.Mutex
+    - sync.Mutex 最好通过指针进行传递
+      - sync.Mutex 通过函数参数传递或者 struct 结构体中值传递时是值传递，会复制一个副本出来
+      - 所以本意通过同一把锁来对共享资源进行控制的时候通过值传递复制一个新的锁出来就达不到想要的效果，锁失效
+    - 在第一次被使用后，不能再对sync.Mutex进行复制
+        ```go
+        type MyMutex struct { 
+         count int 
+         sync.Mutex
+        }
+        func main() {
+         var mu MyMutex
+         mu.Lock()
+         var mu1 = mu    //加锁后复制了一个新的Mutex出来，此时 mu1 跟 mu的锁状态一致，都是加锁的状态
+         mu.count++
+         mu.Unlock()
+         mu1.Lock()
+         mu1.count++
+         mu1.Unlock() 
+         fmt.Println(mu.count, mu1.count)
+        }
+        ……
+        fatal error: all goroutines are asleep - deadlock!
+        ```
+      - 复制会连带 Mutex 的状态一起复制，所以 mu1 其实跟复制时 mu 的状态一样，已经是加锁状态，下面再加锁就会死锁
+  - Sync.Map
+    - 以空间换效率，通过read和dirty两个map来提高读取效率
+    - 优先从read map中读取(无锁)，否则再从dirty map中读取(加锁)
+    - 动态调整，当misses次数过多时，将dirty map提升为read map
+    - 延迟删除，删除只是为value打一个标记，在dirty map提升时才执行真正的删除
 
