@@ -1429,6 +1429,21 @@
   - 小结
     - 在分布式系统中，我们经常需要判断时间间隔来检测心跳。而墙上时钟与NTP的组合可能会带来时间的前后跳跃与闪烁，所以使用单调时钟更加安全和保险。
     - 在go语言中，没有直接调用调用时钟的函数。可以通过time.Now()获得带单调时钟的Time结构体，并通过Since和Until获得相对准确的时间间隔。
+- [CSP vs Actor model for concurrency](https://dev.to/karanpratapsingh/csp-vs-actor-model-for-concurrency-1cpg)
+  - Communicating Sequential Processes (CSP)
+    - In CSP we use "channels" for communication and synchronization. Although there is decoupling between the processes, they are still coupled to the channel.
+    - It is fully synchronous, a channel writer must block until a channel reader reads. The advantage of that blocking based mechanism is that a channel only needs to ever hold one message.
+  - Actor model 
+    - It is inherently asynchronous, a message sender will not block whether the reader is ready to pull from the mailbox or not, instead the message goes into a queue usually called a "mailbox". Which is convenient, but it's a bit harder to reason about and mailboxes potentially have to hold a lot of messages.
+    - Each process has a single mailbox, messages are put into the receiver's mailbox by the sender, and fetched by the receiver.
+  - Comparison
+    - Processes in CSP are anonymous, while actors have identities.
+    - CSP uses channels for message passing, whereas actors use mailboxes.
+    - Actor must only communicate through message delivery, hence making them stateless.
+    - CSP messages are delivered in the order they were sent.
+    - The actor model was designed for distributed programs, so it can scale across several machines.
+    - Actor model is more decoupled than CSP.
+
 
 
 
