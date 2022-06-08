@@ -125,13 +125,14 @@
   - io_uring
     - Design
       - 在设计上是真正异步的（truly asynchronous）。只要 设置了合适的 flag，它在 系统调用上下文中就只是将请求放入队列， 不会做其他任何额外的事情， 保证了应用永远不会阻塞。
+      - 真正的异步化设计（Proactor），而非如epoll等本质上的同步行为（Reactor）。而其关键在于，程序和kernel通过SQ/CQ两个队列进行解耦。
       - 支持任何类型的 I/O：cached files、direct-access files 甚至 blocking sockets
       - 灵活、可扩展：基于 io_uring 甚至能重写（re-implement）Linux 的每个系统调用
     - 原理及核心数据结构：SQ/CQ/SQE/CQE
       - 每个 io_uring 实例都有 两个环形队列（ring），在内核和应用程序之间共享：
         - 提交队列：submission queue (SQ)
         - 完成队列：completion queue (CQ)
-        ![img.png](socket_io_uring_sq.png)
+        - ![img.png](socket_io_ring_arch.png)
         - 都是 单生产者、单消费者，size 是 2 的幂次；
         - 提供 无锁接口（lock-less access interface），内部使用 **内存屏障**做同步（coordinated with memory barriers）。
       - 带来的好处
