@@ -301,7 +301,17 @@
     - 配置简单可靠，维护成本低，仅需在 CDN、WAF 终端配置自定义 Header 即可。
     - 如果使用 X-Appengine-Remote-Addr，对于使用 Google Cloud 的 App Engine 的服务不需做任何修改。对于使用的国内云厂商的服务，则需要显式的配置 engine. AppEngine = true，然后继续通过 ctx.ClientIP() 方法即可。 
     - 如果使用其他自定义 Header，如 X-Client-Real-IP 来获取客户端真实 IP，建议可以考虑自行封装 ClientIP(*gin.Context) string 函数，从 X-Client-Real-IP 中获取客户端 IP。
-
+- [一些常见的源 IP 保持方法](https://mp.weixin.qq.com/s/-ntUY5leJva3tWCqTb_ecw)
+  - 七层协议的源 IP 保持 - X-Forwarded-For
+  - 四层协议的源 IP 保持
+    - DNAT
+      - IPVS/iptables都支持 DNAT，客户端通过 VIP 访问 LB，请求报文到达 LB 时，LB 根据连接调度算法选择一个后端 Server，将报文的目标地址 VIP 改写成选定 Server 的地址，报文的目标端口改写成选定 Server 的相应端口，最后将修改后的报文发送给选出的 Server。由于 LB 在转发报文时，没有修改报文的源 IP，所以，后端 Server 可以看到客户端的源 IP
+    - Transparent Proxy
+      - Nginx/Haproxy 支持透明代理(Transparent Proxy)。当开启该配置时，LB 与后端服务建立连接时，会将 socket 的源 IP 绑定为客户端的 IP 地址，这里依赖内核TPROXY以及 socket 的 IP_TRANSPARENT 选项。
+    - TOA
+      - TOA(TCP Option Address)是基于四层协议（TCP）获取真实源 IP 的方法，本质是将源 IP 地址插入 TCP 协议的 Options 字段。这需要内核安装对应的TOA内核模块。
+    - Proxy Protocol
+      - Proxy Protocol是 Haproxy 实现的一个四层源地址保留方案。它的原理特别简单，Proxy 在与后端 Server 建立 TCP 连接后，在发送实际应用数据之前，首先发送一个Proxy Protocol协议头(包括客户端源 IP/端口、目标IP/端口等信息)。这样，后端 server 通过解析协议头获取真实的客户端源 IP 地址。
 - [CDC](https://mp.weixin.qq.com/s/kzRf6zMDfElrN-VKXfo_Cw)
   - Change Data Capture[1] 简称 CDC, 用于异构数据同步，将 database 的数据同步到第三方，这里的 DB 可以是 MySQL, PG, Mongo 等等一切数据源，英文技术圈称之为 Single Source OF True (SSOT), 目标称为 Derived Data Systems。
     ![img.png](micro_service_cdc.png)
