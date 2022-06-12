@@ -797,7 +797,16 @@
        return err
     }
     ```
-    
+- [channel 三大坑](https://mp.weixin.qq.com/s/--vpHBw-yRPL7x4n35kUQQ)
+  - for-range 操作channel在收到 close 的信号后会退出、goroutine 不再阻塞，能够被回收。
+  - 如何优雅地 close channel
+    - 除非必须关闭 chan，否则不要主动关闭。关闭 chan 最优雅的方式，就是不要关闭 chan~
+    - 当一个 chan 没有 sender 和 receiver 时，即不再被使用时，GC 会在一段时间后标记、清理掉这个 chan。
+  - chan 关闭的原则
+    - Don't close a channel from the receiver side 不要在消费者端关闭 chan
+    - Don't close a channel if the channel has multiple concurrent senders  有多个并发写的生产者时也别关
+
+
 
 
 
