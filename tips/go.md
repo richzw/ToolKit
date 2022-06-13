@@ -1443,7 +1443,9 @@
     - CSP messages are delivered in the order they were sent.
     - The actor model was designed for distributed programs, so it can scale across several machines.
     - Actor model is more decoupled than CSP.
-
+- [SSA工具](https://mp.weixin.qq.com/s/P_bPVzfZZhpokoLXllGxdw)
+  - SSA 工具最方便的地方是它可以把源代码和汇编通过颜色对应起来
+  - `GOSSAFUNC=main go build -gcflags="-N -l" ./main.go`
 
 
 
