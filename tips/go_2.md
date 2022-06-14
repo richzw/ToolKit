@@ -1395,6 +1395,32 @@
     - 通过在堆上分配一个巨大的对象(一般是几个 GB)来欺骗 GOGC，让 Go 能够尽量充分地利用堆空间来减少 GC 触发的频率。
   - [auto gc tuner](https://eng.uber.com/how-we-saved-70k-cores-across-30-mission-critical-services/)
     - 设定程序的内存占用阈值，通过 GC 期间对用户 finalizer 函数的回调来达成每次 GC 触发时都动态设置 GOGC，以使应用使用内存与目标逐渐趋近的目的。
+         ```go
+         type finalizerRef struct {
+         	parent *finalizer
+         }
+         
+         type finalizer struct {
+         	ch  chan time.Time
+         	ref *finalizerRef
+         }
+         
+         func finalizerHandler(f *finalizerRef) {
+         	select {
+         	case f.parent.ch <- time.Time{}:
+         	default:
+         	}
+         	runtime.SetFinalizer(f, finalizerHandler)
+         }
+         
+         func NewTicker() (*finalizer) {
+         	f := &finalizer{ch: make(chan time.Time, 1)}
+         	f.ref = &finalizerRef{parent: f}
+         	runtime.SetFinalizer(f.ref, finalizerHandler)
+         	f.ref = nil
+         	return f
+         }
+         ```
   - memory ballast 和 auto gc tuner 是为了解决 Go 在没有充分利用内存的情况下，频繁触发 GC 导致 GC 占用 CPU 过高的优化手段。
   - 在 Go 1.19 中新增加的 debug.SetMemoryLimit 从根本上解决了这个问题，可以直接把 memory ballast 和 gc tuner 丢进垃圾桶了。
      - OOM 的场景：SetMemoryLimit 设置内存上限即可
