@@ -992,7 +992,6 @@
       - 设置  /proc/sys/vm/zone_reclaim_mode，调整 NUMA 架构下内存回收策略，建议设置为 0，这样在回收本地内存之前，会在其他 Node 寻找空闲内存，从而避免在系统还有很多空闲内存的情况下，因本地 Node 的本地内存不足，发生频繁直接内存回收导致性能下降的问题；
     - 在经历完直接内存回收后，空闲的物理内存大小依然不够，那么就会触发 OOM 机制，OOM killer 就会根据每个进程的内存占用情况和 oom_score_adj 的值进行打分，得分最高的进程就会被首先杀掉。
     - 我们可以通过调整进程的 /proc/[pid]/oom_score_adj 值，来降低被 OOM killer 杀掉的概率。
-
 - [Linux 工具来确定服务器上的性能瓶颈]
   - mpstat -P ALL 1 – 显示每个 CPU 的 CPU 细分时间，您可以用它来检查不平衡性。单个热 CPU 或许是某个单线程应用程序的证据。
   - pidstat 1 – 显示每个进程的 CPU 利用率并打印滚动摘要，这对于长期观察模式非常有用。
@@ -1002,6 +1001,26 @@
   - sar -n DEV 1 – 将网络接口吞吐量（rxkB/s 和 txkB/s）显示为工作负载的衡量指标。检查是否已达到任何限制。
   - sar -n TCP,ETCP 1 – 显示关键 TCP 指标，包括：active/s（每秒钟在本地启动的 TCP 连接数）、passive/s（每秒钟远程启动的 TCP 连接数）和 retrans/s（每秒钟的 TCP 重新传输次数）。
   - iftop – 显示服务器与使用带宽最多的远程 IP 地址之间的连接。n iftop 提供在一个软件包中，该软件包在基于 Red Hat 和 Debian 的发行版中具有相同的名称。但是，在基于 Red Hat 的发行版中，您可能会在第三方存储库中找到 n iftop。
+- [Avoiding CPU Throttling in a Containerized Environment](https://eng.uber.com/avoiding-cpu-throttling-in-a-containerized-environment/)
+  - switching from CPU quotas to cpusets (also known as CPU pinning) allowed us to trade a slight increase in P50 latencies for a significant drop in P99 latencies.
+  - Cgroups
+    - There are two types of cgroups (controllers in Linux terms) for performing CPU isolation
+      - CPU - CPU time quotas
+      - cpuset - CPU pinning
+  - CPU Quotas
+    - quota = core_count * period  (period (typically 100 ms))
+  - CPU Quotas and Throttling
+    - ![img.png](os_cpu_quota_throttle.png)
+  - Avoiding Throttling Using Cpusets
+    - ![img.png](os_cpu_cpuset.png)
+  - Assigning CPUs
+    - In order to use cpusets, containers must be bound to cores. Allocating cores correctly requires a bit of background on how modern CPU architectures work since wrong allocation can cause significant performance degradations.
+  - Downsides and Limitations
+    - While cpusets solve the issue of large tail latencies, there are some limitations and tradeoffs
+      - Fractional cores cannot be allocated.
+      - System-wide processes can still steal time.
+      - Defragmentation is required. 
+      - No bursting. 
 
 
 
