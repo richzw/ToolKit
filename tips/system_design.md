@@ -449,4 +449,47 @@
 - [超大规模分布式存储系统架构设计](https://mp.weixin.qq.com/s/IJhXKZSa5SBiBgXg0dJkHg)
 - [超大规模分布式存储系统架构设计——浅谈B站对象存储](https://mp.weixin.qq.com/s/0FL8WbsBSg9hsqUil3C6KA)
 - [超大规模分布式存储系统架构设计——浅谈B站对象存储(BOSS)实现（下）](https://mp.weixin.qq.com/s/0FL8WbsBSg9hsqUil3C6KA)
+- [如何调用一个只支持batch_call的服务](https://mp.weixin.qq.com/s/S80RmHp87gvWfFZ226hp0A)
+  - 为了充分利用GPU并行计算的能力，不少算法服务会希望上游通过加大batch的同时减少并发的方式进行接口调用
+    - 对于上下游性能差距明显的服务，建议配合mq采用异步调用的方式将服务串联起来。
+    - 如果非得使用同步调用的方式进行调用，建议模仿Nagle算法的形式，攒一批数据再发起请求，这样既可以增大batch，同时减少并发
+      ```go
+        size := 100
+          // 这个数组用于收集视频里的图片，每个 IVideoInfo 下都有N张图片
+          videoInfos := make([]IVideoInfo, 0, size)
+          tick := time.NewTicker(200 * time.Microsecond)
+          defer tick.Stop()
+          for {
+              select {
+              case <-tick.C:
+                  if len(videoInfos) > 0 {
+                      // 200ms超时，去请求下游
+                      limitStartFunc(videoInfos, true)
+                      // 请求结束后把之前收集的数据清空，重新开始收集。
+                      videoInfos = make([]IVideoInfo, 0, size)
+                  }
+              // AddChan就是所谓的全局队列
+              case videoInfo, ok := <-AddChan:
+                  if !ok {
+                      // 通道关闭时，如果还有数据没有去发起请求，就请求一波下游服务
+                      limitStartFunc(videoInfos, false)
+                      videoInfos = make([]IVideoInfo, 0, size)
+                      return nil
+                  } else {
+                      videoInfos = append(videoInfos, videoInfo)
+                      if videoInfos 内的图片满足xx数量 {
+                          limitStartFunc(videoInfos, false)
+                          videoInfos = make([]IVideoInfo, 0, size)
+                          // 重置定时器
+                          tick.Reset(200 * time.Microsecond)
+                      }
+                  }
+              }
+          }
+      ```
+
+
+
+
+
 
