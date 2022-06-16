@@ -686,6 +686,39 @@
     | ttl	| 存活时间，定时清理，避免死锁 |
   - 基于 Redis 的实现
     - 基于单节点 Redis 的分布式锁 `set key value nx px 10000`
+      - [实现可重入锁](https://mp.weixin.qq.com/s/742RZJxeyxhBlqz6eJ5kEg)
+        - 当线程拥有锁之后，往后再遇到加锁方法，直接将加锁次数加 1，然后再执行方法逻辑。
+        ```lua
+        if (redis.call('exists', KEYS[1]) == 0) then
+          redis.call('hincrby', KEYS[1], ARGV[2], 1);
+          redis.call('pexpire', KEYS[1], ARGV[1]);
+          return 1;
+        end ;
+        if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then
+          redis.call('hincrby', KEYS[1], ARGV[2], 1);
+          redis.call('pexpire', KEYS[1], ARGV[1]);
+          return 1;
+        end ;
+        return 0;
+        ```
+         ```lua
+         -- unlock
+         -- 判断 hash set 可重入 key 的值是否等于 0
+         -- 如果为 0 代表 该可重入 key 不存在
+         if (redis.call('hexists', KEYS[1], ARGV[1]) == 0) then
+             return nil;
+         end ;
+         -- 计算当前可重入次数
+         local counter = redis.call('hincrby', KEYS[1], ARGV[1], -1);
+         -- 小于等于 0 代表可以解锁
+         if (counter > 0) then
+             return 0;
+         else
+             redis.call('del', KEYS[1]);
+             return 1;
+         end ;
+         return nil;
+         ```
     - 基于多节点 Redis 的分布式锁 Redlock
   - 基于 ZooKeeper 实现
     - 基于 ZooKeeper 实现的分布式锁依赖以下两个节点属性：
