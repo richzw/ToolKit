@@ -239,7 +239,14 @@
     - 调整 proxy_max_temp_file_size 大小
       - 调大 让临时文件足够可以缓冲整个响应
       - 调小 让整个链路上的数据流动起来，不要阻塞后端的 write 操作，进而触发后端的超时
-
+- [内存泄漏-原因、避免以及定位](https://mp.weixin.qq.com/s/rDEqEr_KoIx3rRakxolDxw)
+  - std::string能否被继承，为什么？
+    - 继承需要父类析构函数为virtual. 不能，因为std::string的析构函数不为virtual，这样会引起内存泄漏。
+  - 智能指针
+    - unique_ptr是限制最严格的一种智能指针，用来替代之前的auto_ptr，独享被管理对象指针所有权。当unique_ptr对象被销毁时，会在其析构函数内删除关联的原始指针
+    - unique_ptr是独占管理权，而shared_ptr则是共享管理权，即多个shared_ptr可以共用同一块关联对象，其内部采用的是引用计数
+    - weak_ptr的出现，主要是为了解决shared_ptr的循环引用，其主要是与shared_ptr一起来私用。和shared_ptr不同的地方在于，其并不会拥有资源，也就是说不能访问对象所提供的成员函数，不过，可以通过weak_ptr.lock()来产生一个拥有访问权限的shared_ptr。
+  
 
 
 
