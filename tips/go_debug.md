@@ -279,6 +279,37 @@
         - stack 的内存占用；
         - OS 分配但是是 reserved 的；
         - runtime 的 Gc 元数据，mcache，mspan 等管理内存
+- [Golang分析内存溢出](https://mp.weixin.qq.com/s/mBkVMEfSXtFezYdjcuuwzg)
+  - 通过 pprof 实时分析
+    - `go tool pprof http://localhost:8899/debug/pprof/heap`
+      - flat：当前函数所占用的容量。
+      - flat%：当前函数所占用的容量，在总分配容量的百分比。
+      - sum%：是从调用的最外层到当前方法累加使用的容量占总容量的百分比
+      - cum：当前函数以及子函数所占用的容量。
+      - cum%：当前函数以及子函数所占用的容量，在总分配容量的百分比。
+      - 最后一列是函数的名字
+  - 程序 crash 的时候自动创建 dump 文件
+    - ulimit -a看下当前是否开启了core file - `echo "ulimit -c unlimited" >> ~/.profile`
+    - `echo "export GOTRACEBACK=crash " >> ~/.profile`
+- [快来抓住内存泄漏](https://mp.weixin.qq.com/s/HosxXlz9e1jOmIY60RRkaQ)
+  - Debug
+    - `go tool pprof -inuse_space http://ip:amdin_port/debug/pprof/heap`
+    - top command
+    - `wget http://ip:admin_port/debug/pprof/heap?debug=1`抓一下当前内存分配的详情
+  - channel导致goroutine泄漏
+    - `wget http://ip:admin_port/debug/pprof/goroutine?debug=1` - debug=1就是获取服务当前goroutine的数目和大致信息
+    - `wget http://ip:admin_port/debug/pprof/goroutine?debug=2` - debug=2获取服务当前goroutine的详细信息
+    - 服务当前的goroutine数也就才1033，也不至于占用那么大的内存。再看看服务线程挂的子线程有多少 - `ps mp 3030923 -o THREAD,tid | wc -l`
+    - 因为这里的channel在make的时候没有设置缓冲值，所以当超时的时候函数返回，此时ch没有消费者了，就一直阻塞了
+  - 深究问题所在
+    - http超时阻塞导致goroutine泄露
+    - go新版本内存管理问题
+  - golang10次内存泄漏，8次goroutine泄漏，1次是真正内存泄漏，还有1次是cgo导致的内存泄漏
+
+
+
+
+
 
 
 
