@@ -1161,6 +1161,11 @@
       - 每个cacheShard同样由索引和数据构成。索引采用map[uint64]uint32来存储，数据采用entry([]byte)环形队列存储。索引中存储的是该条数据在entryBuffer写入的位置pos。每条kv数据按照TLV的格式写入队列。
       - 和bigcache和freecache不同的一点在于它的环形队列可以自动扩容。同时bigcache中数据的过期是通过全局的时间窗口维护的，每个单独的kv无法设置不同的过期时间。
       - ![img.png](go_local_cache_bigcace.png)
+      - 堆上有 4 千万个对象，GC 的扫描过程就超过了 4 秒钟，这就不能忍了。 主要的优化思路有：
+        - offheap（堆外内存），GC 只会扫描堆上的对象，那就把对象都搞到栈上去，但是这样这个缓存库就高度依赖 offheap 的 malloc 和 free 操作了
+        - 参考 freecache 的思路，用 ringbuffer 存 entry，绕过了 map 里存指针，简单瞄了一下代码，后面有空再研究一下（继续挖坑
+        - 利用 Go 1.5+ 的特性： 当 map 中的 key 和 value 都是基础类型时，GC 就不会扫到 map 里的 key 和 value
+      - 最终他们采用了 map[uint64]uint32 作为 cacheShard 中的关键存储。key 是 sharding 时得到的 uint64 hashed key，value 则只存 offset ，整体使用 FIFO 的 bytes queue，也符合按照时序淘汰的需求，非常精巧。
     - fastcache实现原理
       - 它的灵感来自于bigcache。所以整体的思路和bigcache很类似，数据通过bucket进行分片。fastcache由512个bucket构成。每个bucket维护一把读写锁。
       - 在bucket内部数据同理是索引、数据两部分构成。索引用map[uint64]uint64存储。数据采用chunks二维的切片(二维数组)存储。
