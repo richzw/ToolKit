@@ -498,6 +498,8 @@
   - 无锁队列的实现
     - 一读一写的无锁队列
     - 多读多写的无锁队列实现
+      - 队列已满判断：`(m_writeIndex+1) % Q_SIZE == m_readIndex`
+      - 队列为空判断： `m_readIndex == m_maximumReadIndex`
 
 
 
