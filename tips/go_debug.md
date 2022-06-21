@@ -305,7 +305,13 @@
     - http超时阻塞导致goroutine泄露
     - go新版本内存管理问题
   - golang10次内存泄漏，8次goroutine泄漏，1次是真正内存泄漏，还有1次是cgo导致的内存泄漏
-
+- [VSCODE可视化调试Go程序的方式](https://mp.weixin.qq.com/s/pmNCkj55UeCx2LosjF9mjA)
+  - dlv debug
+    - 先 go build 编译，出二进制文件，然后用 dlv exec 来调试；
+    - 程序已经跑在测试环境，dlv attach 调试；
+    - 程序出 core 了，dlv core 调试
+  - vscode 调试
+    - vscode 调试首先创建一个 .vscode/launch.json 的配置文件
 
 
 
