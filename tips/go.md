@@ -1446,7 +1446,47 @@
 - [SSA工具](https://mp.weixin.qq.com/s/P_bPVzfZZhpokoLXllGxdw)
   - SSA 工具最方便的地方是它可以把源代码和汇编通过颜色对应起来
   - `GOSSAFUNC=main go build -gcflags="-N -l" ./main.go`
-
+- [Go 的 nil 值判断](https://mp.weixin.qq.com/s/BwqHMhc2WtAY_R-UffNQ4w)
+  - interface 的 nil 
+    ```go
+    type iface struct {
+        tab *itab
+        data unsafe.Pointer
+    }
+    type eface struct {
+        _type *_type
+        data unsafe.Pointer
+    }
+    ```
+    - interface 变量定义是一个 16 个字节的结构体，首 8 字节是类型字段，后 8 字节是数据指针。普通的 interface 是 iface 结构，interface{} 对应的是 eface 结构；
+    - interface 变量新创建的时候是 nil ，则这 16 个字节是全 0 值；
+    - interface 变量的 nil 判断，汇编逻辑是判断首 8 字节是否是 0 值；
+  - Issue code
+    ```go
+    type Worker interface {
+        Work() error
+    }
+    
+    type Qstruct struct{}
+    
+    func (q *Qstruct) Work() error {
+        return nil
+    }
+    
+    // 返回一个 nil 
+    func findSomething() *Qstruct {
+        return nil
+    }
+    ```
+    - 函数 findSomething 返回的是一个具体类型指针。所以，它一定会把接口变量 iface 前 8 字节设置非零字段的，因为有具体类型呀（无论具体类型是否是 nil 指针）。而判断 interface 是否是 nil 值，则是只根据 iface 的前 8 字节是否是零值判断的。
+    ```go
+    // 如果 findSomething 需要返回 nil 值，那么直接返回 nil 的 interface 
+    func findSomething() Worker {
+        return nil
+    }
+    ```
+    - 一定不要写任何有 接口 = 具体类型(nil) 逻辑的代码。如果是 nil 值就直接赋给接口，而不要过具体类型的转换
+    - findSomething 需要返回 nil 的时候，则是直接返回 nil 的 interface，这是一个 16 个字节全零的变量。而在外面赋值给 v 的时候，则是 interface 到 interface 的赋值，所以 v = findSomething() 的赋值之后，v 还是全 0 值。
 
 
 
