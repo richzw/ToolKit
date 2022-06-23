@@ -1402,35 +1402,50 @@
     - 设定程序的内存占用阈值，通过 GC 期间对用户 finalizer 函数的回调来达成每次 GC 触发时都动态设置 GOGC，以使应用使用内存与目标逐渐趋近的目的。
          ```go
          type finalizerRef struct {
-         	parent *finalizer
+             parent *finalizer
          }
          
          type finalizer struct {
-         	ch  chan time.Time
-         	ref *finalizerRef
+             ch  chan time.Time
+             ref *finalizerRef
          }
          
          func finalizerHandler(f *finalizerRef) {
-         	select {
-         	case f.parent.ch <- time.Time{}:
-         	default:
-         	}
-         	runtime.SetFinalizer(f, finalizerHandler)
+             select {
+             case f.parent.ch <- time.Time{}:
+             default:
+             }
+             runtime.SetFinalizer(f, finalizerHandler)
          }
          
          func NewTicker() (*finalizer) {
-         	f := &finalizer{ch: make(chan time.Time, 1)}
-         	f.ref = &finalizerRef{parent: f}
-         	runtime.SetFinalizer(f.ref, finalizerHandler)
-         	f.ref = nil
-         	return f
+             f := &finalizer{ch: make(chan time.Time, 1)}
+             f.ref = &finalizerRef{parent: f}
+             runtime.SetFinalizer(f.ref, finalizerHandler)
+             f.ref = nil
+             return f
          }
          ```
+      - [gogctuner sample](https://github.com/cch123/gogctuner)
   - memory ballast 和 auto gc tuner 是为了解决 Go 在没有充分利用内存的情况下，频繁触发 GC 导致 GC 占用 CPU 过高的优化手段。
   - 在 Go 1.19 中新增加的 debug.SetMemoryLimit 从根本上解决了这个问题，可以直接把 memory ballast 和 gc tuner 丢进垃圾桶了。
      - OOM 的场景：SetMemoryLimit 设置内存上限即可
      - GC 触发频率高的场景：SetMemoryLimit 设置内存上限，GOGC = off
   - 1.19 另一个更新也比较有意思，按栈统计确定初始大小 会在 GC 期间将扫描过的 goroutine 和其栈大小求一个平均值，下次 newproc 创建 goroutine 的时候，就用这个平均值来创建新的 goroutine，而不是以前的 2KB
+- [怎么使用 SetMemoryLimit](https://mp.weixin.qq.com/s/EIuM073G7VV1rIsnTXWyEw)
+  - `GOMEMLIMIT=10737418240 GOGC=off GODEBUG=gctrace=1 ./soft_memory_limit -depth=21`
+  - 通过SetMemoryLimit设置一个较大的值，再加上 GOGC=off，可以实现ballast的效果
+  - 但是在没有关闭GOGC的情况下，还是有可能会触发很多次的GC,影响性能，这个时候还得GOGC Tuner调优，减少触达MemoryLimit之前的GC次数。
+
+
+
+
+
+
+
+
+
+
 
 
 
