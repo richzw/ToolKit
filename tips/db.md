@@ -720,6 +720,9 @@
     - 从软件这一层来说，Buffer是块设备的缓冲，Cache是文件系统的缓存。以Linux为例，
       - Buffer(Buffer Cache)以块形式缓冲了块设备的操作，定时或手动的同步到硬盘，它是为了缓冲写操作然后一次性将很多改动写入硬盘，避免频繁写硬盘，提高写入效率。
       - Cache(Page Cache)以页面形式缓存了文件系统的文件，给需要使用的程序读取，它是为了给读操作提供缓冲，避免频繁读硬盘，提高读取效率。
+    - Buffer 与 Cache 的用途有所不一定：
+      - Buffer 的主要目的是在不同应用、线程、进程之间共享字节数据，例如为了让不同速度的设备能够进行数据同步，就会使用共享 Buffer；
+      - Cache 的主要目的是提高字节数据的读取/写入速度，例如根据时间局部性、地址局部性操作系统提供 page cache 机制；
   - MySQL 缓冲区设计
     ![img.png](mysql_cache.png)
     - 应用层：
@@ -729,10 +732,34 @@
       - Page Cache：操作系统通过缓存以及预读机制对文件系统中的 block 基于 page 进行缓存管理；
       - Direct Buffer：当使用 Direct I/O 提供的相关 API 时，操作系统不再提供基于 Page Cache 机制的缓存，而是直接使用 Direct Buffer；
     - 磁盘的 Disk Buffer：磁盘也可以提供磁盘缓存，通常在 MySQL 中会关闭磁盘缓存，我们仅仅需要了解有 Disk Buffer 这一概念即可。
+    - MySQL 为此提供了一些参数来控制 Page Cache 数据落盘的具体行为
+      - innodb_flush_log_at_trx_commit
+        - 1（默认值）：每次事务提交时都日志必须刷新到磁盘上，提供了最可靠的事务性保证；
+        - 0：日志每间隔 1 秒刷新到磁盘上，这意味着在缓存中还没有来得及刷新到磁盘上的数据在宕机时会丢失；
+        - 2：日志在事务提交后以及每间隔 1 秒刷新到磁盘上，这意味着在缓存中还没有来得及刷新到磁盘上的数据在宕机时会丢失；
+      - innodb_flush_method
+        - fdatasync，即取值 0，这是默认配置值。对 log files 以及 data files 都采用 fsync 的方式进行同步；
+        - O_DSYNC，即取值 1。对 log files 使用 O_SYNC 打开与刷新日志文件，使用 fsync 来刷新 data files 中的数据；
+        - O_DIRECT，即取值 4。利用 Direct I/O 的方式打开 data file，并且每次写操作都通过执行 fsync 系统调用的方式落盘；
+        - O_DIRECT_NO_FSYNC，即取值 5。利用 Direct I/O 的方式打开 data files，但是每次写操作并不会调用 fsync 系统调用进行落盘；
     - MySQL 日志刷新策略通过 sync_binlog 参数进行配置，其有 3 个可选配置：
       - sync_binlog=0：MySQL 应用将完全不负责日志同步到磁盘，将缓存中的日志数据刷新到磁盘全权交给操作系统来完成；
       - sync_binlog=1：MySQL 应用在事务提交前将缓存区的日志刷新到磁盘；
       - sync_binlog=N：当 N 不为 0 与 1 时，MySQL 在收集到 N 个日志提交后，才会将缓存区的日志同步到磁盘。
+  - MySQL 的典型配置
+    - innodb_flush_log_at_trx_commit 参数配置为 1：Redo Log 走 Page Cache，并且每次写操作的日志在事务提交前都通过 fsync 刷新到磁盘；
+    - innodb_flush_method 参数配置为 O_DIRECT：InnoDB Buffer Pool 走 Direct I/O，并且每次写操作导致的文件数据（包括文件元数据）都通过 fsync 系统调用刷新到磁盘；
+    - 写一条 redo log 涉及到的步骤有：
+      - 日志写入 Redo Log buffer；
+      - 日志写入 Page Cache；
+      - 通过系统调用 fsync 将 Page Cache 中的脏页刷新到磁盘；
+      - 日志提交；
+    - 修改表的一行记录涉及到的步骤有：
+      - 更新后的数据写于 InnoDB Buffer Pool；
+      - 定时进行如下逻辑（异步进行）：
+        - InnoDB Buffer Pool 脏数据进行刷新，通过文件的 write 方法进行；
+        - 文件的 write 方法直接导致数据写于磁盘上；
+        - 定时进行文件的 fysnc 调用，确保文件元数据写于磁盘上；
 - [Tips and Tricks++ for Querying and Indexing MongoDB](https://www.youtube.com/watch?v=5mBY27wVau0&list=PL4RCxklHWZ9u_xtprouvxCvzq2m6q_0_E&index=10)
   - ESR rule
     - A good starting place applicable to most user cases
