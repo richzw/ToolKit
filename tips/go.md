@@ -1487,6 +1487,62 @@
     ```
     - 一定不要写任何有 接口 = 具体类型(nil) 逻辑的代码。如果是 nil 值就直接赋给接口，而不要过具体类型的转换
     - findSomething 需要返回 nil 的时候，则是直接返回 nil 的 interface，这是一个 16 个字节全零的变量。而在外面赋值给 v 的时候，则是 interface 到 interface 的赋值，所以 v = findSomething() 的赋值之后，v 还是全 0 值。
+- [Go 语言中的零拷贝优化](https://mp.weixin.qq.com/s/wz-In-r1z91Te_HChsIMkA)
+  - 导言
+    - io.Copy()/io.CopyN()/io.CopyBuffer()/io.ReaderFrom 基于 TCP 协议的 socket 在使用上述接口和方法进行数据传输时利用到了 Linux 的零拷贝技术 sendfile 和 splice
+    - splice 零拷贝技术做了一点优化：为 splice 系统调用实现了一个 pipe pool，复用管道，减少频繁创建和销毁 pipe buffers 所带来的系统开销
+  - splice
+    - 相较于mmap、sendfile和 MSG_ZEROCOPY 等其他技术，splice 从使用成本、性能和适用范围等维度综合来看更适合在程序中作为一种通用的零拷贝方式。
+    - splice() 是基于 Linux 的管道缓冲区 (pipe buffer) 机制实现的，所以 splice() 的两个入参文件描述符才要求必须有一个是管道设备
+      ```go
+      int pfd[2];
+      
+      pipe(pfd);
+      ssize_t bytes = splice(file_fd, NULL, pfd[1], NULL, 4096, SPLICE_F_MOVE);
+      assert(bytes != -1);
+      
+      bytes = splice(pfd[0], NULL, socket_fd, NULL, bytes, SPLICE_F_MOVE | SPLICE_F_MORE);
+      assert(bytes != -1);
+      ```
+    - ![img.png](go_splice_usage.png)
+    - 使用 splice() 完成一次磁盘文件到网卡的读写过程如下：
+      - 用户进程调用 pipe()，从用户态陷入内核态，创建匿名单向管道，pipe() 返回，上下文从内核态切换回用户态；
+      - 用户进程调用 splice()，从用户态陷入内核态；
+      - DMA 控制器将数据从硬盘拷贝到内核缓冲区，从管道的写入端"拷贝"进管道，splice() 返回，上下文从内核态回到用户态；
+      - 用户进程再次调用 splice()，从用户态陷入内核态；
+      - 内核把数据从管道的读取端"拷贝"到套接字缓冲区，DMA 控制器将数据从套接字缓冲区拷贝到网卡；
+      - splice() 返回，上下文从内核态切换回用户态。
+  - pipe pool for splice
+    - 如果仅仅是使用 splice 进行单次的大批量数据传输，则创建和销毁 pipe 开销几乎可以忽略不计，但是如果是需要频繁地使用 splice 来进行数据传输，比如需要处理大量网络 sockets 的数据转发的场景，则 pipe 的创建和销毁的频次也会随之水涨船高，每调用一次 splice 都创建一对 pipe 管道描述符，并在随后销毁掉，对一个网络系统来说是一个巨大的消耗。
+    - 思考
+      - 链表和数组是用来实现 pool 的最简单的数据结构
+        - 数组因为数据在内存分配上的连续性，能够更好地利用 CPU 高速缓存加速访问，但是首先，对于运行在某个 CPU 上的线程来说，一次只需要取一个 pipe buffer 使用，所以高速缓存在这里的作用并不十分明显
+        - 链表则是更加适合的选择，因为作为 pool 来说其中所有的资源都是等价的，并不需要随机访问去获取其中某个特定的资源，而且链表天然是动态伸缩的，随取随弃。
+      - lock
+        - 最初的 mutex 是一种完全内核态的互斥量实现，在并发量大的情况下会产生大量的系统调用和上下文切换的开销
+        - 在 Linux kernel 2.6.x 之后都是使用 futex (Fast Userspace Mutexes) 实现，也即是一种用户态和内核态混用的实现，通过在用户态共享一段内存，并利用原子操作读取和修改信号量，在没有竞争的时候只需检查这个用户态的信号量而无需陷入内核，信号量存储在进程内的私有内存则是线程锁，存储在通过 mmap 或者 shmat 创建的共享内存中则是进程锁。
+      - 优化
+        - 降低锁的粒度或者减少抢(全局)锁的频次
+        - 因为 pipe pool 中的资源本来就是全局共享的，也就是无法对锁的粒度进行降级，因此只能是尽量减少多线程抢锁的频次，而这种优化常用方案就是在全局资源池之外引入本地资源池，对多线程访问资源的操作进行错开。
+        - 锁本身的优化，由于 mutex 是一种休眠等待锁，即便是基于 futex 优化之后在锁竞争时依然需要涉及内核态开销，此时可以考虑使用自旋锁（Spin Lock），也即是用户态的锁，共享资源对象存在用户进程的内存中，避免在锁竞争的时候陷入到内核态等待，自旋锁比较适合临界区极小的场景，而 pipe pool 的临界区里只是对链表的增删操作，非常匹配。
+    - HAProxy 实现的 pipe pool 就是依据上述的思路进行设计的，将单一的全局资源池拆分成全局资源池+本地资源池。
+      - 全局资源池利用单链表和自旋锁实现，
+      - 本地资源池则是基于线程私有存储（Thread Local Storage, TLS）实现
+        - TLS 是一种线程的私有的变量，它的主要作用是在多线程编程中避免锁竞争的开销。
+        - TLS 私有变量则会存入 TLS 帧，也就是 .tdata 和 .tboss 段，与.data 和 .bss 不同的是，运行时程序不会直接访问这些段，而是在程序启动后，动态链接器会对这两个段进行动态初始化 （如果有声明 TLS 的话），之后这两个段不会再改变，而是作为 TLS 的初始镜像保存起来。每次启动一个新线程的时候都会将 TLS 块作为线程堆栈的一部分进行分配并将初始的 TLS 镜像拷贝过来，也就是说最终每个线程启动时 TLS 块中的内容都是一样的。
+      - HAProxy 的 pipe pool 实现原理：
+        - 声明 thread_local 修饰的一个单链表，节点是 pipe buffer 的两个管道描述符，那么每个需要使用 pipe buffer 的线程都会初始化一个基于 TLS 的单链表，用以存储 pipe buffers；
+        - 设置一个全局的 pipe pool，使用自旋锁保护。
+  - pipe pool in Go
+    - 基于 sync.Pool 标准库来实现 pipe pool，并利用 runtime.SetFinalizer 来解决定期释放 pipe buffers 的问题。
+    - sync.Pool 底层原理简单来说就是：私有变量+共享双向链表。
+      - ![img.png](go_sync_pool.png)
+      - 获取对象时：当某个 P 上的 goroutine 从 sync.Pool 尝试获取缓存的对象时，需要先把当前的 goroutine 锁死在 P 上，防止操作期间突然被调度走，然后先尝试去取本地私有变量 private，如果没有则去 shared 双向链表的表头取，该链表可以被其他 P 消费（或者说"偷"），如果当前 P 上的 shared 是空则去"偷"其他 P 上的 shared 双向链表的表尾，最后解除锁定，如果还是没有取到缓存的对象，则直接调用 New 创建一个返回。
+      - 放回对象时：先把当前的 goroutine 锁死在 P 上，如果本地的 private 为空，则直接将对象存入，否则就存入 shared 双向链表的表头，最后解除锁定。
+      - shared 双向链表的每个节点都是一个环形队列，主要是为了高效复用内存，共享双向链表在 Go 1.13 之前使用互斥锁 sync.Mutex 保护，Go 1.13 之后改用 atomic CAS 实现无锁并发，原子操作无锁并发适用于那些临界区极小的场景，性能会被互斥锁好很多，正好很贴合 sync.Pool 的场景
+      - sync.Pool 的设计也具有部分的 TLS 思想，所以从某种意义上来说它是就 Go 语言的 TLS 机制。
+      - sync.Pool 基于 victim cache 会保证缓存在其中的资源对象最多不超过两个 GC 周期就会被回收掉
+
 
 
 
