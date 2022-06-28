@@ -399,7 +399,7 @@
 - [Life of a Packet in Kubernetes](https://dramasamy.medium.com/life-of-a-packet-in-kubernetes-part-1-f9bc0909e051)
 - [Mastering Container Networking](https://iximiuz.com/en/posts/container-networking-is-simple/)
 - [24 个常见的 Docker 疑难杂症处理技巧](https://mp.weixin.qq.com/s/R58f7fac2F3MP0TLV36vyQ)
-
+- [探究 Docker 容器化技术背后的黑科技](https://mp.weixin.qq.com/s/Fx6bLAKQCvrymhZ6IpBtuQ)
 
 
 
