@@ -1141,6 +1141,51 @@
   - 本文介绍了[twitter](https://blog.twitter.com/engineering/en_us/topics/infrastructure/2019/improving-key-expiration-in-redis)如何通过优化key的过期淘汰，使得在一些集群中，redis的内存使用降低了25%。
   - 在 Redis 中有两种方式可以使key过期，主动和被动。扫描将触发被动key过期，当eky被读取时，将检查 TTL，如果过期则将其丢弃并且不返回任何内容。Redis 文档中描述了版本 3.2 中的主动过期机制。它从一个名为 activeExpireCycle 的函数开始。它运行在 Redis 称为 cron 的内部计时器上，每秒运行几次。该函数的作用是循环遍历每个键空间，检查设置了 TTL 的随机键，如果过期键达到百分比阈值，则重复此过程直到达到时间限制。
   - 在 2.4 和 3.2 版本之间，activeExpireCycle 的实现发生了变化。在 2.4 中，每次运行时都会检查每个数据库，在 3.2 中，现在可以检查的数据库数量有一个最大值。3.2 版还为该功能引入了一个快速选项。“慢”在计时器上运行，“快”在检查事件循环上的事件之前运行。快速到期周期会在某些条件下提前返回，并且函数超时和退出的阈值也较低。时间限制也被更频繁地检查。
+- [Postgresql Lock](https://medium.com/compass-true-north/postgresql-lessons-we-learned-the-hard-way-663ddf666e4)
+  - ![img.png](db_pg_lock_overview.png)
+    - Access share lock: This lock is taken out by most SELECT statements. It can only block (and can only be blocked by) “ACCESS EXCLUSIVE” locks
+    - Row exclusive lock: This is the lock taken out by most UPDATE statements. Despite the name, it is (like all the other locks we’re discussing today) a table-level lock. Though this lock allows other row exclusive locks on the same table, note that most writes which require row exclusive locks will also take out row-level-locks on the rows affected — and these row-level locks would block any updates that impact the same rows (again, row-level locks are out-of-scope here! Please read https://postgrespro.com/blog/pgsql/5968005 for more info).
+    - Access exclusive lock: This lock is required by most ALTER TABLE statements (i.e. schema changes/db migrations). Note that this is the only lock that can block (and be blocked by) our all-important read queries (ie SELECT/“access share lock” commands). This will be an important plot point later in the article.
+  - Investigation
+    - `select * from pg_catalog.pg_stat_activity`
+       ```sql
+       -- Which lock is it waiting on
+       select * from pg_stat_activity psa
+       join pg_catalog.pg_locks pl on psa.pid = pl.pid
+       left join pg_stat_all_tables psat on psat.relid = pl.relation
+       where pl.pid = 33403;
+       
+       -- Why can’t we acquire the lock
+       select * from pg_catalog.pg_blocking_pids(33403)
+       
+       -- What locks does *that* query have
+       select * from pg_stat_activity psa
+                       join pg_catalog.pg_locks pl on psa.pid = pl.pid
+                       left join pg_stat_all_tables psat on psat.relid = pl.relation
+       where pl.pid = 31825;
+       
+       -- why can’t that query finish
+       select * from pg_catalog.pg_stat_activity where pid = 31825;
+       ```
+    - what is an idle-in-transaction query
+      - A query is “idle in transaction” if a client began a transaction, but never committed or rolled it back
+    - our database was locked because “idle in transaction” query + migration = locked db
+  - Resolution
+    - select pg_terminate_backend(31825);
+    - select pg_cancel_backend(31825);
+  - Prevention
+    - Set idle-in-transaction timeout - idle_in_transaction_session_timeout
+    - Set migration timeout - SET LOCAL statement_timeout
+    - Acquire explicit lock with NOWAIT - 
+    - Use read replicas
+    - Limit who can access prod/staging database 
+  - Preparation
+    - Increase the number of superuser_reserved_connections
+    - Enable log_locks_wait
+
+
+
+
 
 
 
