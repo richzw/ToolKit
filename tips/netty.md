@@ -18,7 +18,43 @@
             - ![img.png](netty_so_linger2.png)
         - 当我们设置了 SO_LINGER 选项之后，Channel 的关闭动作会被阻塞并延时关闭，在延时关闭期间，Reactor 线程依然可以响应 OP_READ 事件和 OP_WRITE 事件，这可能会导致 Reactor 线程不断的自旋循环浪费 CPU 资源，所以基于这个原因，netty 这里需要将 Channel 从 Reactor 上注销掉。这样 Reactor 线程就不会在响应 Channel 上的 IO 事件了。
   - TCP 连接的异常关闭
-    - 
+    - RST Packet
+      - 通讯方不管是发出或者是收到一个 RST 包 ，都会导致内存，端口等连接资源被释放，并且跳过正常的 TCP 四次挥手关闭流程直接强制关闭，Socket 缓冲区的数据来不及处理直接被丢弃。
+      - 通讯端收到一个 RST 包后
+        - 如果仍然对 Socket 进行读取，那么就会抛出 connection has been reset by the peer 异常，
+        - 如果仍然对 Socket 进行写入，就会抛出 broken pipe 异常。应用程序通过这样的方式来感知内核是否收到 RST 包。
+      - 发送 RST 强制关闭连接，这将导致之前已经发送但尚未送达的、或是已经进入对端 Socket 接收缓冲区但还未被对端应用程序处理的数据被无条件丢弃，导致对端应用程序可能会出现异常
+    - 哪些场景导致需要发送 RST 来强制关闭连接呢
+      - TCP 连接队列已满
+        - 半连接队列 SYN-Queue 已满
+          - ![img.png](netty_syn_queue_full.png)
+          - TCP 内核协议栈需要等待 63s 的时间才能断开这个半连接
+          - 内核参数 net.ipv4.tcp_syncookies 可以影响内核处理半连接队列溢出时的行为：
+            - net.ipv4.tcp_syncookies = 0 ：服务端直接丢弃客户端发来的 SYN 包。
+            - net.ipv4.tcp_syncookies = 1 ：如果此时全连接队列 ACEPT-Queue 也满了，并且 qlen_young(qlen_young 表示目前半连接队列中，没有进行 SYN+ACK 包重传的连接数量) 的值大于 1 ，那么直接丢弃 SYN 包，否则就生成 syncookie（一个特别的 sequence number ）然后作为 SYN + ACK 包中的序列号返回给客户端。并输出 "possible SYN flooding on port . Sending cookies."。
+          - tcp_syncookies 不适合用在服务端负载很高的场景，因为在启用 tcp_syncookies 的时候，服务端在发送 SYN+ACK 包之前，会要求客户端在短时间内回复一个序号，这个序号包含客户端之前发送 SYN 包内的信息，比如 IP 和端口。
+          - 如果客户端回复的这个序号是正确的，那么服务端就认为这个客户端是正常的，随后就会发送携带 syncookie 的 SYN+ACK 包给客户端。如果客户端不回复这个序号或者序号不正确，那么服务端就认为这个客户端是不正常的，直接丢弃连接不理会。
+          - 除此之外，我们还可以调整以下内核参数来防御 SYN Flood 攻击
+            - 增大半连接队列容量 tcp_max_syn_backlog 。设置比默认 256 更大的一个数值。
+            - 减少 SYN+ACK 重试次数 tcp_synack_retries 。
+        - 全连接队列 ACCEPT-Queue 已满
+          - 内核参数 net.ipv4.tcp_abort_on_overflow 会影响内核协议栈处理全连接队列溢出的行为。
+            - 当 tcp_abort_on_overflow = 0 时，服务端内核协议栈会将该连接标记为 acked 状态，但仍保留在 SYN-Queue 中，并开启 SYN+ACK 重传机制。当 SYN+ACK 包的重传次数超过 net.ipv4.tcp_synack_retries 设置的值时，再将该连接从 SYN queue 中删除。但是此时在客户端的视角来说，连接已经建立成功了。客户端并不知道此时 ACK 包已经被服务端所忽略，如果此时向服务端发送数据的话，服务端会回复 RST 给客户端。
+            - ![img.png](netty_accept_queue_full1.png)
+            - 当 tcp_abort_on_overflow = 1 时， 服务端TCP 协议栈直接回复 RST 包，并直接从 SYN-Queue 中删除该连接信息。
+            - ![img.png](netty_accept_queue_full2.png)
+          - Netty 中全连接队列 ACCEPT-Queue 的长度由 min(backlog, somaxconn) 决定
+      - 连接未被监听的端口 - 当客户端 Connect 一个未被监听的远端服务端口，则会收到对端发来的一个 RST 包
+      - 服务端程序崩溃
+      - 开启 SO_LINGER 选项设置 l_linger = 0
+        - 将选项参数设置为 l_onoff = 1，l_linger = 0 时，当客户端调用 close 方法关闭连接的时候，这时内核协议栈会发出 RST 而不是 FIN 。跳过正常的四次挥手关闭流程直接强制关闭，Socket 缓冲区的数据来不及处理直接丢弃。
+      - 主动关闭方在关闭时 Socket 接收缓冲区还有未处理数据
+      - 
+
+
+
+
+
 
 
 
