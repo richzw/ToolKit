@@ -599,6 +599,46 @@
     - Nginx，在使用sendfile模式的情况下，可以设置打开TCP_CORK选项: 将nginx.conf配置文件里的tcp_nopush配置为on. 
 - [Linux Network Performance Parameters](https://github.com/cch123/linux-network-performance-parameters)
 - [Cilium 的 eBPF 收发包路径](http://arthurchiao.art/blog/understanding-ebpf-datapath-in-cilium-zh/)
+- [没有accept，能建立TCP连接吗](https://mp.weixin.qq.com/s/n17NjGRab1u5eXkOCro1gg)
+  - Answer
+    - 就算不执行accept()方法，三次握手照常进行，并顺利建立连接。
+    - 在服务端执行accept()前，如果客户端发送消息给服务端，服务端是能够正常回复ack确认包的。
+  - 半连接队列、全连接队列是什么
+    - 半连接队列（SYN队列），服务端收到第一次握手后，会将sock加入到这个队列中，队列内的sock都处于SYN_RECV 状态。
+      - 半连接队列（syn_table）是个哈希表。
+      - 半连接队列没有命令可以直接查看到，但因为半连接队列里，放的都是SYN_RECV 状态的连接，那可以通过统计处于这个状态的连接的数量，间接获得半连接队列的长度
+      - `netstat -nt | grep -i '127.0.0.1:8080' | grep -i 'SYN_RECV' | wc -l`
+      - `netstat -s | grep -i "SYNs to LISTEN sockets dropped"`
+      - 
+    - 全连接队列（ACCEPT队列），在服务端收到第三次握手后，会将半连接队列的sock取出，放到全连接队列中。队列里的sock都处于 ESTABLISHED状态。这里面的连接，就等着服务端执行accept()后被取出了。
+      - 全连接队列（icsk_accept_queue）是个链表
+      - 通过ss -lnt命令，可以看到全连接队列的大小，其中Send-Q是指全连接队列的最大值，可以看到我这上面的最大值是128；Recv-Q是指当前的全连接队列的使用值，我这边用了0个，也就是全连接队列里为空，连接都被取出来了。
+      - 查看是否发生过队列溢出。`netstat -s | grep overflowed`
+      - 如果配合使用`watch -d` 命令，可以自动每2s间隔执行相同命令，还能高亮显示变化的数字部分，如果溢出的数字不断变多，说明正在发生溢出的行为。
+    - 建立连接的过程中根本不需要accept() 参与， 执行accept()只是为了从全连接队列里取出一条连接
+  - 全连接队列满了会怎么样？
+    - 如果队列满了，服务端还收到客户端的第三次握手ACK，默认当然会丢弃这个ACK。
+    - `cat /proc/sys/net/ipv4/tcp_abort_on_overflow` 
+      - tcp_abort_on_overflow设置为 0，全连接队列满了之后，会丢弃这个第三次握手ACK包，并且开启定时器，重传第二次握手的SYN+ACK，如果重传超过一定限制次数，还会把对应的半连接队列里的连接给删掉
+      - tcp_abort_on_overflow设置为 1，全连接队列满了之后，就直接发RST给客户端，效果上看就是连接断了。
+  - 半连接队列要是满了会怎么样
+    - 一般是丢弃，但这个行为可以通过 tcp_syncookies 参数去控制
+    - 当它被设置为1的时候，客户端发来第一次握手SYN时，服务端不会将其放入半连接队列中，而是直接生成一个cookies，这个cookies会跟着第二次握手，发回客户端。客户端在发第三次握手的时候带上这个cookies，服务端验证到它就是当初发出去的那个，就会建立连接并放入到全连接队列中。可以看出整个过程不再需要半连接队列的参与。
+    - 会有一个cookies队列吗
+      - 实际上cookies并不会有一个专门的队列保存，它是通过通信双方的IP地址端口、时间戳、MSS等信息进行实时计算的，保存在TCP报头的seq里。
+    - cookies方案为什么不直接取代半连接队列
+      - cookies方案虽然能防 SYN Flood攻击，但是也有一些问题。因为服务端并不会保存连接信息，所以如果传输过程中数据包丢了，也不会重发第二次握手的信息。
+      - 编码解码cookies，都是比较耗CPU的，利用这一点，如果此时攻击者构造大量的第三次握手包（ACK包）这种通过构造大量ACK包去消耗服务端资源的攻击，叫ACK攻击，受到攻击的服务器可能会因为CPU资源耗尽导致没能响应正经请求。
+  - 没有listen，为什么还能建立连接
+    - 两个客户端同时向对方发出请求建立连接（TCP同时打开），这两个情况都有个共同点，就是没有服务端参与，也就是没有listen，就能建立连接。
+    - 我们知道执行listen方法时，会创建半连接队列和全连接队列。三次握手的过程中会在这两个队列中暂存连接信息。
+    - 内核还有个全局hash表，可以用于存放sock连接的信息。这个全局hash表其实还细分为ehash，bhash和listen_hash
+    - 在TCP自连接的情况中，客户端在connect方法时，最后会将自己的连接信息放入到这个全局hash表中，然后将信息发出，消息在经过回环地址重新回到TCP传输层的时候，就会根据IP端口信息，再一次从这个全局hash中取出信息。于是握手包一来一回，最后成功建立连接。
+
+
+
+
+
 
 
 
