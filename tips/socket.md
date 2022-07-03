@@ -98,6 +98,21 @@
     - The EPOLLEXCLUSIVE flag is used to prevent the "thundering heard" behavior, so only a single epoll_wait caller is woken up for each fd wake-up event.
     - As I pointed out before, for edge-triggered states, an fd wake-up event is a change in the fd state. So all EPOLLIN events will be raised until all data was read (the listening socket's backlog was emptied).
     - On the other hand, for level triggered events, each EPOLLIN will invoke a wake up event. If no one is waiting, these events will be merged.
+  - epoll为什么要有ET触发模式
+    - 如果采用 EPOLLLT 模式的话，系统中一旦有大量你不需要读写的就绪文件描述符，它们每次调用epoll_wait都会返回，这样会大大降低处理程序检索自己关心的就绪文件描述符的效率.
+    - 而采用EPOLLET这种边缘触发模式的话，当被监控的文件描述符上有可读写事件发生时，epoll_wait()会通知处理程序去读写。如果这次没有把数据全部读写完(如读写缓冲区太小)，那么下次调用epoll_wait()时，它不会通知你，也就是它只会通知你一次，直到该文件描述符上出现第二次可读写事件才会通知你！！！这种模式比水平触发效率高，系统不会充斥大量你不关心的就绪文件描述符。
+  - [Summary](https://mp.weixin.qq.com/s/_tZ0xQ3uE3ZlwEq4cOPdSg)
+    - ET模式（边缘触发）
+      - 只有数据到来才触发，不管缓存区中是否还有数据，缓冲区剩余未读尽的数据不会导致epoll_wait返回；
+      - 边沿触发模式很大程度上降低了同一个epoll事件被重复触发的次数，所以效率更高；
+      - 对于读写的connfd，边缘触发模式下，必须使用非阻塞IO，并要一次性全部读写完数据。
+      - ET的编程可以做到更加简洁，某些场景下更加高效，但另一方面容易遗漏事件，容易产生bug；
+    - LT 模式（水平触发，默认）
+      - 只要有数据都会触发，缓冲区剩余未读尽的数据会导致epoll_wait返回；
+      - LT比ET多了一个开关EPOLLOUT事件(系统调用消耗，上下文切换）的步骤；
+      - 对于监听的sockfd，最好使用水平触发模式（参考nginx），边缘触发模式会导致高并发情况下，有的客户端会连接不上，LT适合处理紧急事件；
+      - 对于读写的connfd，水平触发模式下，阻塞和非阻塞效果都一样，不过为了防止特殊情况，还是建议设置非阻塞；
+      - LT的编程与poll/select接近，符合一直以来的习惯，不易出错；
 - [异步I/O框架 io_uring](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247562787&idx=1&sn=471a0956249ca789afad774978522717&chksm=c1850172f6f28864474f9832bfc61f723b5f54e174417d570a6b1e3f9f04bda7b539662c0bed&scene=21#wechat_redirect)
   - Source [1](How io_uring and eBPF Will Revolutionize Programming in Linux), [2](An Introduction to the io_uring Asynchronous I/O Framework)
   - 概述
@@ -287,6 +302,12 @@
     - 还会再建立一个 rdllist 双向链表，用于存储准备就绪的事件，当 epoll_wait 调用时，仅仅观察这个 rdllist 双向链表里有没有数据即可。
   - 调用 epoll_ctl 如果增加 socket 句柄，则检查在红黑树中是否存在，存在立即返回，不存在则添加到树干上，然后向内核注册回调函数，用于当中断事件来临时向准备就绪链表中插入数据；
   - 调用 epoll_wait 检查eventpoll对象中的rdllist双向链表是否有epitem元素而已，如果rdllist链表不为空，则这里的事件复制到用户态内存（使用共享内存提高效率）中，同时将事件数量返回给用户。
+  - ![img.png](socket_epoll_overview.png)
+  - [理解epoll不足之处](https://mp.weixin.qq.com/s/_tZ0xQ3uE3ZlwEq4cOPdSg)
+    - 1.定时的精度不够，只到5ms级别，select可以到0.1ms；
+    - 2.当连接数少并且连接都十分活跃的情况下，select和poll的性能可能比epoll好；
+    - 3.epoll_ctrl每次只能够修改一个fd（kevent可以一次改多个，每次修改，epoll需要一个系统调用，不能 batch 操作，可能会影响性能）。
+    - 4.可能会在定时到期之前返回，导致还需要下一个epoll_wait调用。
 - [io_ring解析]()
   - [io_ring worker pool](https://blog.cloudflare.com/missing-manuals-io_uring-worker-pool/)
 - [RSS, RPS and RFS](https://stackoverflow.com/questions/44958511/what-is-the-main-difference-between-rss-rps-and-rfs)
