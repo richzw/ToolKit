@@ -394,7 +394,68 @@
     - DER Filename Extensions - .der and .cer.
     - View contents of DER-encoded certificate file  `openssl x509 -inform der -in CERTIFICATE.der -text -noout`
     - Convert DER-encoded certificate to PEM `openssl x509 -inform der -in CERTIFICATE.der -out CERTIFICATE.pem`
-
+- [NAT](https://arthurchiao.art/blog/nat-zh/)
+  - Netfilter
+    - Linux 内核中有一个数据包过滤框架（packet filter framework），叫做 netfilter（ 项目地址 netfilter.org）。这个框架使得 Linux 机器可以像路由器一 样工作。
+    - 和 NAT 相关的最重要的规则，都在 nat 这个（iptables）table 里。这个表有三个预置的 chain：PREROUTING, OUTPUT 和 POSTROUTING
+  - 如何设置规则
+    - 从本地网络发出的、目的是因特网的包，将发送方地址修改为路由器 的地址。 `iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE`
+  - iptable
+    ```shell
+    $> iptables -t nat -A chain [...]
+    
+    # list rules:
+    $> iptables -t nat -L
+    
+    # remove user-defined chain with index 'myindex':
+    $> iptables -t nat -D chain myindex
+    
+    # Remove all rules in chain 'chain':
+    $> iptables -t nat -F chain
+    # TCP packets from 192.168.1.2:
+    $> iptables -t nat -A POSTROUTING -p tcp -s 192.168.1.2 [...]
+    
+    # UDP packets to 192.168.1.2:
+    $> iptables -t nat -A POSTROUTING -p udp -d 192.168.1.2 [...]
+    
+    # all packets from 192.168.x.x arriving at eth0:
+    $> iptables -t nat -A PREROUTING -s 192.168.0.0/16 -i eth0 [...]
+    
+    # all packets except TCP packets and except packets from 192.168.1.2:
+    $> iptables -t nat -A PREROUTING -p ! tcp -s ! 192.168.1.2 [...]
+    
+    # packets leaving at eth1:
+    $> iptables -t nat -A POSTROUTING -o eth1 [...]
+    
+    # TCP packets from 192.168.1.2, port 12345 to 12356
+    # to 123.123.123.123, Port 22
+    # (a backslash indicates contination at the next line)
+    $> iptables -t nat -A POSTROUTING -p tcp -s 192.168.1.2 \
+       --sport 12345:12356 -d 123.123.123.123 --dport 22 [...]
+    
+    #对于 nat table，有如下几种动作：SNAT, MASQUERADE, DNAT, REDIRECT，都需要通过 -j 指定
+    # Source-NAT: Change sender to 123.123.123.123
+    $> iptables [...] -j SNAT --to-source 123.123.123.123
+    
+    # Mask: Change sender to outgoing network interface
+    $> iptables [...] -j MASQUERADE
+    
+    # Destination-NAT: Change receipient to 123.123.123.123, port 22
+    $> iptables [...] -j DNAT --to-destination 123.123.123.123:22
+    
+    # Redirect to local port 8080
+    $> iptables [...] -j REDIRECT --to-ports 8080
+    ```
+    - SNAT - 修改源 IP 为固定新 IP 
+    - MASQUERADE - 修改源 IP 为动态新 IP
+    - DNAT - 修改目的 IP - DNAT 可以用于运行在防火墙后面的服务器。
+    - REDIRECT - 将包重定向到本机另一个端口 - REDIRECT 是 DNAT 的一个特殊场景。包被重定向到路由器的另一个本地端口，可以实现， 例如透明代理的功能。和 DNAT 一样，REDIRECT 适用于 PREROUTING 和 OUTPUT chain 。
+  - NAT 应用 
+    - 透明代理 `iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-ports 8080 `
+    - 绕过防火墙 
+    - 通过 NAT 从外网访问内网服务 
+      - 假设我 们有一个 HTTP 服务运行在内网机器 192.168.1.2，NAT 路由器的地址是 192.168.1.1 ，并通过另一张有公网 IP 123.123.123.123 的网卡连接到了外部网络。 要使得外网机器可以访问 192.168.1.2 的服务
+      - `iptables -t nat -A PREROUTING -p tcp -i eth1 --dport 80 -j DNAT --to 192.168.1.2`
 
 
 
