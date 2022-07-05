@@ -29,11 +29,24 @@
       ![img.png](k8s_network_aws_pod2pod.png)
     - Services
       - because of the ephemeral nature of Pods, it is almost never a good idea to directly use Pod IP addresses. Pod IP addresses are not persisted across restarts and can change without warning, in response to events that cause Pod restarts (such as application failures, rollouts, rollbacks, scale-up/down, etc.).
-      - Kubernetes Service objects allow you to assign a single virtual IP address to a set of Pods. It works by keeping track of the state and IP addresses for a group of Pods and proxying / load-balancing traffic to them
+      - Kubernetes Service objects allow you to assign a single virtual IP address to a set of Pods. Used to build service discovery. It works by keeping track of the state and IP addresses for a group of Pods and proxying / load-balancing traffic to them
       - Pods can also use internally available DNS names instead of Service IP addresses. This DNS system is powered by CoreDNS
+      - Service的type类型
+        - ClusterIP： 默认方式。根据是否生成ClusterIP又可分为普通Service和Headless Service两类：
+          - 普通Service：通过为Kubernetes的Service分配一个集群内部可访问的固定虚拟IP（Cluster IP），实现集群内的访问。为最常见的方式。
+          - Headless Service：该服务不会分配Cluster IP，也不通过kube-proxy做反向代理和负载均衡。而是通过DNS提供稳定的网络ID来访问，DNS会将headless service的后端直接解析为podIP列表。主要供StatefulSet中对应POD的序列用。
+        - NodePort：除了使用Cluster IP之外，还通过将service的port映射到集群内每个节点的相同一个端口，实现通过nodeIP:nodePort从集群外访问服务。
+        - LoadBalancer：和nodePort类似，不过除了使用一个Cluster IP和nodePort之外，还会向所使用的公有云申请一个负载均衡器，实现从集群外通过LB访问服务。在公有云提供的 Kubernetes 服务里，都使用了一个叫作 CloudProvider 的转接层，来跟公有云本身的 API 进行对接。所以，在上述 LoadBalancer 类型的 Service 被提交后，Kubernetes 就会调用 CloudProvider 在公有云上为你创建一个负载均衡服务，并且把被代理的 Pod 的 IP 地址配置给负载均衡服务做后端。
     - Endpoints
       - how do Services know which Pods to track, and which Pods are ready to accept traffic? The answer is Endpoints
       - ![img.png](k8s_network_endpoint.png)
+      - Represent the list of IPs behind a Service
+      - Recall that service had port and targetPort fields
+    - DNS
+      - Run as a pod in the cluster
+      - Exposed by a Service VIP
+      - Containers are configured by kubelet to use kube-dns
+      - Default implementation is CoreDNS
     - Kubelet
       - Kubelet 是在集群中的每个节点上运行的代理，是负责在工作节点上运行的所有内容的组件。它确保容器在 Pod 中运行。
       - 通过在 API Server 中创建节点资源来注册它正在运行的节点。
@@ -42,8 +55,10 @@
       - 持续监控正在运行的容器并将其状态、事件和资源消耗报告给 API Server。
       - 运行容器活性探测，在探测失败时重新启动容器，在容器的 Pod 从 API Server 中删除时终止容器，并通知服务器 Pod 已终止。
     - Kube-proxy
+      - Run on every Node in the cluster
       - 它负责监视 API Server 以了解Service和 pod 定义的更改，以保持整个网络配置的最新状态。当一个Service由多个 pod 时，proxy会在这些 pod 之间负载平衡。
       - kube-proxy 之所以得名，是因为它是一个实际的代理服务器，用于接受连接并将它们代理到 Pod，当前的实现使用 iptables 或 ipvs 规则将数据包重定向到随机选择的后端 Pod，而不通过实际的代理服务器传递它们。
+      - Watch Service and Endpoints, link Endpoints(backends) with Service(frontends)
   - K8S network requirement
     - all pods can communicate with all other pods without using network address translation (NAT)
     - all Nodes can communicate with all Pods without NAT
