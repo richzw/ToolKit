@@ -564,7 +564,7 @@
       - 关于压缩等级
         - 在压缩等级的设置上可能存在较为严重的边际效用递减问题。
         - 在进行基准测试时发现，将zlib压缩等级由 BestCompression 调整为 DefaultCompression 后，压缩率只有近 1‱ 的下降，但压缩方面的 CPU 占用却相对提高近 **50%**。
-    - 使用更高效的序列化库
+    - [使用更高效的序列化库](https://segmentfault.com/a/1190000041591284)
       - 背景
         - worker 服务在设计之初基于快慢隔离的思想，使用三个不同的 consumer group 进行分开消费，导致对同一份数据会重复消费三次，而上游产出的数据是在 PB 序列化之后写入 Kafka，消费侧亦需要进行 PB 反序列化方能使用，因此导致了 PB 反序列化操作在 CPU 上的较大开销。
       - 优化
@@ -575,14 +575,14 @@
         - [用过去或未来换现在的时间](https://mp.weixin.qq.com/s/S8KVnG0NZDrylenIwSCq8g)
           - 页面静态化、池化技术、预编译、代码生成等都是提前做一些事情，用过去的时间，来降低用户在线服务的响应时间；
           - 另外对于一些在线服务非必须的计算、存储的耗时操作，也可以异步化延后进行处理，这就是用未来的时间换现在的时间
-    - 数据攒批 减少调用
+    - [数据攒批 减少调用](https://mp.weixin.qq.com/s/ntNGz6mjlWE7gb_ZBc5YeA)
       - 背景
         - 在观察 pprof 图后发现写 hbase 占用了近 50% 的相对 CPU，经过进一步分析后，发现每次在序列化一个字段时 Thrift 都会调用一次 socket->syscall，带来频繁的上下文切换开销。
       - 优化
         - 原代码中使用了 Thrift 的 TTransport 实现，其功能是包装 TSocket，裸调 Syscall，每次 Write 时都会调用 socket 写入进而调用 Syscall。
         - 发现其中有多种 Transport 实现，而 TTBufferedTransport 是符合我们编码习惯的。
         - 数据攒批：将数据先写入用户态内存中，而后统一调用 syscall 进行写入，常用在数据落盘、网络传输中，可降低系统调用次数、利用磁盘顺序写特性等，是一种空间换时间的做法。有时也会牺牲一定的数据实时性
-    - 语法调整
+    - [语法调整](https://mp.weixin.qq.com/s/Lv2XTD-SPnxT2vnPNeREbg)
       - slice、map 预初始化，减少频繁扩容导致的内存拷贝与分配开销
       - 字符串连接使用 strings.builder(预初始化) 代替 fmt.Sprintf()
       - buffer 修改返回 string([]byte) 操作为 []byte，减少内存 []byte -> string 的内存拷贝开销
