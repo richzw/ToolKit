@@ -832,8 +832,32 @@
     - 观察系统的 CPU 使用情况
     - 如果 CPU 使用率在达到一定值之后不再上升，反而引起了延迟的剧烈波动，这时大概率是发生了阻塞，进入 pprof 的 web 页面，点击 goroutine，查看 top 的 goroutine 数，这时应该有大量的 goroutine 阻塞在某处，比如 Semacquire
     - 如果 CPU 上升较快，未达到预期吞吐就已经过了高水位，则可以重点考察 CPU 使用是否合理，在 CPU 高水位进行 profile 采样，重点关注火焰图中较宽的“平顶山”
-
-
+  - 优化案例
+    - gc mark 占用过多 CPU
+      - 在 Go 语言中 gc mark 占用的 CPU 主要和运行时的对象数相关，也就是我们需要看 inuse_objects。
+      - 定时任务，或访问流量不规律的应用，需要关注 alloc_objects。
+      - 优化主要是下面几方面
+        - 减少变量逃逸 - 尽量在栈上分配对象
+          - 查看某个 package 内的逃逸情况 - `go build -gcflags="-m -m" github.com/cch123/elasticsql`
+          - 逃逸分析的结果是会随着版本变化的，所以去背诵网上逃逸相关的文章结论是没有什么意义的。
+        - 使用 sync.Pool 复用堆上对象
+          - 最简单的复用就是复用各种 struct，slice，在复用时 put 时，需要 size 是否已经扩容过头，小心因为 sync.Pool 中存了大量的巨型对象导致进程占用了大量内存
+    - 调度占用过多 CPU
+      - goroutine 频繁创建与销毁会给调度造成较大的负担，如果我们发现 CPU 火焰图中 schedule，findrunnable 占用了大量 CPU，那么可以考虑使用开源的 [workerpool](https://github.com/valyala/fasthttp/blob/master/workerpool.go#L19) 来进行改进
+      - 如果客户端与服务端之间使用的是短连接，那么我们可以使用长连接。
+    - 进程占用大量内存
+      - Go 内存占用优化的是在网关(包括 mesh)、存储系统这两个场景
+        - 对于网关类系统来说 海量的连接加上海量的 goroutine，使网关和 mesh 成为 Go OOM 的重灾区。所以网关侧的优化一般就是优化：
+          - goroutine 占用的栈内存
+          - read buffer 和 write buffer 占用的内存
+        - 对于存储类系统来说，内存占用方面的努力也是在优化 buffer，比如 dgraph [使用 cgo + jemalloc 来优化他们的产品](https://dgraph.io/blog/post/manual-memory-management-golang-jemalloc/)
+    - 锁冲突严重，导致吞吐量瓶颈
+      - 进行锁优化的思路无非就一个“拆”和一个“缩”字：
+        - 拆：将锁粒度进行拆分，比如全局锁，我能不能把锁粒度拆分为连接粒度的锁；如果是连接粒度的锁，那我能不能拆分为请求粒度的锁；在 logger fd 或 net fd 上加的锁不太好拆，那么我们增加一些客户端，比如从 1-> 100，降低锁的冲突是不是就可以了。
+        - 缩：缩小锁的临界区，比如业务允许的前提下，可以把 syscall 移到锁外面；比如我们只是想要锁 map，但是却不小心锁了连接读写的逻辑，或许简单地用 sync.Map 来代替 map Lock，defer Unlock 就能简单地缩小临界区了。
+    - timer 相关函数占用大量 CPU
+      - 使用时间轮/粗粒度的时间管理，精确到 ms 级一般就足够了
+      - 升级到 Go 1.14+，享受官方的升级红利
 
 
 
