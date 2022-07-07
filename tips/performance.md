@@ -817,6 +817,26 @@
       - 一般情况下我们是不需要使用 trace 来定位性能问题的，通过压测 + profile 就可以解决大部分问题，除非我们的问题与 runtime 本身的问题相关
       - 采集 trace 对系统的性能影响还是比较大的，即使我们只是开启 gctrace，把 gctrace 日志重定向到文件，对系统延迟也会有一定影响，因为 gctrace 的 print 是在 stw 期间来做的 
       - [gctrace引起runtime调度阻塞](https://xiaorui.cc/archives/6232)
+    - perf
+  - 微观性能优化
+    - `logStr := fmt.Sprintf("userid: %v; orderid: %v", userID, orderID)` 使用 fmt 系列函数，则会造成局部对象逃逸到堆上，这里是高频路径上有大量逃逸，所以导致线上服务的 GC 压力加重，大量接口超时
+    - 修改高并发接口时，拿不准的尽量都应进行简单的线下 benchmark 测试
+  - 宏观性能优化
+    - 接口类的服务，我们可以使用两种方式对其进行压测：
+      - 固定 QPS 压测：在每次系统有大的特性发布时，都应进行固定 QPS 压测，与历史版本进行对比，需要关注的指标包括，相同 QPS 下的系统的 CPU 使用情况，内存占用情况(监控中的 RSS 值)，goroutine 数，GC 触发频率和相关指标(是否有较长的 stw，mark 阶段是否时间较长等)，平均延迟，p99 延迟。
+      - 极限 QPS 压测：极限 QPS 压测一般只是为了 benchmark show，没有太大意义。系统满负荷时，基本 p99 已经超出正常用户的忍受范围了
+    - pprof 还提供了 --base 的 flag，能够很直观地帮我们发现不同版本之间的指标差异 `go tool pprof --base base.heap current.heap`
+  - 寻找性能瓶颈
+    - 使用固定 QPS 压测，以阶梯形式逐渐增加压测 QPS，如 1000 -> 每分钟增加 1000 QPS
+    - 压测过程中观察系统的延迟是否异常
+    - 观察系统的 CPU 使用情况
+    - 如果 CPU 使用率在达到一定值之后不再上升，反而引起了延迟的剧烈波动，这时大概率是发生了阻塞，进入 pprof 的 web 页面，点击 goroutine，查看 top 的 goroutine 数，这时应该有大量的 goroutine 阻塞在某处，比如 Semacquire
+    - 如果 CPU 上升较快，未达到预期吞吐就已经过了高水位，则可以重点考察 CPU 使用是否合理，在 CPU 高水位进行 profile 采样，重点关注火焰图中较宽的“平顶山”
+
+
+
+
+
 
 
 
