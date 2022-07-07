@@ -312,7 +312,8 @@
     - 程序出 core 了，dlv core 调试
   - vscode 调试
     - vscode 调试首先创建一个 .vscode/launch.json 的配置文件
-
+- [Seven ways to profile a Go program](https://go-talks.appspot.com/github.com/davecheney/presentations/seven.slide#1)
+  
 
 
 
