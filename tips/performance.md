@@ -790,10 +790,33 @@
       - 要熟悉项目中使用的网络协议，至少要对 TCP, HTTP 有所了解。
   - 优化越靠近应用层效果越好
     - [How I cut GTA Online loading times by 70%](https://nee.lv/2021/02/28/How-I-cut-GTA-Online-loading-times-by-70/)
-    - 
-
-
-
+  - 优化的工作流程
+    - 建立评估指标，例如固定 QPS 压力下的延迟或内存占用，或模块在满足 SLA 前提下的极限 QPS
+    - 通过自研、开源压测工具进行压测，直到模块无法满足预设性能要求:如大量超时，QPS 不达预期，OOM
+    - 通过内置 profile 工具寻找性能瓶颈
+    - 本地 benchmark 证明优化效果
+    - 集成 patch 到业务模块，回到 2
+  - 工具
+    - pprof
+      - memory profiler
+        - 四个相应的指标
+          - inuse_objects：当我们认为内存中的驻留对象过多时，就会关注该指标
+          - inuse_space：当我们认为应用程序占据的 RSS 过大时，会关注该指标
+          - alloc_objects：当应用曾经发生过历史上的大量内存分配行为导致 CPU 或内存使用大幅上升时，可能关注该指标
+          - alloc_space：当应用历史上发生过内存使用大量上升时，会关注该指标
+        - 网关类应用因为海量连接的关系，会导致进程消耗大量内存，所以我们经常看到相关的优化文章，主要就是降低应用的 inuse_space。
+        - 当我们进行 GC 调优时，会同时关注应用分配的对象数、正在使用的对象数，以及 GC 的 CPU 占用的指标。
+      - cpu profiler
+        - CPU profiler 使用 setitimer 系统调用，操作系统会每秒 100 次向程序发送 SIGPROF 信号。在 Go 进程中会选择随机的信号执行 sigtrampgo 函数。该函数使用 sigprof 或 sigprofNonGo 来记录线程当前的栈。
+        - Go 语言内置的 cpu profiler 是在性能领域比较常见的 On-CPU profiler，对于瓶颈主要在 CPU 消耗的应用，我们使用内置的 profiler 也就足够了
+    - fgprof
+      - 我们碰到的问题是应用的 CPU 使用不高，但接口的延迟却很大，那么就需要用上 Off-CPU profiler，遗憾的是官方的 profiler 并未提供该功能，我们需要借助社区的 fgprof。
+      - fgprof 是启动了一个后台的 goroutine，每秒启动 99 次，调用 runtime.GoroutineProfile 来采集所有 gorooutine 的栈。
+      - 但调用 GoroutineProfile 函数的开销并不低，如果线上系统的 goroutine 上万，每次采集 profile 都遍历上万个 goroutine 的成本实在是太高了。所以 fgprof 只适合在测试环境中使用
+    - trace
+      - 一般情况下我们是不需要使用 trace 来定位性能问题的，通过压测 + profile 就可以解决大部分问题，除非我们的问题与 runtime 本身的问题相关
+      - 采集 trace 对系统的性能影响还是比较大的，即使我们只是开启 gctrace，把 gctrace 日志重定向到文件，对系统延迟也会有一定影响，因为 gctrace 的 print 是在 stw 期间来做的 
+      - [gctrace引起runtime调度阻塞](https://xiaorui.cc/archives/6232)
 
 
 
