@@ -781,8 +781,16 @@
        }
     }
     ```
-
-
+- [Go 应用的性能优化](https://xargin.com/go-perf-optimization/)
+  - 优化的前置知识
+    - 对于计算密集型的程序来说，优化的主要精力会放在 CPU 上，要知道 CPU 基本的流水线概念，知道怎么样在使用少的 CPU 资源的情况下，达到相同的计算目标。
+    - 对于 IO 密集型的程序(后端服务一般都是 IO 密集型)来说，优化可以是降低程序的服务延迟，也可以是提升系统整体的吞吐量. IO 密集型应用主要与磁盘、内存、网络打交道
+      - 要了解内存的多级存储结构：L1，L2，L3，主存
+      - 要知道基本的文件系统读写 syscall，批量 syscall，数据同步 syscall。
+      - 要熟悉项目中使用的网络协议，至少要对 TCP, HTTP 有所了解。
+  - 优化越靠近应用层效果越好
+    - [How I cut GTA Online loading times by 70%](https://nee.lv/2021/02/28/How-I-cut-GTA-Online-loading-times-by-70/)
+    - 
 
 
 
