@@ -482,6 +482,29 @@
     - 如果本地有DNS Client Cache，先走Cache查询，所以有时候看不到DNS网络包。Linux下nscd可以做这个cache，Windows下有 ipconfig /displaydns ipconfig /flushdns
     - 如果 /etc/resolv.conf 中配置了多个nameserver，默认使用第一个，只有第一个失败【如53端口不响应、查不到域名后再用后面的nameserver顶上】
     - 如果 /etc/resolv.conf 中配置了rotate，那么多个nameserver轮流使用. 但是因为glibc库的原因用了rotate 会触发nameserver排序的时候第二个总是排在第一位
+- [理解 netfilter 和 iptables](https://mp.weixin.qq.com/s/e8pyVJZ4CBf0xy3OGVr3LA)
+  - Netfilter 的设计与实现
+    - ![img.png](k8s_network_packet_path.png)
+    - netfilter hooks
+      - 所谓的 hook 实质上是代码中的枚举对象（值为从 0 开始递增的整型）每个 hook 在内核网络栈中对应特定的触发点位置，以 IPv4 协议栈为例，有以下 netfilter hooks 定义：
+      - 所有的触发点位置统一调用 NF_HOOK 这个宏来触发 hook
+    - 回调函数与优先级
+      - netfilter 的另一组成部分是 hook 的回调函数。内核网络栈既使用 hook 来代表特定触发位置，也使用 hook （的整数值）作为数据索引来访问触发点对应的回调函数。
+      - 内核的其他模块可以通过 netfilter 提供的 api 向指定的 hook 注册回调函数，同一 hook 可以注册多个回调函数，通过注册时指定的 priority 参数可指定回调函数在执行时的优先级。
+  - iptables
+    - 基于内核 netfilter 提供的 hook 回调函数机制，netfilter 作者 Rusty Russell 还开发了 iptables，实现在用户空间管理应用于数据包的自定义规则。
+      - 用户空间的 iptables 命令向用户提供访问内核 iptables 模块的管理界面。
+      - 内核空间的 iptables 模块在内存中维护规则表，实现表的创建及注册。
+      - iptables 主要操作以下几种对象：
+        - table：对应内核空间的 xt_table 结构，iptable 的所有操作都对指定的 table 执行，默认为 filter。
+        - chain：对应指定 table 通过特定 netfilter hook 调用的规则集，此外还可以自定义规则集，然后从 hook 规则集中跳转过去。
+        - rule：对应上文中 ipt_entry、ipt_entry_match 和 ipt_entry_target，定义了对数据包的匹配规则以及匹配后执行的行为。
+        - match：具有很强扩展性的自定义匹配规则。
+        - target：具有很强扩展性的自定义匹配后行为。
+  - conntrack
+    - 仅仅通过 3、4 层的首部信息对数据包进行过滤是不够的，有时候还需要进一步考虑连接的状态。netfilter 通过另一内置模块 conntrack 进行连接跟踪（connection tracking），以提供根据连接过滤、地址转换（NAT）等更进阶的网络过滤功能。由于需要对连接状态进行判断，conntrack 在整体机制相同的基础上，又针对协议特点有单独的实现。
+
+
 
 
 
