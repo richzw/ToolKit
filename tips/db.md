@@ -516,6 +516,24 @@
     - 第一种，近似值
       - 执行 explain 命令效率是很高的，因为它并不会真正的去查询，下图中的 rows 字段值就是  explain 命令对表 t_order 记录的估算值。
     - 额外表保存计数值
+- [为什么 mysql 的 count() 方法这么慢](https://mp.weixin.qq.com/s/R1IBtP8fh5RwKjNfQI-YUw)
+  - count()的原理
+    - count()方法的目的是计算当前sql语句查询得到的非NULL的行数
+    - 读全表数据  select count(*) from sms；语句。
+      - 使用 myisam引擎的数据表里有个记录当前表里有几行数据的字段，直接读这个字段返回就好了，因此速度快得飞起。
+      - 使用innodb引擎的数据表，则会选择体积最小的索引树，然后通过遍历叶子节点的个数挨个加起来，这样也能得到全表数据。
+    - 为什么innodb不能像myisam那样实现count()方法
+      - myisam和innodb这两个引擎 最大的区别在于myisam不支持事务，而innodb支持事务
+      - 事务，有四层隔离级别，其中默认隔离级别就是可重复读隔离级别（RR
+      - innodb引擎通过MVCC实现了可重复隔离级别，事务开启后，多次执行同样的select快照读，要能读到同样的数据。
+      - 因此由于事务隔离级别的存在，不同的事务在同一时间下，看到的表内数据行数是不一致的，因此innodb，没办法，也没必要像myisam那样单纯的加个count字段信息在数据表上。
+  - 各种count()方法的原理
+    - count(*)
+      server层拿到innodb返回的行数据，不对里面的行数据做任何解析和判断，默认取出的值肯定都不是null，直接行数+1。
+    - count(1)
+      server层拿到innodb返回的行数据，每行放个1进去，默认不可能为null，直接行数+1.
+    - count(某个列字段)
+      由于指明了要count某个字段，innodb在取数据的时候，会把这个字段解析出来返回给server层，所以会比count(1)和count(*)多了个解析字段出来的流程。
 - [MySQL查询时字符串尾部存在空格的问题](https://jasonkayzk.github.io/2022/02/27/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8MySQL%E6%9F%A5%E8%AF%A2%E6%97%B6%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B0%BE%E9%83%A8%E5%AD%98%E5%9C%A8%E7%A9%BA%E6%A0%BC%E7%9A%84%E9%97%AE%E9%A2%98/)
   - 在 MySQL 5.7.x，在查询/匹配 varchar 或者 char 类型时，会忽略尾部的空格（数据和查询条件）进行匹配；
   - 在 MySQL 8.0.x 中，对于 varchar 的查询的逻辑不再去除尾部空格，而是采用精确匹配的方式
