@@ -409,6 +409,47 @@
     - DER Filename Extensions - .der and .cer.
     - View contents of DER-encoded certificate file  `openssl x509 -inform der -in CERTIFICATE.der -text -noout`
     - Convert DER-encoded certificate to PEM `openssl x509 -inform der -in CERTIFICATE.der -out CERTIFICATE.pem`
+- [TLS 单向和双向认证](https://mp.weixin.qq.com/s/JOpega3ud9P7NDNsGAwCCg)
+  - SSL 证书 （也称为 TLS 或 SSL /TLS 证书）是将网站的身份绑定到由公共密钥和私有密钥组成的加密密钥对的数字文档。 证书中包含的公钥允许 Web 浏览器执行以下操作： 通过 TLS 和 HTTPS 协议。 私钥在服务器上保持安全，并用于对网页和其他文档（例如图像和 JavaScript 文件）进行数字签名。
+  - 双向 TLS（mTLS)
+    - TLS 服务器端提供一个授信证书，当我们使用 https 协议访问服务器端时，客户端会向服务器端索取证书并认证（浏览器会与自己的授信域匹配或弹出不安全的页面）。
+    - mTLS 则是由同一个 Root CA 生成两套证书，即客户端证书和服务端证书。客户端使用 https 访问服务端时，双方会交换证书，并进行认证，认证通过方可通信。
+  - 证书格式类型
+    - .DER .CER，文件是二进制格式，只保存证书，不保存私钥。
+    - .PEM，一般是文本格式(Base64 ASCII），可保存证书，可保存私钥。
+    - .CRT，可以是二进制格式，可以是文本格式，与 .DER 格式相同，不保存私钥。
+    - .PFX .P12，二进制格式，同时包含证书和私钥，一般有密码保护。
+    - .JKS，二进制格式，同时包含证书和私钥，一般有密码保护。
+  - 证书生成
+    ```shell
+    # 生成CA的私钥和证书
+    echo Generate the ca certificate
+    openssl genrsa -out ../certs/ca.key 4096
+    openssl req -x509 -sha256 -new -nodes -key ../certs/ca.key -days 3650 -subj "/C=IN/ST=UK/L=Dehradun/O=VMware/CN=Hemant Root CA" -extensions v3_ca -out ../certs/ca.crt
+    
+    # 生成服务端的私钥和证书
+    echo generating server certificate
+    openssl genrsa -out ../certs/server.key 2048
+    openssl req -new -subj "/C=IN/ST=UK/L=Dehradun/O=VMware/CN=localhost" -key ../certs/server.key -out server_signing_req.csr
+    openssl x509 -req -days 365 -in server_signing_req.csr -CA ../certs/ca.crt -CAkey ../certs/ca.key -CAcreateserial -out ../certs/server.crt
+    del server_signing_req.csr
+    
+    # 生成客户端的私钥和证书
+    echo generating client certificate
+    openssl genrsa -out ../certs/client.key 2048
+    openssl req -new -subj "/C=IN/ST=UK/L=Dehradun/O=VMware/CN=localhost" -key ../certs/client.key -out client_signing_req.csr
+    openssl x509 -req -days 365 -in client_signing_req.csr -CA ../certs/ca.crt -CAkey ../certs/ca.key -CAcreateserial -out ../certs/client.crt
+    rm client_signing_req.csr
+    
+    # 验证证书
+    openssl verify -CAfile ../certs/ca.crt ../certs/server.crt
+    openssl verify -CAfile ../certs/ca.crt ../certs/client.crt
+    ```
+  - 测试证书
+    - 连接到远程服务器 `openssl s_client -connect host.docker.internal:8000 -showcerts`
+    - 带 CA 证书连接远程服务器 `openssl s_client -connect host.docker.internal:8000 -CAfile ca.crt`
+    - 调试远程服务器的 SSL/TLS `openssl s_client -connect host.docker.internal:8000 -tlsextdebug`
+    - 模拟的 HTTPS 服务，可以返回 Openssl 相关信息 `openssl s_server -accept 443 -cert server.crt -key server.key -www`
 - [NAT](https://arthurchiao.art/blog/nat-zh/)
   - Netfilter
     - Linux 内核中有一个数据包过滤框架（packet filter framework），叫做 netfilter（ 项目地址 netfilter.org）。这个框架使得 Linux 机器可以像路由器一 样工作。
