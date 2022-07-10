@@ -634,7 +634,11 @@
     - 我们知道执行listen方法时，会创建半连接队列和全连接队列。三次握手的过程中会在这两个队列中暂存连接信息。
     - 内核还有个全局hash表，可以用于存放sock连接的信息。这个全局hash表其实还细分为ehash，bhash和listen_hash
     - 在TCP自连接的情况中，客户端在connect方法时，最后会将自己的连接信息放入到这个全局hash表中，然后将信息发出，消息在经过回环地址重新回到TCP传输层的时候，就会根据IP端口信息，再一次从这个全局hash中取出信息。于是握手包一来一回，最后成功建立连接。
-
+- [主流的中间件所采用的网络模型](https://mp.weixin.qq.com/s/RtZY-2ILt-x6CdYrRe1bEw)
+  - ![img.png](socket_middleware_network_model.png)
+  - ![img.png](socket_redis_network_model.png)
+  - ![img.png](socket_netty_network_model.png)
+  - ![img.png](socket_gnet_network_model.png)
 
 
 
