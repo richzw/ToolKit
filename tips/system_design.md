@@ -511,12 +511,17 @@
       - 你该如何控制每一层的时间轮的指针按时进行移动呢？
     - 存在空轮询
   - [开源的时间轮实现](https://www.luozhiyun.com/archives/444)
+    - 时间轮代码是仿照Kafka写的，所以在具体实现时间轮 TimingWheel 时还有一些小细节：
+      - 时间轮的时间格中每个链表会有一个root节点用于简化边界条件。它是一个附加的链表节点，该节点作为第一个节点，它的值域中并不存储任何东西，只是为了操作的方便而引入的；
+      - 除了第一层时间轮，其余高层时间轮的起始时间（startMs）都设置为创建此层时间轮时前面第一轮的 currentTime。每一层的 currentTime 都必须是 tickMs 的整数倍，如果不满足则会将 currentTime 修剪为 tickMs 的整数倍。修剪方法为：currentTime = startMs – (startMs % tickMs)；
+      - Kafka 中的定时器只需持有 TimingWheel 的第一层时间轮的引用，并不会直接持有其他高层的时间轮，但每一层时间轮都会有一个引用（overflowWheel）指向更高一层的应用；
+      - Kafka 中的定时器使用了 DelayQueue 来协助推进时间轮。在操作中会将每个使用到的时间格中每个链表都加入 DelayQueue，DelayQueue 会根据时间轮对应的过期时间 expiration 来排序，最短 expiration 的任务会被排在 DelayQueue 的队头，通过单独线程来获取 DelayQueue 中到期的任务；
     - 优先队列可以避免空轮询以及复杂状态的维护
     - 既然使用了优先队列，为什么还需要使用时间轮？时间轮的意义是什么？
       - 直接使用优先队列就能够实现定时任务，但是时间复杂度为 O(logN)，使用时间轮主要能够基于 bucket 对同一过期时间的任务进行汇聚，这样能够降低时间复杂度。
       - 假设 N 个任务最终被注册到 K 个 bucket 中（也就是有 k 个时间刻度有任务），优先队列上的时间复杂度为 O(logK)，而时间轮上的时间复杂度为 O(1)，因此最终时间复杂度为 O(logK*1) = O(logK)。
-
-
+    - ![img.png](system_design_hirachi_timewheel.png)
+  - [Hashed and Hierarchical Timing Wheels: Data Structures for the Efficient Implementation of a Timer Facility](https://blog.acolyer.org/2015/11/23/hashed-and-hierarchical-timing-wheels/)
 
 
 
