@@ -522,8 +522,35 @@
       - 假设 N 个任务最终被注册到 K 个 bucket 中（也就是有 k 个时间刻度有任务），优先队列上的时间复杂度为 O(logK)，而时间轮上的时间复杂度为 O(1)，因此最终时间复杂度为 O(logK*1) = O(logK)。
     - ![img.png](system_design_hirachi_timewheel.png)
   - [Hashed and Hierarchical Timing Wheels: Data Structures for the Efficient Implementation of a Timer Facility](https://blog.acolyer.org/2015/11/23/hashed-and-hierarchical-timing-wheels/)
-
-
+- [后台服务架构高性能设计](https://mp.weixin.qq.com/s/y1X51Kxeap9ZWQo47OjSSg)
+  - 无锁化
+    - 串行无锁
+      - 如 redis/Nginx 都采用了这种方式。在网络编程模型中，常规的方式是主线程负责处理 I/O 事件，并将读到的数据压入队列，工作线程则从队列中取出数据进行处理，这种半同步/半异步模型需要对队列进行加锁
+      - 可以改成无锁串行的形式，当 MainReactor accept 一个新连接之后从众多的 SubReactor 选取一个进行注册，通过创建一个 Channel 与 I/O 线程进行绑定，此后该连接的读写都在同一个线程执行，无需进行同步
+    - 结构无锁
+      - 利用硬件支持的原子操作可以实现无锁的数据结构，很多语言都提供 CAS 原子操作 atomic 可以用于实现无锁队列
+        ```cgo
+        class LockFreeList
+        {
+            atomic<Node<T> *> head;
+        public:
+            void pushFront(const T &value)
+            {
+                auto *node = new Node<T>(value);
+                node->next = head.load();
+                while(!head.compare_exchange_weak(node->next, node)); //②
+            }
+        };
+        ```
+  - 零拷贝
+    - 这里的拷贝指的是数据在内核缓冲区和应用程序缓冲区直接的传输，并非指进程空间中的内存拷贝（当然这方面也可以实现零拷贝，如传引用和 C++中 move 操作）
+    - 内存映射
+      - 内存映射将用户空间的一段内存区域映射到内核空间，用户对这段内存区域的修改可以直接反映到内核空间，同样，内核空间对这段区域的修改也直接反映用户空间，简单来说就是用户空间共享这个内核缓冲区。mmap
+      - 采用内存映射后数据拷贝减少为 3 次，不再经过应用程序直接将内核缓冲区中的数据拷贝到 Socket 缓冲区中
+    - 零拷贝
+      - 零拷贝就是一种避免 CPU 将数据从一块存储拷贝到另外一块存储，从而有效地提高数据传输效率的技术。Linux 内核 2.4 以后，支持带有 DMA 收集拷贝功能的传输，将内核页缓存中的数据直接打包发到网络上 sendfile
+      - 1）DMA 将数据拷贝到 DMA 引擎的内核缓冲区中；2）将数据的位置和长度的信息的描述符加到套接字缓冲区；3）DMA 引擎直接将数据从内核缓冲区传递到协议引擎；
+      - 零拷贝并非真正的没有拷贝，还是有 2 次内核缓冲区的 DMA 拷贝，只是消除了内核缓冲区和用户缓冲区之间的 CPU 拷贝。Linux 中主要的零拷贝函数有 sendfile、splice、tee 等
 
 
 
