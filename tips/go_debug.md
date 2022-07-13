@@ -313,8 +313,37 @@
   - vscode 调试
     - vscode 调试首先创建一个 .vscode/launch.json 的配置文件
 - [Seven ways to profile a Go program](https://go-talks.appspot.com/github.com/davecheney/presentations/seven.slide#1)
-  
-
+  - [time](https://cloud.tencent.com/developer/article/1478198)
+    - `/usr/bin/time -v`
+    - go tool 中的 `-toolexec`
+      - 当我们构建很慢的时候，如何才能知道为什么慢呢？go 工具链中支持 -x 命令，可以显示具体执行的每一条命令，这样我们就可以看到到底执行到哪里的时候慢了 `go build -x`
+      - -toolexec 的参数，其值将作为工具链每一个命令的前缀来执行 如果 -toolexec=time，那么假如有一个 go build xxx.go 的命令，就会变为 time go build xxx.go 来执行。
+  - GODEBUG
+    - 如果你关心垃圾收集，则可以启用 gctrace=1
+    - Profiler 会启动你的程序，然后通过配置操作系统，来定期中断程序，然后进行采样。比如发送 SIGPROF 信号给被分析的进程，这样进程就会被暂停，然后切换到 Profiler 中进行分析。Profiler 则取得被分析的程序的每个线程的当前位置等信息进行统计，然后恢复程序继续执行。
+  - pprof
+    - 这包含了两部分：
+      - 每个 Go 程序中内置 runtime/pprof 包
+      - 然后用 go tool pprof 来分析性能数据文件
+    - 函数进行性能分析的办法就是使用 testing - `go test -run=XXX -bench=IndexByte -cpuprofile=/tmp/c.p bytes`
+    - `go tool pprof bytes.test /tmp/c.p`来分析
+  - /debug/pprof
+  - perf
+    - 由于现在 Go 已经支持了 Frame Pointer，所以可以和 -toolexec= 配合来对 Go 应用进行性能分析。
+    - `go build -toolexec="perf stat" cmd/compile/internal/gc`
+    - perf record
+      - $ go build -toolexec="perf record -g -o /tmp/p" cmd/compile/internal/gc
+      - $ perf report -i /tmp/p
+  - Flame Graph
+    ```shell
+    $ go build -gcflags=-cpuprofile=/tmp/c.p .
+    $ go-torch $(go tool -n compile) /tmp/c.p
+    ```
+  - go tool trace
+    ```shell
+    $ go test -trace=trace.out path/to/package
+    $ go tool trace [flags] pkg.test trace.out
+    ```
 
 
 
