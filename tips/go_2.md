@@ -1446,9 +1446,47 @@
 - [简单的 redis get 为什么也会有秒级的延迟](https://mp.weixin.qq.com/s/GtVtgTBZxW2ecs7QyDTcEg)
   - redis server 6.0 给 client 返回的 command 命令的响应，在 go-redis/redis v6 版本 parse 会出错：degradation for not caching command response[1]。
   - 每次 parse 都出错，那自然每次 once.Do 都会进 slow path 了，redis cluster 的 client 是全局公用，所以这里的锁是个全局锁，并且锁内有较慢的网络调用
-
-
-
+- [Go 实现 REST API 部分更新](http://russellluo.com/)
+  - 使用指针 [sample](https://go.dev/play/p/XaTbJkJOAk4)
+  - 客户端维护的 FieldMask 
+     ```go
+     type Person struct {
+         Name    string  `json:"name"`
+         Age     int     `json:"age"`
+         Address Address `json:"address"`
+     }
+     
+     type UpdatePersonRequest struct {
+         Person    Person `json:"person"`
+         FieldMask string `json:"field_mask"`
+     }
+     ```
+  - 改用 JSON Patch
+     ```go
+     PATCH /people/1 HTTP/1.1
+     
+     [
+         { 
+             "op": "replace", 
+             "path": "/age", 
+             "value": 25
+         },
+         {
+             "op": "replace",
+             "path": "/address/city",
+             "value": "Guangzhou"
+         }
+     ]
+     ```
+  - 服务端维护的 FieldMask
+    - Go 的 JSON 反序列化其实有两种：
+      - 将 JSON 反序列化为结构体（优势：操作直观方便；不足：有零值问题）
+      - 将 JSON 反序列化为 map[string]interface{}（优势：能够准确表达 JSON 中有无特定字段；不足：操作不够直观方便）
+    - 如果我们只是把 map[string]interface{} 作为一个反序列化的中间结果呢？比如：
+      - 首先将 JSON 反序列化为 map[string]interface{}
+      - 然后用 map[string]interface{} 来充当（服务端维护的）FieldMask
+      - 最后将 map[string]interface{} 解析为结构体（幸运的是，已经有现成的库 [mapstructure](https://github.com/mitchellh/mapstructure) 可以做到！）
+    - [sample](https://github.com/RussellLuo/fieldmask/blob/master/example_partial_update_test.go)
 
 
 
