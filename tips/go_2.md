@@ -1487,7 +1487,43 @@
       - 然后用 map[string]interface{} 来充当（服务端维护的）FieldMask
       - 最后将 map[string]interface{} 解析为结构体（幸运的是，已经有现成的库 [mapstructure](https://github.com/mitchellh/mapstructure) 可以做到！）
     - [sample](https://github.com/RussellLuo/fieldmask/blob/master/example_partial_update_test.go)
-
+- [Go 程序热开关功能](https://mp.weixin.qq.com/s/-QPTRaqN1MzYjk8VP2H1Ew)
+  - 我们经常会有热开关的需求，即特定功能在程序运行中的适当时候对它进行打开或关闭。例如性能分析中使用的 pprof 采样，就是一种典型的热开关
+  - 我们可以将基于接口触发的方式改为信号通知 - 在 linux 系统，可以通过kill -signal_number pid命令向程序发送指定信号。
+    ```go
+    func RegisterSignalForProfiling(sig os.Signal) {
+     ch := make(chan os.Signal)
+     started := false
+     signal.Notify(ch, sig)
+    
+     go func() {
+      var memoryProfile, cpuProfile, traceProfile *os.File
+      for range ch {
+       if started {
+        pprof.StopCPUProfile()
+        trace.Stop()
+        pprof.WriteHeapProfile(memoryProfile)
+        memoryProfile.Close()
+        cpuProfile.Close()
+        traceProfile.Close()
+        started = false
+       } else {
+        cpuProfile, _ = os.Create("cpu.pprof")
+        memoryProfile, _ = os.Create("memory.pprof")
+        traceProfile, _ = os.Create("runtime.trace")
+        pprof.StartCPUProfile(cpuProfile)
+        trace.Start(traceProfile)
+        started = true
+       }
+      }
+     }()
+    }
+    
+    func main() {
+    RegisterSignalForProfiling(syscall.Signal(31))
+    ...
+    }
+    ```
 
 
 
