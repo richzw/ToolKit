@@ -788,6 +788,60 @@
   - TCP/IP详解（卷一）
     - 两端需要用“序列号加一”这个动作来表示对SYN标志位的确认。同样的道理，在TCP挥手阶段，确认号也是要加一的，也就是表示对FIN标志位的确认。
   - 挥手阶段的确认号需要“加一”，这样就可以把对FIN的ACK和之前的普通ACK区分开，避免迟到的ACK报文被认为是对FIN的ACK。而握手也跟挥手一样，采用了相同的做法。
+- [网络基础与性能优化](https://mp.weixin.qq.com/s/9iVzwgpGBm3vZ5ObRFwK5g)
+  - 常用的网络性能指标
+    - 带宽：表示链路的最大传输速率，单位通常为 b/s （比特 / 秒）
+    - 吞吐量：表示单位时间内成功传输的数据量，单位通常为 b/s（比特 / 秒）或者 B/s（字节 / 秒）
+    - 延时：表示从网络请求发出后，一直到收到远端响应，所需要的时间延迟。在不同场景中，这一指标可能会有不同含义。比如，它可以表示，建立连接需要的时间（比如 TCP 握手延时），或一个数据包往返所需的时间（比如 RTT）
+    - PPS：Packet Per Second（包 / 秒），表示以网络包为单位的传输速率。PPS 通常用来评估网络的转发能力基于 Linux 服务器的转发，则容易受网络包大小的影响。
+    - 并发连接数：TCP 可以连接多少
+    - 丢包率：丢包占总包的比重
+    - 重传率：重新传输的网络包比例
+  - Tool
+    - route：用于显示和操作 IP 路由表，通过目标地址 ip 和子网掩码可以分析出发包路径
+      - #route -n 查看路由表
+      - ip route 用ip命令查看和操作IP路由的一些信息
+    - sar -n DEV：显示网络信息，用 sar 分析网络更多的是用于流量和包量的检测和异常发现
+    - nmap：用于网络探测和安全审核的工具
+      ```shell
+      nmap <target ip1 address> <target ip2 address> #快速扫描多个ip地址
+      nmap -p(range) <target IP>    #指定端口和范围
+      ```
+    - iperf 是常用的网络性能测试工具，用来测试 TCP 和 UDP 的吞吐量，以客户端和服务器通信的方式，测试一段时间内的平均吞吐量 - 在服务器执行iperf -s 表示启动服务端，-i 表示汇报间隔，-p 表示监听端口
+  - TCP 选项
+    - SO_LINGER
+      - 指定函数 close 对面向连接的协议如何操作，内核缺省 close 操作是立即返回，如果有数据残留在套接口缓冲区中则系统将试着将这些数据发送给对方。
+      - 设置 l_onoff 为 0，则关闭 linger，close 直接返回，未发送数据将由内核完成传输
+      - 设置 l_onoff 为非 0，l_linger 为 0，则打开 linger，则立即关闭该连接，通过发送 RST 分组 (而不是用正常的 FIN|ACK|FIN|ACK 四个分组) 来关闭该连接。如果发送缓冲区中如果有未发送完的数据，则丢弃。主动关闭一方的 TCP 状态则跳过 TIMEWAIT，直接进入 CLOSED
+      - 设置 l_onoff 为非 0，l_linger 为非 0，将连接的关闭设置一个超时。如果 socket 发送缓冲区中仍残留数据，进程进入睡眠，内核进入定时状态去尽量去发送这些数据。在超时之前，如果所有数据都发送完且被对方确认，内核用正常的 FIN|ACK|FIN|ACK 四个分组来关闭该连接，close() 成功返回。如果超时之时，数据仍然未能成功发送及被确认，用上面的方式来关闭此连接。close() 返回 EWOULDBLOCK
+      - 四次挥手断开连接主动关闭方会进入 TIME_WAIT 状态，TIME_WAIT 状态非常多的话会导致系统负载较大 (TIME_WAIT 本身不占用资源，但是处理 TIME_WAIT 需要耗费资源)，故可以通过设置打开 linger 则直接发送 RST 分组，这种情况不会产生 TIME_WAIT。
+    - SO_REUSEADDR
+      - 通常一个端口释放后会等待两分钟 (TIME_WAIT 时间) 之后才能再被使用，SO_REUSEADDR 是让端口释放后立即就可以被再次使用。
+      - SO_REUSEADDR 用于对 TCP 套接字处于 TIME_WAIT 状态下的 socket，才可以重复绑定使用。server 程序总是应该在调用 bind() 之前设置 SO_REUSEADDR 套接字选项。在 TCP 连接中，主动关闭方会进入 TIME_WAIT 状态，因此这个功能也就是主动方收到被动方发送的 FIN 后，发送 ACK 后就可以断开连接，不再去处理该 ACK 丢失等情况。
+    - TCP_NODELAY/TCP_CHORK
+      - TCP_NODELAY 和 TCP_CHORK 都禁掉了 Nagle 算法，行为需求有些不同：
+        - TCP_NODELAY 不使用 Nagle 算法，不会将小包进行拼接成大包再进行发送，而是直接将小包发送出去
+        - TCP_CORK 适用于需要传送大量数据时，可以提高 TCP 的发行效率。设置 TCP_CORK 后将每次尽量发送最大的数据量，当然也有一个阻塞时间，当阻塞时间到的时候数据会自动传送
+    - TCP_DEFER_ACCPT
+      - 推迟接收，设置该选项后，服务器接收到第一个数据后，才会建立连接。(可以用来防范空连接攻击)
+      - 当设置该选项后，服务器收到 connect 完成 3 次握手后，服务器仍然是 SYN_RECV，而不是 ESTABLISHED 状态，操作系统不会接收数据，直至收到一个数据才会进行 ESTABLISHED 状态。因此如果客户一直没有发送数据，则服务器会重传 SYN/ACK 报文，会有重传次数和超时值的限制。
+    - SO_KEEPALIVE
+      - SO_KEEPALIVE 保持连接检测对方主机是否崩溃，避免（服务器）永远阻塞于 TCP 连接的输入
+      - tcp_keepalive_intvl，保活探测消息的发送频率。默认值为 75s。
+      - tcp_keepalive_probes，TCP 发送保活探测消息以确定连接是否已断开的次数。默认值为 9
+      - tcp_keepalive_time，在 TCP 保活打开的情况下，最后一次数据交换到 TCP 发送第一个保活探测消息的时间，即允许的持续空闲时间。默认值为 7200s（2h）
+    - SO_SNDTIMEO & SO_RCVTIMEO
+      - SO_RCVTIMEO 和 SO_SNDTIMEO ，它们分别用来设置 socket 接收数据超时时间和发送数据超时时间。
+    - buffer size
+      - 增大每个套接字的缓冲区大小 net.core.optmem_max；
+      - 增大套接字接收缓冲区大小 net.core.rmem_max 和发送缓冲区大小 net.core.wmem_max；
+      - 增大 TCP 接收缓冲区大小 net.ipv4.tcp_rmem 和发送缓冲区大小 net.ipv4.tcp_wmem
+    - backlog
+      - 设置 backlog 后，系统会和 / proc/sys/net/core/somaxconn 比较，取较小值作为真正的 backlog
+      - 当已连接队列满后，如果设置 tcp_abort_on_overflow 为 0 表示如果三次握手第三步的时候全连接队列满了那么 server 扔掉 client 发过来的 ack
+      - 当半连接队列满后，如果启用 syncookies (net.ipv4.tcp_syncookies = 1), 新的连接不进入未完成队列, 不受影响. 否则, 服务器不在接受新的连接.
+
+
 
 
 
