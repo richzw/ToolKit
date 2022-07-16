@@ -877,5 +877,39 @@
     - 火焰图中的 TplToStr 模板函数同样占到了比较大的 CPU 耗时，此函数的功能是把用户传来的参数和预制的模板拼出一个新的 string 字符串
       - 可以直接用字符串拼接去代替模板功能
     - 接口流程中有一些不影响主流程的操作完全可以异步化
+- [GO性能优化](https://www.bilibili.com/video/BV1Z64y1m7uc/)
+  - blocking
+    - lock blocking
+      - Do not create sync.Pool object for every request
+    - udp fd lock
+      - push mode -> pull mode
+      - sync metrics -> async metric
+      - one client -> multiple clients
+    - logger fd lock
+      - one file -> multiple files
+      - sync write -> async write
+  - high cpu usage
+    - runtime scheduler
+      - use goroutine pool
+    - garbage collections
+      - merge objects
+      - prt -> values
+      - sync.Pool
+      - heap -> stack
+      - unsafe convert
+    - json 
+      - jsoniter
+  - high MEM usage
+    - heap alloc
+      - sync.Pool
+      - multi-level sync.Pool
+      - map -> slice
+      - offheap
+    - massive g stacks
+      - epoll hack - gnet
+      - subset algorithm
+    
+
+
 
 
