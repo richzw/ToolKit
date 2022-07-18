@@ -37,6 +37,7 @@
           - Headless Service：该服务不会分配Cluster IP，也不通过kube-proxy做反向代理和负载均衡。而是通过DNS提供稳定的网络ID来访问，DNS会将headless service的后端直接解析为podIP列表。主要供StatefulSet中对应POD的序列用。
         - NodePort：除了使用Cluster IP之外，还通过将service的port映射到集群内每个节点的相同一个端口，实现通过nodeIP:nodePort从集群外访问服务。
         - LoadBalancer：和nodePort类似，不过除了使用一个Cluster IP和nodePort之外，还会向所使用的公有云申请一个负载均衡器，实现从集群外通过LB访问服务。在公有云提供的 Kubernetes 服务里，都使用了一个叫作 CloudProvider 的转接层，来跟公有云本身的 API 进行对接。所以，在上述 LoadBalancer 类型的 Service 被提交后，Kubernetes 就会调用 CloudProvider 在公有云上为你创建一个负载均衡服务，并且把被代理的 Pod 的 IP 地址配置给负载均衡服务做后端。
+        - ![img.png](k8s_network_servcietype.png)
     - Endpoints
       - how do Services know which Pods to track, and which Pods are ready to accept traffic? The answer is Endpoints
       - ![img.png](k8s_network_endpoint.png)
@@ -60,24 +61,27 @@
       - kube-proxy 之所以得名，是因为它是一个实际的代理服务器，用于接受连接并将它们代理到 Pod，当前的实现使用 iptables 或 ipvs 规则将数据包重定向到随机选择的后端 Pod，而不通过实际的代理服务器传递它们。
       - Watch Service and Endpoints, link Endpoints(backends) with Service(frontends)
   - K8S network requirement
+    - Every Pod gets its own IP address.
+    - Containers within a Pod share their network namespace ( IP and MAC address ) and therefore can communicate with each other using the loopback address.
     - all pods can communicate with all other pods without using network address translation (NAT)
     - all Nodes can communicate with all Pods without NAT
     - the IP that a Pod sees itself as is the same IP that others see it as
   - Container to Container network
-    ![img.png](k8s_network_pod.png)
+    - ![img.png](k8s_network_pod.png)
     - Containers in a pod has the same network namespace
       - they have same network configuration
       - sharing the same Pod IP address
     - network accessing via loopback or eth0 interface
     - package are always handled in the network namespace
-    ![img.png](k8s_network_container.png)
+    - ![img.png](k8s_network_container.png)
   - Pod to Pod network
     - every Pod has a real IP address and each Pod communicates with other Pods using that IP address.
     - namespaces can be connected using a Linux `Virtual Ethernet Device` or `veth pair` consisting of two virtual interfaces that can be spread over multiple namespaces.
     - A Linux Ethernet bridge is a virtual Layer 2 networking device used to unite two or more network segments, working transparently to connect two networks together.
     - Bridges implement the ARP protocol to discover the link-layer MAC address associated with a given IP address.
-    ![img.png](k8s_network_pod2pod.png)
-    ![img.png](k8s_network_pod2pod_acrossnode.png)
+    - ![img.png](k8s_network_pod2pod.png)
+    - ![img.png](k8s_network_pod2pod_container2con.png)
+    - ![img.png](k8s_network_pod2pod_acrossnode.png)
 
     |  | L2 | Route | Overlay | Cloud |
     | --- | --- | --- | --- | --- |
@@ -88,11 +92,11 @@
       - 它是指构建在另一个网络上的计算机网络，这是一种网络虚拟化技术的形式. Overlay 底层依赖的网络就是 Underlay 网络，这两个概念也经常成对出现
       - Underlay 网络是专门用来承载用户 IP 流量的基础架构层，它与 Overlay 网络之间的关系有点类似物理机和虚拟机
       - 在实践中我们一般会使用虚拟局域网扩展技术（Virtual Extensible LAN，VxLAN）组建 Overlay 网络。在下图中，两个物理机可以通过三层的 IP 网络互相访问
-      ![img_1.png](k8s_network_vxlan.png)
+      - ![img_1.png](k8s_network_vxlan.png)
       - VxLAN 使用虚拟隧道端点（Virtual Tunnel End Point、VTEP）设备对服务器发出和收到的数据包进行二次封装和解封。
       - 虚拟网络标识符（VxLAN Network Identifier、VNI）, VxLAN 会使用 24 比特的 VNI 表示虚拟网络个数，总共可以表示 16,777,216 个虚拟网络，这也就能满足数据中心多租户网络隔离的需求了。
-      ![img.png](k8s_network_vxlan_frame.png)
-      ![img.png](k8s_network_overlay_packet.png)
+      - ![img.png](k8s_network_vxlan_frame.png)
+      - ![img.png](k8s_network_overlay_packet.png)
     - Inside Pod
       ```shell
       IP address
@@ -146,7 +150,7 @@
       ```
   - Pod to Service network
     - Pod IP address - are mutable and will appear and disappear due to scaling up or down
-    - Service assign a single VIP for load balance between a group of
+    - Service assign a single VIP for load balance between a group of Pods
     - [Kube-Proxy](https://mayankshah.dev/blog/demystifying-kube-proxy/)
       - a network proxy that runs on each node in your cluster. It watches Service and Endpoints objects and accordingly updates the routing rules on its host nodes to allow communicating over Services.
       - User Model
@@ -162,6 +166,7 @@
           - IPVS provides better scalability and performance for large clusters.
           - IPVS supports more sophisticated load balancing algorithms than IPTABLES (least load, least connections, locality, weighted, etc.).
           - IPVS supports server health checking and connection retries, etc.
+    - ![img.png](k8s_network_pod2service.png)
     - Using DNS
       - Kubernetes can optionally use DNS to avoid having to hard-code a Service’s cluster IP address into your application.
       - It configures the kubelets running on each Node so that containers use the DNS Service’s IP to resolve DNS names.
@@ -202,7 +207,8 @@
       - Loadbalance
         - Each service needs to have own external IP
         - Typically implemented as NLB
-    ![img.png](k8s_network_alb.png)
+    - ![img.png](k8s_network_alb.png)
+    - ![img.png](k8s_network_internet2service.png)
     - Layer 7
       ```shell
       > kc get svc -n beta -o wide
@@ -238,6 +244,8 @@
       KUBE-MARK-MASQ  all  --  172.20.254.146       0.0.0.0/0            /* beta/word-v5-beta:http */
       DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* beta/word-v5-beta:http */ tcp to:172.20.254.146:3021
       ```
+  - Source: https://medium.com/techbeatly/kubernetes-networking-fundamentals-d30baf8a28c8
+
 
 
 - [CNI](https://platform9.com/blog/the-ultimate-guide-to-using-calico-flannel-weave-and-cilium/)
