@@ -1443,6 +1443,33 @@
   - `GOMEMLIMIT=10737418240 GOGC=off GODEBUG=gctrace=1 ./soft_memory_limit -depth=21`
   - 通过SetMemoryLimit设置一个较大的值，再加上 GOGC=off，可以实现ballast的效果
   - 但是在没有关闭GOGC的情况下，还是有可能会触发很多次的GC,影响性能，这个时候还得GOGC Tuner调优，减少触达MemoryLimit之前的GC次数。
+- [聊聊两个Go即将过时的GC优化策略](https://www.luozhiyun.com/archives/680)
+  - GC
+    - GC几个阶段
+      - sweep termination（清理终止）：会触发 STW ，所有的 P（处理器） 都会进入 safe-point（安全点）；
+      - the mark phase（标记阶段）：恢复程序执行，GC 执行根节点的标记，这包括扫描所有的栈、全局对象以及不在堆中的运行时数据结构；
+      - mark termination（标记终止）：触发 STW，扭转 GC 状态，关闭 GC 工作线程等；
+      - the sweep phase（清理阶段）：恢复程序执行，后台并发清理所有的内存管理单元
+    - 由于标记阶段是要从根节点对堆进行遍历，对存活的对象进行着色标记，因此标记的时间和目前存活的对象有关，而不是与堆的大小有关，也就是堆上的垃圾对象并不会增加 GC 的标记时间
+    - 在什么时候会触发 GC
+      - 监控线程 runtime.sysmon 定时调用；
+        - 后台运行一个线程定时执行 runtime.sysmon 函数，这个函数主要用来检查死锁、运行计时器、调度抢占、以及 GC 等。
+      - 手动调用 runtime.GC 函数进行垃圾收集；
+        - 会获取当前的 GC 循环次数，然后设值为 gcTriggerCycle 模式调用 gcStart 进行循环
+      - 申请内存时 runtime.mallocgc 会根据堆大小判断是否调用；
+      - 上面这三个触发 GC 的地方最终都会调用 gcStart 执行 GC，但是在执行 GC 之前一定会先判断这次调用是否应该被执行，并不是每次调用都一定会执行 GC， 这个时候就要说一下 runtime.gcTrigger中的 test 函数，这个函数负责校验本次 GC 是否应该被执行。
+      - runtime.gcTrigger中的 test 函数最终会根据自己的三个策略
+        - gcTriggerHeap：按堆大小触发，堆大小和上次 GC 时相比达到一定阈值则触发；
+          - 触发 GC 的时机是由上次 GC 时的堆内存大小，和当前堆内存大小值对比的增长率来决定的，这个增长率就是环境变量 GOGC，默认是 100
+          - 可以通过 GODEBUG=gctrace=1,gcpacertrace=1 打印出来
+        - gcTriggerTime：按时间触发，如果超过 forcegcperiod（默认2分钟） 时间没有被 GC，那么会执行GC；
+        - gcTriggerCycle：没有开启垃圾收集，则触发新的循环；
+    - 如果收集器确定它需要减慢分配速度，它将招募应用程序 Goroutines 来协助标记工作。这称为 Mark assist 标记辅助。这也就是为什么在分配内存的时候还需要判断要不要执行 mallocgc 进行 GC
+    - 在进行 Mark assist 的时候 Goroutines 会暂停当前的工作，进行辅助标记工作，这会导致当前 Goroutines 工作的任务有一些延迟。
+  - Go Memory Ballast
+  - Go GC Tuner
+  - Soft Memory Limit
+    - 通过内置的 debug.SetMemoryLimit 函数我们可以调整触发 GC 的堆内存目标值，从而减少 GC 次数，降低GC 时 CPU 占用的目的。
 - [简单的 redis get 为什么也会有秒级的延迟](https://mp.weixin.qq.com/s/GtVtgTBZxW2ecs7QyDTcEg)
   - redis server 6.0 给 client 返回的 command 命令的响应，在 go-redis/redis v6 版本 parse 会出错：degradation for not caching command response[1]。
   - 每次 parse 都出错，那自然每次 once.Do 都会进 slow path 了，redis cluster 的 client 是全局公用，所以这里的锁是个全局锁，并且锁内有较慢的网络调用
@@ -1487,43 +1514,7 @@
       - 然后用 map[string]interface{} 来充当（服务端维护的）FieldMask
       - 最后将 map[string]interface{} 解析为结构体（幸运的是，已经有现成的库 [mapstructure](https://github.com/mitchellh/mapstructure) 可以做到！）
     - [sample](https://github.com/RussellLuo/fieldmask/blob/master/example_partial_update_test.go)
-- [Go 程序热开关功能](https://mp.weixin.qq.com/s/-QPTRaqN1MzYjk8VP2H1Ew)
-  - 我们经常会有热开关的需求，即特定功能在程序运行中的适当时候对它进行打开或关闭。例如性能分析中使用的 pprof 采样，就是一种典型的热开关
-  - 我们可以将基于接口触发的方式改为信号通知 - 在 linux 系统，可以通过kill -signal_number pid命令向程序发送指定信号。
-    ```go
-    func RegisterSignalForProfiling(sig os.Signal) {
-     ch := make(chan os.Signal)
-     started := false
-     signal.Notify(ch, sig)
-    
-     go func() {
-      var memoryProfile, cpuProfile, traceProfile *os.File
-      for range ch {
-       if started {
-        pprof.StopCPUProfile()
-        trace.Stop()
-        pprof.WriteHeapProfile(memoryProfile)
-        memoryProfile.Close()
-        cpuProfile.Close()
-        traceProfile.Close()
-        started = false
-       } else {
-        cpuProfile, _ = os.Create("cpu.pprof")
-        memoryProfile, _ = os.Create("memory.pprof")
-        traceProfile, _ = os.Create("runtime.trace")
-        pprof.StartCPUProfile(cpuProfile)
-        trace.Start(traceProfile)
-        started = true
-       }
-      }
-     }()
-    }
-    
-    func main() {
-    RegisterSignalForProfiling(syscall.Signal(31))
-    ...
-    }
-    ```
+
 
 
 
