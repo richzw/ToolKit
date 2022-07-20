@@ -805,7 +805,24 @@
   - chan 关闭的原则
     - Don't close a channel from the receiver side 不要在消费者端关闭 chan
     - Don't close a channel if the channel has multiple concurrent senders  有多个并发写的生产者时也别关
-
+- [Data Race Patterns in Go](https://eng.uber.com/data-race-patterns-in-go/)
+  - Go’s design choice to transparently capture free variables by reference in goroutines is a recipe for data races
+    - Data race due to loop index variable capture
+    - Data race due to idiomatic `err` variable capture. 
+    - ![img.png](go_dr_err_capture.png)
+    - Data race due to named return variable capture.
+    - ![img.png](go_dr_name_variable_capture.png)
+  - Slices are confusing types that create subtle and hard-to-diagnose data races
+    - ![img.png](go_dr_slice_ex.png)
+  - Concurrent accesses to Go’s built-in, thread-unsafe maps cause frequent data races 
+  - Go developers often err on the side of pass-by-value (or methods over values), which can cause non-trivial data races
+    - ![img.png](go_dr_pass_by_value.png)
+    - A converse of this situation happens when developers accidentally implement a method where the receiver is a pointer to the structure instead of a value/copy of the structure. In these situations, multiple goroutines invoking the method end up accidentally sharing the same internal state of the structure, whereas the developer intended otherwise. Here, also, the caller is unaware that the value type was transparently converted to a pointer type at the receiver.
+  - Mixed use of message passing (channels) and shared memory makes code complex and susceptible to data races
+    - ![img.png](go_dr_share_memory.png)
+  - Go offers more leeway in its group synchronization construct sync.WaitGroup, but the incorrect placement of Add/Done methods leads to data races
+  - Data race due to defer statement ordering leading to incorrect WaitGroup.Done() placement.
+    - ![img.png](go_dr_defer_order.png)
 
 
 
