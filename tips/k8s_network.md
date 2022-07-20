@@ -59,6 +59,13 @@
       - Run on every Node in the cluster
       - 它负责监视 API Server 以了解Service和 pod 定义的更改，以保持整个网络配置的最新状态。当一个Service由多个 pod 时，proxy会在这些 pod 之间负载平衡。
       - kube-proxy 之所以得名，是因为它是一个实际的代理服务器，用于接受连接并将它们代理到 Pod，当前的实现使用 iptables 或 ipvs 规则将数据包重定向到随机选择的后端 Pod，而不通过实际的代理服务器传递它们。
+        - Kubernetes v1.1 添加了 iptables 模式代理，在 Kubernetes v1.2 中，kube-proxy 的 iptables 模式成为默认设置。 Kubernetes v1.8 添加了 ipvs 代理模式。
+        - ipvs是工作在内核态的4层负载均衡，基于内核底层netfilter实现，netfilter主要通过各个链的钩子实现包处理和转发
+        - 由于ipvs工作在内核态，只处理四层协议，因此只能基于路由或者NAT进行数据转发，可以把ipvs当作一个特殊的路由器网关，这个网关可以根据一定的算法自动选择下一跳。
+        - IPVS vs IPTABLES
+          - iptables 使用链表，ipvs 使用哈希表；
+          - iptables 只支持随机、轮询两种负载均衡算法而 ipvs 支持的多达 8 种；
+          - ipvs 还支持 realserver 运行状况检查、连接重试、端口映射、会话保持等功能。
       - Watch Service and Endpoints, link Endpoints(backends) with Service(frontends)
   - K8S network requirement
     - Every Pod gets its own IP address.
