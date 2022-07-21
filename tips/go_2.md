@@ -1514,7 +1514,13 @@
       - 然后用 map[string]interface{} 来充当（服务端维护的）FieldMask
       - 最后将 map[string]interface{} 解析为结构体（幸运的是，已经有现成的库 [mapstructure](https://github.com/mitchellh/mapstructure) 可以做到！）
     - [sample](https://github.com/RussellLuo/fieldmask/blob/master/example_partial_update_test.go)
-
+- [noCopy 是什么机制](https://mp.weixin.qq.com/s/ptVPpsWsQkgmRZmlMlFfdA)
+  - 当我们用 go vet 检查静态问题的时候，你是否遇到 noCopy 相关的错误  assignment copies lock value to m: sync.Mutex
+  - 为什么锁不能拷贝
+    - 变量资源本身带状态且操作要配套的不能拷贝。
+    - 针对需要配套操作的变量类型，基本上都会要求 noCopy 的，否则拷贝出来就乱套了
+  - Go 里面通过实现一个 noCopy 的结构体，然后嵌入这个结构体就能让 go vet 检查出来。
+  - Mutex Lock，Cond，Pool，WaitGroup 。这些资源都严格要求操作要配套
 
 
 
