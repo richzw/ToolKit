@@ -344,7 +344,8 @@
     $ go test -trace=trace.out path/to/package
     $ go tool trace [flags] pkg.test trace.out
     ```
-
+- [Go 应用的持续性分析](https://mp.weixin.qq.com/s/4MnPx3AoVu_fb3UeM1tCNg)
+  - [Pyroscope](https://github.com/pyroscope-io/pyroscope)
 
 
 
