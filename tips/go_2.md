@@ -1521,7 +1521,7 @@
     - 针对需要配套操作的变量类型，基本上都会要求 noCopy 的，否则拷贝出来就乱套了
   - Go 里面通过实现一个 noCopy 的结构体，然后嵌入这个结构体就能让 go vet 检查出来。
   - Mutex Lock，Cond，Pool，WaitGroup 。这些资源都严格要求操作要配套
-
+- [A Guide to the Go Garbage Collector](https://colobu.com/2022/07/16/A-Guide-to-the-Go-Garbage-Collector/)
 
 
 
