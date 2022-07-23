@@ -1236,6 +1236,42 @@
     - MySQL重启不会导致同一个binlog里面出现两个相同Xid，但若global_query_id达到上限，就会继续从0开始计数。理论上还是会出现同一个binlog里面出现相同Xid。
     - Xid只需要不在同一个binlog文件中出现重复值即可。虽然理论上会出现重复值，但是概率极小，可以忽略不计
     - InnoDB的max_trx_id 递增值每次MySQL重启都会被保存起来，所以我们文章中提到的脏读的例子就是一个必现的bug，好在留给我们的时间还很充裕
+- [MySQL 自增列 Duplicate Error 问题分析](https://fanlv.wiki/2022/05/25/mysql-insert-auto-incre/)
+  - 每次都是在数据迁移的时候，报这个PK Duplicate Error的错误，基本肯定是我们做数据迁移导致的。引出几个问题：
+     - 生成自增ID实现方式？并发生成ID会不会冲突？
+     - 生成自增ID加锁机制粒度，锁的释放机制是啥？
+     - 生成自增ID和唯一索引冲突检查流程是怎么样的？
+  - Auto-Incr 背景知识
+    - AUTO_INCREMENT相关特性
+      - InnoDB提供了一种可配置的锁定机制，可以显着提高向具有AUTO_INCREMENT列的表添加行的SQL语句的可伸缩性和性能。
+      - 定义为AUTO_INCREMENT的列，必须是索引的第一列或者是唯一列，因为需要使用SELECT MAX(ai_col)查找以获得最大值列值。不这样定义，Create Table的时候会报1075 - Incorrect table definition; there can be only one auto column and it must be defined as a key错误。
+      - AUTO_INCREMENT的列，可以只定义为普通索引，不一定要是PRIMARY KEY或者UNIQUE，但是为了保证AUTO_INCREMENT的唯一性，建议定义为PK或者UNIQUE
+    - AUTO_INCREMENT 锁模式
+      - 0：传统模式（traditional）
+        - 在这一模式下，所有的insert语句(insert like) 都要在语句开始的时候得到一个表级的auto_inc锁，在语句结束的时候才释放这把锁，注意呀，这里说的是语句级而不是事务级的，一个事务可能包涵有一个或多个语句。
+        - 它能保证值分配的可预见性，与连续性，可重复性，这个也就保证了insert语句在复制到slave的时候还能生成和master那边一样的值(它保证了基于语句复制的安全)。
+        - 由于在这种模式下auto_inc锁一直要保持到语句的结束，所以这个就影响到了并发的插入。
+      - 1：连续模式（consecutive）
+        - 在这种模式下，对于simple insert语句，MySQL会在语句执行的初始阶段将一条语句需要的所有自增值会一次性分配出来，并且通过设置一个互斥量来保证自增序列的一致性，一旦自增值生成完毕，这个互斥量会立即释放，不需要等到语句执行结束。所以，在consecutive模式，多事务并发执行simple insert这类语句时， 相对traditional模式，性能会有比较大的提升。
+        - 由于一开始就为语句分配了所有需要的自增值，那么对于像Mixed-mode insert这类语句，就有可能多分配了一些值给它，从而导致自增序列出现空隙。而traditional模式因为每一次只会为一条记录分配自增值，所以不会有这种问题。
+        - 另外，对于Bulk inserts语句，依然会采取AUTO-INC锁。所以，如果有一条Bulk inserts语句正在执行的话，Simple inserts也必须等到该语句执行完毕才能继续执行。
+      - 2：交错模式（interleaved）
+        - 在这种模式下，对于所有的insert-like语句，都不会存在表级别的AUTO-INC锁，意味着同一张表上的多个语句并发时阻塞会大幅减少，这时的效率最高。
+        - 但是会引入一个新的问题：当binlog_format为statement时，这时的复制没法保证安全，因为批量的insert，比如insert ..select..语句在这个情况下，也可以立马获取到一大批的自增ID值，不必锁整个表，slave在回放这个SQL时必然会产生错乱（binlog使用row格式没有这个问题）。
+    - Others
+      - 自增值的生成后是不能回滚的，所以自增值生成后，事务回滚了，那么那些已经生成的自增值就丢失了，从而使自增列的数据出现空隙。
+      - 正常情况下，自增列是不存在0这个值的。所以，如果插入语句中对自增列设置的值为0或者null，就会自动应用自增序列。那么，如果想在自增列中插入为0这个值，怎么办呢？可以通过将SQL Mode设置为NO_AUTO_VALUE_ON_ZERO即可。
+      - 在MySQL 5.7以及更早之前，自增序列的计数器(auto-increment counter)是保存在内存中的。auto-increment counter在每次MySQL重新启动后通过类似下面的这种语句进行初始化：
+         SELECT MAX(AUTO_INC_COLUMN) FROM table_name FOR UPDATE
+      - 而从MySQL 8开始，auto-increment counter被存储在了redo log中，并且每次变化都会刷新到redo log中。另外，我们可以通过ALTER TABLE … AUTO_INCREMENT = N来主动修改auto-increment counter。
+    - 生产环境相关配置
+      - 配置是innodb_autoinc_lock_mode = 2，binlog_format = ROW
+  - Insert 流程源码分析
+    - mysql_parse -> mysql_execute_command -> Sql_cmd_insert::execute -> Sql_cmd_insert::mysql_insert -> write_record -> handler::ha_write_row -> ha_innobase::write_row
+    - 这里我们主要关注innodb层的数据写入函数ha_innobase::write_row 相关的代码就好了，生成自增ID和唯一索引冲突检查都是在这个函数里面完成的。
+  - Summary
+    - innodb_autoinc_lock_mode=2的时候，MySQL是申请到ID以后就会释放锁。并发生成自增ID不会冲突。
+    - MySQL是先生成ID，再去做插入前的唯一索引冲突检查。如果一部分Client用MySQL自增ID，一部分Client用自己生成的ID，是有可能导致自增ID的Client报PK Duplicate Error的。
 
 
 
