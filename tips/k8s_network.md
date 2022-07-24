@@ -559,8 +559,49 @@
         - target：具有很强扩展性的自定义匹配后行为。
   - conntrack
     - 仅仅通过 3、4 层的首部信息对数据包进行过滤是不够的，有时候还需要进一步考虑连接的状态。netfilter 通过另一内置模块 conntrack 进行连接跟踪（connection tracking），以提供根据连接过滤、地址转换（NAT）等更进阶的网络过滤功能。由于需要对连接状态进行判断，conntrack 在整体机制相同的基础上，又针对协议特点有单独的实现。
-
-
+- [云原生虚拟网络 tun/tap & veth-pair](https://www.luozhiyun.com/archives/684)
+  - 主流的虚拟网卡方案有tun/tap和veth两种
+  - tun/tap 出现得更早
+    - tun 和 tap 是两个相对独立的虚拟网络设备，它们作为虚拟网卡，除了不具备物理网卡的硬件功能外，它们和物理网卡的功能是一样的，此外tun/tap负责在内核网络协议栈和用户空间之间传输数据。
+      - tun 设备是一个三层网络层设备，从 /dev/net/tun 字符设备上读取的是 IP 数据包，写入的也只能是 IP 数据包，因此常用于一些点对点IP隧道，例如OpenVPN，IPSec等；
+      - tap 设备是二层链路层设备，等同于一个以太网设备，从 /dev/tap0 字符设备上读取 MAC 层数据帧，写入的也只能是 MAC 层数据帧，因此常用来作为虚拟机模拟网卡使用；
+      - tap设备是一个二层设备所以通常接入到 Bridge上作为局域网的一个节点，tun设备是一个三层设备通常用来实现 vpn。
+    - 功能
+      - 一个是连接其它设备（虚拟网卡或物理网卡）和 Bridge 这是 tap 设备的作用；
+      - 另一个是提供用户空间程序去收发虚拟网卡上的数据，这是 tun 设备的作用。
+    - 云原生虚拟网络中， flannel 的 UDP 模式中的 flannel0 就是一个 tun 设备
+      - 发现 tun/tap 设备是一个虚拟网络设备，负责数据转发，但是它需要通过文件作为传输通道，这样不可避免的引申出 tun/tap 设备为什么要转发两次，这也是为什么 flannel 设备 UDP 模式下性能不好的原因，导致了后面这种模式被废弃掉。
+    - OpenVPN 也利用到了 tun/tap 进行数据的转发
+  - veth 实际上不是一个设备，而是一对设备，因而也常被称作 Veth-Pair。
+    - Docker 中的 Bridge 模式就是依靠 veth-pair 连接到 docker0 网桥上与宿主机乃至外界的其他机器通信的
+    - veth 作为一个二层设备，可以让两个隔离的网络名称空间之间可以互相通信，不需要反复多次经过网络协议栈， 
+    - veth pair 是一端连着协议栈，另一端彼此相连的，数据之间的传输变得十分简单，这也让 veth 比起 tap/tun 具有更好的性能。
+     ```shell
+     # 创建两个namespace
+     ip netns add ns1
+     ip netns add ns2
+     
+     # 通过ip link命令添加vethDemo0和vethDemo1
+     ip link add vethDemo0 type veth peer name vethDemo1
+     
+     # 将 vethDemo0 vethDemo1 分别加入两个 ns
+     ip link set vethDemo0 netns ns1
+     ip link set vethDemo1 netns ns2
+     
+     # 给两个 vethDemo0 vethDemo1  配上 IP 并启用
+     ip netns exec ns1 ip addr add 10.1.1.2/24 dev vethDemo0
+     ip netns exec ns1 ip link set vethDemo0 up
+     
+     ip netns exec ns2 ip addr add 10.1.1.3/24 dev vethDemo1
+     ip netns exec ns2 ip link set vethDemo1 up
+     
+     #我们可以看到 namespace 里面设置好了各自的虚拟网卡以及对应的ip：
+     ip netns exec ns1 ip addr  
+     #我们 ping vethDemo1 设备的 ip：
+     ip netns exec ns1 ping 10.1.1.3
+     
+     ip netns exec ns1 tcpdump -n -i vethDemo0 
+     ```
 
 
 
