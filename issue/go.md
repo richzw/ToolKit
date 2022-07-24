@@ -823,6 +823,79 @@
   - Go offers more leeway in its group synchronization construct sync.WaitGroup, but the incorrect placement of Add/Done methods leads to data races
   - Data race due to defer statement ordering leading to incorrect WaitGroup.Done() placement.
     - ![img.png](go_dr_defer_order.png)
+- [一次线上内存使用率异常问题排查](https://fanlv.wiki/2022/06/02/golang-pprof-mem/)
+  - 背景
+    - 某个集群内存的RSS使用率一直在80%左右，他用的是8核16G. 但是在pprof里面查的堆内存才使用了6.3G左右，程序里面主要用了6G的LocalCache所以heap用了6.3G是符合预期的。
+  - 基础知识
+    - TCMalloc 算法
+      - TCMalloc是用来替代传统的malloc内存分配函数。它有减少内存碎片，适用于多核，更好的并行性支持等特性
+    - mmap 函数
+      - mmap它的主要功能是将一个虚拟内存区域与一个磁盘上的文件关联起来. 就是可以将一个文件，映射到一段虚拟内存，写内存的时候操作系统会自动同步内存的内容到文件。内存同步到磁盘，还涉及到一个PageCache的概念
+      - 文件可以是磁盘上的一个实体文件，比如kafka写日志文件的时候，就用了mmap
+      - 文件也可以是一个匿名文件，这种场景mmap不会去写磁盘，主要用于内存申请的场景。比如调用malloc函数申请内存，当申请的大小超过MMAP_THRESHOLD（默认是128K）大小，内核就会用mmap去申请内存。
+      - 介绍mmap，就会说到zero copy，就是相对于标准IO来说少了一次内存Copy的开销。
+      - ![img.png](go_mmap_zero_copy.png)
+      - mmap申请的内存不在虚拟地址空间的堆区，在内存映射段（Memory Mapping Region）
+      - ![img.png](go_mmap_mmr.png)
+    - Golang 内存分配
+      - 用的 TCMalloc（Thread-Caching Malloc）算法, 简单点说就是Golang是使用 mmap 函数去操作系统申请一大块内存，然后把内存按照 0~32KB``68个 size 类型的mspan，每个mspan按照它自身的属性 Size Class 的大小分割成若干个object
+      - mspan：Go中内存管理的基本单元，是由一片连续的8KB的页组成的大块内存，每个mspan按照它自身的属性Size Class的大小分割成若干个object，mspan的Size Class共有68种（算上0） , numSpanClasses = _NumSizeClasses << 1 (因为需要区分需要GC和不需要GC的)
+      - mcache：每个工作线程都会绑定一个mcache，本地缓存可用的mspan资源。
+      - mcentral：为所有 mcache提供切分好的 mspan资源。需要加锁
+      - mheap：代表Go程序持有的所有堆空间，Go程序使用一个mheap的全局对象_mheap来管理堆内存。
+    - TCMalloc 的内存浪费
+      - Golang的 sizeclasses.go 源码里面已经给我们已经计算了出每个size的tail waste和max waste比例
+    - Go 查看内存使用情况几种方式
+      - 执行前添加系统环境变量GODEBUG='gctrace=1'来跟踪打印垃圾回收器信息
+      - 代码中使用runtime.ReadMemStats来获取程序当前内存的使用情况
+      - 通过pprof获取
+    - Sysmon 监控线程
+      - Go Runtime在启动程序的时候，会创建一个独立的M作为监控线程，称为sysmon，它是一个系统级的daemon线程。这个sysmon独立于GPM之外，也就是说不需要P就可以运行
+      - sysmon主要如下几件事
+        - 释放闲置超过5分钟的span物理内存，scavenging。（Go 1.12之前）
+        - 如果超过两分钟没有执行垃圾回收，则强制执行GC。
+        - 将长时间未处理的netpoll结果添加到任务队列
+        - 向长时间运行的g进行抢占
+        - 收回因为syscall而长时间阻塞的p
+  - 问题排查过程
+    - 内存泄露？
+      - 服务内存一周内一直都是在80%~85%左右波动，然后pprof看的heap的使用也是符合预期的。看了下程序的Runtime监控，容器的内存监控，都是正常的。基本可以排除内存泄露的可能性。
+    - madvise
+      - GO 1.12 ~ Go 1.15 版本，被提到很多次的问题。
+      - madvise() 函数建议内核,在从addr指定的地址开始,长度等于len参数值的范围内,该区域的用户虚拟内存应遵循特定的使用模式。内核使用这些信息优化与指定范围关联的资源的处理和维护过程。
+        - MADV_FREE ：（Linux 4.5以后开始支持这个特性），内核在当出现内存压力时才会主动释放这块内存。
+        - MADV_DONTNEED：预计未来长时间不会被访问，可以认为应用程序完成了对这部分内容的访问，因此内核可以立即释放与之相关的资源。
+      - Go Runtime 对 madvise 的使用
+        - 在Go 1.12版本的时候，为了提高内存的使用效率，把madvise的参数从MADV_DONTNEED改成MADV_FREE
+        - 使用MADV_FREE的问题是，Golang程序释放的内存，操作系统并不会立即回收，只有操作系统内存紧张的时候，才会主动去回收，而我们的程序，都是跑在容器中的，所以造成了，我们容器内存使用快满了，但是物理机的内存还有很多内存，导致的现象就是用pprof看的内存不一样跟看的RES相差巨大。
+    - memory scavenging
+      - Go把内存归还给系统的操作叫做scavenging。在Go程序执行过程中，当对象释放的时候，对象占用的内存并没有立即返还给操作系统(为了提高内存分配效率，方式归还以后又理解需要申请)，而是需要等待GC（定时或者条件触发）和scavenging（定时或者条件触发）才会把空闲的内存归还给操作系统。
+      - 当然我们也可以在代码里面调用debug.FreeOSMemory()来主动释放内存。debug.FreeOSMemory()的功能是强制进行垃圾收集，然后尝试将尽可能多的内存返回给操作系统
+    - GC 触发机制
+      - GO的GC触发可以分为主动触发和被动触发
+        - 主动触发就是在代码里面主动执行runtime.GC()，线上环境我们一般很少主动触发。
+        - 这里我们主要讲下被动触发，被动触发有两种情况：
+          - 当前内存分配达到一定比例则触发，可以通过环境变量GOGC或者代码中调用runtime.SetGCPercent来设置
+          - 定时触发GC，这个是sysmon线程里面干的时区，一般是2分钟（runtime中写死的）内没有触发GC，会强制执行一次GC
+    - scavenging 触发机制
+      - GO 1.12之前是通过定时触发，2.5min会执行一次scavenge，然后会回收超过5分钟内没有使用过的mspan
+      - 这样会有个问题是，如果不停的有大量内存申请和释放，会导致mspan内存一直不会释放给操作系统（因为不停被使用然后释放），导致堆内存监控和RSS监控不一致
+  - 结论
+    - 我们知道了pprof抓的堆内存的大小和RSS不一致，有几种可能：
+      - 是程序申请的内存还没有被GC。
+      - 内存虽然被GO执行了GC，但是可能并没有归还给操作系统（scavenging）
+    - `curl http://ip:port/debug/pprof/heap?debug=1 | grep Heap`
+      - HeapInuse： 堆上使用中的mspan大小。
+      - HeapReleased：归还了多少内存给操作系统。
+      - HeapIdle：空闲的mspan大小。HeapIdle - HeapReleased 等于runtime持有了多少个空闲的mspan，这部分还没有释放给操作系统
+    - 为什么我们程序的localcache大小设置的只有了6G，实际heap使用了10.88G，因为HeapInuse除了程序真正使用的内存，还包括：
+      - 程序释放的内存，但是还没有被GC。这部分内存还是算在HeapInuse中（这个应该是大头）。
+      - 上面说的mspan的max waste和tail waste这部分也在HeapInuse（这个应该很少）。
+      - 假设一个8k的mspan上只使用了一个大小为8Byte的obj，这个在HeapInuse会算8K。
+
+
+
+
 
 
 
