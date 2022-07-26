@@ -228,10 +228,10 @@
         bucket.lastTokenSec = time.Now().Unix()
      }
      ```
-
-  `golang.org/x/time/rate`。该限流器也是基于 Token Bucket(令牌桶) 实现的。
-  `uber-go/ratelimit`也是一个很好的选择，与Golang官方限流器不同的是Uber的限流器是通过漏桶算法实现的
-  [Ref](https://mp.weixin.qq.com/s/dJ3hiuA-8BdNF_ENL-WIUg)
+  - ![img.png](micro_service_ratelimit_gw.png)
+  - `golang.org/x/time/rate`。该限流器也是基于 Token Bucket(令牌桶) 实现的。
+  - `uber-go/ratelimit`也是一个很好的选择，与Golang官方限流器不同的是Uber的限流器是通过漏桶算法实现的
+  - [Ref](https://mp.weixin.qq.com/s/dJ3hiuA-8BdNF_ENL-WIUg)
   ```go
     type Limiter struct {
     mu     sync.Mutex
