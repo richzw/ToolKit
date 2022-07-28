@@ -148,24 +148,31 @@ fasthttp 它几乎把所有的对象都用sync.Pool维护。
 - Write tests and benchmarks for hot paths.
 - Avoid conversion between []byte and string, since this may result in memory allocation+copy. Fasthttp API provides functions for both []byte and string - use these functions instead of converting manually between []byte and string. There are some exceptions - see this wiki page for more details.
 
-Design Details
+[Design Details](https://www.jianshu.com/p/12f3955c7e1c)
 --------------
 
-![img.png](fasthttp.png)
+- ![img.png](fasthttp.png)
+- fasthttp设计了一套机制，目的是尽量复用goroutine，而不是每次都创建新的goroutine。fasthttp的Server accept一个conn之后，会尝试从workerpool中的ready切片中取出一个channel，该channel与某个worker goroutine一一对应。一旦取出channel，就会将accept到的conn写到该channel里，而channel另一端的worker goroutine就会处理该conn上的数据读写。当处理完该conn后，该worker goroutine不会退出，而是会将自己对应的那个channel重新放回workerpool中的ready切片中，等待这下一次被取出。
+- 我们看到fasthttp的模型不太适合这种连接连上后进行持续“饱和”请求的场景，更适合短连接或长连接但没有持续饱和请求，在后面这样的场景下，它的goroutine复用模型才能更好的得以发挥。
+- 但即便“退化”为了net/http模型，fasthttp的性能依然要比net/http略好，这是为什么呢？这些性能提升主要是fasthttp在内存分配层面的优化trick的结果，比如大量使用sync.Pool，比如避免在[]byte和string互转等。
+- fasthttp.Server中的Concurrency可以用来限制workerpool中并发处理的goroutine的个数，但由于每个goroutine只处理一个连接，当Concurrency设置过小时，后续的连接可能就会被fasthttp拒绝服务。因此fasthttp的默认Concurrency为
+   `const DefaultConcurrency = 256 * 1024`
 
-  fasthttp设计了一套机制，目的是尽量复用goroutine，而不是每次都创建新的goroutine。fasthttp的Server accept一个conn之后，会尝试从workerpool中的ready切片中取出一个channel，该channel与某个worker goroutine一一对应。一旦取出channel，就会将accept到的conn写到该channel里，而channel另一端的worker goroutine就会处理该conn上的数据读写。当处理完该conn后，该worker goroutine不会退出，而是会将自己对应的那个channel重新放回workerpool中的ready切片中，等待这下一次被取出。
+- ![img.png](fasthttp_details.png)
+- 启动监听；
+- 循环监听端口获取连接；
+- 获取到连接之后首先会去 ready 队列里获取 workerChan，获取不到就会去对象池获取；
+- 将监听的连接传入到 workerChan 的 channel 中；
+- workerChan 有一个 Goroutine 一直循环获取 channel 中的数据，获取到之后就会对请求进行处理然后返回。
+- 上面有提到 workerChan 其实就是一个连接处理对象，这个对象里面有一个 channel 用来传递连接；每个 workerChan 在后台都会有一个 Goroutine 循环获取 channel 中的连接，然后进行处理。如果没有设置最大同时连接处理数的话，默认是 256 * 1024个。这样可以在并发很高的时候还可以同时保证对外提供服务。
 
-我们看到fasthttp的模型不太适合这种连接连上后进行持续“饱和”请求的场景，更适合短连接或长连接但没有持续饱和请求，在后面这样的场景下，它的goroutine复用模型才能更好的得以发挥。
+- [优化点](https://www.luozhiyun.com/archives/574)
+  - 在实现上还通过 sync.Pool 来大量的复用对象，减少内存分配，如： workerChanPool 、ctxPool 、readerPool、writerPool 等等多大30多个 sync.Pool 。
+  - 除了复用对象，fasthttp 还会切片，通过 `s = s[:0]`和 `s = append(s[:0], b…)`来减少切片的再次创建。
+  - fasthttp 由于需要和 string 打交道的地方很多，所以还从很多地方尽量的避免[]byte到string转换时带来的内存分配和拷贝带来的消耗 
+  - 控制异步 Goroutine 的同时处理数量，最大默认是 256 * 1024个
 
-但即便“退化”为了net/http模型，fasthttp的性能依然要比net/http略好，这是为什么呢？这些性能提升主要是fasthttp在内存分配层面的优化trick的结果，比如大量使用sync.Pool，比如避免在[]byte和string互转等。
 
-fasthttp.Server中的Concurrency可以用来限制workerpool中并发处理的goroutine的个数，但由于每个goroutine只处理一个连接，当Concurrency设置过小时，后续的连接可能就会被fasthttp拒绝服务。因此fasthttp的默认Concurrency为
 
-`const DefaultConcurrency = 256 * 1024`
-
-Source
--------
-
-- https://www.jianshu.com/p/12f3955c7e1c
 
 
