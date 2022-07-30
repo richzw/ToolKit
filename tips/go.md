@@ -1561,6 +1561,75 @@
     - 如果解锁一个未上锁的锁直接panic，因为没加锁mutexLocked的值为0，解锁时进行mutexLocked - 1操作，这个操作会让整个互斥锁魂村，所以需要有这个判断
     - 如果锁处于饥饿模式直接唤醒等待队列队头的waiter
     - 如果锁处于正常模式下，没有等待的goroutine可以直接退出，如果锁已经处于锁定状态、唤醒状态、饥饿模式则可以直接退出，因为已经有被唤醒的 goroutine 获得了锁.
+- [实现一个互斥锁](https://colobu.com/2017/03/09/implement-TryLock-in-Go/)
+  - [channel](https://mp.weixin.qq.com/s/kakmyZtiMceqXdszJv4OYg)
+    ```go
+    / 使用chan实现互斥锁
+    type Mutex struct {
+        ch chan struct{}
+    }
+    
+    // 使用锁需要初始化
+    func NewMutex() *Mutex {
+        mu := &Mutex{make(chan struct{}, 1)}
+        mu.ch <- struct{}{}
+        return mu
+    }
+    
+    // 请求锁，直到获取到
+    func (m *Mutex) Lock() {
+        <-m.ch
+    }
+    
+    // 解锁
+    func (m *Mutex) Unlock() {
+        select {
+        case m.ch <- struct{}{}:
+        default:
+            panic("unlock of unlocked mutex")
+        }
+    }
+    // 尝试获取锁
+    func (m *Mutex) TryLock() bool {
+    select {
+        case <-m.ch:
+            return true
+        default:
+    }
+        return false
+    }
+    
+    // 加入一个超时的设置
+    func (m *Mutex) LockTimeout(timeout time.Duration) bool {
+        timer := time.NewTimer(timeout)
+        select {
+            case <-m.ch:
+                timer.Stop()
+                return true
+            case <-timer.C:
+        }
+        return false
+    }
+    ```
+  - spinlock
+    ```go
+    type spinLock uint32
+    func (sl *spinLock) Lock() {
+    	for !atomic.CompareAndSwapUint32((*uint32)(sl), 0, 1) {
+    		runtime.Gosched() //without this it locks up on GOMAXPROCS > 1
+    	}
+    }
+    func (sl *spinLock) Unlock() {
+    	atomic.StoreUint32((*uint32)(sl), 0)
+    }
+    func (sl *spinLock) TryLock() bool {
+    	return atomic.CompareAndSwapUint32((*uint32)(sl), 0, 1)
+    }
+    func SpinLock() sync.Locker {
+    	var lock spinLock
+    	return &lock
+    }
+    ```
 - [在Go中如何正确重试请求](https://www.luozhiyun.com/archives/677)
   - 对于网络通信失败的处理分为以下几步：
     - 感知错误。通过不同的错误码来识别不同的错误，在HTTP中status code可以用来识别不同类型的错误；
