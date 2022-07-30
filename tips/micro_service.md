@@ -813,6 +813,21 @@
   - 接口合并或者说考虑批量处理思想
   - 接口实现过程中，恰当使用缓存
   - 接口考虑[幂等性](https://mp.weixin.qq.com/s?__biz=Mzg3NzU5NTIwNg==&mid=2247497427&idx=1&sn=2ed160c9917ad989eee1ac60d6122855&chksm=cf2229faf855a0ecf5eb34c7335acdf6420426490ee99fc2b602d54ff4ffcecfdab24eeab0a3&token=1260947715&lang=zh_CN&scene=21#wechat_redirect)
+    - 设计
+      - 全局的唯一性ID - snowflake
+      - select+insert+主键/唯一索引冲突 
+      - 直接insert + 主键/唯一索引冲突
+      - 状态机幂等 - 很多业务表，都是有状态的，比如转账流水表，就会有0-待处理，1-处理中、2-成功、3-失败状态
+      - 抽取防重表 - 
+      - token
+      - 悲观锁(如select for update)
+      - 乐观锁
+      - 分布式锁
+    - [方案](https://mp.weixin.qq.com/s/BZhrSJKbItKZ7zzK3MpSDA)
+      - 对于下单等存在唯一主键的，可以使用“唯一主键方案”的方式实现。
+      - 对于更新订单状态等相关的更新场景操作，使用“乐观锁方案”实现更为简单。
+      - 对于上下游这种，下游请求上游，上游服务可以使用“下游传递唯一序列号方案”更为合理。
+      - 类似于前端重复提交、重复下单、没有唯一ID号的场景，可以通过 Token 与 Redis 配合的“防重 Token 方案”实现更为快捷。
   - 读写分离，优先考虑读从库，注意主从延迟问题
   - 接口注意返回的数据量，如果数据量大需要分页
   - 代码锁的粒度控制好
