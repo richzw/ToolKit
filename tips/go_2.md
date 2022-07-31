@@ -1214,14 +1214,20 @@
   - JSON
     - GO 1.14 标准库 JSON大量使用反射获取值，首先 go 的反射本身性能较差，其次频繁分配对象，也会带来内存分配和 GC 的开销
     - valyala/fastjson star: 1.4k
+      - 它将 JSON 解析划分为两部分：Parse、Get。 Parse 负责将 JSON 串解析成为一个结构体并返回，然后通过返回的结构体来获取数据。在 Parse 解析的过程是无锁的，所以如果想要在并发地调用 Parse 进行解析需要使用 ParserPool
       - 通过遍历 json 字符串找到 key 所对应的 value，返回其值 []byte，由业务方自行处理。同时可以返回一个 parse 对象用于多次解析；
       - 只提供了简单的 get 接口，不提供 Unmarshal 到结构体或 map 的接口；
+      - 没有常用的如 JSON 转 Struct 或 JSON 转 map 的操作。如果只是想简单的获取 JSON 中的值，那么使用这个库是非常方便的，但是如果想要把 JSON 值转化成一个结构体就需要自己动手一个个设值了。
     - tidwall/gjson star: 9.5k
       - 原理与 fastjson 类似，但不会像 fastjson 一样将解析的内容保存在一个 parse 对象中，后续可以反复的利用，所以当调用 GetMany 想要返回多个值的时候，需要遍历 JSON 串多次，因此效率会比较低；
       - 提供了 get 接口和 Unmarshal 到 map 的接口，但没有提供 Unmarshal 到 struct 的接口；
     - buger/jsonparser star: 4.4k
-      - 原理与 gjson 类似，有一些更灵活的 api；
-      - 只提供了简单的 get 接口，不提供 Unmarshal 到结构体或 map 的接口；
+      - 原理与 gjson 类似，有一些更灵活的 api； 只提供了简单的 get 接口，不提供 Unmarshal 到结构体或 map 的接口；
+      - 性能如此高的原因可以总结为：
+        - 使用 for 循环来减少递归的使用；
+        - 相比标准库而言没有使用反射；
+        - 在查找相应的 key 值找到了便直接退出，可以不用继续往下递归；
+        - 所操作的 JSON 串都是已被传入的，不会去重新再去申请新的空间，减少了内存分配；
     - json-iterator star: 10.3k
       - 兼容标准库；
       - 其之所以快，一个是尽量减少不必要的内存复制，另一个是减少 reflect 的使用——同一类型的对象，jsoniter 只调用 reflect 解析一次之后即缓存下来。
