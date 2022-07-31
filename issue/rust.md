@@ -20,3 +20,4 @@
          self.client.request(body).instrument(query_span).await?.into_parts()
      };
      ```
+- [Rust 编码规范](https://rust-coding-guidelines.github.io/rust-coding-guidelines-zh/safe-guides/code_style/naming/P.NAM.01.html)
