@@ -908,7 +908,33 @@
     - massive g stacks
       - epoll hack - gnet
       - subset algorithm
-    
+- [日志库 zap 设计与实现](https://www.luozhiyun.com/archives/542)
+  - 一个日志库来说，最主要是无非是这三类：
+    - 对于输入的数据需要如何序列化；
+    - 将输入的数据序列化后存放到哪里，是控制台还是文件，还是别的地方；
+    - 然后就是日志的级别，是 Debug、Info 亦或是 Error
+  - 同理 zap 也是这样，在使用 NewCore 创建 Core 结构体的时候需要传入的三个参数分别对应的就是：输入数据的编码器 Encoder、日志数据的目的地 WriteSyncer，以及日志级别 LevelEnabler。
+  - 性能
+    - 使用对象池
+      - zap 通过 sync.Pool 提供的对象池，复用了大量可以复用的对象
+      - zap 在实例化 CheckedEntry 、Buffer、Encoder 等对象的时候，会直接从对象池中获取，而不是直接实例化一个新的，这样复用对象可以降低 GC 的压力，减少内存分配
+    - 避免反射
+      - fmt.Sprintf效率实际上是很低的，通过查看fmt.Sprintf源码， 可以看出效率低有两个原因
+        - fmt.Sprintf 接受的类型是 interface{}，内部使用了反射；
+        - fmt.Sprintf 的用途是格式化字符串，需要去解析格式串，比如 %s、 %d之类的，增加了解析的耗时。
+      - zap
+        - 在 zap 中，使用的是内建的 Encoder，它会通过内部的 Buffer 以 byte 的形式来拼接日志数据，减少反射所带来性能损失；
+        - 以及 zap 是使用的结构化的日志，所以没有 %s、 %d之类的标识符需要解析，也是一个性能提升点。
+    - 更高效且灵活的序列化器
+      - 在 zap 中自己实现了 consoleEncoder、jsonEncoder 两个序列化器，这两个序列化器都可以根据传入的 EncoderConfig 来实现日志格式的灵活配置，这个灵活配置不只是日志输出的 key 的名称，而是通过在 EncoderConfig 中传入函数来调用到用户自定义的 Encoder 实现。
+  - ![img.png](performance_zap.png)
+    - 首先是获取 CheckedEntry 实例，封装相应的日志数据；
+    - 然后根据 core 里面封装的 encoder 进行编码，将编码的内容放入到 buffer 中；
+    - 将 buffer 中的内容输出到 core 里封装的 WriteSyncer 中。
+
+
+
+
 
 
 
