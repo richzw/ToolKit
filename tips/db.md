@@ -992,11 +992,14 @@
       - 更新表数据的时候，也是如此，发现 Buffer Pool 里存在要更新的数据，就直接在 Buffer Pool 里更新
     - binlog
       - binlog 是逻辑日志，记录内容是语句的原始逻辑 属于MySQL Server 层
+      - binlog（归档日志）保证了MySQL集群架构的数据一致性
     - undo log
       - MVCC 的实现依赖于：隐藏字段、Read View、undo log
-    - 两阶段提交
+    - [两阶段提交](https://mp.weixin.qq.com/s/ltXgNa0fb63yQ26fEMvFeg)
       - 在执行更新语句过程，会记录redo log与binlog两块日志，以基本的事务为单位，redo log在事务执行过程中可以不断写入，而binlog只有在提交事务时才写入，所以redo log与binlog的写入时机不一样。
       - 为了解决两份日志之间的逻辑一致问题，InnoDB存储引擎使用两阶段提交方案。原理很简单，将redo log的写入拆成了两个步骤prepare和commit，这就是两阶段提交。
+        - 写入binlog时发生异常也不会有影响，因为MySQL根据redo log日志恢复数据时，发现redo log还处于prepare阶段，并且没有对应binlog日志，就会回滚该事务
+        - redo log设置commit阶段发生异常，那会不会回滚事务呢？并不会回滚事务，它会执行上图框住的逻辑，虽然redo log是处于prepare阶段，但是能通过事务id找到对应的binlog日志，所以MySQL认为是完整的，就会提交事务恢复数据。
       - ![img.png](db_mysql_binlog_redo_log_trx.png)
   - 总结
     - MySQL InnoDB 引擎使用 redo log(重做日志) 保证事务的持久性，使用 undo log(回滚日志) 来保证事务的原子性。
