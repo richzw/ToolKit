@@ -581,4 +581,15 @@
       - 随机分片
       - 组合分片
     - 二级索引
+- [抢火车票难题](https://mp.weixin.qq.com/s/qtTD0QSENYrUUTDcyBNz1Q)
+  - 如何在 100 万人同时抢 1 万张火车票时，系统提供正常、稳定的服务。
+  - 大型高并发系统架构
+    - ![img.png](system_design_load_balance_1.png)
+    - OSPF（开放式最短链路优先）是一个内部网关协议（Interior Gateway Protocol，简称 IGP）OSPF 通过路由器之间通告网络接口的状态来建立链路状态数据库，生成最短路径树，OSPF 会自动计算路由接口上的 Cost 值，但也可以通过手工指定该接口的 Cost 值，手工指定的优先于自动计算的值。
+    - LVS （Linux Virtual Server）它是一种集群（Cluster）技术，采用 IP 负载均衡技术和基于内容请求分发技术
+    - Nginx 加权轮询 
+
+
+
+
 
