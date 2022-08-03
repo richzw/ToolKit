@@ -1275,6 +1275,43 @@
   - Summary
     - innodb_autoinc_lock_mode=2的时候，MySQL是申请到ID以后就会释放锁。并发生成自增ID不会冲突。
     - MySQL是先生成ID，再去做插入前的唯一索引冲突检查。如果一部分Client用MySQL自增ID，一部分Client用自己生成的ID，是有可能导致自增ID的Client报PK Duplicate Error的。
+- [Ten Advanced SQL Concepts You Should Know for Data Science Interviews](https://towardsdatascience.com/ten-advanced-sql-concepts-you-should-know-for-data-science-interviews-4d7015ec74b0)
+  - Common Table Expressions (CTEs)
+    - If you ever wanted query a query, that’s when CTEs come into play — CTEs essentially create a temporary table.
+    - Using common table expressions (CTEs) is a great way to modularize and break down your code, the same way that you would break down an essay into several paragraphs.
+  - Recursive CTEs
+     ```sql
+     WITH expression_name (column_list)
+     AS
+     (
+         -- Anchor member
+         initial_query  
+         UNION ALL
+         -- Recursive member that references expression_name.
+         recursive_query  
+     )
+     -- references expression name
+     SELECT *
+     FROM   expression_name
+     ```
+  - Temporary Functions
+    ```sql
+    CREATE TEMPORARY FUNCTION get_seniority(tenure INT64) AS (
+       CASE WHEN tenure < 1 THEN "analyst"
+            WHEN tenure BETWEEN 1 and 3 THEN "associate"
+            WHEN tenure BETWEEN 3 and 5 THEN "senior"
+            WHEN tenure > 5 THEN "vp"
+            ELSE "n/a"
+       END
+    );
+    ```
+  - EXCEPT vs NOT IN
+    - EXCEPT filters out duplicates and returns distinct rows unlike NOT IN.
+    - EXCEPT expects the same number of columns in both queries/tables, where NOT IN compares a single column from each query/table.
+  - Calculating Delta Values - LAG
+
+
+
 
 
 
