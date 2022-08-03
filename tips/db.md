@@ -1294,6 +1294,8 @@
      SELECT *
      FROM   expression_name
      ```
+    - ![img.png](db_cte_recursive.png)
+    - [ref](https://medium.com/swlh/recursion-in-sql-explained-graphically-679f6a0f143b)
   - Temporary Functions
     ```sql
     CREATE TEMPORARY FUNCTION get_seniority(tenure INT64) AS (
