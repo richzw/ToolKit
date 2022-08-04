@@ -1295,7 +1295,11 @@
      FROM   expression_name
      ```
     - ![img.png](db_cte_recursive.png)
-    - [ref](https://medium.com/swlh/recursion-in-sql-explained-graphically-679f6a0f143b)
+      - [ref](https://medium.com/swlh/recursion-in-sql-explained-graphically-679f6a0f143b)
+      - base query executed first, taking whatever it needs to compute the result R0. 
+      - Second recursive query is executed taking R0 as input, that is R references R0 in the recursive query when first executed. 
+      - Recursive query produces the result R1 and that is what R will reference to at the next invocation. And so on until recursive query returns empty result. 
+      - At that point all intermediate results are combined together.
   - Temporary Functions
     ```sql
     CREATE TEMPORARY FUNCTION get_seniority(tenure INT64) AS (
