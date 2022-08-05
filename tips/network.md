@@ -877,7 +877,13 @@
     - mtr命令可以查看到你的机器和目的机器之间的每个节点的丢包情况
       - `-r是指report` 中间有一些是host是???，那个是因为mtr默认用的是ICMP包，有些节点限制了ICMP包，导致不能正常展示。
       - `mtr -r -u` 可以在mtr命令里加个-u，也就是使用udp包，就能看到部分???对应的IP
-
+- [服务端如果只 bind 了 IP 地址和端口，而没有调用 listen 的话，然后客户端对服务端发起了连接建立，此时那么会发生什么呢](https://mp.weixin.qq.com/s/7P_1VkBeoArKuuEqGcR9ig)
+  - 服务端如果只 bind 了 IP 地址和端口，而没有调用 listen 的话，然后客户端对服务端发起了连接建立，服务端会回 RST 报文。
+    - Linux 内核处理收到 TCP 报文的入口函数是  tcp_v4_rcv，在收到 TCP 报文后，会调用 __inet_lookup_skb 函数找到 TCP 报文所属 socket 。
+    - 查找监听套接口（__inet_lookup_listener）这个函数的实现是，根据目的地址和目的端口算出一个哈希值，然后在哈希表找到对应监听该端口的 socket。
+    - 本次的案例中，服务端是没有调用 listen 函数的，所以自然也是找不到监听该端口的 socket。
+    - 所以，__inet_lookup_skb 函数最终找不到对应的 socket，于是跳转到no_tcp_socket。
+    - 在这个错误处理中，只要收到的报文（skb）的「校验和」没问题的话，内核就会调用 tcp_v4_send_reset 发送RST中止这个连接。
 
 
 
