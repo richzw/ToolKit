@@ -1315,11 +1315,40 @@
     - EXCEPT filters out duplicates and returns distinct rows unlike NOT IN.
     - EXCEPT expects the same number of columns in both queries/tables, where NOT IN compares a single column from each query/table.
   - Calculating Delta Values - LAG
-
-
-
-
-
+- [MySQL 主从](https://mp.weixin.qq.com/s/0uhM2jptAogSRHMc3sopbQ)
+  - 为什么使用 MySQL 主从 
+    - 读写分离：从库提供查询，减少主库压力，提升性能；
+    - 高可用：故障时可切换从库，保证服务高可用；
+    - 数据备份：数据备份到从库，防止服务器宕机导致数据丢失。
+  - 主从复制原理
+    - ![img.png](db_mysql_binlog_details.png)
+    - 主库写 binlog：主库的更新 SQL(update、insert、delete) 被写到 binlog；
+    - 主库发送 binlog：主库创建一个 log dump 线程来发送 binlog 给从库；
+    - 从库写 relay log：从库在连接到主节点时会创建一个 IO 线程，以请求主库更新的 binlog，并且把接收到的 binlog 信息写入一个叫做 relay log 的日志文件；
+    - 从库回放：从库还会创建一个 SQL 线程读取 relay log 中的内容，并且在从库中做回放，最终实现主从的一致性。
+  - 如何保证主从一致
+    - 在 binlog = statement 格式时，主库在执行这条 SQL 时，使用的是索引 a，而从库在执行这条 SQL 时，使用了索引 create_time，最后主从数据不一致了
+      - 可以把 binlog 格式修改为 row，row 格式的 binlog 日志记录的不是 SQL 原文，而是两个 event:Table_map 和 Delete_rows。
+      - Table_map event 说明要操作的表，Delete_rows event用于定义要删除的行为，记录删除的具体行数。row 格式的 binlog 记录的就是要删除的主键 ID 信息，因此不会出现主从不一致的问题。
+    - 但是如果 SQL 删除 10 万行数据，使用 row 格式就会很占空间，10 万条数据都在 binlog 里面，写 binlog 的时候也很耗 IO。但是 statement 格式的 binlog 可能会导致数据不一致。
+      - 一个折中的方案，mixed 格式的 binlog，其实就是 row 和 statement 格式混合使用，当 MySQL 判断可能数据不一致时，就用 row 格式，否则使用就用 statement 格式。
+  - 主从延迟
+    - 主从延迟，其实就是“从库回放” 完成的时间，与 “主库写 binlog” 完成时间的差值，会导致从库查询的数据，和主库的不一致
+    - 原理
+      - 主从延迟主要是出现在 “relay log 回放” 这一步，当主库的 TPS 并发较高，产生的 DDL 数量超过从库一个 SQL 线程所能承受的范围，那么延时就产生了，
+      - 当然还有就是可能与从库的大型 query 语句产生了锁等待。
+    - 主从延迟情况
+      - 从库机器性能：从库机器比主库的机器性能差，只需选择主从库一样规格的机器就好。
+      - 从库压力大：可以搞了一主多从的架构，还可以把 binlog 接入到 Hadoop 这类系统，让它们提供查询的能力。
+      - 从库过多：要避免复制的从节点数量过多，从库数据一般以3-5个为宜。
+      - 大事务：如果一个事务执行就要 10 分钟，那么主库执行完后，给到从库执行，最后这个事务可能就会导致从库延迟 10 分钟啦。日常开发中，不要一次性 delete 太多 SQL，需要分批进行，另外大表的 DDL 语句，也会导致大事务。
+      - 网络延迟：优化网络，比如带宽 20M 升级到 100M。
+      - MySQL 版本低：低版本的 MySQL 只支持单线程复制，如果主库并发高，来不及传送到从库，就会导致延迟，可以换用更高版本的 MySQL，支持多线程复制。
+    - 主从延迟解决方案
+      - 使用缓存：我们在同步写数据库的同时，也把数据写到缓存，查询数据时，会先查询缓存，不过这种情况会带来 MySQL 和 Redis 数据一致性问题。
+      - 查询主库：直接查询主库，这种情况会给主库太大压力，不建议这种方式。
+      - 数据冗余：对于一些异步处理的场景，如果只扔数据 ID，消费数据时，需要查询从库，我们可以把数据全部都扔给消息队列，这样消费者就无需再查询从库
+  
 
 
 
