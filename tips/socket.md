@@ -639,8 +639,24 @@
   - ![img.png](socket_redis_network_model.png)
   - ![img.png](socket_netty_network_model.png)
   - ![img.png](socket_gnet_network_model.png)
-
-
+- [TCP 和 UDP 可以同时监听相同的端口吗？](https://mp.weixin.qq.com/s/rD0Fe4nqWjNAe9hGPrzBEQ)
+  - TCP 和 UDP 可以同时绑定相同的端口吗？
+    - 可以的。传输层有两个传输协议分别是 TCP 和 UDP，在内核中是两个完全独立的软件模块
+  - 多个 TCP 服务进程可以绑定同一个端口吗？
+    - 如果两个 TCP 服务进程绑定的 IP 地址不同，而端口相同的话，也是可以绑定成功的，
+    - 如果两个 TCP 服务进程同时绑定的 IP 地址和端口都相同，那么执行 bind() 时候就会出错，错误是“Address already in use”。
+    - 当 TCP 服务进程重启时，服务端会出现 TIME_WAIT 状态的连接，TIME_WAIT 状态的连接使用的 IP+PORT 仍然被认为是一个有效的 IP+PORT 组合，相同机器上不能够在该 IP+PORT 组合上进行绑定，那么执行 bind() 函数的时候，就会返回了 Address already in use 的错误。
+    - 重启 TCP 服务进程时，如何避免“Address in use”的报错信息？
+      - 我们可以在调用 bind 前，对 socket 设置 SO_REUSEADDR 属性，可以解决这个问题
+    - 如果 TCP 服务进程 A 绑定的地址是  0.0.0.0 和端口 8888，而如果 TCP 服务进程 B 绑定的地址是 192.168.1.100 地址（或者其他地址）和端口 8888，那么执行 bind() 时候也会出错。
+      - 这个问题也可以由 SO_REUSEADDR 解决，因为它的另外一个作用是：绑定的 IP地址 + 端口时，只要 IP 地址不是正好(exactly)相同，那么允许绑定。
+  - 客户端的端口可以重复使用吗？
+    - TCP 连接是由四元组（源IP地址，源端口，目的IP地址，目的端口）唯一确认的，那么只要四元组中其中一个元素发生了变化，那么就表示不同的 TCP 连接的。所以如果客户端已使用端口 64992 与服务端 A 建立了连接，那么客户端要与服务端 B 建立连接，还是可以使用端口 64992 的，因为内核是通过四元祖信息来定位一个 TCP 连接的，并不会因为客户端的端口号相同，而导致连接冲突的问题。
+  - 多个客户端可以 bind 同一个端口吗？
+    - 要看多个客户端绑定的 IP + PORT 是否都相同，如果都是相同的，那么在执行 bind() 时候就会出错，错误是“Address already in use”。
+  - 如何解决客户端 TCP 连接 TIME_WAIT 过多，导致无法与同一个服务器建立连接的问题？
+    - 那就是打开 net.ipv4.tcp_tw_reuse  这个内核参数。
+    - 因为开启了这个内核参数后，客户端调用 connect  函数时，如果选择到的端口，已经被相同四元组的连接占用的时候，就会判断该连接是否处于  TIME_WAIT 状态，如果该连接处于 TIME_WAIT 状态并且 TIME_WAIT 状态持续的时间超过了 1 秒，那么就会重用这个连接，然后就可以正常使用该端口了。
 
 
 
