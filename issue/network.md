@@ -338,7 +338,19 @@
   - With Go, the frequency of keepalives can be changed from the default using the net.TCPConn.SetKeepAlivePeriod() method.
     - The above example sets the TCP_KEEPINTVL socket option to 30 seconds; overriding the tcp_keepalive_intvl system parameter for this specific connection
     - In addition to overriding the keepalive interval, this method also changes the idle time, setting the TCP_KEEPIDLE socket option to 30 seconds; overriding the tcp_keepalive_time system parameter.
-
+- [记一次线上超时问题的发现、排查、定位以及解决过程](https://mp.weixin.qq.com/s/Yh2dOC8Pumeis-h1_gMLjg)
+  - 根据引擎监控系统来查看三方的基础数据监控, 超时监控报警
+  - 看到超时这么多，第一时间先ping下，看看网络间耗时咋样
+  - 开始尝试使用curl来分析各个阶段的耗时 `curl  -o /dev/null -s -w %{time_namelookup}::%{time_connect}::%{time_starttransfer}::%{time_total}::%{speed_download}"\n" --data-binary @req.dat https://www.baidu.com`
+    - 从上述结构可以看出，在time_starttransfe阶段，也就是说对方业务处理结果仍然会出现2s耗时，问题复现。
+  - 代码： log是最直接也是最有效的方式
+  - 线上抓包： 上面抓包结果来看，在序号为6的位置，对方返回了http 204，然后又重新手动发了一次curl请求，在序号10的时候，对方又返回了http 204(从发送请求到收到对方响应耗时38ms)，但是奇怪的时候，在后面50s后，client端(发送方)开发发送FIN请求关闭连接，从代码逻辑来分析，是因为超时导致的关闭连接。
+  - 同类对比： 只能通过与其它家正常返回的做对比，看看能不能得到有用结论。
+    - 通过对比上述两家的区别，发现超时的该家较正常的三方返回，多了Content-Length、Content-Type等字段
+  - 分析原因
+    - http 204 Content-Length hang
+    - 从上节标准可以看出，在http 204、304的时候，不允许返回Content-Length，那么如果返回了，libcurl又是如何处理的呢 - libcurl bug
+    
 
 
 
