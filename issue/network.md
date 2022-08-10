@@ -351,8 +351,15 @@
     - http 204 Content-Length hang
     - 从上节标准可以看出，在http 204、304的时候，不允许返回Content-Length，那么如果返回了，libcurl又是如何处理的呢 - libcurl bug
     
-
-
+- [TCP丢包不重传问题](https://yesphet.github.io/posts/tcp%E4%B8%A2%E5%8C%85%E4%B8%8D%E9%87%8D%E4%BC%A0%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/)
+  - Issue
+    - 从以下客户端抓包可以看到，客户端没有收到 [2711665,2719857] 这个包，因此一直在对 2711665进行ack，而服务端确实有收到大量的Duplicate ACK ack 2711665
+  - Debug
+    - 查看 /proc/sys/net/ipv4/tcp_reordering 的值为3，所以可以确认服务端是有开启快速重传的，在收到3次duplicate ACK后就应该进行快重传，但从抓包文件中并没有发现有触发快速重传
+    - 再通过 nstat 发现TcpExtTcpWqueueTooBig值较为异常
+    - [Adventures in the TCP stack: Uncovering performance regressions in the TCP SACKs vulnerability fixes](https://www.databricks.com/blog/2019/09/16/adventures-in-the-tcp-stack-performance-regressions-vulnerability-fixes.html)
+  - Solve
+    - 通过升级内核版本至 3.10.0-1062.1.1.el7.x86_64 后发现问题得到了解决
 
 
 
