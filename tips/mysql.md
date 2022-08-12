@@ -157,8 +157,40 @@
     - Record Lock，记录锁，也就是仅仅把一条记录锁上；
     - Gap Lock，间隙锁，锁定一个范围，但是不包含记录本身；
     - Next-Key Lock：Record Lock + Gap Lock 的组合，锁定一个范围，并且锁定记录本身。
-
-
+- [明明加了唯一索引，为什么还是产生重复数据](https://mp.weixin.qq.com/s/Jdi4GS1SqtUs7U1FWBkwxw)
+  - 在mysql8的一张innodb引擎的表中，加了唯一索引，但最后发现数据竟然还是重复了
+  - 唯一索引字段包含null
+    - 创建唯一索引的字段，都不能允许为null，否则mysql的唯一性约束可能会失效。
+  - 逻辑删除表加唯一索引
+    - 物理删除 - 用delete语句操作
+    - 逻辑删除 - 主要是通过update语句操作的
+    - 对于这种逻辑删除的表，是没法加唯一索引的 - 假设之前给商品表中的name和model加了唯一索引，如果用户把某条记录删除了，delete_status设置成1了。后来，该用户发现不对，又重新添加了一模一样的商品。
+    - 方案
+      - 删除状态+1 
+      - 增加时间戳字段
+        - 在添加数据时，timeStamp字段写入默认值1。
+        - 然后一旦有逻辑删除操作，则自动往该字段写入时间戳。 这样即使是同一条记录，逻辑删除多次，每次生成的时间戳也不一样，也能保证数据的唯一性。
+      - 增加id字段
+        - 增加时间戳字段基本可以解决问题。但在在极限的情况下，可能还是会产生重复数据。
+        - 该方案的思路跟增加时间戳字段一致，即在添加数据时给delete_id设置默认值1，然后在逻辑删除时，给delete_id赋值成当前记录的主键id。
+  - 重复历史数据如何加唯一索引
+    - 最简单的做法是，增加一张防重表，然后把数据初始化进去。
+      ```sql
+      insert into product_unqiue(id,name,category_id,unit_id,model) 
+      select max(id), select name,category_id,unit_id,model from product
+      group by name,category_id,unit_id,model;
+      ```
+    - 增加一个delete_id字段
+      - 表创建唯一索引之前，先要做数据处理。 
+        - 获取相同记录的最大id：然后将delete_id字段设置成1
+        - 然后将其他的相同记录的delete_id字段，设置成当前的主键
+  - 给大字段加唯一索引
+    - 如果model字段很大，这样就会导致该唯一索引，可能会占用较多存储空间 - 目前mysql innodb存储引擎中索引允许的最大长度是3072 bytes，其中unqiue key最大长度是1000 bytes
+    - 增加hash字段
+      - 我们可以增加一个hash字段，取大字段的hash值，生成一个较短的新值。该值可以通过一些hash算法生成，固定长度16位或者32位等。
+    - 加唯一索引
+      - 如果实在不好加唯一索引，就不加唯一索引，通过其他技术手段保证唯一性。
+    - redis分布式锁 - 用name、model、delete_status和delete_id字段，生成一个hash值，然后给这个新值加锁
 
 
 
