@@ -183,7 +183,6 @@
         - sidecar: provides a single health check endpoint to perform healthchecks for dnsmasq and kubedns.
     - Service
         ```shell
-        
         > kc get svc -n kube-system
         NAME                                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                        AGE
         kube-dns                            ClusterIP   10.100.0.10      <none>        53/UDP,53/TCP                  25d
@@ -335,7 +334,7 @@
     - 最短延迟调度：SED，最短的预期延迟调度算法将网络连接分配给具有最短的预期延迟的服务器。如果将请求发送到第 i 个服务器，则预期的延迟时间为（Ci +1）/ Ui，其中 Ci 是第 i 个服务器上的连接数，而 Ui 是第 i 个服务器的固定服务速率（权重） 。
     - 永不排队调度：NQ，从不队列调度算法采用两速模型。当有空闲服务器可用时，请求会发送到空闲服务器，而不是等待快速响应的服务器。如果没有可用的空闲服务器，则请求将被发送到服务器，以使其预期延迟最小化（最短预期延迟调度算法）
 
-- [tunneling](https://wiki.linuxfoundation.org/networking/tunneling)
+- [Tunneling](https://wiki.linuxfoundation.org/networking/tunneling)
   - Tunneling is a way to transform data frames to allow them pass networks with incompatible address spaces or even incompatible protocols.
   - Linux kernel supports 3 tunnel types: 
     - IPIP (IPv4 in IPv4)
@@ -620,6 +619,46 @@
     - 通信过程
       - Flannel 的 VXLAN 模式网络中的 VTEP 的 MAC 地址并不是通过多播学习的，而是通过 apiserver 去做的同步（或者是etcd）
       - 每个节点在创建 Flannel 的时候，各个节点会将自己的VTEP信息上报给 apiserver，而apiserver 会再同步给各节点上正在 watch node api 的 listener(Flanneld)，Flanneld 拿到了更新消息后，再通过netlink下发到内核，更新 FDB（查询转发表） 表项，从而达到了整个集群的同步。
+- [云原生虚拟网络之 Flannel 工作原理](https://mp.weixin.qq.com/s/qqVcOkifm8xRSRk7ZSBMKA)
+  - 概述
+    - Docker 的网络模式。在默认情况，Docker 使用 bridge 网络模式
+    - ![img.png](k8s_network_docker_network_bridge.png)
+    - 在 Docker 的默认配置下，一台宿主机上的 docker0 网桥，和其他宿主机上的 docker0 网桥，没有任何关联，它们互相之间也没办法连通。所以，连接在这些网桥上的容器，自然也没办法进行通信了。
+    - 这个时候 Flannel 就来了，它是 CoreOS 公司主推的容器网络方案。实现原理其实相当于在原来的网络上加了一层 Overlay 网络，该网络中的结点可以看作通过虚拟或逻辑链路而连接起来的。
+    - Flannel 会在每一个宿主机上运行名为 flanneld 代理，其负责为宿主机预先分配一个Subnet 子网，并为 Pod 分配ip地址。Flannel 使用 Kubernetes 或 etcd 来存储网络配置、分配的子网和主机公共 ip 等信息，数据包则通过 VXLAN、UDP 或 host-gw 这些类型的后端机制进行转发。
+  - Subnet 子网
+    - Flannel 要建立一个集群的覆盖网络（overlay network），首先就是要规划每台主机容器的 ip 地址。
+      ```shell
+      [root@localhost ~]# cat /run/flannel/subnet.env
+      FLANNEL_NETWORK=172.20.0.0/16
+      FLANNEL_SUBNET=172.20.0.1/24
+      FLANNEL_MTU=1450
+      FLANNEL_ipMASQ=true
+      ```
+  - Flannel backend
+    - udp
+      - udp 是 Flannel 最早支持的模式，在这个模式中主要有两个主件：flanneld 、flannel0 。
+        - flanneld 进程负责监听 etcd 上面的网络变化，以及用来收发包
+        - flannel0 则是一个三层的 tun 设备，用作在操作系统内核和用户应用程序之间传递 ip 包。(tun 设备是一个三层网络层设备，它用来模拟虚拟网卡，可以直接通过其虚拟 IP 实现相互访问。tun 设备会从 /dev/net/tun 字符设备文件上读写数据包，应用进程 A 会监听某个端口传过来的数据包，负责封包和解包数据。)
+      - ![img.png](k8s_network_flannel_udp_model.png)
+      - ip 为 172.20.0.8 的容器想要给另一个节点的 172.20.1.8 容器发送数据，这个数据包根据 ip 路由会先交给 flannel0 设备，然后 flannel0 就会把这个 ip 包，交给创建这个设备的应用程序，也就是 flanneld 进程，flanneld 进程是一个 udp 进程，负责处理 flannel0 发送过来的数据包。
+      - flanneld 进程会监听 etcd 的网络信息，然后根据目的 ip 的地址匹配到对应的子网，从 etcd 中找到这个子网对应的宿主机 node 的 ip 地址，然后将这个数据包直接封装在 udp 包里面，然后发送给 node 2。
+      - 由于每台宿主机上的 flanneld 都监听着一个 8285 端口，所以 node 2 机器上 flanneld 进程会从 8285 端口获取到传过来的数据，解析出封装在里面的发给源 ip 地址。
+      - udp 模式现在已经废弃，原因就是因为它经过三次用户态与内核态之间的数据拷贝。
+        - 容器发送数据包经过 cni0 网桥进入内核态一次；
+        - 数据包由 flannel0 设备进入到 flanneld 进程又一次；
+        - 第三次是 flanneld 进行 udp 封包之后重新进入内核态，将 UDP 包通过宿主机的 eth0 发出去。
+    - VXLAN
+      - VXLAN（虚拟可扩展局域网），它是 Linux 内核本身就支持的一种网络虚似化技术。
+      - VXLAN 采用 L2 over L4 （MAC in UDP）的报文封装模式，把原本在二层传输的以太帧放到四层 UDP 协议的报文体内，同时加入了自己定义的 VXLAN Header。在 VXLAN Header 里直接就有 24 Bits 的 VLAN ID，可以存储 1677 万个不同的取值，VXLAN 让二层网络得以在三层范围内进行扩展，不再受数据中心间传输的限制。VXLAN 工作在二层网络（ ip 网络层），只要是三层可达（能够通过 ip 互相通信）的网络就能部署 VXLAN 。
+      - ![img.png](k8s_network_flannel_vxlan.png)
+      - 发送端：在 node1 中发起 ping 172.20.1.2 ，ICMP 报文经过 cni0 网桥后交由 flannel.1 设备处理。 flannel.1 设备是 VXLAN 的 VTEP 设备，负责 VXLAN 封包解包。因此，在发送端，flannel.1 将原始L2报文封装成 VXLAN UDP 报文，然后从 eth0 发送；
+      - 接收端：node2 收到 UDP 报文，发现是一个 VXLAN 类型报文，交由 flannel.1 进行解包。根据解包后得到的原始报文中的目的 ip，将原始报文经由 cni0 网桥发送给相应容器；
+    - host-gw
+      - host-gw模式通信十分简单，它是通过 ip 路由直连的方式进行通信，flanneld 负责为各节点设置路由 ，将对应节点Pod子网的下一跳地址指向对应的节点的 ip ：
+      - ![img.png](k8s_network_flannel_host_gw.png)
+  - Summary
+    - 对比三种网络，udp 主要是利用 tun 设备来模拟一个虚拟网络进行通信；vxlan 模式主要是利用 vxlan 实现一个三层的覆盖网络，利用 flannel1 这个 vtep 设备来进行封拆包，然后进行路由转发实现通信；而 host-gw 网络则更为直接，直接改变二层网络的路由信息，实现数据包的转发，从而省去中间层，通信效率更高
 - [Containerd 的使用](https://mp.weixin.qq.com/s/--t74RuFGMmTGl2IT-TFrg)
   - Docker
     - CS 架构，守护进程负责和 Docker Client 端交互，并管理 Docker 镜像和容器。现在的架构中组件 containerd 就会负责集群节点上容器的生命周期管理，并向上为 Docker Daemon 提供 gRPC 接口。
