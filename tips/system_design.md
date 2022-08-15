@@ -199,6 +199,8 @@
   - LRU
     - 最近使用的数据很大概率将会再次被使用。而最近一段时间都没有使用的数据，很大概率不会再使用。把最长时间未被访问的数据置换出去。这种算法是完全从最近使用的时间角度去考虑的
     - Issue： 如果某个客户端访问大量历史数据时，可能使缓存中的数据被这些历史数据替换，其他客户端访问数据的命中率大大降低。
+    - an access pattern with Long tail distribution. Here, the y-axis represents the normalized access frequency of the items in cache and the x-axis represents the items ordered from highest frequency to lowest.
+    - In this case, lots of newly added “yellow” items with low access frequency could push out rare but valuable “green” items responsible for the vast majority of hits. As a result, the LRU policy may sweep its contents together with valuable “green” entities due to traffic fluctuations.
   - ARC 自适应缓存替换算法,它结合了LRU与LFU,来获得可用缓存的最佳使用。
     - 当时访问的数据趋向于访问最近的内容，会更多地命中LRU list，这样会增大LRU的空间； 当系统趋向于访问最频繁的内容，会更多地命中LFU list，这样会增加LFU的空间.
     - 执行过程
@@ -211,14 +213,17 @@
         同样，如果一次命中发生在LFU ghost 链表中，它会将LRU链表的长度减一，以此在LFU 链表中加一个可用空间。
       ![img.png](system_design_arc1.png)
       ![img.png](system_design_arc2.png)
-  - 2Q
+  - [2Q](https://arpitbhayani.me/blogs/2q-cache)
     - 有两个缓存队列，一个是FIFO队列，一个是LRU队列。当数据第一次访问时，2Q算法将数据缓存在FIFO队列里面，当数据第二次被访问时，则将数据从FIFO队列移到LRU队列里面，两个队列各自按照自己的方法淘汰数据
+    - ![img.png](system_design_2q_simple.png)
     - 执行过程
       - 新访问的数据插入到FIFO队列；
       - 如果数据在FIFO队列中一直没有被再次访问，则最终按照FIFO规则淘汰；
       - 如果数据在FIFO队列中被再次访问，则将数据移到LRU队列头部；
       - 如果数据在LRU队列再次被访问，则将数据移到LRU队列头部；
       - LRU队列淘汰末尾的数据。
+    - 2Q Full Version
+      - ![img.png](system_design_2q_full.png)
 - [动手实现一个localcache - 欣赏优秀的开源设计](https://mp.weixin.qq.com/s/KfxfRqTrFvt9K5dEVU94yw)
   - 高效的并发访问
     - 本地缓存的简单实现可以使用map[string]interface{} + sync.RWMutex的组合，使用sync.RWMutex对读进行了优化
