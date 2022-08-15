@@ -1549,7 +1549,8 @@
      - Go 后台监控 runtime.sysmon 检测超时发送抢占信号；
      - Go GC 栈扫描发送抢占信号；
      - Go GC STW 的时候调用 preemptall 抢占所有 P，让其暂停；
-
+- [Payload validation in Go with Validator](https://thedevelopercafe.com/articles/payload-validation-in-go-with-validator-626594a58cf6)
+  - [Source](https://github.com/go-playground/validator/)
 
 
 
