@@ -73,7 +73,17 @@
         - 使用性能好，内存占用小的序列化方式
   - 小数据集合编码优化
     - ![img.png](redis_type_encoding.png)
-
+    - 数据编码优化技巧
+      - ziplist 的不足 - 每次修改都可能触发 realloc 和 memcopy, 可能导致连锁更新(数据可能需要挪动)。
+      - quicklist 是 ziplist 和 linkedlist 的混合体，它将 linkedlist 按段切分，每一段使用 ziplist 来紧凑存储，多个 ziplist 之间使用双向指针串接起来。
+    - 对象共享池
+      - Redis 在启动的时候默认生成一个 0 ~9999 的整数对象共享池用于对象复用，减少内存占用。
+    - 使用 Bit 比特位或 byte 级别操作
+      - 比如在一些「二值状态统计」的场景下使用 Bitmap 实现，
+      - 对于网页 UV 使用 HyperLogLog 来实现，大大减少内存占用。
+    - 妙用 Hash 类型优化
+      - 比如说系统中有一个用户对象，我们不需要为一个用户的昵称、姓名、邮箱、地址等单独设置一个 key，而是将这个信息存放在一个哈希表里。
+      - 当我们为每个属性都创建 key，就会创建大量的 redisObejct 对象占用内存
 
 
 
