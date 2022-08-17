@@ -308,6 +308,17 @@
     - 2.当连接数少并且连接都十分活跃的情况下，select和poll的性能可能比epoll好；
     - 3.epoll_ctrl每次只能够修改一个fd（kevent可以一次改多个，每次修改，epoll需要一个系统调用，不能 batch 操作，可能会影响性能）。
     - 4.可能会在定时到期之前返回，导致还需要下一个epoll_wait调用。
+- [epoll vs io_uring](https://www.ihcblog.com/rust-runtime-design-1/)
+  - epoll
+    - epoll 是 linux 下较好的 IO 事件通知机制，可以同时监听多个 fd 的 ready 状态。
+      - 使用 epoll 的时候，需要设置 fd 为非阻塞模式。当 read 时，在没有数据的情况下，read 也会立刻返回 WOULD_BLOCK。这时需要做的事情是将这个 fd 注册到 epoll fd 上，并设置 EPOLLIN 事件。
+      - 之后在没事做的时候（所有任务都卡在 IO 了），陷入 syscall epoll_wait。当有 event 返回时，再对对应的 fd 做 read（取决于注册时设置的触发模式，可能还要做一些其他事情，确保下次读取正常）。
+    - 总的来说，这个机制十分简单：设置 fd 为非阻塞模式，并在需要的时候注册到 epoll fd 上，然后 epoll fd 的事件触发时，再对 fd 进行操作。这样将多个 fd 的阻塞问题转变为单个 fd 的阻塞。
+  - io_uring
+    - io-uring 不是一个事件通知机制，它是一个真正的异步 syscall 机制。你并不需要在它通知后再手动 syscall，因为它已经帮你做好了。
+      - io-uring 主要由两个 ring 组成（SQ 和 CQ），SQ 用于提交任务，CQ 用于接收任务的完成通知。任务（Op）往往可以对应到一个 syscall（如 read 对应 ReadOp），也会指定这次 syscall 的参数和 flag 等。
+      - 在 submit 时，内核会消费掉所有 SQE，并注册 callback。之后等有数据时，如网卡中断发生，数据通过驱动读入，内核就会触发这些 callback，做 Op 想做的事情，如拷贝某个 fd 的数据到 buffer（这个 buffer 是用户指定的 buffer）。相比 epoll，io-uring 是纯同步的。
+    - 直接将想做的事情丢到 SQ 中（如果 SQ 满了就要先 submit 一下），然后在没事干（所有任务都卡在 IO 了）的时候 submit_and_wait(1)（submit_and_wait 和 submit 并不是 syscall，它们是 liburing 对 enter 的封装）；返回后消费 CQ，即可拿到 syscall 结果。
 - [io_ring解析]()
   - [io_ring worker pool](https://blog.cloudflare.com/missing-manuals-io_uring-worker-pool/)
 - [RSS, RPS and RFS](https://stackoverflow.com/questions/44958511/what-is-the-main-difference-between-rss-rps-and-rfs)
