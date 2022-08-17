@@ -59,8 +59,20 @@
       - 触发 swap 的情况有哪些呢
         - Redis 使用了比可用内存更多的内存；
         - 与 Redis 在同一机器运行的其他进程在执行大量的文件读写 I/O 操作（包括生成大文件的 RDB 文件和 AOF 后台线程），文件读写占用内存，导致 Redis 获得的内存减少，触发了 swap。
-
-
+- [Redis 内存优化神技，小内存保存大数据](https://mp.weixin.qq.com/s/rqOuadayzFwmThnPApx7SQ)
+  - Redis 如何存储键值对
+    - Redis 使用「dict」结构来保存所有的键值对（key-value）数据，这是一个全局哈希表，所以对 key 的查询能以 O(1) 时间得到。
+    - ![img.png](redis_global_object.png)
+  - 键值对优化
+    - 优化神技：降低 Redis 内存使用的最粗暴的方式就是缩减键（key）与值（value）的长度。
+      - 对于 key 的优化：使用单词简写方式优化内存占用。
+      - value 的优化
+        - 过滤不必要的数据：不要大而全的一股脑将所有信息保存，想办法去掉一些不必要的属性
+        - 精简数据：比如用户的会员类型：0 表示「屌丝」、1 表示 「VIP」、2表示「VVIP」
+        - 数据压缩：对数据的内容进行压缩，比如使用 GZIP、Snappy
+        - 使用性能好，内存占用小的序列化方式
+  - 小数据集合编码优化
+    - ![img.png](redis_type_encoding.png)
 
 
 
