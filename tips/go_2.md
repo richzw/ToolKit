@@ -1551,10 +1551,43 @@
      - Go GC STW 的时候调用 preemptall 抢占所有 P，让其暂停；
 - [Payload validation in Go with Validator](https://thedevelopercafe.com/articles/payload-validation-in-go-with-validator-626594a58cf6)
   - [Source](https://github.com/go-playground/validator/)
-
-
-
-
+- [单例模式](https://mp.weixin.qq.com/s?__biz=MzUzNTY5MzU2MA==&mid=2247495627&idx=1&sn=9286c6ca545280d881a3457194627cd1&chksm=fa833e5ccdf4b74addb43f60ccbddad9c3dbf650ecf2b6cfdcf58f088112fb2d6a70cd4b4b49&scene=178&cur_album_id=2531498848431669249#rd)
+  - 饿汉模式 - 适用于在程序早期初始化时创建已经确定需要加载的类型实例
+    ```go
+    var dbConn *databaseConn
+        
+    func init() {
+      dbConn = &databaseConn{}
+    }
+    ```
+  - 懒汉模式 - 延迟加载的模式
+    ```go
+    func GetInstance() *singleton {
+        if atomic.LoadUInt32(&initialized) == 1 {  // 原子操作 
+          return instance
+       }
+    
+        mu.Lock()
+        defer mu.Unlock()
+    
+        if initialized == 0 {
+             instance = &singleton{}
+             atomic.StoreUint32(&initialized, 1)
+        }
+        return instance
+    }
+    ```
+    ```go
+    var instance *singleton
+    var once sync.Once
+    
+    func GetInstance() *singleton {
+        once.Do(func() {
+            instance = &singleton{}
+        })
+        return instance
+    }
+    ```
 
 
 
