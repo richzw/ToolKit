@@ -894,8 +894,47 @@
     - Messages Pool 所有的延时消息存放，结构为KV结构，key为消息ID，value为一个具体的message（这里选择Redis Hash结构主要是因为hash结构能存储较大的数据量，数据较多时候会进行渐进式rehash扩容，并且对于HSET和HGET命令来说时间复杂度都是O(1)）
     - Delayed Queue是16个有序队列（队列支持水平扩展），结构为ZSET，value 为 messages pool中消息ID，score为过期时间（分为多个队列是为了提高扫描的速度）
     - Worker 代表处理线程，通过定时任务扫描 Delayed Queue 中到期的消息
-
-
-
+- [Nginx + keepalived 实现高可用](https://mp.weixin.qq.com/s/DBdmwRMgrj0ShvZi-dTkVA)
+  - Nginx rewrite 规则
+    - Rewrite规则含义就是某个URL重写成特定的URL（类似于Redirect），从某种意义上说为了美观或者对搜索引擎友好，提高收录量及排名等
+      ```shell
+      rewrite    <regex>    <replacement>                 [flag];
+        关键字      正则        替代内容                    flag标记
+      ```
+  - Nginx 防盗链
+    ```shell
+    location ~* \.(rmvb|jpg|png|swf|flv)$ { #rmvb|jpg|png|swf|flv表示对rmvb|jpg|png|swf|flv后缀的文件实行防盗链
+            valid_referers none blocked  www.dbspread.com; #表示对www.dbspread.com此域名开通白名单，比如在www.test.com的index.html引用download/av123.rmvb,无效
+            root   html/b;
+            if ($invalid_referer) { #如果请求不是从www.dbspread.com白名单发出来的请求，直接重定向到403.html这个页面或者返回403 
+                 #rewrite ^/ http://www.dbspread.com/403.html;
+                 return 403;
+            }
+    }
+    ```
+  - 动静分离
+    ```shell
+            location ~ .*\.(php|jsp|cgi|shtml)?$ #动态分离 ~匹配 以.*结尾（以PHP JSP结尾走这段）
+             {
+                proxy_set_header Host  $host;
+                   proxy_set_header X-Real-IP $remote_addr;
+                   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                   proxy_pass http://jvm_web2;
+            }
+    
+            #静态分离 ~匹配 以.*结尾（以html|htm|gif|jpg|jpeg|bmp|png|ico|txt|js|css结尾走这段），当然不是越久越好，如果有10000个用户在线，都保存几个月，系统托跨
+            location ~ .*\.(html|htm|gif|jpg|jpeg|bmp|png|ico|txt|js|css)$ 
+            {
+                root /var/local/static; #静态资源存放在nginx的安装机器上
+                #proxy_pass http://www.static.com; #静态资源也可存放在远程服务器上
+                expires    30d; #30天之内只要访问过一次就从缓存拿
+            }
+    ```
+  - Nginx+keepalived 高可用
+    - keepalived
+      - Keepalived软件起初是专为LVS负载均衡软件设计的，用来管理并监控LVS集群系统中各个服务节点的状态，后来又加入了可以实现高可用的VRRP (Virtual Router Redundancy Protocol ,虚拟路由器冗余协议）功能
+      - 管理LVS负载均衡软件实现LVS集群节点的健康检查作为系统网络服务的高可用性（failover）
+      - Keepalived高可用服务之间的故障切换转移，是通过 VRRP 来实现的。在 Keepalived服务正常工作时，主 Master节点会不断地向备节点发送（多播的方式）心跳消息，用以告诉备Backup节点自己还活着，当主 Master节点发生故障时，就无法发送心跳消息，备节点也就因此无法继续检测到来自主 Master节点的心跳了，于是调用自身的接管程序，接管主Master节点的 IP资源及服务。而当主 Master节点恢复时，备Backup节点又会释放主节点故障时自身接管的IP资源及服务，恢复到原来的备用角色。
+    
 
 
