@@ -327,7 +327,65 @@
         - stream 接收窗口=最大接受窗口 - 已接收数据
         - connection
           接收窗口 = Stream1 接收窗口 + Stream2 接收窗口 + ... + StreamN 接收窗口
-
+- [X.509 Encodings and Conversions](https://www.ssl.com/guide/pem-der-crt-and-cer-x-509-encodings-and-conversions/)
+  - You may have seen digital certificate files with a variety of filename extensions, such as .crt, .cer, .pem, or .der. These extensions generally map to two major encoding schemes for X.509 certificates and keys: PEM (Base64 ASCII), and DER (binary).
+  - PEM
+    - PEM (originally “Privacy Enhanced Mail”) is the most common format for X.509 certificates, CSRs, and cryptographic keys. A PEM file is a text file containing one or more items in Base64 ASCII encoding, each with plain-text headers and footers (e.g. -----BEGIN CERTIFICATE----- and -----END CERTIFICATE-----)
+    - PEM Filename Extensions - .crt, .pem, .cer, .key (for private keys), and .ca-bundle
+    - View contents of PEM certificate file `openssl x509 -in CERTIFICATE.pem -text -noout `
+    - Convert PEM certificate to DER `openssl x509 -outform der -in CERTIFICATE.pem -out CERTIFICATE.der`
+    - Convert PEM certificate with chain of trust to PKCS#7
+      - PKCS#7 (also known as P7B) is a container format for digital certificates that is most often found in Windows and Java server contexts, and usually has the extension .p7b. PKCS#7 files are not used to store private keys. In the example below, -certfile MORE.pem represents a file with chained intermediate and root certificates (such as a .ca-bundle file downloaded from SSL.com).
+      - `openssl crl2pkcs7 -nocrl -certfile CERTIFICATE.pem -certfile MORE.pem -out CERTIFICATE.p7b`
+    - Convert PEM certificate with chain of trust and private key to PKCS#12
+      - PKCS#12 (also known as PKCS12 or PFX) is a common binary format for storing a certificate chain and private key in a single, encryptable file, and usually have the filename extensions .p12 or .pfx. In the example below, -certfile MORE.pem adds a file with chained intermediate and root certificates (such as a .ca-bundle file downloaded from SSL.com), and -inkey PRIVATEKEY.key adds the private key for CERTIFICATE.crt(the end-entity certificate). Please see this how-to for a more detailed explanation of the command shown.
+      - `openssl pkcs12 -export -out CERTIFICATE.pfx -inkey PRIVATEKEY.key -in CERTIFICATE.crt -certfile MORE.crt`
+  - DER
+    - DER (Distinguished Encoding Rules) is a binary encoding for X.509 certificates and private keys. Unlike PEM, DER-encoded files do not contain plain text statements such as -----BEGIN CERTIFICATE-----.
+    - DER Filename Extensions - .der and .cer.
+    - View contents of DER-encoded certificate file  `openssl x509 -inform der -in CERTIFICATE.der -text -noout`
+    - Convert DER-encoded certificate to PEM `openssl x509 -inform der -in CERTIFICATE.der -out CERTIFICATE.pem`
+- [TLS 单向和双向认证](https://mp.weixin.qq.com/s/JOpega3ud9P7NDNsGAwCCg)
+  - SSL 证书 （也称为 TLS 或 SSL /TLS 证书）是将网站的身份绑定到由公共密钥和私有密钥组成的加密密钥对的数字文档。 证书中包含的公钥允许 Web 浏览器执行以下操作： 通过 TLS 和 HTTPS 协议。 私钥在服务器上保持安全，并用于对网页和其他文档（例如图像和 JavaScript 文件）进行数字签名。
+  - 双向 TLS（mTLS)
+    - TLS 服务器端提供一个授信证书，当我们使用 https 协议访问服务器端时，客户端会向服务器端索取证书并认证（浏览器会与自己的授信域匹配或弹出不安全的页面）。
+    - mTLS 则是由同一个 Root CA 生成两套证书，即客户端证书和服务端证书。客户端使用 https 访问服务端时，双方会交换证书，并进行认证，认证通过方可通信。
+  - 证书格式类型
+    - .DER .CER，文件是二进制格式，只保存证书，不保存私钥。
+    - .PEM，一般是文本格式(Base64 ASCII），可保存证书，可保存私钥。
+    - .CRT，可以是二进制格式，可以是文本格式，与 .DER 格式相同，不保存私钥。
+    - .PFX .P12，二进制格式，同时包含证书和私钥，一般有密码保护。
+    - .JKS，二进制格式，同时包含证书和私钥，一般有密码保护。
+  - 证书生成
+    ```shell
+    # 生成CA的私钥和证书
+    echo Generate the ca certificate
+    openssl genrsa -out ../certs/ca.key 4096
+    openssl req -x509 -sha256 -new -nodes -key ../certs/ca.key -days 3650 -subj "/C=IN/ST=UK/L=Dehradun/O=VMware/CN=Hemant Root CA" -extensions v3_ca -out ../certs/ca.crt
+    
+    # 生成服务端的私钥和证书
+    echo generating server certificate
+    openssl genrsa -out ../certs/server.key 2048
+    openssl req -new -subj "/C=IN/ST=UK/L=Dehradun/O=VMware/CN=localhost" -key ../certs/server.key -out server_signing_req.csr
+    openssl x509 -req -days 365 -in server_signing_req.csr -CA ../certs/ca.crt -CAkey ../certs/ca.key -CAcreateserial -out ../certs/server.crt
+    del server_signing_req.csr
+    
+    # 生成客户端的私钥和证书
+    echo generating client certificate
+    openssl genrsa -out ../certs/client.key 2048
+    openssl req -new -subj "/C=IN/ST=UK/L=Dehradun/O=VMware/CN=localhost" -key ../certs/client.key -out client_signing_req.csr
+    openssl x509 -req -days 365 -in client_signing_req.csr -CA ../certs/ca.crt -CAkey ../certs/ca.key -CAcreateserial -out ../certs/client.crt
+    rm client_signing_req.csr
+    
+    # 验证证书
+    openssl verify -CAfile ../certs/ca.crt ../certs/server.crt
+    openssl verify -CAfile ../certs/ca.crt ../certs/client.crt
+    ```
+  - 测试证书
+    - 连接到远程服务器 `openssl s_client -connect host.docker.internal:8000 -showcerts`
+    - 带 CA 证书连接远程服务器 `openssl s_client -connect host.docker.internal:8000 -CAfile ca.crt`
+    - 调试远程服务器的 SSL/TLS `openssl s_client -connect host.docker.internal:8000 -tlsextdebug`
+    - 模拟的 HTTPS 服务，可以返回 Openssl 相关信息 `openssl s_server -accept 443 -cert server.crt -key server.key -www`
 
 
 
