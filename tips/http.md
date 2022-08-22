@@ -386,7 +386,24 @@
     - 带 CA 证书连接远程服务器 `openssl s_client -connect host.docker.internal:8000 -CAfile ca.crt`
     - 调试远程服务器的 SSL/TLS `openssl s_client -connect host.docker.internal:8000 -tlsextdebug`
     - 模拟的 HTTPS 服务，可以返回 Openssl 相关信息 `openssl s_server -accept 443 -cert server.crt -key server.key -www`
-
+- [HTTPS 一定安全可靠吗](https://mp.weixin.qq.com/s/IYZrtK7pJTeCOBwY-sC9HA)
+  - 客户端通过浏览器向服务端发起 HTTPS 请求时，被「假基站」转发到了一个「中间人服务器」，于是客户端是和「中间人服务器」完成了 TLS 握手，然后这个「中间人服务器」再与真正的服务端完成 TLS 握手?
+  - 中间人就可以解开浏览器发起的 HTTPS 请求里的数据，也可以解开服务端响应给浏览器的 HTTPS 响应数据。相当于，中间人能够 “偷看” 浏览器与服务端之间的 HTTPS 请求和响应的数据。 但是要发生这种场景是有前提的，前提是用户点击接受了中间人服务器的证书。
+  - 客户端是如何验证证书?
+    - ![img.png](http_cert_verify.png)
+    - 当服务端向 CA 机构申请证书的时候，CA 签发证书的过程，如上图左边部分：
+      - 首先 CA 会把持有者的公钥、用途、颁发者、有效时间等信息打成一个包，然后对这些信息进行 Hash 计算，得到一个 Hash 值；
+      - 然后 CA 会使用自己的私钥将该 Hash 值加密，生成 Certificate Signature，也就是 CA 对证书做了签名；
+      - 最后将 Certificate Signature 添加在文件证书上，形成数字证书；
+    - 客户端校验服务端的数字证书的过程，如上图右边部分：
+      - 首先客户端会使用同样的 Hash 算法获取该证书的 Hash 值 H1；
+      - 通常浏览器和操作系统中集成了 CA 的公钥信息，浏览器收到证书后可以使用 CA 的公钥解密 Certificate Signature 内容，得到一个 Hash 值 H2 ；
+      - 最后比较 H1 和 H2，如果值相同，则为可信赖的证书，否则则认为证书不可信。
+  - 证书的验证过程中还存在一个证书信任链的问题 因为我们向 CA 申请的证书一般不是根证书签发的，而是由中间证书签发的
+  - HTTPS 协议本身到目前为止还是没有任何漏洞的，即使你成功进行中间人攻击，本质上是利用了客户端的漏洞（用户点击继续访问或者被恶意导入伪造的根证书），并不是 HTTPS 不够安全。
+  - 如何避免被中间人抓取数据
+    - 不要点击任何证书非法的网站，这样 HTTPS 数据就不会被中间人截取到了。
+    - 通过 HTTPS 双向认证来避免这种问题 - 用了双向认证方式，不仅客户端会验证服务端的身份，而且服务端也会验证客户端的身份
 
 
 
