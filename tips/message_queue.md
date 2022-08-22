@@ -137,5 +137,23 @@
     - feeds 流系统用户时间线后台实现方案（读扩散、写扩散）： 读扩散和写扩散更是这样一个 case。对于读扩散而言，主要采用拉取的方式获取数据。而对于写扩散而言，它是典型的数据推送的方式。当然在系统实现中，更复杂的场景往往会选择读写结合的思路来实现
   - 消息队列消费模型
     - ![img.png](message_queue_consumer_model.png)
+- [aws 上的 kafka 生产 hang 导致消费停止订阅一例](https://mp.weixin.qq.com/s/uj7jP-ywZD7Z9IYjgAODvA)
+  - 有一个 kafka 的 message 的 redirector 模块，收到上游消息后，启动三个 goroutine 转发给下游的 kafka 集群，等待转发全部完毕之后提交 ack，并继续处理下一条消息，是一个比较简单且朴素的设计。
+  - 下游的 kafka 集群是 aws 提供的 msk 服务，该服务每月会有例行的安全升级，升级方式是滚动升级，每次更新一个实例，滚动更新直至完毕，持续时间会比较长，可能会有十多分钟
+  - 但是这个 redirector 在升级期间却无法进行工作，并且在升级完之后，看起来也不会继续订阅上游的消息，这就有点诡异了
+  - 在 Go 里，没什么问题是通过 pprof 和日志定位不出来的，服务无法工作期间，我们可以看看 redirector 模块上的日志：
+    - `consumer/broker/26 abandoned subscription to msg_result.u.3_10/0 because consuming was taking too long`
+    - 因为 consume 花的时间太长，所以对上游的订阅也被 client 停掉了，为什么会花时间长？只要简单看看 pprof，就能看到阻塞在 sendmessage 上的 goroutine：
+    - 可以看到就是发送消息的 goroutine 发生了阻塞，从日志来看 produce 的消息发不出去，所以导致 library 认为 consume 花费时间太长从而放弃了对上游消息的订阅
+  - kafka 本身是有多副本以及 min.insync_replica 机制的，比如正常情况下，可以将 kafka 的 insync_replica 设置为 3，但 min.insync_replica 设置为 2，这样只要不是多个副本中所在的 broker 全挂掉，按说 produce 也是不应该发生无限阻塞的。
+  - 结果发现是这些 produce 阻塞的队列副本本身设置就有问题。。。。比如 insync_replica 设置为 1，或者 insync_replica = min.insync_replica，这样在滚动重启时都会导致 producer 无法发生消息。
+- [为什么不推荐使用Sarama Go客户端收发消息](https://help.aliyun.com/document_detail/266782.html)
+  - 所有Sarama Go版本客户端存在以下已知问题：
+    - 当Topic新增分区时，Sarama Go客户端无法感知并消费新增分区，需要客户端重启后，才能消费到新增分区。
+    - 当Sarama Go客户端同时订阅两个以上的Topic时，有可能会导致部分分区无法正常消费消息。
+    - 当Sarama Go客户端的消费位点重置策略设置为Oldest(earliest)时，如果客户端宕机或服务端版本升级，由于Sarama Go客户端自行实现OutOfRange机制，有可能会导致客户端从最小位点开始重新消费所有消息。
+  - 建议尽早将Sarama Go客户端替换为Confluent Go客户端
+
+
 
 
