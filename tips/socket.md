@@ -668,7 +668,13 @@
   - 如何解决客户端 TCP 连接 TIME_WAIT 过多，导致无法与同一个服务器建立连接的问题？
     - 那就是打开 net.ipv4.tcp_tw_reuse  这个内核参数。
     - 因为开启了这个内核参数后，客户端调用 connect  函数时，如果选择到的端口，已经被相同四元组的连接占用的时候，就会判断该连接是否处于  TIME_WAIT 状态，如果该连接处于 TIME_WAIT 状态并且 TIME_WAIT 状态持续的时间超过了 1 秒，那么就会重用这个连接，然后就可以正常使用该端口了。
-
+- [一次关于TCP RST原因的调查](https://mp.weixin.qq.com/s/4iEMqjOT_bICGG-7QIBhUQ)
+  - eBay的某一个URL出现了奇怪的现象。访问这个URL的时候，有时候能拿到正常的页面，有时候却是一个异常页面. 错误就是Java的Socket Exception: Connect reset。
+  - 从时间顺序来看，在发生RST之前发生的事情只有下面两件：
+    - 1. app tier LB向server发送HTTP GET请求
+    - 2. server回复了两个HTTP响应报文
+  - 这次的HTTP响应，即有Transfer-Encoding: chunked头部，也有Content-Length: 215039这个头部
+  - 如果LB就此认为这个HTTP响应非法，从而用RST来关闭连接，也是无可厚非
 
 
 
