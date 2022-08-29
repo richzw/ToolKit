@@ -48,6 +48,9 @@
       - Exposed by a Service VIP
       - Containers are configured by kubelet to use kube-dns
       - Default implementation is CoreDNS
+      - ![img.png](k8s_network_dns.png)
+        - DNS类型。DNS分为根DNS、顶级DNS、权威DNS和非权威DNS。根DNS共有13组，遍布全球，它可以根据请求的顶级域名将DNS解析指定给下面对应的顶级DNS。顶级DNS又根据二级域名指定权威DNS，直到解析出域名对应的IP。而一些大公司还会自建DNS，又叫非权威DNS，它们的分布更广，比较知名的有Google的8.8.8.8，Microsoft的4.2.2.1，还有CloudFlare的1.1.1.1等等。
+        - DNS解析域名步骤。实际的解析过程分为4步：系统首先会找DNS缓存，可能是浏览器里的，也可能是系统里的；如果找不到，再去查看hosts文件，里面有我们自定义的域名-IP对应规则，Mac下的hosts文件路径为/etc/hosts；如果匹配不到，再去问非权威DNS，一般默认是走我们网络运营商指定的；如果还是没解析出来，就要走根DNS的解析流程
     - Kubelet
       - Kubelet 是在集群中的每个节点上运行的代理，是负责在工作节点上运行的所有内容的组件。它确保容器在 Pod 中运行。
       - 通过在 API Server 中创建节点资源来注册它正在运行的节点。
@@ -255,7 +258,73 @@
       - KUBE-SEP-* chain represents a Service EndPoint. It simply does DNAT, replacing service IP:port with pod's endpoint IP:Port.
   - Source: https://medium.com/techbeatly/kubernetes-networking-fundamentals-d30baf8a28c8
 
-
+- [HTTP](https://mp.weixin.qq.com/s/Hx5utPuUF4GO3Nb3xwD7Sg)
+  - HTTP
+    - ![img.png](k8s_network_http_frame.png)
+    - Body 属性
+      - Accept-Encoding表示的是请求方可以支持的压缩格式，可能不止一个。
+      - Content-Encoding表示的是传输的body实际采用的压缩格式。
+      - Transfer-Encoding: chunked：这表示数据是被分块传输的。
+      - Accept-Ranges: bytes：我们一般会通过HEAD请求先问问服务端是否支持范围请求，如果支持通过字节范围请求，服务端就会返回这个。
+      - Range: bytes=x-y：在服务端支持的情况下，请求方就可以明确要请求第x~y字节的内容。
+      - Content-Range: bytes x-y/length：这表示服务端返回的body是第x~y字节的内容，内容总长度为length。
+    - Connection：长连接相关
+      - Connection: keep-alive：即表示使用长连接，在HTTP/1.1中默认开启。
+      - Connection: close：主动关闭长连接，一般是由客户端发出的。
+    - Cookie：解决HTTP无状态特点带来的问题。
+      - Set-Cookie: a=xxx，Set-Cookie: b=yyy：这是服务端返回的，一个Cookie本质上就是一个键值对，并且每个Cookie是分开的。
+      - Cookie: a=xxx; b=yyy：这是客户端在发送请求时带上的，也就是之前服务端返回的Cookie们，它们是合在一起的。
+    - Cache：缓存相关。
+      - Cache-Control
+        - max-age的单位是秒，从返回那一刻就开始计算；
+        - no-store代表客户端不允许缓存；
+        - no-cache代表客户端使用缓存前必须先来服务端验证；
+        - must-revalidate代表缓存失效后必须验证。
+        - 服务端可以返回的属性有：max-age=10/no-store/no-cache/must-revalidate。
+          - Last-Modified代表文件的最后修改时间。
+          - ETag全称是Entity Tag，代表资源的唯一标识，它是为了解决修改时间无法准确区分文件变化的问题。比如一个文件在一秒内修改了很多次，而修改时间的最小单位是秒；又或者一个文件修改了时间属性，但内容没有变化。Etag还分为强Etag、弱Etag：
+        - 客户端可以发送的属性有：max-age=0；no-cache
+          - If-Modified-Since里放的就是上次请求服务端返回的Last-Modified，如果服务端资源没有比这个时间更新的话，服务端就会返回304，表示客户端用缓存就行。
+          - If-None-Match里放的就是上次请求服务端返回的ETag了，如果服务端资源的Etag没变，服务端也是返回304。
+    - Proxy：代理相关
+      - Via：代理服务器会在发送请求时，把自己的主机名加端口信息追加到该字段的末尾。
+      - X-Forwarded-For：类似Via的追加方式，但追加的内容是请求方的IP地址。
+      - X-Real-IP：只记录客户端的IP地址，它更简洁一点。
+    - Proxy Cache：代理缓存相关
+      - 客户端可以缓存，中间商代理服务器当然也可以缓存。但因为代理的双重身份性，所以Cache-Control针对代理缓存还增加了一些定制化的属性
+      - 从服务端到代理服务器
+        - private代表数据只能在客户端保存，不能缓存在代理上与别人共享，比如用户的私人数据。
+        - public代表数据完全开放，谁都可以缓存。
+        - s-maxage代表缓存在代理服务器上的生存时间。
+        - no-transform代表禁止代理服务器对数据做一些转换操作，因为有的代理会提前对数据做一些格式转换，方便后面的请求处理。
+      - 从客户端到代理服务器
+        - max-stale代表接受缓存过期一段时间。
+        - min-fresh则与上面相反，代表缓存必须还有一段时间的保质期。
+        - only-if-cached代表客户端只接受代理缓存。如果代理上没有符合条件的缓存，客户端也不要代理再去请求服务端了。
+    - ![img.png](k8s_network_http_headers.png)
+  - HTTPS
+    - 基于ECDHE的TLS主流握手方式 VS. 基于RSA的TLS传统握手方式。 两者的关键区别在于通信密钥生成过程中，第三个随机数Pre-Master的生成方式：
+      - 前者：两端先随机生成公私钥，同时公钥（加签名）作为参数传给对方，然后两端基于双方的参数，使用ECDHE算法生成Pre-Master；
+      - 后者：客户端直接生成随机数Pre-Master，然后用服务器证书的公钥加密后发给服务器。
+    - 因为前者的公私钥是随机生成的，即使某次私钥泄漏了或者被破解了，也只影响一次通信过程；而后者的公私钥是固定的，只要私钥泄漏或者被破解，那之前所有的通信记录密文都会被破解，因为耐心的黑客一直在长期收集报文，等的就是这一天（据说斯诺登的棱镜门事件就是利用了这一点）。
+    - 也就是说，前者“一次一密”，具备前向安全；而后者存在“今日截获，明日破解”的隐患，不具备前向安全。
+    - 
+  - HTTP2
+    - HTTP/2基于Chrome的SPDY协议
+    - 传输数据格式从文本转成了二进制，大大方便了计算机的解析。
+    - 基于虚拟流的概念，实现了多路复用能力，同时替代了HTTP/1.1里的管道功能。
+    - 利用HPACK算法进行头部压缩，在之前都只针对body做压缩。
+    - 允许服务端新建“流”主动推送消息。比如在浏览器刚请求HTML的时候就提前把可能会用到的JS、CSS文件发给客户端。
+    - 在安全方面，其实也做了一些强化，加密版本的HTTP/2规定其下层的通信协议必须在TLS1.2以上（因为之前的版本有很多漏洞），需要支持前向安全和SNI（Server Name Indication，它是TLS的一个扩展协议，在该协议下，在握手过程开始时通过客户端告诉它正在连接的服务器的主机名称），并把几百个弱密码套件给列入“黑名单”了。
+  - HTTP3
+    - HTTP/3基于Chrome的QUIC协议
+    - 它最大的改变就是把下层的传输层协议从TCP换成了QUIC，完全解决了TCP的队头阻塞问题（注意，是TCP的，不是HTTP的），在弱网环境下表现更好。因为 QUIC 本身就已经支持了加密、流和多路复用等能力，所以 HTTP/3 的工作减轻了很多。
+    - 头部压缩算法从HPACK升级为QPACK。
+    - 基于UDP实现了可靠传输，引入了类似HTTP/2的流概念。
+    - 内含了TLS1.3，加快了建连速度。
+    - 连接使用“不透明”的连接ID来标记两端，而不再通过IP地址和端口绑定，从而支持用户无感的连接迁移。
+    - HOL
+      - ![img.png](k8s_network_hol.png)
 
 - [CNI](https://platform9.com/blog/the-ultimate-guide-to-using-calico-flannel-weave-and-cilium/)
   - flannel
