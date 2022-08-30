@@ -214,8 +214,26 @@
       - 而 Read View 规则帮我们判断当前版本的数据是否可见。从而不需要通过加锁的方式，就可以实现提交读和可重复读这两种隔离级别。
     - MVCC本质上就是一种数据结构。已提交读和可重复读都是使用了Read View这种策略通过区间判断获取自己能够读取的内容，然后展示。InnoDB通过MVCC，解决了脏读、不可重复读。
     - InnoDB如何去解决幻读呢？光靠MVCC其实是不够的，InnoDB通过MVCC + Next-Key Lock(临键锁)来解决幻读
-
-
+- [MYSQL 最朴素的监控](https://mp.weixin.qq.com/s/_90oeKftUWhRAAiYQMQefw)
+  - 连接数（Connects）
+    - 最大使用连接数：show status like ‘Max_used_connections’
+    - 当前打开的连接数：show status like ‘Threads_connected’
+  - 缓存（bufferCache）
+    - 未从缓冲池读取的次数：show status like ‘Innodb_buffer_pool_reads’
+    - 从缓冲池读取的次数：show status like ‘Innodb_buffer_pool_read_requests’
+    - 缓冲池的总页数：show status like ‘Innodb_buffer_pool_pages_total’
+    - 缓冲池空闲的页数：show status like ‘Innodb_buffer_pool_pages_free’
+    - 缓存命中率计算：（1-Innodb_buffer_pool_reads/Innodb_buffer_pool_read_requests）*100%
+    - 缓存池使用率为：((Innodb_buffer_pool_pages_total-Innodb_buffer_pool_pages_free）/Innodb_buffer_pool_pages_total）*100%
+  - 锁（lock）
+    - 锁等待个数：show status like ‘Innodb_row_lock_waits’
+    - 平均每次锁等待时间：show status like ‘Innodb_row_lock_time_avg’
+    - 查看是否存在表锁：show open TABLES where in_use>0；有数据代表存在锁表，空为无表锁
+  - SQL
+    - 查看 mysql 开关是否打开：show variables like ‘slow_query_log’，ON 为开启状态，如果为 OFF，set global slow_query_log=1 进行开启
+    - 查看 mysql 阈值：show variables like ‘long_query_time’，根据页面传递阈值参数，修改阈值 set global long_query_time=0.1
+    - 查看 mysql 慢 sql 目录：show variables like ‘slow_query_log_file’
+    - 格式化慢 sql 日志：mysqldumpslow -s at -t 10 /export/data/mysql/log/slow.log
 
 
 
