@@ -180,7 +180,11 @@
     - 当Sarama Go客户端同时订阅两个以上的Topic时，有可能会导致部分分区无法正常消费消息。
     - 当Sarama Go客户端的消费位点重置策略设置为Oldest(earliest)时，如果客户端宕机或服务端版本升级，由于Sarama Go客户端自行实现OutOfRange机制，有可能会导致客户端从最小位点开始重新消费所有消息。
   - 建议尽早将Sarama Go客户端替换为Confluent Go客户端
-
+- [RocketMQ 的设计理念](https://mp.weixin.qq.com/s/-SuP4Z-Hf6PTlSsjwABasg)
+  - 为了消息持久化，我们设计了 commitlog 文件，通过顺序写的方式保证了文件写入的高性能，但如果每次 producer 写入消息或者 consumer 读取消息都从文件来读写，由于涉及到磁盘 IO 显然性能会有很大的问题，于是我们了解到操作系统读写文件会先将文件加载到内存中的 page cache 中。
+  - 由于 page cache 存在内核空间中，还需要将其拷贝到用户空间中才能为进程所用（同样的，写入消息也要写将消息写入用户空间的 buffer，再拷贝到 内核空间中的 page cache），于是我们使用了 mmap 来避免了这次拷贝，这样的话 producer 发送消息只要先把消息写入 page cache 再异步刷盘，而 consumer 只要保证消息进度能跟得上 producer 产生消息的进度，就可以直接从 page cache 中读取消息进行消费，于是 producer 与 consumer 都可以直接从 page cache 中读写消息，极大地提升了消息的读写性能。
+  - 那怎么保证 consumer 消费足够快以跟上 producer 产生消息的速度的，显然，让消息分布式，分片存储是一种通用方案，这样的话通过增加 consumer 即可达到并发消费消息的目的
+  - 最后，为了避免每次创建 Topic 或者 broker 宕机都得修改 producer/consumer 上的配置，我们引入了 nameserver， 实现了服务的自动发现功能。
 
 
 
