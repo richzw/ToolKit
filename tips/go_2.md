@@ -1588,6 +1588,36 @@
         return instance
     }
     ```
+- [Make the zero value useful](https://mp.weixin.qq.com/s/Ucqqg4h9uRo7RVd8XCz80w)
+  - Sync.Mutex - sync.Mutex 被设计为无需显式初始化就可以使用，可以实现这个功能的原因是 sync.Mutex 包 含两个未导出的整数字段
+  - Byte.Buffer - 因为有零值的存在，bytes.Buffer 在进行写入或读取的操作时，不需要人为的进行明确的初始化。也能做到很好的开箱即用。
+  - Slices - 在 slices 的定义中，它的零值是 nil。这意味着你不需要显式定义一个 slices，只需要直接声明它，就可以使用了。
+  - Nil func - 你可以在有 nil 值的类型上调用方法，这也是零值作为缺省值的作用之一。
+     ```go
+     type Config struct {
+             path string
+     }
+     
+     func (c *Config) Path() string {
+             if c == nil {
+                     return "/usr/home"
+             }
+             return c.path
+     }
+     
+     func main() {
+             var c1 *Config
+             var c2 = &Config{
+                     path: "/export",
+             }
+             fmt.Println(c1.Path(), c2.Path())
+     }
+     ```
+
+
+
+
+
 
 
 
