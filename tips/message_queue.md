@@ -185,6 +185,40 @@
   - 由于 page cache 存在内核空间中，还需要将其拷贝到用户空间中才能为进程所用（同样的，写入消息也要写将消息写入用户空间的 buffer，再拷贝到 内核空间中的 page cache），于是我们使用了 mmap 来避免了这次拷贝，这样的话 producer 发送消息只要先把消息写入 page cache 再异步刷盘，而 consumer 只要保证消息进度能跟得上 producer 产生消息的进度，就可以直接从 page cache 中读取消息进行消费，于是 producer 与 consumer 都可以直接从 page cache 中读写消息，极大地提升了消息的读写性能。
   - 那怎么保证 consumer 消费足够快以跟上 producer 产生消息的速度的，显然，让消息分布式，分片存储是一种通用方案，这样的话通过增加 consumer 即可达到并发消费消息的目的
   - 最后，为了避免每次创建 Topic 或者 broker 宕机都得修改 producer/consumer 上的配置，我们引入了 nameserver， 实现了服务的自动发现功能。
+- [重构 Kafka?](https://mp.weixin.qq.com/s/_RIvZwK1sJJP8xnUDyAk1Q)
+  - Kafka 架构的缺陷
+    - Kafka 把 broker 和 partition 的数据存储牢牢绑定在一起，会产生很多问题。
+      - Kafka 的很多操作都涉及 partition 数据的全量复制
+        - 典型的扩容场景，假设有broker1, broker2两个节点，它们分别负责若干个 partition，现在我想新加入一个broker3节点分摊broker1的部分负载
+        - 给某个 partition 新增一个 follower 副本，那么这个新增的 follower 副本必须要跟 leader 副本同步全量数据。毕竟 follower 存在的目的就是随时替代 leader，所以复制 leader 的全量数据是必须的。
+        - 因为 broker 要负责存储，所以整个集群的容量可能局限于存储能力最差的那个 broker 节点。而且如果某些 partition 中的数据特别多（数据倾斜），那么对应 broker 的磁盘可能很快被写满，这又要涉及到 partition 的迁移，数据复制在所难免。
+    - Kafka 底层依赖操作系统的 Page Cache，会产生很多问题
+      - 首先一个问题就是 Kafka 消息持久化并不可靠，可能丢消息
+        - Linux 文件系统会利用 Page Cache 机制优化性能。Page Cache 说白了就是读写缓存，Linux 告诉你写入成功，但实际上数据并没有真的写进磁盘里，而是写到了 Page Cache 缓存里，可能要过一会儿才会被真正写入磁盘。
+          那么这里面就有一个时间差，当数据还在 Page Cache 缓存没有落盘的时候机器突然断电，缓存中的数据就会永远丢失。
+      - 消费者消费数据的情况，主要有两种可能：一种叫追尾读（Tailing Reads），一种叫追赶读（Catch-up Reads）
+        - 追尾读，顾名思义，就是消费者的消费速度比较快，生产者刚生产一条消息，消费者立刻就把它消费了 生产者写入消息，broker 把消息写入 Page Cache 写缓存，然后消费者马上就来读消息，那么 broker 就可以快速地从 Page Cache 里面读取这条消息发给消费者，这挺好，没毛病。
+        - 追赶读的场景，就是消费者的消费速度比较慢，生产者已经生产了很多新消息了，但消费者还在读取比较旧的数据 此时读写都依赖 Page Cache，所以读写操作可能会互相影响，对一个 partition 的大量读可能影响到写入性能，大量写也会影响读取性能，而且读写缓存会互相争用内存资源，可能造成 IO 性能抖动。
+  - 存算分离架构
+    - Pulsar 改用多层的存算分离架构，broker 节点只负责计算，把存储的任务交给专业的存储引擎 Bookkeeper 来做
+    - 在 Pulsar 中，我们可以把每个 partition 理解成一个文件描述符，broker 只需持有文件描述符，对数据的处理全部甩给存储引擎 Bookkeeper 去做。
+    - 由于 Pulsar 中的 broker 是无状态的，所以很容易借助 k8s 这样的基础设施实现弹性扩缩容。
+  - 节点对等架构
+    - Kafka 使用主从复制的方式实现高可用；而 Bookkeeper 采用 Quorum 机制实现高可用。
+    - Bookkeeper 集群是由若干 bookie 节点（运行着 bookie 进程的服务器）组成的，不过和 Kafka 的主从复制机制不同，这些 bookie 节点都是对等的，没有主从的关系。
+    - 当 broker 要求 Bookkeeper 集群存储一条消息（entry）时，这条消息会被并发地同时写入多个 bookie 节点进行存储：
+  - 读写隔离
+    - bookie 节点实现读写隔离，自己维护缓存，不再依赖操作系统的 Page Cache，保证了数据可靠性和高性能。
+    - 每个 bookie 节点都拥有两块磁盘，其中 Journal 磁盘专门用于写入数据，Entry Log 磁盘专门用于读取数据，而 memtable 是 bookie 节点自行维护的读写缓存。
+      - Journal 盘的写入不依赖 Page Cache，直接强制刷盘（可配置），写入完成后 bookie 节点就会返回 ACK 写入成功
+      - 写 Journal 盘的同时，数据还会在 memotable 缓存中写一份，memotable 会对数据进行排序，一段时间后刷入 Entry Log 盘。
+      - 这样不仅多了一层缓存，而且 Entry Log 盘中的数据有一定的有序性，在读取数据时可以一定程度上提高性能。
+
+
+
+
+
+
 
 
 
