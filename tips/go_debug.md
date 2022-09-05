@@ -326,8 +326,11 @@
     - 这包含了两部分：
       - 每个 Go 程序中内置 runtime/pprof 包
       - 然后用 go tool pprof 来分析性能数据文件
-    - 函数进行性能分析的办法就是使用 testing - `go test -run=XXX -bench=IndexByte -cpuprofile=/tmp/c.p bytes`
-    - `go tool pprof bytes.test /tmp/c.p`来分析
+    - 函数进行性能分析的办法就是使用 testing 
+      - `go test -run=XXX -bench=IndexByte -cpuprofile=/tmp/c.p bytes`
+      - ` go test -run ^$ -bench BenchmarkPopulateReflect  -cpuprofile cpu.prof`
+    - `go tool pprof bytes.test /tmp/c.p` 来分析
+    - `go tool pprof -http :8080 tt.test cpu.prof `
   - /debug/pprof
   - perf
     - 由于现在 Go 已经支持了 Frame Pointer，所以可以和 -toolexec= 配合来对 Go 应用进行性能分析。
