@@ -931,11 +931,156 @@
     - 首先是获取 CheckedEntry 实例，封装相应的日志数据；
     - 然后根据 core 里面封装的 encoder 进行编码，将编码的内容放入到 buffer 中；
     - 将 buffer 中的内容输出到 core 里封装的 WriteSyncer 中。
-
-
-
-
-
-
+- [如何让 Go 反射变快](https://mp.weixin.qq.com/s/fzmN6zFVioQGedTdSDmyqQ)
+  - [Source](https://philpearl.github.io/post/aintnecessarilyslow/)
+  - 反射基本版
+     ```go
+     func populateStructReflect(in interface{}) error {
+      val := reflect.ValueOf(in)
+      if val.Type().Kind() != reflect.Ptr {
+       return fmt.Errorf("you must pass in a pointer")
+      }
+      elmv := val.Elem()
+      if elmv.Type().Kind() != reflect.Struct {
+       return fmt.Errorf("you must pass in a pointer to a struct")
+      }
+     
+      fval := elmv.FieldByName("B")
+      fval.SetInt(42)
+     
+      return nil
+     }
+     ```
+  - 加入缓存策略
+    ```go
+    var cache = make(map[reflect.Type][]int)
+    
+    func populateStructReflectCache(in interface{}) error {
+     typ := reflect.TypeOf(in)
+    
+     index, ok := cache[typ]
+     if !ok {
+      if typ.Kind() != reflect.Ptr {
+       return fmt.Errorf("you must pass in a pointer")
+      }
+      if typ.Elem().Kind() != reflect.Struct {
+       return fmt.Errorf("you must pass in a pointer to a struct")
+      }
+      f, ok := typ.Elem().FieldByName("B")
+      if !ok {
+       return fmt.Errorf("struct does not have field B")
+      }
+      index = f.Index
+      cache[typ] = index
+     }
+    
+     val := reflect.ValueOf(in)
+     elmv := val.Elem()
+    
+     fval := elmv.FieldByIndex(index)
+     fval.SetInt(42)
+    
+     return nil
+    }
+    ```
+  - 利用字段偏移
+   ```go
+   var unsafeCache = make(map[reflect.Type]uintptr)
+   
+   type intface struct {
+    typ   unsafe.Pointer
+    value unsafe.Pointer
+   }
+   
+   func populateStructUnsafe(in interface{}) error {
+    typ := reflect.TypeOf(in)
+   
+    offset, ok := unsafeCache[typ]
+    if !ok {
+     if typ.Kind() != reflect.Ptr {
+      return fmt.Errorf("you must pass in a pointer")
+     }
+     if typ.Elem().Kind() != reflect.Struct {
+      return fmt.Errorf("you must pass in a pointer to a struct")
+     }
+     f, ok := typ.Elem().FieldByName("B")
+     if !ok {
+      return fmt.Errorf("struct does not have field B")
+     }
+     if f.Type.Kind() != reflect.Int {
+      return fmt.Errorf("field B should be an int")
+     }
+     offset = f.Offset
+     unsafeCache[typ] = offset
+    }
+   
+    structPtr := (*intface)(unsafe.Pointer(&in)).value
+    *(*int)(unsafe.Pointer(uintptr(structPtr) + offset)) = 42
+   
+    return nil
+   }
+   ```
+  - 更改缓存 key 类型
+    - 如果我们对 CPU 进行采样，将会看到大部分时间都用于访问 map，它还会显示 map 访问在调用 runtime.interhash 和 runtime.interequal。这些是用于 hash 接口并检查它们是否相等的函数。也许使用更简单的 key 会加快速度？我们可以使用来自接口的类型信息的地址，而不是 reflect.Type 本身。
+    ```go
+    var unsafeCache2 = make(map[uintptr]uintptr)
+    
+    func populateStructUnsafe2(in interface{}) error {
+     inf := (*intface)(unsafe.Pointer(&in))
+    
+     offset, ok := unsafeCache2[uintptr(inf.typ)]
+     if !ok {
+      typ := reflect.TypeOf(in)
+      if typ.Kind() != reflect.Ptr {
+       return fmt.Errorf("you must pass in a pointer")
+      }
+      if typ.Elem().Kind() != reflect.Struct {
+       return fmt.Errorf("you must pass in a pointer to a struct")
+      }
+      f, ok := typ.Elem().FieldByName("B")
+      if !ok {
+       return fmt.Errorf("struct does not have field B")
+      }
+      if f.Type.Kind() != reflect.Int {
+       return fmt.Errorf("field B should be an int")
+      }
+      offset = f.Offset
+      unsafeCache2[uintptr(inf.typ)] = offset
+     }
+    
+     *(*int)(unsafe.Pointer(uintptr(inf.value) + offset)) = 42
+    
+     return nil
+    }
+    ```
+  - 引入描述符
+    - 调用者应该在初始化时调用describeType函数以获得一个typeDescriptor，之后调用populateStructUnsafe3函数时会用到它。在这个非常简单的例子中，typeDescriptor只是结构体中B字段的偏移量。
+     ```go
+     type typeDescriptor uintptr
+     
+     func describeType(in interface{}) (typeDescriptor, error) {
+      typ := reflect.TypeOf(in)
+      if typ.Kind() != reflect.Ptr {
+       return 0, fmt.Errorf("you must pass in a pointer")
+      }
+      if typ.Elem().Kind() != reflect.Struct {
+       return 0, fmt.Errorf("you must pass in a pointer to a struct")
+      }
+      f, ok := typ.Elem().FieldByName("B")
+      if !ok {
+       return 0, fmt.Errorf("struct does not have field B")
+      }
+      if f.Type.Kind() != reflect.Int {
+       return 0, fmt.Errorf("field B should be an int")
+      }
+      return typeDescriptor(f.Offset), nil
+     }
+     
+     func populateStructUnsafe3(in interface{}, ti typeDescriptor) error {
+      structPtr := (*intface)(unsafe.Pointer(&in)).value
+      *(*int)(unsafe.Pointer(uintptr(structPtr) + uintptr(ti))) = 42
+      return nil
+     }
+     ```
 
 
