@@ -159,6 +159,7 @@
     - 借助bcc排查
       - `/usr/share/bcc/tools/memleak -p $(pidof c-so)`
       - `/usr/share/bcc/tools/memleak -p $(pidof c-so) -t`
+      - `sudo /usr/share/bcc/tools/memleak -p $(pidof process) -O /lib/libc.musl-x86_64.so.1 -a`
     - 借助pmap/gdb排查
       - `pmap -p <pid>      # /proc/<pid>/maps`
       - `pmap -x -p <pid>   # /proc/<pid>/smaps`
