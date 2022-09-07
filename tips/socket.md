@@ -675,6 +675,45 @@
     - 2. server回复了两个HTTP响应报文
   - 这次的HTTP响应，即有Transfer-Encoding: chunked头部，也有Content-Length: 215039这个头部
   - 如果LB就此认为这个HTTP响应非法，从而用RST来关闭连接，也是无可厚非
+- [TCP_NODELAY vs TCP_CORK]
+  - TCP_NODELAY
+    - TCP_NODELAY is used for disabling Nagle's algorithm.
+    - Nagle's algorithm
+      - Nagle's algorithm is for reducing more number of small network packets in wire. 
+      - The algorithm is: if data is smaller than a limit (usually MSS), wait until receiving ACK for previously sent packets and in the mean time accumulate data from user. Then send the accumulated data.
+    - However, waiting for the ACK may increase latency when sending streaming data. Additionally, if the receiver implements the 'delayed ACK policy', it will cause a temporary deadlock situation. In such cases, disabling Nagle's algorithm is a better option.
+  - TCP_CORK
+    - If set, don't send out partial frames. All queued partial frames are sent when the option is cleared again. This is useful for prepending headers before calling sendfile(2), or for throughput optimization.
+    - there is a 200-millisecond ceiling on the time for which output is corked by TCP_CORK. If this ceiling is reached, then queued data is automatically transmitted. 
+    - By forcing TCP_CORK, data would be aggregated to the same buffer (SKB) until the buffer is filled. This option is stronger than TCP_NODELAY (i.e. disable Nagle's algorithm) so it would still work even when TCP_NODELAY option is set.
+  - [tcp_autocorking](https://stackoverflow.com/a/45195801/3011380)
+    - tcp_autocorking is a flag for the kernel for checking specific conditions and perform corking when these conditions are met.
+    - tcp_autocorking, on the other hand, wouldn't force aggregation until the buffer is full, but rather check specific conditions for continuing aggregation on current buffer. The tcp_push() function calls tcp_should_autocork() function (net/include/tcp.c) in order to check if current buffer should be sent:
+  - [Use case](https://stackoverflow.com/a/22189889/3011380)
+    - **TCP_NODELAY ON** means send the data (partial frames) the moment you get, regardless if you have enough frames for a full network packet.
+    - **TCP_NODELAY OFF** means Nagles Algoritm which means send the data when it is bigger than the MSS or waiting for the receiving acknowledgement before sending data which is smaller.
+    - **TCP_CORK ON** means don't send any data (partial frames) smaller than the MSS until the application says so or until 200ms later.
+    - **TCP_CORK OFF** means send all the data (partial frames) now.
+    - TCP_NODELAY sends doesn't accumulate the logical packets before sending then as network packets, Nagle's algorithm does according the algorithm, and TCP_CORK does according to the application setting it.
+    - A side effect of this is that Nagle's algorithm will send partial frames on an idle connection, TCP_CORK won't.
+    - TCP_CORK is useful whenever the server knows the patterns of its bulk transfers. Which is just about 100% of the time with any kind of file serving.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
