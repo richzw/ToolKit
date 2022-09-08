@@ -1613,8 +1613,56 @@
              fmt.Println(c1.Path(), c2.Path())
      }
      ```
-
-
+- [Go Memory Model](https://go.dev/ref/mem)
+  - Synchronization
+    - A send on a channel is synchronized before the completion of the corresponding receive from that channel.
+    - The closing of a channel is synchronized before a receive that returns a zero value because the channel is closed.
+       ```go
+       var c = make(chan int, 10)
+       var a string
+       
+       func f() {
+       	a = "hello, world"
+       	c <- 0
+       }
+       
+       func main() {
+       	go f()
+       	<-c
+       	print(a)
+       }
+       ```
+    - A receive from an unbuffered channel is synchronized before the completion of the corresponding send on that channel.
+       ```go
+       var c = make(chan int)
+       var a string
+       
+       func f() {
+       	a = "hello, world"
+       	<-c
+       }
+       
+       func main() {
+       	go f()
+       	c <- 0
+       	print(a)
+       }
+       ```
+    - The kth receive on a channel with capacity C is synchronized before the completion of the k+Cth send from that channel completes.
+       ```go
+       var limit = make(chan int, 3)
+       
+       func main() {
+       	for _, w := range work {
+       		go func(w func()) {
+       			limit <- 1
+       			w()
+       			<-limit
+       		}(w)
+       	}
+       	select{}
+       }
+       ```
 
 
 
