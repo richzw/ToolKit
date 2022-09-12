@@ -76,7 +76,28 @@
     - “僵尸”cgroups：那些没有进程运行并被删除的 cgroups 仍然持有一定的内存空间（在我们的案例中，这些缓存对象是目录数据，但也有可能是页缓存或是 tmpfs）。
     - 与其在 cgroup 释放的时候遍历所有的缓存页，而这也可能很慢，内核会惰性地等待这些内存需要用到的时候再去回收它们，当所有的内存页被清理以后，相应的 cgroup 才会最后被回收。与此同时，这些 cgroup 仍然会被计入统计信息中。
     - 我们的节点具有大量的僵尸 cgroup，有些节点的读/停顿超过一秒钟
-
+- [Docker/Kubernetes上无法解释的连接超时原因探寻](https://mp.weixin.qq.com/s/VYBs8iqf0HsNg9WAxktzYQ)
+  - 摘要
+    - Linux内核在做SNAT（源地址转换）时存在一个已知的资源竞争问题，这可能导致SYN包被丢弃
+      - SNAT默认是在Docker和Flannel的对外连接上进行的，使用iptables的masquerade(地址伪装)规则。
+      - 这个资源竞争可能发生在多个容器并发地尝试与同一个外部地址建立连接的时候。在一些场景下，两个连接可能分配到同一个端口用以地址转换，这最终导致一个或多个包被丢弃以及至少1秒的连接时延
+    - 资源竞争情况也存在于DNAT（目的地址转换
+      - 在Kubernetes中，这意味着访问ClusterIP时可能会丢包。当你从Pod发送一个请求到ClusterIP，kube-proxy（通过iptables)默认将ClsuterIP替换成你要访问的Service的某个Pod IP。
+      - DNS是Kubernetes最常见的Service之一，这个资源竞争问题可能使DNS解析域名时产生间歇性的延时，参见Kubernetes社区Issue 56903。
+  - Netfilter和SNAT
+    - 如果从外部主机无法直接访问容器，容器也就不可能和外部服务通信。如果一个容器请求外部的服务，由于容器IP是不可路由的，远程服务器不知道应该把响应发到哪里。但事实上只要每个主机对容器到外部的连接做一次SNAT就能实现。
+    - Iptables是一个可以让我们用命令行来配置netfilter的工具。默认的Docker安装会添加一些iptables规则，来对向外的连接做SNAT
+    - 当一个从容器到外部服务的连接发出后，因为Docker/Flannel添加的iptables规则它会被netfilter处理。netfilter的NAT模块进行SNAT的操作，它将向外传输的包中的源地址替换主机IP，并且在内核中添加一个条目来记录这个转换。
+    - 这些条目存储在内核的conntrack表（conntrack是netfilter的另一个模块）中。你可以通过命令`sudo conntrack -L`来查看这个表的内容。
+  - 端口转换
+    - 如果一个端口被已经建立的连接占用，另一个容器尝试使用相同的本地端口访问同一个服务，netfilter不仅要改变该容器的源IP，还包括源端口
+  - 用户态的conntrack
+    - conntrack软件包有一个命令来显示一些统计信息（conntrack -S）。有一个字段立刻引起我们的注意，当运行那个命令时“insert_field”的值是一个非零值。
+    - netfilter也支持两种其它的算法来找到可用的端口：
+      - 使用部分随机来选择端口搜索的初始位置。当SNAT规则带有flag NF_NAT_RANGE_PROTO_RANDOM时这种模式被使用。
+      - 完全随机来选择端口搜索的初始位置。带有 flag NF_NAT_RANGE_PROTO_RANDOM_FULLY时使用。
+      - NF_NAT_RANGE_PROTO_RANDOM降低了两个线程以同一个初始端口开始搜索的次数，但是仍然有很多的错误。
+      - 只有使用 NF_NAT_RANGE_PROTO_RANDOM_FULLY才能显著减少conntrack表插入错误的次数。在一台Docker测试虚机，使用默认的masquerade规则，10到80个线程并发请求连接同一个主机有2%-4%的插入错误。
 
 
 
