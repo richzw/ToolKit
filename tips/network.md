@@ -914,6 +914,46 @@
   - 没有数据传输的情况：
     - 如果双方都没有开启 TCP keepalive 机制，那么在客户端拔掉网线后，如果客户端一直不插回网线，那么客户端和服务端的 TCP 连接状态将会一直保持存在。
     - 如果双方都开启了 TCP keepalive 机制，那么在客户端拔掉网线后，如果客户端一直不插回网线，TCP keepalive 机制会探测到对方的 TCP 连接没有存活，于是就会断开 TCP 连接。而如果在 TCP 探测期间，客户端插回了网线，那么双方原本的 TCP 连接还是能正常存在。
+- [如何使用 Wireshark 分析 TCP 吞吐瓶颈](https://mp.weixin.qq.com/s/KXPF-9f_VYRnEgIe22bxkQ)
+  - Debug 网络质量的时候，我们一般会关注两个因素：延迟和吞吐量（带宽）。延迟比较好验证，Ping 一下或者 mtr 一下就能看出来。
+  - 吞吐量的场景一般是所谓的长肥管道(Long Fat Networks, LFN) 比如下载大文件。吞吐量没有达到网络的上限，主要可能受 3 个方面的影响：
+    - 发送端出现了瓶颈
+      - 发送端出现瓶颈一般的情况是 buffer 不够大，因为发送的过程是，应用调用 syscall，将要发送的数据放到 buffer 里面，然后由系统负责发送出去
+    - 接收端出现了瓶颈
+    - 中间的网络层出现了瓶颈
+  - TCP 为了优化传输效率
+    - 保护接收端，发送的数据不会超过接收端的 buffer 大小 (Flow control)
+      - 在两边连接建立的时候，会协商好接收端的 buffer 大小 (receiver window size, rwnd), 并且在后续的发送中，接收端也会在每一个 ack 回包中报告自己剩余和接受的 window 大小。
+      - rwnd 查看方式
+        - 这个 window size 直接就在 TCP header 里面，抓下来就能看这个字段 但是真正的 window size 需要乘以 factor, factor 是在 TCP 握手节点通过 TCP Options 协商的
+    - 保护网络，发送的数据不会 overwhelming 网络 (Congestion Control, 拥塞控制), 如果中间的网络出现瓶颈，会导致长肥管道的吞吐不理想；
+      - 对于网络的保护，原理也是维护一个 Window，叫做 Congestion window，拥塞窗口，cwnd, 这个窗口就是当前网络的限制，发送端不会发送超过这个窗口的容量（没有 ack 的总数不会超过 cwnd）。
+      - 默认的算法是 cubic, 也有其他算法可以使用，比如 Google 的 BBR
+      - 主要的逻辑是，慢启动(Slow start), 发送数据来测试，如果能正确收到 receiver 那边的 ack，说明当前网络能容纳这个吞吐，将 cwnd x 2，然后继续测试。直到下面一种情况发生：
+         - 发送的包没有收到 ACK
+         - cwnd 已经等于 rwnd 了
+      - cwnd 查看方式
+        - Congestion control 是发送端通过算法得到的一个动态变量，会试试调整，并不会体现在协议的传输数据中。所以要看这个，必须在发送端的机器上看。
+        - Linux 中可以使用 ss -i 选项将 TCP 连接的参数都打印出来
+  - Wireshark 分析
+    - Statistics -> TCP Stream Graph -> Time Sequence(tcptrace)
+    - Y 轴表示的 Sequence Number, 就是 TCP 包中的 Sequence Number，这个很关键。图中所有的数据，都是以 Sequence Number 为准的。
+    - ![img.png](network_wireshark_statistics.png)
+    - 几种常见的 pattern
+      - 丢包
+        - ![img.png](network_wireshark_statistics_lost_packet.png)
+        - 很多红色 SACK，说明接收端那边重复在说：中间有一个包我没有收到，中间有一个包我没有收到。
+      - 吞吐受到接收 window size 限制
+        - ![img.png](network_wireshark_statistics_window_size.png)
+        - 从这个图可以看出，黄色的线（接收端一 ACK）一上升，蓝色就跟着上升（发送端就开始发），直到填满绿色的线（window size）。说明网络并不是瓶颈，可以调大接收端的 buffer size.
+      - 吞吐受到网络质量限制
+        - ![img.png](network_wireshark_statistics_network_flow.png)
+        - 从这张图中可以看出，接收端的 window size 远远不是瓶颈，还有很多空闲。
+        - 放大可以看出，中间有很多丢包和重传，并且每次只发送一点点数据，这说明很有可能是 cwnd 太小了，受到了拥塞控制算法的限制。
+
+
+
+
 
 
 
