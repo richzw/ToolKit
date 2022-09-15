@@ -1642,3 +1642,7 @@
         - 加入了扰动（jitter），目的是防止惊群问题 （Thundering Herd Problem）的发生. 
     - 对冲策略。对冲是指在不等待响应的情况主动发送单次调用的多个请求，然后取首个返回的回包。这个概念是 grpc 中的概念
     - 熔断降级；如果重试之后还是不行，说明这个故障不是短时间的故障，而是长时间的故障。那么可以对服务进行熔断降级，后面的请求不再重试
+- [Understanding Allocations in Go](https://medium.com/eureka-engineering/understanding-allocations-in-go-stack-heap-memory-9a2631b5035d)
+  - `go test -run TestPointerIt -trace=pointer_trace.out`
+  - `go tool trace pointer_trace.out`
+
