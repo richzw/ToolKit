@@ -350,7 +350,17 @@
     ```
 - [Go 应用的持续性分析](https://mp.weixin.qq.com/s/4MnPx3AoVu_fb3UeM1tCNg)
   - [Pyroscope](https://github.com/pyroscope-io/pyroscope)
-
+- [Go test/benchmark test](https://philpearl.github.io/post/reader/)
+  - Test trace
+     ```shell
+     go test -run TestPointerIt -trace=pointer_trace.out
+     go tool trace pointer_trace.out
+     ```
+  - Benchmark 
+    ```shell
+    go test -run ^$ -bench BenchmarkReadString -memprofile mem.prof
+    go tool pprof -http :6060 blog.test mem.prof
+    ```
 
 
 
