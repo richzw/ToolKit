@@ -697,8 +697,56 @@
     - TCP_NODELAY sends doesn't accumulate the logical packets before sending then as network packets, Nagle's algorithm does according the algorithm, and TCP_CORK does according to the application setting it.
     - A side effect of this is that Nagle's algorithm will send partial frames on an idle connection, TCP_CORK won't.
     - TCP_CORK is useful whenever the server knows the patterns of its bulk transfers. Which is just about 100% of the time with any kind of file serving.
-
-
+- [从一次经历谈 TIME_WAIT 的那些事](https://coolshell.cn/articles/22263.html)
+  - Issue
+    - EaseProbe 是一个轻量独立的用来探活服务健康状况的小工具.不会设置 TCP 的 KeepAlive 重用链接，因为探活工具除了要探活所远端的服务，还要探活整个网络的情况，所以，每次探活都需要从新来过，这样才能捕捉得到整个链路的情况。
+    - 根据TCP的状态机，我们知道这会导致在探测端这边出现的 TIME_WAIT 的 TCP 链接，根据 TCP 协议的定义，这个 TIME_WAIT 需要等待 2倍的MSL 时间，TCP 链接都会被系统回收，在回收之前，这个链接会占用系统的资源，主要是两个资源，一个是文件描述符，这个还好，可以调整，另一个则是端口号，这个是没法调整的
+  - 为什么要 TIME_WAIT
+    - 为了 防止来自一个连接的延迟段被依赖于相同四元组（源地址、源端口、目标地址、目标端口）的稍后连接接受（被接受后，就会被马上断掉，TCP状态机紊乱）。
+      - 虽然，可以通过指定 TCP 的 sequence number 一定范围内才能被接受。
+      - 但这也只是让问题发生的概率低了一些，对于一个吞吐量大的的应用来说，依然能够出现问题，尤其是在具有大接收窗口的快速连接上 [rfc1337](https://www.rfc-editor.org/rfc/rfc1337)
+    - 另一个目的是确保远端已经关闭了连接
+      - 当最后一个ACK丢失时，对端保持该LAST-ACK状态。在没有TIME-WAIT状态的情况下，可以重新打开连接，而远程端仍然认为先前的连接有效。当它收到一个SYN段（并且序列号匹配）时，它将以RST应答，因为它不期望这样的段。新连接将因错误而中止：
+    - TIME_WAIT 的这个超时时间的值如下所示：
+      - 在 macOS 上是15秒， sysctl net.inet.tcp | grep net.inet.tcp.msl
+      - 在 Linux 上是 60秒 cat /proc/sys/net/ipv4/tcp_fin_timeout
+  - 解决方案
+    - 把这个超时间调小一些，这样就可以把TCP 的端口号回收的快一些。但是也不能太小，如果流量很大的话，TIME_WAIT一样会被耗尽。
+    - 设置上 tcp_tw_reuse 。RFC 1323提出了一组 TCP 扩展来提高高带宽路径的性能。除其他外，它定义了一个新的 TCP 选项，带有两个四字节时间戳字段。第一个是发送选项的 TCP 时间戳的当前值，而第二个是从远程主机接收到的最新时间戳。如果新时间戳严格大于为前一个连接记录的最新时间戳。Linux 将重用该状态下的现有 TIME_WAIT 连接用于出站的链接。也就是说，这个参数对于入站连接是没有任何用图的。
+    - SO_LINGER 
+      - 这个参数主要是为了延尽关闭来用的，也就是说你应用调用 close()函数时，如果还有数据没有发送完成，则需要等一个延时时间来让数据发完，但是，如果你把延时设置为 0  时，Socket就丢弃数据，并向对方发送一个 RST 来终止连接，因为走的是 RST 包，所以就不会有 TIME_WAIT 了。
+      - 这个东西在服务器端永远不要设置，不然，你的客户端就总是看到 TCP 链接错误 “connnection reset by peer”，
+  - Golang
+    - net.TCPConn 有个方法 SetLinger()可以完成这个事，使用起来也比较简单：
+    - 对于Golang 的标准库中的 HTTP 对象来说，就有点麻烦了，Golang的 http 库把底层的这边连接对象全都包装成私有变量了，你在外面根本获取不到
+      ```go
+      client := &http.Client{
+          Timeout: h.Timeout(),
+          Transport: &http.Transport{
+            TLSClientConfig:   tls,
+            DisableKeepAlives: true,
+            DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+              d := net.Dialer{Timeout: h.Timeout()}
+              conn, err := d.DialContext(ctx, network, addr)
+              if err != nil {
+                return nil, err
+              }
+              tcpConn, ok := conn.(*net.TCPConn)
+              if ok {
+                tcpConn.SetLinger(0)
+                return tcpConn, nil
+              }
+              return conn, nil
+            },
+          },
+        }
+      ```
+  - Summary
+    - TIME_WAIT 是一个TCP 协议完整性的手段，虽然会有一定的副作用，但是这个设计是非常关键的，最好不要妥协掉。
+    - 永远不要使用  tcp_tw_recycle ，这个参数是个巨龙，破坏力极大。
+    - 服务器端永远不要使用  SO_LINGER(0)，而且使用 tcp_tw_reuse 对服务端意义不大，因为它只对出站流量有用。
+    - 在服务端上最好不要主动断链接，设置好KeepAlive，重用链接，让客户端主动断链接。
+    - 在客户端上可以使用 tcp_tw_reuse  和 SO_LINGER(0)
 
 
 
