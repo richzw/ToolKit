@@ -1083,5 +1083,9 @@
       return nil
      }
      ```
-
+- [如何优化你的程序](https://mp.weixin.qq.com/s/S46POYxx4QQQuubpGwMaxg)
+  - 性能优化关注：CPU、内存、磁盘IO、网络IO等四个方面
+  - 性能指标：吞吐率、响应时间、QPS/IOPS、TP99、资源使用率是我们经常关注的指标。
+  - Tools - bcc tools
+  - perf不仅仅可以定位cpu瓶颈，还可以查看很多方面，比如缺页，分支预测失败，上下文切换等。
 
