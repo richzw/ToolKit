@@ -697,6 +697,7 @@
     - TCP_NODELAY sends doesn't accumulate the logical packets before sending then as network packets, Nagle's algorithm does according the algorithm, and TCP_CORK does according to the application setting it.
     - A side effect of this is that Nagle's algorithm will send partial frames on an idle connection, TCP_CORK won't.
     - TCP_CORK is useful whenever the server knows the patterns of its bulk transfers. Which is just about 100% of the time with any kind of file serving.
+<<<<<<< Updated upstream
 - [从一次经历谈 TIME_WAIT 的那些事](https://coolshell.cn/articles/22263.html)
   - Issue
     - EaseProbe 是一个轻量独立的用来探活服务健康状况的小工具.不会设置 TCP 的 KeepAlive 重用链接，因为探活工具除了要探活所远端的服务，还要探活整个网络的情况，所以，每次探活都需要从新来过，这样才能捕捉得到整个链路的情况。
@@ -747,6 +748,10 @@
     - 服务器端永远不要使用  SO_LINGER(0)，而且使用 tcp_tw_reuse 对服务端意义不大，因为它只对出站流量有用。
     - 在服务端上最好不要主动断链接，设置好KeepAlive，重用链接，让客户端主动断链接。
     - 在客户端上可以使用 tcp_tw_reuse  和 SO_LINGER(0)
+- [TIME_WAIT]()
+  - [Coping with the TCP TIME-WAIT state on busy Linux servers](https://vincent.bernat.ch/en/blog/2014-tcp-time-wait-state-linux#about-the-time-wait-state)
+  - [TIME_WAIT and its design implications for protocols and scalable client server systems](http://www.serverframework.com/asynchronousevents/2011/01/time-wait-and-its-design-implications-for-protocols-and-scalable-servers.html)
+
 
 
 
