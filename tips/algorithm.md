@@ -445,7 +445,30 @@
     - 假设这 100 亿数据都是 int 类型，4 字节（32 位）的有符号整数，存在一个超大文件中。
     - 将每个数字用二进制表示，比较二进制的【最高位】 (第 32 位)，如果数字的最高位为 0，则将这个数字写入 file_0 文件中；如果最高位为 1，则将该数字写入 file_1 文件中。
     - 将 file_0 文件依次读一部分到内存，将每个数字用二进制表示，比较二进制的【次高位】（第 31 位），如果数字的次高位为 0，写入 file_0_0 文件中；如果次高位为 1 ，写入 file_0_1 文件中。
-
+- [位操作 - 最高位非零置位]()
+  ```go
+  func BitTest(x int) int {
+  	y := -x & x     //Extracts lowest set bit, 1110 0101 -> 0000 0001
+  	y = (x + 1) & x //Will clear the trailing ones, 1110 0101 - > 1110 0100
+  	y = (x - 1) | x //Will set the trailing zeros, 0110 0100 - > 0110 0111
+  
+  	return y
+  }
+  
+  /*
+  First calculate the mask of all the bits that aren't the leading zeroes, by "spreading" the bits downwards:
+  
+  uint64_t m = x | (x >> 1);
+  m |= m >> 2;
+  m |= m >> 4;
+  m |= m >> 8;
+  m |= m >> 16;
+  m |= m >> 32;
+  Then set all the bits that that mask doesn't cover:
+  
+  return x | ~m;
+  */
+  ```
 
 
 
