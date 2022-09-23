@@ -27,6 +27,13 @@
   - 为什么越来越多“唱衰” LSM 的声音呢
     - SSD 多通道并发、超高的随机性能是变革的核心因素。
     - 《WiscKey: Separating Keys from Values in SSD-Conscious Storage》就讨论了在 SSD 时代，LSM 架构的优化思路
+  - LSM vs B-Tree
+    - B 树是数据可变的代表结构
+      - B 树的难点在于平衡性维护和并发控制，一般用在读多写少的场景
+      - 维护了所有数据的有序性，读取性能必然起飞，但写入性能你也别抱太大希望。
+    - LSM 树是数据不可变的代表结构。你只能在尾部追加新数据，不能修改之前已经插入的数据。
+      - LSM 树的难点在于 compact 操作和读取数据时的效率优化，一般用在写多读少的场景。
+      - 可以维护局部数据的有序性，从而一定程度提升读性能。
 - [BitMap Index](https://github.com/mkevac/gopherconrussia2019)
   - [Details](https://medium.com/bumble-tech/bitmap-indexes-in-go-unbelievable-search-speed-bb4a6b00851)
   - Indexing approach
