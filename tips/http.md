@@ -404,6 +404,31 @@
   - 如何避免被中间人抓取数据
     - 不要点击任何证书非法的网站，这样 HTTPS 数据就不会被中间人截取到了。
     - 通过 HTTPS 双向认证来避免这种问题 - 用了双向认证方式，不仅客户端会验证服务端的身份，而且服务端也会验证客户端的身份
+- [QUIC Protocol to Optimize Uber’s App Performance](https://www.uber.com/en-HK/blog/employing-quic-protocol/)
+  - Prefix
+    - we concluded that integrating QUIC in our apps would reduce the tail-end latencies compared to TCP. 
+    - We witnessed a reduction of 10-30 percent in tail-end latencies for HTTPS traffic at scale in our rider and driver apps.
+    - In addition to improving the performance of our apps in low connectivity networks, QUIC gives us end-to-end control over the flow of packets in the user space.
+  - TCP
+    - Most users access Uber’s services on the move, and the tail-end latencies of our applications running on TCP were far from meeting the requirements of the real-time nature of our HTTPS traffic. 
+  - TCP Performance over wireless
+    - TCP for wired network
+    - wireless networks are susceptible to losses from interference and signal attenuation. 
+    - Cellular networks are affected by signal loss (or path loss) due to reflection/absorption by things in the environment
+    - To overcome intermittent fluctuations in bandwidth and loss, cellular networks typically employ large buffers to absorb traffic bursts. Large buffers can cause excessive queueing, causing longer delays. TCP often interprets such queuing as loss due to time out durations, so it tends to retransmit and further fill up the buffer. This problem, known as bufferbloat, is a major challenge in today’s Internet.
+  - TCP performance
+    - In the case that a packet or ACK is lost, the sender retransmits the packet after the expiration of a retransmission timeout (RTO). The RTO is dynamically computed based on various factors, such as the estimate of the RTT between the sender and the receiver.
+  - QUIC
+    - 0-RTT connection establishment: QUIC allows reuse of the security credential established in previous connections, reducing the overhead of secure connection handshakes by way of sending data in the first round trip. In the future, TLS1.3 will support 0-RTT, but the TCP three-way handshake will still be required.
+    - Overcoming HoL blocking: HTTP/2 uses a single TCP connection to each origin to improve performance, but this can lead to head-of-line (HoL) blocking. For instance, an object B (e.g, trip request) may get blocked behind another object A (e.g, logging request) which experiences loss. In this case, delivery of B is delayed until A can recover from the loss. However, QUIC facilitates multiplexing and delivers a request to the application independent of other requests that are being exchanged.  
+    - Congestion control: QUIC sits in the application layer, making it easier to update the core algorithm of the transport protocol that controls the sending rate based on network conditions, such as packet loss and RTT. Most TCP deployments use the CUBIC algorithm, which is not optimal for delay-sensitive traffic. Recently developed algorithms, such as BBR, model the network more accurately and optimize for latency. QUIC lets us enable BBR and update the algorithm as it evolves.
+    - Loss Recovery: QUIC invokes two tail loss probes (TLP) before RTO is triggered even when a loss is outstanding, which is different from some TCP implementations. TLP essentially retransmits the last packet (or a new packet, if available) to trigger fast recovery. Tail loss handling is particularly useful for Uber’s network traffic patterns, which are composed of short, sporadic latency-sensitive transfers.
+    - Optimized ACKing:  Since each packet carries a unique sequence number, the problem of distinguishing retransmission from delayed packets is eliminated. The ACK packets also contain the time to process the packet and generate the ACK at the client level. These features ensure that QUIC more accurately estimates the RTT. QUIC’s ACKs support up to 256 NACK ranges, helping the sender to be more resilient to packet reordering and ensuring fewer bytes on the wire. Selective ACK (SACK) in TCP does not resolve this problem in all cases.
+    - Connection Migration: QUIC connections are identified by a 64 bit connection ID, so that if a client changes IP addresses, it can continue to use the old connection ID from the new IP address without interrupting any in-flight requests. This is a common occurrence in mobile applications when a user switches between WiFi and cellular connections.
+
+
+
+
 
 
 
