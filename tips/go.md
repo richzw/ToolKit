@@ -1645,4 +1645,4 @@
 - [Understanding Allocations in Go](https://medium.com/eureka-engineering/understanding-allocations-in-go-stack-heap-memory-9a2631b5035d)
   - `go test -run TestPointerIt -trace=pointer_trace.out`
   - `go tool trace pointer_trace.out`
-
+- [Memory Model](https://mp.weixin.qq.com/s/t6ATJLfte3kedReIMuA2bg)
