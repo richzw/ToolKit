@@ -71,6 +71,29 @@
     - 直接接管网卡的RX数据包（类似DPDK用户态驱动）处理；
     - 通过运行BPF指令快速处理报文；
     - 和Linux协议栈无缝对接；
+  - Ex
+    - 下面是一个最小的完整 XDP 程序，实现丢弃包的功能（xdp-example.c）：
+    ```c
+    #include <linux/bpf.h>
+    
+    #ifndef __section
+    # define __section(NAME)                  \
+    __attribute__((section(NAME), used))
+    #endif
+    
+    __section("prog")
+    int xdp_drop(struct xdp_md *ctx)
+    {
+    return XDP_DROP;
+    }
+    
+    char __license[] __section("license") = "GPL";
+    ```
+    - 用下面的命令编译并加载到内核：
+    ```shell
+    $ clang -O2 -Wall -target bpf -c xdp-example.c -o xdp-example.o
+    $ ip link set dev em1 xdp obj xdp-example.o
+    ```
 
 
 
