@@ -1663,7 +1663,46 @@
        	select{}
        }
        ```
-
+- [nil Isn't Equal to nil](https://www.calhoun.io/when-nil-isnt-equal-to-nil/)
+   ```go
+   	// case 1
+   	var i any
+   	var err error
+   	fmt.Printf("%T, %v \n", i, i)
+   	fmt.Printf("%T, %v \n", err, err) // (<nil>, <nil>)
+   	println("i == nil ", i == nil)
+   	println("err == nil ", err == nil)
+   	println("err == i ", err == i)
+   
+   	// case 2
+   	var a *int
+   	var b interface{}
+   
+   	fmt.Printf("%T, %v \n", a, a)      // (*int, <nil>)
+   	fmt.Printf("%T, %v \n", b, b)      // (<nil>, <nil>)
+   	fmt.Println("a == nil:", a == nil) // (*int, <nil>) == (*int, <nil>)
+   	fmt.Println("b == nil:", b == nil) // (<nil>, <nil>) == (<nil>, <nil>)
+   	fmt.Println("a == b:", a == b)     // (*int, <nil>) == (<nil>, <nil>)
+   
+   	if a == nil && b == nil {
+   		fmt.Println("both a and b are nil") // both are nil
+   	}
+   
+   	// case 3
+   	var aa *int = nil
+   	var bb interface{} = aa
+   
+   	fmt.Printf("aa=(%T, %v)\n", aa, aa) // (*int, <nil>)
+   	fmt.Printf("bb=(%T, %v)\n", bb, bb) // (*int, <nil>)
+   	fmt.Println("aa == nil:", aa == nil)
+   	/*
+   		This one is a little less obvious, but when we compare the variable b to a hard-coded nil our compiler once again needs to determine what type to give that nil value.
+   		When this happens the compiler makes the same decision it would make if assigning nil to the b variable -
+   		that is it sets the right hand side of our equation to be (<nil>, <nil>) - and if we look at the output for b it clearly has a different type: (*int, <nil>)
+   	*/
+   	fmt.Println("bb == nil:", bb == nil) // (*int, <nil>) == (<nil>, <nil>)
+   	fmt.Println("aa == bb:", aa == bb)
+   ```
 
 
 
