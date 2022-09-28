@@ -366,7 +366,21 @@
       - ![img.png](mysql_user_record.png)
   - Summary
     - 多个数据页之间通过页号构成了双向链表。而每一个数据页的行数据之间，又通过下一条记录的位置构成了单项链表
-
+- [删库跑路后，我连表名都不能修改了](https://mp.weixin.qq.com/s/5dw6WC2TOtMvrPY137Q_Yg)
+  - 无论是ALTER还是RENAME都不能正常使用，看来drop的权限确实会对修改表名造成影响
+    - RENAME TABLE renames one or more tables. You must have ALTER and DROP privileges for the original table, and CREATE and INSERT privileges for the new table.
+  - 当我需要清空一张表、顺带把AUTO_INCREMENT的主键置为初始值时，突然发现truncate命令也无法执行了
+    - 相对于delete一行行删除数据，truncate会删除表后重新新建表，这一操作相对delete会快很多，尤其是对大表而言。
+    - 如果执行了truncate的话，那么自增列id的值会被重置为 1
+  - delete 后如何恢复数据
+    - 我们需要根据删除操作发生的时间找到临近的binglog文件：
+     ```shell
+     mysqlbinlog --base64-output=decode-rows -v 
+       --database=mall 
+       --start-datetime="2021-09-17 20:50:00" 
+       --stop-datetime="2021-09-17 21:30:00" 
+       D:\tmp\mysql-bin.000001 > mysqllog.sql
+     ```
 
 
 
