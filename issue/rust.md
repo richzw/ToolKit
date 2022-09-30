@@ -71,6 +71,66 @@
         Ok(())
     }
     ```
+- [错误处理](https://mp.weixin.qq.com/s/r5cmcflZcKICQWZ9YxuhlA)
+  - Result的完整形态是Result<T, E>，其中T和E是泛型参数 - Result是两个类型的集合：
+    - 一个是没有错误时的计算结果
+    - 一个是出错时，要返回的错误
+    ```rust
+    async fn client_test() {
+        let res = client
+            .post(...
+            ))
+        .header("Authorization", &config_env::get__api_token())
+            .header("Accept", "application/json")
+            .json(&task)
+            .send()
+            .await;
+        match res {
+            Ok(body) => {
+                println!("Succeed posting task {:?}", body);
+                if body.status() == reqwest::StatusCode::OK {
+                    if let Ok(result) = body.json::<serde_json::Value>().await {
+                        if let Some(code) = result.get("code") {
+                            if let Some(code) = code.as_u64() {
+                                if code != 200 {
+    
+                                    if let Err(e) = github::issue::post_issue_comment(...
+                                    ).await
+                                    {
+                                        eprintln!("{}", e);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }}
+    }
+    ```
+  - 方式一、首先先把代码段提到一个单独的函数post_sending_task()，然后将返回值改成Result
+  - 方式二、使用组合子，如将Option转换成Result，从而可以使用问号 `let res = get_something().ok_or_else(|| err)?;`
+  - 方式三、提前返回。通过反转if的条件，提前返回
+  - 方式四、如果获取结果的同时必须处理错误的情况，那么使用下面的形式，
+    `let res = match step1() {
+    Ok(o)=> o,
+    Err(e) => { handle error }}`
+    ```
+    async fn post_sending_task(body: reqwest::Response, backend_task: &Task) -> Result<(), E> {
+        if body.status() != reqwest::StatusCode::OK {
+            return Err(anyhow::anyhow!(format!("Failed to send job with status code {}", body.status())));
+        }
+    
+        let result = body.json::<serde_json::Value>().await?;
+        let code = result.get("code").ok_or(Err(anyhow::anyhow!(format!("no code in it"))))?;
+        let code = code.as_u64().ok_or(anyhow::anyhow!(format!("code is not u64")))?;
+        if code < 400 {
+            return Ok(());
+        }
+        
+        github::issue::post_issue_comment(...).await
+    }
+    ```
+
 
 
 
