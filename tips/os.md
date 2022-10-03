@@ -1213,8 +1213,18 @@
         - 当我们在随机读取文件的时候，也不希望内核使用 page cache。因为这样违反了程序局部性原理，当我们随机读取文件的时候，内核预读进 page cache 中的数据将很久不会再次得到访问，白白浪费 page cache 空间不说，还额外增加了预读的磁盘 IO。
       - ![img.png](os_directly_io.png)
       - 从整个 Direct IO 的过程中我们看到，一共发生了两次上下文的切换，两次的数据拷贝。
-
-
+- [CPU 与 GPU 到底有什么区别](https://mp.weixin.qq.com/s/jPh5o5LXDWi7WogyN6AHvQ)
+  - CPU和GPU的最大不同在于架构。
+    - CPU适用于广泛的应用场景(学识渊博)，可以执行任意程序。
+    - CPU内部cache以及控制部分占据了很大一部分片上面积，因此计算单元占比很少。
+    - GPU则专为多任务而生，并发能力强，具体来讲就是多核，GPU则可能会有成百上千核：
+    - GPU只有很简单的控制单元，剩下的大部分都被计算单元占据，因此CPU的核数有限，而GPU则轻松堆出上千核：
+  - 奇怪的工作方式
+    - 对CPU来说，不同的核心可以执行不同的机器指令 - MIMD，(Multiple Instruction, Multiple Data)
+    - GPU上的这些核心必须整齐划一的运行相同的机器指令，只是可以操作不同的数据。- SIMD，(Single Instruction, Multiple Data)
+    - GPU的定位非常简单，就是纯计算，GPU绝不是用来取代CPU的，CPU只是把一些GPU非常擅长的事情交给它，GPU仅仅是用来分担CPU工作的配角。
+    - ![img.png](os_cpu_gpu_cuda.png)
+    - GPU的计算场景是这样的：1)计算简单；2）重复计算。
 
 
 
