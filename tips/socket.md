@@ -751,7 +751,19 @@
 - [TIME_WAIT]()
   - [Coping with the TCP TIME-WAIT state on busy Linux servers](https://vincent.bernat.ch/en/blog/2014-tcp-time-wait-state-linux#about-the-time-wait-state)
   - [TIME_WAIT and its design implications for protocols and scalable client server systems](http://www.serverframework.com/asynchronousevents/2011/01/time-wait-and-its-design-implications-for-protocols-and-scalable-servers.html)
-
+- [UDP就一定比TCP快](https://juejin.cn/post/7147243567075819557/)
+  - TCP
+    - 重传机制 - 如果长时间等不到对方的确认，TCP就会重新发一次消息，这就是所谓的重传机制
+    - 流量控制机制 - TCP就需要思考有没有办法可以尽量避免重传, TCP根据窗口的大小去控制自己发送的数据量，这样就能大大减少丢包的概率。
+    - 滑动窗口机制 - TCP是通过滑动窗口机制来实现流量控制机制的
+    - 拥塞控制机制 - 流量控制针对的是单个连接数据处理能力的控制，拥塞控制针对的是整个网络环境数据处理能力的控制。
+    - 分段机制 - 降低重传带来的影响呢？ - 当我们需要发送一个超大的数据包时，如果这个数据包丢了，那就得重传同样大的数据包。但如果我能将其分成一小段一小段，那就算真丢了，那我也就只需要重传那一小段就好了，大大减小了重传的压力，这就是TCP的分段机制。
+      - 在传输层叫MSS（Maximum Segment Size）
+      - 在网络层，如果数据包还大于MTU（Maximum Transmit Unit）
+      - 一般情况下，MSS=MTU-40Byte，所以TCP分段后，到了IP层大概率就不会再分片了。
+    - 乱序重排机制 - 后发的数据包先到是吧，那就先放到专门的乱序队列中，等数据都到齐后，重新整理好乱序队列的数据包顺序后再给到用户，这就是乱序重排机制。
+  - UDP
+    - 对于UDP+重传的场景，如果要传超大数据包，并且没有实现分段机制的话，那数据就会在IP层分片，一旦丢包，那就需要重传整个超大数据包。而TCP则不需要考虑这个，内部会自动分段，丢包重传分段就行了。这种场景下，其实TCP更快。
 
 
 
