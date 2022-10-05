@@ -425,6 +425,44 @@
     - Loss Recovery: QUIC invokes two tail loss probes (TLP) before RTO is triggered even when a loss is outstanding, which is different from some TCP implementations. TLP essentially retransmits the last packet (or a new packet, if available) to trigger fast recovery. Tail loss handling is particularly useful for Uber’s network traffic patterns, which are composed of short, sporadic latency-sensitive transfers.
     - Optimized ACKing:  Since each packet carries a unique sequence number, the problem of distinguishing retransmission from delayed packets is eliminated. The ACK packets also contain the time to process the packet and generate the ACK at the client level. These features ensure that QUIC more accurately estimates the RTT. QUIC’s ACKs support up to 256 NACK ranges, helping the sender to be more resilient to packet reordering and ensuring fewer bytes on the wire. Selective ACK (SACK) in TCP does not resolve this problem in all cases.
     - Connection Migration: QUIC connections are identified by a 64 bit connection ID, so that if a client changes IP addresses, it can continue to use the old connection ID from the new IP address without interrupting any in-flight requests. This is a common occurrence in mobile applications when a user switches between WiFi and cellular connections.
+- [HTTPS 握手会影响性能吗](https://mp.weixin.qq.com/s/HEuhidyV-WuKp8ncD6TJ_w)
+  - HTTPS 相比 HTTP 协议多一个 TLS 协议握手过程，目的是为了通过非对称加密握手协商或者交换出对称加密密钥，这个过程最长可以花费掉 2 RTT，接着后续传输的应用数据都得使用对称加密密钥来加密/解密。
+  - 如何优化 HTTPS？
+    - 分析性能损耗
+      - 第一个环节， TLS 协议握手过程；
+        - TLS 协议握手过程不仅增加了网络延时（最长可以花费掉 2 RTT），而且握手过程中的一些步骤也会产生性能损耗
+        - 对于 ECDHE 密钥协商算法，握手过程中会客户端和服务端都需要临时生成椭圆曲线公私钥；
+        - 客户端验证证书时，会访问 CA 获取 CRL 或者 OCSP，目的是验证服务器的证书是否有被吊销；
+        - 双方计算 Pre-Master，也就是对称加密密钥；
+      - 第二个环节，握手后的对称加密报文传输。
+        - 现在主流的对称加密算法 AES、ChaCha20 性能都是不错的，而且一些 CPU 厂商还针对它们做了硬件级别的优化，因此这个环节的性能消耗可以说非常地小。
+    - 硬件优化
+      - 支持 AES-NI 特性的 CPU，因为这种款式的 CPU 能在指令级别优化了 AES 算法，这样便加速了数据的加解密传输过程。
+      - `sort -u /proc/cryto |grep module | grep aes`
+      - 选择 ChaCha20 对称加密算法，因为 ChaCha20 算法的运算指令相比 AES 算法会对 CPU 更友好一点。
+    - 软件优化
+      - 将 Linux 内核从 2.x 升级到 4.x；
+      - 将 OpenSSL 从 1.0.1 升级到 1.1.1；
+    - 协议优化 - 密钥交换过程进行优化
+      - 尽量选用 ECDHE 密钥交换算法替换 RSA 算法，因为该算法由于支持「False Start」，它是“抢跑”的意思，客户端可以在 TLS 协议的第 3 次握手后，第 4 次握手前，发送加密的应用数据，以此将 TLS 握手的消息往返由 2 RTT 减少到 1 RTT，而且安全性也高，具备前向安全性。
+      - ECDHE 算法是基于椭圆曲线实现的，不同的椭圆曲线性能也不同，应该尽量选择 x25519 曲线
+        - 在 Nginx 上，可以使用 ssl_ecdh_curve 指令配置想使用的椭圆曲线，把优先使用的放在前面：
+      - 对于对称加密算法方面，如果对安全性不是特别高的要求，可以选用 AES_128_GCM，它比 AES_256_GCM 快一些，因为密钥的长度短一些。
+      - TLS 升级
+        - 直接把 TLS 1.2 升级成 TLS 1.3，TLS 1.3 大幅度简化了握手的步骤，完成 TLS 握手只要 1 RTT，而且安全性更高。
+        - ![img.png](http_tls_12_13.png)
+        - TLS 1.3 把 Hello 和公钥交换这两个消息合并成了一个消息，于是这样就减少到只需 1 RTT 就能完成 TLS 握手 - 客户端在  Client Hello 消息里带上了支持的椭圆曲线，以及这些椭圆曲线对应的公钥。
+        - TLS1.3 对密码套件进行“减肥”了，对于密钥交换算法，废除了不支持前向安全性的  RSA 和 DH 算法，只支持 ECDHE 算法。
+    - 证书优化
+      - 一个是证书传输，
+        - 对于服务器的证书应该选择椭圆曲线（ECDSA）证书，而不是 RSA 证书，因为在相同安全强度下， ECC 密钥长度比 RSA 短的多。
+      - 一个是证书验证；
+        - 客户端在验证证书时，是个复杂的过程，会走证书链逐级验证，验证的过程不仅需要「用 CA 公钥解密证书」以及「用签名算法验证证书的完整性」，而且为了知道证书是否被 CA 吊销，客户端有时还会再去访问 CA， 下载 CRL 或者 OCSP 数据，以此确认证书的有效性。
+        - CRL
+          - 
+
+
+
 
 
 
