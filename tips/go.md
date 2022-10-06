@@ -1615,19 +1615,19 @@
     ```go
     type spinLock uint32
     func (sl *spinLock) Lock() {
-    	for !atomic.CompareAndSwapUint32((*uint32)(sl), 0, 1) {
-    		runtime.Gosched() //without this it locks up on GOMAXPROCS > 1
-    	}
+        for !atomic.CompareAndSwapUint32((*uint32)(sl), 0, 1) {
+            runtime.Gosched() //without this it locks up on GOMAXPROCS > 1
+        }
     }
     func (sl *spinLock) Unlock() {
-    	atomic.StoreUint32((*uint32)(sl), 0)
+        atomic.StoreUint32((*uint32)(sl), 0)
     }
     func (sl *spinLock) TryLock() bool {
-    	return atomic.CompareAndSwapUint32((*uint32)(sl), 0, 1)
+        return atomic.CompareAndSwapUint32((*uint32)(sl), 0, 1)
     }
     func SpinLock() sync.Locker {
-    	var lock spinLock
-    	return &lock
+        var lock spinLock
+        return &lock
     }
     ```
 - [在Go中如何正确重试请求](https://www.luozhiyun.com/archives/677)
@@ -1646,3 +1646,54 @@
   - `go test -run TestPointerIt -trace=pointer_trace.out`
   - `go tool trace pointer_trace.out`
 - [Memory Model](https://mp.weixin.qq.com/s/t6ATJLfte3kedReIMuA2bg)
+- [Go Error处理最佳实践](https://mp.weixin.qq.com/s/o4k9Bu1X6KTK8Mvv9ufJPQ)
+  - Go处理错误
+    - 直观的返回error
+    - 屏蔽过程中的error的处理 - wrap error into struct
+    - 利用函数式编程延迟运行
+      - kubernetes中的visitor对此就有很多种扩展方式，分离了数据和行为
+            ```go
+            type Walker interface {
+                Next MyFunc
+            }
+            type SliceWalker struct {
+                index int 
+                funs []MyFunc
+            } 
+            
+            func NewEnterFunc() MyFunc {
+                return func(t ZooTour) error {
+                    return t.Enter()
+                }
+            }
+            
+            func BreakOnError(t ZooTour, walker Walker) error {
+                for {
+                    f := walker.Next() 
+                    if f == nil {
+                        break
+                    }
+                    if err := f(t); err := nil {
+                      // 遇到错误break或者continue继续执行  
+                  }
+                }
+            }
+            ```
+  - 分层下的Error Handling
+    - Wrap erros
+      - Dao层使用Wrap上抛错误
+      - Service层追加信息 errors.WithMessage
+      - MiddleWare统一打印错误日志
+      - 要判断error是否为指定的错误时，可以使用errors.Cause获取root error，再进行和sentinel error判定；
+  - errgroup集中错误处理 - https://github.com/go-kratos/kratos/blob/v0.3.3/pkg/sync/errgroup/errgroup.go
+    - B站拓展包主要解决了官方ErrGroup的几个痛点：控制并发量、Recover住协程的Panic并打出堆栈信息。
+    - Go方法并发的去调用在量很多的情况下会产生死锁，因为他的切片不是线程安全的，如果要并发，并发数量一定不能过大，一旦动用了任务切片，那么很有可能就在wait方法那里hold住了。这个可以加个锁来优化。
+    - Wg watigroup只在Go方法中进行Add()，并没有控制消费者的并发，Wait的逻辑就是分发者都分发完成，直接关闭管道，让消费者并发池自行销毁，不去管控，一旦逻辑中有完全hold住的方法那么容易产生内存泄漏。
+
+
+
+
+
+
+
+
