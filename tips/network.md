@@ -976,7 +976,17 @@
         - 当某个媒体流开始收到关键帧的时候，降低该流让出空余带宽的量，使得整体输出码率的波动性降低。
       - 波峰检测
         - 使用 300ms 统计窗口判断波峰，出现较大的波峰数据时，降低该流让出带宽的量，减小整体输出码率的波动性。
-
+- [MSS vs MTU](https://networkengineering.stackexchange.com/questions/8288/what-is-the-difference-between-mss-and-mtu)
+  - MTU
+    - MTU is maximum IP packet size of a given link.
+    - MTU is used for fragmentation i.e packet larger than MTU is fragmented.
+    - If no fragmentation is wanted, either you have to check the MTU at each hop or use a helper protocol for that (Path MTU Discovery)
+    - IPv6 does NOT support packet fragmentation by routers, hence PMTUD with ICMPv6 is mandatory if you don't want to lose a packet somewhere because of small MTU. Endpoints can fragment, but not routers Also, IPv6 has a much higher MINIMUM MTU.
+  - MSS
+    - MSS is Maximum TCP segment size
+    - Packet exceeding MSS aren't fragmented, they're simply discarded.
+    - MSS is normally decided in the TCP three-way handshake
+    - MSS=MTU-40(IP header(20 bytes) + TCP header(20 bytes) )
 
 
 
