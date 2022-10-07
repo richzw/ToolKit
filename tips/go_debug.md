@@ -361,6 +361,31 @@
     go test -run ^$ -bench BenchmarkReadString -memprofile mem.prof
     go tool pprof -http :6060 blog.test mem.prof
     ```
-
-
-
+- [Go CPU profiler 内幕](https://mp.weixin.qq.com/s/rgdmO4qUv-wtfkAEow57Kg)
+  - [The Busy Developer’s Guide to Go Profiling, Tracing and Observability]()
+  - 基本知识
+    - 当前市面上存在两种类型的profiler:
+      - tracing(跟踪): 当预定义的事件发生时进行测量。例如，函数被调用，函数退出等等。
+      - Sampling(采样): 定期进行测量。
+    - Go CPU profiler 是一个采样分析器。当然Go还有一个执行跟踪器（execution tracer），它是 tracing profiler, 跟踪某些事件，例如请求锁，GC相关事件等等
+      - 采样器(sampler)：定期调用回调，并且通常分析数据收集堆栈跟踪(stack trace)。不同的profiler使用不同的策略来触发回调。
+      - 数据收集：这是profiler收集其数据的地方：它可能会消耗内存或调用计数，基本上是与堆栈跟踪关联的一些指标。
+    - [Linux perf 使用 PMU(Performance Monitor Unit)计数器进行采样](https://easyperf.net/blog/2018/06/01/PMU-counters-and-profiling-basics)
+  - 如何定期触发探查器？
+    - 在 Linux 中，Go 运行时使用 setitimer/timer_create/timer_settime 来设置 SIGPROF 信号处理器。此处理器按runtime.SetCPUProfileRate设置的周期间隔触发，默认情况下是100Mz(10毫秒)
+    - 在Go 1.18之前，Go CPU profiler的采样器存在一些严重的问题，你可以在[这里](https://www.datadoghq.com/blog/engineering/profiling-improvements-in-go-1-18/)看到这些问题的细节。我们记错的话，settimer API 是Linux中每个线程触发基于时间的信号的推荐方法: 从技术上讲，它的工作原理就像你期望的进程信号处理机制一样。但它并不是多核分析的良好机制。
+    - 由于 Go 使用非阻塞 I/O，等待I/O的goroutine不会被统计为running的goroutine，Go CPU profiler 不会捕获这类goroutine的数据
+    - fgprof 使用runtime.GoroutineProfile获取 on-CPU 和 off-CPU的数据。
+  - profiler 如何收集数据
+    - 一个一个随机的运行的goroutine收到SIGPROF信号，它会被中断并执行信号处理程序。中断的 goroutine 的堆栈跟踪在此信号处理程序的上下文中获取到，然后与当前profiler标签[10]一起保存到lock-free[11]日志结构中
+    - ![img.png](go_debug_cpu_profile.png)
+    - 为什么 Go 为了实现一个独特的lock-free结构而花费了那么大精力只为了保存临时分析数据？为什么不定期将所有内容写入hashmap？
+      - 首先看的第一件事就是SIGPROF处理器就是禁用内存分派。此外，profiler代码不包含热门和锁，甚至堆栈的最大深度也是硬编码的。截止Go 1.19, 最大深度是64
+  - 开销
+    - profiler开销是恒定的？嗯，这要视情况而定。让我解释一下原因：在单个profiler中断中，会发生以下情况：
+      - 一个随机运行的goroutine执行上下文切换来运行SIGPROF处理器，
+      - 执行堆栈遍历，并且 Go 运行时将堆栈跟踪保存到lock-free ring buffer中，
+      - goroutine 恢复。
+    - 以上所有事情都发生在大约1微秒（在典型的CPU上）。但是，在实践中，情况变得更糟。如果您搜索“Go CPU profiler的开销”，您将看到从 %0.5 到 %1-%5 的数字（
+    - 在典型的 I/O 密集型应用程序上，profiler的开销将非常小。
+  - [Source](https://sumercip.com/posts/inside-the-go-cpu-profiler/)
