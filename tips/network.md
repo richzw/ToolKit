@@ -977,16 +977,25 @@
       - 波峰检测
         - 使用 300ms 统计窗口判断波峰，出现较大的波峰数据时，降低该流让出带宽的量，减小整体输出码率的波动性。
 - [MSS vs MTU](https://networkengineering.stackexchange.com/questions/8288/what-is-the-difference-between-mss-and-mtu)
-  - MTU
+  - [MTU](https://www.cloudflare.com/learning/network-layer/what-is-mtu/)
     - MTU is maximum IP packet size of a given link.
-    - MTU is used for fragmentation i.e packet larger than MTU is fragmented.
+    - MTU is used for fragmentation i.e packet larger than MTU is fragmented. When two computing devices open a connection and begin exchanging packets, those packets are routed across multiple networks. It is necessary to take into account not just the MTU of the two devices at the ends of each communication, but all routers, switches, and servers in the middle as well. Packets that exceed the MTU on any point in the network path are fragmented.
     - If no fragmentation is wanted, either you have to check the MTU at each hop or use a helper protocol for that (Path MTU Discovery)
-    - IPv6 does NOT support packet fragmentation by routers, hence PMTUD with ICMPv6 is mandatory if you don't want to lose a packet somewhere because of small MTU. Endpoints can fragment, but not routers Also, IPv6 has a much higher MINIMUM MTU.
-  - MSS
-    - MSS is Maximum TCP segment size
+    - When is fragmentation not possible
+      - IPv6 does NOT support packet fragmentation by routers, hence PMTUD with ICMPv6 is mandatory if you don't want to lose a packet somewhere because of small MTU. Endpoints can fragment, but not routers Also, IPv6 has a much higher MINIMUM MTU.
+      - Fragmentation is also not possible when the "Don't Fragment" flag is activated in a packet's IP header.
+    - What is path MTU discovery
+      - Path MTU discovery, or PMTUD, is the process of discovering the MTU of all devices, routers, and switches on a network path.
+      - IPv4: IPv4 allows fragmentation and thus includes the Don't Fragment flag in the IP header. PMTUD in IPv4 works by sending test packets along the network path with the Don't Fragment flag turned on. If any router or device along the path drops the packet, it sends back an ICMP message with its MTU. The source device lowers its MTU and sends another test packet. This process is repeated until the test packets are small enough to traverse the entire network path without being dropped.
+      - IPv6: For IPv6, which does not allow fragmentation, PMTUD works in much the same way. The key difference is that IPv6 headers do not have the Don't Fragment option and so the flag is not set. Routers that support IPv6 will not fragment IPv6 packets, so if the test packets exceed the MTU, the routers drop the packets and send back corresponding ICMP messages without checking for a Don't Fragment flag. IPv6 PMTUD sends smaller and smaller test packets until the packets can traverse the entire network path, just like in IPv4.
+  - [MSS](https://www.cloudflare.com/zh-cn/learning/network-layer/what-is-mss/)
+    - MSS is a layer 4, or transport layer, metric. It is used with TCP, a transport layer protocol
+    - Packets have several headers attached to them that contain information about their contents and destination. MSS measures the non-header portion of a packet, which is called the payload.
+    - MSS is Maximum TCP segment size that a network-connected device can receive. MSS is measured in bytes
     - Packet exceeding MSS aren't fragmented, they're simply discarded.
-    - MSS is normally decided in the TCP three-way handshake
-    - MSS=MTU-40(IP header(20 bytes) + TCP header(20 bytes) )
+    - MSS is normally decided in the TCP three-way handshake, both devices communicate the size of the packets they are able to receive (this can be called "MSS clamping"
+    - MSS is determined by another metric that has to do with packet size: MTU
+    - ![img.png](network_mtu_mss.png)
 
 
 
