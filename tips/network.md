@@ -996,7 +996,12 @@
     - MSS is normally decided in the TCP three-way handshake, both devices communicate the size of the packets they are able to receive (this can be called "MSS clamping"
     - MSS is determined by another metric that has to do with packet size: MTU
     - ![img.png](network_mtu_mss.png)
-
+- [能ping通，TCP就一定能连通吗](https://mp.weixin.qq.com/s/fb2uUWz5ZjPEfYv_l6e4Zg)
+  - 路由器可以通过OSPF协议生成路由表，利用数据包里的IP地址去跟路由表做匹配，选择最优路径后进行转发。
+  - 当路由表一个都匹配不上时会走默认网关。当匹配上多个的时候，会先看匹配长度，如果一样就看管理距离，还一样就看路径成本。如果连路径成本都一样，那等价路径。如果路由开启了ECMP，那就可以同时利用这几条路径做传输。
+  - ECMP可以提高链路带宽，同时利用五元组做哈希键进行路径选择，保证了同一条连接的数据包走同一条路径，减少了乱序的情况。
+  - 可以通过traceroute命令查看到链路上是否有用到ECMP的情况。
+  - 开启了ECMP的网络链路中，TCP和ping命令可能走的路径不同，甚至同样是TCP，不同连接之间，走的路径也不同，因此出现了连接时好时坏的问题，实在是走投无路了，可以考虑下是不是跟ECMP有关。
 
 
 
