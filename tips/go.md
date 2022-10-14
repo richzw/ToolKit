@@ -1689,8 +1689,38 @@
     - B站拓展包主要解决了官方ErrGroup的几个痛点：控制并发量、Recover住协程的Panic并打出堆栈信息。
     - Go方法并发的去调用在量很多的情况下会产生死锁，因为他的切片不是线程安全的，如果要并发，并发数量一定不能过大，一旦动用了任务切片，那么很有可能就在wait方法那里hold住了。这个可以加个锁来优化。
     - Wg watigroup只在Go方法中进行Add()，并没有控制消费者的并发，Wait的逻辑就是分发者都分发完成，直接关闭管道，让消费者并发池自行销毁，不去管控，一旦逻辑中有完全hold住的方法那么容易产生内存泄漏。
-
-
+- [avoid allocations when creating slices in Go](https://mp.weixin.qq.com/s/SLouDICt3HABv_wh-sSqKw)
+  - Code - 但是也很危险。当你开始更改 slice 时，也很容易浪费内存。例如，你按此方法分配 1M 对象，然后你移除掉 999k，你将保持 1M 的很大内存块在内存中。
+  ```go
+  // 11 Allocations (Slice + Each Coord)
+  xs := make([]*Coord, 10)
+  for i := range xs {
+   xs[i] := new(Coord)
+  }
+  
+  // 2 Allocations (Pointer Slice + Data Slice)
+  xs := make([]*Coord, 10)
+  xsData := make([]Coord, 10)
+  for i := range xs {
+   xs[i] = &xsData[i]
+  }
+  ```
+  - generic
+   ```go
+   func Calloc[T any](len, cap int) []*T ( 
+    xs := make([]*T, len, cap)
+    ys := make([]T, len, cap)
+    for i := range xs {
+     xs[i] = &ys[i]
+    }
+    return xs
+   }
+   
+   func main() (
+    fmt.Println(Calloc[int](10, 10))
+    // Output: [0xc000018050 0xc000018058 0xc000018060 Oxc000018068 0xc000018070 0xc000018078 Oxc000018080 Oxc000018088 0xc000018090 0xc000018098]
+   }
+   ```
 
 
 
