@@ -1721,9 +1721,61 @@
     // Output: [0xc000018050 0xc000018058 0xc000018060 Oxc000018068 0xc000018070 0xc000018078 Oxc000018080 Oxc000018088 0xc000018090 0xc000018098]
    }
    ```
-
-
-
-
+- [IO 流的并发](https://mp.weixin.qq.com/s/wNBkC-X1FMPuHBX1P_DXbQ)
+  - Steps
+    - 需要一个 teeReader 来分流 - 这个组件主要是用来分流的，把一个读流分叉出一股数据流出去
+    - 需要一个 Pipe 写转读 - 调用 io.Pipe 会产生一个 Reader 和 Writer ，把数据写到 Writer 里，就能从 Reader 里原封不动的读出来。这可太适合写转读了
+    - 需要两个 goroutine 做并发
+  - Code
+     ```go
+     func TeeReader(r Reader, w Writer) Reader {
+         return &teeReader{r, w}
+     }
+     
+     func (t *teeReader) Read(p []byte) (n int, err error) {
+         n, err = t.r.Read(p)
+         if n > 0 {
+             // 把读到的每一次数据都输入到 Writer 里去.
+             // 分一股数据流出去
+             if n, err := t.w.Write(p[:n]); err != nil {
+                 return n, err
+             }
+         }
+         return
+     }
+     ```
+   ```go
+   func ConcurrencyWrtie(src io.Reader, dest [2]io.Writer) (err error) {
+       errCh := make(chan error, 1)
+   
+       // 管道，主要是用来写、读流转化
+       pr, pw := io.Pipe()
+       // teeReader ，主要是用来 IO 流分叉
+       wr := io.TeeReader(src, pw)
+   
+       // 并发写入
+       go func() {
+           var _err error
+           defer func() {
+               pr.CloseWithError(_err)
+               errCh <- _err
+           }()
+           _, _err = io.Copy(dest[1], pr)
+       }()
+   
+       defer func() {
+           // TODO：异常处理
+           pw.Close()
+           _err := <-errCh
+           _ = _err
+       }()
+   
+       // 数据写入
+       _, err = io.Copy(dest[0], wr)
+   
+       return err
+   }
+   ```
+   
 
 
