@@ -1622,14 +1622,14 @@
        var a string
        
        func f() {
-       	a = "hello, world"
-       	c <- 0
+           a = "hello, world"
+           c <- 0
        }
        
        func main() {
-       	go f()
-       	<-c
-       	print(a)
+           go f()
+           <-c
+           print(a)
        }
        ```
     - A receive from an unbuffered channel is synchronized before the completion of the corresponding send on that channel.
@@ -1638,14 +1638,14 @@
        var a string
        
        func f() {
-       	a = "hello, world"
-       	<-c
+           a = "hello, world"
+           <-c
        }
        
        func main() {
-       	go f()
-       	c <- 0
-       	print(a)
+           go f()
+           c <- 0
+           print(a)
        }
        ```
     - The kth receive on a channel with capacity C is synchronized before the completion of the k+Cth send from that channel completes.
@@ -1653,55 +1653,55 @@
        var limit = make(chan int, 3)
        
        func main() {
-       	for _, w := range work {
-       		go func(w func()) {
-       			limit <- 1
-       			w()
-       			<-limit
-       		}(w)
-       	}
-       	select{}
+           for _, w := range work {
+               go func(w func()) {
+                   limit <- 1
+                   w()
+                   <-limit
+               }(w)
+           }
+           select{}
        }
        ```
 - [nil Isn't Equal to nil](https://www.calhoun.io/when-nil-isnt-equal-to-nil/)
    ```go
-   	// case 1
-   	var i any
-   	var err error
-   	fmt.Printf("%T, %v \n", i, i)
-   	fmt.Printf("%T, %v \n", err, err) // (<nil>, <nil>)
-   	println("i == nil ", i == nil)
-   	println("err == nil ", err == nil)
-   	println("err == i ", err == i)
+       // case 1
+       var i any
+       var err error
+       fmt.Printf("%T, %v \n", i, i)
+       fmt.Printf("%T, %v \n", err, err) // (<nil>, <nil>)
+       println("i == nil ", i == nil)
+       println("err == nil ", err == nil)
+       println("err == i ", err == i)
    
-   	// case 2
-   	var a *int
-   	var b interface{}
+       // case 2
+       var a *int
+       var b interface{}
    
-   	fmt.Printf("%T, %v \n", a, a)      // (*int, <nil>)
-   	fmt.Printf("%T, %v \n", b, b)      // (<nil>, <nil>)
-   	fmt.Println("a == nil:", a == nil) // (*int, <nil>) == (*int, <nil>)
-   	fmt.Println("b == nil:", b == nil) // (<nil>, <nil>) == (<nil>, <nil>)
-   	fmt.Println("a == b:", a == b)     // (*int, <nil>) == (<nil>, <nil>)
+       fmt.Printf("%T, %v \n", a, a)      // (*int, <nil>)
+       fmt.Printf("%T, %v \n", b, b)      // (<nil>, <nil>)
+       fmt.Println("a == nil:", a == nil) // (*int, <nil>) == (*int, <nil>)
+       fmt.Println("b == nil:", b == nil) // (<nil>, <nil>) == (<nil>, <nil>)
+       fmt.Println("a == b:", a == b)     // (*int, <nil>) == (<nil>, <nil>)
    
-   	if a == nil && b == nil {
-   		fmt.Println("both a and b are nil") // both are nil
-   	}
+       if a == nil && b == nil {
+           fmt.Println("both a and b are nil") // both are nil
+       }
    
-   	// case 3
-   	var aa *int = nil
-   	var bb interface{} = aa
+       // case 3
+       var aa *int = nil
+       var bb interface{} = aa
    
-   	fmt.Printf("aa=(%T, %v)\n", aa, aa) // (*int, <nil>)
-   	fmt.Printf("bb=(%T, %v)\n", bb, bb) // (*int, <nil>)
-   	fmt.Println("aa == nil:", aa == nil)
-   	/*
-   		This one is a little less obvious, but when we compare the variable b to a hard-coded nil our compiler once again needs to determine what type to give that nil value.
-   		When this happens the compiler makes the same decision it would make if assigning nil to the b variable -
-   		that is it sets the right hand side of our equation to be (<nil>, <nil>) - and if we look at the output for b it clearly has a different type: (*int, <nil>)
-   	*/
-   	fmt.Println("bb == nil:", bb == nil) // (*int, <nil>) == (<nil>, <nil>)
-   	fmt.Println("aa == bb:", aa == bb)
+       fmt.Printf("aa=(%T, %v)\n", aa, aa) // (*int, <nil>)
+       fmt.Printf("bb=(%T, %v)\n", bb, bb) // (*int, <nil>)
+       fmt.Println("aa == nil:", aa == nil)
+       /*
+           This one is a little less obvious, but when we compare the variable b to a hard-coded nil our compiler once again needs to determine what type to give that nil value.
+           When this happens the compiler makes the same decision it would make if assigning nil to the b variable -
+           that is it sets the right hand side of our equation to be (<nil>, <nil>) - and if we look at the output for b it clearly has a different type: (*int, <nil>)
+       */
+       fmt.Println("bb == nil:", bb == nil) // (*int, <nil>) == (<nil>, <nil>)
+       fmt.Println("aa == bb:", aa == bb)
    ```
   - `nil` a predeclared identifier representing the zero value for a pointer, channel, func, interface, map or slice type
   - `nil` hs no type
@@ -1731,7 +1731,23 @@
   - nil == nil ?
     - `invalid operation: nil == nil (operator == not defined on nil)
     - ==符号对于nil来说是一种未定义的操作, 因为nil是没有类型的，是在编译期根据上下文确定的，所以要比较nil的值也就是比较不同类型的nil
-
+- [Go语言](https://mp.weixin.qq.com/s/0X4lasAf5Sbt_tromlqwIQ)
+  - 优势
+    - 语言层面上支持高并发。
+    - 它自带了 Goroutine、也就是协程，可以比较充分地利用多核的性能，让程序员更容易使用并发。
+    - 其次，它非常简单易学，并且开发效率非常高。关键字数量更少，但是表达能力很强大
+  - Golang 存在的问题
+    - Go 是 Google 的 Go，而不是社区的 Go
+    - 性能问题，可以分为以下两个方面，
+       - 一个是 GC，这是属于内存管理的一个问题；
+         - GC 是一个并发 - 标记 - 清除（CMS）算法收集器 - Go 在实现 GC 的过程当中，过多地把重心放在了暂停时间——也就是 Stop the World（STW）的时间方面，但是代价是牺牲了 GC 中的其他特性。
+         - GC 有很多需要关注的方面，比如吞吐量——GC 肯定会减慢程序，那么它对吞吐量有多大的影响；
+           - 在一段固定的 CPU 时间里可以回收多少垃圾；
+           - 另外还有 Stop the World 的时间和频率；
+           - 以及新申请内存的分配速度；还有在分配内存时，空间的浪费情况；
+           - 以及在多核机器下，GC 能否充分利用多核等很多方面问题
+         - 它也是一个不分代的 GC。所以体现在性能上，就是内存分配和 GC 通常会占用比较多 CPU 资源。
+       - 另外一个是编译生成代码的质量问题
 
 
 
