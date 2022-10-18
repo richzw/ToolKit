@@ -322,6 +322,8 @@
   - GODEBUG
     - 如果你关心垃圾收集，则可以启用 gctrace=1
     - Profiler 会启动你的程序，然后通过配置操作系统，来定期中断程序，然后进行采样。比如发送 SIGPROF 信号给被分析的进程，这样进程就会被暂停，然后切换到 Profiler 中进行分析。Profiler 则取得被分析的程序的每个线程的当前位置等信息进行统计，然后恢复程序继续执行。
+  - Test only run specific function by name
+    - `go test -v -bench=^BenmarkSliceInit -run=^$ -benchmem`
   - pprof
     - 这包含了两部分：
       - 每个 Go 程序中内置 runtime/pprof 包
