@@ -1776,6 +1776,9 @@
        return err
    }
    ```
-   
+- [go最新版]
+  - 首先你必须安装或者更新gotip到最新版(如果你已经安装了gotip, 执行gotip downloamd,如果还未安装，请先go install golang.org/dl/gotip@latest)。
+  - 启用-arena: 运行GOEXPERIMENT=arenas gotip run -arena main.go 21
+
 
 
