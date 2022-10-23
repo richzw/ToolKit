@@ -391,3 +391,27 @@
     - 以上所有事情都发生在大约1微秒（在典型的CPU上）。但是，在实践中，情况变得更糟。如果您搜索“Go CPU profiler的开销”，您将看到从 %0.5 到 %1-%5 的数字（
     - 在典型的 I/O 密集型应用程序上，profiler的开销将非常小。
   - [Source](https://sumercip.com/posts/inside-the-go-cpu-profiler/)
+- [性能分析](https://mp.weixin.qq.com/s/UMdvW7z4SyNn5t-u6sQaAQ)
+  - 使用
+    - cpu分析： `go tool pprof http://ip:port/debug/pprof/profile\?seconds\=60`
+    - heap分析 `go tool pprof http://ip:port/debug/pprof/heap`
+    - trace分析： `go tool trace http://ip:port/debug/pprof/trace?seconds=10`
+    - web模式：会开启端口，web页面可以看到对应的火焰图与graphviz一样的图，比较直观
+      ```shell
+      wget -O trace.out http://ip:port/debug/pprof/trace?seconds=10
+      curl http://ip:port/debug/pprof/trace?seconds=10 > trace.out
+      ```
+  - 实战性能分析
+    - 火焰图对比 `./go tool pprof http://ip:port/debug/pprof/profile?seconds=30`
+    - gctrace分析 `export GODEBUG=gctrace=1`
+    - trace分析
+      ```shell
+      wget -O trace.out http://ip:port/debug/pprof/trace?seconds=10
+      
+      go tool trace trace.out
+      ```
+      - cpu相关，顺序为：Scheduler latency profile-> Goroutine analysis->View trace
+      - 内存 `./go tool pprof http://ip:port/debug/pprof/heap`
+
+
+
