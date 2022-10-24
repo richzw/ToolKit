@@ -1245,6 +1245,20 @@
   - 信号
     - 信号是一种软件形式的异常，它允许进程和内核中断其他进程，可以通知进程系统中发生了一个某种类型的事件
     - 进程从内核模式切换到用户模式时，会检查进程中未被阻塞的待处理信号的集合（pending & ~blocked），如果这个集合为空，那么内核将控制传递到进程的下一条指令（I_next）；如果是非空，那么内核选择集合中某个信号 k （通常是最小的 k）强制进程接收，然后进程会根据信号触发某种行为，完成之后会回到控制流中执行下一个指令（I_next）
+- [Linux mutex](https://mp.weixin.qq.com/s/pvlfdH1orO5JV4cqRB3WRQ)
+  - 互斥锁（英语：Mutual exclusion，缩写 Mutex）是一种用于多线程编程中，防止两条线程同时对同一公共资源（比如全域变量）进行读写的机制。
+  - mutex与spinlock的区别？
+    - spinlock是让一个尝试获取它的线程在一个循环中等待的锁，线程在等待时会一直查看锁的状态。而mutex是一个可以让多个进程轮流分享相同资源的机制
+    - spinlock通常短时间持有，mutex可以长时间持有
+    - spinlock任务在等待锁释放时不可以睡眠，mutex可以
+  - 实现
+    - mutex使用了原子变量owner来追踪锁的状态，owner实际上是指向当前mutex锁拥有者的struct task_struct *指针，所以当锁没有被持有时，owner为NULL。
+    - 上锁
+      - fastpath：通过 cmpxchg() 当前任务与所有者来尝试原子性的获取锁。这仅适用于无竞争的情况（cmpxchg() 检查 0UL，因此上面的所有 3 个状态位都必须为 0）。如果锁被争用，它会转到下一个可能的路径。
+      - midpath：又名乐观旋转（optimistic spinning）—在锁的持有者正在运行并且没有其他具有更高优先级（need_resched）的任务准备运行时，通过旋转来获取锁。理由是如果锁的所有者正在运行，它很可能很快就会释放锁。mutex spinner使用 MCS 锁排队，因此只有一个spinner可以竞争mutex。
+        - MCS 锁（由 Mellor-Crummey 和 Scott 提出）是一个简单的自旋锁，具有公平的理想属性，每个 cpu 都试图获取在本地变量上旋转的锁，排队采用的是链表实现的FIFO。它避免了常见的test-and-set自旋锁实现引起的昂贵的cacheline bouncing。类似MCS的锁是专门为睡眠锁的乐观旋转而量身定制的（毕竟如果只是短暂的自旋比休眠效率要高）。
+        - 自定义 MCS 锁的一个重要特性是它具有额外的属性，即当spinner需要重新调度时，它们能够直接退出 MCS 自旋锁队列。这有助于避免需要重新调度的 MCS spinner持续在mutex持有者上自旋，而仅需直接进入慢速路径获取MCS锁。
+      - slowpath：最后的手段，如果仍然无法获得锁，则将任务添加到等待队列并休眠，直到被解锁路径唤醒。在正常情况下它阻塞为 TASK_UNINTERRUPTIBLE。
 
 
 
