@@ -19,8 +19,19 @@
     - 删除也是写入。往存储里面写一条带删除标记的记录，而不是直接更新原来的数据。
     - 从用户 key/value 来讲是 log 的结构是一种无序的结构，它的查找效率非常低。所以，自然而然，LSM 的架构里就需要引入一种新型的**有序的数据结构，这个就是 sst** 文件（ 全名：sorted string  table ）
     - 把有效的数据从 sst 文件中读出来（删除或者被覆盖的旧数据丢弃）写到新的文件，然后修改指向关系，然后把旧的文件删掉。这个过程叫做 compact 
-  - LSM Tree 的设计思想，考虑极致的提升写的性能，读的性能则靠其他的手段解决
-    ![img.png](datastructure_lsm.png)
+  - LSM Tree 的设计思想 - 保存一组合理组织、后台合并的 SSTables
+    - ![img.png](datastructure_lsm.png)
+    - SSTable（Sorted String Table）
+      - 构建 SSTable 文件 
+        - 在内存中维护一个有序结构（称为 MemTable）。红黑树、AVL 树、条表。
+        - 到达一定阈值之后全量 dump 到外存。
+      - 维护 SSTable 文件
+        - 先去 MemTable 中查找，如果命中则返回。
+        - 再去 SSTable 按时间顺序由新到旧逐一查找。
+      - 如果 SSTable 文件越来越多，则查找代价会越来越大。因此需要将多个 SSTable 文件合并，以减少文件数量，同时进行 GC，我们称之为紧缩（ Compaction）
+      - 性能优化
+        - 优化 SSTable 的查找。常用 Bloom Filter。
+        - 层级化组织 SSTable。以控制 Compaction 的顺序和时间。常见的有 size-tiered 和 leveled compaction。
     - leveldb 的 compact 分为两种：
       - minor compact ：这个是 memtable 到 Level 0 的转变；
       - major compact ：这个是 Level 0 到底层或者底下的 Level 的 sstable 的相互转变
@@ -30,10 +41,17 @@
   - LSM vs B-Tree
     - B 树是数据可变的代表结构
       - B 树的难点在于平衡性维护和并发控制，一般用在读多写少的场景
+      - 以页（page）为粒度对磁盘数据进行修改, 面向页、查找树
       - 维护了所有数据的有序性，读取性能必然起飞，但写入性能你也别抱太大希望。
-    - LSM 树是数据不可变的代表结构。你只能在尾部追加新数据，不能修改之前已经插入的数据。
+      - 优化：
+        - 不使用 WAL，而在写入时利用 Copy On Write 技术。同时，也方便了并发控制。如 LMDB、BoltDB。
+        - 对中间节点的 Key 做压缩，保留足够的路由信息即可。以此，可以节省空间，增大分支因子。
+        - 为了优化范围查询，有的 B 族树将叶子节点存储时物理连续。但当数据不断插入时，维护此有序性的代价非常大。
+    - LSM 树是数据不可变的代表结构。你只能在尾部追加新数据，不能修改之前已经插入的数据。变随机写为顺序写
       - LSM 树的难点在于 compact 操作和读取数据时的效率优化，一般用在写多读少的场景。
       - 可以维护局部数据的有序性，从而一定程度提升读性能。
+    - ![img.png](data_structure_lsm_vs_btree.png)
+    
 - [BitMap Index](https://github.com/mkevac/gopherconrussia2019)
   - [Details](https://medium.com/bumble-tech/bitmap-indexes-in-go-unbelievable-search-speed-bb4a6b00851)
   - Indexing approach
