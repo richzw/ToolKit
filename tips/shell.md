@@ -13,7 +13,8 @@
   - 在找到文件后执行命令 - `-exec` 选项后面的命令必须以分号（;）结束 `find . -type f -atime +5 -exec ls {} \;`
 - [Top 20 Network Monitoring Tools in Linux](https://linoxide.com/network-monitoring-tools-linux/)
   - [Translation](https://mp.weixin.qq.com/s/VwPxTr5tBdteE2aJg1cYUA)
-
+- 进程上次的启动时间
+  - `ps -o lstart {pid}`
 
 
 
