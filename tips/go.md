@@ -1779,6 +1779,13 @@
 - [go最新版]
   - 首先你必须安装或者更新gotip到最新版(如果你已经安装了gotip, 执行gotip downloamd,如果还未安装，请先go install golang.org/dl/gotip@latest)。
   - 启用-arena: 运行GOEXPERIMENT=arenas gotip run -arena main.go 21
-
-
+- [loop variable semantics](https://github.com/golang/go/discussions/56010#top)
+  - The item variable is **per-loop**, not per-iteration
+    ```go
+    var all []*Item
+    for _, item := range items {
+    	all = append(all, &item)
+    }
+    ```
+  - redefining these semantics, to make loop variables per-iteration instead of per-loop
 
