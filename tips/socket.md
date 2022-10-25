@@ -701,7 +701,6 @@
     - TCP_NODELAY sends doesn't accumulate the logical packets before sending then as network packets, Nagle's algorithm does according the algorithm, and TCP_CORK does according to the application setting it.
     - A side effect of this is that Nagle's algorithm will send partial frames on an idle connection, TCP_CORK won't.
     - TCP_CORK is useful whenever the server knows the patterns of its bulk transfers. Which is just about 100% of the time with any kind of file serving.
-<<<<<<< Updated upstream
 - [从一次经历谈 TIME_WAIT 的那些事](https://coolshell.cn/articles/22263.html)
   - Issue
     - EaseProbe 是一个轻量独立的用来探活服务健康状况的小工具.不会设置 TCP 的 KeepAlive 重用链接，因为探活工具除了要探活所远端的服务，还要探活整个网络的情况，所以，每次探活都需要从新来过，这样才能捕捉得到整个链路的情况。
@@ -768,7 +767,14 @@
     - 乱序重排机制 - 后发的数据包先到是吧，那就先放到专门的乱序队列中，等数据都到齐后，重新整理好乱序队列的数据包顺序后再给到用户，这就是乱序重排机制。
   - UDP
     - 对于UDP+重传的场景，如果要传超大数据包，并且没有实现分段机制的话，那数据就会在IP层分片，一旦丢包，那就需要重传整个超大数据包。而TCP则不需要考虑这个，内部会自动分段，丢包重传分段就行了。这种场景下，其实TCP更快。
-
+- [TCP 三次握手](https://mp.weixin.qq.com/s/sqkYBM-4l4qFFPkjY_zCJA)
+  - TCP 三次握手中，客户端收到的第二次握手中 ack 确认号不是自己期望的，会发生什么？是直接丢弃 or 回 RST 报文？
+    - ![img.png](socket_invalid_ack_num.png)
+    - 回 RST 报文。TCP 使用三次握手建立连接的最主要原因就是防止「历史连接」初始化了连接。
+    - 如果是两次握手连接，就无法阻止历史连接，那为什么 TCP 两次握手为什么无法阻止历史连接呢？
+      - 因为在两次握手的情况下，「被动发起方」没有中间状态给「主动发起方」来阻止历史连接，导致「被动发起方」可能建立一个历史连接，造成资源浪费。
+  - 什么情况下会收到不正确的 ack（第二次握手中的 ack） 呢
+    - 当客户端发起多次 SYN 报文，然后网络拥堵的情况下，「旧的 SYN 报文」比「新的 SYN 报文」早抵达服务端，此时服务端就会按照收到的「旧的 SYN 报文」回复 syn+ack 报文，而此报文的确认号并不是客户端期望收到的，于是客户端就会回 RST 报文。
 
 
 
