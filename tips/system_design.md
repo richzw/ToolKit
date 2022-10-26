@@ -766,7 +766,8 @@
       - 执行一条简单的数据库查询或更新操作：5-50ms
       - 在局域网中的TCP连接上收发一趟数据包：1-10ms；广域网中大约10-200ms，视传输距离和网络节点的设备而定
       - 从用户态切换到内核态，完成一次系统调用：100ns - 1 μs，视不同的系统调用函数和硬件水平而定，少数系统调用可能远超此范围。
-
+- [publish-subscribe sample](https://making.pusher.com/how-pusher-channels-has-delivered-10000000000000-messages/)
+  - ![img.png](system_design_pubsub_sys.png)
 
 
 
