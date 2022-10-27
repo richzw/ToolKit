@@ -775,8 +775,18 @@
       - 因为在两次握手的情况下，「被动发起方」没有中间状态给「主动发起方」来阻止历史连接，导致「被动发起方」可能建立一个历史连接，造成资源浪费。
   - 什么情况下会收到不正确的 ack（第二次握手中的 ack） 呢
     - 当客户端发起多次 SYN 报文，然后网络拥堵的情况下，「旧的 SYN 报文」比「新的 SYN 报文」早抵达服务端，此时服务端就会按照收到的「旧的 SYN 报文」回复 syn+ack 报文，而此报文的确认号并不是客户端期望收到的，于是客户端就会回 RST 报文。
-
-
+- [Unix Domain Socket]
+  - Unix Domain socket
+    - an inter-process communication mechanism that allows bidirectional data exchange between processes running on the same machine.
+    - UNIX domain sockets know that they’re executing on the same system, so they can avoid some checks and operations (like routing); which makes them faster and lighter than IP sockets.
+    - Listening sockets live in the filesystem hierarchy and access to them can be controlled by filesystem permissions.
+    - UNIX domain sockets are subject to file system permissions, while TCP sockets can be controlled only on the packet filter level.
+  - TCP/IP sockets
+    - a mechanism allowing communication between processes over the network. In some cases, you can use TCP/IP sockets to talk with processes running on the same computer (by using the loopback interface)
+    - A connected TCP socket is identified by the combination of local IP, local port, remote IP and remote port. A listening TCP socket is identified by local port and possibly local IP. As I understand it, at least on linux TCP/IP sockets always result in the generation and decoding of TCP/IP packets, even if the client and server are on the same machine.
+  - Command
+    - Linux `netstat -a -p --unix`
+    - MaxOS `netstat -a -f unix`
 
 
 
