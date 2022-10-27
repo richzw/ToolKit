@@ -15,6 +15,17 @@
   - [Translation](https://mp.weixin.qq.com/s/VwPxTr5tBdteE2aJg1cYUA)
 - 进程上次的启动时间
   - `ps -o lstart {pid}`
-
-
+- [ip rate limit](https://making.pusher.com/per-ip-rate-limiting-with-iptables/index.html)
+  ```shell
+  $ iptables --new-chain SOCAT-RATE-LIMIT
+  $ iptables --append SOCAT-RATE-LIMIT \
+      --match hashlimit \
+      --hashlimit-mode srcip \
+      --hashlimit-upto 50/sec \
+      --hashlimit-burst 100 \
+      --hashlimit-name conn_rate_limit \
+      --jump ACCEPT
+  $ iptables --append SOCAT-RATE-LIMIT --jump DROP
+  $ iptables -I INPUT -p tcp --dport 1234 --jump SOCAT-RATE-LIMIT
+  ```
 
