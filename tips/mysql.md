@@ -148,6 +148,27 @@
     - 可重复读隔离级别下虽然很大程度上避免了幻读，但是还是没有能完全解决幻读。
     - 第一个例子：对于快照读， MVCC 并不能完全避免幻读现象。因为当事务 A 更新了一条事务 B 插入的记录，那么事务 A 前后两次查询的记录条目就不一样了，所以就发生幻读。
     - 第二个例子：对于当前读，如果事务开启后，并没有执行当前读，而是先快照读，然后这期间如果其他事务插入了一条记录，那么事务后续使用当前读进行查询的时候，就会发现两次查询的记录条目就不一样了，所以就发生幻读。
+- [幻读的问题](https://mp.weixin.qq.com/s/b805ZIO7-IabjStlAs7Wow)
+  - MySQL在可重复读的情况下解决幻读的方案
+    - 在当前读的情况下加记录锁与间隙锁解决幻读，加间隙锁的目的是防止数据插入预防幻读
+  - MySQL 记录锁+间隙锁可以防止删除操作而导致的幻读吗 - 答案是可以的
+  - 什么是幻读
+    - 幻读（Phantom Read）
+      - The so-called phantom problem occurs within a transaction when the same query produces different sets of rows at different times.
+    - MySQL 可重复读隔离级别是解决幻读问题，查询数据的操作有两种方式，所以解决的方式是不同的
+      - 针对快照读（普通 select 语句），是通过 MVCC 方式解决了幻读，因为可重复读隔离级别下，事务执行过程中看到的数据，一直跟这个事务启动时看到的数据是一致的，即使中途有其他事务插入了一条数据，是查询不出来这条数据的，所以就很好了避免幻读问题。
+      - 针对当前读（select ... for update 等语句），是通过 next-key lock（记录锁+间隙锁）方式解决了幻读，因为当执行 select ... for update 语句的时候，会加上 next-key lock，如果有其他事务在 next-key lock 锁范围内插入了一条记录，那么这个插入语句就会被阻塞，无法成功插入，所以就很好了避免幻读问题。
+  - 实验
+    - MySQL 记录锁+间隙锁可以防止删除操作而导致的幻读问题
+    - 可以通过 `select * from performance_schema.data_locks\G;` 这条语句，查看事务执行 SQL 过程中加了什么锁
+    - 从上面输出的信息可以看到，共加了两种不同粒度的锁，分别是：
+      - 表锁（LOCK_TYPE: TABLE）：X 类型的意向锁；
+      - 行锁（LOCK_TYPE: RECORD）：X 类型的 next-key 锁；
+    - 这里我们重点关注「行锁」，图中 LOCK_TYPE 中的 RECORD 表示行级锁，而不是记录锁的意思：
+      - 如果 LOCK_MODE 为 X，说明是 next-key 锁；
+      - 如果 LOCK_MODE 为 X, REC_NOT_GAP，说明是记录锁；
+      - 如果 LOCK_MODE 为 X, GAP，说明是间隙锁；
+  - 在线上在执行 update、delete、select ... for update 等具有加锁性质的语句，一定要检查语句是否走了索引，如果是全表扫描的话，会对每一个索引加 next-key 锁，相当于把整个表锁住了，这是挺严重的问题。
 - [MySQL的锁](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247496932&idx=1&sn=5bd840a32040998aa60c6317ccad71ac&chksm=f98db04ecefa39584c87d1b514b6f607e0950af514b67d8299e12049907cdb11fecfc02bc374&scene=21#wechat_redirect)
   - 全局锁
     - 要使用全局锁，则要执行 `flush tables with read lock`
@@ -318,27 +339,6 @@
         - 设置事务等待锁的超时时间。当一个事务的等待时间超过该值后，就对这个事务进行回滚，于是锁就释放了，另一个事务就可以继续执行了。在 InnoDB 中，参数 innodb_lock_wait_timeout 是用来设置超时时间的，默认值时 50 秒。
         - 开启主动死锁检测。主动死锁检测在发现死锁后，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。将参数 innodb_deadlock_detect 设置为 on，表示开启这个逻辑，默认就开启。
       - 我们可以回归业务的角度来预防死锁，对订单做幂等性校验的目的是为了保证不会出现重复的订单，那我们可以直接将 order_no 字段设置为唯一索引列，利用它的唯一下来保证订单表不会出现重复的订单，不过有一点不好的地方就是在我们插入一个已经存在的订单记录时就会抛出异常。
-- [幻读的问题](https://mp.weixin.qq.com/s/b805ZIO7-IabjStlAs7Wow)
-  - MySQL在可重复读的情况下解决幻读的方案
-    - 在当前读的情况下加记录锁与间隙锁解决幻读，加间隙锁的目的是防止数据插入预防幻读
-  - MySQL 记录锁+间隙锁可以防止删除操作而导致的幻读吗 - 答案是可以的
-  - 什么是幻读
-    - 幻读（Phantom Read）
-      - The so-called phantom problem occurs within a transaction when the same query produces different sets of rows at different times.
-    - MySQL 可重复读隔离级别是解决幻读问题，查询数据的操作有两种方式，所以解决的方式是不同的
-      - 针对快照读（普通 select 语句），是通过 MVCC 方式解决了幻读，因为可重复读隔离级别下，事务执行过程中看到的数据，一直跟这个事务启动时看到的数据是一致的，即使中途有其他事务插入了一条数据，是查询不出来这条数据的，所以就很好了避免幻读问题。
-      - 针对当前读（select ... for update 等语句），是通过 next-key lock（记录锁+间隙锁）方式解决了幻读，因为当执行 select ... for update 语句的时候，会加上 next-key lock，如果有其他事务在 next-key lock 锁范围内插入了一条记录，那么这个插入语句就会被阻塞，无法成功插入，所以就很好了避免幻读问题。
-  - 实验
-    - MySQL 记录锁+间隙锁可以防止删除操作而导致的幻读问题
-    - 可以通过 `select * from performance_schema.data_locks\G;` 这条语句，查看事务执行 SQL 过程中加了什么锁
-    - 从上面输出的信息可以看到，共加了两种不同粒度的锁，分别是：
-      - 表锁（LOCK_TYPE: TABLE）：X 类型的意向锁；
-      - 行锁（LOCK_TYPE: RECORD）：X 类型的 next-key 锁；
-    - 这里我们重点关注「行锁」，图中 LOCK_TYPE 中的 RECORD 表示行级锁，而不是记录锁的意思：
-      - 如果 LOCK_MODE 为 X，说明是 next-key 锁；
-      - 如果 LOCK_MODE 为 X, REC_NOT_GAP，说明是记录锁；
-      - 如果 LOCK_MODE 为 X, GAP，说明是间隙锁；
-  - 在线上在执行 update、delete、select ... for update 等具有加锁性质的语句，一定要检查语句是否走了索引，如果是全表扫描的话，会对每一个索引加 next-key 锁，相当于把整个表锁住了，这是挺严重的问题。
 - [innodb 是如何存数据的](https://mp.weixin.qq.com/s/qtHDWJB3UrgU4zxINUQ8yw)
   - innodb底层是如何存储数据的？
     - 把数据存在磁盘上 - 从磁盘上读写数据，至少需要两次IO请求才能完成。一次是读IO，另一次是写IO。
