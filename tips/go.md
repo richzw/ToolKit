@@ -8,7 +8,6 @@
         for _, s := range strings {
             outChannel <- s
         }
-    
         return outChannel, nil
     }
     
@@ -58,7 +57,6 @@
          return outChannel, nil
      }
      
-    
     func sink(ctx context.Context, values <-chan string) {
         for {
             select {
@@ -66,7 +64,7 @@
                 log.Print(ctx.Err().Error())
                 return
             case val, ok := <-values:
-    +			log.Print(val)  // for debug
+                 log.Print(val)  // for debug
                 if ok {
                     log.Println(val)
                 }
@@ -90,7 +88,6 @@
              log.Fatal(err)
          }
      
-    
         sink(ctx, outputChannel)
      }
     ```
