@@ -412,6 +412,18 @@
       ```
       - cpu相关，顺序为：Scheduler latency profile-> Goroutine analysis->View trace
       - 内存 `./go tool pprof http://ip:port/debug/pprof/heap`
-
+- [Practical Memory Profiling]
+  - `go test -bench . -benchmem -memprofile p.out`
+  - `go tool pprof  p.out`
+    - list funcname
+      - flat colmun and cumulative column
+    - weblist funcname
+    - o // command
+    - noinline=true // set noinline to true
+  - `go test -bench . -benchmem -memprofile p.out -gcflags -m=2`
+  - list funcname in go tool pprof
+    - inline call the new buffer
+    - cannot inline function too complicate cost xxx exceeds budget xx
+  - `go tool pprof -noinlines p.out`
 
 
