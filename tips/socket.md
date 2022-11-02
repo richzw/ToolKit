@@ -543,6 +543,26 @@
   - When to use SO_LINGER with timeout 0 - SO_LINGER socket option to 0. This causes pending data to be discarded and the connection to be aborted with an RST rather than for the pending data to be transmitted and the connection closed cleanly with a FIN.
     - If a client of your server application misbehaves (times out, returns invalid data, etc.) an abortive close makes sense to avoid being stuck in CLOSE_WAIT or ending up in the TIME_WAIT state.
     - If you must restart your server application which currently has thousands of client connections you might consider setting this socket option to avoid thousands of server sockets in TIME_WAIT (when calling close() from the server end) as this might prevent the server from getting available ports for new client connections after being restarted.
+- [What really is the "linger time" that can be set with SO_LINGER on sockets](https://stackoverflow.com/questions/71975992/what-really-is-the-linger-time-that-can-be-set-with-so-linger-on-sockets)
+  - When a TCP socket is disconnected, there are three things the system has to consider:
+    - There might still be unsent data in the send-buffer of that socket which would get lost if the socket is closed immediately.
+    - There might still be data in flight, that is, data has already been sent out to the other side but the other side has not yet acknowledged to have received that data correctly and it may have to be resent or otherwise is lost.
+    - Closing a TCP socket is a three-way handshake with no confirmation of the third packet. As the sender doesn't know if the third packet has ever arrived, it has to wait some time and see if the second one gets resend. If it does, the third one has been lost and must be resent.
+  - When you close a socket using the close() call, the system will usually not immediately destroy the socket but will first try to resolve all the three issues above to prevent data loss and ensure a clean disconnect.
+  - There is a socket option named `SO_LINGER` that controls how the system will close a socket. You can turn lingering on or off using that option and if is turned on, set a timeout
+    - The default is that lingering is turned off, which means close() returns immediately and the details of the socket closing process are left up to the system which will usually deal with it as described above.
+    - If you turn lingering on and set a timeout other than zero, close() will not return immediately. It will only return if issue (1) and (2) have been resolved. 
+      - If it is success, all remaining data got sent and acknowledged, 
+      - if it is failure and errno is set to `EWOULDBLOCK`, the timeout has been hit and some data might have been lost.
+    - In case of a non-blocking socket, close() will not block, not even with a linger time other than zero.
+    - If you enable lingering but set the linger time to zero, this changes pretty much everything. In that case a call to close() will really close the socket immediately.
+      - no matter if the socket is blocking or non-blocking, close() returns at once. Any data still in the send buffer is just discarded. Any data in flight is ignored and may or may not have arrived correctly at the other side.
+      - the socket is also not closed using a normal TCP close handshake (FIN-ACK), it is killed instantly using a reset (RST).
+      - if the other side tries to send something over the socket after the reset, this operation will fail with `ECONNRESET`.  whereas a normal close would result in `EPIPE`
+  - To learn more about how different systems actually deal with different linger settings
+    - [blocking sockets](https://www.nybek.com/blog/2015/03/05/cross-platform-testing-of-so_linger/)
+    - [non-blocking sockets](https://www.nybek.com/blog/2015/04/29/so_linger-on-non-blocking-sockets/)
+  - If you manually close a socket that is blocking (at least the moment you close it, might have been non-blocking before) and this socket has lingering enabled with timeout of zero, this is your best chance to avoid that this socket will go into TIME_WAIT state.
 - [Go tcp shutdown() 和 close() 的区别](https://www.dawxy.com/article/golang-tcp-shutdown-%E5%92%8C-close-%E7%9A%84%E5%8C%BA%E5%88%AB/)
   - 在 go 中 syscall.shutdown 其实是在TCPConn.CloseRead 和 CloseWrite 中调用的，
   - 而 TCPConn.Close 调用的是 syscall.close
