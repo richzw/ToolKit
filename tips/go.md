@@ -1411,8 +1411,26 @@
     ```go
     var all []*Item
     for _, item := range items {
-    	all = append(all, &item)
+        all = append(all, &item)
     }
     ```
   - redefining these semantics, to make loop variables per-iteration instead of per-loop
+- [Compatibility: How Go Programs Keep Working](https://github.com/golang/go/discussions/55090)
+  - Struct literals and new fields
+    - Code using untagged composite literals instead of tagged literals will break due to the new field
+    - Go 1: client code must use tagged literals to avoid such breakages
+  - sort.Sort output order changed in Go 1.6 
+    - write test accepting any valid output
+  - strconv.ParseInt change in Go 1.13 to parse underscore between number 
+  - net.ParseIP parse leading zero issue
+  - SHA1 certificate change in Go 1.18 and 1.19
+    - //go:debug x509sha1=1
+  - Extend GODEBUG
+    - add GODEBUG for likely problematic changes
+    - set specific GODEBUG in source code for package main
+      - //go:debug http2client=0 (Environment variable still win)
+    - set default GODEBUG using GO version in main module `go.mod`
+  - Every package has a go.mod with Go version
+  - Require tagged cross-package literals
+
 
