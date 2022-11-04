@@ -1465,28 +1465,66 @@
   - sample code
     ```go
     func main() {
-    	n := 1_000_000
-    	m := make(map[int][128]byte)
-    	printAlloc()
+        n := 1_000_000
+        m := make(map[int][128]byte)
+        printAlloc()
     
-    	for i := 0; i < n; i++ { // Adds 1 million elements
-    		m[i] = [128]byte{}
-    	}
-    	printAlloc()
+        for i := 0; i < n; i++ { // Adds 1 million elements
+            m[i] = [128]byte{}
+        }
+        printAlloc()
     
-    	for i := 0; i < n; i++ { // Deletes 1 million elements
-    		delete(m, i)
-    	}
+        for i := 0; i < n; i++ { // Deletes 1 million elements
+            delete(m, i)
+        }
     
-    	runtime.GC() // Triggers a manual GC
-    	printAlloc()
-    	runtime.KeepAlive(m) // Keeps a reference to m so that the map isn’t collected
+        runtime.GC() // Triggers a manual GC
+        printAlloc()
+        runtime.KeepAlive(m) // Keeps a reference to m so that the map isn’t collected
     }
     
     func printAlloc() {
-    	var m runtime.MemStats
-    	runtime.ReadMemStats(&m)
-    	fmt.Printf("%d KB\n", m.Alloc/1024)
+        var m runtime.MemStats
+        runtime.ReadMemStats(&m)
+        fmt.Printf("%d KB\n", m.Alloc/1024)
     }
     ```
+- [Database Connection Pooling]()
+  - A connection pool is a set of maintained connections that can be reused for future requests to the database. 
+  - SetMaxOpenConns
+    - sets the maximum number of open connections to the database - By default this is unlimited! 
+    - If this value is set, new queries will be blocked until a connection becomes available.
+    - In AWS, the maximum number of connections is based on PostgreSQL memory. You can check online for the limits for your database instance type.
+    - metric
+      ```go
+      metric.TrackFuncFloat("db.connection_pool_usage", func() float64 {
+        numOpenConnections := float64(underlyingDB.Stats().OpenConnections)
+        return numOpenConnections / float64(maxOpenConnections)
+      })
+      ```
+  - SetMaxIdleConns
+    - sets the maximum number of connections in the idle connection pool - By default, 2
+    - You’ll want to set this value to be a fraction of the MaxConnections.
+    - metric
+      ```go
+      func (ncm *sqlConnectionsMetric) Open(name string) (driver.Conn, error) {
+        conn, err := ncm.underlyingDriver.Open(name)
+      
+        if err != nil {
+          ncm.metric.Increment("db.new_connection.error")
+        } else {
+          ncm.metric.Increment("db.new_connection.ok")
+        }
+      
+        return conn, err
+      }
+      ```
+  - SetConnMaxLifetime
+    - sets the maximum amount of time a connection may be reused - By default, there’s no limit on the connection age
+    - you’ll want to set this if you’re also setting the max idle connections. As a simple heuristic, the higher max idle connections percentage, the lower connection max lifetime you should set.
+
+
+
+
+
 
