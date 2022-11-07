@@ -807,6 +807,16 @@
   - Command
     - Linux `netstat -a -p --unix`
     - MaxOS `netstat -a -f unix`
+- [TCP vs UDP](https://mp.weixin.qq.com/s/5P3cGcZFQEk6t8xiX4OfMQ)
+  - TCP
+    - ![img_1.png](socket_tcp_summary.png)
+    - 流量控制
+      - ![img_1.png](socket_tcp_flow_control_window.png)
+      - 流量控制，就是让发送方的发送速率不要太快，要让接收方来得及接收。 利用滑动窗口机制可以很方便地在tcp连接上实现对发送方的流量控制
+      - 重传计时器
+        - TCP发送方收到接收方的零窗口通知后，应启动持续计时器。持续计时器超时后，向接收方发送零窗口探测报文
+        - 即使接收窗口为0，接收方也会接收：零窗口探测报文段、确认报文段、携带紧急数据的报文段
+      - TCP发送方的发送窗口大小 = Math.min(自身拥塞窗口大小, TCP接收方的接收窗口大小)
 
 
 
