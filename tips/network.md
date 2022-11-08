@@ -1056,6 +1056,22 @@
     - 当 PC0 发送 ARP 数据包，交换机会把数据包发往 PC0 之外的所有主机，并在相应包中记录下相应 Mac 地址与接口数据。
   - 路由表
     - 路由表中记录着不同网段的信息。路由表中记录的信息有的需要手动添加（称为静态路由表），通过路由协议自动获取的（称为动态路由表），我们的主机直接连到路由器上（中间无三层网络设备）这种情况是直连路由，属于静态路由。
+- [Tune parameter under load test]
+  - Server:
+     ```shell
+     fs.file-max=1048576
+     fs.nr-open=1048576
+     net.core.somaxconn=10240
+     net.ipv4.tcp_mem=1048576 1048576 1048576
+     net.ipv4.tcp_max_syn_backlog=1024
+     ```
+  - Client:
+    ```shell
+    fs.file-max=1048576
+    fs.nr-open=1048576
+    net.ipv4.ip_local_port_range=1024 65534
+    net.ipv4.tcp_mem%=1048576 1048576 1048576
+    ```
 
 
 
