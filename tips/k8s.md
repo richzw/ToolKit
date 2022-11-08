@@ -104,7 +104,6 @@
     - Predicates： 挑选出可以运行该Pod的所有Node  ->  
     - Priority：给所有Node打分 -> 将Pod绑定到得分最高的Node上 -> 将Pod信息更新回Etcd -> 
     - node的kubelet感知到etcd中有自己node需要拉起的pod -> 取出该Pod信息，做基本的二次检测（端口，资源等）-> 在node 上拉起该pod 。
-
     - Predicates阶段会有很多过滤规则：比如volume相关，node相关，pod相关
     - Priorities阶段会为Node打分，Pod调度到得分最高的Node上，打分规则比如： 空余资源、实际物理剩余、镜像大小、Pod亲和性等
   - Kuberentes中可以为Pod设置优先级，高优先级的Pod可以： 1、在调度队列中先出队进行调度 2、调度失败时，触发抢占，调度器为其抢占低优先级Pod的资源。
@@ -121,7 +120,11 @@
       - 缺乏请求治理的灵活性：4 层负载均衡在传输层工作，它只负责消息的传递，但是无法处理应用层的 HTTP 协议的信息，因此相较于 7 层负载缺乏对请求治理的“灵活性”和 “智能性”。比如无法根据请求的内容（比如 verb、url 等字段）制定灵活的负载均衡和路由策略，也无法在网关层对请求级别进行限流降级等处理。
   - Done
     - KubeGateway 对外以 K8s 标准 API 的形式提供代理配置管理的服务，主要提供路由转发规则、上游集群 kube-apiserver 地址、集群证书信息、限流等请求治理策略等配置信息的维护变更。它代理 kube-apiserver 的请求的流程如下图所示，主要分为五个步骤：请求解析、路由匹配、用户认证、流量治理和反向代理。
-
+- [Journey of components when creating a pod]
+  - Pod creation
+    - kube-apiserver -> kubelet -> dockerd -> containerd (-> containerd-shim) -> runc
+    - ![img.png](k8s_pod_creation.png)
+  
 
 
 
