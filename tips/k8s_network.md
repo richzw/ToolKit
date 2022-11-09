@@ -730,7 +730,28 @@
       - dockershim 收到请求后, 转化成 Docker Daemon 能识别的请求, 发到 Docker Daemon 上请求创建一个容器，请求到了 Docker Daemon 后续就是 Docker 创建容器的流程了，去调用 containerd，然后创建 containerd-shim 进程，通过该进程去调用 runc 去真正创建容器。
     - ![img.png](k8s_network_containerd_shim.png)
       - 到了 containerd 1.1 版本后就去掉了 CRI-Containerd 这个 shim，直接把适配逻辑作为插件的方式集成到了 containerd 主进程中，现在这样的调用就更加简洁了
-
+- [Kubernetes 网络排错](https://mp.weixin.qq.com/s/yX6haXz05F4Spu0_3rvJYw)
+  - 网络异常大概分为如下几类
+    - 网络不可达，主要现象为 ping 不通，其可能原因为：
+      - 源端和目的端防火墙（iptables, selinux）限制
+      - 网络路由配置不正确
+      - 源端和目的端的系统负载过高，网络连接数满，网卡队列满
+      - 网络链路故障
+    - 端口不可达：主要现象为可以 ping 通，但 telnet 端口不通，其可能原因为：
+       - 源端和目的端防火墙限制
+       - 源端和目的端的系统负载过高，网络连接数满，网卡队列满，端口耗尽
+       - 目的端应用未正常监听导致（应用未启动，或监听为 127.0.0.1 等）
+    - DNS 解析异常：主要现象为基础网络可以连通，访问域名报错无法解析，访问 IP 可以正常连通。其可能原因为
+      - Pod 的 DNS 配置不正确
+      - DNS 服务异常
+      - pod 与 DNS 服务通讯异常
+    - 大数据包丢包：主要现象为基础网络和端口均可以连通，小数据包收发无异常，大数据包丢包。可能原因为：
+      - 可使用 ping -s 指定数据包大小进行测试
+      - 数据包的大小超过了 docker、CNI 插件、或者宿主机网卡的 MTU 值。
+    - CNI 异常：主要现象为 Node 可以通，但 Pod 无法访问集群地址，可能原因有：
+      - kube-proxy 服务异常，没有生成 iptables 策略或者 ipvs 规则导致无法访问
+      - CIDR 耗尽，无法为 Node 注入 PodCIDR 导致 CNI 插件异常
+      - 其他 CNI 插件问题
 
 
 
