@@ -824,6 +824,7 @@
       - 发送端：SYN=1、seq=x
       - 接收端：ACK=1、ack=x+1、SYN=1、seq=y
       - 发送端：ACK=1、ack=y+1、seq=x+1
+      - ![img.png](socket_three_handshake.png)
       - TCP规定：SYN被设置为1的报文段不能携带数据，但要消耗掉一个序号
       - TCP规定：普通的确认报文段如果不携带数据，则不消耗序号
     - 四次挥手
@@ -831,7 +832,10 @@
       - 接收端：ACK=1，ack=u+1，seq=v
       - 接收端：FIN=1，ACK=1，ack=u+1，seq=w（w：半关闭情况下，可能收到了数据）
       - 发送端：ACK=1，ack=w+1，seq=u+1
+      - ![img.png](socket_four_handshake.png)
       - TCP规定：终止位FIN等于1的报文段，即使不携带数据，也要一个消耗掉一个序号
+  - UDP
+    - ![img.png](socket_tcp_udp.png)
 
 
 
