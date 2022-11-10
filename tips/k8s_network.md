@@ -752,8 +752,62 @@
       - kube-proxy 服务异常，没有生成 iptables 策略或者 ipvs 规则导致无法访问
       - CIDR 耗尽，无法为 Node 注入 PodCIDR 导致 CNI 插件异常
       - 其他 CNI 插件问题
-
-
+  - Tools
+    - tcpdump
+      - 捕获所有网络接口 `tcpdump -D`
+      - 按 IP 查找流量 `tcpdump host 1.1.1.1`
+      - 按源 / 目的 地址过滤 `tcpdump src|dst 1.1.1.1`
+      - 通过网络查找数据包 `tcpdump net 1.2.3.0/24`
+      - 使用十六进制输出数据包内容 `tcpdump -c 1 -X icmp`
+      - 查看特定端口的流量 `tcpdump src port 1025`
+      - 查找端口范围的流量 `tcpdump portrange 21-23`
+      - 过滤包的大小 `tcpdump greater 64`
+      - 原始输出 `tcpdump -ttnnvvS -i eth0`
+      - 查找从某个 IP 到端口任何主机的某个端口所有流量 `tcpdump -nnvvS src 10.5.2.3 and dst port 3389`
+      - 可以将指定的流量排除，如这显示所有到 192.168.0.2 的 非 ICMP 的流量。 `tcpdump dst 192.168.0.2 and src net and not icmp`
+      - `tcpdump 'src 10.0.2.4 and (dst port 3389 or 22)'`
+      - 过滤 TCP 标记位
+        - TCP RST `tcpdump 'tcp[tcpflags] == tcp-rst'`
+        - TCP SYN `tcpdump 'tcp[tcpflags] == tcp-syn'`
+      - 查找 http 包
+        - 查找只是 GET 请求的流量 `tcpdump -vvAls0 | grep 'GET'`
+        - 查找 http 客户端 IP `tcpdump -vvAls0 | grep 'Host:'`
+  - Pod抓包
+    - 对于 Kubernetes 集群中的 Pod，由于容器内不便于抓包，通常视情况在 Pod 数据包经过的 veth 设备，docker0 网桥，CNI 插件设备（如 cni0，flannel.1 etc..）及 Pod 所在节点的网卡设备上指定 Pod IP 进行抓包。
+    - 需要注意在不同设备上抓包时指定的源目 IP 地址需要转换，如抓取某 Pod 时，ping {host} 的包，在 veth 和 cni0 上可以指定 Pod IP 抓包，而在宿主机网卡上如果仍然指定 Pod IP 会发现抓不到包，因为此时 Pod IP 已被转换为宿主机网卡 IP
+    - nsenter
+      - 如果一个容器以非 root 用户身份运行，而使用 docker exec 进入其中后，但该容器没有安装 sudo 或未 netstat ，并且您想查看其当前的网络属性，如开放端口，这种场景下将如何做到这一点？nsenter 就是用来解决这个问题的。
+      - `nsenter -t pid -n <commond>`
+      - `docker inspect --format "{{ .State.Pid }}" 6f8c58377aae`
+    - paping
+      - paping 命令可对目标地址指定端口以 TCP 协议进行连续 ping，通过这种特性可以弥补 ping ICMP 协议，以及 nmap , telnet 只能进行一次操作的的不足；通常情况下会用于测试端口连通性和丢包率
+    - mtr
+  - Cases
+    - ![img.png](k8s_network_dig_network.png)
+    - 扩容节点访问 service 地址不通
+      - 现象：
+        - 所有节点之间的 pod 通信正常
+        - 任意节点和 Pod curl registry 的 Pod 的 IP:5000 均可以连通
+        - 新扩容节点 10.153.204.15 curl registry 服务的 Cluster lP 10.233.0.100:5000 不通，其他节点 curl 均可以连通
+      - 分析思路：
+        - 根据现象 1 可以初步判断 CNI 插件无异常
+        - 根据现象 2 可以判断 registry 的 Pod 无异常
+        - 根据现象 3 可以判断 registry 的 service 异常的可能性不大，可能是新扩容节点访问 registry 的 service 存在异常
+      - 怀疑方向：
+        - 问题节点的 kube-proxy 存在异常
+        - 问题节点的 iptables 规则存在异常
+        - 问题节点到 service 的网络层面存在异常
+      - 排查过程：
+        - 排查问题节点的 kube-proxy
+        - 执行 kubectl get pod -owide -nkube-system l grep kube-proxy 查看 kube-proxy Pod 的状态，问题节点上的 kube-proxy Pod 为 running 状态
+        - 执行 kubecti logs <nodename> <kube-proxy pod name> -nkube-system 查看问题节点 kube-proxy 的 Pod 日志，没有异常报错
+        - 在问题节点操作系统上执行 iptables -S -t nat 查看 iptables 规则
+      - 解决方法：修改网卡配置文件 /etc/sysconfig/network-scripts/ifcfg-enp26s0f0 里 BOOTPROTO="dhcp"为 BOOTPROTO="none"；重启 docker 和 kubelet 问题解决。
+    - 集群外云主机调用集群内应用超时
+      - 在云主机 telnet 应用接口地址和端口，可以连通，证明网络连通正常，如图所示
+      - 云主机上调用接口不通，在云主机和 Pod 所在 Kubernetes 节点同时抓包，使用 wireshark 分析数据包
+      - 通过抓包结果分析结果为 TCP 链接建立没有问题，但是在传输大数据的时候会一直重传 1514 大小的第一个数据包直至超时。怀疑是链路两端 MTU 大小不一致导致（现象：某一个固定大小的包一直超时的情况）
+      - 在云主机上使用 ping -s 指定数据包大小，发现超过 1400 大小的数据包无法正常发送。结合以上情况，定位是云主机网卡配置的 MTU 是 1500，tunl0 配置的 MTU 是 1440，导致大数据包无法发送至 tunl0 ，因此 Pod 没有收到报文，接口调用失败。
 
 
 
