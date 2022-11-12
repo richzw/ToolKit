@@ -544,6 +544,31 @@
     - The main problem is that there is very little data that can be saved in a SYN Cookie. 
     - With the MSS setting truncated to only 4 distinct values, Linux doesn't know any optional TCP parameters of the other party. Information about Timestamps, ECN, Selective ACK, or Window Scaling is lost, and can lead to degraded TCP session performance.
     - Fortunately Linux has a work around. If TCP Timestamps are enabled, the kernel can reuse another slot of 32 bits in the Timestamp field
+- [TCP SYN Queue and Accept Queue](https://www.alibabacloud.com/blog/tcp-syn-queue-and-accept-queue-overflow-explained_599203)
+  - Check of the Relevant Indicators
+    - `ss -lnt`
+       ```shell
+       # -n Does not resolve the service name
+       # -t only show tcp sockets
+       # -l Displays LISTEN-state sockets
+       $ ss -lnt
+       State      Recv-Q Send-Q    Local Address:Port         Peer Address:Port
+       LISTEN     0      128       [::]:2380                  [::]:*
+       ```
+      - For sockets in LISTEN states - Kernel version
+        - Recv-Q: The size of the current accept queue, which means the three connections have been completed and are waiting for the application accept() TCP connections.
+        - Send-Q: the maximum length of the accept queue, which is the size of the accept queue.
+      - For sockets in non-LISTEN state
+        - Recv-Q: the number of bytes received but not read by the application.
+        - Send-Q: the number of bytes sent but not acknowledged.
+    - netstat
+      - Run the `netstat -s | grep -i "listen"` command to view the overflow status of TCP SYN queue and accept queue.
+  - Accept Queue
+    - The maximum length of a TCP accept queue is controlled by `min(somaxconn, backlog)`, where:
+      - `somaxconn` is kernel parameter for Linux and is specified by `/proc/sys/net/core/somaxconn`
+      - A `backlog` is one of the TCP protocol's listen function parameters, which is the size of the int `listen(int sockfd, int backlog)` function's backlog. In the Golang, backlog parameters of listen function use the values from the `/proc/sys/net/core/somaxconn` file.
+    
+
 - [网络框架netpoll的源码实现](https://mp.weixin.qq.com/s?__biz=MzI2NDU4OTExOQ==&mid=2247534884&idx=1&sn=e66b4574dafc9b54b3aa194a41cbd903&scene=21#wechat_redirect)
   - [netpoll](https://github.com/cloudwego/netpoll/blob/develop/README_CN.md)是一款开源的golang编写的高性能网络框架(基于Multi-Reactor模型)，旨在用于处理rpc场景
   - net库问题
