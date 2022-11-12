@@ -768,7 +768,16 @@
       - 从用户态切换到内核态，完成一次系统调用：100ns - 1 μs，视不同的系统调用函数和硬件水平而定，少数系统调用可能远超此范围。
 - [publish-subscribe sample](https://making.pusher.com/how-pusher-channels-has-delivered-10000000000000-messages/)
   - ![img.png](system_design_pubsub_sys.png)
-
+- [Feed 流系统](https://mp.weixin.qq.com/s/YDqbmcyXjxoHvDAiIZtd4A)
+  - 在线推，离线拉
+    - 推
+      - 读取操作快
+      - 逻辑复杂 / 消耗大量存储空间 / 粉丝数多的时候会是灾难
+    - 拉
+      - 逻辑简单 / 节约存储空间
+      - 读取效率低下，关注人数多的时候会出现灾难
+  - 总结
+    - 
 
 
 
