@@ -567,8 +567,11 @@
     - The maximum length of a TCP accept queue is controlled by `min(somaxconn, backlog)`, where:
       - `somaxconn` is kernel parameter for Linux and is specified by `/proc/sys/net/core/somaxconn`
       - A `backlog` is one of the TCP protocol's listen function parameters, which is the size of the int `listen(int sockfd, int backlog)` function's backlog. In the Golang, backlog parameters of listen function use the values from the `/proc/sys/net/core/somaxconn` file.
-    
-
+  - SYN queue
+    - Maximum Length Control of SYN Queue
+      - When you call the listen, the incoming backlog
+      - The default value of the /proc/sys/net/core/somaxconn is 128
+      - The default value of /proc/sys/net/ipv4/tcp_max_syn_backlog is 1024
 - [网络框架netpoll的源码实现](https://mp.weixin.qq.com/s?__biz=MzI2NDU4OTExOQ==&mid=2247534884&idx=1&sn=e66b4574dafc9b54b3aa194a41cbd903&scene=21#wechat_redirect)
   - [netpoll](https://github.com/cloudwego/netpoll/blob/develop/README_CN.md)是一款开源的golang编写的高性能网络框架(基于Multi-Reactor模型)，旨在用于处理rpc场景
   - net库问题
