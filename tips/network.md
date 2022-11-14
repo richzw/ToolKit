@@ -563,15 +563,41 @@
         - Send-Q: the number of bytes sent but not acknowledged.
     - netstat
       - Run the `netstat -s | grep -i "listen"` command to view the overflow status of TCP SYN queue and accept queue.
-  - Accept Queue
+    - listen call `man 2 listen`
+      - backlog parameter specifies the queue length for `completely established sockets waiting to be accepted`, instead of the number of incomplete connection requests;
+        - If the backlog argument is greater than `/proc/sys/net/core/somaxconn`, it is silently truncated to that value. 
+        - Since Linux 5.4, the default of `somaxconn` is `4096`; in earlier kernels, the default value is `128`.
+      - The `max length of the queue for incomplete sockets` can be set using `/proc/sys/net/ipv4/tcp_max_syn_backlog`.
+        - When syncookies are enabled there is no logical maximum length and this setting is ignored. See tcp(7) for more information.
+    - ![img.png](network_syn_accept_queue.png)
+  - Accept Queue - Purpose: storing ESTABLISHED but haven’t been accept()-ed connections
     - The maximum length of a TCP accept queue is controlled by `min(somaxconn, backlog)`, where:
       - `somaxconn` is kernel parameter for Linux and is specified by `/proc/sys/net/core/somaxconn`
       - A `backlog` is one of the TCP protocol's listen function parameters, which is the size of the int `listen(int sockfd, int backlog)` function's backlog. In the Golang, backlog parameters of listen function use the values from the `/proc/sys/net/core/somaxconn` file.
-  - SYN queue
+  - SYN queue - Purpose: storing SYN_RECV state connections
+    - “SYN queue” is not a real queue, but combines two pieces of information to serve as a queue:
+      - The ehash: this is a **hash table** holding all ESTABLISHED and SYN_RECV state connections;
+      - The qlen field in accept queue (struct request_sock_queue): the number of connections in "SYN queue", actually is the number of SYN_RECV state connections in the ehash.
     - Maximum Length Control of SYN Queue
       - When you call the listen, the incoming backlog
       - The default value of the /proc/sys/net/core/somaxconn is 128
       - The default value of /proc/sys/net/ipv4/tcp_max_syn_backlog is 1024
+    - Check queue status
+      - `sudo netstat -antp | grep SYN_RECV | wc -l`
+      - `ss -n state syn-recv sport :80 | wc -l`
+    - “SYN queue” overflow test: simple SYN flood
+      - client `sudo hping3 -S <server ip> -p <server port> --flood`
+      - server `sudo netstat -antp | grep SYN_RECV | wc -l`
+  - TFO (TCP fast open)
+    - TCP Fast Open (TFO) is an extension to speed up the opening of successive Transmission Control Protocol (TCP) connections between two endpoints. It works by using a TFO cookie (a TCP option), which is a cryptographic cookie stored on the client and set upon the initial connection with the server.[1] When the client later reconnects, it sends the initial SYN packet along with the TFO cookie data to authenticate itself. If successful, the server may start sending data to the client even before the reception of the final ACK packet of the three-way handshake, thus skipping a round-trip delay and lowering the latency in the start of data transmission.
+    - `net.ipv4.tcp_fastopen`
+      - 1：enable client support (default)
+      - 2：enable server support
+      - 3: enable client & server
+    - With TFO enabled,
+      - Clients use sendto() instead of connect();
+      - SYN packets carry data directly.
+    - ![img.png](network_tcp_tfo.png)
 - [网络框架netpoll的源码实现](https://mp.weixin.qq.com/s?__biz=MzI2NDU4OTExOQ==&mid=2247534884&idx=1&sn=e66b4574dafc9b54b3aa194a41cbd903&scene=21#wechat_redirect)
   - [netpoll](https://github.com/cloudwego/netpoll/blob/develop/README_CN.md)是一款开源的golang编写的高性能网络框架(基于Multi-Reactor模型)，旨在用于处理rpc场景
   - net库问题
