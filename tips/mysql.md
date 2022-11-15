@@ -415,7 +415,16 @@
     - 唯一索引在满足一些条件的时候，索引的 next-key lock 退化为间隙锁或者记录锁。
     - 非唯一索引范围查询，索引的 next-key lock 不会退化为间隙锁和记录锁。
   - 还有一件很重要的事情，在线上在执行 update、delete、select ... for update 等具有加锁性质的语句，一定要检查语句是否走了索引，如果是全表扫描的话，会对每一个索引加 next-key 锁，相当于把整个表锁住了，这是挺严重的问题。
-
+- [SQL 优化](https://mp.weixin.qq.com/s/X2u1bN9KtgT-4J_QAa7sjQ)
+  - 慢SQL优化思路
+    - 慢查询日志记录慢SQL
+      - 查看下慢查询日志配置，我们可以使用`show variables like 'slow_query_log%'`命令
+      - 可以使用`show variables like 'long_query_time'`命令，查看超过多少时间，才记录到慢查询日志
+    - explain分析SQL的执行计划
+      - type表示连接类型，查看索引执行情况的一个重要指标。以下性能从好到坏依次：`system > const > eq_ref > ref > ref_or_null > index_merge > unique_subquery > index_subquery > range > index > ALL`
+    - profile 分析执行耗时
+    - Optimizer Trace分析详情
+    - 确定问题并采用相应的措施
 
 
 
