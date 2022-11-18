@@ -377,10 +377,26 @@
   - We run strace dig google.com and we see that dig correctly calls sendmsg() and recvmsg() but that the latter times out.
   -  dropwatch, a tool that shows you where in the kernel a packet is dropped.
   - net.core.rmem_default is how you set the default receive buffer size for UDP packets. A common value is something around 200KiB, but if your server receives a lot of UDP packets you might want to increase the buffer size. If the buffer is full when a new packet arrives, because the application was not fast enough to consume them, then you will lose packets. The customer was running an application to collect metrics that were sent as UDP packets, so they had correctly increased the buffer to ensure they didn’t lose any data points. And they had set this value to the highest value possible: 2^31 - 1 (if you try and set it to 2^31 the kernel returns “INVALID ARGUMENT”).
-
-
-
-
+- [CPU高负载引发内核探索之旅](https://mp.weixin.qq.com/s/QRuB25pqX61uZYaLsb3JRg)
+  - 问题起源
+    - 值班期间，运维同学偶然发现一台机器CPU消耗异常，从监控视图上看出现较多毛刺。而属于同一集群的其他机器在同一时间段CPU消耗相对稳定。
+  - 分析
+    - 虽然高负载发生的时间很短，依靠这套系统我们先拿到了导致高负载的直接原因，发生在inet_hash_connect函数中
+    - inet_lookup_listener是服务端收到新连接时寻找监听端口，而inet_hash_connect函数是主动建立tcp连接，对应到我们的场景，就是STGW服务器与后端RealServer（后面简称RS）建立连接。
+    - 为什么inet_hash_connect会出现高负载？
+      - 从perf看，直接原因是raw_spin_lock锁带来的剧烈消耗，我们先找到这个锁所在位置，根据对应内核源码找inet_hash_connect实现及内部调用中，发现只有inet_check_establish里会进行spin_lock
+  - 前期排查
+    - 通常锁造成高负载我们会怀疑是否有死锁产生，从cpu现象来看只是短时间突增并非死锁。那么我们有另外两种猜想：
+      - 锁覆盖的范围执行极慢，导致锁了很长时间。
+      - 频繁执行该函数执行加锁导致高负载。
+    - 加锁部分是一个遍历哈希链表的操作，通过传入的参数计算一个哈希值，拿到哈希桶后遍历其中可用的节点，这种遍历操作确实值得怀疑，历史case告诉我们，哈希桶挂载的节点非常多导致遍历复杂度急剧上升，拖累整个cpu
+    - 存在不均匀的流量，ehash计算的哈希值可能都是同一个或几个，导致大量连接都落到了少数几个桶里，这种也有可能导致高负载。
+  - 发现不同内核版本在inet_hash_connect函数实现上，确实有明显区别
+    - 3.10内核不出问题：其端口选取过程为for循环在port_offset基础上逐次递增1，直到找到可用端口为止，或者超过了local_port_range个数，则返回EADDRNOTAVAIL
+    - 4.14内核出现高负载问题：其端口选取过程为for循环在port_offset基础上逐次递增2，只把奇数范围（取决于local_port_range左边界）端口进行遍历，如果整个奇数范围都找不到可用端口，再遍历所有偶数端口，直到找到可用端口为止，或者超过了local_port_range个数，则返回EADDRNOTAVAIL。
+  - 4.14内核做了奇偶区分，每次递增2就是为了只找奇数或偶数的端口，这种遍历方式乍一看似乎没毛病，因为可用端口总数限定了（local_port_range），在port_offset初始值Z足够离散的情况下，遍历过程不管递增1还是递增2，应该是差不多的，都有概率在递增后碰到可用端口。
+  - 上面提到，我们的问题服务器，有一个业务只绑定了一个RS，在高负载的时候，服务器与这个RS建立的连接超过了2w条。结合这个现象，很快发现了问题所在，由于我们的local_port_range为10241~59999，总的可用端口数为49758个，其中奇数、偶数分别占2.4万多个。
+  - 所以，高负载期间，问题服务器与该RS建立了2w多条连接，实际上将inet_hash_connect中的奇数端口几乎耗尽，然而每次与该RS建立新连接，内核都要首先遍历奇数端口，进行2w多次无效的端口查找与检查（inet_check_establish进行spin_lock），才有可能开始遍历偶数端口，从而找到可用端口。
 
 
 
