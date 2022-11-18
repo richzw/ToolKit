@@ -1522,7 +1522,14 @@
   - SetConnMaxLifetime
     - sets the maximum amount of time a connection may be reused - By default, there’s no limit on the connection age
     - you’ll want to set this if you’re also setting the max idle connections. As a simple heuristic, the higher max idle connections percentage, the lower connection max lifetime you should set.
-
+- [Go vs Rust]()
+  - Stackless VS Stackful
+    - 并发编程涉及到一个在计算机历史上非常古老的问题，即如何让程序从执行中“暂停”并“恢复”？关于这个问题有两个不同的解答思路。
+      - 1. 函数式编程的思路。如果能将暂停时的所有状态在暂停前作为函数的值返回，并且在恢复时作为参数传入下一个需要被执行的函数，就可以解决这个暂停与恢复的问题。其实暂停往往出现在函数内部，它不一定出现在一个函数调用结束以及下一个函数调用开始的这个时机，所以函数式编程找到了一种方法，在任何情况下都能将一个在函数内部暂停的状态重新编译为多个不同的函数，并且把这个状态暴露为参数，在这些函数之间传递。
+      - 2. 从程序实际执行的方式触发。如果我们保存程序当前所有的寄存器数据以及内存数据，那么我们就可以直接从寄存器和内存数据中恢复执行，对于操作系统的进程与线程也是使用这种方式。
+    - Rust 和 Go 分别使用了这两种不同的方式。
+      - Rust 始终采取第一种方式，我们通常把它叫做无栈协程，因为它不需要额外的栈保存协程状态，只需函数自身的栈就可以实现这一点。
+      - Go 使用的是有栈协程，因为 Goroutine 需要额外的栈保存。Goroutine 当前的堆内存情况，以及 Goroutine 的栈到达临界值之后，我们需要如何处理 Goroutine 的栈扩容，这些都是需要付出额外的开销及空间的。它的优势在于付出了一定的运行时成本，因此使用起来更方便。
 
 
 
