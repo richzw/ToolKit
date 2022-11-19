@@ -461,6 +461,28 @@
         - limit 100000,10 扫描更多的行数，也意味着回表更多的次数。
       - 我们可以通过减少回表次数来优化。一般有标签记录法和延迟关联法。
         - 延迟关联法 - 就是把条件转移到主键索引树，然后减少回表
+    - in元素过多
+      - 这是因为in查询在MySQL底层是通过n*m的方式去搜索，类似union。5.6之后超过这个临界值后该列的cost就不参与计算了。因此会导致执行计划选择不准确。默认是200，即in条件超过了200个数据，会导致in的代价计算存在问题，可能会导致Mysql选择的索引不准确。
+    - order by 走文件排序导致的慢查询
+      - order by排序，分为全字段排序和rowid排序。它是拿max_length_for_sort_data和结果行数据长度对比，如果结果行数据长度超过max_length_for_sort_data这个值，就会走rowid排序，相反，则走全字段排序。
+      - sort_buffer的大小是由一个参数控制的：sort_buffer_size。
+        - 如果要排序的数据小于sort_buffer_size，排序在sort_buffer内存中完成
+        - 如果要排序的数据大于sort_buffer_size，则借助磁盘文件来进行排序。
+      - order by使用文件排序，效率会低一点。我们怎么优化呢？
+        - 因为数据是无序的，所以就需要排序。如果数据本身是有序的，那就不会再用到文件排序啦。而索引数据本身是有序的，我们通过建立索引来优化order by语句。
+        - 我们还可以通过调整max_length_for_sort_data、sort_buffer_size等参数优化；
+    - 索引字段上使用is null， is not null，索引可能失效
+    - group by使用临时表
+      - Extra 这个字段的Using temporary表示在执行分组的时候使用了临时表
+      - 优化group by
+        - group by 后面的字段加索引
+        - order by null 不用排序
+        - 尽量只使用内存临时表
+        - 使用SQL_BIG_RESULT
+    - delete + in子查询不走索引！
+      - 当delete遇到in子查询时，即使有索引，也是不走索引的。而对应的select + in子查询，却可以走索引。
+
+
 
 
 
