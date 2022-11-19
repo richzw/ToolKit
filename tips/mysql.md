@@ -481,7 +481,9 @@
         - 使用SQL_BIG_RESULT
     - delete + in子查询不走索引！
       - 当delete遇到in子查询时，即使有索引，也是不走索引的。而对应的select + in子查询，却可以走索引。
-
+- [分页 + 模糊查询](https://mp.weixin.qq.com/s/sVv02L6sKCD3PLiLJfMIeA)
+  - 模糊查询和分页，如果分开用，一般是没问题的。 但如果它们要一起使用，一定要考虑排序问题。
+  - 我们可以通过mysql提供的：char_length、locate、instr和position函数等，来实现很多复杂的排序功能
 
 
 
