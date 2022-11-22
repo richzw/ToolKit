@@ -1137,10 +1137,36 @@
 - [Push Flag]
   - PSH是一段连续TCP报文的最后一个报文会带的标志位. 当一段应用层的消息体被写入到TCP socket时，如果超过了MSS，就会分段成多个TCP段，最后一个段就会带上PSH，前面几个不带
   - 服务器而言，同一个源IP，可能会因为NAT后面的机器，这些机器timestamp递增型无可保证，服务器会拒绝非递增的请求 `netstat -s | grep reject`
-
-
-
-
+- [TCP挥手 握手](https://mp.weixin.qq.com/s/Z0EqSihRaRbMscrZJl-zxQ)
+  - FIN一定要程序执行close()或shutdown()才能发出吗？
+    - 不一定。一般情况下，通过对socket执行 close() 或 shutdown() 方法会发出FIN。但实际上，只要应用程序退出，不管是主动退出，还是被动退出（因为一些莫名其妙的原因被kill了）, 都会发出 FIN。
+    - FIN 是指"我不再发送数据"，因此shutdown() 关闭读不会给对方发FIN, 关闭写才会发FIN。
+  - 主动方在close之后收到的数据，会怎么处理 - Close()的含义是，此时要同时关闭发送和接收消息的功能。
+    - 如果当前连接对应的socket的接收缓冲区有数据，会发RST。
+      - 虽然理论上，第二次和第三次挥手之间，被动方是可以传数据给主动方的。 但如果 主动方的四次挥手是通过 close() 触发的，那主动方是不会去收这个消息的。而且还会回一个 RST。直接结束掉这次连接。
+    - 如果发送缓冲区有数据，那会等待发送完，再发第一次挥手的FIN。
+  - 怎么知道对端socket执行了close还是shutdown
+    - 被动方内核协议栈收到了RST，会把连接关闭。但内核连接关闭了，应用层也不知道（除非被通知）。 此时被动方应用层接下来的操作，无非就是读或写。
+      - 如果是读，则会返回RST的报错，也就是我们常见的Connection reset by peer。
+      - 如果是写，那么程序会产生SIGPIPE信号，应用层代码可以捕获并处理信号，如果不处理，则默认情况下进程会终止，异常退出。
+    - 总结一下，当被动关闭方 recv() 返回EOF时，说明主动方通过 close()或 shutdown(fd, SHUT_WR) 发起了第一次挥手。 如果此时被动方执行两次 send()。
+      - 第一次send(), 一般会成功返回。
+      - 第二次send()时。如果主动方是通过 shutdown(fd, SHUT_WR) 发起的第一次挥手，那此时send()还是会成功。如果主动方通过 close()发起的第一次挥手，那此时会产生SIGPIPE信号，进程默认会终止，异常退出。不想异常退出的话，记得捕获处理这个信号。
+  - 如果被动方一直不发第三次挥手，会怎么样
+    - 主动方会根据自身第一次挥手的时候用的是 close() 还是 shutdown(fd, SHUT_WR) ，有不同的行为表现。
+      - 如果是 `shutdown(fd, SHUT_WR)` ，说明主动方其实只关闭了写，但还可以读，此时会一直处于 FIN-WAIT-2， 死等被动方的第三次挥手。
+      - 如果是 close()， 说明主动方读写都关闭了，这时候会处于 `FIN-WAIT-2`一段时间，这个时间由 `net.ipv4.tcp_fin_timeout` 控制，一般是 60s，这个值正好跟2MSL一样 。超过这段时间之后，状态不会变成 `TIME-WAIT`，而是直接变成`CLOSED`。
+  - TCP两次挥手
+    - 两端IP+端口都一样的连接，叫TCP自连接  `nc -p 6666 127.0.0.1 6666`
+    - 相同的socket，自己连自己的时候，握手是三次的。挥手是两次的
+    - ![img.png](network_self_connect.png)
+      - CLOSING 很少见，除了出现在自连接关闭外，一般还会出现在TCP两端同时关闭连接的情况下。
+      - 处于CLOSING状态下时，只要再收到一个ACK，就能进入 TIME-WAIT 状态，然后等个2MSL，连接就彻底断开了。这跟正常的四次挥手还是有些差别的。大家可以滑到文章开头的TCP四次挥手再对比下。
+  - 四次握手
+    - 不同客户端之间是否可以互联？有一种情况叫TCP同时打开
+    - ![img.png](network_sync_open_simutinously.png)
+    - `while true; do nc -p 2224 127.0.0.1 2223 -v;done`
+      `while true; do nc -p 2223 127.0.0.1 2224 -v;done`
 
 
 
