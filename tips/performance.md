@@ -1088,4 +1088,37 @@
   - 性能指标：吞吐率、响应时间、QPS/IOPS、TP99、资源使用率是我们经常关注的指标。
   - Tools - bcc tools
   - perf不仅仅可以定位cpu瓶颈，还可以查看很多方面，比如缺页，分支预测失败，上下文切换等。
-
+- [Making a Go program 42% faster ](https://hmarr.com/blog/go-allocation-hunting/)
+  - Origin Code
+     ```go
+     type Ruleset []Rule
+     
+     func (r Ruleset) Match(path string) (*Rule, error) {
+       for i := len(r) - 1; i >= 0; i-- {
+         rule := r[i]
+         match, err := rule.Match(path)
+         if match || err != nil {
+           return &rule, err
+         }
+       }
+       return nil, nil
+     }
+     ```
+  - `go tool pprof -http=":8000" ./codeowners ./cpu.pprof`
+  - `go build -gcflags=-m *.go` - `moved to heap: rule`
+    ```go
+     func (r Ruleset) Match(path string) (*Rule, error) {
+     	for i := len(r) - 1; i >= 0; i-- {
+    -		rule := r[i]
+    +		rule := &r[i]
+     		match, err := rule.Match(path)
+     		if match || err != nil {
+    -			return &rule, err
+    +			return rule, err
+     		}
+     	}
+     	return nil, nil
+     }
+    ```
+  - Changing Ruleset from being []Rule to []*Rule, which would mean we no longer need to explicitly take a reference to the rule.
+  - Returning a Rule rather than a *Rule. This would still copy the Rule, but it should stay on the stack instead of moving to the heap.
