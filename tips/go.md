@@ -1530,8 +1530,16 @@
     - Rust 和 Go 分别使用了这两种不同的方式。
       - Rust 始终采取第一种方式，我们通常把它叫做无栈协程，因为它不需要额外的栈保存协程状态，只需函数自身的栈就可以实现这一点。
       - Go 使用的是有栈协程，因为 Goroutine 需要额外的栈保存。Goroutine 当前的堆内存情况，以及 Goroutine 的栈到达临界值之后，我们需要如何处理 Goroutine 的栈扩容，这些都是需要付出额外的开销及空间的。它的优势在于付出了一定的运行时成本，因此使用起来更方便。
-
-
+- [PGO](https://mp.weixin.qq.com/s/7uobN6DmpIYqG34pOpvvlA)
+  - Profile-guided optimization (PGO)，翻译过来是使用配置文件引导的优化。也被称为：
+    - profile-directed feedback（PDF）
+    - feedback-directed optimization（FDO）
+  - PGO 是计算机编程中的一种编译器优化技术，借助配置文件来引导编译，达到提高程序运行时性能的目的。
+    - 检测程序。编译器从你的源代码和编译器的代码创建并链接一个检测程序。
+    - 运行检测的可执行文件。每次执行插桩代码时，插桩程序都会生成一个动态信息文件，用于最终编译。
+    - 最终编译。当您第二次编译时，动态信息文件将合并到一个摘要文件中。编译器会使用此文件中的概要信息，然后尝试选择程序中最频繁最优的运行路径去执行。
+  - Go 团队最终也敲定将基于 runtime/pprof 来得到所需 profile
+  - 在 Go 工具链上，将在 go build 子命令增加 -pgo=<path>，用于显式指定用于 PGO 构建的 profile 文件位置。
 
 
 
