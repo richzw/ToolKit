@@ -1277,7 +1277,7 @@
     - splice 将数据从管道移动到文件描述符，反之亦然；
     - vmsplice 将数据从用户内存移动到管道中。
   - [source](https://mazzo.li/posts/fast-pipes.html)
-
+- [CPU](https://mp.weixin.qq.com/s/G6vljRX_gq5w-1xzj8jHjA)
 
 
 
