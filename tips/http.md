@@ -487,8 +487,21 @@
       - Pre-shared Key
         - 前面的 Session ID 和 Session Ticket 方式都需要在 1 RTT 才能恢复会话。
         - 对于重连 TLS1.3 只需要 0 RTT，原理和 Ticket 类似，只不过在重连时，客户端会把 Ticket 和 HTTP 请求一同发送给服务端，这种方式叫 Pre-shared Key。
-        - 
-
+- [HTTP](https://mp.weixin.qq.com/s/BW2GsZjXCGeVWd4fVCLhOQ)
+  - Evolution
+    - ![img.png](http_http_evolution.png)
+    - ![img.png](http_protocol_compare.png)
+  - TCP的局限性
+    - TCP 会间歇性挂起数据传输
+    - TCP 不支持流级多路复用
+    - TCP 导致冗余通信
+  - QUIC
+    - 选择UDP作为底层传输层协议
+    - 流复用和流量控制
+    - 灵活的拥塞控制
+    - 更好的错误处理 - QUIC 提议使用增强的丢失恢复机制和前向纠错来处理错误的数据包，尤其是对于在传输中容易出现高错误率的缓慢的无线网络。
+    - 更快地握手
+    - 压缩 - QPACK 下，HTTP 报头可以在不同的 QUIC 流中乱序到达。QPACK 使用了一种查找表机制来对报头进行编码和解码。
 
 
 
