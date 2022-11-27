@@ -299,7 +299,7 @@
       - 对应用层并没有提供很好的管理 API，几乎是透明管理。应用层即使想优化 Page Cache 的使用策略也很难进行. 一些应用选择在用户空间实现自己的 page 管理，而不使用 page cache，例如 MySQL InnoDB 存储引擎以 16KB 的页进行管理。
 - [零拷贝](https://mp.weixin.qq.com/s/K-5HJCxDzjZuHhWk1SPEQQ)
   - 零拷贝是指计算机执行IO操作时，CPU不需要将数据从一个存储区域复制到另一个存储区域，从而可以减少上下文切换以及CPU的拷贝时间。它是一种I/O操作优化技术。
-  - 传统的IO流程，包括read和write的过程。4次数据拷贝（两次CPU拷贝以及两次的DMA拷贝)
+  - 传统的IO流程，包括read和write的过程。4次数据拷贝（两次CPU拷贝以及两次的DMA拷贝) - DMA(Direct Memory Access，直接存储器访问) 是计算机科学中的一种内存访问技术。它允许某些电脑内部的硬件子系统（电脑外设），可以独立地直接读写系统内存，允许不同速度的硬件设备来沟通，而不需要依于中央处理器的大量中断负载。
     - read：把数据从磁盘读取到内核缓冲区，再拷贝到用户缓冲区
     - write：先把数据写入到socket缓冲区，最后写入网卡设备。
     ![img.png](os_write_read.png)
@@ -307,11 +307,34 @@
   - 零拷贝并不是没有拷贝数据，而是减少用户态/内核态的切换次数以及CPU拷贝的次数。零拷贝实现有多种方式，分别是
     - mmap+write：2次DMA拷贝和1次CPU拷贝
       ![img.png](os_mmap_write.png)
-    - sendfile： 2次DMA拷贝和1次CPU拷贝
+    - sendfile： 2次DMA拷贝和1次CPU拷贝 - sendfile适合从文件读取数据写socket场景
       ![img.png](os_sendfile.png)
     - 带有DMA收集拷贝功能的sendfile: 2次数据拷贝都是包DMA拷贝
       - linux 2.4版本之后，对sendfile做了优化升级，引入SG-DMA技术，其实就是对DMA拷贝加入了scatter/gather操作，它可以直接从内核空间缓冲区中将数据读取到网卡。使用这个特点搞零拷贝，即还可以多省去一次CPU拷贝
       ![img.png](os_sendfile_scattergatter.png)
+    - [splice、tee、vmsplice](https://mp.weixin.qq.com/s/IfrW10OIHa61sLGdT44mng)
+      - sendfile性能虽好，但是还是有些场景下是不能使用的，比如我们想做一个socket proxy,源和目的都是socket,就不能直接使用sendfile了。这个时候我们可以考虑splice
+      - ![img.png](os_splice_tee_sample.png)
+      - tee系统调用用来在两个管道中拷贝数据。vmsplice系统调用pipe指向的内核缓冲区和用户程序的缓冲区之间的数据拷贝。
+    - MSG_ZEROCOPY
+      - Linux v4.14 版本接受了在TCP send系统调用中实现的支持零拷贝(MSG_ZEROCOPY)的patch，通过这个patch，用户进程就能够把用户缓冲区的数据通过零拷贝的方式经过内核空间发送到网络套接字中去，在5.0中支持UDP
+        ```go
+        if (setsockopt(fd, SOL_SOCKET, SO_ZEROCOPY, &one, sizeof(one)))
+                error(1, errno, "setsockopt zerocopy");
+        ret = send(fd, buf, sizeof(buf), MSG_ZEROCOPY);
+        ```
+    - copy_file_range
+      - Linux 4.5 增加了一个新的API: copy_file_range, 它在内核态进行文件的拷贝，不再切换用户空间，所以会比cp少块一些，在一些场景下会提升性能。
+  - AF_XDP是Linux 4.18新增加的功能，以前称为AF_PACKETv4（从未包含在主线内核中），是一个针对高性能数据包处理优化的原始套接字，并允许内核和应用程序之间的零拷贝。由于套接字可用于接收和发送，因此它仅支持用户空间中的高性能网络应用。
+  - Go标准库中的零拷贝
+    - sendfile
+      - io.Copy -> *TCPConn.ReadFrom -> *TCPConn.readFrom -> net.sendFile -> poll.sendFile
+    - splice
+      - *TCPConn.readFrom初始就是尝试使用splice,使用的场景和限制也提到了。net.splice函数其实是调用poll.Splice
+    - CopyFileRange
+      - io.Copy -> *File.ReadFrom -> *File.readFrom -> poll.CopyFileRange -> poll.copyFileRange
+    - http
+      - http.FileServer -> *fileHandler.ServeHTTP -> http.serveFile -> http.serveContent -> io.CopyN -> io.Copy -> 和sendFile的调用链接上了。可以看到访问文件的时候是调用了sendFile。
 - [DMA 与零拷贝技术](https://spongecaptain.cool/SimpleClearFileIO/2.%20DMA%20%E4%B8%8E%E9%9B%B6%E6%8B%B7%E8%B4%9D%E6%8A%80%E6%9C%AF.html)
   - Note: 除了 Direct I/O，与磁盘相关的文件读写操作都有使用到 page cache 技术
   - 数据的四次拷贝与四次上下文切换
