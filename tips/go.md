@@ -1540,6 +1540,13 @@
     - 最终编译。当您第二次编译时，动态信息文件将合并到一个摘要文件中。编译器会使用此文件中的概要信息，然后尝试选择程序中最频繁最优的运行路径去执行。
   - Go 团队最终也敲定将基于 runtime/pprof 来得到所需 profile
   - 在 Go 工具链上，将在 go build 子命令增加 -pgo=<path>，用于显式指定用于 PGO 构建的 profile 文件位置。
+- [Cost of a integer cast](https://boyter.org/posts/cost-of-integer-cast-in-go/)
+  - a integer to integer cast it’s as close to “free” as any other CPU operation. Integer to float is about 3x slower, but again for most things you can consider it free.
+
+
+
+
+
 
 
 
