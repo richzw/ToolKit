@@ -233,16 +233,27 @@
   - 排序的本质可以这样来表述：一组未排序的N个数字，它们一共有N!种重排，其中只有一种排列是满足题意的（譬如从大到小排列）。换句话说，排序问题的可能性一共有N!种。任何基于比较的排序的基本操作单元都是“比较a和b”
   - 一个只有两种输出的问题最多只能将可能性空间切成两半，根据上面的思路，最佳切法就是切成1/2和1/2。也就是说，我们希望在比较了a和b的大小关系之后，如果发现a<b的话剩下的排列可能性就变成N!/2，如果发现a>b也是剩下N!/2种可能性
   - 一个直接的推论是，如果每次都像上面这样的完美比较，那么N个元素的N!种可能排列只需要log_2{N!}就排查玩了，而log_2{N!}近似于NlogN。这正是快排的复杂度。
-- [pdqsort]
+- [pdqsort](https://mp.weixin.qq.com/s/5HqfRGqPyAhFt0krPgMHOQ)
   - 插入排序 快速排序  堆排序
     - 所有短序列和元素有序情况下，插入排序性能最好
     - 大部分case，快速排序有较好的性能
-    - 任何情况下，堆排序的性能比较稳定
-  - pdqsort: pattern-defeating-quicksort  不稳定的混合排序
+    - 任何情况下，堆排序的性能比较稳定, 在最坏情况下的时间复杂度仍然为 O(n* logn)
+  - [pdqsort](https://arxiv.org/pdf/2106.05123.pdf): pattern-defeating-quicksort  不稳定的混合排序
+    - 其理想情况下的时间复杂度为 O(n)，最坏情况下的时间复杂度为 O(n* logn)，不需要额外的空间。
     - 短序列 - 插入排序  - 长度（12 ~ 32）
     - 快速排序保证整体性能 - pivot使用中位数， 改进partition
       - 短序列 ，固定元素
       - 中序列 <= 50, 采样三个元素 median of three
+        ```go
+        int medianThree(int a, int b, int c) {
+            if ((a > b) ^ (a > c)) 
+                return a;
+            else if ((b < a) ^ (b < c)) 
+                return b;
+            else
+                return c;
+        }
+        ```
       - 长序列 > 50,采样九个元素 median of medians
       - 采用序列是逆序序列 - 翻转整个序列
       - 采样序列是顺序序列 - 插入排序 partial insert sort 有限次数的插入排序 提高性能
@@ -251,5 +262,17 @@
     - 元素重复度比较高的情况
       - 采样pivot重复度？NO
       - 如果两次partition的 pivot相同，即partition是无效分割
+  - details
+    - ![img.png](data_structure_pdqsort.png)
+    - wasBalanced: Bool, 代表上次 partition 是否平衡。在 pivot 和真正的 median 很接近时我们认为是平衡的（true），此变量可以用 partition 后的 pivot index 同 array 两端的距离来判定。
+    - wasPartitioned: Bool, 如果为真，则代表上次 partition 没有交换任何元素（即上次 partition 分割的是一个本身已经有序的 array）。
+    - limit: int，如果为 0，则后续对 unsorted array 的排序都会使用 heap sort 而不是 quick sort。这种情况发生在 quicksort 有很多次选择的 pivot 和真正的 median 差距很大，从而导致 partition 后的两个 sub-arrays 长度相差较大的场景中。limit 的初始值是根据待排序 array 的长度计算出来的，每次发现快排策略效果不佳时，即 !wasBalanced 为真，则使得 limit 减小 1。
+  - pdqsort 相比于 Go 原有算法的优势
+    - 在纯粹的算法层面，即 pdqsort (with sort.Interface) ，pdqsort 在完全随机的情况下和原有算法（类似于 IntroSort）性能几乎一致
+    - 在常见的场景下（例如序列有序|几乎有序|逆序|几乎逆序|重复元素较多）等情况下，会比原有的算法快 1 ~ 30 倍。
+    - Go 原有的算法类似于 introsort，其通过递归次数来决定是否切换到 fall back 算法，而 pdqsort 使用了另一种计算方式（基于序列长度），使得切换到 fall back 算法的时机更加合理。
+
+
+
 
 
