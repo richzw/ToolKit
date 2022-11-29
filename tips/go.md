@@ -1542,7 +1542,10 @@
   - 在 Go 工具链上，将在 go build 子命令增加 -pgo=<path>，用于显式指定用于 PGO 构建的 profile 文件位置。
 - [Cost of a integer cast](https://boyter.org/posts/cost-of-integer-cast-in-go/)
   - a integer to integer cast it’s as close to “free” as any other CPU operation. Integer to float is about 3x slower, but again for most things you can consider it free.
-
+- [Is Go scalable]
+  - math/rand: PRNG 高性能场景下性能不佳 - fastrand
+  - sync.Map: 高性能场景下性能不佳  整体unscalable - skipmap 基于skiplist实现scalable的 sorted map
+  - channel：高性能场景下性能不佳  整体unscalable - LSCQ scalalbe FIFO queue
 
 
 

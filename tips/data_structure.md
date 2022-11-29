@@ -47,7 +47,6 @@
       - LSM 树的难点在于 compact 操作和读取数据时的效率优化，一般用在写多读少的场景。
       - 可以维护局部数据的有序性，从而一定程度提升读性能。
     - ![img.png](data_structure_lsm_vs_btree.png)
-    
 - [BitMap Index](https://github.com/mkevac/gopherconrussia2019)
   - [Details](https://medium.com/bumble-tech/bitmap-indexes-in-go-unbelievable-search-speed-bb4a6b00851)
   - Indexing approach
@@ -234,6 +233,23 @@
   - 排序的本质可以这样来表述：一组未排序的N个数字，它们一共有N!种重排，其中只有一种排列是满足题意的（譬如从大到小排列）。换句话说，排序问题的可能性一共有N!种。任何基于比较的排序的基本操作单元都是“比较a和b”
   - 一个只有两种输出的问题最多只能将可能性空间切成两半，根据上面的思路，最佳切法就是切成1/2和1/2。也就是说，我们希望在比较了a和b的大小关系之后，如果发现a<b的话剩下的排列可能性就变成N!/2，如果发现a>b也是剩下N!/2种可能性
   - 一个直接的推论是，如果每次都像上面这样的完美比较，那么N个元素的N!种可能排列只需要log_2{N!}就排查玩了，而log_2{N!}近似于NlogN。这正是快排的复杂度。
-
+- [pdqsort]
+  - 插入排序 快速排序  堆排序
+    - 所有短序列和元素有序情况下，插入排序性能最好
+    - 大部分case，快速排序有较好的性能
+    - 任何情况下，堆排序的性能比较稳定
+  - pdqsort: pattern-defeating-quicksort  不稳定的混合排序
+    - 短序列 - 插入排序  - 长度（12 ~ 32）
+    - 快速排序保证整体性能 - pivot使用中位数， 改进partition
+      - 短序列 ，固定元素
+      - 中序列 <= 50, 采样三个元素 median of three
+      - 长序列 > 50,采样九个元素 median of medians
+      - 采用序列是逆序序列 - 翻转整个序列
+      - 采样序列是顺序序列 - 插入排序 partial insert sort 有限次数的插入排序 提高性能
+    - 快速排序不佳的时候，堆排序保证最坏情况下仍为 nlogn
+      - pivot离着序列端点比较近 （len/8）
+    - 元素重复度比较高的情况
+      - 采样pivot重复度？NO
+      - 如果两次partition的 pivot相同，即partition是无效分割
 
 
