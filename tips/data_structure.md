@@ -271,8 +271,31 @@
     - 在纯粹的算法层面，即 pdqsort (with sort.Interface) ，pdqsort 在完全随机的情况下和原有算法（类似于 IntroSort）性能几乎一致
     - 在常见的场景下（例如序列有序|几乎有序|逆序|几乎逆序|重复元素较多）等情况下，会比原有的算法快 1 ~ 30 倍。
     - Go 原有的算法类似于 introsort，其通过递归次数来决定是否切换到 fall back 算法，而 pdqsort 使用了另一种计算方式（基于序列长度），使得切换到 fall back 算法的时机更加合理。
-
-
-
+- [Hash](https://zhuanlan.zhihu.com/p/277732297)
+  - [CS166](http://web.stanford.edu/class/cs166/)
+  - Hashmap
+    - Load factor 
+      - Load factor is the ratio of the number of elements in the hashmap to the number of buckets
+      - 装载因子主要是进行扩容，以减少哈希碰撞
+    - std::unordered_set
+      - 为了优化遍历操作(不会遍历空的桶)，GCC 将值用单链表的形式组织起来了
+      - ![img.png](data_structure_unordered_set.png)
+  - 优化
+    - 丢弃额外的数据结构，使用同一个数组来存储元素。
+    - 通过抛弃多种数据结构的实现方式，同时使用线性探测法来进行存储，对 cache 更加友好，也提高的空间局部性的利用。
+    - 如何处理哈希冲突
+      - 线性探测法的好处是有很好的缓存表现，比如线性探测法是顺序性地访问元素，而这些连续的内存正是缓存行的一部分，省下了 CPU 指令周期。作为对比，平方探测法就没有很好的缓存表现，因为它会跳着查找。
+    - Robin Hood hashing
+      - 我们将元素的实际存放位置和它算出来的哈希值做差，称之为距离。D(value) = abs( 实际存放位置 - hash(value) )
+      - 在新的哈希操作中，如果 当前元素的距离 小于 要被插入元素的距离，就进行替换，并继续操作替换出来的元素插入。
+      - advantage
+        - 由于进行了元素位置的重新分配，所以装载因子可以设置得很高。
+        - 而且查找效率也变高了，不需要查询直到出现空桶为止，根据插入规则，可以直接判断距离 D(当前元素) < D(查询元素)，就能停止了，返回元素不存在。
+        - 同时也可以提供更好的空间局部性的利用。
+  - **Hopscotch hashing** is a mix between open addressing and chained hashing that can be thought of as taking a chained hash table and storing each item in each bucket in a slot near where the item wants to go. This strategy plays well with multithreading. 
+  - **The Swiss table** uses the fact that some processors can perform multiple operations in parallel with a single instruction to speed up a linear probing table. 
+  - **Extendible hashing** is designed for databases and file systems and uses a mix of a trie and a chained hash table to dynamically increase bucket sizes as individual buckets get loaded. 
+  - **Robin Hood hashing** is a variant of linear probing in which items can be moved after being inserted to reduce the variance in how far from home each element can live.
+  - **cuckoo hashing** have two hash tables and two hash functions. Each item can be in exactly one of two places - it's either in the location in the first table given by the first hash function, or it's in the location in the second table given by the second hash function. This means that lookups are worst-case efficient, since you only have to check two spots to see if something is in the table.
 
 
