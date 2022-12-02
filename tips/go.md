@@ -1546,7 +1546,7 @@
   - math/rand: PRNG 高性能场景下性能不佳 - fastrand
   - sync.Map: 高性能场景下性能不佳  整体unscalable - skipmap 基于skiplist实现scalable的 sorted map
   - channel：高性能场景下性能不佳  整体unscalable - LSCQ scalalbe FIFO queue
-
+- [大端序 - 有序 Key 的构造](https://mp.weixin.qq.com/s/WyIP6M4-z9onI_WHqQs5RQ)
 
 
 
