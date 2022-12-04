@@ -124,7 +124,18 @@
   - Pod creation
     - kube-apiserver -> kubelet -> dockerd -> containerd (-> containerd-shim) -> runc
     - ![img.png](k8s_pod_creation.png)
-  
+- [limits and requests](https://stackoverflow.com/a/73703128/3011380)
+  - Best practices for CPU limits and requests on Kubernetes
+    - Use CPU requests for everything and make sure they are accurate
+    - Do NOT use CPU limits.
+  - Best practices for Memory limits and requests on Kubernetes
+    - Use memory limits and memory requests 
+    - Set memory limit= memory request
+  - Checking the throttling rate of your pods
+    - Just login to the pod and run `cat /sys/fs/cgroup/cpu,cpuacct/kubepods/{PODID}/{CONTAINERID}/cpu.stat`.
+      - nr_periods — Total schedule period
+      - nr_throttled — Total throttled period out of nr_periods
+      - throttled_time — Total throttled time in ns
 
 
 
