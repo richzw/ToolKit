@@ -28,4 +28,29 @@
   $ iptables --append SOCAT-RATE-LIMIT --jump DROP
   $ iptables -I INPUT -p tcp --dport 1234 --jump SOCAT-RATE-LIMIT
   ```
+- [iptablse常用命令](https://mp.weixin.qq.com/s/1RIR_AECgDr45EENtPRK9w)
+  - 清除iptables（常用） `iptables -F`
+  - 备份iptables（常用） `iptables-save > iptables.txt`
+  - 导入iptables（常用） `iptables-restore < iptables.txt`
+  - 机器重启自动生效（常用） `service iptables save`
+  - 清空某条规则： `iptables -t filter -D INPUT -s 1.2.3.4 -j DROP`
+  - 禁止某个ip（下面用$ip表示）访问本机： `iptables -I INPUT -s $ip -j DROP`
+  - 禁止某个ip段（下面用 mask表示，其中$mask是掩码）访问本机： `iptables -I INPUT -s $ip/$mask -j DROP`
+  - 禁止本机访问某个ip（下面用$ip表示）： `iptables -A OUTPUT -d $ip -j DROP`
+  -  禁止某个ip（下面用$ip表示）访问本机的80端口的tcp服务： `iptables -I INPUT -p tcp –dport 80 -s $ip -j DROP`
+  - 禁止所有ip访问本机的80端口的tcp服务： `iptables -A INPUT -p tcp --dport 80 -j DROP`
+  - 禁止所有ip访问本机的所有端口： `iptables -A INPUT -j DROP`
+  - 禁止除了某个ip（下面用$ip表示）之外其他ip都无法访问本机的3306端口（常用）：
+    - （1）首先 禁止所有 `iptables -I INPUT -p tcp --dport 3306 -j DROP`
+    - （2）然后 开放个别 `iptables -I INPUT -s $ip -p tcp --dport 3306 -j ACCEPT`
+- bash
+  - 通过增加 -v 选项，即可开启详细模式，用于查看所执行的命令
+  - 通过增加 -x 参数来进入 xtrace 模式，用于调试执行阶段的变量值。
+  - 增加 -u 选项， 可以检查变量是否未定义/绑定
+  - 组合使用 -vu 就可以直接看到具体出现问题的代码是什么内容
+  - 在需要调试的位置设置 set -x ，在结束的位置设置 set +x ，这样调试日志中就只会记录我需要调试部分的日志了
+  - set -e 选项。该选项在遇到首个 非0 值的时候会直接退出
 
+
+
+  
