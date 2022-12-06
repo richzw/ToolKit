@@ -1353,7 +1353,14 @@
       - 使用缓存：我们在同步写数据库的同时，也把数据写到缓存，查询数据时，会先查询缓存，不过这种情况会带来 MySQL 和 Redis 数据一致性问题。
       - 查询主库：直接查询主库，这种情况会给主库太大压力，不建议这种方式。
       - 数据冗余：对于一些异步处理的场景，如果只扔数据 ID，消费数据时，需要查询从库，我们可以把数据全部都扔给消息队列，这样消费者就无需再查询从库
-  
+- [How Postgres Stores Rows](https://ketansingh.me/posts/how-postgres-stores-rows/)
+  - PostgreSQL stores the actual data into segment files (more generally called heap files). Typically its fixed to 1GB size but you can configure that at compile time using --with-segsize.
+  - These segment files contain data in fixed size pages which is usually **8Kb**, although a different page size can be selected when compiling the server with --with-blocksize
+  - ![img.png](db_postgresql_row.png)
+    - lp(1..N) is line pointer array. It points to a logical offset within that page. Since these are arrays, elements are fixed sized but the number of elements can vary.
+    - row(1..N) represents actual SQL rows. They are added in reverse order within a page. They are generally variable sized and in order to reach to a specific tuple we use line pointer. Since there can be variable number of rows inside a page, items are added backward while line pointer is added to front.
+    - special space is typically used when storing indexes in these page, usually sibling nodes in a B-Tree for example. For table data this is not used.
+
 
 
 
