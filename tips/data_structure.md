@@ -227,6 +227,13 @@
     - std::memory_order_release：不对重排做限制，只保证相关共享内存访问的原子性。
     - std::memory_order_acquire: 用在 load 时，保证同线程中该 load 之后的对相关内存读写语句不会被重排到 load 之前，并且其他线程中对同样内存用了 store release 都对其可见。
     - std::memory_order_release：用在 store 时，保证同线程中该 store 之后的对相关内存的读写语句不会被重排到 store 之前，并且该线程的所有修改对用了 load acquire 的其他线程都可见。
+  - Why would you wanna use SkipLists?
+    - lookup, deletion and insertion has logarithmic complexity
+    - these are relatively very easy to implement as you don’t need to take care of rebalancing tree (as with RB Trees, AVL Trees, B+Trees) or container resizing (as with HashMaps).
+    - thread safe implementation is also not too complex, there are lock and lock-free concurrent implemetations out there and memory footprint is generally low when compared to other ordered collection.
+  - Improving performance
+    - Memory Access - This can be done with manual memory management and using a custom memory pool.
+    - Unrolled SkipList is one which stores multiple elements in each node. Unrolling is designed to give a better cache performance which can depend on the size of the objects which are accessed.
 - Quick Sort
   - 答案的任何一个分支都是等概率的
   - ![img.png](data_structure_weight_ball.png)
