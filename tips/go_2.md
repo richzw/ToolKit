@@ -216,7 +216,6 @@
     - strings.join方法的benchmark就可以发现，因为使用了grow方法，提前分配好内存，在字符串拼接的过程中，不需要进行字符串的拷贝，也不需要分配新的内存
     - bytes.Buffer方法性能是低于strings.builder的，bytes.Buffer 转化为字符串时重新申请了一块空间，存放生成的字符串变量
     - strings.join ≈ strings.builder > bytes.buffer > []byte转换string > "+" > fmt.sprintf
-
 - [Go Ballast 让内存控制更加丝滑](https://mp.weixin.qq.com/s/SlQkv74hXZzZEdUAhTobuw)
   - GO 的 GC 是标记-清除方式，当 GC 会触发时全量遍历变量进行标记，当标记结束后执行清除，把标记为白色的对象执行垃圾回收。值得注意的是，这里的回收仅仅是标记内存可以返回给操作系统，并不是立即回收，这就是你看到 Go 应用 RSS 一直居高不下的原因。在整个垃圾回收过程中会暂停整个 Go 程序（STW），Go 垃圾回收的耗时还是主要取决于标记花费的时间的长短，清除过程是非常快的。
   - Go GC 优化的手段你知道的有哪些？
@@ -909,7 +908,6 @@
       var limit = make(chan struct{}, 3)
       
       func main() {
-          // …………
           for _, w := range work {
               go func() {
                   limit <- struct{}{}
@@ -917,7 +915,6 @@
                   <-limit
               }()
           }
-          // …………
       }
       ```
 - [slice tricks](https://mp.weixin.qq.com/s/IQRHWNUnxiaCDleayNVRVg)

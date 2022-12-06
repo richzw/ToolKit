@@ -392,7 +392,6 @@
         wg.Wait()
     }
     ```
-
 - [Sync Once Source Code](https://mp.weixin.qq.com/s/nkhZyKG4nrUulpliMKdgRw)
   - 问题
     - 为啥源码引入Mutex而不是CAS操作
@@ -471,7 +470,6 @@
         ```
     - 小优化4
       - 用函数区分开了fast path和slow path，对fast path做了内联优化
-
 - [Option Design](https://mp.weixin.qq.com/s/WUqpmyxWv_W5E6RtxazYAg)
   - Good approach
     ```go
@@ -483,7 +481,7 @@
       return server
     }
     ```
-    通过不定长度的方式代表可以给多个 options，以及每一个 option 是一个 func 型态，其参数型态为 *http. Server。那我们就可以在 NewServer 这边先给 default value，然后通过 for loop 将每一个 options 对其 Server 做的参数进行设置，这样 client 端不仅可以针对他想要的参数进行设置，其他没设置到的参数也不需要特地给 zero value 或是默认值，完全封装在 NewServer 就可以了
+    - 通过不定长度的方式代表可以给多个 options，以及每一个 option 是一个 func 型态，其参数型态为 *http. Server。那我们就可以在 NewServer 这边先给 default value，然后通过 for loop 将每一个 options 对其 Server 做的参数进行设置，这样 client 端不仅可以针对他想要的参数进行设置，其他没设置到的参数也不需要特地给 zero value 或是默认值，完全封装在 NewServer 就可以了
      ```go
      func main() {
        readTimeoutOption := func(server *http.Server) {
@@ -550,9 +548,8 @@
     }
     
     ```
-    可以看到通过设计一个Option interface，里面用了 apply function，以及使用一个 options struct 将所有的 field 都放在这个 struct 里面，每一个 field 又会用另外一种 struct 或是 custom type 进行封装，并 implement apply function，最后再提供一个 public function：WithLogger 去给 client 端设值。
-
-    这样的做法好处是可以针对每一个 option 作更细的 custom function 设计，例如选项的 description 为何？可以为每一个 option 再去 implement Stringer interface，之后提供 option 描述就可以调用 toString 了，设计上更加的方便
+    - 可以看到通过设计一个Option interface，里面用了 apply function，以及使用一个 options struct 将所有的 field 都放在这个 struct 里面，每一个 field 又会用另外一种 struct 或是 custom type 进行封装，并 implement apply function，最后再提供一个 public function：WithLogger 去给 client 端设值。
+    - 这样的做法好处是可以针对每一个 option 作更细的 custom function 设计，例如选项的 description 为何？可以为每一个 option 再去 implement Stringer interface，之后提供 option 描述就可以调用 toString 了，设计上更加的方便
      ```go
      func (l loggerOption) apply(opts *options) {
        opts.logger = l.Log
@@ -707,31 +704,28 @@
        }
        ```
 - [怎么使用 direct io](https://mp.weixin.qq.com/s/fr3i4RYDK9amjdCAUwja6A)
-
-  操作系统的 IO 过文件系统的时候，默认是会使用到 page cache，并且采用的是 write back 的方式，系统异步刷盘的。由于是异步的，如果在数据还未刷盘之前，掉电的话就会导致数据丢失。
-  写到磁盘有两种方式：
-  - 要么就每次写完主动 sync 一把
-  - 要么就使用 direct io 的方式，指明每一笔 io 数据都要写到磁盘才返回。
-  
-  O_DIRECT 的知识点
-  - direct io 也就是常说的 DIO，是在 Open 的时候通过 flag 来指定 O_DIRECT 参数，之后的数据的 write/read 都是绕过 page cache，直接和磁盘操作，从而避免了掉电丢数据的尴尬局面，同时也让应用层可以自己决定内存的使用（避免不必要的 cache 消耗）。
-  - direct io 模式需要用户保证对齐规则，否则 IO 会报错，有 3 个需要对齐的规则：
-    - IO 的大小必须扇区大小（512字节）对齐 
-    - IO 偏移按照扇区大小对齐； 
-    - 内存 buffer 的地址也必须是扇区对齐
-
-  为什么 Go 的 O_DIRECT 知识点值得一提
-  - O_DIRECT 平台不兼容 
+  - 操作系统的 IO 过文件系统的时候，默认是会使用到 page cache，并且采用的是 write back 的方式，系统异步刷盘的。由于是异步的，如果在数据还未刷盘之前，掉电的话就会导致数据丢失。
+  - 写到磁盘有两种方式：
+    - 要么就每次写完主动 sync 一把
+    - 要么就使用 direct io 的方式，指明每一笔 io 数据都要写到磁盘才返回。
+  - O_DIRECT 的知识点
+    - direct io 也就是常说的 DIO，是在 Open 的时候通过 flag 来指定 O_DIRECT 参数，之后的数据的 write/read 都是绕过 page cache，直接和磁盘操作，从而避免了掉电丢数据的尴尬局面，同时也让应用层可以自己决定内存的使用（避免不必要的 cache 消耗）。
+    - direct io 模式需要用户保证对齐规则，否则 IO 会报错，有 3 个需要对齐的规则：
+      - IO 的大小必须扇区大小（512字节）对齐 
+      - IO 偏移按照扇区大小对齐； 
+      - 内存 buffer 的地址也必须是扇区对齐
+  - 为什么 Go 的 O_DIRECT 知识点值得一提
+    - O_DIRECT 平台不兼容 
     - Go 标准库 os 中的是没有 O_DIRECT 这个参数的. 其实 O_DIRECT 这个 Open flag 参数本就是只存在于 linux 系统。// syscall/zerrors_linux_amd64.go
       ```go
       // +build linux
       // 指明在 linux 平台系统编译
       fp := os.OpenFile(name, syscall.O_DIRECT|flag, perm)
       ```
-  - Go 无法精确控制内存分配地址
-    - direct io 必须要满足 3 种对齐规则：io 偏移扇区对齐，长度扇区对齐，内存 buffer 地址扇区对齐。前两个还比较好满足，但是分配的内存地址作为一个小程序员无法精确控制
-    - `buffer := make([]byte, 4096)` 那这个地址是对齐的吗？ 答案是：不确定。
-    - 方法很简单，**就是先分配一个比预期要大的内存块，然后在这个内存块里找对齐位置**。 这是一个任何语言皆通用的方法，在 Go 里也是可用的。
+    - Go 无法精确控制内存分配地址
+      - direct io 必须要满足 3 种对齐规则：io 偏移扇区对齐，长度扇区对齐，内存 buffer 地址扇区对齐。前两个还比较好满足，但是分配的内存地址作为一个小程序员无法精确控制
+      - `buffer := make([]byte, 4096)` 那这个地址是对齐的吗？ 答案是：不确定。
+      - 方法很简单，**就是先分配一个比预期要大的内存块，然后在这个内存块里找对齐位置**。 这是一个任何语言皆通用的方法，在 Go 里也是可用的。
     ```go
     const (
         AlignSize = 512
@@ -769,7 +763,7 @@
        return block
     }
     ```
-  - 有开源的库吗
+    - 有开源的库吗
     - https://github.com/ncw/directio
       ```go
       // 创建句柄
@@ -801,8 +795,7 @@
   - IEEE754 浮点数分类小结
   ![img.png](go_float5.png)
 - [优雅的 Go 错误问题解决方案](https://mp.weixin.qq.com/s?__biz=MjM5ODYwMjI2MA==&mid=2649764790&idx=1&sn=fc63b1cf5071aa0324987d1e5b3cab71&scene=21#wechat_redirect)
-  
-  服务/系统的错误信息返回
+  - 服务/系统的错误信息返回
   - 传统方案
     - 服务/系统层面的错误信息返回，大部分协议都可以看成是 code - message 模式或者是其变体
     - 我们在使用 code - message 机制的时候，特别是业务初期，难以避免的是前后端的设计文案没能完整地覆盖所有的错误用例，或者是错误极其罕见。因此当出现错误时，提示暧昧不清（甚至是直接提示错误信息），导致用户从错误信息中找到解决方案
@@ -812,7 +805,6 @@
     - 我们可以将 message 的提示信息如下展示：“未知错误，错误代码 30EV，如需协助，请联系 XXX”。顺带一提，30EV 是 "Access denied for user 'db_user'@'127.0.0.1'" 的计算结果，这样一来，我就对调用方隐藏了敏感信息。
     ```go
     import (
-        // ...
         "github.com/martinlindhe/base36"
     )
     
@@ -823,8 +815,6 @@
             "I", "1",
         )
     )
-    
-    // ...
     
     func Err2Hashcode(err error) (uint64, string) {
         u64 := hash(err.Error())
@@ -856,10 +846,8 @@
         return uint64(u &amp; 0xFFFFF)
     }
     ```
-    
 - [Golang内存管理优化！三色标记法源码浅析](https://mp.weixin.qq.com/s/A2aCo9UYyI3iHCu9nsGrAA)
-
-  探讨的gcDrain函数就是使用三色标记法找到存活对象的一个重要函数，了解gcDrain函数就会对golang垃圾回收机制有更深的理解
+  - 探讨的gcDrain函数就是使用三色标记法找到存活对象的一个重要函数，了解gcDrain函数就会对golang垃圾回收机制有更深的理解
   - golang垃圾回收过程
   
     | 阶段	| 说明	| 赋值器状态 |
@@ -871,16 +859,13 @@
     | GCoff	| 内存归还阶段，将内存依照策略归还给操作系统，写屏障关闭	| 并发 |
     ![img.png](go_gc.png)
   - 三色标记法
-
-    三色标记法是golang在堆内存中寻找存活对象的抽象过程
+    - 三色标记法是golang在堆内存中寻找存活对象的抽象过程
     - 黑色对象标识该对象已经被标记过了，且黑色对象引用的对象也全部都被标记过了。
     - 灰色对象表示该对象已经被标记了但是该对象引用的对象没有被全部标记。
     - 白色对象就是没有被标记的对象，被认为是潜在的垃圾，在标记开始前，所有对象都是白色对象
     ![img.png](go_gc_tricolor.png)
-  
 - [如何有效控制 Go 线程数](https://mp.weixin.qq.com/s/HYcHfKScBlYCD0IUd0t4jA)
-
-  Go 对运行时创建的线程数量有一个限制，默认是 10000 个线程
+  - Go 对运行时创建的线程数量有一个限制，默认是 10000 个线程
   - 闲置线程
     - GOMAXPROCS 的定义文档，我们可以看到该变量只是限制了可以同时执行用户级 Go 代码的 OS 系统线程数量（通俗地讲：Go 程序最多只能有和 P 相等个数的系统线程同时运行）。但是，**在系统调用中被阻塞的线程不在此限制之中**
     - Go 网络编程模型，就是一种异步系统调用。它使用网路轮询器进行系统调用，调度器可以防止 G 在进行这些系统调用时阻塞 M。这可以让 M 继续执行其他的 G，而不需要创建新的 M。
@@ -1547,9 +1532,44 @@
   - sync.Map: 高性能场景下性能不佳  整体unscalable - skipmap 基于skiplist实现scalable的 sorted map
   - channel：高性能场景下性能不佳  整体unscalable - LSCQ scalalbe FIFO queue
 - [大端序 - 有序 Key 的构造](https://mp.weixin.qq.com/s/WyIP6M4-z9onI_WHqQs5RQ)
-
-
-
-
-
-
+- [GC]()
+  - 内存分配方式
+    - 线性分配
+      - 线性分配（Bump Allocator）是一种高效的内存分配方法，但是有较大的局限性。当我们使用线性分配器时，只需要在内存中维护一个指向内存特定位置的指针，如果用户程序向分配器申请内存，分配器只需要检查剩余的空闲内存、返回分配的内存区域并修改指针在内存中的位置
+      - 线性分配器回收内存因为线性分配器具有上述特性，所以需要与合适的垃圾回收算法配合使用，例如：标记压缩（Mark-Compact）、复制回收（Copying GC）和分代回收（Generational GC）等算法，它们可以通过拷贝的方式整理存活对象的碎片，将空闲内存定期合并，这样就能利用线性分配器的效率提升内存分配器的性能了
+      - 应用代表：Java（如果使用 Serial, ParNew 等带有 Compact 过程的收集器时，采用分配的方式为线性分配）
+      - 问题：内存碎片
+      - 解决方式：GC 算法中加入「复制/整理」阶段
+    - 空闲链表分配
+      - 空闲链表分配器（Free-List Allocator）可以重用已经被释放的内存，它在内部会维护一个类似链表的数据结构。当用户程序申请内存时，空闲链表分配器会依次遍历空闲的内存块，找到足够大的内存，然后申请新的资源并修改链表
+      - 空闲链表分配器因为不同的内存块通过指针构成了链表，所以使用这种方式的分配器可以重新利用回收的资源，但是因为分配内存时需要遍历链表，所以它的时间复杂度是 O(n)。空闲链表分配器可以选择不同的策略在链表中的内存块中进行选择，最常见的是以下四种：
+        - 首次适应（First-Fit）— 从链表头开始遍历，选择第一个大小大于申请内存的内存块；
+        - 循环首次适应（Next-Fit）— 从上次遍历的结束位置开始遍历，选择第一个大小大于申请内存的内存块；
+        - 最优适应（Best-Fit）— 从链表头遍历整个链表，选择最合适的内存块；
+        - 隔离适应（Segregated-Fit）— 将内存分割成多个链表，每个链表中的内存块大小相同，申请内存时先找到满足条件的链表，再从链表中选择合适的内存块；
+      - 应用代表：GO、Java（如果使用 CMS 这种基于标记-清除，采用分配的方式为空闲链表分配）
+      - 问题：相比线性分配方式的 bump-pointer 分配操作（top += size），空闲链表的分配操作过重，例如在 GO 程序的 pprof 图中经常可以看到 mallocgc() 占用了比较多的 CPU；
+  - Golang
+    - 内存分配方式 Golang 采用了基于空闲链表分配方式的 [TCMalloc 算法](https://github.com/google/tcmalloc/blob/master/docs/design.md)
+      - ![img.png](golang_tcmalloc_gc.png)
+    - GC 算法
+      - Golang 采用了基于并发标记与清扫算法的三色标记法。
+        - GC 的四个阶段
+          - Mark Prepare - STW 做标记阶段的准备工作，需要停止所有正在运行的goroutine(即STW)，标记根对象，启用内存屏障，内存屏障有点像内存读写钩子，它用于在后续并发标记的过程中，维护三色标记的完备性(三色不变性)，这个过程通常很快，大概在10-30微秒。
+          - Marking - Concurrent 标记阶段会将大概25%(gcBackgroundUtilization)的P用于标记对象，逐个扫描所有G的堆栈，执行三色标记，在这个过程中，所有新分配的对象都是黑色，被扫描的G会被暂停，扫描完成后恢复，这部分工作叫后台标记(gcBgMarkWorker)。这会降低系统大概25%的吞吐量，比如MAXPROCS=6，那么GC P期望使用率为6*0.25=1.5，这150%P会通过专职(Dedicated)/兼职(Fractional)/懒散(Idle) 三种工作模式的Worker共同来完成。这还没完，为了保证在Marking过程中，其它G分配堆内存太快，导致Mark跟不上Allocate的速度，还需要其它G配合做一部分标记的工作，这部分工作叫辅助标记(mutator assists)。在Marking期间，每次G分配内存都会更新它的”负债指数”(gcAssistBytes)，分配得越快，gcAssistBytes越大，这个指数乘以全局的”负载汇率”(assistWorkPerByte)，就得到这个G需要帮忙Marking的内存大小(这个计算过程叫revise)，也就是它在本次分配的mutator assists工作量(gcAssistAlloc)。
+          - Mark Termination - STW 标记阶段的最后工作是Mark Termination，关闭内存屏障，停止后台标记以及辅助标记，做一些清理工作，整个过程也需要STW，大概需要60-90微秒。在此之后，所有的P都能继续为应用程序G服务了。
+          - Sweeping - Concurrent 在标记工作完成之后，剩下的就是清理过程了，清理过程的本质是将没有被使用的内存块整理回收给上一个内存管理层级(mcache -> mcentral -> mheap -> OS)，清理回收的开销被平摊到应用程序的每次内存分配操作中，直到所有内存都Sweeping完成。当然每个层级不会全部将待清理内存都归还给上一级，避免下次分配再申请的开销，比如Go1.12对mheap归还OS内存做了优化，使用NADV_FREE延迟归还内存。
+        - 关于 GC 触发阈值
+          - ![img.png](golang_gc_trigger_threshold.png)
+          - GC开始时内存使用量：GC trigger；
+          - GC标记完成时内存使用量：Heap size at GC completion；
+          - GC标记完成时的存活内存量：图中标记的Previous marked heap size为上一轮的GC标记完成时的存活内存量；
+          - 本轮GC标记完成时的预期内存使用量：Goal heap size；
+    - 存在问题
+      - GC Marking - Concurrent 阶段，这个阶段有三个问题：
+        - GC 协程和业务协程是并行运行的，大概会占用 25% 的CPU，使得程序的吞吐量下降；
+        - 如果业务 goroutine 分配堆内存太快，导致 Mark 跟不上 Allocate 的速度，那么业务 goroutine 会被招募去做协助标记，暂停对业务逻辑的执行，这会影响到服务处理请求的耗时。
+        - GOGC 在稳态场景下可以很好的工作，但是在瞬态场景下，如定时的缓存失效，定时的流量脉冲，GC 影响会急剧上升。一个典型例子：[IO 密集型服务 耗时优化](https://segmentfault.com/a/1190000041637173)
+      - GC Mark Prepare、Mark Termination - STW 阶段，这两个阶段虽然按照官方说法时间会很短，但是在实际的线上服务中，有时会在 trace 图中观测到长达十几 ms 的停顿，
+        - 原因可能为：OS 线程在做内存申请的时候触发内存整理被“卡住”，Go Runtime 无法抢占处于这种情况的 goroutine ，进而阻塞 STW 完成。
+      - 过于关注 STW 的优化，带来服务吞吐量的下降（高峰期内存分配和 GC 时间的 CPU 占用超过 30% ）
