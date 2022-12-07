@@ -808,7 +808,16 @@
       - 云主机上调用接口不通，在云主机和 Pod 所在 Kubernetes 节点同时抓包，使用 wireshark 分析数据包
       - 通过抓包结果分析结果为 TCP 链接建立没有问题，但是在传输大数据的时候会一直重传 1514 大小的第一个数据包直至超时。怀疑是链路两端 MTU 大小不一致导致（现象：某一个固定大小的包一直超时的情况）
       - 在云主机上使用 ping -s 指定数据包大小，发现超过 1400 大小的数据包无法正常发送。结合以上情况，定位是云主机网卡配置的 MTU 是 1500，tunl0 配置的 MTU 是 1440，导致大数据包无法发送至 tunl0 ，因此 Pod 没有收到报文，接口调用失败。
-
+- [Misc]
+  - kubelet 启动时需要之前说的一个随机端口完成exec的功能。
+    - 正常情况下k8s nodePort 的端口在localhost 访问时： iptables模式下使用localhost:nodePort 是可以正常访问nodePort 服务的。
+    - 但是ipvs 模式下是不能使用localhost:nodePort  这种形式访问的: 相关issue：https://github.com/kubernetes/kubernetes/issues/67730
+      - 在ipvs模式下conntrack 表项会表现成这样（类似回环问题）：
+      - tcp      6 119 SYN_SENT src=127.0.0.1 dst=127.0.0.1 sport=38770 dport=42515 [UNREPLIED] src=127.0.0.1 dst=10.133.38.54 sport=42515 dport=17038 mark=0 use=1 会显示timeout。
+   - 所以当k8s nodePort和kubelet启动的随机端口一致时:
+     - iptables 模式下会被转发到nodeport svc
+     - ipvs 下会导致回环不通。
+   - 综上：kubelet 启动时监听到port 和nodePort 不能一样。
 
 
 
