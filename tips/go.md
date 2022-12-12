@@ -1601,6 +1601,46 @@
             - 当 GC 处于标记阶段时，指针写入需要额外的处理（write barrier）
             - 运行中的 goroutine 必须被暂停，以便扫描它们的根。
         - 减少堆上对象数量；
+      - 手段
+        - sync.pool
+          - 使用 sync.pool() 缓存对象，减少堆上对象分配数
+          - sync.pool 是全局对象，读写存在竞争问题，因此在这方面会消耗一定的 CPU，但之所以通常用它优化后 CPU 会有提升，是因为它的对象复用功能对 GC 和内存分配带来的优化，因此 sync.pool 的优化效果取决于锁竞争增加的 CPU 消耗与优化 GC 与内存分配减少的 CPU 消耗这两者的差值；
+        - 设置 GOGC 参数（go 1.19 之前）
+          - GOGC 默认值是 100，也就是下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍，通过调大 GOGC 值（gcpercent）的方式，达到减少 GC 次数的目的
+          - Issue: GOGC 参数不易控制，设置较小提升有限，设置较大容易有 OOM 风险，因为堆大小本身是在实时变化的，在任何流量下都设置一个固定值，是一件有风险的事情。
+        - ballast 内存控制（go 1.19 之前）
+          - 仍然是从利用了下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍这一原理，初始化一个生命周期贯穿整个 Go 应用生命周期的超大 slice，用于内存占位，实际操作有以下两种方式
+          - 相比于设置 GOGC 的优势
+            - 安全性更高，OOM 风险小；
+            - 效果更好，可以从 pprof 图看出，后者的优化效果更大；
+          - 负面考量
+            - 问：虽然通过大切片占位的方式可以有效降低 GC 频率，但是每次 GC 需要扫描和回收的对象数量变多了，是否会导致进行 GC 的那一段时间产生耗时毛刺？
+            - 答：不会，GC 有两个阶段 mark 与 sweep，unused_objects 只与 sweep 阶段有关，但这个过程是非常快速的；mark 阶段是 GC 时间占用最主要的部分，但其只与当前的 inuse_objects 有关，与 unused_objects 无太大关系；因此，综上所述，降低频率确实会让每次 GC 时的 unused_objects 有所增长，但并不会对 GC 增加太多负担
+          - [cases](https://segmentfault.com/a/1190000041602269)
+        - GCTuner（go 1.19 之前）
+          - 原理： https://eng.uber.com/how-we-saved-70k-cores-across-30-mission-critical-services/
+          - 实现： https://github.com/bytedance/gopkg/tree/develop/util/gctuner
+          - 简述： 同上文讲到的设置 GOGC 参数的思路相同，但增加了自动调整的设计，而非在程序初始设置一个固定值，可以有效避免高峰期的 OOM 问题。
+          - 优点： 不需要修改 GO 源码，通用性较强；
+          - 缺点：对内存的控制不够精准。
+        - GO SetMemoryLimit（go 1.19 及之后）
+          - 原理： https://github.com/golang/proposal/blob/master/design/48409-soft-memory-limit.md
+          - 简述： 通过对 Go 使用的内存总量设置软内存限制来调整 Go 垃圾收集器的行为。此选项有两种形式：runtime/debug调用的新函数SetMemoryLimit和GOMEMLIMIT环境变量。总之，运行时将尝试通过限制堆的大小并通过更积极地将内存返回给底层平台来维持此内存限制。这包括一种有助于减轻垃圾收集死循环的机制。最后，通过设置GOGC=off，Go 运行时将始终将堆增长到满内存限制。
+          - 效果测试：https://colobu.com/2022/06/20/how-to-use-SetMemoryLimit/
+          - 其他：
+            - 与 GCTuner 的区别：a. 两者都是通过调节 heapgoal 和 gctrigger 的值（GC 触发阈值），达到影响 GC 触发时机的目的；b. GCTuner 对于 heapgoal 值的调整，依赖 SetFinalizer 的执行时机，在执行时通过设置 GOGC 参数间接调整的，在每个 GC 周期时最多调整一次；而 SetMemoryLimit 是一直在实时动态调整的，在每次检查是否需要触发GC的时候重新算的，不仅是每一轮 GC 完时决定，因此对于内存的控制更加精准。 
+            - 对内存的控制非常精准，可以关注到所有由 runtime 管理的内存，包括全局 Data 段、BSS 段所占用的内存；goroutine 栈的内存；被GC管理的内存；非 GC 管理的内存，如 trace、GC 管理所需的 mspan 等数据结构；缓存在 Go Heap 中没有被使用，也暂时未归还操作系统的内存；
+            - 一般配合 GOGC = off 一起使用，可以达到最好的效果。
+        - 堆外分配
+          - fastcache：直接调用 syscall.mmap 申请堆外内存使用；
+          - Bigcache: 会在内存中分配大数组用以达到 0 GC 的目的，并使用 `map[int]int`，维护对对象的引用；当 map 中的 key 和 value 都是基础类型时，GC 就不会扫到 map 里的 key 和 value
+          - offheap：使用 cgo 管理堆外内存；
+        - [GAB（Goroutine allocation buffer）](https://mp.weixin.qq.com/s/0X4lasAf5Sbt_tromlqwIQ)
+          - 优化对象分配效率，并减少 GC 扫描的工作量。
+          - GAB（Goroutine allocation buffer）机制，用来优化小对象内存分配。Go 的内存分配用的是 tcmalloc 算法，传统的 tcmalloc，会为每个分配请求执行一个比较完整的 malloc GC 方法，而我们的 Gab 为每个 Goroutine 预先分配一个比较大的 buffer，然后使用 bump-pointer 的方式，为适合放进 Gab 里的小对象来进行快速分配。
+        - Go1.20 arena
+          - 可以经由 runtime 申请内存，但由用户手动管理此块堆内存。因为是经由 runtime 申请的，可以被 runtime 感知到，因此可以纳入 GC 触发条件中的内存计算里，有效降低 OOM 风险。
+
 
 
 
