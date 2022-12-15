@@ -818,7 +818,25 @@
      - iptables 模式下会被转发到nodeport svc
      - ipvs 下会导致回环不通。
    - 综上：kubelet 启动时监听到port 和nodePort 不能一样。
-
+- [Underlay vs Overlay Network Model](https://mp.weixin.qq.com/s/UOO75q8Ij-Ywl62pLqD2MA)
+  - Underlay Network Model
+    - Underlay Network 顾名思义是指网络设备基础设施，如交换机，路由器, DWDM 使用网络介质将其链接成的物理网络拓扑，负责网络之间的数据包传输。
+    - underlay network 可以是二层，也可以是三层；二层的典型例子是以太网 Ethernet，三层是的典型例子是互联网 Internet。
+    - 而工作于二层的技术是 vlan，工作在三层的技术是由 OSPF, BGP 等协议组成。
+    - k8s 中的 underlay network
+      - 模型下典型的有 flannel 的 host-gw 模式与 calico BGP 模式。
+      - flannel host-gw 模式中每个 Node 需要在同一个二层网络中，并将 Node 作为一个路由器，跨节点通讯将通过路由表方式进行，这样方式下将网络模拟成一个underlay network。
+      - Calico 提供了的 BGP 网络解决方案，在网络模型上，Calico 与 Flannel host-gw 是近似的，但在软件架构的实现上，flannel 使用 flanneld 进程来维护路由信息；而 Calico 是包含多个守护进程的，其中 Brid 进程是一个 BGP 客户端与路由反射器(Router Reflector)，BGP 客户端负责从 Felix 中获取路由并分发到其他 BGP Peer，而反射器在 BGP 中起了优化的作用。
+    - IPVLAN & MACVLAN
+      - IPVLAN 允许一个物理网卡拥有多个 IP 地址，并且所有的虚拟接口用同一个 MAC 地址；
+      - MACVLAN 则是相反的，其允许同一个网卡拥有多个 MAC 地址，而虚拟出的网卡可以没有 IP 地址
+  - Overlay Network Model
+    - Overlay
+      - overlay network 使用的是一种或多种隧道协议 (tunneling)，通过将数据包封装，实现一个网络到另一个网络中的传输，具体来说隧道协议关注的是数据包（帧）。
+    - 常见的网络隧道技术
+      - 通用路由封装 ( Generic Routing Encapsulation ) 用于将来自 IPv4/IPv6 的数据包封装为另一个协议的数据包中，通常工作与 L3 网络层中。
+      - VxLAN (Virtual Extensible LAN)，是一个简单的隧道协议，本质上是将 L2 的以太网帧封装为 L4 中 UDP 数据包的方法，使用 4789 作为默认端口。
+    - 这种工作在 overlay 模型下典型的有 flannel 与 calico 中的的 VxLAN, IPIP 模式。
 
 
 
