@@ -437,3 +437,5 @@
     - Pushback: Retry in n ms
       - Retry policy: Retry in n ms. If this attempt also fails, retry delay will reset to initial backoff for the following retry (if applicable)
       - Hedging policy: Send next hedged request in n ms. Subsequent hedged requests will resume at n + hedgingDelay
+- [gRPC Proxy](https://github.com/zcong1993/grpc-go-beyond/tree/f6be07759b2027d9140e439c621c50ec649e3acc/internal/proxy)
+
