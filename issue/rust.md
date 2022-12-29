@@ -130,7 +130,13 @@
         github::issue::post_issue_comment(...).await
     }
     ```
-
+- [Rust笔记](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzI1MjAzNDI1MA==&action=getalbum&album_id=2170724251283095557&scene=173&from_msgid=2648217143&from_itemidx=2&count=3&nolastread=1#wechat_redirect)
+- [Rust 的泛型](https://mp.weixin.qq.com/s/OBg5B93G8Gz9srB-jQQGiw)
+- [Rust 语法梳理与总结](https://mp.weixin.qq.com/s/H0oZZg6YBzQDRMzyujVYcg)
+- [Rust wiki](https://rustwiki.org/zh-CN/book/ch03-02-data-types.html)
+- [Go vs Rust Idioms](https://programming-idioms.org/cheatsheet/Go/Rust)
+- [Using unwrap() in Rust is Okay](https://blog.burntsushi.net/unwrap/)
+- [Error Handling in Rust](https://blog.burntsushi.net/rust-error-handling/)
 
 
 
