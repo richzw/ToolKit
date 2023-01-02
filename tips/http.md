@@ -428,6 +428,7 @@
     - Optimized ACKing:  Since each packet carries a unique sequence number, the problem of distinguishing retransmission from delayed packets is eliminated. The ACK packets also contain the time to process the packet and generate the ACK at the client level. These features ensure that QUIC more accurately estimates the RTT. QUIC’s ACKs support up to 256 NACK ranges, helping the sender to be more resilient to packet reordering and ensuring fewer bytes on the wire. Selective ACK (SACK) in TCP does not resolve this problem in all cases.
     - Connection Migration: QUIC connections are identified by a 64 bit connection ID, so that if a client changes IP addresses, it can continue to use the old connection ID from the new IP address without interrupting any in-flight requests. This is a common occurrence in mobile applications when a user switches between WiFi and cellular connections.
 - [HTTPS 握手会影响性能吗](https://mp.weixin.qq.com/s/HEuhidyV-WuKp8ncD6TJ_w)
+  - ![img.png](http_tls_handshake.png)
   - HTTPS 相比 HTTP 协议多一个 TLS 协议握手过程，目的是为了通过非对称加密握手协商或者交换出对称加密密钥，这个过程最长可以花费掉 2 RTT，接着后续传输的应用数据都得使用对称加密密钥来加密/解密。
   - 如何优化 HTTPS？
     - 分析性能损耗
