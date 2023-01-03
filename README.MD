@@ -60,6 +60,7 @@ Time Wheel
 ======
 
 [Hashed and Hierarchical Timing Wheels](https://blog.acolyer.org/2015/11/23/hashed-and-hierarchical-timing-wheels/)
+[多级时间轮定时器](https://mp.weixin.qq.com/s/E5fF3hki1JgroWyc-oiTzg)
 
 Delay Queue
 ======
