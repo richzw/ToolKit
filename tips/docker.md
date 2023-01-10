@@ -400,6 +400,11 @@
 - [Mastering Container Networking](https://iximiuz.com/en/posts/container-networking-is-simple/)
 - [24 个常见的 Docker 疑难杂症处理技巧](https://mp.weixin.qq.com/s/R58f7fac2F3MP0TLV36vyQ)
 - [探究 Docker 容器化技术背后的黑科技](https://mp.weixin.qq.com/s/Fx6bLAKQCvrymhZ6IpBtuQ)
-
-
-
+- [containerd]
+  - `task` concept
+    - A Task is the runtime state of the container. A Task encapsulates a Process.
+    - In the process of building Docker, one huge pain point we found is the mixing of runtime state (container status) with things like config state (container configuration).
+    - When building containerd it was decided to split these things so they can be managed separately. So a "container" in containerd is configuration/metadata.
+    - Where the Process is the executed command in the container, the Task's Process is the first/primary command in the container.
+    - When the Process exits, the Task state is exited.
+    - ` ctr -n k8s.io t ps` `ctr -n k8s.io c ls` `ctr namespace ls`
