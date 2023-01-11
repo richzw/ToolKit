@@ -94,7 +94,12 @@
     $ clang -O2 -Wall -target bpf -c xdp-example.c -o xdp-example.o
     $ ip link set dev em1 xdp obj xdp-example.o
     ```
-
+- [AF_XDP](https://mp.weixin.qq.com/s/uPHVo-4rGZNvPXLKHPq9QQ)
+  - AF_XDP的核心组件主要分为两个部分：AF_XDP socket和UMEM
+    - 其中AF_XDP socket（xsk）的使用方法和传统的socket类似，AF_XDP支持用户通过socket()来创建一个xsk。每个xsk包含一个RX ring和TX ring，其中收包是在RX ring上进行的，发包则是在TX ring上面执行。用户也是通过操作RX ring和TX ring来实现网络数据帧的收发
+    - UMEM是由一组大小相等的数据内存块所组成的。UMEM中每个数据块的地址可以用一个地址描述符来表述。地址描述符被定义为这些数据块在UMEM中的相对偏移。用户空间负责为UMEM分配内存，常用的方式是通过mmap进行分配。UMEM也包含两个ring，分别叫做FILL ring和COMPLETION ring。这些ring中保存着前面所说的地址描述符
+    - 在收包前，用户将收包的地址描述符填充到FILL ring，然后内核会消费FILL ring开始收包，完成收包的地址描述符会被放置到xsk的RX ring中，用户程序消费RX ring即可获取接收到的数据帧。在发包时，用户程序向UMEM的地址描述符所引用的内存地址写入数据帧，然后填充到TX ring中，接下来内核开始执行发包。完成发包的地址描述符将被填充到COMPLETION ring中。
+    - 为了让xsk成功地从网卡中收到网络数据帧，需要将xsk绑定到确定的网卡和队列。这样，从特定网卡队列接收到的数据帧，通过XDP_REDIRECT即可重定向到对应已绑定的xsk。
 
 
 
