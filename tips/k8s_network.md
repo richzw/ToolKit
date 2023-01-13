@@ -772,6 +772,16 @@
       - 查找 http 包
         - 查找只是 GET 请求的流量 `tcpdump -vvAls0 | grep 'GET'`
         - 查找 http 客户端 IP `tcpdump -vvAls0 | grep 'Host:'`
+      - `tcpdump -i eth0 -nn -s0 -v port 80`
+        - -nn : 单个 n 表示不解析域名，直接显示 IP；两个 n 表示不解析域名和端口。这样不仅方便查看 IP 和端口号，而且在抓取大量数据时非常高效，因为域名解析会降低抓取速度。
+        - -s0 : tcpdump 默认只会截取前 96 字节的内容，要想截取所有的报文内容，可以使用 -s number， number 就是你要截取的报文字节数，如果是 0 的话，表示截取报文全部内容。
+        - -v : 使用 -v，-vv 和 -vvv 来显示更多的详细信息，通常会显示更多与特定协议相关的信息。
+        - -p : 不让网络接口进入混杂模式。当网卡工作在混杂模式下时，网卡将来自接口的所有数据都捕获并交给相应的驱动程序。
+        - -e : 显示数据链路层信息。默认情况下 tcpdump 不会显示数据链路层信息，使用 -e 选项可以显示源和目的 MAC 地址，以及 VLAN tag 信息。
+        - -A 表示使用 ASCII 字符串打印报文的全部数据，这样可以使读取更加简单，方便使用 grep 等工具解析输出内容。
+        - -l : 如果想实时将抓取到的数据通过管道传递给其他工具来处理，需要使用 -l 选项来开启行缓冲模式
+      -  抓取所有发往网段 192.168.1.x 或从网段 192.168.1.x 发出的流量 `tcpdump net 192.168.1`
+      - [More Samples](https://icloudnative.io/posts/tcpdump-examples/)
   - Pod抓包
     - 对于 Kubernetes 集群中的 Pod，由于容器内不便于抓包，通常视情况在 Pod 数据包经过的 veth 设备，docker0 网桥，CNI 插件设备（如 cni0，flannel.1 etc..）及 Pod 所在节点的网卡设备上指定 Pod IP 进行抓包。
     - 需要注意在不同设备上抓包时指定的源目 IP 地址需要转换，如抓取某 Pod 时，ping {host} 的包，在 veth 和 cni0 上可以指定 Pod IP 抓包，而在宿主机网卡上如果仍然指定 Pod IP 会发现抓不到包，因为此时 Pod IP 已被转换为宿主机网卡 IP
