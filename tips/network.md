@@ -1222,7 +1222,8 @@
   - https://flopezluis.github.io/gossip-simulator/
   - Redis 集群采用的就是 gossip 协议来交换信息。当有新节点要加入到集群的时候，需要用到一个 meet 命令。
   - 六度分隔理论 
-
+- NAT
+  - ![img.png](network_nat_tunnel.png)
 
 
 
