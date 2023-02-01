@@ -1642,7 +1642,11 @@
           - 可以经由 runtime 申请内存，但由用户手动管理此块堆内存。因为是经由 runtime 申请的，可以被 runtime 感知到，因此可以纳入 GC 触发条件中的内存计算里，有效降低 OOM 风险。
 - [Hacking Go's Runtime with Generics](https://www.dolthub.com/blog/2022-12-19-maphash/)
   - [maphash](https://github.com/dolthub/maphash)
-
+- [pointer vs struct receiver]
+  - The reality is that there are tradeoffs to both approaches. 
+  - Structs are typically more expensive to copy onto the stack than a pointer, especially for a large struct. 
+  - But keeping objects on the stack instead of the heap avoids garbage collector pressure, which can be faster in certain circumstances. From an aesthetic / design perspective there are tradeoffs as well: 
+  - sometimes it's really desirable to enforce immutability semantics, which you get with a struct receiver.
 
 
 
