@@ -503,7 +503,10 @@
     - 更好的错误处理 - QUIC 提议使用增强的丢失恢复机制和前向纠错来处理错误的数据包，尤其是对于在传输中容易出现高错误率的缓慢的无线网络。
     - 更快地握手
     - 压缩 - QPACK 下，HTTP 报头可以在不同的 QUIC 流中乱序到达。QPACK 使用了一种查找表机制来对报头进行编码和解码。
-
+- [pipelining disabled in modern browsers]
+  - Buggy proxies are still common and these lead to strange and erratic behaviors that Web developers cannot foresee and diagnose easily.
+  - Pipelining is complex to implement correctly: the size of the resource being transferred, the effective RTT that will be used, as well as the effective bandwidth, have a direct incidence on the improvement provided by the pipeline. Without knowing these, important messages may be delayed behind unimportant ones.
+  - Pipelining is subject to the HOL problem.
 
 
 
