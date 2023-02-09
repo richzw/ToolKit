@@ -1006,6 +1006,17 @@
     - jwt无法在服务端主动退出的问题
     - jwt无法作废已颁布的令牌，只能等到令牌过期问题
     - jwt携带大量用户扩展信息导致降低传输效率问题
+    - Security Issue
+      - The `none` algorithm
+      - The algorithms are passed in an array 
+        - The solution is to use just one algorithm, or use two different methods with just one algorithm each, and call two methods independently.
+      - Claims are optional
+        - JWT provides a nice way to organize and ensure different claims that could help improve security, but they are all optional. For example, in the sample code to the right, sub, iss, aud, and so on are all optional.
+    - Dangerous for user authentication
+      - Logout doesn’t really log you out.
+      - Blocking users doesn’t immediately block them
+      - JWTs could contain stale data.
+      - JWT’s are often not encrypted.
   - gtoken的优势
     - gtoken支持单点应用使用内存存储，支持个人项目文件存储，也支持企业集群使用redis存储，完全适用于个人和企业生产级使用；
     - 有效避免了jwt服务端无法退出问题；
