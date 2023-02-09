@@ -148,10 +148,12 @@
       - 真正的异步化设计（Proactor），而非如epoll等本质上的同步行为（Reactor）。而其关键在于，程序和kernel通过SQ/CQ两个队列进行解耦。
       - 支持任何类型的 I/O：cached files、direct-access files 甚至 blocking sockets
       - 灵活、可扩展：基于 io_uring 甚至能重写（re-implement）Linux 的每个系统调用
-    - 原理及核心数据结构：SQ/CQ/SQE/CQE
+    - [原理及核心数据结构](https://www.skyzh.dev/posts/articles/2021-06-14-deep-dive-io-uring/)：SQ/CQ/SQE/CQE
       - 每个 io_uring 实例都有 两个环形队列（ring），在内核和应用程序之间共享：
-        - 提交队列：submission queue (SQ)
-        - 完成队列：completion queue (CQ)
+        - 提交队列：submission queue (SQ) - SQE: Submission Queue Entry	提交队列项	提交队列中的一项。
+        - 完成队列：completion queue (CQ) - CQE: Completion Queue Entry	完成队列项	完成队列中的一项
+        - 用户将需要进行的操作写入 io_uring 的 SQ 中。在 CQ 中，用户可以收割任务的完成情况
+        - Ring:环 比如 SQ Ring，就是“提交队列信息”的意思。 包含队列数据、队列大小、丢失项等等信息。
         - ![img.png](socket_io_ring_arch.png)
         - 都是 单生产者、单消费者，size 是 2 的幂次；
         - 提供 无锁接口（lock-less access interface），内部使用 **内存屏障**做同步（coordinated with memory barriers）。
@@ -167,6 +169,10 @@
           - 这种模式中，会创建一个内核线程（kernel thread）来执行 SQ 的轮询工作。
       - io_uring 系统调用 API
          - io_uring_setup(2)
+           - 该函数返回一个 file descriptor，并将 io_uring 支持的功能、以及各个数据结构在 fd 中的偏移量存入 params。用户根据偏移量将 fd 映射到内存 (mmap) 后即可获得一块内核用户共享的内存区域。
+           - 这块内存区域中，有 io_uring 的上下文信息：提交队列信息 (SQ_RING) 和完成队列信息 (CQ_RING)；还有一块专门用来存放提交队列元素的区域 (SQEs)。SQ_RING 中只存储 SQE 在 SQEs 区域中的序号
+           - ![img.png](socket_io_uring_setup_api.png)
+           - io_uring_setup 设计的巧妙之处在于，内核通过一块和用户共享的内存区域进行消息的传递。在创建上下文后，任务提交、任务收割等操作都通过这块共享的内存区域进行，在 IO_SQPOLL 模式下（后文将详细介绍），可以完全绕过 Linux 的 syscall 机制完成需要内核介入的操作（比如读写文件），大大减少了 syscall 切换上下文、刷 TLB 的开销。
          - io_uring_register(2)
          - io_uring_enter(2)
 - [Linux 网络包发送过程](https://mp.weixin.qq.com/s?__biz=MjM5Njg5NDgwNA==&mid=2247485146&idx=1&sn=e5bfc79ba915df1f6a8b32b87ef0ef78&scene=21#wechat_redirect)
