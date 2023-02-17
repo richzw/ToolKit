@@ -915,8 +915,11 @@
   - 零成本抽象
     - 在 Go 里面，它的 interface 是动态分发的，即运行时通过类型的元数据和指针，去动态调用所需接口，它可能会造成多一次的内存寻址。
     - 最主要是它会影响到 inline。而且在 Go 里面没有提供一种零成本抽象的方案，它不像 Rust 里面有一个 box dyn，与 interface 很像。还有一种是静态编译式的，做静态分发，在编译的时候直接把类型给单例化出来了，这就是一个零成本的，但是 Go 里面没有。
-
-
+- Leak Detective techniques
+  - Monitor your services for leaks. Key resources to check for every piece of Go software include: a. Memory b. Goroutines c. File descriptors (open files)
+  - Depending on your application, you might also want to monitor: a. Disk space b. Inodes c. Child processes d. Special resources used by your application
+  - Avoid running all your background jobs on the exact same schedule. Use prime numbers to avoid overlapping job runs.
+  - Use metrics or logs to record background job start and end times; look for correlations between these times and leaks.
 
 
 
