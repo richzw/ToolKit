@@ -50,7 +50,8 @@
   - 组合使用 -vu 就可以直接看到具体出现问题的代码是什么内容
   - 在需要调试的位置设置 set -x ，在结束的位置设置 set +x ，这样调试日志中就只会记录我需要调试部分的日志了
   - set -e 选项。该选项在遇到首个 非0 值的时候会直接退出
-
+- [SSH Tunnels](https://iximiuz.com/en/posts/ssh-tunnels/)
+  - ![img.png](shell_ssh_tunnel.png)
 
 
   
