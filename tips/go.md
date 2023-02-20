@@ -1647,6 +1647,16 @@
   - Structs are typically more expensive to copy onto the stack than a pointer, especially for a large struct. 
   - But keeping objects on the stack instead of the heap avoids garbage collector pressure, which can be faster in certain circumstances. From an aesthetic / design perspective there are tradeoffs as well: 
   - sometimes it's really desirable to enforce immutability semantics, which you get with a struct receiver.
+- [Go arena](https://pyroscope.io/blog/go-1-20-memory-arenas/)
+  - 什么是内存 Arenas
+    - Go 运行时必须跟踪 *每个* 分配的对象，导致性能开销增加。Arenas 提供了一种解决这个问题的方法，通过减少与许多小分配相关的开销
+  - 建议：
+    - 仅在**关键代码路径**中使用 arenas。不要在所有地方使用它们
+    - 在使用 arenas 前后对代码进行分析，以确保您在 arenas 可以提供最大效益的地方添加 arenas
+    - 密切关注在 arenas 上创建的对象的生命周期。确保不要将它们泄漏到程序的其他组件，其中对象可能超出 arenas 的生命周期
+    - 使用`defer a.Free()`确保不会忘记释放内存
+    - 使用`arena.Clone()`将对象克隆回堆上，如果您在 arenas 被释放后想要使用它们
+
 
 
 
