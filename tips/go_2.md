@@ -8,8 +8,7 @@
     - ***T**：普通类型指针类型，用于传递对象地址，不能进行指针运算。
     - **unsafe.poniter**：通用指针类型，用于转换不同类型的指针，不能进行指针运算，不能读取内存存储的值(需转换到某一类型的普通指针)
     - **uintptr**：用于指针运算，GC不把uintptr当指针，uintptr无法持有对象。uintptr类型的目标会被回收。
-    
-    三者关系就是：unsafe.Pointer是桥梁，可以让任意类型的指针实现相互转换，也可以将任意类型的指针转换为uintptr进行指针运算，也就说uintptr是用来与unsafe.Pointer打配合
+    - 三者关系就是：unsafe.Pointer是桥梁，可以让任意类型的指针实现相互转换，也可以将任意类型的指针转换为uintptr进行指针运算，也就说uintptr是用来与unsafe.Pointer打配合
   - Sizeof、Alignof、Offsetof三个函数的基本使用
     ```go
      // sizeof
@@ -47,7 +46,6 @@
     ```
   - 内存对齐
     - 对齐的作用和原因：CPU访问内存时，并不是逐个字节访问，而是以字长（word size)单位访问。比如32位的CPU，字长为4字节，那么CPU访问内存的单位也是4字节。这样设计可以减少CPU访问内存的次数，加大CPU访问内存的吞吐量。假设我们需要读取8个字节的数据，一次读取4个字节那么就只需读取2次就可以。内存对齐对实现变量的原子性操作也是有好处的，每次内存访问都是原子的，如果变量的大小不超过字长，那么内存对齐后，对该变量的访问就是原子的，这个特性在并发场景下至关重要。
-    
 - Splitting a go array or slice in a defined number of chunks.
   ```go
   func SplitSlice(array []int, numberOfChunks int) [][]int {
@@ -57,13 +55,10 @@
       if numberOfChunks <= 0 {
           return nil
       }
-  
       if numberOfChunks == 1 {
           return [][]int{array}
       }
-  
       result := make([][]int, numberOfChunks)
-  
       // we have more splits than elements in the input array.
       if numberOfChunks > len(array) {
           for i := 0; i < len(array); i++ {
@@ -73,14 +68,11 @@
       }
   
       for i := 0; i < numberOfChunks; i++ {
-  
           min := (i * len(array) / numberOfChunks)
           max := ((i + 1) * len(array)) / numberOfChunks
   
           result[i] = array[min:max]
-  
       }
-  
       return result
   }
   ```
@@ -141,15 +133,12 @@
             // great we go our result in time and we can move on
             // from now on, `b` is populated, with the read bytes
     }
-    
     // here we can use `result` as `readResult` and the buffer `b`
-    
     ```
 - [Golang GC Marker](https://mp.weixin.qq.com/s/n-4YxL_irIBqd2fxszmDeg)
   - 每个P都有  Mark worker
   - 三色标记
   - 混合写屏障： 在栈外设置 加入写屏障 + 删除写屏障
-
 - [map](https://mp.weixin.qq.com/s/SGv5vuh9aU2mqViC4Kj0YQ)
   - hmap 由很多 bmap（bucket） 构成，每个 bmap 都保存了 8 个 key/value 对
     ![img.png](go_map.png)
@@ -226,8 +215,7 @@
       - 对某些程序本身占用内存就低，容易触发 GC - 对 API 接口耗时比较敏感的业务，如果  GOGC 置默认值的时候，也可能也会遇到接口的周期性的耗时波动
       - GOGC 设置很大，有的时候又容易触发 OOM
     - 设置 debug.SetGCPercent()
-      
-    这两种方式的原理和效果都是一样的，GOGC 默认值是 100，也就是下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍
+    - 这两种方式的原理和效果都是一样的，GOGC 默认值是 100，也就是下次 GC 触发的 heap 的大小是这次 GC 之后的 heap 的一倍
   - [GO 内存 ballast](https://blog.twitch.tv/en/2019/04/10/go-memory-ballast-how-i-learnt-to-stop-worrying-and-love-the-heap/) [issue 23044](https://github.com/golang/go/issues/23044)
     - 什么是 Go ballast，其实很简单就是初始化一个生命周期贯穿整个 Go 应用生命周期的超大 slice。
       ```go
@@ -243,13 +231,10 @@
        ```go
        func main() {
            ballast := make([]byte, 10*1024*1024*1024)
-       
            <-time.After(time.Duration(math.MaxInt64))
            runtime.KeepAlive(ballast)
        }
-       
        $ ps -eo pmem,comm,pid,maj_flt,min_flt,rss,vsz --sort -rss | numfmt --header --to=iec --field 5 | numfmt --header --from-unit=1024 --to=iec --field 6 | column -t | egrep "[t]est|[P]I"
-       
        ```
     - 当怀疑我们的接口的耗时是由于 GC 的频繁触发引起的，我们需要怎么确定呢？
       - 首先你会想到周期性的抓取 pprof 的来分析，这种方案其实也可以，但是太麻烦了。
@@ -258,7 +243,6 @@
   - 有些同学喜欢利用 runtime.SetFinalizer 模拟析构函数，当变量被回收时，执行一些回收操作，加速一些资源的释放。在做性能优化的时候这样做确实有一定的效果，不过这样做是有一定的风险的。
     ```go
     type File struct { d int }
-    
     func main() {
         p := openFile("t.txt")
         content := readFile(p.d)
@@ -276,7 +260,6 @@
         runtime.SetFinalizer(p, func(p *File) {
           syscall.Close(p.d)
         })
-    
         return p
     }
     
@@ -288,7 +271,6 @@
         if err != nil {
           panic(err)
         }
-    
         return string(buf[:])
     }
     
@@ -300,7 +282,6 @@
           i := 1
           a = &i
         }
-    
         _ = a
     }
     ```
@@ -312,10 +293,7 @@
       func main() {
           p := openFile("t.txt")
           content := readFile(p.d)
-          
           runtime.KeepAlive(p)
-      
-          println("Here is the content: "+content)
       }
       ```
       runtime.KeepAlive 能阻止 runtime.SetFinalizer 延迟发生，保证我们的变量不被 GC 所回收
@@ -372,7 +350,7 @@
         panic("level2")
     }
     
-    func main() {
+    func main() 
         level1()
     ```
     - 由于一个函数 recover 了 panic，Go 需要一种跟踪，并恢复这个程序的方法。为了达到这个目的，每一个 Goroutine 嵌入了一个特殊的属性，指向一个代表该 panic 的对象
@@ -599,7 +577,6 @@
     fmt.Println(x)  // {856f5555806443e98b7ed04c5a9d6a9a 1}
     fmt.Println(y)  // {856f5555806443e98b7ed04c5a9d6a9a 1}
     fmt.Println(reflect.DeepEqual(x, y)) // false ???
-    
     ```
     原来此 1 非彼 1，Content 字段的数据类型由 int 转换为了 float64 。而在接口中，其动态类型不一致时，它的比较是不相等的。
 - [Go 为什么不支持可重入锁](https://mp.weixin.qq.com/s/pQBsAxnaBXkk7G1cdUgsww)
@@ -689,7 +666,6 @@
     - 等待一个事件，也可以通过 close 一个 channel 就足够了
     - 利用 channel 阻塞的特性和带缓冲的 channel 来实现控制并发数量
     - singlelFlight - 一般系统重要的查询增加了缓存后，如果遇到缓存击穿，那么可以通过任务计划，加索等方式去解决这个问题，singleflight 这个库也可以很不错的应对这种问题
-    - 
   - 有锁的地方就去用 channel 优化 [demo](https://github.com/LinkinStars/simple-chatroom)
 - [Go的内存布局和分配原理](https://mp.weixin.qq.com/s/gCDxWzslfPXayJ_RFQVb7g)
   ![img.png](go_memory.png)
@@ -840,8 +816,7 @@
       }
       defer f.Close()
       
-      // Copy will put all the data from Body into f, without creating a huge buffer in memory
-      // (moves chunks at a time)
+      // Copy will put all the data from Body into f, without creating a huge buffer in memory (moves chunks at a time)
       io.Copy(f, resp.Body)
       ```
 - [动态调整 GOGC 优化 Go 的 GC 标记 CPU 占用](https://mp.weixin.qq.com/s/XR1KAeCW930i-Qxv6N2kaA)
@@ -868,7 +843,6 @@
     - Go 有一个 finalizer 机制，在对象被 GC 时可以触发用户的回调方法。Uber 实现了一个自引用的 finalizer 能够在每次 GC 的时候进行 reset，这样也可以降低这个内存检测的 CPU 消耗
     - 在 finalizerHandler 里调用 runtime.SetFinalizer(f, finalizerHandler) 能让这个 handler 在每次 GC 期间被执行；这样就不会让引用真的被干掉了，这样使该对象存活也并不需要太高的成本，只是一个指针而已
     ![img.png](go_finalizer.png)
-
 - [空结构体struct{}](https://mp.weixin.qq.com/s/YU45CYk7Q-Na2WISMrUYCQ)
   - 空结构体类型的变量占用的空间为0
      ```go
@@ -1055,8 +1029,7 @@
         w    int
         wcap int
     }
-    ```
-     ```go
+
      func (bp *BytePoolCap) Get() (b []byte) {
          select {
          case b = <-bp.c:
@@ -1552,7 +1525,6 @@
   - 饿汉模式 - 适用于在程序早期初始化时创建已经确定需要加载的类型实例
     ```go
     var dbConn *databaseConn
-        
     func init() {
       dbConn = &databaseConn{}
     }
@@ -1594,7 +1566,6 @@
      type Config struct {
              path string
      }
-     
      func (c *Config) Path() string {
              if c == nil {
                      return "/usr/home"
@@ -1728,6 +1699,13 @@
   - nil == nil ?
     - `invalid operation: nil == nil (operator == not defined on nil)
     - ==符号对于nil来说是一种未定义的操作, 因为nil是没有类型的，是在编译期根据上下文确定的，所以要比较nil的值也就是比较不同类型的nil
+- [nil channel vs close channel]
+  - A send to a nil channel blocks forever
+  - A receive from a nil channel blocks forever
+  - A send to a closed channel panics
+  - A receive from a closed channel returns the zero value immediately
+  - A closed channel, will be `selected` immediately, and get nil value of the channel type. Thus may cause the other channels in the select never get selected.
+  - A nil channel, will never be `selected`.
 - [Go语言](https://mp.weixin.qq.com/s/0X4lasAf5Sbt_tromlqwIQ)
   - 优势
     - 语言层面上支持高并发。
