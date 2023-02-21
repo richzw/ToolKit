@@ -157,4 +157,17 @@
   - 那么，如果我非要保证绝对一致性怎么办，先给出结论：
     - 没有办法做到绝对的一致性，这是由 CAP 理论决定的，缓存系统适用的场景就是非强一致性的场景，所以它属于 CAP 中的 AP。
       所以，我们得委曲求全，可以去做到 BASE 理论中说的最终一致性。
+- [Ristretto: A High-Performance Go Cache](https://dgraph.io/blog/post/introducing-ristretto-high-perf-go-cache/)
+  - Fast Access
+    - sharded mutex-wrapped Go maps are the best overall performance 
+    - To generate a fast hash, we borrowed `runtime.memhash` from Go Runtime
+  - Concurrency and Contention Resistance
+    - [BP-Wrapper](https://dgraph.io/blog/refs/bp_wrapper.pdf) - two ways to mitigate contention: prefetching and batching.
+    - Rather than acquiring a mutex lock for every metadata mutation, we wait for a ring buffer to fill up before we acquire a mutex and process the mutations.
+    - a simple `sync.RWMutex` guarded map is way better than `sync.Map` when we are using only a few processor cores.
+
+
+
+
+
 
