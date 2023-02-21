@@ -257,8 +257,8 @@
           }
       }
       ```
-      因为 timer.After 底层是调用的 timer.NewTimer，NewTimer 生成 timer 后，会将 timer 放入到全局的 timer 堆中。
-      for 会创建出来数以万计的 timer 放入到 timer 堆中，导致机器内存暴涨，同时不管 GMP 周期 checkTimers，还是插入新的 timer 都会疯狂遍历 timer 堆，导致 CPU 异常。
+      - 因为 timer.After 底层是调用的 timer.NewTimer，NewTimer 生成 timer 后，会将 timer 放入到全局的 timer 堆中。
+      - for 会创建出来数以万计的 timer 放入到 timer 堆中，导致机器内存暴涨，同时不管 GMP 周期 checkTimers，还是插入新的 timer 都会疯狂遍历 timer 堆，导致 CPU 异常。
        ```go
        func main() {
            timer := time.NewTimer(time.Second * 5)    
@@ -282,7 +282,7 @@
            println("done")
        }
        ```
-      只有等待 timer 超时 "done" 才会输出，原理很简单：程序阻塞在 <-timer1.C 上，一直等待 timer 被触发时，回调函数 time.sendTime 才会发送一个当前时间到 timer1.C 上，程序才能继续往下执行。
+      - 只有等待 timer 超时 "done" 才会输出，原理很简单：程序阻塞在 <-timer1.C 上，一直等待 timer 被触发时，回调函数 time.sendTime 才会发送一个当前时间到 timer1.C 上，程序才能继续往下执行。
       ```go
       func main() {
           timer1 := time.NewTimer(2 * time.Second)
@@ -294,9 +294,8 @@
           println("done")
       }
       ```
-      程序就会一直死锁了，因为 timer1.Stop 并不会关闭 channel C，使程序一直阻塞在 timer1.C 上。
-
-      Stop 的正确的使用方式：
+      - 程序就会一直死锁了，因为 timer1.Stop 并不会关闭 channel C，使程序一直阻塞在 timer1.C 上。
+      - Stop 的正确的使用方式：
        ```go
        func main() {
            timer1 := time.NewTimer(2 * time.Second)
@@ -326,15 +325,12 @@
             return c
         }
         ```
-        用 dlv 调试断点到 divzero 函数，然后执行 disassemble ，你就能看到秘密了
-        编译器偷偷加上了一段 if/else 的判断逻辑，并且还给加了 runtime.panicdivide  的代码。
+        - 用 dlv 调试断点到 divzero 函数，然后执行 disassemble ，你就能看到秘密了
+        - 编译器偷偷加上了一段 if/else 的判断逻辑，并且还给加了 runtime.panicdivide  的代码。
       - 内核发送给进程信号触发
-      
-        最典型的是非法地址访问，比如， nil 指针 访问会触发 panic
-        
-        在 Go 进程启动的时候会注册默认的信号处理程序（ sigtramp ）
-
-        在 cpu 访问到 0 地址会触发 page fault 异常，这是一个非法地址，内核会发送 SIGSEGV 信号给进程，所以当收到 SIGSEGV 信号的时候，就会让 sigtramp 函数来处理，最终调用到 panic 函数 ：
+        - 最典型的是非法地址访问，比如， nil 指针 访问会触发 panic
+        - 在 Go 进程启动的时候会注册默认的信号处理程序（ sigtramp ）
+        - 在 cpu 访问到 0 地址会触发 page fault 异常，这是一个非法地址，内核会发送 SIGSEGV 信号给进程，所以当收到 SIGSEGV 信号的时候，就会让 sigtramp 函数来处理，最终调用到 panic 函数 ：
          ```
          // 信号处理函数回
          sigtramp （纯汇编代码）
@@ -346,22 +342,19 @@
                      -> panicmem 
                        -> panic (内存段错误)
          ```
-        在进程初始化的时候，创建 M0（线程）的时候用系统调用 sigaction 给信号注册处理函数为 sigtramp
+        - 在进程初始化的时候，创建 M0（线程）的时候用系统调用 sigaction 给信号注册处理函数为 sigtramp
     - Summary
       - panic( ) 函数内部会产生一个关键的数据结构体 _panic ，并且挂接到 goroutine 之上；
       - panic( ) 函数内部会执行 _defer 函数链条，并针对 _panic 的状态进行对应的处理；
       - 循环执行 goroutine 上面的 _defer 函数链，如果执行完了都还没有恢复 _panic 的状态，那就没得办法了，退出进程，打印堆栈。
       - 如果在 goroutine 的 _defer 链上，有个朋友 recover 了一下，把这个 _panic 标记成恢复，那事情就到此为止，就从这个 _defer 函数执行后续正常代码即可，走 deferreturn 的逻辑。
-
 - [如何限定Goroutine数量](https://juejin.cn/post/7017286487502766093)
   - 用有 buffer 的 channel 来限制
   - channel 与 sync 同步组合方式实现控制 goroutine
   - 利用无缓冲 channel 与任务发送/执行分离方式
     ```go
     var wg = sync.WaitGroup{}
-    
     func doBusiness(ch chan int) {
-    
         for t := range ch {
             fmt.Println("go task = ", t, ", goroutine count = ", runtime.NumGoroutine())
             wg.Done()
@@ -374,9 +367,7 @@
     }
     
     func main() {
-    
         ch := make(chan int)   //无buffer channel
-    
         goCnt := 3              //启动goroutine的数量
         for i := 0; i < goCnt; i++ {
             //启动go
@@ -388,7 +379,6 @@
             //发送任务
             sendTask(t, ch)
         }
-    
         wg.Wait()
     }
     ```
@@ -509,7 +499,6 @@
     }
     
     type cacheOption bool
-    
     func (c cacheOption) apply(opts *options) {
       opts.cache = bool(c)
     }
@@ -543,10 +532,7 @@
       for _, o := range opts {
         o.apply(&options)
       }
-    
-      // ...
     }
-    
     ```
     - 可以看到通过设计一个Option interface，里面用了 apply function，以及使用一个 options struct 将所有的 field 都放在这个 struct 里面，每一个 field 又会用另外一种 struct 或是 custom type 进行封装，并 implement apply function，最后再提供一个 public function：WithLogger 去给 client 端设值。
     - 这样的做法好处是可以针对每一个 option 作更细的 custom function 设计，例如选项的 description 为何？可以为每一个 option 再去 implement Stringer interface，之后提供 option 描述就可以调用 toString 了，设计上更加的方便
@@ -578,10 +564,7 @@
         // when we want to wait till
         until, _ := time.Parse(time.RFC3339, "2023-06-22T15:04:05+02:00")
         
-        // and now we wait
         waitUntil(ctx, until)
-        
-        // Do what ever we want..... 🎉
     }
     ```
 - [Better scheduling](https://stephenafamo.com/blog/posts/better-scheduling-in-go)
@@ -599,12 +582,12 @@
             fmt.Println(theTime.Format("2006-01-02 15:04:05"))
         }
     ```
-    - Dangers of using time.Tick()
-      - When we use the time.Tick() function, we do not have direct access to the underlying time.Ticker and so we cannot close it properly.
-    - Limitations using time.Tick()
+    - Dangers of using `time.Tick()`
+      - When we use the `time.Tick()` function, we do not have direct access to the underlying `time.Ticker` and so we cannot close it properly.
+    - Limitations using `time.Tick()`
       - Specify a start time
       - Stop the ticker
-  - Extending time.Tick() using a custom function
+  - Extending `time.Tick()` using a custom function
      ```go
      func cron(ctx context.Context, startTime time.Time, delay time.Duration) <-chan time.Time {
          // Create the channel which we will return
@@ -621,14 +604,11 @@
                  startTime = startTime.Add(times * delay)
              }
          }
-     
          // Run this in a goroutine, or our function will block until the first event
          go func() {
-     
              // Run the first event after it gets to the start time
              t := <-time.After(time.Until(startTime))
              stream <- t
-     
              // Open a new ticker
              ticker := time.NewTicker(delay)
              // Make sure to stop the ticker when we're done
@@ -645,7 +625,6 @@
                  }
              }
          }()
-     
          return stream
      }
      ```
@@ -656,13 +635,8 @@
        startTime, err := time.Parse(
            "2006-01-02 15:04:05",
            "2019-09-17 14:00:00",
-       ) // is a tuesday
-       if err != nil {
-           panic(err)
-       }
-       
+       ) 
        delay := time.Hour * 24 * 7 // 1 week
-       
        for t := range cron(ctx, startTime, delay) {
            // Perform action here
            log.Println(t.Format("2006-01-02 15:04:05"))
@@ -676,27 +650,7 @@
            "2006-01-02 15:04:05",
            "2019-09-17 14:00:00",
        ) // any time in the past works but it should be on the hour
-       if err != nil {
-           panic(err)
-       }
-       
        delay := time.Hour // 1 hour
-       
-       for t := range cron(ctx, startTime, delay) {
-           // Perform action here
-           log.Println(t.Format("2006-01-02 15:04:05"))
-       }
-       ```
-     - Run every 10 minutes, starting in a week
-       ```go
-       ctx := context.Background()
-       
-       startTime, err := time.Now().AddDate(0, 0, 7) // see https://golang.org/pkg/time/#Time.AddDate
-       if err != nil {
-           panic(err)
-       }
-       
-       delay := time.Minute * 10 // 10 minutes
        
        for t := range cron(ctx, startTime, delay) {
            // Perform action here
