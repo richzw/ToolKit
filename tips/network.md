@@ -185,6 +185,13 @@
       - 如果 RST 报文的序列号不能落在对方的滑动窗口内，这个 RST 报文会被对方丢弃的，就达不到关闭的连接的效果
     - 我们可以伪造一个四元组相同的 SYN 报文，来拿到“合法”的序列号！如果处于 establish 状态的服务端，收到四元组相同的 SYN 报文后，会回复一个 Challenge ACK，这个 ACK 报文里的「确认号」，正好是服务端下一次想要接收的序列号. 然后用这个确认号作为 RST 报文的序列号，发送给服务端，此时服务端会认为这个 RST 报文里的序列号是合法的，于是就会释放连接！
       ![img.png](network_killcx.png)
+    - [Tools](https://mp.weixin.qq.com/s/-rxFP4iiV_TSKJz9jl3NDQ)
+      - tcpkill
+        - 这种方式无法关闭非活跃的 TCP 连接，只能用于关闭活跃的 TCP 连接。因为如果这条 TCP 连接一直没有任何数据传输，则就永远获取不到正确的序列号。
+        - tcpkill 工具是在双方进行 TCP 通信时，拿到对方下一次期望收到的序列号，然后将序列号填充到伪造的 RST 报文，并将其发送给对方，达到关闭 TCP 连接的效果。
+      - killcx
+        - 是属于主动获取，它是主动发送一个 SYN 报文，通过对方回复的 Challenge ACK 来获取正确的序列号，所以这种方式无论 TCP 连接是否活跃，都可以关闭。
+        - killcx 工具是主动发送一个 SYN 报文，对方收到后会回复一个携带了正确序列号和确认号的 ACK 报文，这个 ACK 被称之为 Challenge ACK，这时就可以拿到对方下一次期望收到的序列号，然后将序列号填充到伪造的 RST 报文，并将其发送给对方，达到关闭 TCP 连接的效果。
 - [收到RST，就一定会断开TCP连接吗](https://mp.weixin.qq.com/s/wh7YyKIHEdIlMxGaJFbqiw)
   - 什么是RST
     - RST 就是用于这种情况，一般用来异常地关闭一个连接。它是一个TCP包头中的标志位。
@@ -214,8 +221,12 @@
     - 不一定会断开。收到RST包，第一步会通过tcp_sequence先看下这个seq是否合法，其实主要是看下这个seq是否在合法接收窗口范围内。如果不在范围内，这个RST包就会被丢弃。
     - RST攻击
       - 有不怀好意的第三方介入，构造了一个RST包，且在TCP和IP等报头都填上客户端的信息，发到服务端，那么服务端就会断开这个连接。
-      - 利用challenge ack获取seq
+      - 利用challenge ack获取seq 
+        - 处于 Establish 状态的服务端，如果收到了客户端的 SYN 报文，会回复一个携带了正确序列号和确认号的 ACK 报文，这个 ACK 被称之为 Challenge ACK。这个 ack 并不是对收到 SYN 报做确认，而是继续回复上一次已发送 ACK。
       - ![img.png](network_challenge_ack.png)
+  - 为什么在 TCP 三次握手过程中，如果客户端收到的 SYN-ACK 报文的确认号不符合预期的话，为什么是回 RST，而不是丢弃呢？
+    - ![img.png](network_outorder_sync_rst.png)
+    - TCP 三次握手防止历史连接建立的过程，之所以 TCP 需要三次握手，首要原因是为了防止旧的重复连接初始化造成混乱，其次原因是可靠的同步双方的序列号。
 - [TCP拥塞控制及谷歌的BBR算法](https://mp.weixin.qq.com/s/pmUdUvHgEhZzAhz2EP5Evg)
   - 流量控制 Flow Control - 微观层面点到点的流量控制
     - 在数据通信中，流量控制是管理两个节点之间数据传输速率的过程，以防止快速发送方压倒慢速接收方
@@ -288,12 +299,10 @@
         - 因为协议栈的数据到了网络层后，在数据链路层前，就因为没有目的MAC地址，没法发出。因此抓包软件抓不到相关数据。
       - ARP本身是没有重试机制的，为什么ARP请求会发那么多遍？
         - 因为 TCP 协议的可靠性，会重发第一次握手的消息，但每一次都因为没有目的 MAC 地址而失败，每次都会发出ARP请求
-      
-      ![img.png](network_connect1.png)
-      邻居子系统，它在网络层和数据链路层之间。可以通过ARP协议将目的IP转为对应的MAC地址，然后数据链路层就可以用这个MAC地址组装帧头
-
-      先到本地ARP表查一下有没有 192.168.31.7 对应的 mac地址 `arp -a`
-      ![img.png](networka_arp.png)
+      - ![img.png](network_connect1.png)
+      - 邻居子系统，它在网络层和数据链路层之间。可以通过ARP协议将目的IP转为对应的MAC地址，然后数据链路层就可以用这个MAC地址组装帧头
+      - 先到本地ARP表查一下有没有 192.168.31.7 对应的 mac地址 `arp -a`
+      - ![img.png](networka_arp.png)
     - 局域网外
       - 瞎编一个不是  192.168.31.xx 形式的 IP 作为这次要用的局域网外IP， 比如 10.225.31.11。先抓包看一下, 这次的现象是能发出 TCP 第一次握手的 SYN包
       - 这个问题的答案其实在上面 ARP 的流程里已经提到过了，如果目的 IP 跟本机 IP 不在同一个局域网下，那么会去获取默认网关的 MAC 地址，这里就是指获取家用路由器的MAC地址。 此时ARP流程成功返回家用路由器的 MAC 地址，数据链路层加入帧头，消息通过网卡发到了家用路由器上。
@@ -616,8 +625,7 @@
     - EventLoop:框架对外提供的接口，对外暴露Serve()方法来创建server端程序。
     - Poll: 是抽象出的一套接口，屏蔽底层不同操作系统平台接口的差异，linux下采用epoll来实现、bsd平台下则采用kqueue来实现。
     - pollmanager:Poll的管理器，可以理解成一个Poll池，也就是一组epoll或者kqueue集合。
-    - loadbalance:负责均衡封装，主要用来从pollmanager按照一定的策略(随机、轮询、最小连接等)选择出来一个Poll实例，一般在客户端初始化完成后，server会调用该接口拿到一个Poll实例，并将新建立的客户端加入到Poll管理。 
-
+    - loadbalance:负责均衡封装，主要用来从pollmanager按照一定的策略(随机、轮询、最小连接等)选择出来一个Poll实例，一般在客户端初始化完成后，server会调用该接口拿到一个Poll实例，并将新建立的客户端加入到Poll管理。
 - [golang 中是如何对 epoll 进行封装的](https://mp.weixin.qq.com/s/ey9Xb8B0WTg0nXAtya3SLQ)
   - 在 golang net 的 listen 中，会完成如下几件事：
     - 创建 socket 并设置非阻塞，
