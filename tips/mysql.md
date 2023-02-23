@@ -405,6 +405,10 @@
       - 可以看到 key_len 为 126 字节，name 的 key_len 为 122，age 的 key_len 为 4，说明优化器使用了 2 个字段的查询条件来形成扫描区间的边界条件，也就是 name 和 age 字段都用到了联合索引进行索引查询。
 - [MySQL 行级锁的加锁规则](https://mp.weixin.qq.com/s/Ef73pSWb_k6yiTTlNCrEjg)
   - MySQL 8.0.26 版本，在可重复读隔离级别之下
+    - [行级锁的种类主要有三类](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247522791&idx=1&sn=db1cdacdc4c73de2ef611d28a9081c90&scene=21#wechat_redirect)
+      - Record Lock，记录锁，也就是仅仅把一条记录锁上；
+      - Gap Lock，间隙锁，锁定一个范围，但是不包含记录本身；
+      - Next-Key Lock：Record Lock + Gap Lock 的组合，锁定一个范围，并且锁定记录本身。
   - 唯一索引等值查询：
     - 当查询的记录是「存在」的，在索引树上定位到这一条记录后，将该记录的索引中的 next-key lock 会退化成「记录锁」。
     - 当查询的记录是「不存在」的，则会在索引树找到第一条大于该查询记录的记录，然后将该记录的索引中的 next-key lock 会退化成「间隙锁」。
@@ -414,7 +418,10 @@
   - 非唯一索引和主键索引的范围查询的加锁规则不同之处在于：
     - 唯一索引在满足一些条件的时候，索引的 next-key lock 退化为间隙锁或者记录锁。
     - 非唯一索引范围查询，索引的 next-key lock 不会退化为间隙锁和记录锁。
-  - 还有一件很重要的事情，在线上在执行 update、delete、select ... for update 等具有加锁性质的语句，一定要检查语句是否走了索引，如果是全表扫描的话，会对每一个索引加 next-key 锁，相当于把整个表锁住了，这是挺严重的问题。
+  - 还有一件很重要的事情，**在线上在执行 update、delete、select ... for update 等具有加锁性质的语句，一定要检查语句是否走了索引，如果是全表扫描的话，会对每一个索引加 next-key 锁，相当于把整个表锁住了，这是挺严重的问题。**
+  - [Example](https://mp.weixin.qq.com/s/TUtwJEcwJJnxYmUaCoBN8Q)
+    - 如果 update 语句更新的是普通字段的值，就会对发生更新的记录加 X 型记录锁。
+    - 但是，如果 update 语句更新的是索引的值，那么在运行的时候会被拆分成删除和插入操作，这时候分析锁的时候，要从这两个操作的角度去分析。
 - [SQL 优化](https://mp.weixin.qq.com/s/X2u1bN9KtgT-4J_QAa7sjQ)
   - 慢SQL优化思路
     - 慢查询日志记录慢SQL
