@@ -164,8 +164,24 @@
   - Concurrency and Contention Resistance
     - [BP-Wrapper](https://dgraph.io/blog/refs/bp_wrapper.pdf) - two ways to mitigate contention: prefetching and batching.
     - Rather than acquiring a mutex lock for every metadata mutation, we wait for a ring buffer to fill up before we acquire a mutex and process the mutations.
-    - a simple `sync.RWMutex` guarded map is way better than `sync.Map` when we are using only a few processor cores.
-
+    - One simple `sync.RWMutex` guarded map is way better than `sync.Map` when we are using only a few processor cores
+    - We use a channel to capture the Sets, dropping them on the floor if the channel is full to avoid contention.
+    - Caveats
+      - Sets in Ristretto are queued into a buffer, control is returned back to the caller, and the buffer is then applied to the cache. This has two side-effects:
+        - There is no guarantee that a set would be applied. It could be dropped immediately to avoid contention or could be rejected later by the policy.
+        - Even if a Set gets applied, it might take a few milliseconds after the call has returned to the user. In database terms, it is an eventual consistency model.
+  - Memory Bounding
+    - [TinyLFU](https://dgraph.io/blog/refs/TinyLFU%20-%20A%20Highly%20Efficient%20Cache%20Admission%20Policy.pdf) 
+      - The main idea is to only let in a new item if its estimate is higher than that of the item being evicted
+      - TinyLFU also maintains the recency of key access by a Reset function. After N key increments, the counters get halved. So, a key that has not been seen for a while would have its counter get reset to zero; paving the way for more recently seen keys.
+    - Sampled LFU
+      - We then compare the ɛ of this key against the incoming key. If the incoming key has a higher ɛ, then this key gets evicted (eviction policy). Otherwise, the incoming key is rejected (admission policy). 
+    - DoorKeeper
+      - Before we place a new key in TinyLFU, Ristretto uses a bloom filter to first check if the key has been seen before. Only if the key is already present in the bloom filter, is it inserted into the TinyLFU. 
+      - This is to avoid polluting TinyLFU with a long tail of keys that are not seen more than once.
+  - Metrics
+    - We initially used atomic counters for these. However, the overhead was significant. We narrowed the cause down to False Sharing. 
+    - To achieve scalability, we ensure that each atomic counter completely occupies a full cache line
 
 
 

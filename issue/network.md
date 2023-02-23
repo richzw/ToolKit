@@ -463,8 +463,10 @@
       - 程序中使用 SO_LINGER ，应用强制使用 RST 关闭。
   - 服务端出现大量 CLOSE_WAIT 状态的原因有哪些？
     - CLOSE_WAIT 状态是「被动关闭方」才会有的状态，而且如果「被动关闭方」没有调用 close 函数关闭连接，那么就无法发出 FIN 报文，从而无法使得 CLOSE_WAIT 状态的连接转变为 LAST_ACK 状态。
-
-
+- [nginx](https://blog.cloudflare.com/the-sad-state-of-linux-socket-balancing/)
+  - NGINX 默认使用`单 listen socket, 多 worker process` 的模型，但是部分情况下，EPOLL 会表现出 `LIFO` 的特性，这可能会导致 worker 进程负载不均衡。
+- [Misc]
+  - 常见的一致性哈希算法存在一定的不均匀性，可以通过影子节点的方式缓解，但与此同时也会降低性能。谷歌 2014 年发布的跳跃一致性 Hash 算法可以解决不均匀的问题，但原始算法又无法支持非尾部节点增删时的少迁移性。
 
 
 
