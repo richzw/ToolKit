@@ -182,6 +182,26 @@
   - Metrics
     - We initially used atomic counters for these. However, the overhead was significant. We narrowed the cause down to False Sharing. 
     - To achieve scalability, we ensure that each atomic counter completely occupies a full cache line
+- [TinyLFU](https://juejin.cn/post/7144327955353698334)
+  - CountMinSketch
+    - 一种计数器，用来统计一个元素的计数，它能够以一个非常小的空间统计大量元素的计数，同时保证高的性能及准确性
+    - 与布隆过滤器类似，由于它是基于概率的，因此它所统计的计数是有一定概率存在误差的，也就是可能会比真实的计数大。
+  - SLRU Segmented LRU
+    - LRU有一个问题，如果一个元素只被访问一次，那么它也会把其他元素给挤出去。这样就会导致如果我们的缓存空间不够长，遇到突发的稀疏流量（比如列表遍历）将会把大量元素给挤出去，留下一堆很可能不会再次被访问的元素在缓存中，导致缓存命中率下降
+    - SLRU就是把缓存分成两段，一段是淘汰段，一段是保护段，两个段都是普通的LRU实现。第一次被访问的元素将进入淘汰段，只有处于淘汰段中的元素再次被访问才会进入保护段。保护段中的元素如果被淘汰将会再次进入淘汰段，而淘汰段的元素被淘汰则会被移出缓存
+  - W-TinyLFU由多个部分组合而成，包括窗口缓存、过滤器和主缓存。
+    - 主缓存是使用SLRU，元素刚进入W-TinyLFU会在窗口缓存暂留一会，被挤出窗口缓存时，会在过滤器中和主缓存中最容易被淘汰的元素进行PK，如果频率大于主缓存中这个最容易被淘汰的元素，才能进入主缓存
+    - ![img.png](img.png)
+    - 窗口缓存
+      - W-TinyLFU选择一个元素是否加入缓存，得看这个元素加入缓存能否提高整体缓存的命中率，而这个评估的依据就是根据元素的频率。但是如果一个刚加入缓存的元素（表示元素刚刚才开始被访问），它的频率并不足以让它加入缓存，那么它会直接被淘汰。
+      - 因此在W-TinyLFU中使用LRU来作为一个窗口缓存，主要是让元素能够有机会在窗口缓存中去积累它的频率，避免因为频率很低而直接被淘汰。
+    - 基于频率
+      - W-TinyLFU中使用BloomFilter+CountMinSketch来统计元素的访问频率，BloomFilter作为一个前置计数器，而CountMinSketch则作为主计数器
+      - BloomFilter避免前面所提到的稀疏流量对CountMinSketch计数器的影响，也就是稀疏流量只会在BloomFilter中进行计数（可以当成是最大值为1的计数），换句话说就是如果BloomFilter中没有计数则先把这次的计数加到BloomFilter中。
+        - 需要BloomFilter的主要原因是CountMinSketch也是基于概率的，在计数的正确性一定的情况下，越多的元素进入CountMinSketch计数器，那么CountMinSketch就需要越大和越多的哈希函数。而BloomFilter可以帮忙抵挡那部分计数值还不需要那么大的元素（也就是计数值只有1），这样我们就可以减小CountMinSketch计数器的大小
+      - 在W-TinyLFU中使用一个4bit大小的CountMinSketch计数器来统计每个元素的访问频率，它是主要的计数器，元素在第一个计数会记录在BloomFilter中，之后就会记录在CountMinSketch中
+
+
 
 
 
