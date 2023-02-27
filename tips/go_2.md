@@ -8,6 +8,7 @@
     - ***T**：普通类型指针类型，用于传递对象地址，不能进行指针运算。
     - **unsafe.poniter**：通用指针类型，用于转换不同类型的指针，不能进行指针运算，不能读取内存存储的值(需转换到某一类型的普通指针)
     - **uintptr**：用于指针运算，GC不把uintptr当指针，uintptr无法持有对象。uintptr类型的目标会被回收。
+      - uintptr并不是指针，它是一个大小并不明确的无符号整型。unsafe.Pointer类型可以与uinptr相互转换，由于uinptr类型保存了指针所指向地址的数值，因此可以通过该数值进行指针运算。
     - 三者关系就是：unsafe.Pointer是桥梁，可以让任意类型的指针实现相互转换，也可以将任意类型的指针转换为uintptr进行指针运算，也就说uintptr是用来与unsafe.Pointer打配合
   - Sizeof、Alignof、Offsetof三个函数的基本使用
     ```go

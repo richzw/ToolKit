@@ -1610,7 +1610,7 @@
     - 密切关注在 arenas 上创建的对象的生命周期。确保不要将它们泄漏到程序的其他组件，其中对象可能超出 arenas 的生命周期
     - 使用`defer a.Free()`确保不会忘记释放内存
     - 使用`arena.Clone()`将对象克隆回堆上，如果您在 arenas 被释放后想要使用它们
-
+- [WaitGroup解读](https://mp.weixin.qq.com/s/PykMWANuSkDWavW5c6L2gg)
 
 
 
