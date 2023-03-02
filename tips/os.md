@@ -1301,10 +1301,22 @@
     - vmsplice 将数据从用户内存移动到管道中。
   - [source](https://mazzo.li/posts/fast-pipes.html)
 - [CPU](https://mp.weixin.qq.com/s/G6vljRX_gq5w-1xzj8jHjA)
-
-
-
-
+- [Command Line Debug](https://mp.weixin.qq.com/s/mqeYsfvW0VRDTPkav7W2Kw)
+  - top
+    - 当 user 占用率过高的时候，通常是某些个别的进程占用了大量的 CPU，这时候很容易通过 top 找到该程序；此时如果怀疑程序异常，可以通过 perf 等思路找出热点调用函数来进一步排查；
+    - 当 system 占用率过高的时候，如果 IO 操作(包括终端 IO)比较多，可能会造成这部分的 CPU 占用率高，比如在 file server、database server 等类型的服务器上，否则(比如>20%)很可能有些部分的内核、驱动模块有问题；
+    - 当 nice 占用率过高的时候，通常是有意行为，当进程的发起者知道某些进程占用较高的 CPU，会设置其 nice 值确保不会淹没其他进程对 CPU 的使用请求；
+    - 当 iowait 占用率过高的时候，通常意味着某些程序的 IO 操作效率很低，或者 IO 对应设备的性能很低以至于读写操作需要很长的时间来完成；
+    - 当 irq/softirq 占用率过高的时候，很可能某些外设出现问题，导致产生大量的irq请求，这时候通过检查 /proc/interrupts 文件来深究问题所在；
+    - 当 steal 占用率过高的时候，黑心厂商虚拟机超售了吧
+  - vmstat
+  - pidstat
+    - 如果想对某个进程进行全面具体的追踪，没有什么比 pidstat 更合适的了——栈空间、缺页情况、主被动切换等信息尽收眼底。这个命令最有用的参数是-t，可以将进程中各个线程的详细信息罗列出来
+  - mpstat -P ALL 1
+    - 如果想直接监测某个进程占用的资源，既可以使用top -u taozj的方式过滤掉其他用户无关进程，也可以采用下面的方式进行选择，ps命令可以自定义需要打印的条目信息：
+  - sar
+    - 网络性能对于服务器的重要性不言而喻，工具 iptraf 可以直观的现实网卡的收发速度信息，比较的简洁方便通过 sar -n DEV 1 也可以得到类似的吞吐量信息
+    - sar 这个工具太强大了，什么 CPU、磁盘、页面交换啥都管，这里使用 -n 主要用来分析网络活动
 
 
 
