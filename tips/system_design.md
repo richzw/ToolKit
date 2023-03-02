@@ -586,6 +586,7 @@
       - 随机分片
       - 组合分片
     - 二级索引
+  - ![img.png](system_design_high_performance.png)
 - [抢火车票难题](https://mp.weixin.qq.com/s/qtTD0QSENYrUUTDcyBNz1Q)
   - 如何在 100 万人同时抢 1 万张火车票时，系统提供正常、稳定的服务。
   - 大型高并发系统架构
