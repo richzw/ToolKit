@@ -1232,10 +1232,28 @@
   - 六度分隔理论 
 - NAT
   - ![img.png](network_nat_tunnel.png)
-
-
-
-
+- [一台服务器最大能支持多少条 TCP 连接](https://mp.weixin.qq.com/s/4ncAKBHwNT15rb7J-IUS9A)
+  - 一台服务器最大能打开的文件数
+    - Linux上能打开的最大文件数量受三个参数影响，分别是：
+      - fs.file-max （系统级别参数）：该参数描述了整个系统可以打开的最大文件数量。但是root用户不会受该参数限制（比如：现在整个系统打开的文件描述符数量已达到fs.file-max ，此时root用户仍然可以使用ps、kill等命令或打开其他文件描述符）
+      - soft nofile（进程级别参数）：限制单个进程上可以打开的最大文件数。只能在Linux上配置一次，不能针对不同用户配置不同的值
+      - fs.nr_open（进程级别参数）：限制单个进程上可以打开的最大文件数。可以针对不同用户配置不同的值
+    - 三个参数之间还有耦合关系，所以配置值的时候还需要注意以下三点：
+      - 如果想加大soft nofile，那么hard nofile参数值也需要一起调整。如果因为hard nofile参数值设置的低，那么soft nofile参数的值设置的再高也没有用，实际生效的值会按照二者最低的来。
+      - 如果增大了hard nofile，那么fs.nr_open也都需要跟着一起调整（fs.nr_open参数值一定要大于hard nofile参数值）。如果不小心把hard nofile的值设置的比fs.nr_open还大，那么后果比较严重。会导致该用户无法登录，如果设置的是*，那么所有用户都无法登录
+      - 如果加大了fs.nr_open，但是是用的echo "xxx" > ../fs/nr_open命令来修改的fs.nr_open的值，那么刚改完可能不会有问题，但是只要机器一重启，那么之前通过echo命令设置的fs.nr_open值便会失效，用户还是无法登录。所以非常不建议使用echo的方式修改内核参数！！！
+    - 调整服务器能打开的最大文件数示例
+      - 假设想让进程可以打开100万个文件描述符，这里用修改conf文件的方式给出一个建议
+        - vim /etc/sysctl.conf 
+          - fs.file-max=1100000 // 系统级别设置成110万，多留点buffer
+          - fs.nr_open=1100000 // 进程级别也设置成110万，因为要保证比 hard nofile大
+        - 使上面的配置生效sysctl -p
+        - vim /etc/security/limits.conf
+          ```shell
+          // 用户进程级别都设置成100w
+          soft nofile 1000000
+          hard nofile 1000000
+          ```
 
 
 
