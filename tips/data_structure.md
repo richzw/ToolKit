@@ -304,5 +304,19 @@
   - **Extendible hashing** is designed for databases and file systems and uses a mix of a trie and a chained hash table to dynamically increase bucket sizes as individual buckets get loaded. 
   - **Robin Hood hashing** is a variant of linear probing in which items can be moved after being inserted to reduce the variance in how far from home each element can live.
   - **cuckoo hashing** have two hash tables and two hash functions. Each item can be in exactly one of two places - it's either in the location in the first table given by the first hash function, or it's in the location in the second table given by the second hash function. This means that lookups are worst-case efficient, since you only have to check two spots to see if something is in the table.
+- [lock-free synchronization always superior to synchronization using locks?]
+  - lock free
+    - Lock-free data structures often perform very well when there is no contention, and will perform correctly even in the presence of contention, but the presence of contention may cause their performance to be severely degraded. 
+    - If 100 threads all try to update a lock-free data structure simultaneously, one would succeed on its first try, at least two would succeed on the first and second try, and least three would succeed within three tries, etc. but the worst-case total number of update attempts required might be over 5,000. 
+    - By contrast, if 100 threads all try to update a lock-based data structure, one would be allowed to perform the update immediately while the other 99 would be blocked, but each of those 99 threads would only be awakened when it would be able to access the data structure without further delay.
+  - lock 
+    - a thread which is waylaid while it holds a lock will block all other threads unless or until it finishes whatever it needs to do and releases the lock. By contrast, when using a lock-free data structure, competing threads which get waylaid will provide less impediment to other other threads than they would have otherwise.
+  - Ex.
+    - Suppose you have two cores and three threads that are ready-to-run. Assume threads A and B are accessing the same collection and will contend significantly while thread C is accessing totally different data and will minimize contention.
+    - If threads A and B use locks, one of those threads will rapidly wind up being de-scheduled and thread C will run on one core. This will allow whichever thread gets scheduled, A or B, to run with nearly no contention at all.
+    - By contrast, with a lock-free collection, the scheduler never gets a chance to deschedule thread A or B. It is entirely possible that threads A and B will run concurrently through their entire timeslice, ping-ponging the same cache lines between their L2 caches the whole time.
+  - Usage
+    - Lock free tends to work out better in more or less the opposite situation: you have more hardware available at any given time than you have threads to run. In this case, a busy-wait with lock-free code can react very quickly when a resource becomes free, make its modification, and keep moving forward.
+
 
 
