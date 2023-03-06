@@ -897,9 +897,22 @@
   - [slice tricks legend](https://ueokande.github.io/go-slice-tricks/)
 - [线程安全的map](https://mp.weixin.qq.com/s/H5HDrwhxZ_4v6Vf5xXUsIg)
   - sync.map
+    - [起源]
+      - cache contention. 
+        - When each core updates the count, it invalidates the local cache entries for that address in all the other cores, and marks itself as the owner of the up-to-date value.
+        - The next core to update the count must fetch the value that the previous core wrote to its cache. On modern hardware, that takes about 40 nanoseconds
+        - only one core can update the counter at once. When multiple cores try to  update it simultaneously, they have to wait in line. Operations that look like they  should run in constant time instead become proportional to the number of CPU cores,  and "concurrent" programs become sequential.
+      - current loops
+        - Cache contention only matters if you have a lot of cores doing a lot of writes. If you aren't in a loop, you don't have "a lot of writes", and if you aren't using concurrency, you don't have "a lot of cores". For either of those cases, a read-write mutex will provide acceptable performance and better type-safety.
+    - 实现
+      - 以空间换效率，通过read和dirty两个map来提高读取效率
+      - 优先从read map中读取(无锁)，否则再从dirty map中读取(加锁)
+      - 动态调整，当misses次数过多时，将dirty map提升为read map
+      - 延迟删除，删除只是为value打一个标记，在dirty map提升时才执行真正的删除
     - 使用场景
       - sync.Map更适合读多更新多而插入新值少的场景, 因为在key存在的情况下读写删操作可以不用加锁直接访问readOnly
       - 不适合反复插入与读取新值的场景，因为这种场景会频繁操作dirty，需要频繁加锁和更新read
+      - If cache contention is not the problem, sync.Map is probably not the solution.
     - 设计点:expunged
       - entry.p取值有3种，nil、expunged和指向真实值
       - 当用Store方法插入新key时，会加锁访问dirty，并把readOnly中的未被标记为删除的所有entry指针复制到dirty，此时之前被Delete方法标记为软删除的entry（entry.p被置为nil）都变为expunged，那这些被标记为expunged的entry将不会出现在dirty中。
@@ -907,6 +920,17 @@
         - 直接删掉entry==nil的元素，而不是置为expunged：在用Store方法插入新key时，readOnly数据拷贝到dirty时直接把为ni的entry删掉。但这要对readOnly加锁，sync.map设计理念是读写分离，所以访问readOnly不能加锁。
         - 不删除entry==nil的元素，全部拷贝：在用Store方法插入新key时，readOnly中entry.p为nil的数据全部拷贝到dirty中。那么在dirty提升为readOnly后这些已被删除的脏数据仍会保留，也就是说它们会永远得不到清除，占用的内存会越来越大。
         - 不拷贝entry.p==nil的元素：在用Store方法插入新key时，不把readOnly中entry.p为nil的数据拷贝到dirty中，那在用Store更新值时，就会出现readOnly和dirty不同步的状态，即readOnly中存在dirty中不存在的key，那dirty提升为readOnly时会出现数据丢失的问题。
+    - Drawback
+      - It may be slower than a read-write mutex for single-core access, and the generated code tends to be larger.
+        - pointer indirection (space and time)
+        - binary bloat (instruction cache)
+        - subtle interaction with escape analysis
+      - Since the keys and values are stored as empty interfaces, converting a regular map to a sync.Map moves type-checking from compile time to run time.
+    - Improvement
+      - Flatten pointers.
+      - Optimize short-lived keys.
+      - Use a Bloom filter instead of a boolean.
+      - Shard the read-write map by key.
   - orcanman/concurrent-map
     - orcaman/concurrent-map的适用场景是：反复插入与读取新值，
     - 其实现思路是:对go原生map进行分片加锁，降低锁粒度，从而达到最少的锁等待时间(锁冲突)。
