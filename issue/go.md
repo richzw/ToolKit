@@ -769,7 +769,11 @@
   - Kind-of Memory Leaking Caused by Not Resetting Pointers in Lost Slice Elements
   - Real Memory Leaking Caused by Hanging Goroutines
   - Real Memory Leaking Caused by Not Stopping time.Ticker Values Which Are Not Used Any More
-  - Real Memory Leaking Caused by Using Finalizers Improperly
+  - [Real Memory Leaking Caused by Using Finalizers Improperly](https://mp.weixin.qq.com/s/ea7LfF2jOoHOSozX-qUZLA)
+    - Finalizer Restrict
+      - A single goroutine runs all finalizers for a program, sequentially. If a finalizer must run for a long time, it should do so by starting a new goroutine.
+      - Go 的 runtime 是用一个单 goroutine 来执行所有的 Finalizer 回调，还是串行化的。
+      - 划重点：一旦执行某个 Finalizer 出了问题，可能会影响到全局的 Finalizer 回调函数的执行。
   - Kind-of Resource Leaking by Deferring Function Calls
   - [Avoiding Memory Leak From Unclosed Response’s Body](https://hackernoon.com/avoiding-memory-leak-in-golang-api-1843ef45fca8)
     ```go
