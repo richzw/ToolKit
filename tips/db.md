@@ -521,6 +521,8 @@
     - 第一种，近似值
       - 执行 explain 命令效率是很高的，因为它并不会真正的去查询，下图中的 rows 字段值就是  explain 命令对表 t_order 记录的估算值。
     - 额外表保存计数值
+      - redis缓存
+      - 二级缓存其实就是内存缓存
 - [为什么 mysql 的 count() 方法这么慢](https://mp.weixin.qq.com/s/R1IBtP8fh5RwKjNfQI-YUw)
   - count()的原理
     - count()方法的目的是计算当前sql语句查询得到的非NULL的行数

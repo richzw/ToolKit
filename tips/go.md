@@ -1611,6 +1611,23 @@
     - 使用`defer a.Free()`确保不会忘记释放内存
     - 使用`arena.Clone()`将对象克隆回堆上，如果您在 arenas 被释放后想要使用它们
 - [WaitGroup解读](https://mp.weixin.qq.com/s/PykMWANuSkDWavW5c6L2gg)
+- [Generics can make your Go code slower](https://planetscale.com/blog/generics-can-make-your-go-code-slower)
+  - 创建一个多态函数(polymorphic function), 广义来讲，有两种方法
+    - 函数操作所有实现都有相同的外观和行为，通常在堆上分配对象，然后将指针传递给函数。由于所有的对象都有相同的形状(它们都是指针！)，我们对它们操作所需要的就是知道，这些方法在哪里。因此，传递给我们的通常伴随一个函数指针表，通常称为 虚拟方法表或是 vtable. 大家对这个肯定有印象，这就是 go interface 实现方式，也是 rust 中 dyn Traits, 以及 c++ 中的虚拟类。这些都是多态的形式，在实践中容易使用，但由于运行时的开销比较高而受到限制
+    - 我们常讲的单态化(monomorphization), 名字听起来吓人，但实现去相对简单。理解为为每个必须操作的类型单独，创建一个函数副本。比如，你想实现两数相加的函数，当调用 float64 类型时，编译器会创建一个函数的副本，并将通用类型占位符替换为 float64. 这是迄今为止实泛型最简单的，同时对于编译器来讲也带来开销
+  - 单态化一直是在系统语言（如C++、D或Rust）中实现泛型的首选设计。这有很多原因，但都可以归结为用较长的编译时间来换取结果代码的显著性能提升
+  - go 泛型实现是基于 [GCShape stenciling with Dictionaries](https://github.com/golang/proposal/blob/master/design/generics-implementation-dictionaries-go1.18.md) 的部分单太化实现
+    - 核心思想是，由于 fully monomorphizing 完全单太化每个实现，会产生大量的代码副本，我们可以在更高层次上做单态化，而不是基于每个类型
+    - 编译器根据参数的 GCShape 而不是类型来执行单态化，go 官方称这种单态化为 stenciling
+    - GCShape 是 go 特有的抽像概念，两个具体的类型可以归类同一个 gcshape group, 当且仅当他们有相同的底层类型或是都是指针(这是伏笔，后面的性能问题就来自于此). 这个概念很直白：比如你有个函数，要对参数进行运算，例如 go 编译器会根据它们的类型有效地进行单态化，使用积分算术指令的 uint32 生成的代码，肯定与浮点数的 float64 不同，同理基于 uint32 别名的类型肯定与底层 uint32 的代码相同
+    - gcshape 定义的第二部分对性能有很大影响。让我再强调一下：All pointers to objects belong to the same GCShape, regardless of the object being pointed at
+    - 这意味着 *time.Time 指针和 *uint64, *bytes.Buffer, *strings.Builder 同处于一个 gcshape group.
+    - go1.18 泛型实现，每次调用泛型函数时，都会把一个静态 dictionaries 字典当成第一个参数，传到函数中，字典中包函了类型的元数据信息。对于 AMD64 架构来说，字典会放到 AX 寄存器中，对于不支持 stack-based 调用归约的平台，会放到栈上。
+    - 在单态化步骤完成后，生成的函数，需要为所有的泛型参数传入一个运行时参数，参数里面包含了 virtual method tables 虚函数表。直观的说，这么做减少了生成的代码量，但这种高次层的单态化，并不适合去做 de-virtualization, inline 或是说任何形式的性能优化
+  - [Translation](https://mp.weixin.qq.com/s/veu5W0BFmLIZ-yvs39NdUw)
+
+
+
 
 
 
