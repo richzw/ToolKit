@@ -737,5 +737,83 @@
     - loss packet
     - timeout not set
 
-
+- Docker 底层、多阶段构建、原子指令你怎么理解、CSP和Actor分布式模型的区别、内存对齐、Channel 和select的基本用法、赋值你认为有多少条汇编指令、比较出名的开源项目pr、Redis持久化、GMP模型、一致性算法
+- TCP 粘包怎么解决、同步控制 waitgroup 、数据库索引优化、TCP 如何实现可靠性、队列，树，栈的应用场景和区别、TCP 在 linux 中一些参数的含义、一些十进制转换二进制、十六进制、如何定位死锁，链表简单题
+- 战争迷雾怎么实现、共识算法、Channel、Make和New的区别、GMP、数组类型算法、UDP实现可靠协议、分布式模型、Panic没被Recover怎么处理、切片扩容、Docker CNI 的实现、数据落盘怎么做的、Lua
+- 自我介绍+算法题:
+  https://leetcode-cn.com/problems/find-peak-element/
+  https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/
+  https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii/
+  问答
+  索引，倒排索引，切词，如何根据 doc id 有没有出现某个 token
+  服务高可用是怎么做的
+  MySQL 可重复读、读提交区别、原理
+  爬虫 URL 去重，设计存储结构(FST，前缀树+后缀树) 
+  MySQL (a,b,c) 索引，几条 SQL 走索引的情况
+  思考题：概率 p 生成 0，1-p 生成 1，如何 1/2 概率生成 1
+- 算法题:
+  https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/
+  https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii/
+  https://leetcode-cn.com/problems/coin-change-2/
+  技术问题
+  讲一下 es 索引的过程
+  切词怎么切，切词算法，降噪
+  让你带应届生，怎么带，
+  有什么工程经验可以分享
+  Redis 缓存淘汰有哪些
+- 算法题:
+  https://leetcode-cn.com/problems/first-missing-positive/
+  技术面
+  文章下面的评论，按点赞数排序，SQL 怎么写
+  把所有评论放到内存里，怎么设计数据结构，存储并排序
+  select * 会有什么问题
+  缓存热 key 怎么解决
+  职业发展
+  领导如何评价你
+  项目难点，亮点
+- 介绍项目
+  问我为什么选择GO，看我有Java从业经历。
+  介绍一下java 和 go 区别，我猜是让我说一些他们的不同点，go 比java 哪里好。我说了一些 特性 3.1 问我协程比进程好在哪里? 我自己顺便说了进程线程 协程三者关系 4. 问我想从事什么
+  项目中有bloom介绍了一下怎么使用的，精度，损失
+  GPM模型
+  redis使用模式 主从 哨兵 巴拉巴拉
+  接着聊项目，然后问了算法
+  渐进式的聊面试，很轻松
+  问我能不能接受看php? 反问时候，聊了一下GORM，应用情况。他们的go-spring，还有他们的夜莺系统。因为看过一点点所以想问问。有培养体系，教我如何写GO(这个我很欣慰)，说有大佬内部课程。
+- 自我介绍(面试官也不看我，一脸严肃我特害怕。然后自我介绍磕磕绊绊的)
+  问我看源码吗?
+  问了问GC 发展史，都怎么玩的 每次优化了啥
+  问了问我go 内存 优化了哪些东⻄(这题我忘了咋问的了)
+  问了一下我项目里nodejs 升级为 java 为啥会快了那么多。6.问了红黑树特性，哪个数据结构用到了。我介绍了一下 红黑树 一些特性 比如 平均查找时间 低 插入删除需要 左旋右旋调平衡。我想到 java里 hashmap 用到了这个结构 7.问了一下map的底层结构 顺便介绍了一下 sync map
+  找出两个大文件交集
+  算法 leetcode 两棵树 b 是 a子集那道题思路 怎么做 dfs 然后比较 值和 指针
+  聊了一下 我的项目 召回相关的 和 nodejs java 迁移 效率提升问题
+  聊了一下 go-spring 夜莺 还有 didi 有个 写sql的github 项目 想问一下应用情况。问我能不能 接受 看看php 之类的
+  问了问我为啥离职
+- 算法题二选一
+  https://leetcode-cn.com/problems/permutations/
+  https://leetcode-cn.com/problems/sorted-merge-lcci/
+  MySQL 隔离级别
+  MySQL 锁
+  MySQL 存储结构(b+树)
+  索引 回表 是什么
+  消息队列，rabbitmq
+  rabbitmq 如何保证可靠性(生产者可靠性、消费者可靠性、存储可靠性)   - rabbitmq 几种模式
+  es 索引的过程
+  线上是如何分表分库的，用什么做分表分库的策略，跨表查询
+  MySQL 如何同步到 es
+  线上 Redis 用的是什么模式
+  缓存热 key 怎么办
+- 介绍项目
+  defer 、go 继承，手写快排
+  登录流程，JWT、session、cookie
+- 缓存一致性
+  Redis key 统计
+  Redis 单线程，io 多路复用
+  算法题 https://www.nowcoder.com/practice/35119064d0224c35ab1ab612bffee8df
+  Redis slowlog 原理
+- 项目为主
+  tcp quick_ack 、 nodelay ，socket 编程 go 协程机制
+  职业规划
+  为什么换工作
 
