@@ -469,7 +469,10 @@
   return x | ~m;
   */
   ```
-
+- [流式数据计算出topk]
+  - [Lossy Counting](https://micvog.files.wordpress.com/2015/06/approximate_freq_count_over_data_streams_vldb_2002.pdf)
+  - [Count-Min Sketch](http://dimacs.rutgers.edu/~graham/pubs/papers/cmencyc.pdf)
+  - [HeavyKeeper](https://www.usenix.org/system/files/conference/atc18/atc18-gong.pdf)
 
 
 
