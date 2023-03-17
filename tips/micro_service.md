@@ -1027,7 +1027,32 @@
 - [评论系统架构设计](https://mp.weixin.qq.com/s/s99ZWuSi0Lu6ivfpBHvLWQ)
 - [How Not To Sort By Average Rating](https://www.evanmiller.org/how-not-to-sort-by-average-rating.html)
   - Score = Lower bound of Wilson score confidence interval for a Bernoulli parameter
-
+- [Clean Architecture]
+  - ![img.png](micro_servicee_clean_arch.png)
+    ```shell
+    ├── adapter // Adapter层，适配各种框架及协议的接入，比如：Gin，tRPC，Echo，Fiber 等
+    ├── application // App层，处理Adapter层适配过后与框架、协议等无关的业务逻辑
+    │   ├── consumer //（可选）处理外部消息，比如来自消息队列的事件消费
+    │   ├── dto // App层的数据传输对象，外层到达App层的数据，从App层出发到外层的数据都通过DTO传播
+    │   ├── executor // 处理请求，包括command和query
+    │   └── scheduler //（可选）处理定时任务，比如Cron格式的定时Job
+    ├── domain // Domain层，最核心最纯粹的业务实体及其规则的抽象定义
+    │   ├── gateway // 领域网关，model的核心逻辑以Interface形式在此定义，交由Infra层去实现
+    │   └── model // 领域模型实体
+    ├── infrastructure // Infra层，各种外部依赖，组件的衔接，以及domain/gateway的具体实现
+    │   ├── cache //（可选）内层所需缓存的实现，可以是Redis，Memcached等
+    │   ├── client //（可选）各种中间件client的初始化
+    │   ├── config // 配置实现
+    │   ├── database //（可选）内层所需持久化的实现，可以是MySQL，MongoDB，Neo4j等
+    │   ├── distlock //（可选）内层所需分布式锁的实现，可以基于Redis，ZooKeeper，etcd等
+    │   ├── log // 日志实现，在此接入第三方日志库，避免对内层的污染
+    │   ├── mq //（可选）内层所需消息队列的实现，可以是Kafka，RabbitMQ，Pulsar等
+    │   ├── node //（可选）服务节点一致性协调控制实现，可以基于ZooKeeper，etcd等
+    │   └── rpc //（可选）广义上第三方服务的访问实现，可以通过HTTP，gRPC，tRPC等
+    └── pkg // 各层可共享的公共组件代码
+    ```
+  - ![img.png](micro_service_proj_layout_process_sample.png)
+  - 外部请求首先抵达 Adapter 层。如果是读请求，则携带简单参数调用 App 层；如果是写请求，则携带 DTO 调用 App 层。App 层将收到的 DTO 转化成对应的 Model，调用 Domain 层 gateway 相关业务逻辑接口方法。由于系统初始化阶段已经完成依赖注入，接口对应的来自 Infra 层的具体实现会处理完成并返回 Model 到 Domain 层，再由 Domain 层返回到 App 层，最终经由 Adapter 层将响应内容呈现给外部
 
 
 
