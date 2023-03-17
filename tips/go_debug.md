@@ -425,5 +425,12 @@
     - inline call the new buffer
     - cannot inline function too complicate cost xxx exceeds budget xx
   - `go tool pprof -noinlines p.out`
+  - [sample](https://f4t.dev/software/go-performance-memory/)
+   ```shell
+   $ go test -bench=. -cpu=1,2,4,8 -benchmem
+   $ go test -bench=. -cpu=1,2,4,8 -benchmem -cpuprofile=cpu.out
+   $ go tool pprof -focus=Solve -call_tree -relative_percentages -png -output=cpu.png cpu.out
+   $ go tool pprof -focus=Solve -relative_percentages -list=hasDuplicates cpu.out
+   ```
 
 
