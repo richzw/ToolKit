@@ -1317,9 +1317,23 @@
   - sar
     - 网络性能对于服务器的重要性不言而喻，工具 iptraf 可以直观的现实网卡的收发速度信息，比较的简洁方便通过 sar -n DEV 1 也可以得到类似的吞吐量信息
     - sar 这个工具太强大了，什么 CPU、磁盘、页面交换啥都管，这里使用 -n 主要用来分析网络活动
-
-
-
+- [网卡的 Ring Buffer ](https://mp.weixin.qq.com/s/v_1QdF3Fmloln0P2xbo4-w)
+  - ![img.png](os_network_card_process.png)
+    - DMA 将 NIC 接收的数据包逐个写入 sk_buff ，一个数据包可能占用多个 sk_buff , sk_buff 读写顺序遵循FIFO（先入先出）原则。
+    - DMA 读完数据之后，NIC 会通过 NIC Interrupt Handler 触发 IRQ （中断请求）。
+    - NIC driver 注册 poll 函数
+    - poll 函数对数据进行检查，例如将几个 sk_buff 合并，因为可能同一个数据可能被分散放在多个 sk_buff 中
+    - poll 函数将 sk_buff 交付上层网络栈处理。
+  - 多 CPU 下的 Ring Buffer 处理
+    - 在多核 CPU 的服务器上，网卡内部会有多个 Ring Buffer，NIC 负责将传进来的数据分配给不同的 Ring Buffer，同时触发的 IRQ 也可以分配到多个 CPU 上，这样存在多个 Ring Buffer 的情况下 Ring Buffer 缓存的数据也同时被多个 CPU 处理，就能提高数据的并行处理能力。
+    - 要实现“NIC 负责将传进来的数据分配给不同的 Ring Buffer”，NIC 网卡必须支持 Receive Side Scaling(RSS) 或者叫做 multiqueue 的功能。
+  - CMD
+    - `$ ethtool -S em1 | more` 网卡收到的数据包统计
+    - 带有 drop 字样的统计和 fifo_errors 的统计 `$ethtool -S em1 | grep -iE "error|drop"`
+    - 查询 Ring Buffer 大小 `ethtool -g em1`
+    - 调整 Ring Buffer 队列数量 `ethtool -l em1`
+    - 调整 Ring Buffer 队列的权重 ` ethtool -x em1`
+      - NIC 如果支持 mutiqueue 的话 NIC 会根据一个 Hash 函数对收到的数据包进行分发
 
 
 
