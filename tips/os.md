@@ -165,10 +165,15 @@
       - 3.收发包都有系统调用的开销。
       - 4.内核工作在多核上，为可全局一致，即使采用Lock Free，也避免不了锁总线、内存屏障带来的性能损耗。
       - 5.从网卡到业务进程，经过的路径太长，有些其实未必要的，例如netfilter框架，这些都带来一定的消耗，而且容易Cache Miss。
+    - DPDK 
+      - 基于UIO（Userspace I/O）旁路数据。数据从 网卡 -> DPDK轮询模式-> DPDK基础库 -> 业务
+      - 用户态的好处是易用开发和维护，灵活性好。并且Crash也不影响内核运行，鲁棒性强。
+      - DPDK的基石UIO - 为了让驱动运行在用户态，Linux提供UIO机制。使用UIO可以通过read感知中断，通过mmap实现和网卡的通讯。
+      - DPDK核心优化：PMD - DPDK的UIO驱动屏蔽了硬件发出中断，然后在用户态采用主动轮询的方式，这种模式被称为PMD（Poll Mode Driver）。
     - [DPDK网络优化](https://cloud.tencent.com/developer/article/1198333)
       - PMD用户态驱动 
-      - CPU亲缘性和独占 
-      - 内存大页和降低内存访问开销 
+      - CPU亲缘性和独占 - 解决多核跳动不精确的问题
+      - 内存大页和降低内存访问开销  - 采用HugePage减少TLB Miss
       - 避免False Sharing 
       - 内存对齐 
       - cache对齐 
