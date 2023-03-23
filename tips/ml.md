@@ -61,6 +61,6 @@
   - 然后，精心选择高质量的文本数据（包括代码），训练Transformer模型，需要很多的GPU算力，进行大量的矩阵运算，达到预定的训练目标即可结束训练。这里，Transformer模型是一个包含所有token的概率模型或开放空间。
   - 然后再用含有人类反馈的强化学习（RLHF）来进一步调整Transformer模型来适应人类的价值观和使用规则。现在，Transformer模型被人类调教后的包含所有token的概率模型或限制空间。
   - 最后，执行任务的时候，就是给出一些提示tokens，或上下文context，在Transformer构成的所有token的限制空间中使用贪婪，集束，温度采用等策略来找到概率最大的可能的token的排列组合。这个组合，就是看到的ChatGPT的输出。
-
+- [Prompt Engineering Guide](https://www.promptingguide.ai/techniques/knowledge)
 
 
