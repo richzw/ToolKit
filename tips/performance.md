@@ -388,6 +388,33 @@
     - Initialize slice with constants
     - Passing variables to closure as arguments instead of accessing the variables directly.
     - Injecting changes to the passed parameters instead of return values back
+  - Sample
+    - escape case
+      ```go
+      func (r Ruleset) Match(path string) (*Rule, error) {
+      	for i := len(r) - 1; i >= 0; i-- {
+      		rule := r[i]
+      		match, err := rule.Match(path)
+      		if match || err != nil {
+      			return &rule, err
+      		}
+      	}
+      	return nil, nil
+      }
+      ```
+  - fix
+     ```go
+     func (r Ruleset) Match(path string) (*Rule, error) {
+     	for i := len(r) - 1; i >= 0; i-- {
+     		rule := &r[i]
+     		match, err := rule.Match(path)
+     		if match || err != nil {
+     			return rule, err
+     		}
+     	}
+     	return nil, nil
+     }
+     ```
 - [TiDB TPS 提升 1000 倍的性能优化之旅](https://gocn.vip/topics/20825)
   - TPS 从 1 到 30
     - 第一个 SQL 优化例子是解决索引缺失的问题
@@ -1122,3 +1149,5 @@
     ```
   - Changing Ruleset from being []Rule to []*Rule, which would mean we no longer need to explicitly take a reference to the rule.
   - Returning a Rule rather than a *Rule. This would still copy the Rule, but it should stay on the stack instead of moving to the heap.
+
+
