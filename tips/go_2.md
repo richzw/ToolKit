@@ -1230,7 +1230,9 @@
     - [sonic](https://mp.weixin.qq.com/s?__biz=MzI1MzYzMjE0MQ==&mid=2247491325&idx=1&sn=e8799316d55c0951b0b54b404a3d87b8&scene=21#wechat_redirect) star: 2k
       - 兼容标准库；
       - 通过JIT（即时编译）和SIMD（单指令-多数据）加速；需要 go 1.15 及以上的版本，提供完成的 json 操作的 API，是一个比 json-iterator 更优的选择。
-      - 已经在抖音内部大范围使用，且 github 库维护给力，issues 解决积极，安全性有保证。
+      - JIT、lazy-load 与 SIMD, 细节优化
+        - RCU 替换 sync.Map 提升 codec cache 的加载速度，
+        - 使用内存池减少 encode buffer 的内存分配
       - sonic ：基于 JIT 技术的开源全场景高性能 JSON 库
     - easyjson star: 3.5k
       - 支持序列化和反序列化;
