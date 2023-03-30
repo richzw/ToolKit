@@ -52,6 +52,12 @@
   - set -e 选项。该选项在遇到首个 非0 值的时候会直接退出
 - [SSH Tunnels](https://iximiuz.com/en/posts/ssh-tunnels/)
   - ![img.png](shell_ssh_tunnel.png)
-
+    ```shell
+    remote# nc -lvk 7780
+    
+    local# ssh -N -L 7777:localhost:7780 root@159.89.238.232
+    
+    local# echo "foo bar" | nc -N localhost 7777
+    ```
 
   
