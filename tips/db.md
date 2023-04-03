@@ -1390,12 +1390,19 @@
     - ANALYZE is not required to be run manually, but it is recommended to run it periodically to keep the statistics up to date.
     - Note, that ANALYZE doesn't read or update indexes. It deals only with table/column contents. ANALYZE. Other queries may read from the table while ANALYZE is running.
   - VACUUM
-    - VACUUM reclaims storage occupied by dead records. Dead records in a table are the deleted or the previous versions of updated records. Such records are only marked as unavailable but still occupy disk space, making table scans slower. VACUUM also has an option that tells it to ANALYZE the table. 
+    - VACUUM reclaims storage occupied by dead records. Dead records in a table are the deleted or the previous versions of updated records. Such records are only marked as unavailable but still occupy disk space, making table scans slower. 
       - Just `VACUUM` command reorganises live records in a table and makes the allocated storage space available for new records. However, this storage space doesn't return to the operating system. It is still reserved for the table.
       -  `VACUUM FULL` exclusively locks the table, creates a new table file, copies only live records to this file, then deletes the old table file. The reclaimed storage space is returned to the system in this case. 
+    - VACUUM also has an option that tells it to ANALYZE the table.
+      - VACUUM ANALYZE is the most common way to run VACUUM. It reclaims dead space and updates statistics.
+      - Vacuum Analyze is a manual cleanup operation and it is usually done once a week or month, depending on the frequency of update/deletes performed on the database
+    - Usage
+      - If your database is taking too much space and there is no space left for your OS to perform any other operation then you need to do a VACUUM FULL
+      - If you cant lock the whole database and you just need to free up space taken by a table Which does alot of updates/deletes. Then go for VACUUM FULL on specific table
+      - If you are facing a problem, where your queries become slower over time, i.e if you run EXPLAIN on a query and sometime it uses sequential scan and the same query with different parameters uses index scan. `ANALYZE VERBOSE your_table_name`
   - REINDEX
     - REINDEX is used to rebuild indexes. It is useful when the index is corrupted or when the index is not used for a long time. REINDEX is also used to rebuild the index after a VACUUM FULL command.
-    - running VACUUM ANALYZE and then REINDEX commands on the biggest tables in the application database really helps to improve its performance.
+    - Running VACUUM ANALYZE and then REINDEX commands on the biggest tables in the application database really helps to improve its performance.
     - Usage
       - In normal situations, you never need to REINDEX. In particular, bulk insert will never fragment an index more than it was before.
       - Indexes get bloated if you delete lots of rows or if you run UPDATEs faster than autovacuum can keep up with. Then you may need to REINDEX them.
