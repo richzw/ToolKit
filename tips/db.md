@@ -1384,9 +1384,21 @@
   - redis使用跳表来实现ZSET，而不是树结构
     - redis的读写全在内存里进行操作，不涉及磁盘IO，同时跳表实现简单，相比B+树、AVL树、少了旋转树结构的开销
   - RocksDB内部使用了跳表，对比使用B+树的innodb，虽然写性能更好，但读性能属实差了些
-
-
-
+- [Postgresql VACUUM, ANALYZE, and REINDEX]
+  - ANALYZE
+    - ANALYZE collects statistics about the contents of all or several columns in a table or entire database. These statistics are then used by the query planner to produce efficient execution plans for queries.
+    - ANALYZE is not required to be run manually, but it is recommended to run it periodically to keep the statistics up to date.
+    - Note, that ANALYZE doesn't read or update indexes. It deals only with table/column contents. ANALYZE. Other queries may read from the table while ANALYZE is running.
+  - VACUUM
+    - VACUUM reclaims storage occupied by dead records. Dead records in a table are the deleted or the previous versions of updated records. Such records are only marked as unavailable but still occupy disk space, making table scans slower. VACUUM also has an option that tells it to ANALYZE the table. 
+      - Just `VACUUM` command reorganises live records in a table and makes the allocated storage space available for new records. However, this storage space doesn't return to the operating system. It is still reserved for the table.
+      -  `VACUUM FULL` exclusively locks the table, creates a new table file, copies only live records to this file, then deletes the old table file. The reclaimed storage space is returned to the system in this case. 
+  - REINDEX
+    - REINDEX is used to rebuild indexes. It is useful when the index is corrupted or when the index is not used for a long time. REINDEX is also used to rebuild the index after a VACUUM FULL command.
+    - running VACUUM ANALYZE and then REINDEX commands on the biggest tables in the application database really helps to improve its performance.
+    - Usage
+      - In normal situations, you never need to REINDEX. In particular, bulk insert will never fragment an index more than it was before.
+      - Indexes get bloated if you delete lots of rows or if you run UPDATEs faster than autovacuum can keep up with. Then you may need to REINDEX them.
 
 
 
