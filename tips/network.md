@@ -1287,7 +1287,7 @@
     - 如果一台client有多个IP（假设客户端有 n 个IP），server端仅有一个IP并且仅启动一个程序，监听一个端口的情况下，一台client机器最大能建立的连接条数是：n * 65535 个
     - 如果一台client仅有一个IP，server端也仅有一个IP但是server端启动多个程序，每个程序监听一个端口的情况下（比如server端启动了m个程序，监听了m个不同端口），一台client机器最大能建立的连接数量为：65535 * m
     - 其余情况类推，但是客户端的可用端口范围一般达不到65535个，受内核参数net.ipv4.ip_local_port_range限制，如果要修改client所能使用的端口范围，可以修改这个内核参数的值。
-  - 
+- [RDMA](http://reports.ias.ac.in/report/12829/understanding-the-concepts-and-mechanisms-of-rdma)
 
 
 
