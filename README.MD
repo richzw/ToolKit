@@ -15,8 +15,15 @@ epoll implementation based on `golang.org/x/sys/unix`
   - Ref http://www.cnhalo.net/2016/03/13/tcp-accelerate-report
     
 - CPU cache
-  - 利用cache line，读入cpu的结构体填满一个cache line
-    
+  - CPU从主存中读取数据至Cache时，并非单个字节形式进行读取，而是以连续内存块的方式进行拷贝，拷贝块内存的单元被称为缓存行（Cache Line）。这样做的理论依据是著名的局部性原理。
+  - 利用cache line，读入cpu的结构体填满一个cache line `sysctl -a`
+  - Cache Coherency & False Sharing
+    - 因为多核线程同时读写同一个 Cache Line 的不同变量，而导致 CPU 缓存失效的现象就是伪共享（False Sharing）。
+    - 伪共享的解决方案
+      - 1. 通过对齐的方式，让不同的线程访问不同的 Cache Line，从而避免伪共享。但是这种方式需要对齐的变量很多，而且需要知道每个变量的大小，这样就会增加代码的复杂度。
+      - 2. 通过使用原子操作来避免伪共享。原子操作是指不会被中断的操作，即使是多线程同时操作也不会出现问题。原子操作的实现方式有很多，比如使用互斥锁、CAS 算法等。但是这种方式会带来性能的损耗。
+      - 3. 通过使用内存池来避免伪共享。内存池的原理是将内存分成多个块，每个块的大小是 Cache Line 的整数倍。当需要分配内存时，从内存池中分配一个 Cache Line 大小的内存块，当不再需要时，将内存块归还给内存池。这样就可以避免伪共享的问题，而且不需要对齐，也不会带来性能的损耗。
+
 - 系统调用剥离
 
 Redis lock
