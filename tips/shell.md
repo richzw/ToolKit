@@ -81,4 +81,23 @@
   - 我从错误的分支拉取了内容，或把内容拉取到了错误的分支
     - 这是另外一种使用 git reflog 情况，找到在这次错误拉(pull) 之前HEAD的指向。然后把HEAD重置到那个指向
     - `$ git reset --hard <commit-hash>`
-  - 
+  - 我想撤销rebase/merge
+    - Git 在进行危险操作的时候会把原始的HEAD保存在一个叫ORIG_HEAD的变量里, 所以要把分支恢复到rebase/merge前的状态是很容易的
+    - `$ git reset --hard ORIG_HEAD`
+  - 我需要组合(combine)几个提交(commit) 
+    - 假设你的工作分支将会做对于 main 的pull-request。一般情况下你不关心提交(commit)的时间戳，只想组合 所有 提交(commit) 到一个单独的里面, 然后重置(reset)重提交(recommit)。确保主(main)分支是最新的和你的变化都已经提交了, 然后
+    - `(my-branch)$ git reset --soft main
+      (my-branch)$ git commit -am "New awesome feature"`
+    - 如果你想要保留你的提交(commit)的时间戳，你可以使用 git rebase -i main
+  - 安全合并(merging)策略
+    - --no-commit 执行合并(merge)但不自动提交, 给用户在做提交前检查和修改的机会。no-ff 会为特性分支(feature branch)的存在过留下证据, 保持项目历史一致
+    - `(main)$ git merge --no-ff --no-commit my-branch`
+  - 检查是否分支上的所有提交(commit)都合并(merge)过了
+    - `(main)$ git log --graph --left-right --cherry-pick --oneline HEAD...feature/120-on-scroll`
+  
+
+
+
+
+
+
