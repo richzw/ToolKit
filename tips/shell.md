@@ -59,5 +59,26 @@
     
     local# echo "foo bar" | nc -N localhost 7777
     ```
-
-  
+- [git commands](https://mp.weixin.qq.com/s/EXHboxE0talIZakIitWp6w)
+  - 我的提交信息(commit message)写错了，我想要修改它
+    - `git commit --amend --only -m 'xxxxxxx'`
+  - 我想从一个提交(commit)里移除一个文件
+    - `$ git checkout HEAD^ myfile
+      $ git add -A
+      $ git commit --amend`
+  - 我想删除我的的最后一次提交(commit) 如果你还没有推到远程, 把Git重置(reset)到你最后一次提交前的状态就可以
+    - `$ git reset --soft HEAD@{1}`
+  - 我意外的做了一次硬重置(hard reset)，我想找回我的内容
+    - `$ git reflog`
+    - `$ git checkout -b temp <commit-hash>`
+    - `$ git checkout master`
+    - `$ git merge temp`
+    - `$ git branch -d temp`
+  - 我想要暂存一个新文件的一部分，而不是这个文件的全部内容
+    - `$ git add --patch filename.x`
+  - 我想把在一个文件里的变化(changes)加到两个提交(commit)里
+    - git add 会把整个文件加入到一个提交. git add -p 允许交互式的选择你想要提交的部分.
+  - 我从错误的分支拉取了内容，或把内容拉取到了错误的分支
+    - 这是另外一种使用 git reflog 情况，找到在这次错误拉(pull) 之前HEAD的指向。然后把HEAD重置到那个指向
+    - `$ git reset --hard <commit-hash>`
+  - 
