@@ -46,15 +46,6 @@
   }
   
   ```
-
-- [零值](https://mp.weixin.qq.com/s/o7SwVDpscSDbi6ePxpjjLQ)
-  - 零值channels
-    
-    给定一个nil channel c:
-      - <-c 从c 接收将永远阻塞
-      - c <- v 发送值到c 会永远阻塞
-      - close(c) 关闭c 引发panic
-
 - [InterfaceSlice](https://github.com/golang/go/wiki/InterfaceSlice)
   Given that you can assign a variable of any type to an interface{}, often people will try code like the following.
   ```go

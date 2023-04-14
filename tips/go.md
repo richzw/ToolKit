@@ -1027,14 +1027,13 @@
     - interface 变量定义是一个 16 个字节的结构体，首 8 字节是类型字段，后 8 字节是数据指针。普通的 interface 是 iface 结构，interface{} 对应的是 eface 结构；
     - interface 变量新创建的时候是 nil ，则这 16 个字节是全 0 值；
     - interface 变量的 nil 判断，汇编逻辑是判断首 8 字节是否是 0 值；
+    - https://go.dev/doc/faq#nil_error
   - Issue code
     ```go
     type Worker interface {
         Work() error
     }
-    
     type Qstruct struct{}
-    
     func (q *Qstruct) Work() error {
         return nil
     }
@@ -1053,6 +1052,30 @@
     ```
     - 一定不要写任何有 接口 = 具体类型(nil) 逻辑的代码。如果是 nil 值就直接赋给接口，而不要过具体类型的转换
     - findSomething 需要返回 nil 的时候，则是直接返回 nil 的 interface，这是一个 16 个字节全零的变量。而在外面赋值给 v 的时候，则是 interface 到 interface 的赋值，所以 v = findSomething() 的赋值之后，v 还是全 0 值。
+  - Issue Code2
+    ```go
+    /*
+    A nil interface, which would hit the first branch of your type switch. This is like var x interface{} = nil
+      - not only is the value nil, the type is also nil.
+    A nil value, like var x interface = (nil)(*Int). This hits the second branch, because it has a type, the type matches the type in the switch,
+    	but the value is nil. In the code, v is a *Int whose value is nil.
+    */
+    func testF(val any) {
+    	switch v := val.(type) {
+    	case nil:
+    		fmt.Println("val type is nil")
+    	case *Int:
+    		fmt.Println("val type is *Int")
+    		if v == nil {
+    			fmt.Println("val after type assertion is nil?")
+    		}
+    	}
+    }
+    func TestFloatDecimal(t *testing.T) {
+    	var i1 *Int
+    	testF(i1)
+    }
+    ```
 - [Go 语言中的零拷贝优化](https://mp.weixin.qq.com/s/wz-In-r1z91Te_HChsIMkA)
   - 导言
     - io.Copy()/io.CopyN()/io.CopyBuffer()/io.ReaderFrom 基于 TCP 协议的 socket 在使用上述接口和方法进行数据传输时利用到了 Linux 的零拷贝技术 sendfile 和 splice
