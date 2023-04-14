@@ -1625,7 +1625,10 @@
     - go1.18 泛型实现，每次调用泛型函数时，都会把一个静态 dictionaries 字典当成第一个参数，传到函数中，字典中包函了类型的元数据信息。对于 AMD64 架构来说，字典会放到 AX 寄存器中，对于不支持 stack-based 调用归约的平台，会放到栈上。
     - 在单态化步骤完成后，生成的函数，需要为所有的泛型参数传入一个运行时参数，参数里面包含了 virtual method tables 虚函数表。直观的说，这么做减少了生成的代码量，但这种高次层的单态化，并不适合去做 de-virtualization, inline 或是说任何形式的性能优化
   - [Translation](https://mp.weixin.qq.com/s/veu5W0BFmLIZ-yvs39NdUw)
-
+- [noCopy vs copyChecker]()
+  - noCopy  is primarily used for static code analysis (by tools like  go vet ) to ensure that structs containing a mutex are not unintentionally copied. The  noCopy  struct contains a private mutex field and a  Lock()  method that panics if called, hence preventing the copy of the struct.
+  - On the other hand,  copyChecker  is used at runtime to prevent the accidental copying of a struct containing a mutex. It is a private struct that is embedded in a struct that contains a mutex, and it contains only a private mutex field. The  copyChecker  struct implements the  Lock  and  Unlock  methods, and when the  copyChecker.Lock()  method is called, it checks to see if the mutex is already locked, and if it is, it panics. This is designed to prevent two instances of a mutex from being created if a struct containing the mutex is copied, which can cause race conditions.
+  - So, in summary,  noCopy  and  copyChecker  are used to prevent the accidental copying of a struct containing a mutex, but  noCopy  is primarily used for static code analysis, while  copyChecker  is used at runtime to prevent race conditions
 
 
 
