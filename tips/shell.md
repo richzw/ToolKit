@@ -94,7 +94,14 @@
     - `(main)$ git merge --no-ff --no-commit my-branch`
   - 检查是否分支上的所有提交(commit)都合并(merge)过了
     - `(main)$ git log --graph --left-right --cherry-pick --oneline HEAD...feature/120-on-scroll`
-  
+- [Shell Commands]()
+  - 查看2015年8月16日14时这一个小时内有多少IP访问: 
+    -  `cat access.log | awk '{print $1}' | sort | uniq -c | awk '{print $2}' | grep -E '2015-08-16 14:' | wc -l`
+  - 查看访问前十个ip地址 
+    - `cat access.log | awk '{print $1}' | sort | uniq -c | sort -nr | head -10 | awk '{print $2}'`
+  - 列出当前服务器每一进程运行的数量，倒序排列 
+    - `ps aux | awk '{print $11}' | sort | uniq -c | sort -nr`
+
 
 
 

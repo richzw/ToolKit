@@ -1406,6 +1406,21 @@
     - Usage
       - In normal situations, you never need to REINDEX. In particular, bulk insert will never fragment an index more than it was before.
       - Indexes get bloated if you delete lots of rows or if you run UPDATEs faster than autovacuum can keep up with. Then you may need to REINDEX them.
+- [事务隔离]
+  - 事务隔离(Isolation)，指的是在数据库系统中并发事务(Transaction)之间的可见性，以及如何相互影响的定义
+  - 肮脏读取
+    - 当一个事务试图读取另一个还未提交的事务正在修改的某一行数据时，肮脏读取(dirty reads)就会发生
+  - 不可重复读取
+    - 当一个事务正在执行的时候，对某一行两次读取的结果不一致，则称发生了不可重复读取(non-repeatable reads)。
+  - 幻象读取
+    - 幻象读取(phantom reads)指的是两次集合查询之间返回了不一致的结果。
+  - 可重复读取
+    - 在可重复读取(REPEATABLE READS)级别下，数据库系统会在在整个事务期间保持所有读取锁和写入锁，但相较于可序列化，范围锁不会被管理，所以幻象读取(phantom reads)可能会出现。
+  - 授权读取
+    - 在授权读取(READ COMMITTED)级别下，数据库系统在整个事务期间保持写入锁，但读取锁会在SELECT执行后立即释放，所以不可重复读取(non-repeatable reads)可能会出现。
+  - 未授权读取
+    - 未授权读取(READ UNCOMMITTED)是最低的隔离级别。这个级别允许出现肮脏读取(dirty reads)。
+
 
 
 
