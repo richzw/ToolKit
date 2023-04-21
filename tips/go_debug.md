@@ -350,8 +350,23 @@
     $ go test -trace=trace.out path/to/package
     $ go tool trace [flags] pkg.test trace.out
     ```
+  - Connecting profiling with tracing
+    - To address this, we're exploring pprof.Do (or alternatively, pprof.SetGoroutineLabels at a lower level). This would enable us to create a connection between profiling and tracing that is currently missing.
+      ```go
+      pprof.Do(
+      		ctx,
+      		pprof.Labels(
+      				"span", fmt.Sprintf("%s", span)
+      		),
+      		func(ctx context.Context) {
+      				doWork(ctx)
+      		},
+      )
+      ```
 - [Go 应用的持续性分析](https://mp.weixin.qq.com/s/4MnPx3AoVu_fb3UeM1tCNg)
   - [Pyroscope](https://github.com/pyroscope-io/pyroscope)
+  - [Grafana Phlare](https://grafana.com/docs/phlare/latest/operators-guide/configure-agent/about-the-agent/)
+  - [eBPF-based Profiling - Parca](https://github.com/parca-dev/parca)
 - [Go test/benchmark test](https://philpearl.github.io/post/reader/)
   - Test trace
      ```shell
@@ -377,7 +392,7 @@
     - 在 Linux 中，Go 运行时使用 setitimer/timer_create/timer_settime 来设置 SIGPROF 信号处理器。此处理器按runtime.SetCPUProfileRate设置的周期间隔触发，默认情况下是100Mz(10毫秒)
     - 在Go 1.18之前，Go CPU profiler的采样器存在一些严重的问题，你可以在[这里](https://www.datadoghq.com/blog/engineering/profiling-improvements-in-go-1-18/)看到这些问题的细节。我们记错的话，settimer API 是Linux中每个线程触发基于时间的信号的推荐方法: 从技术上讲，它的工作原理就像你期望的进程信号处理机制一样。但它并不是多核分析的良好机制。
     - 由于 Go 使用非阻塞 I/O，等待I/O的goroutine不会被统计为running的goroutine，Go CPU profiler 不会捕获这类goroutine的数据
-    - fgprof 使用runtime.GoroutineProfile获取 on-CPU 和 off-CPU的数据。
+    - fgprof 使用runtime.GoroutineProfile获取 on-CPU 和 off-CPU的数据。(Go's default profiler has a downside of only being able to view either On-CPU or Off-CPU time)
   - profiler 如何收集数据
     - 一个一个随机的运行的goroutine收到SIGPROF信号，它会被中断并执行信号处理程序。中断的 goroutine 的堆栈跟踪在此信号处理程序的上下文中获取到，然后与当前profiler标签[10]一起保存到lock-free[11]日志结构中
     - ![img.png](go_debug_cpu_profile.png)
