@@ -101,6 +101,7 @@
     - `cat access.log | awk '{print $1}' | sort | uniq -c | sort -nr | head -10 | awk '{print $2}'`
   - 列出当前服务器每一进程运行的数量，倒序排列 
     - `ps aux | awk '{print $11}' | sort | uniq -c | sort -nr`
+- [Vim cheatsheet](https://mp.weixin.qq.com/s/BkJnbXvuVZIAExOkgVqPWw)
 
 
 
