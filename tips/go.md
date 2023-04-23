@@ -1652,9 +1652,17 @@
   - noCopy  is primarily used for static code analysis (by tools like  go vet ) to ensure that structs containing a mutex are not unintentionally copied. The  noCopy  struct contains a private mutex field and a  Lock()  method that panics if called, hence preventing the copy of the struct.
   - On the other hand,  copyChecker  is used at runtime to prevent the accidental copying of a struct containing a mutex. It is a private struct that is embedded in a struct that contains a mutex, and it contains only a private mutex field. The  copyChecker  struct implements the  Lock  and  Unlock  methods, and when the  copyChecker.Lock()  method is called, it checks to see if the mutex is already locked, and if it is, it panics. This is designed to prevent two instances of a mutex from being created if a struct containing the mutex is copied, which can cause race conditions.
   - So, in summary,  noCopy  and  copyChecker  are used to prevent the accidental copying of a struct containing a mutex, but  noCopy  is primarily used for static code analysis, while  copyChecker  is used at runtime to prevent race conditions
-
-
-
+- [panic or runtime.Goexit]
+  - How go recover panic
+    - Go needs a way to track it and resume the execution of the program. For that, each goroutine embeds a special attribute that points to an object that represents the panic
+    - When a panic occurs, this object is created before running the deferred functions. 
+    - Then, the function recovering the panic actually just returns the information of that object along with marking the panic as recovered
+    - Once the panic is seen as recovered, Go needs to resume the current work. However, since the runtime is among the deferred frames, it has no idea where to resume. 
+    - For that reason, when the panic is marked as recovered, Go saves the current program counter and stack pointer of the current frame to resume after the function where the panic occurred
+  - Goexit
+    - It is also interesting to note that the function runtime.Goexit uses the exact same workflow. It actually creates a panic object with a special flag to differentiate it from a real panic. 
+    - This flag allows the runtime to skip the recovery and exit properly rather than stopping the execution of the program.
+  - use double-defer to distinguish panic from runtime.Goexit, more details see https://golang.org/cl/134395
 
 
 
