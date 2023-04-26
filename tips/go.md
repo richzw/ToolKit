@@ -1493,6 +1493,9 @@
       - Rust 始终采取第一种方式，我们通常把它叫做无栈协程，因为它不需要额外的栈保存协程状态，只需函数自身的栈就可以实现这一点。
       - Go 使用的是有栈协程，因为 Goroutine 需要额外的栈保存。Goroutine 当前的堆内存情况，以及 Goroutine 的栈到达临界值之后，我们需要如何处理 Goroutine 的栈扩容，这些都是需要付出额外的开销及空间的。它的优势在于付出了一定的运行时成本，因此使用起来更方便。
 - [PGO](https://mp.weixin.qq.com/s/7uobN6DmpIYqG34pOpvvlA)
+  - [Preclude](https://www.pixelstech.net/article/1677391324-Understanding-PGO-in-GoLang-1-20)
+    - When compiling a program, the compiler will perform many optimizations, including well-known optimizations such as inline optimization, escape analysis, and constant propagation, which can be achieved directly by analyzing the program's source code.
+    - However, some optimizations cannot be implemented by analyzing the source code alone. For example, if a function has many if/else conditional branches, we may want the compiler to automatically optimize the order of the conditional branches to speed up the conditional branch judgment and improve program performance.
   - Profile-guided optimization (PGO)，翻译过来是使用配置文件引导的优化。也被称为：
     - profile-directed feedback（PDF）
     - feedback-directed optimization（FDO）
