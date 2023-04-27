@@ -55,7 +55,6 @@
       - prealloc， slice 与map 预分配大小
     
 - [GC pause over 100ms排查](https://mp.weixin.qq.com/s/Lk1EbiT7WprVOyX_dXYMyg)
-  
   - 复现：用ab 50并发构造些请求看看. 网络来回延时60ms, 但是平均处理耗时200多ms, 99%耗时到了679ms
   - GC以及trace： 该进程的runtime信息, 发现内存很少，gc-pause很大，GOMAXPROCS为76，是机器的核数
     `export GODEBUG=gctrace=1`, 重启进程看看. 可以看出gc停顿的确很严重
@@ -78,8 +77,7 @@
   
   lsof -n|awk '{print $2}'|sort|uniq -c|sort -nr|more
   ```
-
-  我们之前遇到过SLAB内存泄露的情况，某公司物理机写了个定时脚本 echo 1 > /proc/sys/vm/drop_caches，会跑满一个核，除此之外没有观测到明显影响，你可以考虑在业务不活跃的情况下试一下。
+  - 我们之前遇到过SLAB内存泄露的情况，某公司物理机写了个定时脚本 echo 1 > /proc/sys/vm/drop_caches，会跑满一个核，除此之外没有观测到明显影响，你可以考虑在业务不活跃的情况下试一下。
 
 - 定时器
   - 定时器这块业务早有标准实现：_小顶堆_, _红黑树_ 和 _时间轮_
@@ -247,7 +245,19 @@
     - unique_ptr是独占管理权，而shared_ptr则是共享管理权，即多个shared_ptr可以共用同一块关联对象，其内部采用的是引用计数
     - weak_ptr的出现，主要是为了解决shared_ptr的循环引用，其主要是与shared_ptr一起来私用。和shared_ptr不同的地方在于，其并不会拥有资源，也就是说不能访问对象所提供的成员函数，不过，可以通过weak_ptr.lock()来产生一个拥有访问权限的shared_ptr。
   
-
+- iowait
+  - 如果系统处于 iowait 状态，那么必须满足以下两个条件：
+    - 系统中存在等待 I/O 请求完成的进程。
+    - 系统当前正处于空闲状态，也就是说没有可运行的进程。
+  - iowait统计原理
+    - Linux 会把 iowait 占用的时间输出到 /proc/stat 文件中，我们可以通过一下命令来获取到 iowait 占用的时间
+    - cat /proc/stat | grep "cpu " | awk '{print $5}'
+    - 可以每隔一段时间读取一次 /proc/stat 文件，然后把两次获取到的 iowait 时间进行相减，得到的结果是这段时间内，CPU处于 iowait 状态的时间。接着再将其除以总时间，得到 iowait 占用总时间的比率。
+  - iowait的影响
+    - iowait 会导致 CPU 空闲，从而导致系统的吞吐量下降。
+    - iowait 会导致系统的响应时间变长，从而导致系统的延迟增大。
+    - iowait 会导致系统的 CPU 利用率下降，从而导致系统的资源利用率下降。
+    - iowait 会导致系统的负载升高，从而导致系统的负载变大。
 
 
 
