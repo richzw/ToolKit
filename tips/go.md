@@ -1666,7 +1666,7 @@
     - It is also interesting to note that the function runtime.Goexit uses the exact same workflow. It actually creates a panic object with a special flag to differentiate it from a real panic. 
     - This flag allows the runtime to skip the recovery and exit properly rather than stopping the execution of the program.
   - use double-defer to distinguish panic from runtime.Goexit, more details see https://golang.org/cl/134395
-
+- [Go 汇编详解](https://mp.weixin.qq.com/s/yPkAn3pRO5j9LKJGRxmaBg)
 
 
 
