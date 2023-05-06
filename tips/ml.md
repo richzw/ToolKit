@@ -63,5 +63,6 @@
   - 最后，执行任务的时候，就是给出一些提示tokens，或上下文context，在Transformer构成的所有token的限制空间中使用贪婪，集束，温度采用等策略来找到概率最大的可能的token的排列组合。这个组合，就是看到的ChatGPT的输出。
 - [Prompt Engineering Guide](https://www.promptingguide.ai/techniques/knowledge)
 - [Parameter optimization in neural networks](https://www.deeplearning.ai/ai-notes/optimization/index.html?_hsmi=218814757&utm_campaign=The%20Batch&utm_medium=email&utm_content=218804890&utm_source=hs_email&_hsenc=p2ANqtz-_FluhJbN2619klYO-hikBLp6-aEAP60t0VaLzoiEItfCyfrdJguDchLz7Q6h5imUeQp3SkfQaBZnlD8_aUcP5U97FiMA)
-
+- [Introduction to Uplift Modeling](https://juanitorduz.github.io/uplift/)
+- [What is Uplift modelling and how can it be done with CausalML](https://analyticsindiamag.com/what-is-uplift-modelling-and-how-can-it-be-done-with-causalml/)
 
