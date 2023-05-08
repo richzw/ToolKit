@@ -887,7 +887,7 @@
     - 客户端收到 RST 报文后，就会释放连接。
   - 客户端发送了一个目标 IP 地址存在但是端口不存在的 UDP 报文，UDP 没有像 TCP 那样的 RST 报文，此时会发生什么？
     - 如果目标端口不可达，那么数据包还没到传输层（UDP/TCP）就被丢弃了。网络层看到没有进程在监听指定的协议端口，就会送回一个“目标端口不可达”的 ICMP 报文。
-
+- [traceroute](https://mp.weixin.qq.com/s/FKSNjIgkzmWoDPY5GIS8qg)
 
 
 
