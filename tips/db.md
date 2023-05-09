@@ -1420,7 +1420,31 @@
     - 在授权读取(READ COMMITTED)级别下，数据库系统在整个事务期间保持写入锁，但读取锁会在SELECT执行后立即释放，所以不可重复读取(non-repeatable reads)可能会出现。
   - 未授权读取
     - 未授权读取(READ UNCOMMITTED)是最低的隔离级别。这个级别允许出现肮脏读取(dirty reads)。
-
-
-
+- Storage and Retrieval
+  - 哈希索引 + 日志存储的优势：
+    - 顺序写入性能很好
+    - 由于大部分文件是不可变的。因此 crash recovery 和 concurrency 更简单。
+    - 压缩操作的特性使得数据文件不容易碎片化
+  - 哈希索引的限制
+    - 对Key的数量限制很高。因为 hash table 需要放在内存中；on-disk hash map 性能比较差。
+    - 不支持 range queries
+  - SSTable 
+    - 如何进行写操作？
+      - 先在内存中维护有序存储结构（比如：AVL树）。我们称为 memtable。
+      - 当占用的内存达到一个阈值后，将其写入到一个分片文件中，我们称为 SSTable file。
+    - 如何进行读操作？
+      - 首先查询内存中的 memtable，命中则返回
+      - 随后按照时间顺序由近到远依次访问每个 SSTable，命中则返回
+    - 如何避免文件数不断膨胀？
+      - 同样有一个后台进程不断地进行合并压缩(Compaction)操作。
+  - Comparing B-Trees and LSM-Trees
+    - LSM-Tree 的优势
+      - 对于 B-Tree 来说写入是以页为单位的，因此即使只有一个元组变动，也需要写入整个页面。
+      - LSM-Tree 通常来说有更小的写放大。B-Tree 更改数据时对页面可能有多次覆盖。
+      - 顺序写吞吐更大。
+      - 更紧凑；更适合压缩；相比于B-Tree有更少的磁盘碎片产生。
+    - LSM-Tree 的劣势
+      - 压缩进程可能会干扰当前的读写进程，导致性能不稳定。
+      - 配置压缩是很重要的，否则可能导致压缩的速度跟不上写入的速度，从而导致磁盘耗尽和读取速度变慢。
+      - LSM-Tree实现事务语义更困难。
 
