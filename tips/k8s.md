@@ -136,8 +136,15 @@
       - nr_periods — Total schedule period
       - nr_throttled — Total throttled period out of nr_periods
       - throttled_time — Total throttled time in ns
-
-
+- Misc
+  - 通过 Kubernetes 集群提供 device plugin framework，可以实现 GPU 共享能力
+  - Kubernetes 在大规模集群下的挑战
+    - 调度器串型调度，存在吞吐瓶颈；
+    - 可以并行调度，并通过节点分区减少调度决策冲突
+  - 作业排队 - Kueue 旨在将批处理作业作为一个单元来管理。Kueue 可以将 Pod 级别的编排留给 Kubernetes 现有的稳定组件
+  - Gang Scheduling - 一种调度策略，它可以将一组 Pod 一起调度到同一台机器上，以便它们可以共享资源并提高性能
+    - Gang scheduling策略可在并发系统中将多个相关联的进程调度到不同处理器上同时运行。最主要的原则是保证所有相关联的进程能够同时启动，防止部分进程的异常，避免整个关联进程组的阻塞。例如，当您提交一个包含多个任务的批量Job时，可能会出现多个任务全部调度成功或者都调度失败的情况。这种All-or-Nothing调度场景，就被称作Gang scheduling。
+  - [NUMA Scheduling](https://docs.openshift.com/container-platform/4.10/scalability_and_performance/cnf-numa-aware-scheduling.html)
 
 
 
