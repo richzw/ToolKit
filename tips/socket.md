@@ -818,6 +818,10 @@
   - Command
     - Linux `netstat -a -p --unix`
     - MaxOS `netstat -a -f unix`
+    - `echo "I'm a Kungfu Dev" | nc -U /tmp/echo.sock`
+    - ` curl -s -N --unix-socket /tmp/httpecho.sock http://localhost/`
+  - Usage
+    - You should choose a Unix domain socket over a network socket when you need to communicate between processes on the same host. Unix domain sockets provide a secure and efficient communication channel between processes on the same host and are suitable for scenarios where the processes need to exchange data frequently or in real time.
 - [TCP vs UDP](https://mp.weixin.qq.com/s/5P3cGcZFQEk6t8xiX4OfMQ)
   - TCP
     - ![img_1.png](socket_tcp_summary.png)
