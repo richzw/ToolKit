@@ -37,13 +37,25 @@
     - Note: Ensure that you do not set the above parameters at values that generate extensive logging. For example, setting log_statement to "all" or setting log_min_duration_statement to "0" or a very small number can generate a huge amount of logging information. This impacts your storage consumption. If you need to set the parameters to these values, make sure you are only doing so for a short period of time for troubleshooting purposes, and closely monitor the storage space, throughout.
   - SELECT query having any `sorting` operations we have to tuning up the `work_mem`
     - Tune up the work_mem and sorting operations. https://aws.amazon.com/blogs/database/tune-sorting-operations-in-postgresql-with-work_mem/
-  - Vaccum
+  - [Vaccum](https://www.percona.com/blog/tuning-autovacuum-in-postgresql-and-autovacuum-internals/)
     - autovacuum will be triggered when the n_dead_tuple of a table meet the threshold. The threshold is calculated using the formula: `vacuum threshold = vacuum base threshold + vacuum scale factor * number of live tuples`
     - For example the command below would make sure the autovacuum be triggered whenever there are 100 rows dead tuple on table users no matter how many live rows the table has: `ALTER TABLE users SET (autovacuum_vacuum_scale_factor = 0, autovacuum_vacuum_threshold = 100);`
     - The default value of vacuum setting through `select * from pg_settings where name like '%autovacuum%'` - autovacuum_vacuum_scale_factor, 0.1 autovacuum_vacuum_threshold, 50
     - `ALTER TABLE users SET (autovacuum_vacuum_scale_factor = 0.01)`
     - To accelerate the vacuum process is that you could consider to increase the parameter: autovacuum_vacuum_cost_limit value
-
+- Expire
+    ```sql
+    CREATE TABLE realdata (
+       id bigint PRIMARY KEY,
+       payload text,
+       create_time timestamp with time zone DEFAULT current_timestamp NOT NULL
+    ) PARTITION BY RANGE (create_time);
+    CREATE VIEW visibledata AS
+       SELECT * FROM realdata
+       WHERE create_time > current_timestamp - INTERVAL '2 years';
+    The view is simple enough that you can INSERT, UPDATE and DELETE on it directly; no need for triggers.
+    Now all data will automagically vanish from visibledata after two years.
+    ```
 
 
 
