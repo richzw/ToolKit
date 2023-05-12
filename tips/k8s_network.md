@@ -847,7 +847,13 @@
       - 通用路由封装 ( Generic Routing Encapsulation ) 用于将来自 IPv4/IPv6 的数据包封装为另一个协议的数据包中，通常工作与 L3 网络层中。
       - VxLAN (Virtual Extensible LAN)，是一个简单的隧道协议，本质上是将 L2 的以太网帧封装为 L4 中 UDP 数据包的方法，使用 4789 作为默认端口。
     - 这种工作在 overlay 模型下典型的有 flannel 与 calico 中的的 VxLAN, IPIP 模式。
-
+- [Pod 是如何获取 IP ]
+  - Pod 的 IP 是由 kube-proxy 通过 iptables 规则设置的，kube-proxy 通过监听 apiserver 的 Endpoint 和 Service 的变化，然后根据 Service 的类型，创建相应的 iptables 规则，将请求转发到后端的 Pod 上。
+  - Kube-controller-manager 为每个节点分配一个 podCIDR。从 podCIDR 中的子网值为节点上的 Pod 分配了 IP 地址。由于所有节点上的 podCIDR 是不相交的子网，因此它允许为每个 pod 分配唯一的IP地址。 
+  - Kubernetes 集群管理员可配置和安装 kubelet、container runtime、network provider，并在每个节点上分发 CNI 插件。
+  - Network provider agent 启动时，将生成 CNI 配置。
+  - 在节点上调度 Pod 后，kubelet 会调用 CRI 插件来创建 Pod。
+  - 在容器情况下，容器的 CRI 插件调用 CNI 配置中指定的 CNI 插件来配置 Pod 网络。
 
 
 
