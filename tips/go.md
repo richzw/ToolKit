@@ -1533,6 +1533,13 @@
     - 内存分配方式 Golang 采用了基于空闲链表分配方式的 [TCMalloc 算法](https://github.com/google/tcmalloc/blob/master/docs/design.md)
       - ![img.png](golang_tcmalloc_gc.png)
     - GC 算法
+      - ![img.png](golang_gc_overview.png)
+        - 无分代
+          - 因为无分代，当我们遇到一些需要在内存中保留几千万 kv map 的场景(比如机器学习的特征系统)时，就需要想办法降低 GC 扫描成本。
+        - 与应用执行并发
+          - 因为有协助标记，当应用的 GC 占用的 CPU 超过 25% 时，会触发大量的协助标记，影响应用的延迟，这时也要对 GC 进行优化。
+        - 协助标记流程
+        - 并发执行时开启 write barrier
       - Golang 采用了基于并发标记与清扫算法的三色标记法。
         - GC 的四个阶段
           - Mark Prepare - STW 做标记阶段的准备工作，需要停止所有正在运行的goroutine(即STW)，标记根对象，启用内存屏障，内存屏障有点像内存读写钩子，它用于在后续并发标记的过程中，维护三色标记的完备性(三色不变性)，这个过程通常很快，大概在10-30微秒。
