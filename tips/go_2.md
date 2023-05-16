@@ -1795,8 +1795,8 @@
           - `go build -gcflags="-l" main.go`
 - [IO 流的并发]
   - 用 teeReader 分流，用 Pipe 把分出来的写流转成读流，然后用不同的 goroutine 操作即可实现 IO 流的并发
-
-
+- [Manual Memory Management in Go using jemalloc]
+  https://github.com/dgraph-io/ristretto/tree/master/z
 
 
 
