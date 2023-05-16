@@ -815,6 +815,44 @@
   - TCP/IP sockets
     - a mechanism allowing communication between processes over the network. In some cases, you can use TCP/IP sockets to talk with processes running on the same computer (by using the loopback interface)
     - A connected TCP socket is identified by the combination of local IP, local port, remote IP and remote port. A listening TCP socket is identified by local port and possibly local IP. As I understand it, at least on linux TCP/IP sockets always result in the generation and decoding of TCP/IP packets, even if the client and server are on the same machine.
+  - Compare [vs TCP sockets using the loop-back interface](https://lists.freebsd.org/pipermail/freebsd-performance/2005-February/001143.html)
+    - While the TCP loop-back interface can skip some of the complexities of the full TCP/IP network stack, it retains many others (ACKs, TCP flow control, and so on).
+    - UDS use paths in the filesystem as their addresses, we can use directory and file permissions to control access to sockets, simplifying authentication.
+    - UNIX domain sockets use the file system as the address name space.  This
+      means you can use UNIX file permissions to control access to communicate
+      with them.  I.e., you can limit what other processes can connect to the
+      daemon -- maybe one user can, but the web server can't, or the like.
+      With IP sockets, the ability to connect to your daemon is exposed off
+      the current system, so additional steps may have to be taken for
+      security.  On the other hand, you get network transparency.  With UNIX
+      domain sockets, you can actually retrieve the credential of the process
+      that created the remote socket, and use that for access control also,
+      which can be quite convenient on multi-user systems.
+    - IP sockets over localhost are basically looped back network on-the-wire
+      IP.  There is intentionally "no special knowledge" of the fact that the
+      connection is to the same system, so no effort is made to bypass the
+      normal IP stack mechanisms for performance reasons.  For example,
+      transmission over TCP will always involve two context switches to get to
+      the remote socket, as you have to switch through the netisr, which
+      occurs following the "loopback" of the packet through the synthetic
+      loopback interface.  Likewise, you get all the overhead of ACKs, TCP
+      flow control, encapsulation/decapsulation, etc.  Routing will be
+      performed in order to decide if the packets go to the localhost.
+      Large sends will have to be broken down into MTU-size datagrams, which
+      also adds overhead for large writes.  It's really TCP, it just goes over
+      a loopback interface by virtue of a special address, or discovering that
+      the address requested is served locally rather than over an ethernet
+      (etc).
+    - UNIX domain sockets have explicit knowledge that they're executing on
+       the same system.  They avoid the extra context switch through the
+       netisr, and a sending thread will write the stream or datagrams directly
+       into the receiving socket buffer.  No checksums are calculated, no
+       headers are inserted, no routing is performed, etc.  Because they have
+       access to the remote socket buffer, they can also directly provide
+       feedback to the sender when it is filling, or more importantly,
+       emptying, rather than having the added overhead of explicit
+       acknowledgement and window changes.  The one piece of functionality that
+       UNIX domain sockets don't provide that TCP does is out-of-band data. 
   - Command
     - Linux `netstat -a -p --unix`
     - MaxOS `netstat -a -f unix`
