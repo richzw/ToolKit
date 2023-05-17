@@ -492,6 +492,57 @@
     - 查看nf_conntrack表最大连接数 `cat /proc/sys/net/netfilter/nf_conntrack_max`
     - 查看nf_conntrack表当前连接数 `cat /proc/sys/net/netfilter/nf_conntrack_count`
     - MTU
+- K8s network issue
+  - 从 VPC a 访问 VPC b 的 TKE 集群的某个节点的 NodePort，有时候正常，有时候会卡住直到超时。
+    - 抓包，抓 server 端 NodePort 的包，发现异常时 server 能收到 SYN，但没响应 ACK：
+    - 反复执行 netstat -s | grep LISTEN 发现 SYN 被丢弃数量不断增加
+    - 跨 VPC 相比同 VPC 访问 NodePort 多了一次 SNAT
+    - 当 tcp_tw_recycle 被开启后，实际上这种行为就被激活了，当客户端或服务端以 NAT 方式构建的时候就可能出现问题
+      - 当多个客户端通过 NAT 方式联网并与服务端交互时，服务端看到的是同一个 IP。也就是说对服务端而言这些客户端实际上等同于一个，可惜由于这些客户端的时间戳可能存在差异。于是乎从服务端的视角看，便可能出现时间戳错乱的现象，进而直接导致时间戳小的数据包被丢弃。
+  - LoadBalancer 类型的 Service，直接压测 NodePort CPS 比较高，但如果压测 LB CPS 就很低。
+    - client 抓包 - 大量SYN重传
+    - server 抓包 - 抓 NodePort 的包，发现当 client SYN 重传时 server 能收到 SYN 包但没有响应
+    - conntrack -S 看到 insert_failed 数量在不断增加，也就是 conntrack 在插入很多新连接的时候失败了
+      - netfilter conntrack 模块为每个连接创建 conntrack 表项时，表项的创建和最终插入之间还有一段逻辑，没有加锁，是一种乐观锁的过程。
+      - conntrack 表项并发刚创建时五元组不冲突的话可以创建成功，但中间经过 NAT 转换之后五元组就可能变成相同
+      - 实际就是 netfilter 做 SNAT 时源端口选举冲突了，黑石 LB 会做 SNAT，SNAT 时使用了 16 个不同 IP 做源，但是短时间内源 Port 却是集中一致的，并发两个 SYN a 和SYN b，被 LB SNAT 后源 IP 不同但源 Port 很可能相同。
+    - 不使用源端口选举，在 iptables 的 MASQUERADE 规则如果加 --random-fully 这个 flag 可以让端口选举完全随机，基本上能避免绝大多数的冲突，但也无法完全杜绝
+    - LB 直接绑 Pod IP，不基于 NodePort，从而避免 netfilter 的 SNAT 源端口冲突问题
+  - DNS 解析偶尔 5S 延时
+    - 因为 netfilter conntrack 模块的设计问题，只不过之前发生在 SNAT，这个发生在 DNAT
+      - DNS client (glibc 或 musl libc) 会并发请求 A 和 AAAA 记录，跟 DNS Server 通信自然会先 connect (建立fd)，后面请求报文使用这个 fd 来发送。
+      - 由于 UDP 是无状态协议， connect 时并不会创建 conntrack 表项, 而并发请求的 A 和 AAAA 记录默认使用同一个 fd 发包，这时它们源 Port 相同
+      - 当并发发包时，两个包都还没有被插入 conntrack 表项，所以 netfilter 会为它们分别创建 conntrack 表项，而集群内请求 kube-dns 或 coredns 都是访问的CLUSTER-IP，报文最终会被 DNAT 成一个 endpoint 的 POD IP
+      - 当两个包被 DNAT 成同一个 IP，最终它们的五元组就相同了，在最终插入的时候后面那个包就会被丢掉。如果 dns 的 pod 副本只有一个实例的情况就很容易发生。
+    - 方案一: 使用 TCP 发送 DNS 请求
+      - 如果使用 TCP 发 DNS 请求，connect 时就会插入 conntrack 表项，而并发的 A 和 AAAA 请求使用同一个 fd，所以只会有一次 connect，也就只会尝试创建一个 conntrack 表项，也就避免插入时冲突。
+      - resolv.conf 可以加 options use-vc 强制 glibc 使用 TCP 协议发送 DNS query
+    - 方案二: 避免相同五元组 DNS 请求的并发
+      - resolv.conf 还有另外两个相关的参数
+        - single-request-reopen (since glibc 2.9)：A 和 AAAA 请求使用不同的 socket 来发送，这样它们的源 Port 就不同，五元组也就不同，避免了使用同一个 conntrack 表项。
+        - single-request (since glibc 2.10)：A 和 AAAA 请求改成串行，没有并发，从而也避免了冲突。
+      - 要给容器的 resolv.conf 加上 options 参数，最方便的是直接在 Pod Spec 里面的 dnsConfig 里面加上，这样所有容器都会继承。
+      - 在容器的 ENTRYPOINT 或者 CMD 脚本中，执行 /bin/echo 'options single-request-reopen' >> /etc/resolv.conf
+      - 在 postStart hook 里加 exec: command: ["/bin/echo", "options single-request-reopen", ">>", "/etc/resolv.conf"]
+      - 使用 MutatingAdmissionWebhook istio 的自动 sidecar 注入就是用这个功能来实现的，也可以通过 MutatingAdmissionWebhook 来自动给所有 Pod 注入 resolv.conf 文件
+    - 方案三: 使用本地 DNS 缓存
+      - 前面两种方案是 glibc 支持的。而基于 alpine 的镜像底层库是 musl libc 不是 glibc，所以即使加了这些 options 也没用。
+      - 这种情况可以考虑使用本地 DNS 缓存来解决。容器的 DNS 请求都发往本地的 DNS 缓存服务(dnsmasq, nscd等)，不需要走 DNAT，也不会发生 conntrack 冲突。另外还有个好处，就是避免 DNS 服务成为性能瓶颈。
+      - 使用本地DNS缓存有两种方式：
+        - 每个容器自带一个 DNS 缓存服务。
+        - 每个节点运行一个 DNS 缓存服务，所有容器都把本节点的 DNS 缓存作为自己的 nameserver。
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

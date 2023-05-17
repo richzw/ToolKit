@@ -1674,6 +1674,9 @@
     - This flag allows the runtime to skip the recovery and exit properly rather than stopping the execution of the program.
   - use double-defer to distinguish panic from runtime.Goexit, more details see https://golang.org/cl/134395
 - [Go 汇编详解](https://mp.weixin.qq.com/s/yPkAn3pRO5j9LKJGRxmaBg)
-
+- Go Generic
+  - No Generic Methods
+    - generic functions are supported, but not generic methods (funcs defined on a type)
+  
 
 
