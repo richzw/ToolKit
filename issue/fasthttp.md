@@ -181,4 +181,28 @@ fasthttp 它几乎把所有的对象都用sync.Pool维护。
     - 缺点是HTTP服务端的路由只是一个静态索引匹配，对于动态路由匹配支持的不好，并且每一个请求都会创建一个gouroutine进行处理，海量请求到来时需要考虑这块的性能瓶颈；
     - HTTP在建立连接时会耗费大量的资源，需要开辟一个goroutine去创建TCP连接，连接建立后会在创建两个goroutine用于HTTP请求的写入和响应的解析，然后使用channel进行通信，所以要合理利用连接池，避免大量的TCP连接的建立可以优化性能
 
+- Overview
+  - 核心优化点
+    - 对象复用
+      - workerpool 对象表示 连接处理 工作池，这样可以控制连接建立后的处理方式，而不是像标准库 net/http 一样，对每个请求连接都启动一个 goroutine 处理， 内部的 ready 字段存储空闲的 workerChan 对象，workerChanPool 字段表示管理 workerChan 的对象池。
+      - Cookie 对象也是通过对象池进行管理的, fasthttp 中一共有 38 个对象是通过对象池进行管理的，可以说几乎复用了所有对象
+    - []byte 复用
+      - fasthttp 中的 []byte 都是通过 sync.Pool 进行管理的，这样可以减少内存分配，减少 GC 压力，比如：ctxPool 、readerPool、writerPool 等等多大30多个 sync.Pool 。
+      - fasthttp 中复用的对象在使用完成后归还到对象池之前，需要调用对应的 Reset 方法进行重置，如果对象中包含 []byte 类型的字段， 那么会直接进行复用，而不是初始化新的 []byte, 例如 URI 对象的 Reset 方法:
+    - []byte 和 string 转换
+      - fasthttp 专门提供了 []byte 和 string 这两种常见的数据类型相互转换的方法 ，避免了 内存分配 + 复制，提升性能
+    - bytebufferpool
+      - 核心优化点是 避免内存拷贝 + 底层 byte 切片复用
+    - 避免反射
+      - fasthttp 中的所有 对象深拷贝 内部实现中都没有使用 反射，而是手动实现的，这样可以完全规避 反射 带来的影响
+  - fasthttp 的问题
+    - 异步 处理场景，框架核心的 对象复用 机制可能导致各种问题，如对象提前归还、对象指针 hang 起、还有更严重的对象字段被重置后继续引用
+    - 复杂度提升， 代码可读性
+  - 最佳实践
+    - 尽可能复用对象和 []byte buffers, 而不是重新分配
+    - 使用 []byte 特性技巧
+    - 使用 sync.Pool 对象池
+    - 在生产环境对程序进行性能分析，go tool pprof --alloc_objects app mem.pprof 通常比 go tool pprof app cpu.pprof 更容易体现性能瓶颈
+    - 为 hot path 上的代码编写测试和基准测试
+    - 避免 []byte 和 string 直接进行类型转换，因为这可能会导致 内存分配 + 复制，可以参考 fasthttp 包内的 s2b 方法和 b2s 方法
 
