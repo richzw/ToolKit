@@ -259,6 +259,59 @@
     - iowait 会导致系统的 CPU 利用率下降，从而导致系统的资源利用率下降。
     - iowait 会导致系统的负载升高，从而导致系统的负载变大。
 
+- [Linux Performance Analysis](https://netflixtechblog.com/linux-performance-analysis-in-60-000-milliseconds-accc10403c55)
+  - USE Method: a methodology for locating performance bottlenecks. This involves checking utilization, saturation, and error metrics for all resources (CPUs, memory, disks, e.t.c.)
+  - uptime
+    - 检查系统平均负载
+    - 负载的平均值显示 1 分钟为 30，比 15 分钟的 19 相比增长较多。有很多原因会导致负载的增加，也许是 CPU 不够用了；vmstat 或者 mpstat 可以进一步确认问题在哪里。
+  - dmesg | tail
+    - 我们主要找一下有没有一些系统错误会导致性能的问题。
+  - vmstat 1
+    - vmstat 展示了虚拟内存、cpu 的一些情况，以及系统的运行进程。
+  - mpstat -P ALL 1
+    - 这个命令把每个 CPU 的时间都打印出来，可以看看 CPU 对任务的处理是否均匀。比如，如果某一单个 CPU 使用率很高的话，说明这是一个单线程应用
+  - pidstat 1
+    - pidstat 会打印出每个进程的 CPU 使用率，内存使用率，I/O 等情况。这个命令可以帮助我们找到 CPU 使用率高的进程，然后再用 strace 或者 perf 来进一步分析。
+  - iostat -xz 1
+    - iostat 是理解块设备（磁盘）的当前负载和性能的重要工具
+    - 较差的磁盘 IO 性能并不一定意味着应用程序会有问题。应用程序可以有许多方法执行异步 IO，而不会阻塞在 IO 上面；应用程序也可以使用诸如预读取，写缓冲等技术降低 IO 延迟对自身的影响
+  - free -m
+  - sar -n DEV 1
+    - 这个工具可以查看网络接口的吞吐量：rxkB/s 和 txkB/s 可以测量负载，也可以看是否达到网络流量限制了。
+  - sar -n TCP,ETCP 1
+  - top
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
