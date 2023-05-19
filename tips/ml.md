@@ -65,4 +65,47 @@
 - [Parameter optimization in neural networks](https://www.deeplearning.ai/ai-notes/optimization/index.html?_hsmi=218814757&utm_campaign=The%20Batch&utm_medium=email&utm_content=218804890&utm_source=hs_email&_hsenc=p2ANqtz-_FluhJbN2619klYO-hikBLp6-aEAP60t0VaLzoiEItfCyfrdJguDchLz7Q6h5imUeQp3SkfQaBZnlD8_aUcP5U97FiMA)
 - [Introduction to Uplift Modeling](https://juanitorduz.github.io/uplift/)
 - [What is Uplift modelling and how can it be done with CausalML](https://analyticsindiamag.com/what-is-uplift-modelling-and-how-can-it-be-done-with-causalml/)
+- [Prometheus for anomaly detection](https://about.gitlab.com/blog/2019/07/23/anomaly-detection-using-prometheus/)
+  - z-score
+    - z-score is measured in the number of standard deviations from the mean
+    - Assuming the underlying data has a normal distribution, 99.7% of the samples should have a z-score between zero to three. The further the z-score is from zero, the less likely it is to exist.
+    ```shell
+    # Z-Score for aggregation
+    (
+    job:http_requests:rate5m -
+    job:http_requests:rate5m:avg_over_time_1w
+    ) /  job:http_requests:rate5m:stddev_over_time_1w
+    ```
+    - normal distribution?
+      - There are numerous statistical techniques for testing your data for a normal distribution, but the best option is to test that your underlying data has a z-score of about +4 to -4.
+      ```shell
+      (
+      max_over_time(job:http_requests:rate5m[1w]) - avg_over_time(job:http_requests:rate5m[1w])
+      ) / stddev_over_time(job:http_requests:rate5m[1w])
+      
+      (
+      min_over_time(job:http_requests:rate5m[1w]) - avg_over_time(job:http_requests:rate5m[1w])
+      ```
+  - Seasonality
+    - Seasonality is a characteristic of a time series metric in which the metric experiences regular and predictable changes that recur every cycle.
+    ```shell
+      quantile(0.5,
+         label_replace(
+           avg_over_time(job:http_requests:rate5m[4h] offset 166h)
+           + job:http_requests:rate5m:avg_over_time_1w - job:http_requests:rate5m:avg_over_time_1w offset 1w
+           , "offset", "1w", "", "")
+         or
+         label_replace(
+           avg_over_time(job:http_requests:rate5m[4h] offset 334h)
+           + job:http_requests:rate5m:avg_over_time_1w - job:http_requests:rate5m:avg_over_time_1w offset 2w
+           , "offset", "2w", "", "")
+         or
+         label_replace(
+           avg_over_time(job:http_requests:rate5m[4h] offset 502h)
+           + job:http_requests:rate5m:avg_over_time_1w - job:http_requests:rate5m:avg_over_time_1w offset 3w
+           , "offset", "3w", "", "")
+       )
+       without (offset)
+    ```
+    
 
