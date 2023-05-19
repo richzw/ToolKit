@@ -414,7 +414,7 @@
     - memory.limit_in_bytes：可配置，当前cgroup里所有进程可使用内存的最大值 由于cgroup v1默认按层级继承的方式管理各个cgroup，因此每个cgroup计费的内存使用量包括其所有子孙cgroup的内存使用量
   - 回收
     - 当某cgroup节点子树内任何进程申请分配X内存时，若usage + X > limit，则会在内存分配上下文中触发内存回收行为，从该子树中回收内存（ Page Cache 内存）。如果回收到>=X的内存，则进程的内存分配成功返回；反之失败，继续在内存分配上下文中触发OOM，从该子树中选择得分最高的（默认为内存使用量最大）的进程kill掉并回收其内存，循环往复直至满足内存分配申请。
-  
+- [Kata Containers](https://mp.weixin.qq.com/s/q0hpsx7DVYLBrxUPpKolqQ)
 
 
 
