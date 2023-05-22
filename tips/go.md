@@ -1674,9 +1674,18 @@
     - This flag allows the runtime to skip the recovery and exit properly rather than stopping the execution of the program.
   - use double-defer to distinguish panic from runtime.Goexit, more details see https://golang.org/cl/134395
 - [Go 汇编详解](https://mp.weixin.qq.com/s/yPkAn3pRO5j9LKJGRxmaBg)
+- [A Comprehensive Guide to Structured Logging in Go](https://betterstack.com/community/guides/logging/logging-in-go/)
+- [JSON Parse](https://www.cockroachlabs.com/blog/high-performance-json-parsing/)
+  - Json Parse is inefficient
+    - Parsing goes in two phases - first it parses the string into raw interface{}s using the Go encoding/json package, then it transforms that into a JSON
+  - [Building a high performance JSON parser](https://dave.cheney.net/high-performance-json.html)
+- full slice expression
+  - `a = a[0:len(a):len(a)]`
+  - the slice a is restricted to itself, the elements past the end of the slice cannot be accessed or modified, even if you accidentally re-slice or append to it.
+  - This trick is useful for returning a slice from an immutable array; if you accidentally append to the supposedly immutable slice, a copy is forced and no data is overwritten because there is no more capacity left.
 - Go Generic
   - No Generic Methods
     - generic functions are supported, but not generic methods (funcs defined on a type)
-  
+
 
 
