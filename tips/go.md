@@ -1686,6 +1686,15 @@
 - Go Generic
   - No Generic Methods
     - generic functions are supported, but not generic methods (funcs defined on a type)
-
+- [Panic vs Recover](https://mp.weixin.qq.com/s/F85plcGPKgz-_6-rJ9dPXg)
+  - 为什么 panic 可以让程序崩溃？
+    - panic 如果没有被捕获，最终会调用 exit(2) 终止程序运行
+  - 为什么 recover 可以捕获 panic 的消息并终止程序崩溃？
+    - recover 最终会调用 recovery 方法恢复程序的继续执行
+    - recovery 方法会从 panic 的调用栈中找到 panic 的调用者，然后继续执行
+    - 如果找不到调用者，那么程序会继续崩溃
+  - 为什么 recover 必须在 defer 中调用？
+  - 为什么 recover 必须在 defer 中直接调用 (不能嵌套)？
+    - gorecover 会进行参数校验，只有在 defer 语句中调用 recover, 才能通过参数校验
 
 
