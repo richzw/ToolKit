@@ -415,6 +415,26 @@
   - 回收
     - 当某cgroup节点子树内任何进程申请分配X内存时，若usage + X > limit，则会在内存分配上下文中触发内存回收行为，从该子树中回收内存（ Page Cache 内存）。如果回收到>=X的内存，则进程的内存分配成功返回；反之失败，继续在内存分配上下文中触发OOM，从该子树中选择得分最高的（默认为内存使用量最大）的进程kill掉并回收其内存，循环往复直至满足内存分配申请。
 - [Kata Containers](https://mp.weixin.qq.com/s/q0hpsx7DVYLBrxUPpKolqQ)
+- [UDP 协议无法通讯问题](https://www.jianshu.com/p/31f29098186a)
+  - Issue
+    - 如果有 UDP 服务运行在宿主机上（或者运行在网络模型为 host 的容器里），并且监听在 0.0.0.0 地址（也就是所有的 ip 地址），从运行在 docker bridge（网桥为 docker0） 网络的容器运行客户端访问服务，两者通信有问题。
+  - Debug
+    - 使用 TCP 协议没有这个问题
+    - 如果 UDP 服务器监听在 eth0 ip ，而不是0.0.0.0上，也不会出现这个问题
+    - 并不是所有的应用都有这个问题，我们的 DNS（dnsmasq + kubeDNS） 也是同样的部署方式，但是功能都正常
+  - Analysis
+    - 从网络报文的分析中可以看到服务端返回的报文源地址不是我们预想的 eth0 地址，而是 docker0 的地址，而客户端直接认为该报文是非法的，返回了 ICMP 的报文给对方
+  - Root Cause
+    - 主机多网络接口 UDP 源地址选择问题
+      - UDP 在多网卡的情况下，可能会发生【服务器端】【源地址】不对的情况，这是内核选路的结果
+      - 因为 UDP 是无状态的协议，内核不会保存连接双方的信息，因此每次发送的报文都认为是独立的，socket 层每次发送报文默认情况不会指明要使用的源地址，只是说明对方地址
+    - dnsmasq 
+      -  setsockopt(4, SOL_IP, IP_PKTINFO, [1], 4) IP_PKTINFO 这个选项就是让内核在 socket 中保存 IP 报文的信息，当然也包括了报文的源地址和目的地址
+      -  收包和发包的系统调用，直接使用 recvmsg 和 sendmsg 系统调用
+    - 如果 ipi_spec_dst 和 ipi_ifindex 不为空，它们都能作为源地址选择的依据，而不是让内核通过路由决定
+    - 通过设置 IP_PKTINFO socket 选项为 1，然后使用 recvmsg 和 sendmsg 传输数据就能保证源地址选择符合我们的期望
+  
+
 
 
 
