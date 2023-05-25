@@ -549,7 +549,25 @@
     - alpine 使用的底层 c 库是 musl libc，其它镜像基本都是 glibc。翻 musl libc 源码，构造 dns 请求时，请求 id 的生成没加锁，而且跟当前时间戳有关：
   - Pod 偶尔会存活检查失败，导致 Pod 重启，业务偶尔连接异常
     - 对比分析下内核参数差异，最后发现是 backlog 太小导致的，节点的 net.ipv4.tcp_max_syn_backlog 默认是 1024，如果短时间内并发新建 TCP 连接太多，SYN 队列就可能溢出，导致部分新连接无法建立。解释一下
-
+- Packet Challenge 之 DNS
+  - What IP address(es) are resolved for www.paypal.com?
+    - ` capinfos dnsing.pcapng`
+    - DNS 响应包里会包含 Queries 和 Answers，也就是查询的域名和响应域名的 IP 信息 `(dns.qry.name == "www.paypal.com") && dns.a`
+    - `tshark -r dnsing.pcapng -Y 'dns.qry.name == "www.paypal.com" && dns.a' -T fields -e ip.src -e ip.dst -e dns.a`
+  - What is the largest DNS TTL value seen in the trace file?
+    - DNS TTL value 同样存在于 DNS 响应数据包 Answers 信息中，也由于 CNAME 的原因，同一个数据帧中会存在多个 TTL 值
+    - `tshark -r dnsing.pcapng -Y 'dns.a' -T fields -e ip.src -e ip.dst -e dns.a -e dns.cname -e dns.a.ttl | awk 'BEGIN{ RS=","; } { print $0 }' | sort -rn | uniq
+      7196`
+  - Which DNS response transaction ID contained the largest number of Answer RRs?
+    - DNS 响应 Transaction ID 和 Answer RRs 字段值均可在以下信息中找到
+    - `tshark -r dnsing.pcapng -Y 'dns.a' -T fields -e ip.src -e ip.dst -e dns.a -e dns.cname -e dns.a.ttl -e dns.id -e dns.count.answers | awk 'BEGIN{ RS=","; } { print $0 }' | sort -rn | uniq`
+  - What is the largest DNS response time seen in this trace file?
+    - DNS 响应时长是查询和响应之间的时间间隔，一般也是判断 DNS 性能指标的一种。该字段 dns.time 实际并不存在于数据包中，是通过 Wireshark 上下文解析标识出来，以 [ ] 表示
+    - `tshark -r dnsing.pcapng -Y 'dns.a' -T fields -e ip.src -e ip.dst -e dns.a -e dns.cname -e dns.a.ttl -e dns.id -e dns.count.answers -e dns.time | awk 'BEGIN{ RS=","; } { print $0 }' | sort -rn | uniq`
+  - What company distributes many of PayPal’s web pages?
+    - 从 DNS 响应上来看，包含有很多 CNAME 解析，使用了 CDN 相关技术。简单通过显示过滤表达式 (dns.qry.name contains "paypal" ) && (dns.flags.response == 1) 过滤出响应数据包中带有 paypal 相关字样的值，然后根据 dns.resp.name 字段值进行处理
+    -  Wireshark dns.time 的算法是第一次查询以及响应数据包之间的间隔时间。
+    - `tshark -r dnsing.pcapng -Y '(dns.qry.name contains "paypal" ) && (dns.flags.response == 1)' -T fields -e ip.src -e ip.dst -e dns.a -e dns.cname -e dns.a.ttl -e dns.id -e dns.count.answers -e dns.time | awk 'BEGIN{ RS=","; } { print $0 }' | sort -rn | uniq`
 
 
 
