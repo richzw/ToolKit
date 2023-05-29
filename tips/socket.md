@@ -931,7 +931,8 @@
     - 如果目标端口不可达，那么数据包还没到传输层（UDP/TCP）就被丢弃了。网络层看到没有进程在监听指定的协议端口，就会送回一个“目标端口不可达”的 ICMP 报文。
 - [traceroute by golang](https://mp.weixin.qq.com/s/FKSNjIgkzmWoDPY5GIS8qg)
 - [ping by golang](https://mp.weixin.qq.com/s/Zc0wKiQ_kJaO9IS5yis2lw)
-
+- [Linux core handle tcp_close]
+  - ![img.png](socket_tcp_close.png)
 
 
 

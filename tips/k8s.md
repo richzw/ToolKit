@@ -145,7 +145,22 @@
   - Gang Scheduling - 一种调度策略，它可以将一组 Pod 一起调度到同一台机器上，以便它们可以共享资源并提高性能
     - Gang scheduling策略可在并发系统中将多个相关联的进程调度到不同处理器上同时运行。最主要的原则是保证所有相关联的进程能够同时启动，防止部分进程的异常，避免整个关联进程组的阻塞。例如，当您提交一个包含多个任务的批量Job时，可能会出现多个任务全部调度成功或者都调度失败的情况。这种All-or-Nothing调度场景，就被称作Gang scheduling。
   - [NUMA Scheduling](https://docs.openshift.com/container-platform/4.10/scalability_and_performance/cnf-numa-aware-scheduling.html)
-
+- Ray
+  - Ray 的框架中最为重要的两个部分是 Ray Core 和 Ray AIR
+    - Ray Core 是底层的分布式的计算框架，使用基于 actor 模型来实现的一套计算框架，它可以将 Python 的一个 Class 或者一个 Function 转成分布式的 actor 和 task，在所有的机器上分布式地进行运行，并且 tasks/actor 之间可以通过分布式的对象存储能力来达到共享的能力。
+      - Ray Core 本身是构建在 grpc 的基础之上，性能高。
+      - Ray Core 提供了基于 Actor 模型的异步并行的技术实现，提高性能。
+      - Ray Core 提供了分布式的共享内存的技术，以及分布式对象存储，Actor/Tasks 之间可以共享内存，来保存或者读取依赖的对象。
+      - Ray Core 使用了分布式引用计数等技术来保证内存的安全，以此提高系统的稳定性。
+      - Ray Core 提供了去中心化的分布式的调度器和对象管理器，可以根据需要进行无缝的扩容。
+      - Ray Core 是一个将 Python 语言分布式化的框架。在AI领域，很多的AI框架都是以 Python 为主的，所以 Ray 可以很好地整合这些框架，为其提供分布式的训练的能力。
+      - Ray 支持很强的容错能力。
+    - Ray AIR 的全称是 Ray AI Runtime，Ray AIR 则是针对机器学习应用场景的扩展和增强。基于 Ray Core，Ray AIR 就是一个分布式的 AI 框架。包含了 AI 各种场景下的一系列的工具包，可以一起使用，也可以分开使用
+      - Ray AIR 提供了大模型切分成模型分片的支撑能力。举例：以 Alpa 为例，Alpa 能够全自动化的并行运行客户的单设备的 code 在分布式的集群上运行。
+      - Ray AIR 提供了数据集切分成数据集分片的能力，以及多 worker 并行运行去处理数据集分片。举例：基于 Embeddings 和 LLM 来实现自己的知识库场景就可以使用 Ray 来加速。
+      - Ray AIR 的 Scale 能力是 Ray 的核心能力之一，在很多模块都体现出来了。Ray AIR中提供了TorchTrainer、TensorflowTrainer、HorovodTrainer、XGBoostTrainer、LightGBMTrainer、LightningTrainer、HuggingFaceTrainer 这些类，可以用于支持各种 AI 框架的分布式训练的能力。
+  - Ray 支持将大模型拆分成很多的小的模型分片，将这些小的模型分片调度到不同主机上去运行，来完成分布式训练，这个能力是 Ray 能支持大模型的核心能力之一。同时不仅仅模型可以进行分片，数据集也可以进行分片，这样不同的模型分片使用不同的数据集分片进行分布式的模型训练，可以按需要扩容，充分利用资源，加速训练。
+  - Ray 集群可以在非容器化环境中运行，同时社区还提供了基于云原生 Kubernetes 的环境来运行整个 Ray 集群，以及以容器方式运行 Actor 和 Task。在这种方式下，要提交一个 Ray 作业，只需要提交一个符合 RayJob CRD 规范的 CR 对象。
 
 
 
