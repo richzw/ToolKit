@@ -678,9 +678,42 @@
     - MySQL 5.7 版本之后 可以通过 information_schema.innodb_locks 查看事务的锁情况，但只能看到阻塞事务的锁；如果事务并未被阻塞，则在该表中看不到该事务的锁情况。
     - MySQL 8.0 版本之后 可以通过 performance_schema.data_locks 查看事务的锁情况，可以看到所有事务的锁情况。
   - 记录存在时的加锁
-    - 加锁的2个决定因素：
+    - 对于innodb, 加锁的2个决定因素：
      - 当前的事务隔离级别。
      - 当前记录是否存在。
+  - [Question: 表t是 innodb 引擘，有主键：id（int类型) ，下面3条语句是否加锁？加锁的话，是什么锁？](https://mp.weixin.qq.com/s/TEXjgA85vUrvx2Q6O5Id1A)
+    ```sql
+    1. select * from t where id=X;
+    2. begin;select * from t where id=X;
+    3. begin;select * from t where id=X for update;
+    ```
+    - 假设 id 为2的记录存在，则在不同的4个隔离级别下3个语句的加锁情况汇总如下表( select 2 表示  select * from t where id =2)
+      - ![img.png](mysql_q_lock1.png)
+      - 对于 begin ; select ... where id =2这种只读事务，会加元数据锁SHARED_READ，防止事务执行期间表结构变化，查询performance_schema.metadata_locks 表可见此锁
+      - 对于 begin; select ... where id =2这种只读事务，MySQL在RC和RR隔离级别下，使用 MVCC 快照读，不加行锁，但在Serial隔离级别下，读写互斥，会加意向共享锁（表锁）和共享记录锁（行锁）
+      - 对于begin; select ... where id=2 for update，会加元数据锁SHARED_WRITE。
+      - 对于begin; select ... where id=2 or update，4种隔离级别都会加意向排它锁（表锁）和排它记录锁（行锁），查询 performance_schema.data_locks 可见此2类锁。
+    - 记录不存在时的加锁
+      - ![img.png](mysql_q_lock2.png)
+      - RR，Serial 隔离级别下，记录锁变成了 Gap Locks（间隙锁），可以防止幻读，lock_data 为3的 GAP lock 锁住区间（1，3），此时ID=2的记录插入会被阻塞。
+    - 主键范围读取
+      - RR 隔离级别为了防止幻读，存在间隙锁（GAP LOCK
+      - 加锁的基本单位是 next-key lock，next-key lock 是前开后闭区间。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
