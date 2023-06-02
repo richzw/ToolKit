@@ -56,6 +56,14 @@
     The view is simple enough that you can INSERT, UPDATE and DELETE on it directly; no need for triggers.
     Now all data will automagically vanish from visibledata after two years.
     ```
-
-
+- 一次数据库连接池满问题排查与解决
+  - Issue
+    - 虽然乐观锁是不需要加锁的，通过CAS的方式进行无锁并发控制进行更新的
+    - 但是InnoDB的update语句是要加锁的。当并发冲突比较大，发生热点更新的时候，多个update语句就会排队获取锁。
+    - 这个排队的过程就会占用数据库链接，一旦排队的事务比较多的时候，就会导致数据库连接被耗尽。
+  - Solution
+    - 1、基于缓存进行热点数据更新，如Redis。
+    - 2、通过异步更新的方式，将高并发的更新削峰填谷掉。
+    - 3、将热点数据进行拆分，分散到不同的库、不同的表中，减少并发冲突。
+    - 4、合并更新请求，通过打批执行的方式来降低冲突。
 
