@@ -161,7 +161,7 @@
       - Ray AIR 的 Scale 能力是 Ray 的核心能力之一，在很多模块都体现出来了。Ray AIR中提供了TorchTrainer、TensorflowTrainer、HorovodTrainer、XGBoostTrainer、LightGBMTrainer、LightningTrainer、HuggingFaceTrainer 这些类，可以用于支持各种 AI 框架的分布式训练的能力。
   - Ray 支持将大模型拆分成很多的小的模型分片，将这些小的模型分片调度到不同主机上去运行，来完成分布式训练，这个能力是 Ray 能支持大模型的核心能力之一。同时不仅仅模型可以进行分片，数据集也可以进行分片，这样不同的模型分片使用不同的数据集分片进行分布式的模型训练，可以按需要扩容，充分利用资源，加速训练。
   - Ray 集群可以在非容器化环境中运行，同时社区还提供了基于云原生 Kubernetes 的环境来运行整个 Ray 集群，以及以容器方式运行 Actor 和 Task。在这种方式下，要提交一个 Ray 作业，只需要提交一个符合 RayJob CRD 规范的 CR 对象。
-
+- [K8sGPT](https://github.com/k8sgpt-ai/k8sgpt)
 
 
 

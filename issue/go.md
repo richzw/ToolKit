@@ -915,8 +915,27 @@
   - Depending on your application, you might also want to monitor: a. Disk space b. Inodes c. Child processes d. Special resources used by your application
   - Avoid running all your background jobs on the exact same schedule. Use prime numbers to avoid overlapping job runs.
   - Use metrics or logs to record background job start and end times; look for correlations between these times and leaks.
-
-
+- [0.001的服务可用性]
+  - Issue
+    - 某个服务可用性出现抖动，偶尔低于0.999。虽然看起来3个9的可用性相当高，但是对于一个 10w+ qps 的服务来讲，影响面就会被放大到不可接受的状态。
+  - Debug
+    - 猜想与否定
+      - 可能的原因，例如某些业务写法导致性能问题，异常流量，系统调用，网络问题，cpu throttle，中间件问题（如redis,mysql），go调度，gc问题
+    - 排查思路
+      - 采集pprof，用cpu profiler查看cpu占用，memory profiler查看gc问题
+      - 开启GODEBUG=gctrace=1 ，可查看程序运行过程中的GC信息。如果觉得是gc问题，可查看服务可用性抖动时间段gctrace是否异常，进一步确认问题
+      - 添加fgprof，辅助排查off-cpu可能性，off-cpu例如I/O、锁、计时器、页交换等，具体详看鸟窝大佬文章：分析Go程序的Off-CPU性能（https://colobu.com/2020/11/12/analyze-On-CPU-in-go/）
+      - 采集go trace，查看go调度问题，例如gc、抢占调度等，真实反映当时调度情况
+      - linux strace查看go运行时调用了哪些系统调用导致超时
+    - gctrace分析
+      - gc有时候会影响系统的延时，所以先用gctrace看看这块有没有问题。
+      - 从gctrace上可以看出，并发标记和扫描的时间占用了860ms（图中红色框0.8+860+0.0668 ms中的860，一般gc问题通常看这块区域），并发标记和扫描比较占用cpu时间，这样可能导致这段时间大多数cpu时间用于扫描，业务协程只能延迟被调度。
+    - strace分析
+    - fgprof分析
+    - trace分析 - 从trace文件上，可以明显看到发生MARK ASSIST了，顿时心中有谱。多抓trace看看，还是有明显的MARK ASSIST了现象，gc问题应该比较明显了。
+    - go heap 分析
+      - gc标记和扫描还得看inuse_objects
+      - 可以看到gcache中LFU生产的object数量高达100w+，而总共的object才300w。这块明显有问题，那很可能就是它导致的问题。
 
 
 
