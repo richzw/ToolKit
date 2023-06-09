@@ -754,7 +754,33 @@
 - [MySQL一定是遵循最左前缀匹配的?](https://www.hollischuang.com/archives/6812)
   - MySQL一定是遵循最左前缀匹配的，这句话在以前是正确的，没有任何毛病。但是在MySQL 8.0中，就不一定了。 - 索引跳跃扫描
   - 这种查询优化比较适合于f1的取值范围比较少，区分度不高的情况，一旦f1的区分度特别高的话，这种查询可能会更慢。
-
+- SQL under MySql 8.0
+  - ORDER BY FIELD() 自定义排序逻辑
+  - case when then else end表达式功能非常强大可以帮助我们解决 if elseif else 这种问题
+    - case when then 语句不匹配如果没有写 else end 会返回 null，影响数据展示
+  - EXISTS 用法
+    - 它的作用是根据主查询的数据，每一行都放到子查询中做条件验证，根据验证结果（TRUE 或者 FALSE），TRUE的话该行数据就会保留
+    ```sql
+    SELECT * from emp e where exists (
+      SELECT * from dept p where e.dept_id = p.dept_id
+        and e.dept_name != p.dept_name
+    )
+    ```
+    - 通过 exists 语法将外层 emp 表全部数据 放到子查询中与一一与 dept 表全部数据进行比较，只要有一行记录返回true
+  - GROUP_CONCAT(expr) 组连接函数
+    - GROUP_CONCAT(expr) 组连接函数可以返回分组后指定字段的字符串连接形式，并且可以指定排序逻辑，以及连接字符串，默认为英文逗号连接
+  - 自连接查询
+    - 自连接查询是指在同一张表中进行连接查询，这种查询方式可以将表中的数据进行横向对比，从而得到更多的信息
+    - tree 表中通过 pid 字段与 id 字段进行父子关联，假如现在有一个需求，我们想按照父子层级将 tree 表数据转换成 一级职位 二级职位 三级职位 三个列名进行展示
+    ```sql
+     SELECT t1.job_name '一级职位', t2.job_name '二级职位', t3.job_name '三级职位'
+     from tree t1 join tree t2 on t1.id = t2.pid left join tree t3 on t2.id = t3.pid
+     where t1.pid = 0;
+     ```
+  - ORDER BY 空值 NULL 排序
+    - ORDER BY 字句中可以跟我们要排序的字段名称，但是当字段中存在 null 值时，会对我们的排序结果造成影响。我们可以通过 ORDER BY IF(ISNULL(title), 1, 0) 语法将 null 值转换成0或1，来达到将 null 值放到前面还是后面进行排序的效果。
+  - with rollup 分组统计数据的基础上再进行统计汇总
+    - MySql 中可以使用 with rollup 在分组统计数据的基础上再进行统计汇总，即用来得到 group by 的汇总信息。
 
 
 
