@@ -1696,5 +1696,47 @@
   - 为什么 recover 必须在 defer 中调用？
   - 为什么 recover 必须在 defer 中直接调用 (不能嵌套)？
     - gorecover 会进行参数校验，只有在 defer 语句中调用 recover, 才能通过参数校验
+- [channel](https://mp.weixin.qq.com/s/HyH5ek9r35DXB82ih1icHg)
+  - 规则
+    - ![img.png](go_channel_op.png)
+  - hchan
+    - hchan 对象表示运行时的 channel。
+    - 对于无缓冲 channel 来说，发送队列和接收队列至少有一个为空，一个无缓冲 channel 和一个阻塞在该 channel 上面的 goroutine，使用 select 语句发送和接收。
+    - 对于有缓冲 channel 来说，qcount > 0 意味着接收队列为空，qcount < dataqsiz 意味着发送队列为空。
+    - ![img.png](go_channel_hchan.png)
+  - waitq
+    - waitq 对象表示因为 channel 缓冲区空间不足而陷入等待的 goroutine 发送/接收队列, 数据结构是双向链表，其中头节点和尾节点都是 sudog 对象
+  - Send
+    - 阻塞发送
+      - channel 阻塞发送时，将 sudog 结构体放入发送队列
+    - channel 非阻塞发送时，分为两种情况:
+      - 缓冲区未满，直接将数据存入缓冲区
+      - 缓冲区已满，将 sudog 结构体放入发送队列
+  - one goroutine could be both in the sendq and recvq of channel at the same time?
+    -  This is because a goroutine can only perform one operation on a channel at a time, either sending or receiving.
+    - When a goroutine performs a send operation on a channel, it is added to the send queue of the channel and waits until another goroutine performs a receive operation on the same channel. Similarly, when a goroutine performs a receive operation on a channel, it is added to the receive queue of the channel and waits until another goroutine performs a send operation on the same channel.
+- [Lensm, A Tool for Viewing Disassembly](storj.io/blog/lensm)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
