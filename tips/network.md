@@ -1309,7 +1309,14 @@
       - 发送能力的变化导致窗口大小的变化，即后面所讲的 TCP 拥塞控制机制。
   - 流量控制机制 ： 由接收方控制的、调节发送方生产速度的机制 ， 其具体的实现方式，就是在回复时设置 TCP 协议头 中的窗口大小字段。
   - TCP 协议的拥塞控制的办法是， 发送方主动减少发送量 
-    
+- [Protocol Summary]
+  - ![img.png](network_arp.png)
+  - ![img.png](network_ip_sum.png)
+  - ![img.png](network_udp_sum.png)
+  - ![img.png](network_icmp_sum.png)
+  - ![img.png](network_tcp_sum.png)
+  - ![img.png](network_http2_sum.png)
+  - ![img.png](network_quic.png)
 
 
 
