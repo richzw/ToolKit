@@ -781,8 +781,21 @@
     - ORDER BY 字句中可以跟我们要排序的字段名称，但是当字段中存在 null 值时，会对我们的排序结果造成影响。我们可以通过 ORDER BY IF(ISNULL(title), 1, 0) 语法将 null 值转换成0或1，来达到将 null 值放到前面还是后面进行排序的效果。
   - with rollup 分组统计数据的基础上再进行统计汇总
     - MySql 中可以使用 with rollup 在分组统计数据的基础上再进行统计汇总，即用来得到 group by 的汇总信息。
-
-
+- [Building and deploying MySQL Raft at Meta](https://engineering.fb.com/2023/05/16/data-infrastructure/mysql-raft-meta/)
+  - Why
+    - In the past, to help guarantee safety and avoid data loss during the complex promotion and failover operations, several automation daemons and scripts would use locking, orchestration steps, a fencing mechanism, and SMC,  a service discovery system. It was a distributed setup, and it was difficult to accomplish this atomically. The automation became more complex and harder to maintain over time as more and more corner cases needed to be patched.
+  - Process
+    - In standard MySQL:
+      - Primary writes to binlog and sends binlog to replicas.
+      - Replicas receive in relay log and apply the transactions to the engine. During apply, a new replica-only binlog is created.
+    - In MySQL Raft:
+      - Primary writes to binlog via Raft, and Raft sends binlog to followers/replicas.
+      - Replicas/followers receive in binlog and apply the transactions to the engine. An apply log is created during apply.
+      - Binlog is the replicated log from the Raft point of view.
+  - Raft vs Paxos
+    - Meta 实现了一个Raft变种协议FlexiRaft ，传统的Raft协议把所有节点都放在一个组里来管理，事务提交也是在这个组，故障重新选举也是在这个组，因此会互相“纠缠”，支持跨地域容灾了嘛，那事务提交也会因为跨区域就慢，真是难平衡呀
+    - FlexiRaft把一个组拆成了两个组，事务在一个组里提交，故障切换在另一个组里搞选举。这样可以做到事务提交不出地域，保证低延迟；好巧不巧遇到地域故障时，又可以把数据库切换到其他地域
+    - 采用Paxos算法的MySQL Group Replication就没这么灵活了，并且MGR还存在一些设计上的缺点。比如为了减少性能损失，MGR的Paxos层里并不持久化日志，多个节点在内存中达成一致后直接提交，这时候如果掉电就存在丢数据的风险。
 
 
 
