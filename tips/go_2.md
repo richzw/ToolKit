@@ -824,12 +824,29 @@
   - [在核心服务上动态调整 GOGC 来降低 GC 的 mark 阶段 CPU 占用](https://eng.uber.com/how-we-saved-70k-cores-across-30-mission-critical-services/)
   - 起因
     - 经过一段时间的线上 profile 采集发现 GC 是很多核心服务的一个很大的 CPU 消耗点，比如 runtime.scanobject 方法消耗了很大比例的计算资源
-  - GOGC Tuner
+  - [GOGC Tuner]
     - Go 的 runtime 会间隙性地调用垃圾收集器来并发进行垃圾回收。这个启动是由内存的压力反馈来决定何时启动 GC 的。所以 Go 的服务可以通过增加内存的用量来降低 GC 的频率以降低 GC 的总 CPU 占用
     - Go 的 GC 触发算法可以简化成下面这样的公式： `hard_target = live_dataset + live_dataset * (GOGC / 100).` 由 pacer 算法来计算每次最合适触发的 heap 内存占用
     - 固定的 GOGC 值没法满足 Uber 内部所有的服务。具体的挑战包括：
       - 对于容器内的可用最大内存并没有进行考虑，理论上存在 OOM 的可能性。
       - 不同的微服务对内存的使用情况完全不同。
+  - [gctuner](https://github.com/bytedance/gopkg/tree/develop/util/gctuner)
+    - The gctuner helps to change the GOGC(GCPercent) dynamically at runtime, set the appropriate GCPercent according to current memory usage.
+    -  _______________  => limit: host/cgroup memory hard limit
+       |               |
+       |---------------| => threshold: increase GCPercent when gc_trigger < threshold
+       |               |
+       |---------------| => gc_trigger: heap_live + heap_live * GCPercent / 100
+       |               |
+       |---------------|
+       |   heap_live   |
+       |_______________|
+
+       threshold = inuse + inuse * (gcPercent / 100)
+       => gcPercent = (threshold - inuse) / inuse * 100
+
+       if threshold < 2*inuse, so gcPercent < 100, and GC positively to avoid OOM
+       if threshold > 2*inuse, so gcPercent > 100, and GC negatively to reduce GC times
   - 自动化
     - Uber 内部搞了一个叫 GOGCTuner 的库。这个库简化了 Go 的 GOGC 参数调整流程，并且能够可靠地自动对其进行调整。
     - 默认的 GOGC 参数是 100%，这个值对于 GO 的开发者来说并不明确，其本身还是依赖于活跃的堆内存。GOGCTuner 会限制应用使用 70% 的内存。并且能够将内存用量严格限制住。
