@@ -137,7 +137,31 @@
 - [Go vs Rust Idioms](https://programming-idioms.org/cheatsheet/Go/Rust)
 - [Using unwrap() in Rust is Okay](https://blog.burntsushi.net/unwrap/)
 - [Error Handling in Rust](https://blog.burntsushi.net/rust-error-handling/)
-
-
-
-
+- [Monoio ：基于 io-uring 的高性能 Rust Runtime](https://mp.weixin.qq.com/s/84EiGzKZG3DHWLsefJZT6Q)
+  - Rust 异步机制
+    - 借助 Rustc 和 llvm，Rust 可以生成足够高效且安全的机器码. 一个应用程序除了计算逻辑以外往往还有 IO，特别是对于网络中间件，IO 其实是占了相当大比例的
+    - 程序做 IO 需要和操作系统打交道，编写异步程序通常并不是一件简单的事情 - Rust 允许自行实现 Runtime 来调度任务和执行 syscall；并提供了 Future 等统一的接口；另外内置了 async-await 语法糖从面向 callback 编程中解放出来。
+    - Async Await 背后的秘密
+      - 其生成结构最终实现 Future trait 
+      - Async + Await 其实是语法糖，可以在 HIR 阶段被展开为 Generator 语法，然后 Generator 又会在 MIR 阶段被编译器展开成状态机
+    - Future 抽象
+      - Future 描述状态机对外暴露的接口：
+        - 推动状态机执行：Poll 方法顾名思义就是去推动状态机执行，给定一个任务，就会推动这个任务做状态转换。
+      - 返回执行结果：
+        - 遇到了阻塞：Pending
+        - 执行完毕：Ready + 返回值
+    - Task, Future 和 Runtime 的关系
+      - ![img.png](rust_future_runtime.png)
+  - Monoio 设计
+    - 基于 GAT(Generic associated types) 的异步 IO 接口
+      - 两种通知机制。第一种是和 epoll 类似的，基于就绪状态的一种通知。第二种是 io-uring 的模式，它是一个基于“完成通知”的模式
+      - io_uring
+        - io_uring 允许用户和内核共享两个无锁队列，submission queue 是用户态程序写，内核态消费；completion queue 是内核态写，用户态消费。通过 enter syscall 可以将队列中放入的 SQE 提交给 kernel，并可选地陷入并等待 CQE。
+        - 在 syscall 密集的应用中，使用 io_uring 可以大大减少上下文切换次数，并且 io_uring 本身也可以减少内核中数据拷贝。
+    - 设计上是一个 thread-per-core 模式的 Runtime。
+      - 所有 Task 均仅在固定线程运行，无任务窃取。
+      - Task Queue 为 thread local 结构操作无锁无竞争。
+      - Thread-per-core 不代表没有跨线程能力。用户依旧可以使用一些跨线程共享的结构，这些和 Runtime 无关；Runtime 提供了跨线程等待的能力。
+  - Runtime 对比
+    - 对于较大量的轻任务，thread-per-core 模式是适合的。特别是代理、网关和文件 IO 密集的应用，使用 Monoio 就非常合适。
+    - ![img.png](rust_runtime_diff.png)

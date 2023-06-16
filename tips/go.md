@@ -1716,8 +1716,16 @@
     -  This is because a goroutine can only perform one operation on a channel at a time, either sending or receiving.
     - When a goroutine performs a send operation on a channel, it is added to the send queue of the channel and waits until another goroutine performs a receive operation on the same channel. Similarly, when a goroutine performs a receive operation on a channel, it is added to the receive queue of the channel and waits until another goroutine performs a send operation on the same channel.
 - [Lensm, A Tool for Viewing Disassembly](storj.io/blog/lensm)
-
-
+- [Tips]
+  - init
+    - init 函数并不是最先被执行的，如果声明了 const 或全局变量，那么 init 函数会在它们之后执行
+    - init 初始化按解析的依赖关系顺序执行
+  - embed types 
+    - 有些字段我们并不想 export ，但是 embed types 可能给我们带出去
+  - Functional Options Pattern传递参数
+    - 设置一个不导出的 struct 叫 options，用来存放配置参数；
+    - 创建一个类型 type Option func(options *options) error，用这个类型来作为返回值；
+  - 以 0 开头的整数表示八进制
 
 
 
