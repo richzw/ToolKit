@@ -641,7 +641,10 @@
   - 前面我们讨论的很多步骤里都涉及到协程的阻塞。例如 Accept 时如果新连接还尚未到达。再比如像 Read 数据的时候对方还没有发送，当前协程都不会占着 cpu 不放，而是会阻塞起来。
     那么当要等待的事件就绪的时候，被阻塞掉的协程又是如何被重新调度的呢？相信大家一定会好奇这个问题。
     - Go 语言的运行时会在调度或者系统监控中调用 sysmon，它会调用 netpoll，来不断地调用 epoll_wait 来查看 epoll   对象所管理的文件描述符中哪一个有事件就绪需要被处理了。如果有，就唤醒对应的协程来进行执行。
-
+  - [netpoll](https://mp.weixin.qq.com/s/L-ML-hkKwbOC71F6cGL3mw)
+    - Go 网络标准库通过在底层封装 epoll 实现了 IO 多路复用，通过网络轮询器加 GMP 调度器避免了传统网络编程中的线程切换和 IO 阻塞
+    - ListenTCP 方法内部实现了创建 socket，绑定端口，监听端口三个操作，相对于传统的 C 系列语言编程，将初始化过程简化为一个方法 API, 当方法执行完成后，epoll 也已经完成初始化工作，进入轮询状态等待连接到来以及 IO 事件。
+    - netpoll 方法用于检测网络轮询器并返回已经就绪的 goroutine 列表. 然后调用方会将返回的 goroutine 逐个加入处理器的本地队列或者全局队列
 - always discard body e.g. io.Copy(ioutil.Discard, resp.Body) if you don't use it
   - HTTP client's Transport will not reuse connections unless the body is read to completion and closed
    ```go
