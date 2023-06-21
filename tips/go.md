@@ -1726,7 +1726,13 @@
     - 设置一个不导出的 struct 叫 options，用来存放配置参数；
     - 创建一个类型 type Option func(options *options) error，用这个类型来作为返回值；
   - 以 0 开头的整数表示八进制
-
+- sync.Pool
+  - Get/Put func is unbalanced on P.
+     - Usually Get and Put are not fired on the same goroutine, which will result in a difference in the fired times of Get and Put on each P. The difference part will trigger the steal operation(using CAS).
+  - poolLocal.private has only one.
+     - Get/Put operations are very frequent. In most cases, Get/Put needs to operate poolLocal.shared (using CAS) instead of the lock-free poolLocal.private.
+  - Frequent GC.
+     - sync.Pool is designed to serve objects with a short life cycle, but we just want to reuse, don’t want frequent GC.
 
 
 
