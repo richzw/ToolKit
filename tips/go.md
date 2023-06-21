@@ -1733,8 +1733,16 @@
      - Get/Put operations are very frequent. In most cases, Get/Put needs to operate poolLocal.shared (using CAS) instead of the lock-free poolLocal.private.
   - Frequent GC.
      - sync.Pool is designed to serve objects with a short life cycle, but we just want to reuse, don’t want frequent GC.
-
-
+- [瞬间高并发，goroutine执行结束后的资源占用问题](https://mp.weixin.qq.com/s/iBo-j4990paKb3Pb7Xk-2w)
+  - p.CPUPercent() && p.MemoryPercent(), 借助github.com/shirou/gopsutil这个库，每隔5s打印一下当前程序的CPU和内存使用信息
+  - goroutine已经执行结束后，GC的耗时明显增加，CPU和内存使用更是大幅上涨
+  - Root cause
+    - allgs会在GC及检查死锁(以及用schedtrace调试)时用到，进行加锁遍历。
+    - 而这个切片只可能单向扩增，而没有收缩操作。
+    - 当流量恢复，这个在洪峰期间扩增的allgs切片，不会相应变小，还是要进行遍历扫描，从而cpu占用升高，用于处理业务的cpu占比相应减少。
+  - [为什么 Go 模块在下游服务抖动恢复后，CPU 占用无法恢复](https://xargin.com/cpu-idle-cannot-recover-after-peak-load/amp/)
+  - 目前运行时从不释放为goroutines创建的g对象，尽管它确实重用它们。其主要原因是调度器经常在没有写屏障的情况下操作g指针（许多调度器代码在没有P的情况下运行，因此不能有写屏障），这使得很难确定何时可以对g进行垃圾收集。
+  - 大致原因就是go的gc采用的是并发垃圾回收，调度器在操作协程指针的时候不使用写屏障（draveness: 7.2 垃圾收集器），因为调度器在很多执行的时候需要使用P（GPM），因此不能使用写屏障，所以调度器很难确定一个协程是否可以当成垃圾回收，这样调度器里的协程指针信息就会泄露。
 
 
 
