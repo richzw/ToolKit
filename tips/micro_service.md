@@ -449,6 +449,28 @@
   ![img.png](micro_service_hytrix.png)
 - [Raft 分布式共识算法讲义](https://mp.weixin.qq.com/s/JOzK15Y85FFwIuMwJifIAw)
   - [Source](https://www.youtube.com/watch?v=vYp4LYbnnW8)
+- Raft vs Paxos
+  - Multi-Paxos是自下而上（bottom-up）设计的弱Leader，而Raft是自上而下（top-down）设计的强Leader
+    - Raft算法为了设计出易于理解的算法，采用了问题分解和简化状态空间的方法。问题分解体现在它将Leader选举、日志复制和成员变更拆解成子问题，分而治之
+    - 为了简化状态空间，Raft增加了更多约束，例如不允许日志出现空洞、限制了日志之间可能变得不一致的方式等，这样得到的系统会更易于推理和校验
+  - 共同点
+    - 它们都是通过Replicated log来实现
+    - 任何时候服务器都可能处于以下三种状态之一：
+      - Leader，负责使用 AppendEntries RPC 将写请求添加到replicated log中。
+      - Follower，回应Leader发送的AppendEntries RPC。
+      - Candidate，Candidate会试图使用 RequestVotes RPC 成为Leader
+    - 服务器都会存储一个递增的数字叫做Term（任期号），每条RPC消息都会包含Term。当服务器接收到RPC时，它会检查RPC里包含的Term与自身Term的大小
+  - 差异点
+    - Leader选举
+      - Paxos允许任何服务器成为Leader，然后再从其他服务器补齐缺少的日志，而Raft只允许拥有最新日志的服务器成为Leader
+    - Leader是否会修改日志的term
+      - 在Raft 中，日志条目的term不会被未来的leader所修改。而在Paxos协议下，这是可能的
+    - 日志的连续性
+      - Raft 的日志是严格顺序写入的，而Paxos通常允许无序写入，但需要额外的协议来填充可能因此发生的日志间隙。
+    - 日志条目提交的条件
+      - 在Raft协议里，即使日志条目被多数派的节点所接受（但未提交），也有可能被回滚掉
+      - 而在Paxos系统里，只要日志条目被复制到了多数派服务器上，Paxos就可以安全地提交日志条目。
+    - Raft增加了一些约束，例如只允许日志从Leader流向其他服务器，当Follower数据与Leader不一致时，Leader会强制Follower的日志复制自己的日志，用Leader的日志条目来覆盖Follower日志中的冲突条目。这使得Raft成为一个强Leader的算法。
 - [eBPF 代替 iptables 优化服务网格数据面性能](https://mp.weixin.qq.com/s/U6-wcBsBC-Khffb7kTBtjA)
   - iptables 实现流量劫持
     - 一个 Pod 的创建过程，sidecar injector 会向 Pod 中注入两个容器，istio-init 和 istio-proxy
