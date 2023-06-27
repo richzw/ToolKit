@@ -869,5 +869,8 @@
   - 热点的容灾
     - 热点检测工具，接入后能基于配置的阈值，自动地统计热点并临时性地使用本地缓存
 - [design pattern && refactor](https://refactoring.guru/)
-
+- [日志平台](https://mp.weixin.qq.com/s/tnP6hI2KwPde7PGg6QyUCw)
+  - 访问加速层 + table format + 查询引擎。
+    - 当前数据访问加速层采用的clickhouse，table format采用的iceberg，查询引擎默认使用的trino。
+    - 基本思路为log-consumer双写clickhouse和iceberg，查询由log-query作为统一查询屏蔽clickhouse和trino。
 
