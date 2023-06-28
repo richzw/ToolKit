@@ -304,6 +304,13 @@
     - [Golang runtime: use SwissTable](https://github.com/golang/go/issues/54766)
     - [SwissMap: A smaller, faster Golang Hash Table](https://www.dolthub.com/blog/2023-03-28-swiss-map/)
     - [SwissTable: A Fast and Cache-Efficient Hash Table](https://arxiv.org/pdf/2004.06804.pdf)
+    - [Designing a Fast, Efficient, Cache-friendly Hash Table, Step by Step](https://www.youtube.com/watch?v=ncHmEUmJZf4&t=1449s)
+    - https://github.com/dolthub/swiss
+    - The SwissTable uses a different hashing scheme called "closed-hashing"
+    - Rather than collect elements into buckets, each key-value pair in the hash-table is assigned its own "slot". The location of this slot is determined by a probing algorithm whose starting point is determined by the hash of the key. The simplest example is a linear probing search which starts at slot hash(key) mod size and stops when the desired key is found, or when an empty slot is reached.
+    - The segmented memory layout of SwissTable is a key driver of its performance. Probe sequences through the table only access the metadata array until a short hash match is found. This access pattern maximizes cache-locality during probing.
+    - Using SSE instructions effectively allows us to divide the length of average probe sequence by 16. Empirical measurements show that even at maximum load, the average probe sequence performs fewer than two 16-way comparisons
+    - Golang support for SSE instructions, and for SIMD instructions in general, is minimal. To leverage these intrinsics, SwissMap uses the excellent Avo package to generate assembly functions with the relevant SSE instructions.
   - **Extendible hashing** is designed for databases and file systems and uses a mix of a trie and a chained hash table to dynamically increase bucket sizes as individual buckets get loaded. 
   - **Robin Hood hashing** is a variant of linear probing in which items can be moved after being inserted to reduce the variance in how far from home each element can live.
   - **cuckoo hashing** have two hash tables and two hash functions. Each item can be in exactly one of two places - it's either in the location in the first table given by the first hash function, or it's in the location in the second table given by the second hash function. This means that lookups are worst-case efficient, since you only have to check two spots to see if something is in the table.

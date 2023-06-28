@@ -148,7 +148,7 @@
     - We initially used atomic counters for these. However, the overhead was significant. We narrowed the cause down to False Sharing. 
     - To achieve scalability, we ensure that each atomic counter completely occupies a full cache line
 - [TinyLFU](https://juejin.cn/post/7144327955353698334)
-  - CountMinSketch
+  - [CountMinSketch](http://web.stanford.edu/class/archive/cs/cs166/cs166.1206/lectures/10/Slides10.pdf)
     - 一种计数器，用来统计一个元素的计数，它能够以一个非常小的空间统计大量元素的计数，同时保证高的性能及准确性
     - 与布隆过滤器类似，由于它是基于概率的，因此它所统计的计数是有一定概率存在误差的，也就是可能会比真实的计数大。
   - SLRU Segmented LRU
