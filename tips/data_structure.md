@@ -305,12 +305,19 @@
     - [SwissMap: A smaller, faster Golang Hash Table](https://www.dolthub.com/blog/2023-03-28-swiss-map/)
     - [SwissTable: A Fast and Cache-Efficient Hash Table](https://arxiv.org/pdf/2004.06804.pdf)
     - [Designing a Fast, Efficient, Cache-friendly Hash Table, Step by Step](https://www.youtube.com/watch?v=ncHmEUmJZf4&t=1449s)
-    - https://github.com/dolthub/swiss
-    - The SwissTable uses a different hashing scheme called "closed-hashing"
-    - Rather than collect elements into buckets, each key-value pair in the hash-table is assigned its own "slot". The location of this slot is determined by a probing algorithm whose starting point is determined by the hash of the key. The simplest example is a linear probing search which starts at slot hash(key) mod size and stops when the desired key is found, or when an empty slot is reached.
-    - The segmented memory layout of SwissTable is a key driver of its performance. Probe sequences through the table only access the metadata array until a short hash match is found. This access pattern maximizes cache-locality during probing.
-    - Using SSE instructions effectively allows us to divide the length of average probe sequence by 16. Empirical measurements show that even at maximum load, the average probe sequence performs fewer than two 16-way comparisons
-    - Golang support for SSE instructions, and for SIMD instructions in general, is minimal. To leverage these intrinsics, SwissMap uses the excellent Avo package to generate assembly functions with the relevant SSE instructions.
+      - https://github.com/dolthub/swiss
+      - The SwissTable uses a different hashing scheme called "closed-hashing"
+      - Rather than collect elements into buckets, each key-value pair in the hash-table is assigned its own "slot". The location of this slot is determined by a probing algorithm whose starting point is determined by the hash of the key. The simplest example is a linear probing search which starts at slot hash(key) mod size and stops when the desired key is found, or when an empty slot is reached.
+      - The segmented memory layout of SwissTable is a key driver of its performance. Probe sequences through the table only access the metadata array until a short hash match is found. This access pattern maximizes cache-locality during probing.
+      - Using SSE instructions effectively allows us to divide the length of average probe sequence by 16. Empirical measurements show that even at maximum load, the average probe sequence performs fewer than two 16-way comparisons
+      - Golang support for SSE instructions, and for SIMD instructions in general, is minimal. To leverage these intrinsics, SwissMap uses the excellent Avo package to generate assembly functions with the relevant SSE instructions.
+    - [Go](https://mp.weixin.qq.com/s/MlxxDYQ_VROPZQk0TYbWYQ)
+      - 内建的 map 采用开放寻址法(open-hashing，也叫拉链法),哈希值冲突(哈希值一样)的键值对会被放在一个桶中，查找的时候，先根据哈希值找到对应的桶，然后再遍历桶中的元素，找到对应的值
+      - SwissTable 使用一种称为“封闭哈希”（Closed Hashing,也叫开地址法）的不同哈希方案。每一个哈希值都会有一个自己的槽(slot),槽的选择是由哈希值决定，最简单的方式就是从hash(key) mod size的槽开始查找，一直往后查找，直到直到对应的键或者空的槽(不存在的 key),这也是开地址法常见的套路
+      - SwissTable 的内存布局是其性能的关键驱动因素。通过使用 SSE 指令，可以将平均探测序列的长度除以 16。实验测量表明，即使在最大负载下，平均探测序列也执行少于两个 16 路比较
+      - 对 CPU 的 cache 更友好，更重要的是，可以通过 SSE 指令并行比较 16 个短哈希。
+      - 在 key 的数量比较少时,swiss 并不能发挥它的 SSE 指令的优势，但是在 key 值非常多的情况下， swiss 优势明显
+      - swiss 库采用了Daniel Lemire提出的一个快速求余(更准确的说，是 modulo reduction)的算法，这个想法看似简单，但实际上非常巧妙 (x * N) / 232
   - **Extendible hashing** is designed for databases and file systems and uses a mix of a trie and a chained hash table to dynamically increase bucket sizes as individual buckets get loaded. 
   - **Robin Hood hashing** is a variant of linear probing in which items can be moved after being inserted to reduce the variance in how far from home each element can live.
   - **cuckoo hashing** have two hash tables and two hash functions. Each item can be in exactly one of two places - it's either in the location in the first table given by the first hash function, or it's in the location in the second table given by the second hash function. This means that lookups are worst-case efficient, since you only have to check two spots to see if something is in the table.
