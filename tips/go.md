@@ -1726,7 +1726,46 @@
     - 设置一个不导出的 struct 叫 options，用来存放配置参数；
     - 创建一个类型 type Option func(options *options) error，用这个类型来作为返回值；
   - 以 0 开头的整数表示八进制
-- sync.Pool
+- [sync.Pool](https://mp.weixin.qq.com/s/ltSzjyRoSRlN-VMEmJ61Cg)
+  - 内部实现
+    - ![img.png](go_sync_pool_data_structure.png)
+    - 数据结构
+      - poolLocal
+        - poolLocal 是一个数组，数组的每个元素是一个 poolLocal 对象，poolLocal 对象包含两个字段，一个是私有的 private，一个是共享的 shared。
+      - 缓存池对象 Pool
+        - victim cache
+          - victim cache 是一个 poolLocal 对象，它的 private 字段是一个链表，用来存放从其他 P 偷来的对象。
+          - 所谓受害者缓存（Victim Cache），是 CPU 硬件处理缓存的一种技术，是一个与直接匹配或低相联缓存并用的、容量很小的全相联缓存
+          - 当一个数据块被逐出缓存时，并不直接丢弃，而是暂先进入受害者缓存。如果受害者缓存已满，就替换掉其中一项。当进行缓存标签匹配时， 在与索引指向标签匹配的同时，并行查看受害者缓存，如果在受害者缓存发现匹配，就将其此数据块与缓存中的不匹配数据块做交换，同时返回给处理器。
+      - poolLocalInternal 对象表示每个处理器 P 的本地对象池
+        - shared 字段的数据结构修改为 单个生产者/多个消费者 双端无锁环形队列，当前处理器 P 可以执行 pushHead/popHead 操作， 其他处理器 P 只能执行 popTail 操作。
+        - 单个生产者：当前处理器 P 上面运行的 goroutine 执行 Put 方法时，将对象放入队列，并且只能放在队列头部，但是其他处理器 P 上运行的 goroutine 不能放入。 由于每个处理器 P 在任意时刻只有一个 goroutine 运行，所以无需加锁。
+        - 多个消费者分两种角色：
+          - 在当前处理器 P 上运行的 goroutine，执行 Get 方法时，从队列头部取对象，由于每个处理器 P 在任意时刻只有一个 goroutine 运行，所以无需加锁
+          - 在其他处理器 P 上运行的 goroutine，执行 Get 方法时，如果该处理器 P 没有缓存对象，就到别的处理器 P 的队列上窃取。 此时窃取者 goroutine 只能从队列尾部取对象，因为同时可能有多个窃取者 goroutine 窃取同一个处理器 P 的队列, 所以用 CAS 来实现无锁队列功能
+      - poolChain
+        - poolChain 是一个数组，数组的每个元素是一个 poolLocalInternal 对象，poolLocalInternal 对象表示每个处理器 P 的本地对象池
+        - poolChain 对象表示 poolDequeue 数据类型的双端环形队列链表，每个节点表示的队列长度是后驱节点队列长度的两倍， 如果当前所有的节点队列满了，就创建一个新的队列 (长度是当前头节点队列长度的 2 倍)，然后挂载到头节点
+        - 为什么 poolChain 的数据结构是链表 + ring buffer (环形队列) 呢
+          - 使用 ring buffer 数据结构的优点非常适用于 sync.Pool 对象池的使用场景。
+          - 预先分配好内存并且分配的元素内存可复用，避免了数据迁移
+          - 作为底层数据结构的数组是连续内存结构，非常利于 CPU Cache, 在访问 poolDequeue 队列中的某个元素时，其附近的元素可能被加载到同一个 Cache Line 中，访问速度更快
+          - 更高效的出队和入队操作，因为环形队列是首尾相连的，避免了普通队列中队首和队尾频繁变动的问题
+        - 但是 ring buffer 也有缺点，就是不能动态扩容，所以 sync.Pool 的 poolChain 长度是固定的，不能动态扩容
+      - poolDequeue 对象
+        - 是一个由 单个生产者/多个消费者 模式组成的固定大小的无锁队列。单个生产者可以从队列头部执行 push 和 pop 操作， 多个消费者只能从队列尾部执行 pop 操作。
+        - 为什么要将 head 和 tail 合并到一个变量里面？ 因为这样可以进行原子操作，完成两个字段的 lock free (无锁编程) 优化
+    - Summary
+      - noCopy 机制
+      - CPU CacheLine 伪共享、内存对齐
+      - poolDequeue.headTail 字段合并设计，压缩、解压、CAS 操作、索引定位等
+      - 每个处理器 P 持有一个对象池，最大限度降低并发冲突
+      - 私有变量/共享变量
+      - 单生产者/多消费者模式实现 “读写分离”
+      - 双端队列的出队顺序 (当前处理器 P 从队列头部操作，其他处理器 P 从队列尾部操作)，最大限度降低并发冲突
+      - 无锁编程
+      - 对象窃取机制
+      - 垃圾回收时的新旧对象交替使用，类似分代垃圾回收的设计理念
   - Get/Put func is unbalanced on P.
      - Usually Get and Put are not fired on the same goroutine, which will result in a difference in the fired times of Get and Put on each P. The difference part will trigger the steal operation(using CAS).
   - poolLocal.private has only one.
