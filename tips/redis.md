@@ -250,5 +250,5 @@
        - 数据迁移成本高：Redis Cluster模式下，当需要增加或减少节点时，需要进行数据迁移，这会带来一定的成本和风险，尤其是在数据量较大的情况下。
        - 集群扩容困难：Redis Cluster模式下，集群的扩容需要进行数据迁移和重新分片，这会带来一定的复杂性和风险，尤其是在集群规模较大的情况下。
        - 部分功能受限：Redis Cluster模式下，一些Redis的功能受到了限制，例如事务、Lua脚本、pub/sub等功能，这些功能只能在单个节点上使用，不能跨节点使用
-
+- [go-redis connection pool timeout](https://redis.uptrace.dev/guide/go-redis-debugging.html#connection-pool-size)
 

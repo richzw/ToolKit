@@ -936,6 +936,31 @@
     - go heap 分析
       - gc标记和扫描还得看inuse_objects
       - 可以看到gcache中LFU生产的object数量高达100w+，而总共的object才300w。这块明显有问题，那很可能就是它导致的问题。
+- [Go Context timeouts can be harmful](https://uptrace.dev/blog/golang-context-timeout.html)
+  - Context deadline exceeded
+    - When context is cancelled, go-redis and most other database clients (including database/sql) must do the following:
+      - Close the connection, because it can't be safely reused.
+      - Open a new connection.
+      - Perform TLS handshake using the new connection.
+      - Optionally, pass some authentication checks, for example, using Redis AUTH command.
+  - Better option
+    - use ReadTimeout and WriteTimeout options which control net.Conn deadlines
+    - Alternatively, you can also use a separate context timeout for each operation
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
