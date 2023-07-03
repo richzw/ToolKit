@@ -108,4 +108,4 @@
        without (offset)
     ```
 - [如何用 PPO 算法让 AI 学会玩 FlappyBird](https://mp.weixin.qq.com/s/5DYBCCU3xsmTHtN5Ciz0WA)
-
+- [Ray 的大规模离线推理](https://mp.weixin.qq.com/s/2-jWtYcO0CVnttRrJOYcnA)
