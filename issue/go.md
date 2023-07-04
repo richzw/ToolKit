@@ -946,7 +946,7 @@
   - Better option
     - use ReadTimeout and WriteTimeout options which control net.Conn deadlines
     - Alternatively, you can also use a separate context timeout for each operation
-
+- [net: add support for MPTCP](https://github.com/golang/go/issues/56539)
 
 
 
