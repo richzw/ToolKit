@@ -109,3 +109,23 @@
     ```
 - [如何用 PPO 算法让 AI 学会玩 FlappyBird](https://mp.weixin.qq.com/s/5DYBCCU3xsmTHtN5Ciz0WA)
 - [Ray 的大规模离线推理](https://mp.weixin.qq.com/s/2-jWtYcO0CVnttRrJOYcnA)
+  - Ray Core：是 Ray 框架的底层框架，提供了一整套的分布式计算的框架，可以将普通的应用转化成分布式的系统
+    - [Ray Core](https://mp.weixin.qq.com/s?__biz=MzA5NTUxNzE4MQ==&mid=2659281279&idx=1&sn=42604ee42f6bad25321e8b38eae34d33&scene=21#wechat_redirect)
+    - [Ray Core](https://mp.weixin.qq.com/s?__biz=MzA5NTUxNzE4MQ==&mid=2659281407&idx=1&sn=548bd7f7421714f6262fee7a3c94a8ab&scene=21#wechat_redirect)
+  - Ray Serve：是一个可扩展的模型服务库，用于构建在线推理 API
+- [Ray 云原生探索之路--分布式构建本地知识库](https://mp.weixin.qq.com/s/K96d-UUnIX0tyWpL6Z7cQA)
+  - 本地向量处理
+    - 离线:  HuggingFace 的 Embeddings 的模型 “text2vec-large-chinese” 来完成这个能力
+    - 基于 pgvector 完成向量处理和向量数据的保存
+    - 基于 elasticsearch 完成向量处理和向量数据的保存
+  - 串行向量化
+    - 串行指的是在处理的过程中没有并发多任务处理能力，有一个 worker 顺序执行的方式去处理整个过程，包括数据文件的读取、文本的拆分以及文本的向量处理，到写入向量数据库。
+    - 串行向量化的方式，可以通过 Ray 的 Actor 模型来完成，Actor 模型是 Ray 的核心模型，可以将普通的 Python 类转化成分布式的 Actor，Actor 之间可以通过消息的方式进行通信，Actor 之间的通信是异步的，Actor 之间的通信是通过 Ray 的 Plasma 存储来完成的。
+  - 并行向量化
+    - 并行指的是在处理的过程中有并发多任务处理能力，有 n 个 worker 并行的方式去运行各种任务。如果在数据量很大的情况下，整个数据的向量化处理能力，会随着可用资源的增多，有很明显的提升。能充分的利用好整个集群的可用资源去处理相关的任务。
+    - 并行向量化的方式，可以通过 Ray 的 Task 模型来完成，Task 模型是 Ray 的核心模型，可以将普通的 Python 函数转化成分布式的 Task，Task 之间可以通过消息的方式进行通信，Task 之间的通信是异步的，Task 之间的通信是通过 Ray 的 Plasma 存储来完成的。
+  - 向量构建相关
+    - CPU 类型的镜像，用于启动 Ray Cluster 的 Head 节点
+    - GPU 类型的镜像，用于启动 Ray Cluster 的 Worker 节点
+
+
