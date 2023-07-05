@@ -947,7 +947,16 @@
     - use ReadTimeout and WriteTimeout options which control net.Conn deadlines
     - Alternatively, you can also use a separate context timeout for each operation
 - [net: add support for MPTCP](https://github.com/golang/go/issues/56539)
-
+  - MPTCP works as follows:
+    - Connection Establishment: MPTCP’s connection establishment process is similar to traditional TCP, except that during the initial handshake, both parties exchange capability options to determine if MPTCP is supported.
+    - Subflow Establishment: Once an MPTCP connection is established, it can initiate multiple subflows (subflow), each of which transmits data over a different network path. These subflows can be identified by different IP addresses and port numbers.
+    - Path Management: MPTCP uses a path management mechanism to select and manage multiple network paths. It allows path selection based on path quality, latency, bandwidth and other metrics, and dynamically adjusts the use of paths according to network conditions.
+    - Data Transfer: MPTCP splits data into appropriately sized blocks and sends them on different sub-streams. The receiving end reassembles the data based on the sequence number of the block and the sub-stream to which the block belongs.
+  - The benefits of MPTCP include:
+    - Bandwidth Enhancement: MPTCP can utilize the bandwidth of multiple paths simultaneously, thus providing higher overall bandwidth.
+    - Load balancing: MPTCP can dynamically adjust data transmission based on path quality and available bandwidth, enabling load balancing and improving network resource utilisation.
+    - Fault Tolerance: Because data can be transmitted over multiple paths, MPTCP can provide better fault tolerance. Even if a path fails, data can still be transmitted through other available paths.
+    - Mobility Support: MPTCP can maintain connectivity when mobile devices switch networks without having to re-establish connectivity, providing a smoother mobile experience.
 
 
 
