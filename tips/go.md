@@ -1766,12 +1766,13 @@
       - 无锁编程
       - 对象窃取机制
       - 垃圾回收时的新旧对象交替使用，类似分代垃圾回收的设计理念
-  - Get/Put func is unbalanced on P.
-     - Usually Get and Put are not fired on the same goroutine, which will result in a difference in the fired times of Get and Put on each P. The difference part will trigger the steal operation(using CAS).
-  - poolLocal.private has only one.
-     - Get/Put operations are very frequent. In most cases, Get/Put needs to operate poolLocal.shared (using CAS) instead of the lock-free poolLocal.private.
-  - Frequent GC.
-     - sync.Pool is designed to serve objects with a short life cycle, but we just want to reuse, don’t want frequent GC.
+  - Defects of sync.Pool
+    - Get/Put func is unbalanced on P.
+       - Usually Get and Put are not fired on the same goroutine, which will result in a difference in the fired times of Get and Put on each P. The difference part will trigger the steal operation(using CAS).
+    - poolLocal.private has only one.
+       - Get/Put operations are very frequent. In most cases, Get/Put needs to operate poolLocal.shared (using CAS) instead of the lock-free poolLocal.private.
+    - Frequent GC.
+       - sync.Pool is designed to serve objects with a short life cycle, but we just want to reuse, don’t want frequent GC.
 - [瞬间高并发，goroutine执行结束后的资源占用问题](https://mp.weixin.qq.com/s/iBo-j4990paKb3Pb7Xk-2w)
   - p.CPUPercent() && p.MemoryPercent(), 借助github.com/shirou/gopsutil这个库，每隔5s打印一下当前程序的CPU和内存使用信息
   - goroutine已经执行结束后，GC的耗时明显增加，CPU和内存使用更是大幅上涨
