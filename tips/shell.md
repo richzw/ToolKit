@@ -102,7 +102,28 @@
   - 列出当前服务器每一进程运行的数量，倒序排列 
     - `ps aux | awk '{print $11}' | sort | uniq -c | sort -nr`
 - [Vim cheatsheet](https://mp.weixin.qq.com/s/BkJnbXvuVZIAExOkgVqPWw)
-
+- [perf](https://mp.weixin.qq.com/s/5Y_ZyDPM6OcejvktyoZzDw)
+  - Perf 工作模式
+    - Couting Mode 
+      - Counting Mode 将会精确统计一段时间内 CPU 相关硬件计数器数值的变化。为了统计用户感兴趣的事件，Perf Tool 将设置性能控制相关的寄存器。这些寄存器的值将在监控周期结束后被读出。典型工具：Perf Stat。
+    - Sampling Mode
+      - Sampling Mode 将以定期采样方式获取性能数据。PMU 计数器将为某些特定事件配置溢出周期。当计数器溢出时，相关数据，如 IP、通用寄存器、EFLAG 将会被捕捉到。典型工具：Perf Record。
+  - Perf Tool 
+    - Perf Stat：分析性能。
+      ```shell
+      perf stat -p $pid -d     # 进程级别统计
+      perf stat -a -d sleep 5  # 系统整体统计
+      perf stat -p $pid -e 'syscalls:sys_enter' sleep 10  #分析进程调用系统调用的情形
+      ```
+    - Perf Top：实时性能分析。
+      ```shell
+      perf top -p $pid -g -F 99
+      ```
+    - Perf Record：记录性能数据。记录一段时间内系统/进程的性能事件, 默认性能事件为 cycles ( CPU 周期数 )
+      ```shell
+      perf record -p $pid -g -e cycles -e cs #进程采样
+      perf record -a -g -e cycles -e cs #系统整体采样
+      ```
 
 
 
