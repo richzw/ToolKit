@@ -281,6 +281,10 @@
   - sar -n TCP,ETCP 1
   - top
 
+- 节省了30%的CPU
+  - 使用top命令定位出占用CPU最高的进程，定位到进程后在使用  `top -Hp pid` 命令， 查看占用 CPU 最高的线程
+  - 为了搞清楚BgMoveProcPool线程到底在执行什么，使用`pstack pid`命令抓取此时的堆栈
+
 
 
 
