@@ -568,7 +568,8 @@
     - 从 DNS 响应上来看，包含有很多 CNAME 解析，使用了 CDN 相关技术。简单通过显示过滤表达式 (dns.qry.name contains "paypal" ) && (dns.flags.response == 1) 过滤出响应数据包中带有 paypal 相关字样的值，然后根据 dns.resp.name 字段值进行处理
     -  Wireshark dns.time 的算法是第一次查询以及响应数据包之间的间隔时间。
     - `tshark -r dnsing.pcapng -Y '(dns.qry.name contains "paypal" ) && (dns.flags.response == 1)' -T fields -e ip.src -e ip.dst -e dns.a -e dns.cname -e dns.a.ttl -e dns.id -e dns.count.answers -e dns.time | awk 'BEGIN{ RS=","; } { print $0 }' | sort -rn | uniq`
-
+- [systemtap脚本追踪内核协议栈丢包堆栈信息](https://mp.weixin.qq.com/s/QcSa3AGrlmJ-BoWN0tzrsA)
+  - 报文如果被内核丢弃后，正常情况都会调用kfree_skb函数，内核通过kfree_skb释放skb，kfree_skb函数中已经埋下了trace点，并且通过__builtin_return_address(0)记录下了调用kfree_skb的函数地址并传给location参数，可以通过systemtap脚本，追踪kfree_skb这个trace point, 找到匹配ip的丢包并输出对应的堆栈
 
 
 
