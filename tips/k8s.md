@@ -1,4 +1,7 @@
 
+- [资料]
+  - [Kubernetes 实践指南](https://imroc.cc/kubernetes/index.html)
+  - [K8S训练营](https://www.qikqiak.com/k8strain/)
 - HPA
   ![img.png](k8s_hpa.png)
 - [VPC与三种K8s网络模型](https://mp.weixin.qq.com/s/W04uff4sHrPM_VtjzHPoJA)

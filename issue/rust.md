@@ -133,10 +133,16 @@
 - [Rust笔记](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzI1MjAzNDI1MA==&action=getalbum&album_id=2170724251283095557&scene=173&from_msgid=2648217143&from_itemidx=2&count=3&nolastread=1#wechat_redirect)
 - [Rust 的泛型](https://mp.weixin.qq.com/s/OBg5B93G8Gz9srB-jQQGiw)
 - [Rust 语法梳理与总结](https://mp.weixin.qq.com/s/H0oZZg6YBzQDRMzyujVYcg)
+- [Box<T>智能指针](https://mp.weixin.qq.com/s/wSHBxpj8yv4Y12E8z_8cag)
+- [规则宏代码](https://mp.weixin.qq.com/s/8hp1HhLGEH_ve-OsIYhS8w)
+- [写Rust，有三大内伤](https://mp.weixin.qq.com/s/GO8f3EH9-MRvDACYH8rUSg)
+- [When Rust hurts](https://mmapped.blog/posts/15-when-rust-hurts.html)
+- [类型状态设计模式](https://mp.weixin.qq.com/s/OqXYweARmPrE-LH8TAIxFQ)
 - [Rust wiki](https://rustwiki.org/zh-CN/book/ch03-02-data-types.html)
 - [Go vs Rust Idioms](https://programming-idioms.org/cheatsheet/Go/Rust)
 - [Using unwrap() in Rust is Okay](https://blog.burntsushi.net/unwrap/)
 - [Error Handling in Rust](https://blog.burntsushi.net/rust-error-handling/)
+- [Rust Runtime 设计与实现](https://www.ihcblog.com/rust-runtime-design-1/)
 - [Monoio ：基于 io-uring 的高性能 Rust Runtime](https://mp.weixin.qq.com/s/84EiGzKZG3DHWLsefJZT6Q)
   - Rust 异步机制
     - 借助 Rustc 和 llvm，Rust 可以生成足够高效且安全的机器码. 一个应用程序除了计算逻辑以外往往还有 IO，特别是对于网络中间件，IO 其实是占了相当大比例的
