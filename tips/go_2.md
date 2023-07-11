@@ -1185,10 +1185,11 @@
         - 参考 freecache 的思路，用 ringbuffer 存 entry，绕过了 map 里存指针，简单瞄了一下代码，后面有空再研究一下（继续挖坑
         - 利用 Go 1.5+ 的特性： 当 map 中的 key 和 value 都是基础类型时，GC 就不会扫到 map 里的 key 和 value
       - 最终他们采用了 map[uint64]uint32 作为 cacheShard 中的关键存储。key 是 sharding 时得到的 uint64 hashed key，value 则只存 offset ，整体使用 FIFO 的 bytes queue，也符合按照时序淘汰的需求，非常精巧。
-    - fastcache实现原理
+    - [fastcache实现原理](https://mp.weixin.qq.com/s/X3YMpCNAOrhGWk0vBJuLtw)
       - 它的灵感来自于bigcache。所以整体的思路和bigcache很类似，数据通过bucket进行分片。fastcache由512个bucket构成。每个bucket维护一把读写锁。
-      - 在bucket内部数据同理是索引、数据两部分构成。索引用map[uint64]uint64存储。数据采用chunks二维的切片(二维数组)存储。
+      - 在bucket内部数据同理是索引、数据两部分构成。索引用map[uint64]uint64存储(作为非指针优化从而避免 GC)。数据采用chunks二维的切片(二维数组)存储(采用指纹 + 哈希索引快速定位数据位置)。
       - 它的内存分配是在堆外分配的，而不是在堆上分配的。堆外分配的内存。这样做也就避免了golang GC的影响。
+        - fastcache 采用的 64KB 的数据块减少了内存碎片和总内存使用量。 此外当从 全局数据块空闲区 获取数据块时，会直接调用 Mmap 分配到堆外内存，减少了总内存使用量，因为 GC 会更频繁地收集未使用的内存，无需调整 GOGC。
       - ![img.png](go_local_cache_fastcache.png)
 - [Goroutine 数量控制在多少合适，会影响 GC 和调度](https://mp.weixin.qq.com/s?__biz=MzUxMDI4MDc1NA==&mid=2247487250&idx=1&sn=3004324a9d2ba99233c4af48843dba64&scene=21#wechat_redirect)
   - M 的限制
