@@ -179,5 +179,5 @@
       - 使用两个不同的时间窗口参数，对数据使用指数加权移动平均（EWMA）函数。一个参数用于慢速滑动窗口，另一个参数用于快速滑动窗口，这有助于识别数据在不同时间尺度上的趋势。
       - 从慢速趋势中减去快速趋势得到 MACD 曲线，并再次应用指数加权平均，获得 MACD 信号曲线。
       - 步骤 3 的指数移动平均 MACD 信号曲线减去 MACD 曲线，我们会得到 MACD 直方图。这个直方图有助于我们检测时间序列数据中的渐变变化。
-
+- [GPT-4 Architecture, Infrastructure, Training Dataset, Costs, Vision, MoE](https://hub.baai.ac.cn/view/27744)
 

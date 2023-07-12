@@ -570,7 +570,15 @@
     - `tshark -r dnsing.pcapng -Y '(dns.qry.name contains "paypal" ) && (dns.flags.response == 1)' -T fields -e ip.src -e ip.dst -e dns.a -e dns.cname -e dns.a.ttl -e dns.id -e dns.count.answers -e dns.time | awk 'BEGIN{ RS=","; } { print $0 }' | sort -rn | uniq`
 - [systemtap脚本追踪内核协议栈丢包堆栈信息](https://mp.weixin.qq.com/s/QcSa3AGrlmJ-BoWN0tzrsA)
   - 报文如果被内核丢弃后，正常情况都会调用kfree_skb函数，内核通过kfree_skb释放skb，kfree_skb函数中已经埋下了trace点，并且通过__builtin_return_address(0)记录下了调用kfree_skb的函数地址并传给location参数，可以通过systemtap脚本，追踪kfree_skb这个trace point, 找到匹配ip的丢包并输出对应的堆栈
-
+- [网络延迟排查方法]
+  - 使用hping3和wrk等工具确认单个请求和并发请求的网络延迟是否正常。
+    - `hping3 -c 10 -S -p 80 -i u1000` 使用traceroute或hping3的 TCP 和 UDP 模式来获取网络延迟。
+    - `wrk -t 10 -c 100 -d 10s http://www.baidu.com` 使用wrk等工具来模拟并发请求。
+    - `traceroute --tcp -p 80 -n google.com`
+  - 使用traceroute，确认路由正确，并查看路由中每个网关跳跃点的延迟。
+  - 使用tcpdump和Wireshark确认网络数据包是否正常收发。
+  - 使用strace等观察应用程序对网络 socket 的调用是否正常
+    - `strace -f wrk --latency -c 100 -t 2 --timeout 2 http://192.168.0.30:8080/`
 
 
 
