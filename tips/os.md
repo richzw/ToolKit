@@ -367,6 +367,7 @@
     - 很多应用程序在面临客户端请求时，可以等价为进行如下的系统调用：
       - File.read(file, buf, len);
       - Socket.send(socket, buf, len);
+      - ![img.png](os_zo_raw_copy.png)
     - 4 次 copy：
       - 物理设备 <-> 内存：
         - CPU 负责将数据从磁盘搬运到内核空间的 Page Cache 中；
@@ -394,15 +395,18 @@
           - DMA 技术；
             - sendfile 依赖于 DMA 技术，将四次 CPU 全程负责的拷贝与四次上下文切换减少到两次
             - ![img.png](os_sendfile_dma.png)
+            - ![img.png](os_sendfile_2.png)
           - 传递文件描述符代替数据拷贝；
             - page cache 以及 socket buffer 都在内核空间中；
             - 数据在传输中没有被更新；
           - 一次系统调用代替两次系统调用
             - 由于 sendfile 仅仅对应一次系统调用，而传统文件操作则需要使用 read 以及 write 两个系统调用。
             - sendfile 能够将用户态与内核态之间的上下文切换从 4 次讲到 2 次
+          - 我们需要注意 sendfile 系统调用的局限性。如果应用程序需要对从磁盘读取的数据进行写操作，例如解密或加密，那么 sendfile 系统调用就完全没法用。这是因为用户线程根本就不能够通过 sendfile 系统调用得到传输的数据。
       - mmap
         - 仅代替 read 系统调用，将内核空间地址映射为用户空间地址，write 操作直接作用于内核空间。
         - 通过 DMA 技术以及地址映射技术，用户空间与内核空间无须数据拷贝，实现了 zero copy
+        - ![img.png](os_zero_copy_mmap.png)
       - 直接 Direct I/O
         - 读写操作直接在磁盘上进行，不使用 page cache 机制，通常结合用户空间的用户缓存使用。
         - 通过 DMA 技术直接与磁盘/网卡进行数据交互，实现了 zero copy
