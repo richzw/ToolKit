@@ -180,4 +180,35 @@
       - 从慢速趋势中减去快速趋势得到 MACD 曲线，并再次应用指数加权平均，获得 MACD 信号曲线。
       - 步骤 3 的指数移动平均 MACD 信号曲线减去 MACD 曲线，我们会得到 MACD 直方图。这个直方图有助于我们检测时间序列数据中的渐变变化。
 - [GPT-4 Architecture, Infrastructure, Training Dataset, Costs, Vision, MoE](https://hub.baai.ac.cn/view/27744)
+- [What Is ChatGPT Doing … and Why Does It Work](https://writings.stephenwolfram.com/2023/02/what-is-chatgpt-doing-and-why-does-it-work/)
+- [元学习（Meta-Learning）](https://mp.weixin.qq.com/s/7o2kj29KQzg_R6gn2n0Ntw)
+- [LongLLaMA模型](https://mp.weixin.qq.com/s/K8ExTUUXDruZGwr-PA4oFQ)
+  - [LongLLaMA: Long-Range Language Model Augmentation for Low-Resource Domains](https://arxiv.org/abs/2307.03170)
+  - 大模型当前面临的一个主要挑战
+    - 模型微调的常见做法不仅需要大量资源和复杂的流程，而且并不总是很清楚地指示模型如何整合新知识
+    - 另外一种有效的替代方法是将新知识整合到上下文中，这不需要训练，但受到模型有效上下文长度的限制。为了使这种方法能够处理大型知识的数据库，模型需要将上下文长度扩展到到数百万个token，这肯定是不现实的。强如GPT-4也不过只有32K的上下文长度。
+  - Focused Transformer，FoT
+    - 用使用FoT对LLaMA模型微调得到了LongLLaMA模型，它的架构和LLaMMA一致。LongLLaMA通过解决大模型的分心问题来显著提升模型的上下文长度，在passkey检索任务中甚至能外推到256K长度的上下文。
+    - FoT额外使用了一块较大的内存来存储历史信息的key-value对，然后借鉴了对比学习的思想在训练阶段中使用跨批次训练（cross-btach）将大量历史信息融入到样本中以增强key-value对的空间结构，这样模型就能对更加专注在和当前问题非常相关的历史信息中。
+    - Transformer（Focused Transformer，FoT）是Transformer模型的一个简单的即插即用扩展，既可以用于训练新模型，也可以用于微调现有的具有更长上下文的大模型。为此，FoT使用记忆注意力网络（memory attention layers）和跨批次训练。
+  - 与Memorizing Transformer的关系
+    - Memorizing Transformer（MT） 与我们的方法密切相关。但有两个关键的区别是：
+      - 训练协议。
+      - 内存如何集成到模型中。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
