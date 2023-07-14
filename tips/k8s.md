@@ -2,6 +2,7 @@
 - [资料]
   - [Kubernetes 实践指南](https://imroc.cc/kubernetes/index.html)
   - [K8S训练营](https://www.qikqiak.com/k8strain/)
+  - [Out-of-memory (OOM) in Kubernetes](https://mihai-albert.com/2022/02/13/out-of-memory-oom-in-kubernetes-part-4-pod-evictions-oom-scenarios-and-flows-leading-to-them/)
 - HPA
   ![img.png](k8s_hpa.png)
 - [VPC与三种K8s网络模型](https://mp.weixin.qq.com/s/W04uff4sHrPM_VtjzHPoJA)
