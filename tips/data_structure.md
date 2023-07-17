@@ -111,7 +111,8 @@
       - 保证了一个比特只被一个元素映射，所以允许删除操作；
     - 缺点：
       - 不能完美的支持删除，存在误删的情况；
-      - 存储空间的大小必须为2的指数的限制让空间效率打了折扣；
+      - 存储空间的大小必须为2的指数的限制让空间效率打了折扣
+  - [Golang ](https://mp.weixin.qq.com/s/0d1wiY4QLz8yhPPsdhg8QQ)
 - [Queue](https://github.com/gammazero/deque)
   - Most queue implementations are in one of three flavors: slice-based, linked list-based, and circular-buffer (ring-buffer) based.
     - Slice-based queues tend to waste memory because they do not reuse the memory previously occupied by removed items. Also, slice based queues tend to only be single-ended.
