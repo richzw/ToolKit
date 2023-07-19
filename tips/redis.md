@@ -251,4 +251,18 @@
        - 集群扩容困难：Redis Cluster模式下，集群的扩容需要进行数据迁移和重新分片，这会带来一定的复杂性和风险，尤其是在集群规模较大的情况下。
        - 部分功能受限：Redis Cluster模式下，一些Redis的功能受到了限制，例如事务、Lua脚本、pub/sub等功能，这些功能只能在单个节点上使用，不能跨节点使用
 - [go-redis connection pool timeout](https://redis.uptrace.dev/guide/go-redis-debugging.html#connection-pool-size)
-
+- [Redis变慢]
+  - 为了避免业务服务器到 Redis 服务器之间的网络延迟，你需要直接在 Redis 服务器上测试实例的响应延迟情况
+    `redis-cli -h 127.0.0.1 -p 6379 --intrinsic-latency 60` `redis-cli -h 127.0.0.1 -p 6379 --latency-history -i 1`
+  - 查看一下 Redis 的慢日志（slowlog）
+    `CONFIG SET slowlog-log-slower-than 5000  CONFIG SET slowlog-max-len 500` `SLOWLOG get 5`
+  - 通过 Redis 的内部监控指标，查看 Redis 的内部状态
+    `INFO COMMANDSTATS` `INFO CPU` `INFO MEMORY` `INFO PERSISTENCE` `INFO REPLICATION` `INFO STATS` `INFO KEYSPACE`
+  - 操作bigkey
+    `redis-cli -h 127.0.0.1 -p 6379 --bigkeys -i 0.01`
+  - fork耗时严重
+    `Redis 上执行 INFO 命令，查看 latest_fork_usec 项，单位微秒。`
+  - 开启内存大页
+    `cat /sys/kernel/mm/transparent_hugepage/enabled`
+  - 碎片整理
+    `通过执行 INFO 命令，得到这个实例的内存碎片率`
