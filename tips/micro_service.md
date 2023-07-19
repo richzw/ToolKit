@@ -1127,3 +1127,11 @@
   - gin 中基于 gin.Context 作为一次 http 请求贯穿整条 handler chain 的核心数据结构
   - gin.Context 是一种会被频繁创建销毁的资源对象，因此使用对象池 sync.Pool 进行缓存复用
 - [Kratos transport sample](https://github.com/tx7do/kratos-transport/blob/main/broker/kafka/subscriber.go)
+- [后端架构的演进](https://mp.weixin.qq.com/s/n3VIfMrP4zb_CKJAu7yXMw)
+  - MVC
+  - DDD
+  - 六边形架构（Ports and Adapters
+  - 洋葱架构
+
+
+
