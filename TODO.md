@@ -26,4 +26,8 @@ A: 在深度学习和自然语言处理中，嵌入（embedding）是将类别�
 
   需要注意的是，嵌入通常需要大量的数据来训练，因为模型需要有足够的信息来学习如何有效地表示每个类别。此外，嵌入的质量对模型的性能有很大影响，因此选择或训练一个好的嵌入是非常重要的。
 
+波动监控方案 
+- chatgpt4 - https://chat.openai.com/share/dc19a37a-ba3f-49d0-ab82-65708f6853ec
+- chatgpt3.5 - https://chat.openai.com/share/bde7fb31-6384-4093-bdfb-a8c0340b78e1
+
 https://mp.weixin.qq.com/s/A6jW4LcXp3oPXj1TJfdYEA
