@@ -195,6 +195,9 @@
     - Memorizing Transformer（MT） 与我们的方法密切相关。但有两个关键的区别是：
       - 训练协议。
       - 内存如何集成到模型中。
+- LLM Practice
+  - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
+  - ![img.png](ml_llm_demo.png)
 - [Prompt](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
   - `Prompt Engineering`, also known as `In-Context Prompting`, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes without updating the model weights.
   - `Instructed LM` (e.g. InstructGPT, natural instruction) finetunes a pretrained model with high-quality tuples of (task instruction, input, ground truth output) to make LM better understand user intention and follow instruction
@@ -238,7 +241,25 @@
     - 提供清晰和具体的指令 (Write clear and specific instructions)
       - 使用分隔符清楚地指示输入的不同部分（Use delimiters to clearly indicate distinct parts of the input）
       - 要求结构化的输出（Ask for a structured output）
-      - 
+      - 让模型检查是否满足条件（Ask the model to check whether conditions are satisfied
+      - 少样本提示（ "Few-shot" prompting）
+    - 给模型时间来“思考”（Give the model time to “think” ）- 这个原则利用了思维链的方法，将复杂任务拆成N个顺序的子任务，这样可以让模型一步一步思考，从而给出更精准的输出
+      - 指定完成任务所需的步骤 （Specify the steps required to complete a task）
+      - 在匆忙得出结论之前，让模型自己找出解决方案（Instruct the model to work out its own solution before rushing to a conclusion）
+    - 模型的限制：幻觉（Model Limitations: Hallucinations）
+      - 一个比较有效的方法可以缓解模型的幻觉问题：让模型给出相关信息，并基于相关信息给我回答。比如告诉模型：“First find relevant information, then answer the question based on the relevant information”。
+  - 技巧 - 黑魔法
+    - 思维连(CoT)提示
+      - 思想链 (CoT) 提示通过中间推理步骤启用复杂的推理能力。您可以将它与少量提示结合使用，以便在响应前需要推理的更复杂任务中获得更好的结果。
+      - 零次COT提示 - `Let's think step by step.`
+      ```shell
+      I went to the market and bought 10 apples.
+      I gave 2 apples to the neighbor and 2 to the repairman.
+      I then went and bought 5 more apples and ate 1.
+      How many apples did I remain with?
+      Let's think step by step.
+      ```
+      
 
 
 
