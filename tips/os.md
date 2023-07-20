@@ -165,24 +165,24 @@
       - 3.收发包都有系统调用的开销。
       - 4.内核工作在多核上，为可全局一致，即使采用Lock Free，也避免不了锁总线、内存屏障带来的性能损耗。
       - 5.从网卡到业务进程，经过的路径太长，有些其实未必要的，例如netfilter框架，这些都带来一定的消耗，而且容易Cache Miss。
-    - DPDK 
+    - DPDK （Data Plane Development Kit）
       - 基于UIO（Userspace I/O）旁路数据。数据从 网卡 -> DPDK轮询模式-> DPDK基础库 -> 业务
+        - 为了让驱动运行在用户态，Linux提供UIO机制。使用UIO可以通过read感知中断，通过mmap实现和网卡的通讯。
+        - UIO旁路了内核，主动轮询去掉硬中断，DPDK从而可以在用户态做收发包处理。带来Zero Copy、无系统调用的好处，同步处理减少上下文切换带来的Cache Miss。
       - 用户态的好处是易用开发和维护，灵活性好。并且Crash也不影响内核运行，鲁棒性强。
       - DPDK的基石UIO - 为了让驱动运行在用户态，Linux提供UIO机制。使用UIO可以通过read感知中断，通过mmap实现和网卡的通讯。
       - DPDK核心优化：PMD - DPDK的UIO驱动屏蔽了硬件发出中断，然后在用户态采用主动轮询的方式，这种模式被称为PMD（Poll Mode Driver）。
     - [DPDK网络优化](https://cloud.tencent.com/developer/article/1198333)
-      - PMD用户态驱动 
-      - CPU亲缘性和独占 - 解决多核跳动不精确的问题
-      - 内存大页和降低内存访问开销  - 采用HugePage减少TLB Miss
-      - 避免False Sharing 
-      - 内存对齐 
+      - PMD用户态驱动 使用无中断方式直接操作网卡的接收和发送队列；
+      - CPU亲缘性和独占 - 解决多核跳动不精确的问题 ; DPDK采用向量SIMD指令优化性能(DPDK采用批量同时处理多个包，再用向量编程，一个周期内对所有包进行处理。比如，memcpy就使用SIMD来提高速度。); 避免False Sharing
+      - 内存大页和降低内存访问开销  - 采用HugePage减少TLB Miss (几何级的降低了页表项的大小，从而减少TLB-Miss)
+      - 内存对齐 根据不同存储硬件的配置来优化程序，确保对象位于不同channel和rank的起始地址，这样能保证对象并并行加载，性能也能够得到极大的提升
       - cache对齐 
-      - NUMA 
-      - 减少进程上下文切换 
-      - 分组预测机制 
-      - 利用流水线并发 
-      - 为了利用空间局部性 
-      - 充分挖掘网卡的潜能
+      - NUMA 亲和，提高numa内存访问性能
+      - 减少进程上下文切换 保证活跃进程数目不超过CPU个数；减少堵塞函数的调用，尽量采样无锁数据结构；
+      - 分组预测机制  利用流水线并发 
+      - 为了利用空间局部性 采用预取Prefetch，在数据被用到之前就将其调入缓存，增加缓存命中率
+      - 充分挖掘网卡的潜能 借助现代网卡支持的分流（RSS, FDIR）和卸载（TSO，chksum）
     - RDMA 作为一种旁路内核的远程内存直接访问技术，被广泛应用于数据密集型和计算密集型场景中，是高性能计算、机器学习、数据中心、海量存储等领域的重要解决方案。
       - RDMA 具有零拷贝、协议栈卸载的特点。RDMA 将协议栈的实现下沉至RDMA网卡(RNIC)，绕过内核直接访问远程内存中的数据
   - [排障](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247505250&idx=1&sn=a854ee9a456e27e3bd4202380e4782c8&chksm=c1842233f6f3ab251f1a686e4f4bbeaa305a73ff3b09d5846b3ae536153ed22ba716c99f0ae5&scene=21#wechat_redirect)

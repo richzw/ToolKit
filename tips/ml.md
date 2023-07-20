@@ -195,10 +195,50 @@
     - Memorizing Transformer（MT） 与我们的方法密切相关。但有两个关键的区别是：
       - 训练协议。
       - 内存如何集成到模型中。
-
-
-
-
+- [Prompt](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
+  - `Prompt Engineering`, also known as `In-Context Prompting`, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes without updating the model weights.
+  - `Instructed LM` (e.g. InstructGPT, natural instruction) finetunes a pretrained model with high-quality tuples of (task instruction, input, ground truth output) to make LM better understand user intention and follow instruction
+  - `RLHF` (Reinforcement Learning from Human Feedback) is a common method to do so. The benefit of instruction following style fine-tuning improves the model to be more aligned with human intention and greatly reduces the cost of communication.
+  - `In-context instruction learning` combines few-shot learning with instruction prompting. It incorporates multiple demonstration examples across different tasks in the prompt
+    ```shell
+    Definition: Determine the speaker of the dialogue, "agent" or "customer".
+    Input: I have successfully booked your tickets.
+    Ouput: agent
+    
+    Definition: Determine which category the question asks for, "Quantity" or "Location".
+    Input: What's the oldest building in US?
+    Ouput: Location
+    ```
+  - Chain-of-Thought 
+    - Few-shot CoT
+    ```shell
+    Question: Jack is a soccer player. He needs to buy two pairs of socks and a pair of soccer shoes. Each pair of socks cost $9.50, and the shoes cost $92. Jack has $40. How much more money does Jack need?
+    Answer: The total cost of two pairs of socks is $9.50 x 2 = $<<9.5*2=19>>19.
+    The total cost of the socks and the shoes is $19 + $92 = $<<19+92=111>>111.
+    Jack need $111 - $40 = $<<111-40=71>>71 more.
+    So the answer is 71.
+    ===
+    Question: Marty has 100 centimeters of ribbon that he must cut into 4 equal parts. Each of the cut parts must be divided into 5 equal parts. How long will each final cut be?
+    Answer:
+    ```
+    - Zero-shot CoT
+    ```shell
+    Question: Marty has 100 centimeters of ribbon that he must cut into 4 equal parts. Each of the cut parts must be divided into 5 equal parts. How long will each final cut be?
+    Answer: Let's think step by step.
+    ```
+  - API
+    - Temperature：
+      - 越低temperature，结果越确定，因为总是选择最可能的下一个标记。在应用方面，您可能希望对基于事实的 QA 等任务使用较低的温度值，以鼓励更真实和简洁的响应
+      - 升高温度可能会导致更多的随机性，从而鼓励更多样化或更有创意的输出。在应用方面，对于诗歌生成或其他创造性任务，增加温度值可能是有益的。
+    - Top_p：同样，top_p一种称为核采样的温度采样技术，可以控制模型在生成响应时的确定性。如果您正在寻找准确和事实的答案，请保持低调。如果您正在寻找更多样化的响应，请增加到更高的值。
+    - system: "role define"
+    - user: "some question"
+    - assistant: "some answer"
+  - Best Practice
+    - 提供清晰和具体的指令 (Write clear and specific instructions)
+      - 使用分隔符清楚地指示输入的不同部分（Use delimiters to clearly indicate distinct parts of the input）
+      - 要求结构化的输出（Ask for a structured output）
+      - 
 
 
 
