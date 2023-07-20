@@ -284,7 +284,12 @@
 - 节省了30%的CPU
   - 使用top命令定位出占用CPU最高的进程，定位到进程后在使用  `top -Hp pid` 命令， 查看占用 CPU 最高的线程
   - 为了搞清楚BgMoveProcPool线程到底在执行什么，使用`pstack pid`命令抓取此时的堆栈
-
+- 线上超时问题
+  - 第一时间先ping下，看看网络间耗时
+  - curl来分析各个阶段的耗时 curl  -o /dev/null -s -w %{time_namelookup}::%{time_connect}::%{time_starttransfer}::%{time_total}::%{speed_download}"\n" --data-binary @req.dat https://www.baidu.com
+  - 通过tcpdump抓包来分析 对方返回了http 204
+  - 发现超时的该家较正常的三方返回，多了Content-Length、Content-Type等字段
+  - 在http 204、304的时候，不允许返回Content-Length，那么如果返回了Content-Length，客户端会一直等待，直到超时
 
 
 
