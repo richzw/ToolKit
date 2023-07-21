@@ -197,8 +197,14 @@
   - Kubernetes 如何为 Services 分配节点端口
     - Kubernetes 1.24 引入了针对 type: ClusterIP Service 的变更，将集群 IP 地址的 CIDR 范围划分为使用不同分配策略的两块来减少冲突的风险。
     - 在 Kubernetes 1.27 中，作为一个 Alpha 特性，你可以为 type: NodePort Service 采用类似的策略。你可以启用新的特性门控 ServiceNodePortStaticSubrange。开启此门控将允许你为 type: NodePort Service 使用不同的端口分配策略，减少冲突的风险。
-
-
+- the pod status hang up on OOMkilled or Completed
+  - If a Pod's status is OOMKilled or Completed, it means that the Pod has terminated. 
+    - The OOMKilled status indicates that the Pod was killed due to an out-of-memory condition
+    - the Completed status indicates that the Pod has completed its execution and exited successfully.
+  - Compute Resources (CPU/Memory) are configured for Containers, not for Pods.
+  - If a Pod container is OOM killed, the Pod is not evicted. The underlying container is restarted by the kubelet based on its RestartPolicy.
+  - Your container being terminated by OOMKill does not imply the pod to become in a Completed/Error status (unless you're using the RestartPolicy: Never).
+  - [Pod troubleshooting](https://www.alibabacloud.com/help/en/ack/ack-managed-and-ack-dedicated/support/pod-troubleshooting)
 
 
 
