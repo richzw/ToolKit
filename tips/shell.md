@@ -124,7 +124,11 @@
       perf record -p $pid -g -e cycles -e cs #进程采样
       perf record -a -g -e cycles -e cs #系统整体采样
       ```
-
+- [git 瘦身](https://mp.weixin.qq.com/s/nNxKzniBeygreKLAAX0Mqw)
+  - ulimit -n 9999999 # 解决可能出现的报错too many open files的问题
+  - git rev-list --objects --all | sort -k 2 > allfileshas.txt # 获取所有文件的hash值
+  -  使用 git filter-branch 截断历史记录
+  - 使用 git-filter-repo 清理截断日期前的所有历史记录，并将截断节点的提交信息修改
 
 
 

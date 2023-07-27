@@ -1484,7 +1484,7 @@
     - 读者无锁访问数据，标记进出临界区；
     - 写者读取，复制，更新；
     - 旧数据延迟回收；
-
+- [Linux 内核中常用的 C 语言技巧](https://mp.weixin.qq.com/s/_eY_opHY46QJfMNIEm3rDw)
 
 
 

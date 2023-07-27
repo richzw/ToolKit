@@ -160,6 +160,7 @@
     - 「ANNOY（Approximate Nearest Neighbors）」它的核心数据结构是随机投影树，实际是一组二叉树，其中每个非叶子节点表示一个将输入空间分成两半的超平面，每个叶子节点存储一个数据。二叉树是独立且随机构建的，因此在某种程度上，它模仿了哈希函数。ANNOY会在所有树中迭代地搜索最接近查询的那一半，然后不断聚合结果。这个想法与 KD 树非常相关，但更具可扩展性。
     - 「HNSW（Hierarchical Navigable Small World）」它受到小世界网络思想的启发，其中大多数节点可以在很少的步骤内被任何其他节点到触达；例如社交网络的“六度分隔”理论。HNSW构建这些小世界图的层次结构，其中底层结构包含实际数据。中间的层创建快捷方式以加快搜索速度。执行搜索时，HNSW从顶层的随机节点开始，导航至目标。当它无法靠近时，它会向下移动到下一层，直到到达最底层。上层中的每个移动都可能覆盖数据空间中的很长一段距离，而下层中的每个移动都可以细化搜索质量。
     - 「FAISS（facebook AI Similarity Search）」它运行的假设是：高维空间中节点之间的距离服从高斯分布，因此这些数据点之间存在着聚类点。faiss通过将向量空间划分为簇，然后在簇内使用用向量量化。faiss首先使用粗粒度量化方法来查找候选簇，然后进一步使用更精细的量化方法来查找每个簇。
+      - [上手Faiss](https://mp.weixin.qq.com/s/GxxPqa1pjDvt9PvAMuebkA)
     - 「ScaNN（Scalable Nearest Neighbors）」的主要创新在于各向异性向量量化。它将数据点量化为一个向量，使得它们的内积与原始距离尽可能相似，而不是选择最接近的量化质心点。
 - 时间序列异常值检测
   - 正确体现各种指标多样的变化趋势和行为特性
@@ -289,13 +290,31 @@
 - LangChain vs LlamaIndex
   - As you can tell, LlamaIndex has a lot of overlap with LangChain for its main selling points, i.e. data augmented summarization and question answering. LangChain is imported quite often in many modules, for example when splitting up documents into chunks. You can use data loaders and data connectors from both to access your documents.
   - LangChain offers more granular control and covers a wider variety of use cases. However, one great advantage of LlamaIndex is the ability to create hierarchical indexes. Managing indexes as your corpora grows in size becomes tricky and having a streamlined logical way to segment and combine individual indexes over a variety of data sources proves very helpful.
+  - LlamaIndex
+    - LlamaIndex 是开发者和 LLM 交互的一种工具。LlamaIndex 接收输入数据并为其构建索引，随后会使用该索引来回答与输入数据相关的任何问题。
+    - LlamaIndex 还可以根据手头的任务构建许多类型的索引，例如向量索引、树索引、列表索引或关键字索引。
 - [Paper connections](https://www.connectedpapers.com/)
-
-
-
-
-
-
+- Tuning
+  - 调参是LLM训练过程中的一个重要环节，目的是找到最优的超参数组合，以提高模型在测试集上的性能
+  - Instruction Tuning
+    - Instruction Tuning是通过添加一些人工规则或指令来对模型进行微调，以使其更好地适应特定的任务或应用场景。
+    - Example：在文本生成任务中，可以添加一些指令来控制生成的文本的长度、内容和风格。
+  - Alignment Tuning
+    - Alignment Tuning是通过对齐源语言和目标语言的数据来对模型进行微调，以提高翻译或文本生成的质量。
+    - Example：在机器翻译任务中，可以通过对齐源语言和目标语言的句子来训练模型，以提高翻译的准确性。
+  - RLHF（reinforcement learning from human feedback）三阶段
+    - RLHF是使用强化学习算法来对模型进行微调，以使其更好地适应特定的任务或应用场景。
+    - 该技术通常分为三个阶段：数据预处理、基准模型训练和强化学习微调。在微调阶段，模型会通过与人类交互来学习如何生成更符合人类预期的文本。
+  - Adapter Tuning
+    - Adapter Tuning是在预训练模型中添加适配器层，以适应特定的任务或应用场景。适配器层可以在不改变预训练模型权重的情况下，对特定任务进行微调。这种技术可以提高模型的效率和泛化能力，同时减少对计算资源的需求。
+  - prefix Tuning
+    - Prefix Tuning是通过在输入中添加一些前缀来对模型进行微调，以使其更好地适应特定的任务或应用场景。前缀可以提供一些额外的信息。
+    - Example：任务类型、领域知识等，以帮助模型更准确地生成文本。
+  - Prompt Tuning
+    - Prompt Tuning是通过设计合适的Prompt来对模型进行微调，以使其更好地适应特定的任务或应用场景。提示是一些关键词或短语，可以帮助模型理解任务的要求和期望输出的格式。
+  - Low-Rank Adaptation（LoRA）
+    - LoRA是通过将预训练模型分解成低秩矩阵来进行微调，以提高模型的效率和泛化能力。该技术可以减少预训练模型的参数数量，同时保留模型的表示能力，从而提高模型的适应性和泛化能力。
+- [Llama2](https://github.com/karpathy/llama2.c/tree/master)
 
 
 
