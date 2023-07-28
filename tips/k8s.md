@@ -205,7 +205,10 @@
   - If a Pod container is OOM killed, the Pod is not evicted. The underlying container is restarted by the kubelet based on its RestartPolicy.
   - Your container being terminated by OOMKill does not imply the pod to become in a Completed/Error status (unless you're using the RestartPolicy: Never).
   - [Pod troubleshooting](https://www.alibabacloud.com/help/en/ack/ack-managed-and-ack-dedicated/support/pod-troubleshooting)
-
+- [Pod 发生 OOM 的时候，背后的流程是什么？]
+  - 这个问题是一个比较深入而且扩展性很强的问题，以 CRI 为 containerd 举例，当内核的 OOMKiller 杀死一个容器的主进程后，containerd-shim 会监听到 OOM 事件，
+  - 然后将向 containerd server 发送 TaskOOM 事件，containerd cri 插件会监听到 TaskOOM 事件并更新容器的 status.reason 为 OOMKilled，并且当在容器退出后， cri 插件会将退出事件发送到 kubelet，并最终更新 Pod 的容器状态。
+  - 其中，containerd-shim 会根据 cgroup 的版本采用不同的 OOM 事件监听方式。
 
 
 
