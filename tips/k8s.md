@@ -209,7 +209,14 @@
   - 这个问题是一个比较深入而且扩展性很强的问题，以 CRI 为 containerd 举例，当内核的 OOMKiller 杀死一个容器的主进程后，containerd-shim 会监听到 OOM 事件，
   - 然后将向 containerd server 发送 TaskOOM 事件，containerd cri 插件会监听到 TaskOOM 事件并更新容器的 status.reason 为 OOMKilled，并且当在容器退出后， cri 插件会将退出事件发送到 kubelet，并最终更新 Pod 的容器状态。
   - 其中，containerd-shim 会根据 cgroup 的版本采用不同的 OOM 事件监听方式。
-
+- [Pod IP 分配机制](https://mp.weixin.qq.com/s/yrg3BkDIxDTa5p45Gsbhww)
+  - kube-apiserver 收到客户端请求（Controller 或 kubectl 客户端）后，创建对应的 Pod；
+  -  kube-scheduler 按照配置的调度策略进行 Pod 调度，选择最为合适的 Node 作为目标节点；
+  -  kubelet（运行于每个 Node 上的 K8s agent）Watch 监听到调度到所在节点的 Pod(s)，开始真正创建 Pod；
+  -  由 CRI 首先创建出 PodSandbox，初始化对应的网络 net namespace，调用 CNI IPAM 插件分配 Pod IP；若 hostNetwork 为 true，则直接使用 Node IP；
+  -  接着 CRI 开始创建 Pod 中第一个 pause container，绑定到上一步创建的 net namespace 和 Pod IP；
+  -  接着由 CRI 依次创建和启动 Pod 中声明的 initContainers 和 containers 容器；
+  -  当所有的 containers 运行起来后，探针探测容器运行符合预期后，Pod 状态最终更新为 Running。
 
 
 
