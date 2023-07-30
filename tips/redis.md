@@ -266,3 +266,21 @@
     `cat /sys/kernel/mm/transparent_hugepage/enabled`
   - 碎片整理
     `通过执行 INFO 命令，得到这个实例的内存碎片率`
+- Redis Overview
+  - ![img.png](redis_internal_ds.png)
+  - Redis 是单线程吗
+    - Redis 单线程指的是「接收客户端请求->解析请求 ->进行数据读写等操作->发送数据给客户端」这个过程是由一个线程（主线程）来完成的
+    - Redis 在启动的时候，是会启动后台线程（BIO）来进行一些后台操作的，比如持久化、集群数据同步等
+    - redis 采用单线程（网络 I/O 和执行命令）那么快，有如下几个原因：
+      - Redis 的大部分操作都在内存中完成，并且采用了高效的数据结构，因此 Redis 瓶颈可能是机器的内存或者网络带宽，而并非 CPU，既然 CPU 不是瓶颈，那么自然就采用单线程的解决方案了；
+      - Redis 采用单线程模型可以避免了多线程之间的竞争，省去了多线程切换带来的时间和性能上的开销，而且也不会导致死锁问题。
+      - Redis 采用了 I/O 多路复用机制处理大量的客户端 Socket 请求，IO 多路复用机制是指一个线程处理多个 IO 流，就是我们经常听到的 select/epoll 机制。
+  - Redis 6.0 之后为什么引入了多线程
+    - 为了提高网络 I/O 的并行度，Redis 6.0 对于网络 I/O 采用多线程来处理。但是对于命令的执行，Redis 仍然使用单线程来处理
+    - Redis 6.0 版本之后，Redis 在启动的时候，默认情况下会额外创建 6 个线程（这里的线程数不包括主线程）：
+      - Redis-server ： Redis的主线程，主要负责执行命令；
+      - bio_close_file、bio_aof_fsync、bio_lazy_free：三个后台线程，分别异步处理关闭文件任务、AOF刷盘任务、释放内存任务；
+      - io_thd_1、io_thd_2、io_thd_3：三个 I/O 线程，io-threads 默认是 4 ，所以会启动 3（4-1）个 I/O 多线程，用来分担 Redis 网络 I/O 的压力。
+
+
+
