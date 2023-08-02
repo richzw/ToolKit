@@ -359,6 +359,7 @@
     - 减少向量大小——通过降维或减少表示向量值的长度。
     - 缩小搜索范围——可以通过聚类或将向量组织成基于树形、图形结构来实现，并限制搜索范围仅在最接近的簇中进行，或者通过最相似的分支进行过滤。
   - ANN 最近邻检索
+    - [Comprehensive Guide To Approximate Nearest Neighbors Algorithms](https://towardsdatascience.com/comprehensive-guide-to-approximate-nearest-neighbors-algorithms-8b94f057d6b6)
     - 树方法，如 KD-tree，Ball-tree，Annoy
     - 哈希方法，如 Local Sensitive Hashing (LSH)
     - 矢量量化方法，如 Product Quantization (PQ)
@@ -376,10 +377,27 @@
   - Hierarchical Navigable Small Worlds (HNSW) 类似 skiplist
     - 这种方法的基本思想是每次将向量加到数据库中的时候，就先找到与它最相邻的向量，然后将它们连接起来，这样就构成了一个图。当需要搜索的时候，就可以从图中的某个节点开始，不断的进行最相邻搜索和最短路径计算，直到找到最相似的向量。
     - HNSW 继承了相同的分层格式，最高层具有更长的边缘（用于快速搜索），而较低层具有较短的边缘（用于准确搜索）
-  - 
+  - 相似性测量 (Similarity Measurement)
+    - 欧几里得距离（Euclidean Distance）
+      - 欧几里得距离算法的优点是可以反映向量的绝对距离，适用于需要考虑向量长度的相似性计算。
+      - 例如推荐系统中，需要根据用户的历史行为来推荐相似的商品，这时就需要考虑用户的历史行为的数量，而不仅仅是用户的历史行为的相似度
+    - 余弦相似度（Cosine Similarity）
+      - 余弦相似度是指两个向量之间的夹角余弦值
+      - 余弦相似度算法的优点是可以反映向量的方向，适用于不需要考虑向量长度的相似性计算。因此适用于高维向量的相似性计算。例如语义搜索和文档分类。
+    - 点积相似度 (Dot product Similarity)
+      - 点积相似度是指两个向量的点积，也就是两个向量对应位置的元素相乘之后再求和。点积相似度算法的优点是可以反映向量的绝对距离和方向，适用于需要考虑向量长度的相似性计算。例如推荐系统中，需要根据用户的历史行为来推荐相似的商品，这时就需要考虑用户的历史行为的数量，而不仅仅是用户的历史行为的相似度。
+      - 点积相似度算法的缺点是需要对向量进行归一化，否则会受到向量长度的影响。例如在推荐系统中，如果用户的历史行为数量很多，那么用户的历史行为向量的长度就会很大，这样就会导致点积相似度算法的结果偏向于历史行为数量较少的用户。
+      - 点积相似度算法的优点在于它简单易懂，计算速度快，并且兼顾了向量的长度和方向。它适用于许多实际场景，例如图像识别、语义搜索和文档分类等。但点积相似度算法对向量的长度敏感，因此在计算高维向量的相似性时可能会出现问题。
+  - 过滤 (Filtering)
+    - 在实际的业务场景中，往往不需要在整个向量数据库中进行相似性搜索，而是通过部分的业务字段进行过滤再进行查询。所以存储在数据库的向量往往还需要包含元数据，例如用户 ID、文档 ID 等信息。这样就可以在搜索的时候，根据元数据来过滤搜索结果，从而得到最终的结果。
+    - 为此，向量数据库通常维护两个索引：一个是向量索引，另一个是元数据索引。然后，在进行相似性搜索本身之前或之后执行元数据过滤，但无论哪种情况下，都存在导致查询过程变慢的困难。
+    - Pre-filtering：在向量搜索之前进行元数据过滤。虽然这可以帮助减少搜索空间，但也可能导致系统忽略与元数据筛选标准不匹配的相关结果。
+    - Post-filtering：在向量搜索完成后进行元数据过滤。这可以确保考虑所有相关结果，在搜索完成后将不相关的结果进行筛选。
   - https://guangzhengli.com/blog/zh/vector-database/
-
-
+- Models
+  - [M3E Models](https://huggingface.co/moka-ai/m3e-base)
+- [Token]
+  - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 
 
 
