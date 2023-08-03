@@ -1465,5 +1465,7 @@
 - Aurora
   - Aurora 的设计思路是把整个 IO 的 flow 只通过 redo log 的形式来做复制，而不是通过整个 IO 链路打到最后 Binlog，再发到另外一台机器上，然后再 apply 这个 Binlog，所以 Aurora 的 IO 链路减少很多
   - 日志复制的单位变小，意味着我发过去的只有 Physical log，不是 Binlog，也不是直接发语句过去，直接发物理的日志能代表着更小的 IO 的路径以及更小的网络包，所以整个数据库系统的吞吐效率会比传统的 MySQL 的部署方案好很多
-
-
+- [FeatureBase]
+  - FeatureBase is a feature-oriented database platform that powers real-time analytics and machine learning applications by executing low-latency, high-throughput, and highly concurrent workloads. Similar to the evolution of data formats from row-oriented to columnar, FeatureBase further evolves columnar into a feature-oriented format that makes each distinct data value individually addressable (accessible, readable, writable and retrievable).
+  - FeatureBase is similar to a columnar store, but breaks each column into each of its unique values so that they can be represented as a single bit. This data representation is excellent for a variety of analytical workloads.
+  - [位图进行范围查询](https://mp.weixin.qq.com/s/-UzbbeD27hgk1bsOiyYJOw)

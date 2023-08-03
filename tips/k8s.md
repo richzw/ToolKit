@@ -217,7 +217,7 @@
   -  接着 CRI 开始创建 Pod 中第一个 pause container，绑定到上一步创建的 net namespace 和 Pod IP；
   -  接着由 CRI 依次创建和启动 Pod 中声明的 initContainers 和 containers 容器；
   -  当所有的 containers 运行起来后，探针探测容器运行符合预期后，Pod 状态最终更新为 Running。
-
+- [chaos engineering in Kubernetes](https://blog.palark.com/chaos-engineering-in-kubernetes-open-source-tools/)
 
 
 

@@ -1881,9 +1881,10 @@
       字符集过小，可以直接使用其他简单的数据结构
       动态数据集，也就是数据集需要频繁地进行插入和删除操作，由于 Radix Tree 的节点需要合并和路径重组，动态修改树结构可能引起较大的开销，在这种情况下，这时平衡二叉搜索树结构（AVL 树、红黑树）更适合
       节点之间的父子节点使用指针连接，对 CPU 和自带 GC 语言不太友好 (这个问题在 Trie Tree 中同样存在)
-
-
-
+- [Why does `IsSorted` in the standard library iterate over the slice in reverse]
+  - because more efficient code can be generated from a downward loop, specifically for the condition part.
+  - `go tool compile -S play.go > play.s`
+ 
 
 
 

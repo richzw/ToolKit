@@ -398,8 +398,23 @@
   - [M3E Models](https://huggingface.co/moka-ai/m3e-base)
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
-
-
+- [Kaggle] 
+  - [时间序列](https://mp.weixin.qq.com/s/j4PsEdZ3VWhuWgPsIEST0A)
+    - [蛋白功能预测大赛](https://www.kaggle.com/competitions/cafa-5-protein-function-prediction)
+    - [Stable Diffusion](https://www.kaggle.com/competitions/stable-diffusion-image-to-prompts)
+      - 提交的评估使用预测提示嵌入向量和实际提示嵌入向量之间的平均余弦相似度得分。
+    - [微型企业密度预测](https://www.kaggle.com/competitions/godaddy-microbusiness-density-forecasting)
+      - 提交的评估使用预测值和实际值之间的对称平均绝对百分比误差(SMAPE)。当预测值和实际值同时为0时，我们定义SMAPE为0。
+    - [股票市场波动率](https://www.kaggle.com/c/optiver-realized-volatility-prediction/data)
+      - 提交的评估使用均方根百分比误差(RMSPE)
+    - [M5预测-不确定性](https://www.kaggle.com/competitions/m5-forecasting-uncertainty/overview/timeline)
+      - 本次比赛使用加权缩放弹球损失（WSPL）
+    - [餐厅人流预测](https://www.kaggle.com/competitions/recruit-restaurant-visitor-forecasting/overview)
+      - 根据均方根对数误差进行评估。RMSLE
+    - [实体店销售](https://www.kaggle.com/competitions/store-sales-time-series-forecasting/overview/evaluation)
+      - 评估指标是均方根对数误差。
+    - [杂货销售预测](https://www.kaggle.com/c/favorita-grocery-sales-forecasting)
+      - 根据归一化加权均方根对数误差 （NWRMSLE） 进行评估
 
 
 
