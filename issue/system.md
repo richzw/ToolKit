@@ -244,8 +244,7 @@
     - unique_ptr是限制最严格的一种智能指针，用来替代之前的auto_ptr，独享被管理对象指针所有权。当unique_ptr对象被销毁时，会在其析构函数内删除关联的原始指针
     - unique_ptr是独占管理权，而shared_ptr则是共享管理权，即多个shared_ptr可以共用同一块关联对象，其内部采用的是引用计数
     - weak_ptr的出现，主要是为了解决shared_ptr的循环引用，其主要是与shared_ptr一起来私用。和shared_ptr不同的地方在于，其并不会拥有资源，也就是说不能访问对象所提供的成员函数，不过，可以通过weak_ptr.lock()来产生一个拥有访问权限的shared_ptr。
-  
-- iowait
+- [iowait](https://mp.weixin.qq.com/s/9ao1O7CR0tHNTIKAPLIfbQ)
   - 如果系统处于 iowait 状态，那么必须满足以下两个条件：
     - 系统中存在等待 I/O 请求完成的进程。
     - 系统当前正处于空闲状态，也就是说没有可运行的进程。
@@ -253,6 +252,7 @@
     - Linux 会把 iowait 占用的时间输出到 /proc/stat 文件中，我们可以通过一下命令来获取到 iowait 占用的时间
     - cat /proc/stat | grep "cpu " | awk '{print $5}'
     - 可以每隔一段时间读取一次 /proc/stat 文件，然后把两次获取到的 iowait 时间进行相减，得到的结果是这段时间内，CPU处于 iowait 状态的时间。接着再将其除以总时间，得到 iowait 占用总时间的比率。
+  - 当 CPU 处于 iowait 状态时，说明 CPU 处于空闲状态，并且系统中有进程因为等待 I/O 请求而阻塞，也说明了 CPU 的利用率不够充分。 这时，我们可以使用异步 I/O（如 iouring）来优化程序，使得进程不会被 I/O 请求阻塞。
   - iowait的影响
     - iowait 会导致 CPU 空闲，从而导致系统的吞吐量下降。
     - iowait 会导致系统的响应时间变长，从而导致系统的延迟增大。
