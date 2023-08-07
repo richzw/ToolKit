@@ -103,7 +103,17 @@
 - [From XDP to Socket: Routing of packets beyond XDP with BPF](https://mp.weixin.qq.com/s/a8OAnprwxggnMEGRHodmMA)
 - [基于eBPF的恶意利用与检测机制](https://tech.meituan.com/2022/04/07/how-to-detect-bad-ebpf-used-in-linux.html)
 - [perf trace](https://mp.weixin.qq.com/s/dlyx-jUJ-CnL5efcWW9PXQ)
-
+- [eBPF技术实战：加速容器网络转发](https://cloud.tencent.com/developer/article/2177278)
+  - 利用 eBPF，略过 bridge、netfilter 等子系统，加速报文转发
+  - 利用 bridge + veth 的转发模式，会多次经历netfilter、路由等子系统，过程非常冗长，导致了转发性能的下降
+  - 优化
+    - TC redirect
+      - 内核协议栈主要支持的 eBPF hook 点 XDP（eXpress Data Path）、TC（Traffic Control）、LWT（Light Weight Tunnel）
+      - 针对于容器网络转发的场景，比较合适的 hook 点是 TC。因为 TC hook 点是协议栈的入口和出口，比较底层，eBPF 程序能够获取非常全面的上下文
+      - 利用 eBPF 在 TC 子系统注入转发逻辑，可以跳过内核协议栈非必须的流程，实现加速转发。收发两个方向的耗时分别减少40%左右，性能提升非常可观
+      - 我们在收包路径上面仍然需要消耗 2 个软中断，才能将报文送往目的地。接下来我们看，如何利用 redirect peer 技术来优化这个流程
+    - TC redirect peer - 加速收包路径
+      - bpf_redirect_peer 会直接将数据包转发到 Pod 网络 namespace 中，避免了enqueue_to_backlog 操作，节省了一次软中断，性能理论上会有提升
 
 
 
