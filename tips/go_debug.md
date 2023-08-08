@@ -447,5 +447,11 @@
    $ go tool pprof -focus=Solve -call_tree -relative_percentages -png -output=cpu.png cpu.out
    $ go tool pprof -focus=Solve -relative_percentages -list=hasDuplicates cpu.out
    ```
-
-
+- [Go 性能分析工具](https://mp.weixin.qq.com/s/5S0gUKqriE_jJVOZCK8zDg)
+  - 优化工作在大部分情况下，内存分析 (例如 go tool pprof --alloc_objects app mem.pprof) 通常比 CPU 耗时分析 (例如 go tool pprof app cpu.pprof) 更容易分析性能瓶颈
+  - 通过 goroutine 采样来分析 goroutine 泄漏问题 (例如访问 http://127.0.0.1:6060/debug/pprof/goroutine?debug=1，查看 goroutine profile 数量)，原理类似 这篇文章中提到的[3]
+  - 指定代码块进行采样 (例如使用 pprof.StartCPUProfile() 和 pprof.StopCPUProfile() 指定要采样的代码块)
+  - 对于 hot path 上面的代码，在单元测试期间就要进行性能采样分析
+  - 生产环境 不要将 pprof HTTP 服务直接暴露给外部或公共网络，以防止未经授权的访问，只有在需要进行性能分析时启动该服务
+  - 生产环境 中设置专门用于采样的服务容器 (例如和灰度类似的采样服务)，设置负载均衡自动分配一定百分比的生产流量到采样服务，线上遇到问题时就可以第一时间进行处理
+  - 生产环境 中设置自定义的 pprof PATH，例如 Gin pprof
