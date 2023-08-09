@@ -455,3 +455,12 @@
   - 生产环境 不要将 pprof HTTP 服务直接暴露给外部或公共网络，以防止未经授权的访问，只有在需要进行性能分析时启动该服务
   - 生产环境 中设置专门用于采样的服务容器 (例如和灰度类似的采样服务)，设置负载均衡自动分配一定百分比的生产流量到采样服务，线上遇到问题时就可以第一时间进行处理
   - 生产环境 中设置自定义的 pprof PATH，例如 Gin pprof
+- [Common pitfalls in Go benchmarking](https://eli.thegreenplace.net/2023/common-pitfalls-in-go-benchmarking/)
+  - Forgetting to reset the timer
+  - Fooled by the compiler
+  - Keeping compiler optimizations in benchmarks under control
+    - using the runtime.KeepAlive function.
+    - Another way is without needing a special function, but is slightly more dangerous; we can use a global exported value to collect the result
+  - Misusing b.N
+    - Forgetting to loop until b.N. Each benchmark invocation only performs the tested operations once. No matter how many times the benchmark harness repeats the benchmark with increasing b.N, the function takes a millisecond to run! Therefore, eventually the benchmark harness hits its N limit of a billion invocations, and divides the execution time (1 ms) by this N to get a nonsensical result.
+    - Using the value of b.N for something other than "how many times to repeat the benchmark". rand.Prime is very fast when its input length is small, but gets pretty slow for large inputs. The harness starts by running the function once to get its bearings, and then 100 times. For size 100 the run-time of rand.Prime is moderate, so the next time the harness can increase b.N by another factor of 100. But for higher inputs, rand.Prime also takes much longer. We end up with a quadratic run-time explosion! Our benchmark function isn't literally hanging - it will finish eventually, but it may take long minutes or hours.

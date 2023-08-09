@@ -41,7 +41,12 @@
     - RisingWave 将整个集群的数据划分为了多个 group （初始时只有2个，一个存储状态，另一个存储 Matieriallize View），同一个计算节点上的同一个 group 的所有算子的状态变更，会合并写入到同一个文件中，对单节点集群来说，一次 Checkpoint 只会生成2个文件。
     - 但是某些场景下，这样产生的文件仍然是非常小的。为了避免加重写放大的负担，我们增加了多种策略来判断是否应当先将当前 Level 0 的多个小文件合并为更大的文件后，再合并到更下层，见 L0 Intra Compaction 中的介绍。
     - 如果某个 group 的数据量过大，为了降低单个 LSM Tree 执行 Compaction 时的写放大开销，RisingWave 会自动分裂数据量过大的 group。
-
+- Hummock 
+  - rust 自研了云原生的 LSM 存储引擎 Hummock ，并将之用来存储流计算中有状态算子的状态
+  - 与一般的 LSM 存储引擎类似，新写入 Hummock 的数据将会写入 mutable mem-table 中，在特定条件下，mutable mem-table 会被 freeze 成 immutable mem-table
+  - 最终immutable mem-table 会写成 SST(sorted string table)文件落入持久化的存储中，同时SST会在 LSM 的元数据中被加到 overlapping L0 中
+  - 在处理 get 请求时，在经过 min-max 以及 bloom filter 的过滤后，Hummock 会从最上层的 mutable mem-table 到最下层的 non-overlapping levels 逐一查找，当查找到对应的 key 时，停止查找并返回对应的 value。
+  - 在处理 iter 请求时，与处理 get 请求不同，经过前期的过滤后，给定范围内的数据可能存在于任意一层数据中
 
 
 
