@@ -356,7 +356,7 @@ Memory Leak
     - 使用grep，我们可以获得包含NewClient样式调用的所有文件的列表，然后将该列表传递给另一个调用grep以仅列出不包含 Close 的文件，同时忽略测试文件：
       `$ grep -L Close $(grep -El 'New[^(]*Client' **/*.go) | grep -v test`
     - `$ grep -L Close $(grep -El 'New[^(]*Client' **/*.go) | grep -v test | xargs sed -i '/New[^(]*Client/,/}/s/}/}\ndefer client.Close()/'`
-
+- [glibc导致的堆外内存泄露](https://mp.weixin.qq.com/s/55slokngVRgqEav6c3TxOA)
 
 
 

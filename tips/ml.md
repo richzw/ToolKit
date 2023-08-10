@@ -415,6 +415,6 @@
       - 评估指标是均方根对数误差。
     - [杂货销售预测](https://www.kaggle.com/c/favorita-grocery-sales-forecasting)
       - 根据归一化加权均方根对数误差 （NWRMSLE） 进行评估
-
+- [ChatGPT的工作原理漫讲](https://mp.weixin.qq.com/s/BKwp12BGqKB2qObEYfrVLQ)
 
 
