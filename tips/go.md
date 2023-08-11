@@ -1002,6 +1002,10 @@
   - Actor model 
     - It is inherently asynchronous, a message sender will not block whether the reader is ready to pull from the mailbox or not, instead the message goes into a queue usually called a "mailbox". Which is convenient, but it's a bit harder to reason about and mailboxes potentially have to hold a lot of messages.
     - Each process has a single mailbox, messages are put into the receiver's mailbox by the sender, and fetched by the receiver.
+    - 并发性： 每个Actor都可以独立地执行，不受其他Actor的影响，从而实现并发执行。
+    - 无共享状态： 每个Actor都有自己的状态，不与其他Actor共享内存，避免了共享状态带来的并发问题。
+    - 异步消息传递： Actor之间通过异步消息传递进行通信，消息的发送和接收是非阻塞的，提高了系统的响应性能。
+    - 面向对象： 每个Actor都可以看作是一个对象，具有自己的状态和行为，可以封装数据和方法。
   - Comparison
     - Processes in CSP are anonymous, while actors have identities.
     - CSP uses channels for message passing, whereas actors use mailboxes.
