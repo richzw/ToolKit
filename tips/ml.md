@@ -149,6 +149,7 @@
     - 通过将思维树与算法蒸馏相结合，我们可以将多个思维树的输出连接起来，以形成一个更长的思维链。这种方法可以将复杂的任务分解为更小的任务，从而使模型能够更好地处理复杂的任务。
     - 思维树的搜索过程可以是BFS（广度优先搜索）或DFS（深度优先搜索），每个状态都由分类器（通过prompt）或多数投票决定
   - ReAct
+    - [REACT: SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS](https://arxiv.org/pdf/2210.03629.pdf)
     - 通过将行动空间扩展为特定任务的离散行动和语言空间的组合，将推理和行动集成到 LLM中。前者使 LLM 能够与环境交互（例如使用维基百科搜索API），后者能够促使LLM 生成自然语言的推理轨迹。
   - 反思
     - 是一个框架，它为代理提供动态记忆和自我反思的能力，以提高它的推理技能。反思采用标准的强化学习设置，其中奖励模型提供简单的二元奖励，行动空间遵循 ReAct 中的设置，同时特定任务的行动空间通过语言来增强复杂的推理步骤。在每个行动at之后，Agent会计算一个启发式值ht，并根据自我反思的结果决定是否重置环境以开始新的试验。
@@ -331,6 +332,7 @@
 - [Milvus 2.0 数据插入与持久化](https://mp.weixin.qq.com/s/D0xdD9mqDgxFvNY19hvDgQ)
 - LLM Apps
   - ![img.png](ml_embedding_search.png)
+  - [Generative Agents: Interactive Simulacra of Human Behavior](https://github.com/joonspk-research/generative_agents)
 - 海量数据相似数据查找方法
   - 高维稀疏向量和稠密向量两大方向
     - 高维稀疏向量的相似查找 - minhash, lsh(Locality-Sensitive Hashing）, simhash
@@ -399,6 +401,16 @@
   - [M3E Models](https://huggingface.co/moka-ai/m3e-base)
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
+- [ANN]
+  - [Comprehensive Guide To Approximate Nearest Neighbors Algorithms](https://towardsdatascience.com/comprehensive-guide-to-approximate-nearest-neighbors-algorithms-8b94f057d6b6)
+- [Tune LLM]
+  - [TRL](https://huggingface.co/docs/trl/index)
+    - TRL is a full stack library where we provide a set of tools to train transformer language models with Reinforcement Learning, from the Supervised Fine-tuning step (SFT), Reward Modeling step (RM) to the Proximal Policy Optimization (PPO) step. The library is integrated with 🤗 transformers.
+    - 在微调领域，得益于huggingface transfomers等框架支持，监督微调SFT相对强化学习微调RLHF（Reinforcement Learning from Human Feedback）来讲更易实施。
+    - 在TRL的出现，把低门槛使用强化学习(Reinforcement Learning) 训练 transformer 语言模型的这个短板补齐，做到了从监督调优 (Supervised Fine-tuning step, SFT)，到训练奖励模型 (Reward Modeling)，再到近端策略优化 (Proximal Policy Optimization)，实现了全面覆盖。
+- [candle](https://github.com/huggingface/candle)
+  - Minimalist ML framework for Rust
+  - candle瞄准于当下又一个被广为诟病又不得不接受的痛点，那就是基于Python语言的pytorch框架训练的大模型速度慢，体积大的问题
 - [Kaggle] 
   - [时间序列](https://mp.weixin.qq.com/s/j4PsEdZ3VWhuWgPsIEST0A)
     - [蛋白功能预测大赛](https://www.kaggle.com/competitions/cafa-5-protein-function-prediction)
