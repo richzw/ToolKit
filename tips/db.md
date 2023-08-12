@@ -1469,3 +1469,14 @@
   - FeatureBase is a feature-oriented database platform that powers real-time analytics and machine learning applications by executing low-latency, high-throughput, and highly concurrent workloads. Similar to the evolution of data formats from row-oriented to columnar, FeatureBase further evolves columnar into a feature-oriented format that makes each distinct data value individually addressable (accessible, readable, writable and retrievable).
   - FeatureBase is similar to a columnar store, but breaks each column into each of its unique values so that they can be represented as a single bit. This data representation is excellent for a variety of analytical workloads.
   - [位图进行范围查询](https://mp.weixin.qq.com/s/-UzbbeD27hgk1bsOiyYJOw)
+- [ES ZSTD压缩算法]
+  - ZSTD压缩算法是一种无损压缩算法，它的压缩速度非常快，而且压缩比也很高，它的压缩速度比Snappy快3倍，而且压缩比比Snappy高30%。
+  - ZSTD（Zstandard）底层基于FSE编码实现，具有出色的压缩和解压速度。
+  - ZSTD算法的实现经过了高度优化，通过SIMD等指令集能够充分利用硬件并行性，同时编码过程大量依赖位移运算来完成状态的切换，以此提高处理速度。
+  - ZSTD采用字典压缩算法，通过引用字典中的匹配项，能够大大减少重复数据的存储空间，提高压缩比
+  - ZSTD采用多级压缩策略，在不同的压缩级别中应用不同的压缩算法，能够在不同的应用场景中灵活地平衡速度和压缩比
+  - Lucene索引文件
+    - 行存文件：包括原文存储文件和原文索引文件。原文存储文件，即.fdt文件。用户写入的原始数据都被存储于该文件中，因其占比大，为节约存储，Lucene在原文存储上支持LZ4压缩和ZIP压缩；原文索引文件，即.fdx文件，它存储了原文数据在原文存储文件中的位置信息，建立起了doc id和原文之间的联系，以支持快速访问和定位。
+    - 列存文件：即.dvd文件，常被应用于一些OLAP分析引擎中。列存文件按列组织数据，不同Document中的同一列数据（Field），相邻存放在一起，这样可以加速该列聚合分析性查询。同时，相邻每列类型相同，在存储的时候可以进行统一性的编码优化，提高压缩率，减少存储磁盘空间的占用。
+    - 索引相关文件：ES依靠分词产生倒排索引，使其具备强大的全文检索能力。索引相关文件中，重点文件包含：字典数据文件&倒排索引文件。字典数据文件，即.tim文件，通过用户配置的索引分词器，能够从用户数据中提取分词信息并存储在.tim文件中。同一列的分词信息，相邻存放，按块组织；倒排索引文件，即.doc文件，也被称为"倒排拉链表"，它记录了每一个分词所关联的文档列表，能够实现快速的单词到文档的倒排查找。
+

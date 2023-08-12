@@ -434,7 +434,7 @@
     - 如果 ipi_spec_dst 和 ipi_ifindex 不为空，它们都能作为源地址选择的依据，而不是让内核通过路由决定
     - 通过设置 IP_PKTINFO socket 选项为 1，然后使用 recvmsg 和 sendmsg 传输数据就能保证源地址选择符合我们的期望
   
-
+- [容器网络原理](https://mp.weixin.qq.com/s/SC83ASJwT0Pm-lX6IVansw)
 
 
 

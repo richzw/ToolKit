@@ -218,7 +218,7 @@
   -  接着由 CRI 依次创建和启动 Pod 中声明的 initContainers 和 containers 容器；
   -  当所有的 containers 运行起来后，探针探测容器运行符合预期后，Pod 状态最终更新为 Running。
 - [chaos engineering in Kubernetes](https://blog.palark.com/chaos-engineering-in-kubernetes-open-source-tools/)
-
+- [K8sGPT 赋能 Kubernetes](https://mp.weixin.qq.com/s/zVpleSMX4VlhC2khukVfqg)
 
 
 
