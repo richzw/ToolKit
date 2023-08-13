@@ -1393,6 +1393,7 @@
     - lp(1..N) is line pointer array. It points to a logical offset within that page. Since these are arrays, elements are fixed sized but the number of elements can vary.
     - row(1..N) represents actual SQL rows. They are added in reverse order within a page. They are generally variable sized and in order to reach to a specific tuple we use line pointer. Since there can be variable number of rows inside a page, items are added backward while line pointer is added to front.
     - special space is typically used when storing indexes in these page, usually sibling nodes in a B-Tree for example. For table data this is not used.
+- [depesz interprete postgresql explain]
 - [索引B+ tree VS Skip List]
   - mysql选了B+树做索引
     - B+树是多叉平衡搜索树，扇出高，只需要3层左右就能存放2kw左右的数据，同样情况下跳表则需要24层左右，假设层高对应磁盘IO，那么B+树的读性能会比跳表要好
