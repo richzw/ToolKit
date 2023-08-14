@@ -429,6 +429,7 @@
     - [杂货销售预测](https://www.kaggle.com/c/favorita-grocery-sales-forecasting)
       - 根据归一化加权均方根对数误差 （NWRMSLE） 进行评估
 - [ChatGPT的工作原理漫讲](https://mp.weixin.qq.com/s/BKwp12BGqKB2qObEYfrVLQ)
+  - [The Impact of chatGPT talks - Stephen Wolfram](https://www.youtube.com/watch?v=u4CRHtjyHTI)
   - Overview
     - ChatGPT 从根本上说总是试图对它目前得到的任何文本进行 “合理的延续” - 它寻找在某种意义上 “意义匹配” 的东西。但最终的结果是，它产生了一个可能出现在后面的词的排序列表，以及 “概率”。
     - 在每一步，它得到一个带有概率的单词列表
@@ -436,10 +437,7 @@
   - 概率从何而来
     - n-gram 概率生成 “随机词”但问题是：没有足够的英文文本可以推导出这些概率
     - ChatGPT 的核心正是一个所谓的 “大型语言模型”（LLM），它的建立可以很好地估计这些概率。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。
-  - 神经网路
-    - 任何给定的神经元是否在某一时刻产生电脉冲，取决于它从其他神经元那里收到的脉冲 —— 不同的连接有不同的 “权重” 贡献
-  
-
+- [Why you should work on AI AGENTS](https://www.youtube.com/watch?v=fqVLjtvWgq8)
 
 
 

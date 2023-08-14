@@ -1,4 +1,4 @@
-
+- [learn rust](https://tinyurl.com/learn-rust-lang)
 - [Rust 内存泄露？如何修复](https://mp.weixin.qq.com/s/k6vwE5YgONuYkv2g-lRduQ)
   - Rust 的借用检查器不能防止内存错误吗？Rust 不应该是“安全的”吗？事实证明，根据 Rust 的规则，泄漏内存是完全安全的！事实上，我们可以使用函数故意泄漏尽可能多的内存std::mem::forget
   - 使用分布式跟踪进行故障排除
