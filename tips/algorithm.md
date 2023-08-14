@@ -648,7 +648,8 @@
       - Two queues 算法可以看做是 LRU-K 算法中 K=2，同时访问列表使用 FIFO 淘汰算法的一个特例
     - LIRS
       - LIRS（Low Inter-reference Recency Set）算法将缓存分为两部分区域：热数据区与冷数据区。LIRS 算法利用冷数据区做了一层隔离，目的是即使在有偶发性的访问操作时，保护热数据区的数据不会被频繁地被置换，以提高缓存的命中。
-
+- [tree-shaking的原理](https://juejin.cn/post/7265125368553685050#heading-0)
+  - 核心原理就是AST语法树
 
 
 

@@ -1410,6 +1410,7 @@
   - sar
     - 网络性能对于服务器的重要性不言而喻，工具 iptraf 可以直观的现实网卡的收发速度信息，比较的简洁方便通过 sar -n DEV 1 也可以得到类似的吞吐量信息
     - sar 这个工具太强大了，什么 CPU、磁盘、页面交换啥都管，这里使用 -n 主要用来分析网络活动
+  - [For More Commands](https://www.jianshu.com/p/0bbac570fa4c)
 - [网卡的 Ring Buffer ](https://mp.weixin.qq.com/s/v_1QdF3Fmloln0P2xbo4-w)
   - ![img.png](os_network_card_process.png)
     - DMA 将 NIC 接收的数据包逐个写入 sk_buff ，一个数据包可能占用多个 sk_buff , sk_buff 读写顺序遵循FIFO（先入先出）原则。

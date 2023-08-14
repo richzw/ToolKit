@@ -1133,6 +1133,6 @@
   - DDD
   - 六边形架构（Ports and Adapters
   - 洋葱架构
-
+- [DDD实践](https://mp.weixin.qq.com/s/QRq_mnifw62LMoHey-tMiQ)
 
 

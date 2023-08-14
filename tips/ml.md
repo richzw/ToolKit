@@ -438,7 +438,13 @@
     - n-gram 概率生成 “随机词”但问题是：没有足够的英文文本可以推导出这些概率
     - ChatGPT 的核心正是一个所谓的 “大型语言模型”（LLM），它的建立可以很好地估计这些概率。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。
 - [Why you should work on AI AGENTS](https://www.youtube.com/watch?v=fqVLjtvWgq8)
-
+- [Sample]
+  - [GPT-4 生成 Golang Worker Pool](https://mp.weixin.qq.com/s/2kmNHqZO5EdYGsOcYg4dhw)
+  - [Building a Self Hosted Question Answering Service using LangChain]()
+    - [Part 1](https://www.anyscale.com/blog/llm-open-source-search-engine-langchain-ray)
+    - [Part 2](https://www.anyscale.com/blog/turbocharge-langchain-now-guide-to-20x-faster-embedding)
+    - [Part 3](https://www.anyscale.com/blog/building-a-self-hosted-question-answering-service-using-langchain-ray)
+    - [Code](https://github.com/ray-project/langchain-ray/tree/main/open_source_LLM_retrieval_qa)
 
 
 
