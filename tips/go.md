@@ -1888,8 +1888,17 @@
 - [Why does `IsSorted` in the standard library iterate over the slice in reverse]
   - because more efficient code can be generated from a downward loop, specifically for the condition part.
   - `go tool compile -S play.go > play.s`
- 
-
+- [net/http]
+  - golang则会为每个网络句柄创建两个goroutine，一个用于读数据，一个用于写数据
+  - 连接与协程数量的关系
+    - 一个连接对应两个协程，一个用于读，一个用于写
+  - resp.body是否读取对连接复用的影响
+    - Yes `ioutil.ReadAll(resp.Body)`
+    - 不执行ioutil.ReadAll(resp.Body)，网络连接无法归还到连接池。
+  - body.close()不执行会怎么样
+    - 不执行body.close()，并不一定会内存泄露。那么什么情况下会协程泄露呢？
+    - 直接说答案，既不执行 ioutil.ReadAll(resp.Body) 也不执行resp.Body.Close()，并且不设置http.Client内timeout的时候，就会导致协程泄露。
+    - 不执行resp.Body.Close()，网络连接就无法为标记为关闭，也就无法正常断开。因此能导致协程泄露，非常好理解。
 
 
 

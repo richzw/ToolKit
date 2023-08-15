@@ -445,7 +445,12 @@
     - [Part 2](https://www.anyscale.com/blog/turbocharge-langchain-now-guide-to-20x-faster-embedding)
     - [Part 3](https://www.anyscale.com/blog/building-a-self-hosted-question-answering-service-using-langchain-ray)
     - [Code](https://github.com/ray-project/langchain-ray/tree/main/open_source_LLM_retrieval_qa)
-
+- [Tools]
+  - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
+  - [斯坦福AI小镇](https://github.com/joonspk-research/generative_agents)
+    - 25 个人工智能代理居住在数字西部世界中，却没有意识到自己生活在模拟中。他们去工作、闲聊、组织社交活动、结交新朋友，甚至坠入爱河。每个人都有独特的个性和背景故事
+    - [Video](https://www.youtube.com/watch?v=nKCJ3BMUy1s)
+    - [Paper Summary](https://wdxtub.com/paper/paper-008/2023/04/25/)
 
 
 
