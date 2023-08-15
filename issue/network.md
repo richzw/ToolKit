@@ -579,7 +579,64 @@
   - 使用tcpdump和Wireshark确认网络数据包是否正常收发。
   - 使用strace等观察应用程序对网络 socket 的调用是否正常
     - `strace -f wrk --latency -c 100 -t 2 --timeout 2 http://192.168.0.30:8080/`
-
+- [详解 TCP 半连接队列、全连接队列](https://developer.aliyun.com/article/804896)
+  - Issue
+    - 上游反馈有万分几的概率请求我们 endpoint 会出现 Connection timeout 。此时系统侧的 apiserver 集群水位在 40%，离极限水位还有着很大的距离，当时通过紧急扩容 apiserver 集群后错误率降为了 0
+    - 定位分析到问题根因出现在系统连接队列被打满导致
+    - 回顾值班时遇到的 Connection timeout 问题，当时相关系统参数配置为：
+      - • net.core.somaxconn = 128
+      - • net.ipv4.tcp_max_syn_backlog = 512
+      - • net.ipv4.tcp_syncookies = 1
+      - • net.ipv4.tcp_abort_on_overflow = 0
+    - 所以出现 Connection timeout 有两种可能情况：
+      - 1、半连接队列未满，全连接队列满，Client 端向 Server 端发起 SYN 被 DROP (参考全连接队列实验结果情况三分析、半连接队列溢出实验情况三)
+      - 2、全连接队列未满，半连接队列大小超过全链接队列最大长度(参考半连接队列溢出实验情况三、半连接队列溢出实验情况四) 问题的最快修复方式是将 net.core.somaxconn 调大，以及 net.ipv4.tcp_abort_on_overflow 设置为 1，net.ipv4.tcp_abort_on_overflow 设置为 1 是为了让 client fail fast。
+  - 半连接队列、全连接队列介绍
+    - TCP 三次握手过程：
+      - 1、Client 端向 Server 端发送 SYN 发起握手，Client 端进入 SYN_SENT 状态
+      - 2、Server 端收到 Client 端的 SYN 请求后，Server 端进入 SYN_RECV 状态，此时内核会将连接存储到半连接队列(SYN Queue)，并向 Client 端回复 SYN+ACK
+      - 3、Client 端收到 Server 端的 SYN+ACK 后，Client 端回复 ACK 并进入 ESTABLISHED 状态
+      - 4、Server 端收到 Client 端的 ACK 后，内核将连接从半连接队列(SYN Queue)中取出，添加到全连接队列(Accept Queue)，Server 端进入 ESTABLISHED 状态
+      - 5、Server 端应用进程调用 accept 函数时，将连接从全连接队列(Accept Queue)中取出
+    - 半连接队列和全连接队列都有长度大小限制，超过限制时内核会将连接 Drop 丢弃或者返回 RST 包。
+  - 常用命令介绍
+    - ss 命令可以查看到全连接队列的信息 `ss -lnt`
+      - 对于 LISTEN 状态的 socket
+        - • Recv-Q：当前全连接队列的大小，即已完成三次握手等待应用程序 accept() 的 TCP 链接
+        - • Send-Q：全连接队列的最大长度，即全连接队列的大小
+      - 对于非 LISTEN 状态的 socket
+        - • Recv-Q：已收到但未被应用程序读取的字节数
+        - • Send-Q：已发送但未收到确认的字节数
+    - netstat 命令可以查看到半连接队列的信息 `netstat -an | grep SYN_RECV`
+    - netstat -s 命令可以查看 TCP 半连接队列、全连接队列的溢出情况
+      - • ListenOverflows：全连接队列溢出次数
+      - • ListenDrops：全连接队列溢出丢弃的连接数
+      - • TCPSynRetrans：SYN 重传的次数
+      - • TCPSyncookiesSent：SYN cookie 发送的次数
+      - • TCPSyncookiesRecv：SYN cookie 收到的次数
+      - • TCPSyncookiesFailed：SYN cookie 失败的次数
+  - 全连接队列实战 
+    - 最大长度控制
+      - TCP 全连接队列的最大长度由 min(somaxconn, backlog) 控制，其中：
+        - • somaxconn 是 Linux 内核参数，由 /proc/sys/net/core/somaxconn 指定
+        - • backlog 是 TCP 协议中 listen 函数的参数之一，即 int listen(int sockfd, int backlog) 函数中的 backlog 大小。在 Golang 中，listen 的 backlog 参数使用的是 /proc/sys/net/core/somaxconn 文件中的值。
+    - 全连接队列溢出实验、实验结果分析...
+      - 能够进入全连接队列的 Socket 最大数量始终比配置的全连接队列最大长度 + 1
+      - 全连接队列满DROP 请求是默认行为，可以通过设置/proc/sys/net/ipv4/tcp_abort_on_overflow 使 Server 端在全连接队列满时，向 Client 端发送 RST 报文。
+      - 情况三：Client 向 Server 发送 SYN 未得到相应，一直在 RETRY
+        - 开启了 /proc/sys/net/ipv4/tcp_syncookies 功能 2、全连接队列满了
+  - 半连接队列实战 
+    - 最大长度控制
+      - 实际上只有在 linux 内核版本小于 2.6.20 时，半连接队列才等于 backlog 的大小
+      - 半连接队列的长度由三个参数指定：
+        - • 调用 listen 时，传入的 backlog
+        - •  /proc/sys/net/core/somaxconn 默认值为 128
+        - •   /proc/sys/net/ipv4/tcp_max_syn_backlog 默认值为 1024
+    - 半连接队列溢出实验、实验结果分析...
+      - 判断是否 Drop SYN 请求
+        - 当 Client 端向 Server 端发送 SYN 报文后，Server 端会将该 socket 连接存储到半连接队列(SYN Queue)，如果 Server 端判断半连接队列满了则会将连接 Drop 丢弃。
+          那么 Server 端是如何判断半连接队列是否满的呢？除了上面一小节提到的半连接队列最大长度控制外，还和 /proc/sys/net/ipv4/tcp_syncookies 参数有关
+        - ![img.png](network_sync_drop.png)
 
 
 
