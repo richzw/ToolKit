@@ -707,7 +707,6 @@
 - [Write-Ahead Log](https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html)
   - The unique log identifier helps in implementing certain other operations on the log like `Segmented Log` or cleaning the log with `Low-Water Mark` etc. 
   - The log updates can be implemented with `Singular Update Queue`
-- [Prometheus TSDB](https://ganeshvernekar.com/blog/prometheus-tsdb-the-head-block/)
 - [都是同样条件的 mysql select 语句，为什么读到的内容却不一样](https://mp.weixin.qq.com/s/w26rmI3wCgXs_Zz8QQFakQ)
   - 以下内容还是默认发生在innodb引擎的可重复读隔离级别下。
   - 事务的回滚是怎么实现的

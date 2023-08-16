@@ -219,6 +219,22 @@
   -  当所有的 containers 运行起来后，探针探测容器运行符合预期后，Pod 状态最终更新为 Running。
 - [chaos engineering in Kubernetes](https://blog.palark.com/chaos-engineering-in-kubernetes-open-source-tools/)
 - [K8sGPT 赋能 Kubernetes](https://mp.weixin.qq.com/s/zVpleSMX4VlhC2khukVfqg)
+- [K8S 1.28]
+  - 原生支持 Sidecar 容器 Alpha
+    - 它为 init 容器引入了 restartPolicy 字段，并使用这个字段来指示 init 容器是 sidecar 容器。Kubelet 将按照 restartPolicy=Always 的顺序与其他 init 容器一起启动 init 容器，但它不会等待其完成，而是等待容器启动完成。
+    - 启动完成的条件是启动探测成功（或者未定义启动探测）并且 postStart 处理程序完成。此条件用 ContainerStatus 类型的字段 Started 表示。有关选择此信号的注意事项，请参阅 “Pod 启动完成条件” 部分。
+    - 字段 restartPolicy 仅在 init 容器上被接受。现在唯一支持的值是 “Always”。不会定义其他值。此外，该字段可为空，因此默认值为 “无值”。容器的 restartPolicy 的其他值将不被接受，容器将遵循当前实现的逻辑。
+    - Sidecar 容器不会阻止 Pod 完成 - 如果所有常规容器都已完成，Sidecar 容器将被终止。在 sidecar 启动阶段，重启行为将类似于 init 容器。如果 Pod restartPolicy 为 Never，则启动期间失败的 sidecar 容器将不会重新启动，整个 Pod 将失败。如果 Pod restartPolicy 为 Always 或 OnFailure，则会重新启动。一旦 sidecar 容器启动（postStart 完成且启动探测成功），即使 Pod restartPolicy 为 Never 或 OnFailure，这些容器也会重新启动。此外，即使在 Pod 终止期间，sidecar 容器也会重新启动。
+    - 为了最大限度地减少 sidecar 容器的 OOM 杀死，这些容器的 OOM 调整将匹配或超过 Pod 中常规容器的 OOM 分数调整。
+
+
+
+
+
+
+
+
+
 
 
 
