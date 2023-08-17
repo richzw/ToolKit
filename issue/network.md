@@ -637,7 +637,26 @@
         - 当 Client 端向 Server 端发送 SYN 报文后，Server 端会将该 socket 连接存储到半连接队列(SYN Queue)，如果 Server 端判断半连接队列满了则会将连接 Drop 丢弃。
           那么 Server 端是如何判断半连接队列是否满的呢？除了上面一小节提到的半连接队列最大长度控制外，还和 /proc/sys/net/ipv4/tcp_syncookies 参数有关
         - ![img.png](network_sync_drop.png)
-
+- [HTTP 传输文件慢问题](https://mp.weixin.qq.com/s/4jOJq-8U3w9s139_7IdUaA)
+  - [Video](https://www.youtube.com/watch?v=h9stVIfug5Y)
+    - http.time 是 HTTP 协议中的时间字段（Time since the request was sent），表示 HTTP 请求到响应的时间间隔。更具体地说，它是 HTTP 请求的时间戳，到 HTTP响应的时间戳之间的时间差。
+  - 客户端数据包文件，问题信息如下：
+    - What is the highest throughput that this file transfer can achieve? Acceptable?
+      - 以 I/O 图和 Throughput 图来说，基本该文件传输的速率达到了 10Mbps 左右
+    - What is the network roundtrip time between client and server?
+      - RTT 图示如下，至于 IRTT ，根据 TCP 三次握手的时间来算，为 0.010904 秒
+    - Is there any packet loss in this trace file?
+      - 没有，可以通过 tcp.analysis.lost_segment 和 tcp.analysis.retransmission 等显示过滤表达式过滤得知结果。
+    - In the handshakes, what TCP options are there? Which ones are missing?
+      - TCP options 如下图，少了啥，少了常见的 Window Scale，客户端和服务器端均无。
+    - What do you think the reason for the low throughput was?
+      - 低吞吐的原因，实际上可以判断是 TCP 接收窗口的问题，也就是缺少了 Window Scale 因子，造成无法提高传输的数据量，窗口满了或者接近满了。
+  - 服务器端数据包文件，问题信息如下：
+    - Look at the handshake, what is the network latency? What TCP options are missing?
+    - What is the highest level of throughput achieved?
+    - What TCP errors do we see? How can we interpret these? Is the server doing something wrong?
+    - Why don't we see this in the client side trace file?
+  
 
 
 
