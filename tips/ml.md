@@ -445,6 +445,7 @@
     - [Part 2](https://www.anyscale.com/blog/turbocharge-langchain-now-guide-to-20x-faster-embedding)
     - [Part 3](https://www.anyscale.com/blog/building-a-self-hosted-question-answering-service-using-langchain-ray)
     - [Code](https://github.com/ray-project/langchain-ray/tree/main/open_source_LLM_retrieval_qa)
+  - [Milvus、Xinference、Llama 2-70B 开源模型和 LangChain，构筑出一个全功能的问答系统](https://mp.weixin.qq.com/s/cXBC0dikldNiGwOwPuJfUQ)
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
   - [斯坦福AI小镇](https://github.com/joonspk-research/generative_agents)
