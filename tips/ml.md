@@ -119,6 +119,7 @@
        without (offset)
     ```
 - [如何用 PPO 算法让 AI 学会玩 FlappyBird](https://mp.weixin.qq.com/s/5DYBCCU3xsmTHtN5Ciz0WA)
+- [Ray: 大模型时代的AI计算基础设施](https://mp.weixin.qq.com/s/nIi9M9aokPQ3sTIbJNGPgg)
 - [Ray 的大规模离线推理](https://mp.weixin.qq.com/s/2-jWtYcO0CVnttRrJOYcnA)
   - Ray Core：是 Ray 框架的底层框架，提供了一整套的分布式计算的框架，可以将普通的应用转化成分布式的系统
     - [Ray Core](https://mp.weixin.qq.com/s?__biz=MzA5NTUxNzE4MQ==&mid=2659281279&idx=1&sn=42604ee42f6bad25321e8b38eae34d33&scene=21#wechat_redirect)
@@ -452,9 +453,17 @@
     - 25 个人工智能代理居住在数字西部世界中，却没有意识到自己生活在模拟中。他们去工作、闲聊、组织社交活动、结交新朋友，甚至坠入爱河。每个人都有独特的个性和背景故事
     - [Video](https://www.youtube.com/watch?v=nKCJ3BMUy1s)
     - [Paper Summary](https://wdxtub.com/paper/paper-008/2023/04/25/)
-
-
-
+- LLM Limitations
+  - Lacking domain-specific information
+    - LLMs are trained solely on data that is publicly available. Thus, they may lack knowledge of domain-specific, proprietary, or private information that is not accessible to the public.
+  - Prone to hallucination
+    - LLMs can only give answers based on the information they have. They may provide incorrect or fabricated information if they don't have enough data to reference.
+  - Immutable pre-training data
+    - LLMs' pre-training data may contain outdated or incorrect information. Unfortunately, such data cannot be modified, corrected, or removed.
+  - Failure to access up-to-date information
+    - LLMs are often trained on outdated data and don't update their knowledge base regularly due to high training costs. For instance, training GPT-3 can cost up to 1.4 million dollars.
+  - Token Limit
+    - LLMs set a limit on the number of tokens that can be added to query prompts. For example, ChatGPT-3 has a limit of 4,096 tokens, while GPT-4 (8K) has a token limit of 8,192.
 
 
 
