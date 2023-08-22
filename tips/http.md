@@ -519,7 +519,10 @@
   - Buggy proxies are still common and these lead to strange and erratic behaviors that Web developers cannot foresee and diagnose easily.
   - Pipelining is complex to implement correctly: the size of the resource being transferred, the effective RTT that will be used, as well as the effective bandwidth, have a direct incidence on the improvement provided by the pipeline. Without knowing these, important messages may be delayed behind unimportant ones.
   - Pipelining is subject to the HOL problem.
-
+- [QUIC 千万 QPS 应用实践](https://developer.volcengine.com/articles/7268132377786843147)
+  - 网络性能-QUIC FEC优化
+  - 网络性能-QOE反馈优化
+  - 网络性能-MPQUIC优化
 
 
 

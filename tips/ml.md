@@ -1,4 +1,4 @@
-
+- [AIGC知识库](https://longalong.feishu.cn/wiki/Jm3EwrFcIiNZW7k1wFDcGpkGnfg?table=tblMuhjq52WBho11&view=vewj3UlzIX)
 - [基于趋势和季节性的时间序列预测](https://mp.weixin.qq.com/s/Ln4E9iZd3b3EZqeEjNNsag)
   - 时间序列模式
     - 时间序列预测模型使用数学方程(s)在一系列历史数据中找到模式。然后使用这些方程将数据[中的历史时间模式投射到未来。
@@ -409,6 +409,9 @@
     - TRL is a full stack library where we provide a set of tools to train transformer language models with Reinforcement Learning, from the Supervised Fine-tuning step (SFT), Reward Modeling step (RM) to the Proximal Policy Optimization (PPO) step. The library is integrated with 🤗 transformers.
     - 在微调领域，得益于huggingface transfomers等框架支持，监督微调SFT相对强化学习微调RLHF（Reinforcement Learning from Human Feedback）来讲更易实施。
     - 在TRL的出现，把低门槛使用强化学习(Reinforcement Learning) 训练 transformer 语言模型的这个短板补齐，做到了从监督调优 (Supervised Fine-tuning step, SFT)，到训练奖励模型 (Reward Modeling)，再到近端策略优化 (Proximal Policy Optimization)，实现了全面覆盖。
+  - Tune Llama2
+    - https://www.anyscale.com/blog/fine-tuning-llama-2-a-comprehensive-case-study-for-tailoring-models-to-unique-applications
+    - 微调LLaMa 2时的经验和结果，非结构化文本和写SQL方面，微调后的结果好于GPT-4，但数学方面微调后也比不上GPT-4
 - [candle](https://github.com/huggingface/candle)
   - Minimalist ML framework for Rust
   - candle瞄准于当下又一个被广为诟病又不得不接受的痛点，那就是基于Python语言的pytorch框架训练的大模型速度慢，体积大的问题
@@ -447,12 +450,20 @@
     - [Part 3](https://www.anyscale.com/blog/building-a-self-hosted-question-answering-service-using-langchain-ray)
     - [Code](https://github.com/ray-project/langchain-ray/tree/main/open_source_LLM_retrieval_qa)
   - [Milvus、Xinference、Llama 2-70B 开源模型和 LangChain，构筑出一个全功能的问答系统](https://mp.weixin.qq.com/s/cXBC0dikldNiGwOwPuJfUQ)
+  - [LLM 回答更加准确的秘密：为检索增强生成（RAG）添加引用源](https://mp.weixin.qq.com/s/I01YcEs_dV8fkSD-HaQQxg)
+    - LLM 的最大问题就是缺乏最新的知识和特定领域的知识。
+    - 业界有两种主要解决方法：微调和检索增强生成（RAG）
+      - 微调的成本更高，需要使用的数据也更多，因此主要适用于风格迁移（style transfer）的场景
+      - RAG 方法使用例如 Milvus 之类的向量数据库，从而将知识和数据注入到应用中，更适用于通用场景
+      - RAG 方法就意味着使用向量数据库存储真理数据，这样可以确保应用返回正确的信息和知识，而不是在缺乏数据时产生幻觉，捏造回答
+    - 
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
   - [斯坦福AI小镇](https://github.com/joonspk-research/generative_agents)
     - 25 个人工智能代理居住在数字西部世界中，却没有意识到自己生活在模拟中。他们去工作、闲聊、组织社交活动、结交新朋友，甚至坠入爱河。每个人都有独特的个性和背景故事
     - [Video](https://www.youtube.com/watch?v=nKCJ3BMUy1s)
     - [Paper Summary](https://wdxtub.com/paper/paper-008/2023/04/25/)
+  - [Using GPT-4 for content moderation](https://openai.com/blog/using-gpt-4-for-content-moderation) 用于互联网内容审核
 - LLM Limitations
   - Lacking domain-specific information
     - LLMs are trained solely on data that is publicly available. Thus, they may lack knowledge of domain-specific, proprietary, or private information that is not accessible to the public.
