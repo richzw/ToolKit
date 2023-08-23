@@ -1536,7 +1536,7 @@
   - Golang
     - 内存分配方式 Golang 采用了基于空闲链表分配方式的 [TCMalloc 算法](https://github.com/google/tcmalloc/blob/master/docs/design.md)
       - ![img.png](golang_tcmalloc_gc.png)
-    - GC 算法
+    - [GC 算法](https://mp.weixin.qq.com/s/1ZHZcMGIMEC2YWcETJub8g)
       - ![img.png](golang_gc_overview.png)
         - 无分代
           - 因为无分代，当我们遇到一些需要在内存中保留几千万 kv map 的场景(比如机器学习的特征系统)时，就需要想办法降低 GC 扫描成本。
