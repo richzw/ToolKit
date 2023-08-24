@@ -318,6 +318,9 @@
     - LoRA是通过将预训练模型分解成低秩矩阵来进行微调，以提高模型的效率和泛化能力。该技术可以减少预训练模型的参数数量，同时保留模型的表示能力，从而提高模型的适应性和泛化能力。
 - [Llama2](https://github.com/karpathy/llama2.c/tree/master)
 - [优化 Milvus 性能](https://mp.weixin.qq.com/s/4gDsAF4QnmXWzomrSFRLLg)
+  - Milvus 是读写分离且无状态的向量数据库，状态信息储存在 etcd 中，coordinator 节点去 etcd 请求状态并修改状态
+    - 当用户需要查看状态信息、清理状态信息场景时，etcd 调试工具必不可少。
+    - [BirdWatcher  是 Milvus 2.0 项目的调试工具，该工具连接 etcd 并检查 Milvus 系统的某些状态](https://mp.weixin.qq.com/s/ot-eMCKqM7aP5pEbGaMIQA)
   - 合理的预计数据量，表数目大小，QPS 参数等指标
   - 选择合适的索引类型和参数
     - 索引的选择对于向量召回的性能至关重要，Milvus 支持了 Annoy，Faiss，HNSW，DiskANN 等多种不同的索引，用户可以根据对延迟、内存使用和召回率的需求进行选择
@@ -412,6 +415,7 @@
   - Tune Llama2
     - https://www.anyscale.com/blog/fine-tuning-llama-2-a-comprehensive-case-study-for-tailoring-models-to-unique-applications
     - 微调LLaMa 2时的经验和结果，非结构化文本和写SQL方面，微调后的结果好于GPT-4，但数学方面微调后也比不上GPT-4
+  - [GPT-3.5 Turbo fine-tuning and API updates](https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates)
 - [candle](https://github.com/huggingface/candle)
   - Minimalist ML framework for Rust
   - candle瞄准于当下又一个被广为诟病又不得不接受的痛点，那就是基于Python语言的pytorch框架训练的大模型速度慢，体积大的问题

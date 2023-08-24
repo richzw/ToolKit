@@ -108,6 +108,11 @@
     - For edge-triggered events (EPOLLET), an fd wake-up event is a change in the fd state. EPOLLEXCLUSIVE ensures that all EPOLLIN events are raised until all data is read or the backlog of a listening socket is emptied.
     - For level-triggered events, each EPOLLIN event will invoke a wake-up event. If no one is waiting, these events will be merged. EPOLLEXCLUSIVE prevents multiple threads from racing to accept connections, ensuring that only one thread handles each connection.
     - It is recommended to set the listening socket to non-blocking mode and call accept in a loop until an EAGAIN or EWOULDBLOCK error is raised, indicating that the backlog is empty. This helps avoid the risk of events being merged. The same approach can be used for reading from a socket.
+  - EPOLLONESHOT
+    - EPOLLONESHOT is used to prevent the "thundering herd" phenomenon, but it is not as effective as EPOLLEXCLUSIVE. It ensures that only one epoll_wait caller is woken up for each fd wake-up event, but it does not prevent multiple threads from racing to accept connections.
+    - The behavior of EPOLLONESHOT is such that after a successful call to epoll_wait(2) where the specified file descriptor was reported, no new events will be reported by epoll_wait(2) on the same file descriptor until you explicitly reactivate it with epoll_ctl(2). You can look at it as a mechanism of temporarily disabling a file descriptor once it is returned by epoll_wait(2).
+    - It does not prevent epoll_wait(2) from returning more than one event in the same call for the same file descriptor - in fact, if multiple events are available at the time of the call, they are all combined into the events field of struct epoll_event, whether or not EPOLLONESHOT is in effect for that file descriptor.
+    - In other words, EPOLLONESHOT controls under what conditions a file descriptor is reported in a call to epoll_wait(2); it does not play a role in event aggregation and detection
   - epoll为什么要有ET触发模式
     - 如果采用 EPOLLLT 模式的话，系统中一旦有大量你不需要读写的就绪文件描述符，它们每次调用epoll_wait都会返回，这样会大大降低处理程序检索自己关心的就绪文件描述符的效率.
     - 而采用EPOLLET这种边缘触发模式的话，当被监控的文件描述符上有可读写事件发生时，epoll_wait()会通知处理程序去读写。如果这次没有把数据全部读写完(如读写缓冲区太小)，那么下次调用epoll_wait()时，它不会通知你，也就是它只会通知你一次，直到该文件描述符上出现第二次可读写事件才会通知你！！！这种模式比水平触发效率高，系统不会充斥大量你不关心的就绪文件描述符。
