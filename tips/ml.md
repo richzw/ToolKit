@@ -73,6 +73,13 @@
     - Binpack/Spread 双重调度可将节点和 GPU 卡不同层级的调度策略进行组合使用，灵活支撑不同场景下资源的使用情况
     - 多卡共享策略 - 单个容器可使用同一节点上的多张 GPU 卡共同提供算力和显存资源，打破同一个容器使用算力/显存局限于一张 GPU 卡的束缚，超过整卡资源可随心分配。
 - [Prompt Engineering Guide](https://www.promptingguide.ai/techniques/knowledge)
+  - Q
+    - Prompt 1: [Problem/question description] State the answer and then explain your reasoning.
+    - Prompt 2: [Problem/question description] Explain your reasoning and then state the answer.
+    - These two prompts are nearly identical, and the former matches the wording of many university exams. But the second prompt is much more likely to get an LLM to give you a good answer.
+    - An LLM generates output by repeatedly guessing the most likely next word (or token). So if you ask it to start by stating the answer, as in the first prompt, it will take a stab at guessing the answer and then try to justify what might be an incorrect guess.
+    - In contrast, prompt 2 directs it to think things through before it reaches a conclusion. This principle also explains the effectiveness of widely discussed prompts such as “Let’s think step by step.”
+  - [prompt examples](https://longalong.feishu.cn/wiki/wikcn6By97y03xfvTs6Bee5mzJd?table=tbl1RtiLL4hAjUze&view=vew04cEa7U&sheet=LC9J5S)
 - [Parameter optimization in neural networks](https://www.deeplearning.ai/ai-notes/optimization/index.html?_hsmi=218814757&utm_campaign=The%20Batch&utm_medium=email&utm_content=218804890&utm_source=hs_email&_hsenc=p2ANqtz-_FluhJbN2619klYO-hikBLp6-aEAP60t0VaLzoiEItfCyfrdJguDchLz7Q6h5imUeQp3SkfQaBZnlD8_aUcP5U97FiMA)
 - [Introduction to Uplift Modeling](https://juanitorduz.github.io/uplift/)
 - [What is Uplift modelling and how can it be done with CausalML](https://analyticsindiamag.com/what-is-uplift-modelling-and-how-can-it-be-done-with-causalml/)
@@ -212,6 +219,7 @@
 - [Transformer模型之输入处理](https://mp.weixin.qq.com/s/ryjV4IVLbjUO-QVieOrW3A)
 - [Transformer模型之Encoder-Decoder](https://mp.weixin.qq.com/s/MPFq_-Jqu0DC7QffSK4oNg)
   - https://github.com/heiyeluren/black-transformer
+- [Theory](https://mp.weixin.qq.com/s/oUe_Vw0vfMvXJ-w97dkK4w)
 - LLM Practice
   - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
   - ![img.png](ml_llm_demo.png)
@@ -468,6 +476,9 @@
     - [Video](https://www.youtube.com/watch?v=nKCJ3BMUy1s)
     - [Paper Summary](https://wdxtub.com/paper/paper-008/2023/04/25/)
   - [Using GPT-4 for content moderation](https://openai.com/blog/using-gpt-4-for-content-moderation) 用于互联网内容审核
+- [inference]
+  - Xinference（https://github.com/xorbitsai/inference） 使得本地模型部署变得非常简单。用户可以轻松地一键下载和部署内置的各种前沿开源模型
+  - [LLM 推理新优化策略：使用连续批处理](https://mp.weixin.qq.com/s/iTT5jJc3tiJ_YzyPf1tFWg)
 - LLM Limitations
   - Lacking domain-specific information
     - LLMs are trained solely on data that is publicly available. Thus, they may lack knowledge of domain-specific, proprietary, or private information that is not accessible to the public.
