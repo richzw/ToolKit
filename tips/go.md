@@ -1700,6 +1700,14 @@
   - 为什么 recover 必须在 defer 中调用？
   - 为什么 recover 必须在 defer 中直接调用 (不能嵌套)？
     - gorecover 会进行参数校验，只有在 defer 语句中调用 recover, 才能通过参数校验
+  - recover能捕获所有错误吗？
+    - 不能
+    - 并发读写 map fatal error: concurrent map read and map write
+    - 堆栈内存耗尽(如递归)
+    - 将 nil 函数作为 goroutine 启动 fatal error: go of nil func value
+    - goroutines 死锁  fatal error: all goroutines are asleep - deadlock!
+    - 线程超过设置的最大限制  fatal error: thread exhaustion
+    - 超出可用内存 fatal error: runtime: out of memory
 - [channel](https://mp.weixin.qq.com/s/HyH5ek9r35DXB82ih1icHg)
   - 规则
     - ![img.png](go_channel_op.png)

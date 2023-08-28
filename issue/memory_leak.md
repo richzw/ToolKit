@@ -357,7 +357,9 @@ Memory Leak
       `$ grep -L Close $(grep -El 'New[^(]*Client' **/*.go) | grep -v test`
     - `$ grep -L Close $(grep -El 'New[^(]*Client' **/*.go) | grep -v test | xargs sed -i '/New[^(]*Client/,/}/s/}/}\ndefer client.Close()/'`
 - [glibc导致的堆外内存泄露](https://mp.weixin.qq.com/s/55slokngVRgqEav6c3TxOA)
-
+- [一次神奇的崩溃](https://mp.weixin.qq.com/s/vMlK7oIQH62VV6qHSPHnQQ)
+  - 一个崩溃案例的分析过程。回顾了C++多态和类内存布局、pc指针与芯片异常处理、内存屏障的相关知识。
+  - 编译器进行了reorder优化，我们就可以使用内存屏障禁止编译器相关优化，可以在addObserver代码中插入一行表示内存屏障的汇编`__asm__ __volatile__("":::"memory")`
 
 
 
