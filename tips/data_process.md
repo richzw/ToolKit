@@ -23,6 +23,6 @@
   - resetting index
   - [Source](https://pandastutor.com/index.html)
 - [ClickHouse JOIN优化](https://mp.weixin.qq.com/s/SN1bbddO_qYmAWLSz3IhsA)
-  
+- [图解 Pandas](https://mp.weixin.qq.com/s/cSk9gCdUTlCV8csmbkj3KQ)
 
 

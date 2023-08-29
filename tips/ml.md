@@ -458,6 +458,10 @@
 - [Why you should work on AI AGENTS](https://www.youtube.com/watch?v=fqVLjtvWgq8)
 - [Sample]
   - [GPT-4 生成 Golang Worker Pool](https://mp.weixin.qq.com/s/2kmNHqZO5EdYGsOcYg4dhw)
+  - [美术内容生产](https://aws.amazon.com/cn/blogs/china/generative-ai-in-gaming-industry-accelerating-game-art-content-production/)
+    - Stable Diffusion 微调模型方式包括了 Text Inversion (Embedding)，Hypernetworks，DreamBooth 和 LoRA，其中最流行的是 LoRA
+    - LoRA 已经被非常多的用来确定角色设计的风格，视角
+    - ControlNet 在现有模型外部叠加一个神经网络结构，通过可训练的 Encoder 副本和在副本中使用零卷积和原始网络相连，来实现在基础模型上了输入更多条件，如边缘映射、分割映射和关键点等图片作为引导，从而达到精准控制输出的内容。
   - [Building a Self Hosted Question Answering Service using LangChain]()
     - [Part 1](https://www.anyscale.com/blog/llm-open-source-search-engine-langchain-ray)
     - [Part 2](https://www.anyscale.com/blog/turbocharge-langchain-now-guide-to-20x-faster-embedding)
@@ -486,7 +490,17 @@
       - 它减少了为了微调而准备问答对（带标记的样本数据），大大减少了复杂度。
       - prompt的构造过程，给了我们很大的操作空间，对于我们后续干预模型效果，完成特定业务需求提供了必要的手段。
   - [改进召回（Retrieval）和引入重排（Reranking）提升RAG架构下的LLM应用效果]
-    - 
+    - RAG架构很好的解决了当前大模型Prompt learning过程中context window限制等问题
+    - Issue
+      - 以RAG召回为例，最原始的做法是通过top-k的方式从向量数据库中检索背景数据然后直接提交给LLM去生成答案，但这样存在检索出来的chunks并不一定完全和上下文相关的问题，最后导致大模型生成的结果质量不佳
+    - Solution
+      - 借鉴推荐系统做法，引入粗排或重排的步骤来改进效果
+      - 原有的top-k向量检索召回扩大召回数目，再引入粗排模型，这里的模型可以是策略，轻量级的小模型，或者是LLM，对召回结果结合上下文进行重排，通过这样的改进模式可以有效提升RAG的效果。
+      - 基于LLM的召回或重排
+        - 在逻辑概念上，这种方法使用 LLM 来决定哪些文档/文本块与给定查询相关。prompt由一组候选文档组成，这时LLM 的任务是选择相关的文档集，并用内部指标对其相关性进行评分。
+        - 为了避免因为大文档chunk化带来的内容分裂，在建库阶段也可做了一定优化，利用summary index对大文档进行索引。
+        - llama-index提供了两种形式的抽象：作为独立的检索模块（ListIndexLLMRetriever）或重排模块（LLMRerank）。
+      - 基于相对轻量的模型和算法
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
   - [斯坦福AI小镇](https://github.com/joonspk-research/generative_agents)

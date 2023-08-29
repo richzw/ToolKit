@@ -1631,6 +1631,7 @@
           - GAB（Goroutine allocation buffer）机制，用来优化小对象内存分配。Go 的内存分配用的是 tcmalloc 算法，传统的 tcmalloc，会为每个分配请求执行一个比较完整的 malloc GC 方法，而我们的 Gab 为每个 Goroutine 预先分配一个比较大的 buffer，然后使用 bump-pointer 的方式，为适合放进 Gab 里的小对象来进行快速分配。
         - Go1.20 arena
           - 可以经由 runtime 申请内存，但由用户手动管理此块堆内存。因为是经由 runtime 申请的，可以被 runtime 感知到，因此可以纳入 GC 触发条件中的内存计算里，有效降低 OOM 风险。
+          - [基于 Arena 特性设计一个本地缓存](https://github.com/ecodeclub/ecache/issues/12) 原本本地缓存缓存了很多数据之后，加重了 GO 垃圾回收的压力。现在改用了 Arena 的实现之后，相当于自己管理内存，GO 回收频率降低很多
 - [Hacking Go's Runtime with Generics](https://www.dolthub.com/blog/2022-12-19-maphash/)
   - [maphash](https://github.com/dolthub/maphash)
 - [pointer vs struct receiver]
