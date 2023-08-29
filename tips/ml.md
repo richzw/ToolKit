@@ -220,6 +220,7 @@
 - [Transformer模型之Encoder-Decoder](https://mp.weixin.qq.com/s/MPFq_-Jqu0DC7QffSK4oNg)
   - https://github.com/heiyeluren/black-transformer
 - [Theory](https://mp.weixin.qq.com/s/oUe_Vw0vfMvXJ-w97dkK4w)
+  - [LLM Agents架构](https://mp.weixin.qq.com/s/xgdMbYv__YNKFJ2n7yMDBQ)
 - LLM Practice
   - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
   - ![img.png](ml_llm_demo.png)
@@ -411,6 +412,7 @@
   - https://guangzhengli.com/blog/zh/vector-database/
 - Models
   - [M3E Models](https://huggingface.co/moka-ai/m3e-base)
+  - [Code Llama](https://mp.weixin.qq.com/s/yU1haYz0j0E5B1vojAqlRQ)
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [ANN]
@@ -468,6 +470,22 @@
       - 微调的成本更高，需要使用的数据也更多，因此主要适用于风格迁移（style transfer）的场景
       - RAG 方法使用例如 Milvus 之类的向量数据库，从而将知识和数据注入到应用中，更适用于通用场景
       - RAG 方法就意味着使用向量数据库存储真理数据，这样可以确保应用返回正确的信息和知识，而不是在缺乏数据时产生幻觉，捏造回答
+    - 在LLM开发领域，有RAG，MRKL，Re-Act，Plan-Execute等模式
+    - 大模型的内在基因
+      - 在机器学习中，我们根据解决问题方法不同将模型分为两类，生成式和判别式
+      - 判别式是直接寻找P(y|x),即y在x条件下的概率，找到决策边界，即根据x来判别y，故叫做判别式
+      - 首先会生成P(x,y)的联合分布，即该类别固有的数学分布是什么样的，然后继而推算P(y|(x,y))，而y本身就是这个概率分布生成的，所以叫做生成式。
+    - RAG
+      - 第一步是用户向chatbot（即LLM应用）提出问题，
+      - 第二步基于问题在数据库中检索相关问题，
+      - 第三步，将检索结果top n的数据传给chatbot，chatbot基于用户问题以及检索到的相关信息进行合并形成最终的prompt，
+      - 第四步，将prompt提交给大模型，
+      - 第五步，大模型产生输出返回给chatbot，进而返回给用户。
+    - 好处
+      - 它能够基于这种模式，尽量减少大模型幻觉带来的问题。
+      - 它减少了为了微调而准备问答对（带标记的样本数据），大大减少了复杂度。
+      - prompt的构造过程，给了我们很大的操作空间，对于我们后续干预模型效果，完成特定业务需求提供了必要的手段。
+  - [改进召回（Retrieval）和引入重排（Reranking）提升RAG架构下的LLM应用效果]
     - 
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)

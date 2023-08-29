@@ -656,7 +656,19 @@
     - What is the highest level of throughput achieved?
     - What TCP errors do we see? How can we interpret these? Is the server doing something wrong?
     - Why don't we see this in the client side trace file?
-  
+- [Linux 网络工具](https://mp.weixin.qq.com/s/Vs-6dHlSWdKk6r700k6Bfw)
+  - nethogs
+    - 当要查找哪个 PID (注：即 process identifier，进程 ID) 给你的网络流量带来了麻烦时，它是非常方便的。它按每个进程来分组带宽，而不是像大多数的工具那样按照每个协议或每个子网来划分流量。
+  - nload
+    - nload 是一个控制台应用，可以被用来实时地监控网络流量和带宽使用情况，它还通过提供两个简单易懂的图表来对流量进行可视化
+  - slurm 是另一个 Linux 网络负载监控工具，它以一个不错的 ASCII 图来显示结果，它还支持许多按键用以交互
+  - 当你想显示连接到网卡上的各个主机的带宽使用情况时，iftop 是一个非常有用的工具
+  - collectl 可以被用来收集描述当前系统状态的数据
+  - netload 命令只展示一个关于当前网络荷载和自从程序运行之后传输数据总的字节数目的简要报告，它没有更多的功能
+  - tcptrack 是一个用来显示 TCP 连接状态的实用工具，它可以显示所有的 TCP 连接，以及它们的状态，它还可以按照主机名或者 IP 地址来过滤连接
+  - Nagios 是一个领先且功能强大的开源监控系统，它使得网络或系统管理员可以在服务器的各种问题影响到服务器的主要事务之前，发现并解决这些问题。
+  - nmap 是一个网络发现和安全审计工具，它可以用来扫描网络主机，以及发现主机上的开放端口和服务
+  - tcpflow 是一个命令行工具，它可以捕捉 TCP 连接(流)的部分传输数据，并以一种方便协议分析或除错的方式来存储数据
 
 
 
