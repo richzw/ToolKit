@@ -427,6 +427,7 @@
     - 微调LLaMa 2时的经验和结果，非结构化文本和写SQL方面，微调后的结果好于GPT-4，但数学方面微调后也比不上GPT-4
   - [GPT-3.5 Turbo fine-tuning and API updates](https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates)
   - [Efficient Fine-Tuning for Llama2-7b on a Single GPU](https://colab.research.google.com/drive/1Ly01S--kUwkKQalE-75skalp-ftwl0fE?usp=sharing)
+    - [Video](https://www.youtube.com/watch?v=g68qlo9Izf0)
 - [candle](https://github.com/huggingface/candle)
   - Minimalist ML framework for Rust
   - candle瞄准于当下又一个被广为诟病又不得不接受的痛点，那就是基于Python语言的pytorch框架训练的大模型速度慢，体积大的问题
