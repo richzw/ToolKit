@@ -226,8 +226,30 @@
     - 字段 restartPolicy 仅在 init 容器上被接受。现在唯一支持的值是 “Always”。不会定义其他值。此外，该字段可为空，因此默认值为 “无值”。容器的 restartPolicy 的其他值将不被接受，容器将遵循当前实现的逻辑。
     - Sidecar 容器不会阻止 Pod 完成 - 如果所有常规容器都已完成，Sidecar 容器将被终止。在 sidecar 启动阶段，重启行为将类似于 init 容器。如果 Pod restartPolicy 为 Never，则启动期间失败的 sidecar 容器将不会重新启动，整个 Pod 将失败。如果 Pod restartPolicy 为 Always 或 OnFailure，则会重新启动。一旦 sidecar 容器启动（postStart 完成且启动探测成功），即使 Pod restartPolicy 为 Never 或 OnFailure，这些容器也会重新启动。此外，即使在 Pod 终止期间，sidecar 容器也会重新启动。
     - 为了最大限度地减少 sidecar 容器的 OOM 杀死，这些容器的 OOM 调整将匹配或超过 Pod 中常规容器的 OOM 分数调整。
-
-
+- [Scaling Kubernetes to 7,500 nodes](https://openai.com/research/scaling-kubernetes-to-7500-nodes#unsolvedproblems)
+  - 资源调度
+    - 我们Kubernetes中的每个Node节点的GPU均采用NVLink和GPUDirect直通网卡，所以在一个Node上仅调度一个Pod独占全部资源来达到算力最大化利用。
+    - 在独占Node场景下确实不需要调度器支持Bin-Pack（尽可能将pod填充满node）和Fragmentation（碎片化）算法，因为此时整个集群的资源最小粒度是Node而不是Pod，也自然不用考虑CPU NUMA拓扑结构。也不存在Node资源争强的问题
+    - 要实现这个效果，采用NodeSelector和DaemoSet可以最简单满足需求，对K8S的调度压力也最小
+    - full bisection bandwidth（全双工切分带宽）指一个集群中任何一半的节点都可以与另一半的节点进行最大带宽的通信，而不会受到带宽限制的影响
+  - Team Taints
+    - 我们根据团队名字设计了一个污点openai.com/team=teamname:NoSchedule并把他标记到服务器上，这样不同团队在使用资源时就必须要添加污点容忍才能协调到资源
+    - 我们还自己开发了个控制器，用于在准入阶段将忽略污点，优先调度低优先级的pod。这样就可以让团队直接可以彼此借用资源。
+  - Gang scheduling
+    - Gang scheduling在处理MPI作业时非常重要，原因在于MPI作业的同步通信特性。由于MPI是一种并行计算的编程模型，它允许进程间通过消息传递的方式进行通信，以完成一项共同的计算任务。在MPI中，一项常见的操作是集合通信，其中所有进程需要同时参与。如果任何一个进程滞后或者不可用，那么所有的进程都将被阻塞，等待该进程完成。这就导致了MPI作业非常依赖于所有参与进程的同步执行。
+    - OpenAI实现Gang Scheduling的方式则是通过嵌入k8s scheuler plugis的方式实现。这个插件名叫Coscheduling，当前已被合并到scheudler-plugin主线
+  - 并行作业处理
+    - 参与到运行MPI作业任务的work节点都必须定期进行checkpoint，这是一种容错机制，可以在作业出错或者系统崩溃时恢复作业的状态，用来避免计算出错后全部重头来过
+    - semi-stateful pod (半状态容器)，由于并行任务的Runtime载体是Pod，它的状态数据主要就是任务执行时产生的checkpoint。显然这部分数据需要被持久化到PVC中。之所以称之为半状态，主要在于即便该容器挂了，最坏的情况也是任务整体暂停并回到上一次checkpoint重新开始，并不会像有状态应用产生不可逆的灾难
+  - 网络
+    - 当K8S集群扩大到7500台时，网络方案不管是基于overlay的flannel还是基于路由实现的组网，都无法在IP地址扩展性和性能方面做到同时兼顾。所以我们使用了Azure的VMSS解决了我们的问题
+    -  我们的Pod对外访问还是基于NAT的，只不过用了Iptables来标记流量的来源以及使用量，这个主要用来评估Pod间或者说是并行作业间网络通讯是否存在瓶颈
+  - API servers
+    - 我们用5台独立的ETCD服务器和5台独立的api server服务器支撑了7500个节点，并当前的配置还足以应对未来的扩容的需求。这里面我们的主要优化点是将Kuebrnetes Events分离到其它Etcd集群上以减少记录大量事件的IO带来的延迟
+    - 运行大量节点场景下，每个Node上的List-Watch带来的泛洪效应比较明显，涓流成河，当所有请求都汇聚到API Server后所带来的传输带宽高达1GB/s! 好在我们用了Kubernete 1.1之后的版本，通过EndpointSlices在服务器将压力缩小了1000倍
+  - Monitoring
+    - 我们Prometheus也经常OOM，后来发现是大量的histogram指标查询堆积造成的。所以我们在后端查询时设置了执行超时时间，这样promtheus的内存就再没爆过了。
+    - Prometheus重启后对WAL文件的重放事件慢得我们也无法忍受，后来在Robust Perception的帮助下知道了调大GOMAXPROCS参数来设置goroutine数来加快重放速度
 
 
 

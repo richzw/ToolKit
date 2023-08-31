@@ -413,6 +413,12 @@
 - Models
   - [M3E Models](https://huggingface.co/moka-ai/m3e-base)
   - [Code Llama](https://mp.weixin.qq.com/s/yU1haYz0j0E5B1vojAqlRQ)
+    - https://ai.meta.com/blog/code-llama-large-language-model-coding/
+    - 
+  - [SeamlessM4T](https://ai.meta.com/blog/seamless-m4t/)
+    - [demo online](https://seamless.metademolab.com)
+    - Meta 发布 SeamlessM4T AI 模型，可翻译和转录近百种语言. 该模型采用了多任务UnitY模型架构，能够直接生成翻译后的文本和语音
+    - SeamlessM4T支持近100种语言的自动语音识别、语音到文本翻译、语音到语音翻译、文本到文本翻译和文本到语音翻译的多任务支持
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [ANN]
@@ -422,10 +428,11 @@
     - TRL is a full stack library where we provide a set of tools to train transformer language models with Reinforcement Learning, from the Supervised Fine-tuning step (SFT), Reward Modeling step (RM) to the Proximal Policy Optimization (PPO) step. The library is integrated with 🤗 transformers.
     - 在微调领域，得益于huggingface transfomers等框架支持，监督微调SFT相对强化学习微调RLHF（Reinforcement Learning from Human Feedback）来讲更易实施。
     - 在TRL的出现，把低门槛使用强化学习(Reinforcement Learning) 训练 transformer 语言模型的这个短板补齐，做到了从监督调优 (Supervised Fine-tuning step, SFT)，到训练奖励模型 (Reward Modeling)，再到近端策略优化 (Proximal Policy Optimization)，实现了全面覆盖。
-  - Tune Llama2
+  - [Tune Llama2](https://mp.weixin.qq.com/s/GHwBVGS9zAApRpp088yc-Q)
     - https://www.anyscale.com/blog/fine-tuning-llama-2-a-comprehensive-case-study-for-tailoring-models-to-unique-applications
     - 微调LLaMa 2时的经验和结果，非结构化文本和写SQL方面，微调后的结果好于GPT-4，但数学方面微调后也比不上GPT-4
   - [GPT-3.5 Turbo fine-tuning and API updates](https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates)
+    - [Tune gpt3.5 sample](https://github.com/LearnPrompt/LLMs-cookbook/tree/main/gpt3.5)
   - [Efficient Fine-Tuning for Llama2-7b on a Single GPU](https://colab.research.google.com/drive/1Ly01S--kUwkKQalE-75skalp-ftwl0fE?usp=sharing)
     - [Video](https://www.youtube.com/watch?v=g68qlo9Izf0)
 - [candle](https://github.com/huggingface/candle)
@@ -503,6 +510,7 @@
         - 为了避免因为大文档chunk化带来的内容分裂，在建库阶段也可做了一定优化，利用summary index对大文档进行索引。
         - llama-index提供了两种形式的抽象：作为独立的检索模块（ListIndexLLMRetriever）或重排模块（LLMRerank）。
       - 基于相对轻量的模型和算法
+  - [引入元数据(metadata)提升RAG](https://mp.weixin.qq.com/s/b8cMhdqSyC7O275GTLb4aQ)
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
   - [斯坦福AI小镇](https://github.com/joonspk-research/generative_agents)
