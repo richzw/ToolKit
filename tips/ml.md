@@ -80,6 +80,13 @@
     - An LLM generates output by repeatedly guessing the most likely next word (or token). So if you ask it to start by stating the answer, as in the first prompt, it will take a stab at guessing the answer and then try to justify what might be an incorrect guess.
     - In contrast, prompt 2 directs it to think things through before it reaches a conclusion. This principle also explains the effectiveness of widely discussed prompts such as “Let’s think step by step.”
   - [prompt examples](https://longalong.feishu.cn/wiki/wikcn6By97y03xfvTs6Bee5mzJd?table=tbl1RtiLL4hAjUze&view=vew04cEa7U&sheet=LC9J5S)
+  - [Least-to-Most Prompting](https://www.breezedeus.com/article/llm-prompt-l2m)
+    - CoT 在容易的问题上效果很好，但在难的问题上效果不显著。而 Least-to-Most Prompting 主要是用来解决难的问题。
+    - Least-to-Most Prompting 思路也很简单，就是先把问题分解成更简单的多个子问题，然后再逐个回答子问题，最终获得原始问题的答案
+      - Least-to-Most Prompting = Planning + Reasoning
+      - Let's break down this problem:
+      - To solve “<problem>”, we need to first solve: “<subproblem1>”, “<subproblem2>”, “<subproblem3>”, …
+    - 另一个技巧是在prompt中加入了少量样例（few-shot），这样可以显著提升效果。这个技巧在CoT中也有，是个提升效果很通用的方法
 - [Parameter optimization in neural networks](https://www.deeplearning.ai/ai-notes/optimization/index.html?_hsmi=218814757&utm_campaign=The%20Batch&utm_medium=email&utm_content=218804890&utm_source=hs_email&_hsenc=p2ANqtz-_FluhJbN2619klYO-hikBLp6-aEAP60t0VaLzoiEItfCyfrdJguDchLz7Q6h5imUeQp3SkfQaBZnlD8_aUcP5U97FiMA)
 - [Introduction to Uplift Modeling](https://juanitorduz.github.io/uplift/)
 - [What is Uplift modelling and how can it be done with CausalML](https://analyticsindiamag.com/what-is-uplift-modelling-and-how-can-it-be-done-with-causalml/)
@@ -435,9 +442,12 @@
     - [Tune gpt3.5 sample](https://github.com/LearnPrompt/LLMs-cookbook/tree/main/gpt3.5)
   - [Efficient Fine-Tuning for Llama2-7b on a Single GPU](https://colab.research.google.com/drive/1Ly01S--kUwkKQalE-75skalp-ftwl0fE?usp=sharing)
     - [Video](https://www.youtube.com/watch?v=g68qlo9Izf0)
-- [candle](https://github.com/huggingface/candle)
-  - Minimalist ML framework for Rust
-  - candle瞄准于当下又一个被广为诟病又不得不接受的痛点，那就是基于Python语言的pytorch框架训练的大模型速度慢，体积大的问题
+- [LLM Tools]
+  - [candle](https://github.com/huggingface/candle)
+    - Minimalist ML framework for Rust
+    - candle瞄准于当下又一个被广为诟病又不得不接受的痛点，那就是基于Python语言的pytorch框架训练的大模型速度慢，体积大的问题
+  - [semantic-kernel](https://github.com/microsoft/semantic-kernel)
+    - [doc](https://learn.microsoft.com/en-us/semantic-kernel/overview/)
 - [Kaggle] 
   - [时间序列](https://mp.weixin.qq.com/s/j4PsEdZ3VWhuWgPsIEST0A)
     - [蛋白功能预测大赛](https://www.kaggle.com/competitions/cafa-5-protein-function-prediction)

@@ -944,8 +944,43 @@
 - [ping by golang](https://mp.weixin.qq.com/s/Zc0wKiQ_kJaO9IS5yis2lw)
 - [Linux core handle tcp_close]
   - ![img.png](socket_tcp_close.png)
-
-
+- [epoll fundamental - EPOLLONESHOT and EPOLLEXCLUSIVE](https://idea.popcount.org/2017-02-20-epoll-is-fundamentally-broken-12/)
+  - Most of the epoll critique is based on two fundamental design issues
+    - Sometimes it is desirable to scale application by using multi threading. This was not supported by early implementations of epoll and was fixed by EPOLLONESHOT and EPOLLEXCLUSIVE flags.
+    - Epoll registers the file description, the kernel data structure, not file descriptor, the userspace handler pointing to it.
+  - The debate is heated because it's technically possible to avoid both pitfalls with careful defensive programming
+    - If you can you should avoid using epoll for load balancing across threads. 
+    - Avoid sharing epoll file descriptor across threads. 
+    - Avoid sharing epoll-registered file descriptors. 
+    - Avoid forking, and if you must: close all epoll-registered file descriptors before calling execve.
+    - Explicitly deregister affected file descriptors from epoll set before calling dup/dup2/dup3 or close.
+  - Load balancing
+    - scaling out accept() calls for a single bound TCP socket
+      - Sometimes it's necessary to serve lots of very short TCP connections. A high throughput HTTP 1.0 server is one such example. Since the rate of inbound connections is high, you want to distribute the work of accept()ing connections across multiple CPU's
+      - Up until kernel 4.5 it wasn't possible to use epoll to scale out accepts. The problem is that epoll_wait() returns all events for a given epoll file descriptor. If you have multiple threads waiting on the same epoll file descriptor, they will all get the same events. This means that you can't use epoll to load balance across threads.
+      - Level triggered - unnecessary wake-up
+        - A naive solution is to have a single epoll file descriptor shared across worker threads. This won't work well, neither will sharing bound socket file descriptor and registering it in each thread to unique epoll instance.
+        - This is because "level triggered" (aka: normal) epoll inherits the "thundering herd" semantics from select(). Without special flags, in level-triggered mode, all the workers will be woken up on each and every new connection.
+      - Edge triggered - unnecessary wake-up and starvation
+        - In this case the socket moved only once from "non-readable" to "readable" state. Since the socket is in edge-triggered mode, the kernel will wake up epoll exactly once.
+        -  In this case all the connections will be received by Thread A and load balancing won't be achieved.
+      - Correct solution
+        - 1. The best and the only scalable approach is to use recent Kernel 4.5+ and use level-triggered events with EPOLLEXCLUSIVE flag
+          - This will ensure only one thread is woken for an event, avoid "thundering herd" issue and scale properly across multiple CPU's
+        - 2. The second best approach is to use edge-triggered events with EPOLLONESHOT flag. at a cost of one extra epoll_ctl() syscall after each event.
+      - Other solutions without epoll
+        - One option is to use SO_REUSEPORT and create multiple listen sockets sharing the same port number
+          - This approach has problems though - when one of the file descriptors is closed, the sockets already waiting in the accept queue will be dropped
+          - kernel 4.5 introduced SO_ATTACH_REUSEPORT_CBPF and SO_ATTACH_REUSEPORT_EBPF socket options. When used properly, with a bit of magic, it should be possible to substitute SO_INCOMING_CPU and overcome the usual SO_REUSEPORT dropped connections on rebalancing problem
+    - scaling usual read() calls for large number of connected sockets
+      - level triggered
+        - We don't want to use the level triggered model due to the "thundering herd" behavior. Additionally the EPOLLEXCLUSIVE won't help since there is a race condition possible.
+      - edge triggered
+        - race condition
+      - Correct solution
+        - The correct solution is to use EPOLLONESHOT and re-arm the file descriptor manually. 
+        - This is the only way to guarantee that the data will be delivered to only one thread and avoid race conditions.
+  - Using epoll() correctly is hard. Understanding extra flags EPOLLONESHOT and EPOLLEXCLUSIVE is necessary to achieve load balancing free of race conditions.
 
 
 

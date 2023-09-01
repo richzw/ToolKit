@@ -566,7 +566,9 @@
   - 而是因为如果锁定读查询语句，没有使用索引列作为查询条件，导致扫描是全表扫描。那么，每一条记录的索引上都会加 next-key 锁（行级锁），这样就相当于锁住的全表，这时如果其他事务对该表进行增、删、改操作的时候，都会被阻塞。
   - Tools
     - 在 MySQL 8.0 以上的版本，可以执行 select * from performance_schema.data_locks\G; 这条语句，查看 Innodb 存储引擎为事务加了什么锁。
-    - 我们的事物 A 执行了普通 select 查询语句，如果要看该事务持有的 MDL 锁，可以通过这条命令 select * from performance_schema.metadata_locks;。
+    - 我们的事物 A 执行了普通 select 查询语句，如果要看该事务持有的 MDL 锁，可以通过这条命令 select * from performance_schema.metadata_locks;
+  - 如果查询条件用了索引/主键，那么select ..... for update就会进行行锁。
+  - 如果是普通字段(没有索引/主键)，那么select ..... for update就会进行锁表。
 - [分库分表](https://mp.weixin.qq.com/s/jPH679biI3CLXHTZr4q3xA)
   - 我们为什么需要分库分表
     - 为什么要分库
