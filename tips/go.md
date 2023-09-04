@@ -1639,6 +1639,13 @@
   - Structs are typically more expensive to copy onto the stack than a pointer, especially for a large struct. 
   - But keeping objects on the stack instead of the heap avoids garbage collector pressure, which can be faster in certain circumstances. From an aesthetic / design perspective there are tradeoffs as well: 
   - sometimes it's really desirable to enforce immutability semantics, which you get with a struct receiver.
+  - [Using pointers to reduce copies is premature optimization](https://trinitroglycerin.github.io/2023/06/10/Go-Using-pointers-to-reduce-copies-is-premature-optimization/)
+    - Pointer could cause Cache Miss
+    - any perceived performance benefits of using a pointer can easily be undone by the nature of how memory is organized within a CPU, and using a pointer can make it harder to follow the flow of data in a program
+    - Pointers are a tool to indicate that you are referring to a value somewhere else. This can be a useful tool for:
+      - Pools - Pointers can help you return a reference to a shared object that is protected by a mutex for which there can only be a limited number of copies
+      - Mutation - Pointers are useful when you want a function to mutate a value that it received (this includes methods).
+      - Optional values - While I prefer using the val, ok := DoThing() pattern, one can easily use a pointer to indicate the absence of a value by returning nil.
 - [Go arena](https://pyroscope.io/blog/go-1-20-memory-arenas/)
   - 什么是内存 Arenas
     - Go 运行时必须跟踪 *每个* 分配的对象，导致性能开销增加。Arenas 提供了一种解决这个问题的方法，通过减少与许多小分配相关的开销
@@ -1908,8 +1915,16 @@
     - 不执行body.close()，并不一定会内存泄露。那么什么情况下会协程泄露呢？
     - 直接说答案，既不执行 ioutil.ReadAll(resp.Body) 也不执行resp.Body.Close()，并且不设置http.Client内timeout的时候，就会导致协程泄露。
     - 不执行resp.Body.Close()，网络连接就无法为标记为关闭，也就无法正常断开。因此能导致协程泄露，非常好理解。
-
-
+- [Structuring Architecture](https://avivcarmi.com/finding-the-best-go-project-structure-part-2/)
+  - we’ve defined our structuring approach: we want packages to be independent of one another and communicate via dependency injection
+    - Structural coherence
+    - Separation of business logic and infrastructure
+    - Reusability
+    - Dependency declaration
+  - Clean Architecture
+  - Hexagonal Architecture
+  - Domain-Driven Design
+  - Modular Structure
 
 
 

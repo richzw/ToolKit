@@ -1919,7 +1919,6 @@
       - Value.Store()  的**参数必须是个局部变量**
     - `atomic.Value` 的 `Store` 和 `Load` 方法都不涉及到数据拷贝，只涉及到指针操作
     - `atomic.Value` 使用 `cas` 操作只在初始赋值的时候，一旦赋值过，后续赋值的原子操作更简单，依赖于 `StorePointer` ，指针值得原子赋值
-  
 
 
 

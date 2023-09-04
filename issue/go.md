@@ -957,7 +957,8 @@
     - Load balancing: MPTCP can dynamically adjust data transmission based on path quality and available bandwidth, enabling load balancing and improving network resource utilisation.
     - Fault Tolerance: Because data can be transmitted over multiple paths, MPTCP can provide better fault tolerance. Even if a path fails, data can still be transmitted through other available paths.
     - Mobility Support: MPTCP can maintain connectivity when mobile devices switch networks without having to re-establish connectivity, providing a smoother mobile experience.
-
+-  [慎写指针类型的全局变量](https://mp.weixin.qq.com/s/yz5d5onsAaVoRfc3-ralhQ)
+  - 并发访问issue
 
 
 
