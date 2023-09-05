@@ -421,11 +421,12 @@
   - [M3E Models](https://huggingface.co/moka-ai/m3e-base)
   - [Code Llama](https://mp.weixin.qq.com/s/yU1haYz0j0E5B1vojAqlRQ)
     - https://ai.meta.com/blog/code-llama-large-language-model-coding/
-    - 
   - [SeamlessM4T](https://ai.meta.com/blog/seamless-m4t/)
     - [demo online](https://seamless.metademolab.com)
     - Meta 发布 SeamlessM4T AI 模型，可翻译和转录近百种语言. 该模型采用了多任务UnitY模型架构，能够直接生成翻译后的文本和语音
     - SeamlessM4T支持近100种语言的自动语音识别、语音到文本翻译、语音到语音翻译、文本到文本翻译和文本到语音翻译的多任务支持
+  - [ControlNet](https://github.com/lllyasviel/ControlNet)
+    - Adding Conditional Control to Text-to-Image Diffusion Models.
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [ANN]
@@ -528,6 +529,7 @@
     - [Video](https://www.youtube.com/watch?v=nKCJ3BMUy1s)
     - [Paper Summary](https://wdxtub.com/paper/paper-008/2023/04/25/)
   - [Using GPT-4 for content moderation](https://openai.com/blog/using-gpt-4-for-content-moderation) 用于互联网内容审核
+  - [SynthID](https://www.deepmind.com/synthid) a tool for watermarking and identifying AI-generated images
 - [inference]
   - Xinference（https://github.com/xorbitsai/inference） 使得本地模型部署变得非常简单。用户可以轻松地一键下载和部署内置的各种前沿开源模型
   - [LLM 推理新优化策略：使用连续批处理](https://mp.weixin.qq.com/s/iTT5jJc3tiJ_YzyPf1tFWg)

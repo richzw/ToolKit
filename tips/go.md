@@ -1547,7 +1547,9 @@
       - Golang 采用了基于并发标记与清扫算法的三色标记法。
         - GC 的四个阶段
           - Mark Prepare - STW 做标记阶段的准备工作，需要停止所有正在运行的goroutine(即STW)，标记根对象，启用内存屏障，内存屏障有点像内存读写钩子，它用于在后续并发标记的过程中，维护三色标记的完备性(三色不变性)，这个过程通常很快，大概在10-30微秒。
-          - Marking - Concurrent 标记阶段会将大概25%(gcBackgroundUtilization)的P用于标记对象，逐个扫描所有G的堆栈，执行三色标记，在这个过程中，所有新分配的对象都是黑色，被扫描的G会被暂停，扫描完成后恢复，这部分工作叫后台标记(gcBgMarkWorker)。这会降低系统大概25%的吞吐量，比如MAXPROCS=6，那么GC P期望使用率为6*0.25=1.5，这150%P会通过专职(Dedicated)/兼职(Fractional)/懒散(Idle) 三种工作模式的Worker共同来完成。这还没完，为了保证在Marking过程中，其它G分配堆内存太快，导致Mark跟不上Allocate的速度，还需要其它G配合做一部分标记的工作，这部分工作叫辅助标记(mutator assists)。在Marking期间，每次G分配内存都会更新它的”负债指数”(gcAssistBytes)，分配得越快，gcAssistBytes越大，这个指数乘以全局的”负载汇率”(assistWorkPerByte)，就得到这个G需要帮忙Marking的内存大小(这个计算过程叫revise)，也就是它在本次分配的mutator assists工作量(gcAssistAlloc)。
+          - Marking - Concurrent 标记阶段会将大概25%(gcBackgroundUtilization)的P用于标记对象，逐个扫描所有G的堆栈，执行三色标记，在这个过程中，所有新分配的对象都是黑色，被扫描的G会被暂停，扫描完成后恢复，这部分工作叫后台标记(gcBgMarkWorker)。这会降低系统大概25%的吞吐量，比如MAXPROCS=6，那么GC P期望使用率为6*0.25=1.5，这150%P会通过专职(Dedicated)/兼职(Fractional)/懒散(Idle) 三种工作模式的Worker共同来完成。
+            - 这还没完，为了保证在Marking过程中，其它G分配堆内存太快，导致Mark跟不上Allocate的速度，还需要其它G配合做一部分标记的工作，这部分工作叫辅助标记(mutator assists)。
+            - 在Marking期间，每次G分配内存都会更新它的”负债指数”(gcAssistBytes)，分配得越快，gcAssistBytes越大，这个指数乘以全局的”负载汇率”(assistWorkPerByte)，就得到这个G需要帮忙Marking的内存大小(这个计算过程叫revise)，也就是它在本次分配的mutator assists工作量(gcAssistAlloc)。
           - Mark Termination - STW 标记阶段的最后工作是Mark Termination，关闭内存屏障，停止后台标记以及辅助标记，做一些清理工作，整个过程也需要STW，大概需要60-90微秒。在此之后，所有的P都能继续为应用程序G服务了。
           - Sweeping - Concurrent 在标记工作完成之后，剩下的就是清理过程了，清理过程的本质是将没有被使用的内存块整理回收给上一个内存管理层级(mcache -> mcentral -> mheap -> OS)，清理回收的开销被平摊到应用程序的每次内存分配操作中，直到所有内存都Sweeping完成。当然每个层级不会全部将待清理内存都归还给上一级，避免下次分配再申请的开销，比如Go1.12对mheap归还OS内存做了优化，使用NADV_FREE延迟归还内存。
         - 关于 GC 触发阈值
@@ -1641,6 +1643,8 @@
   - sometimes it's really desirable to enforce immutability semantics, which you get with a struct receiver.
   - [Using pointers to reduce copies is premature optimization](https://trinitroglycerin.github.io/2023/06/10/Go-Using-pointers-to-reduce-copies-is-premature-optimization/)
     - Pointer could cause Cache Miss
+      - When a pointer is passed to a function, what will be read into the cache of the processor is (probably) the memory address of the value that the processor needs to work on, and not the actual value. 
+      - When the processor attempts to do some work on the value, it first has to go and find wherever the value that the address is pointing to is located. In some trivial examples, the value and the address could have spatial or temporal locality
     - any perceived performance benefits of using a pointer can easily be undone by the nature of how memory is organized within a CPU, and using a pointer can make it harder to follow the flow of data in a program
     - Pointers are a tool to indicate that you are referring to a value somewhere else. This can be a useful tool for:
       - Pools - Pointers can help you return a reference to a shared object that is protected by a mutex for which there can only be a limited number of copies
@@ -1672,7 +1676,9 @@
   - [Translation](https://mp.weixin.qq.com/s/veu5W0BFmLIZ-yvs39NdUw)
 - [noCopy vs copyChecker]()
   - noCopy  is primarily used for static code analysis (by tools like  go vet ) to ensure that structs containing a mutex are not unintentionally copied. The  noCopy  struct contains a private mutex field and a  Lock()  method that panics if called, hence preventing the copy of the struct.
-  - On the other hand,  copyChecker  is used at runtime to prevent the accidental copying of a struct containing a mutex. It is a private struct that is embedded in a struct that contains a mutex, and it contains only a private mutex field. The  copyChecker  struct implements the  Lock  and  Unlock  methods, and when the  copyChecker.Lock()  method is called, it checks to see if the mutex is already locked, and if it is, it panics. This is designed to prevent two instances of a mutex from being created if a struct containing the mutex is copied, which can cause race conditions.
+  - On the other hand,  copyChecker  is used at runtime to prevent the accidental copying of a struct containing a mutex. It is a private struct that is embedded in a struct that contains a mutex, and it contains only a private mutex field. 
+    - The  copyChecker  struct implements the  Lock  and  Unlock  methods, and when the  copyChecker.Lock()  method is called, it checks to see if the mutex is already locked, and if it is, it panics. 
+    - This is designed to prevent two instances of a mutex from being created if a struct containing the mutex is copied, which can cause race conditions.
   - So, in summary,  noCopy  and  copyChecker  are used to prevent the accidental copying of a struct containing a mutex, but  noCopy  is primarily used for static code analysis, while  copyChecker  is used at runtime to prevent race conditions
 - [panic or runtime.Goexit]
   - How go recover panic
