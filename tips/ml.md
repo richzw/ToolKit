@@ -332,7 +332,6 @@
     - Prompt Tuning是通过设计合适的Prompt来对模型进行微调，以使其更好地适应特定的任务或应用场景。提示是一些关键词或短语，可以帮助模型理解任务的要求和期望输出的格式。
   - Low-Rank Adaptation（LoRA）
     - LoRA是通过将预训练模型分解成低秩矩阵来进行微调，以提高模型的效率和泛化能力。该技术可以减少预训练模型的参数数量，同时保留模型的表示能力，从而提高模型的适应性和泛化能力。
-- [Llama2](https://github.com/karpathy/llama2.c/tree/master)
 - [优化 Milvus 性能](https://mp.weixin.qq.com/s/4gDsAF4QnmXWzomrSFRLLg)
   - Milvus 是读写分离且无状态的向量数据库，状态信息储存在 etcd 中，coordinator 节点去 etcd 请求状态并修改状态
     - 当用户需要查看状态信息、清理状态信息场景时，etcd 调试工具必不可少。
@@ -419,6 +418,7 @@
   - https://guangzhengli.com/blog/zh/vector-database/
 - Models
   - [M3E Models](https://huggingface.co/moka-ai/m3e-base)
+  - [Llama2](https://github.com/karpathy/llama2.c/tree/master)
   - [Code Llama](https://mp.weixin.qq.com/s/yU1haYz0j0E5B1vojAqlRQ)
     - https://ai.meta.com/blog/code-llama-large-language-model-coding/
   - [SeamlessM4T](https://ai.meta.com/blog/seamless-m4t/)
@@ -475,6 +475,7 @@
   - 概率从何而来
     - n-gram 概率生成 “随机词”但问题是：没有足够的英文文本可以推导出这些概率
     - ChatGPT 的核心正是一个所谓的 “大型语言模型”（LLM），它的建立可以很好地估计这些概率。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。
+  - [Fixing Hallucinations in LLMs](https://betterprogramming.pub/fixing-hallucinations-in-llms-9ff0fd438e33)
 - [Why you should work on AI AGENTS](https://www.youtube.com/watch?v=fqVLjtvWgq8)
 - [Sample]
   - [GPT-4 生成 Golang Worker Pool](https://mp.weixin.qq.com/s/2kmNHqZO5EdYGsOcYg4dhw)
