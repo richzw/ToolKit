@@ -114,7 +114,7 @@
       - 我们在收包路径上面仍然需要消耗 2 个软中断，才能将报文送往目的地。接下来我们看，如何利用 redirect peer 技术来优化这个流程
     - TC redirect peer - 加速收包路径
       - bpf_redirect_peer 会直接将数据包转发到 Pod 网络 namespace 中，避免了enqueue_to_backlog 操作，节省了一次软中断，性能理论上会有提升
-
+- [eBPF 实现 OFF CPU Time 记录并生成火焰图](https://mp.weixin.qq.com/s/kPi78YnQkKkR0aShwjVViw)
 
 
 

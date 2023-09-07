@@ -669,9 +669,33 @@
   - Nagios 是一个领先且功能强大的开源监控系统，它使得网络或系统管理员可以在服务器的各种问题影响到服务器的主要事务之前，发现并解决这些问题。
   - nmap 是一个网络发现和安全审计工具，它可以用来扫描网络主机，以及发现主机上的开放端口和服务
   - tcpflow 是一个命令行工具，它可以捕捉 TCP 连接(流)的部分传输数据，并以一种方便协议分析或除错的方式来存储数据
-
-
-
+- [ss的send-Q一定是发送队列]
+  - Issue
+    - netstat发现全连接和半连接对接溢出数一直增加，但ss 没看出来溢出
+    - ss -tln命令的输出。其中，Recv-Q这一列都是0，而Send-Q都是8192。
+    - netstat -s | grep -i "listen"的输出。可以看到，有几千万个SYN报文（也就是握手请求）被丢弃了。而且，这两个计数器一直在持续增加
+    - 疑问有两点：
+      - 1. Recv-Q为什么是零呢？netstat不是显示不断有新的握手请求被丢弃吗，为什么ss这里的Recv-Q完全没有体现？
+        - Recv-Q 列显示的是接收队列中的数据量。接收队列中的数据是已经由 TCP 协议栈接收但还未被应用程序读取的数据。当一个 SYN 报文到达，TCP 协议栈会尝试与发送 SYN 的客户端建立连接。
+        - 在正常的三次握手过程中，服务器会发送 SYN-ACK 响应，等待来自客户端的 ACK 以完成连接的建立。如果SYN 报文被丢弃了。这意味着三次握手未能完成。那么，该连接实际上还未被成功建立，也就没有数据进入接收队列，因此 Recv-Q 的值会是 0。
+      - 2. Send-Q为什么是8192呢？这个字段不是表示发送队列中的字节数吗？连接都没建立，哪来的发送队列，居然还有值？
+  - 分析
+    - 分析ss源码
+      - ss属于iproute2工具集，这个工具集相对较新，其目标之一也是要替换netstat, ifconfig等相对老旧的命令。 (github.com上找到iproute2项目的代码仓库)
+      - ss之所以能替代netstat，原因之一就是ss获取socket信息的接口是netlink，而netstat是读取/proc伪文件接口。两者相比，netlink的效率更高。
+    - 内核代码分析
+      - 设置的sysctl net.ipv4.tcp_max_syn_backlog值不是8192，但是net.core.somaxconn的值确实是8192，也就是跟Send-Q的值对上了
+      - 那为什么是somaxconn呢？这里也是一个小的知识点。如果我们man listen，会看到文档的解释是：
+        - If the backlog argument is greater than the value in /proc/sys/net/core/somaxconn, then it is silently truncated to that value
+      - 如果应用程序在调用listen()时指定了一个超过somaxconn的值，会被自动限定为somaxconn的值。而这个值，通常是超过tcp_max_syn_backlog的
+    - 首先是strace。我们执行strace ss -tln，然后搜索idiag_wqueue
+    - Linux内核的kprobe提供了这样一种可能。通过它，我们可以跟踪内核中的大部分函数。当然，由于kprobe只是一种内核特性，所以还需要有用户空间友好的工具来调用它，然后才能展现它的巨大价值。这里我们可以用bpftrace
+      - 我们要追踪recvmsg系统调用，首先要找到对应的kprobe探测点函数。我们可以cat /proc/kallsyms | grep recvmsg，这样可以搜出来几十个包含recvmsg的探测点。一般可以跟踪__sys_开头的函数，这次就是__sys_recvmsg。
+      - 由于整个行为是ss程序发起的，我们还可以把ss作为过滤器，更加精确的找到只是由ss程序发起发的recvmsg系统调用
+      - `bpftrace -e 'kprobe:__sys_recvmsg /comm=="ss"/ {printf("kstack: %s\n", kstack);}'`
+    - 我们不难得出ss跟内核交互的过程：
+      - ss -> sendmsg() -进内核-> netlink逻辑 -> tcp_diag_get_info()更新inet_diag_msg结构体
+      - ss <- recvmsg() <-出内核- netlink逻辑 <- 更新过的inet_diag_msg结构体
 
 
 

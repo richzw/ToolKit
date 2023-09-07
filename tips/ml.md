@@ -87,6 +87,7 @@
       - Let's break down this problem:
       - To solve “<problem>”, we need to first solve: “<subproblem1>”, “<subproblem2>”, “<subproblem3>”, …
     - 另一个技巧是在prompt中加入了少量样例（few-shot），这样可以显著提升效果。这个技巧在CoT中也有，是个提升效果很通用的方法
+  - [wonderful prompt](https://github.com/yzfly/wonderful-prompts)
 - [Parameter optimization in neural networks](https://www.deeplearning.ai/ai-notes/optimization/index.html?_hsmi=218814757&utm_campaign=The%20Batch&utm_medium=email&utm_content=218804890&utm_source=hs_email&_hsenc=p2ANqtz-_FluhJbN2619klYO-hikBLp6-aEAP60t0VaLzoiEItfCyfrdJguDchLz7Q6h5imUeQp3SkfQaBZnlD8_aUcP5U97FiMA)
 - [Introduction to Uplift Modeling](https://juanitorduz.github.io/uplift/)
 - [What is Uplift modelling and how can it be done with CausalML](https://analyticsindiamag.com/what-is-uplift-modelling-and-how-can-it-be-done-with-causalml/)
