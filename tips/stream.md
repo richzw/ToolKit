@@ -58,4 +58,4 @@
   - Watermark 与 Trigger
     - 在事件时间（Event Time）时间列上定义时间窗口（Time Window）对数据进行划分，使用水位线（Watermark）来描述事件的完整性，使得计算引擎可以在每个窗口内的事件完整且不会更改后，再使用类似批处理的方式进行处理。这种触发计算的方式也被称为完整性触发。
     - 在流计算系统中通过某些 timeout 或其他策略指定注入 Watermark。比如在 RisingWave 中可以通过如下 SQL 定义 timeout 为 5s 的 Watermark。
-
+- [RisingWave 打造 Feature Store](https://mp.weixin.qq.com/s/KojIae28RGat-Wi_sVaqRA)

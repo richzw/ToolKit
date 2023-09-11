@@ -450,6 +450,7 @@
     - candle瞄准于当下又一个被广为诟病又不得不接受的痛点，那就是基于Python语言的pytorch框架训练的大模型速度慢，体积大的问题
   - [semantic-kernel](https://github.com/microsoft/semantic-kernel)
     - [doc](https://learn.microsoft.com/en-us/semantic-kernel/overview/)
+  - [Prompt Flow](https://microsoft.github.io/promptflow/how-to-guides/quick-start.html)
 - [Kaggle] 
   - [时间序列](https://mp.weixin.qq.com/s/j4PsEdZ3VWhuWgPsIEST0A)
     - [蛋白功能预测大赛](https://www.kaggle.com/competitions/cafa-5-protein-function-prediction)
