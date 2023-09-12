@@ -231,6 +231,7 @@
   - [LLM Agents架构](https://mp.weixin.qq.com/s/xgdMbYv__YNKFJ2n7yMDBQ)
   - [An introduction to Reinforcement Learning from Human Feedback (RLHF)](https://docs.google.com/presentation/d/1eI9PqRJTCFOIVihkig1voRM4MHDpLpCicX9lX1J2fqk/edit#slide=id.g12c29d7e5c3_0_0)
     - [Video](https://www.youtube.com/watch?v=2MBJOuVq380)
+  - [主流大语言模型的技术原理](https://mp.weixin.qq.com/s/P1enjLqH-UWNy7uaIviWRA)
 - LLM Practice
   - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
   - ![img.png](ml_llm_demo.png)

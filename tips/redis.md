@@ -281,6 +281,6 @@
       - Redis-server ： Redis的主线程，主要负责执行命令；
       - bio_close_file、bio_aof_fsync、bio_lazy_free：三个后台线程，分别异步处理关闭文件任务、AOF刷盘任务、释放内存任务；
       - io_thd_1、io_thd_2、io_thd_3：三个 I/O 线程，io-threads 默认是 4 ，所以会启动 3（4-1）个 I/O 多线程，用来分担 Redis 网络 I/O 的压力。
-
+- [Making sense of Redis’ SCAN cursor](https://engineering.q42.nl/redis-scan-cursor/)
 
 
