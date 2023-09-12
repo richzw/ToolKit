@@ -229,6 +229,8 @@
   - https://github.com/heiyeluren/black-transformer
 - [Theory](https://mp.weixin.qq.com/s/oUe_Vw0vfMvXJ-w97dkK4w)
   - [LLM Agents架构](https://mp.weixin.qq.com/s/xgdMbYv__YNKFJ2n7yMDBQ)
+  - [An introduction to Reinforcement Learning from Human Feedback (RLHF)](https://docs.google.com/presentation/d/1eI9PqRJTCFOIVihkig1voRM4MHDpLpCicX9lX1J2fqk/edit#slide=id.g12c29d7e5c3_0_0)
+    - [Video](https://www.youtube.com/watch?v=2MBJOuVq380)
 - LLM Practice
   - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
   - ![img.png](ml_llm_demo.png)
@@ -468,6 +470,7 @@
       - 评估指标是均方根对数误差。
     - [杂货销售预测](https://www.kaggle.com/c/favorita-grocery-sales-forecasting)
       - 根据归一化加权均方根对数误差 （NWRMSLE） 进行评估
+  - [量化交易](https://mp.weixin.qq.com/s/vHzu2UcWRiT1BkfsYqhEBQ)
 - [ChatGPT的工作原理漫讲](https://mp.weixin.qq.com/s/BKwp12BGqKB2qObEYfrVLQ)
   - [The Impact of chatGPT talks - Stephen Wolfram](https://www.youtube.com/watch?v=u4CRHtjyHTI)
   - Overview
@@ -533,9 +536,9 @@
     - [Paper Summary](https://wdxtub.com/paper/paper-008/2023/04/25/)
   - [Using GPT-4 for content moderation](https://openai.com/blog/using-gpt-4-for-content-moderation) 用于互联网内容审核
   - [SynthID](https://www.deepmind.com/synthid) a tool for watermarking and identifying AI-generated images
-- [inference]
-  - Xinference（https://github.com/xorbitsai/inference） 使得本地模型部署变得非常简单。用户可以轻松地一键下载和部署内置的各种前沿开源模型
-  - [LLM 推理新优化策略：使用连续批处理](https://mp.weixin.qq.com/s/iTT5jJc3tiJ_YzyPf1tFWg)
+  - [inference]
+    - Xinference（https://github.com/xorbitsai/inference） 使得本地模型部署变得非常简单。用户可以轻松地一键下载和部署内置的各种前沿开源模型
+    - [LLM 推理新优化策略：使用连续批处理](https://mp.weixin.qq.com/s/iTT5jJc3tiJ_YzyPf1tFWg)
 - LLM Limitations
   - Lacking domain-specific information
     - LLMs are trained solely on data that is publicly available. Thus, they may lack knowledge of domain-specific, proprietary, or private information that is not accessible to the public.
