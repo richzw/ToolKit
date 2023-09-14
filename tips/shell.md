@@ -129,7 +129,7 @@
   - git rev-list --objects --all | sort -k 2 > allfileshas.txt # 获取所有文件的hash值
   -  使用 git filter-branch 截断历史记录
   - 使用 git-filter-repo 清理截断日期前的所有历史记录，并将截断节点的提交信息修改
-
+- [常用 Shell 脚本](https://mp.weixin.qq.com/s/hPqiHB4g2IcP0PLFc1UgWQ)
 
 
 
