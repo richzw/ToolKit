@@ -282,5 +282,18 @@
       - bio_close_file、bio_aof_fsync、bio_lazy_free：三个后台线程，分别异步处理关闭文件任务、AOF刷盘任务、释放内存任务；
       - io_thd_1、io_thd_2、io_thd_3：三个 I/O 线程，io-threads 默认是 4 ，所以会启动 3（4-1）个 I/O 多线程，用来分担 Redis 网络 I/O 的压力。
 - [Making sense of Redis’ SCAN cursor](https://engineering.q42.nl/redis-scan-cursor/)
-
-
+- [一次访问Redis延时高问题排查](https://mp.weixin.qq.com/s?__biz=MzIzOTU0NTQ0MA==&mid=2247533651&idx=1&sn=bc8e313fa5b767f401719deba42b6e93&chksm=e92a795cde5df04a43569c6137c0bd46b20fdf7dc1c3ea0380d33e2f915a37b59c0df8a10131&scene=21#wechat_redirect)
+  ```
+  spring.redis.jedis.pool.max-active=500 // 线上稳定保有4台, 4*500=2000, 仍然远小于Redis规格支持的3w
+  spring.redis.jedis.pool.max-idle=500
+  
+  spring.redis.jedis.pool.time-between-eviction-runs-millis=30000 // 定时心跳保活与检测
+  
+  spring.redis.jedis.pool.min-idle=500 // 连接池的稳定数量
+  spring.redis.jedis.pool.test-while-idle=true //定时心跳保活与检测
+  spring.redis.jedis.pool.num-tests-per-eviction-run=-1 // 每次保活检测, 都需要把500个连接都检测一遍. 如果设置为-2, 则每次检测1/2比例的的连接.
+  spring.redis.jedis.pool.min-evictable-idle-time-millis=-1 // 不要因为idleTime大于某个阈值从而把连接给删除掉. 这样可以防止无意义的大规模连接重建。
+  ```
+  - [后续](https://mp.weixin.qq.com/s/trbGNYZPEfzaAMz6kZ_YKg)
+    - 扩展JedisConnectionConfiguration支持其他参
+    - SpringBoot官方能够在配置文件里支持这些JedisPool/CommonsObjectPool2原生的参数

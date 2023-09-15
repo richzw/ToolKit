@@ -473,6 +473,8 @@
       - 根据归一化加权均方根对数误差 （NWRMSLE） 进行评估
   - [量化交易](https://mp.weixin.qq.com/s/vHzu2UcWRiT1BkfsYqhEBQ)
 - [ChatGPT的工作原理漫讲](https://mp.weixin.qq.com/s/BKwp12BGqKB2qObEYfrVLQ)
+  - [大模型综述](https://github.com/RUCAIBox/LLMSurvey)
+  - [主流大语言模型的技术原理](https://mp.weixin.qq.com/s/P1enjLqH-UWNy7uaIviWRA)
   - [The Impact of chatGPT talks - Stephen Wolfram](https://www.youtube.com/watch?v=u4CRHtjyHTI)
   - Overview
     - ChatGPT 从根本上说总是试图对它目前得到的任何文本进行 “合理的延续” - 它寻找在某种意义上 “意义匹配” 的东西。但最终的结果是，它产生了一个可能出现在后面的词的排序列表，以及 “概率”。
