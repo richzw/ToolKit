@@ -981,7 +981,8 @@
         - The correct solution is to use EPOLLONESHOT and re-arm the file descriptor manually. 
         - This is the only way to guarantee that the data will be delivered to only one thread and avoid race conditions.
   - Using epoll() correctly is hard. Understanding extra flags EPOLLONESHOT and EPOLLEXCLUSIVE is necessary to achieve load balancing free of race conditions.
-
+- [socks5详解](https://mp.weixin.qq.com/s/tggv-lS3iRWoCdjh6Fag-w)
+  - SOCKS5（Socket Secure 5）是一种网络协议，用于在客户端和代理服务器之间进行通信。它是SOCKS协议的第五个版本，SOCKS5协议支持TCP和UDP协议，并提供了认证和加密的功能
 
 
 
