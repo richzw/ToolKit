@@ -1509,6 +1509,12 @@
     - 最终编译。当您第二次编译时，动态信息文件将合并到一个摘要文件中。编译器会使用此文件中的概要信息，然后尝试选择程序中最频繁最优的运行路径去执行。
   - Go 团队最终也敲定将基于 runtime/pprof 来得到所需 profile
   - 在 Go 工具链上，将在 go build 子命令增加 -pgo=<path>，用于显式指定用于 PGO 构建的 profile 文件位置。
+  - [Profile-guided optimization in Go 1.21](https://go.dev/blog/pgo)
+    - 常量传播(constant propagation)可以在编译时计算常量表达式的值,避免了运行时的计算开销。
+    - 逃逸分析(Escape analysis)可以避免为局部作用域的对象分配堆内存,从而避免 GC 的开销。
+    - 内联(Inlining)会将简单函数的函数体拷贝到调用者中,这通常可以在调用者中启用进一步的优化(例如额外的常量传播或更好的逃逸分析)。
+    - 去虚拟化(Devirtualization)会将接口值上的间接调用(如果可以静态确定其类型)转换为对具体方法的直接调用(这通常可以内联该调用)。
+  - 
 - [Cost of a integer cast](https://boyter.org/posts/cost-of-integer-cast-in-go/)
   - a integer to integer cast it’s as close to “free” as any other CPU operation. Integer to float is about 3x slower, but again for most things you can consider it free.
 - [Is Go scalable]

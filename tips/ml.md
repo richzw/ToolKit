@@ -167,6 +167,7 @@
   - ReAct
     - [REACT: SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS](https://arxiv.org/pdf/2210.03629.pdf)
     - 通过将行动空间扩展为特定任务的离散行动和语言空间的组合，将推理和行动集成到 LLM中。前者使 LLM 能够与环境交互（例如使用维基百科搜索API），后者能够促使LLM 生成自然语言的推理轨迹。
+    - 《ReAct：在语言模型中协同推理和行动》的实现，俗称为 ReAct 论文，该论文演示了一种提示技术，使模型能够通过 “思维链” 进行 “推理”（reason），并能够通过使用预定义工具集中的工具（如能够搜索互联网）来 “行动”（act）
   - 反思
     - 是一个框架，它为代理提供动态记忆和自我反思的能力，以提高它的推理技能。反思采用标准的强化学习设置，其中奖励模型提供简单的二元奖励，行动空间遵循 ReAct 中的设置，同时特定任务的行动空间通过语言来增强复杂的推理步骤。在每个行动at之后，Agent会计算一个启发式值ht，并根据自我反思的结果决定是否重置环境以开始新的试验。
   - Chain of Hindsight，CoH
@@ -531,6 +532,7 @@
         - llama-index提供了两种形式的抽象：作为独立的检索模块（ListIndexLLMRetriever）或重排模块（LLMRerank）。
       - 基于相对轻量的模型和算法
   - [引入元数据(metadata)提升RAG](https://mp.weixin.qq.com/s/b8cMhdqSyC7O275GTLb4aQ)
+- [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
   - [斯坦福AI小镇](https://github.com/joonspk-research/generative_agents)
@@ -553,7 +555,6 @@
     - LLMs are often trained on outdated data and don't update their knowledge base regularly due to high training costs. For instance, training GPT-3 can cost up to 1.4 million dollars.
   - Token Limit
     - LLMs set a limit on the number of tokens that can be added to query prompts. For example, ChatGPT-3 has a limit of 4,096 tokens, while GPT-4 (8K) has a token limit of 8,192.
-
 
 
 
