@@ -157,6 +157,8 @@
       ```
   - 数据传输过程优化
     - 消息流转过程中，需要考虑消息体的传输效率优化，采用 MessagePack 对消息体进行序列化，压缩消息体大小
+- [go处理1分钟百万请求](https://marksuper.xyz/2021/10/08/handle_million_req/)
+  - [探究 Go 的高级特性之 - 处理1分钟百万请求](https://mp.weixin.qq.com/s/hC_Hl4CQi725cirFwhxGfg)
 - [动手实现一个localcache](https://mp.weixin.qq.com/s/ZtSA3J8HK4QarhrJwBQtXw)
   - 数据结构 - HashTable
   - 并发安全 

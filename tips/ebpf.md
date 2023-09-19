@@ -116,6 +116,6 @@
       - bpf_redirect_peer 会直接将数据包转发到 Pod 网络 namespace 中，避免了enqueue_to_backlog 操作，节省了一次软中断，性能理论上会有提升
 - [eBPF 实现 OFF CPU Time 记录并生成火焰图](https://mp.weixin.qq.com/s/kPi78YnQkKkR0aShwjVViw)
 - [Tracing a packet journey using Linux tracepoints, perf and eBPF](https://blog.yadutaf.fr/2017/07/28/tracing-a-packet-journey-using-linux-tracepoints-perf-ebpf/)
-
+  - [Chinese](https://mp.weixin.qq.com/s/yQIoc1GPpV14ATUKJxY5XQ)
 
 

@@ -333,6 +333,14 @@
        - mysql的事务没有正确处理，例如：rollback 或者 commit
     - 使用 perf 把所有的调用关系使用火焰图给绘制出来。既然我们推断代码中没有释放mysql连接
     - 由于那一行代码没有对事务进行回滚，导致服务端没有主动发起close。因此 MySQL负载均衡器 在达到 60s 的时候主动触发了close操作，但是通过tcp抓包发现，服务端并没有进行回应，这是因为代码中的事务没有处理，因此从而导致大量的端口、连接资源被占用。
+- [504错误码，你觉得这个服务是出了什么问题]
+  - 最常见的原因，可能是网络出现异常了。比如：偶然的网络抖动，或者是带宽被占满了。
+  - 线程池满了
+  - 接口超时得有点莫名其妙，特别是遇到数据库出现死锁的时候
+  - 超时时间设置过短
+  - 一次性返回数据太多
+  - sql语句没走索引
+  - OOM
 - [Keeping TCP Connections Alive in Golang](https://madflojo.medium.com/keeping-tcp-connections-alive-in-golang-801a78b7cf1)
   - With Go any net.TCPConn type can have keepalives enabled by running the net.TCPConn.SetKeepAlive() method with true as the value.
   - With Go, the frequency of keepalives can be changed from the default using the net.TCPConn.SetKeepAlivePeriod() method.
