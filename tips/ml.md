@@ -535,6 +535,7 @@
 - [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
+    - [MetaGPT：让每个人拥有专属智能体](https://mp.weixin.qq.com/s/U8YU1vQVdUprOspRdpiGNQ)
   - [斯坦福AI小镇](https://github.com/joonspk-research/generative_agents)
     - 25 个人工智能代理居住在数字西部世界中，却没有意识到自己生活在模拟中。他们去工作、闲聊、组织社交活动、结交新朋友，甚至坠入爱河。每个人都有独特的个性和背景故事
     - [Video](https://www.youtube.com/watch?v=nKCJ3BMUy1s)
@@ -544,6 +545,18 @@
   - [inference]
     - Xinference（https://github.com/xorbitsai/inference） 使得本地模型部署变得非常简单。用户可以轻松地一键下载和部署内置的各种前沿开源模型
     - [LLM 推理新优化策略：使用连续批处理](https://mp.weixin.qq.com/s/iTT5jJc3tiJ_YzyPf1tFWg)
+    - [模型部署与推理](https://mp.weixin.qq.com/s/glPPSqHjsnDjC0DZSuuPzA)
+      - 模型压缩
+        - 模型压缩的方向大致分为剪枝（Pruning），知识蒸馏（Knowledge Distillation，KD），量化（Quantization），低秩分解（Low-Rank Factorization），权重共享（Weight sharing），神经网络架构搜索（NAS
+        - 知识蒸馏是由教师网络和学生网络组成。教师网络通常是一个更复杂的模型，使用整个训练数据集进行训练。网络中的大量参数使得收敛相对简单。然后，应用知识转移模块将教师网络学到的知识提炼到学生网络中。
+        - 对于大模型（LLM）来讲，根据方法是否侧重于将 LLM 的涌现能力（EA）蒸馏到小模型（SLM）进行分类。分为：标准 KD 和基于 EA 的 KD。其中标准蒸馏即前面提到的模式，区别仅在于区别在于教师模型是大模型。
+        - 量化就特指浮点算法转换为定点运算（定点，即小数点的位置是固定的，通常为纯小数或整数）或离散运算，如将fp16存储的模型量化为INT8或者INT4
+        - 所谓Offloading就是将GPU中的计算放置到CPU中，这样就能够减少GPU的占用
+        - 低秩分解是将一个大的矩阵分解为两个小的矩阵的乘积，这样就能够减少模型的参数量
+        - 并行策略有三种：数据并行，张量并行，流水线并行
+          - 数据并行（data parallelism, DP），即每张显卡上都完整保存一个模型，将数据分割成多个batch，然后独立计算梯度，最终再将梯度值平均化，作为最终梯度。在推理过程中，本质就是独立并行推理，可增加设备数来增加系统整体吞吐。
+          - 张量并行，也叫模型并行（model parallelism/tensor parallelism, MP/TP）：模型张量很大，一张卡放不下，将tensor分割成多块，一张卡存一块，让每个卡分别计算，最后拼接（all gather）在一起。在推理过程中，可以将计算任务拆分到多个卡中并行计算,可横向增加设备数，从而提升并行度，以加少延迟。
+          - 流水线并行，将网络按层切分，划分成多组，一张卡存一组。下一张显卡拿到上一张显卡计算的输出进行计算，通过纵向增加设备数量可以提高流水线的并行性，减少显卡的等待时间，从而提升设备的利用率。
 - LLM Limitations
   - Lacking domain-specific information
     - LLMs are trained solely on data that is publicly available. Thus, they may lack knowledge of domain-specific, proprietary, or private information that is not accessible to the public.
