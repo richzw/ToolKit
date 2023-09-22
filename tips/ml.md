@@ -233,6 +233,7 @@
   - [An introduction to Reinforcement Learning from Human Feedback (RLHF)](https://docs.google.com/presentation/d/1eI9PqRJTCFOIVihkig1voRM4MHDpLpCicX9lX1J2fqk/edit#slide=id.g12c29d7e5c3_0_0)
     - [Video](https://www.youtube.com/watch?v=2MBJOuVq380)
   - [主流大语言模型的技术原理](https://mp.weixin.qq.com/s/P1enjLqH-UWNy7uaIviWRA)
+  - [Tokenization与Embedding](https://mp.weixin.qq.com/s?__biz=MzA5MTIxNTY4MQ==&mid=2461139643&idx=1&sn=cd16d5eea8a93113893320642ad0a204&chksm=87396095b04ee983fddae57c546d6f80830d399d6850d6b1ad5828c15d1bb76bbb11770c4207&scene=21#wechat_redirect)
 - LLM Practice
   - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
   - ![img.png](ml_llm_demo.png)
@@ -501,7 +502,7 @@
   - [LLM 回答更加准确的秘密：为检索增强生成（RAG）添加引用源](https://mp.weixin.qq.com/s/I01YcEs_dV8fkSD-HaQQxg)
     - LLM 的最大问题就是缺乏最新的知识和特定领域的知识。
     - 业界有两种主要解决方法：微调和检索增强生成（RAG）
-      - 微调的成本更高，需要使用的数据也更多，因此主要适用于风格迁移（style transfer）的场景
+      - 微调的成本更高，需要使用的数据也更多，并且每一次 fine-tune 的时间比较久，企业无法经常去做这个事情，因为它的 cost 非常高. 因此主要适用于风格迁移（style transfer）的场景
       - RAG 方法使用例如 Milvus 之类的向量数据库，从而将知识和数据注入到应用中，更适用于通用场景
       - RAG 方法就意味着使用向量数据库存储真理数据，这样可以确保应用返回正确的信息和知识，而不是在缺乏数据时产生幻觉，捏造回答
     - 在LLM开发领域，有RAG，MRKL，Re-Act，Plan-Execute等模式
@@ -532,6 +533,7 @@
         - llama-index提供了两种形式的抽象：作为独立的检索模块（ListIndexLLMRetriever）或重排模块（LLMRerank）。
       - 基于相对轻量的模型和算法
   - [引入元数据(metadata)提升RAG](https://mp.weixin.qq.com/s/b8cMhdqSyC7O275GTLb4aQ)
+    - 如果所有用户上传文档放到一个collection 是可以设置field 为用户id等标识, 然后通过langcchain封装的milvus里面的参数 search_params 来筛选出来  考虑建两个collection，public 和 individual, 然后根据用户鉴权判定查询的collection
 - [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
@@ -568,7 +570,12 @@
     - LLMs are often trained on outdated data and don't update their knowledge base regularly due to high training costs. For instance, training GPT-3 can cost up to 1.4 million dollars.
   - Token Limit
     - LLMs set a limit on the number of tokens that can be added to query prompts. For example, ChatGPT-3 has a limit of 4,096 tokens, while GPT-4 (8K) has a token limit of 8,192.
-
+- [向量数据库](https://developer.aliyun.com/article/1328709?spm=a2c6h.12883283.index.43.5ba74307ZagBs5)
+  - 本质上就是给定一条向量，我们要搜索离它最近的 k 条向量，那最近的这个距离的定义可以是，比如说，内积或者欧氏距离、或者余弦距离。有了距离的定义以后，我们还要定义一些向量的搜索算法。
+  - 向量搜索算法总体来说分为两类，
+    - 第一类是精准搜索 KNN - FLAT，一个向量一个向量地去检索，然后取 top k，召回率会很高，但是它的执行的性能会比较差，因为要做全局扫描
+    - approximate nearest neighbor，就是 ANN，那这类算法它可能回答的并不是最精准的 top k 的向量，但是这一类算法的好处是执行效率比较高。
+  
 
 
 
