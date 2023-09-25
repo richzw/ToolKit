@@ -804,7 +804,13 @@
     - FlexiRaft把一个组拆成了两个组，事务在一个组里提交，故障切换在另一个组里搞选举。这样可以做到事务提交不出地域，保证低延迟；好巧不巧遇到地域故障时，又可以把数据库切换到其他地域
     - 采用Paxos算法的MySQL Group Replication就没这么灵活了，并且MGR还存在一些设计上的缺点。比如为了减少性能损失，MGR的Paxos层里并不持久化日志，多个节点在内存中达成一致后直接提交，这时候如果掉电就存在丢数据的风险。
 - [MySQL 事务隔离级别](https://mp.weixin.qq.com/s/4vV792F4UBaTTB7W9EsHbw)
-
+- [TDSQL-C]
+  - 存算分离
+  - flashback query - 数据快速恢复
+  - audit
+  - severless - 存储资源 释放 （弹性）
+  - 平滑弹性扩缩容 - 移除毛刺
+  - serverless = Faas + Baas
 
 
 
