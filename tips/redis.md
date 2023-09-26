@@ -316,3 +316,4 @@
   - [后续](https://mp.weixin.qq.com/s/trbGNYZPEfzaAMz6kZ_YKg)
     - 扩展JedisConnectionConfiguration支持其他参
     - SpringBoot官方能够在配置文件里支持这些JedisPool/CommonsObjectPool2原生的参数
+- [开发redis module](https://mp.weixin.qq.com/s/W8qZo7C4IxO3D5To7_SRwg)

@@ -449,6 +449,33 @@
     - [Tune gpt3.5 sample](https://github.com/LearnPrompt/LLMs-cookbook/tree/main/gpt3.5)
   - [Efficient Fine-Tuning for Llama2-7b on a Single GPU](https://colab.research.google.com/drive/1Ly01S--kUwkKQalE-75skalp-ftwl0fE?usp=sharing)
     - [Video](https://www.youtube.com/watch?v=g68qlo9Izf0)
+  - [finetune(微调)](https://mp.weixin.qq.com/s?__biz=MzA5MTIxNTY4MQ==&mid=2461139904&idx=1&sn=172e92206322ce3c8077e5cdff70502a&chksm=873961eeb04ee8f85bc49cafa1c462f5e0b3eef4ba4a02425118eea7373251a98665e9931996&scene=21#wechat_redirect)
+    - 参数高效微调（PEFT）- Delta Tuning
+      - 采用只改变少量的参数(delta parameters)，达到微调的目的的方法，叫做参数高效微调（Parameter-efficient finetuning，PEFT）
+        - 其思路也比较简单直接，那就是区别于原来全量微调，固定原有模型参数，只微调变化的部分，减少计算成本和时间
+        - 只存储微调部分的参数，而不保存全部模型，减少存储空间
+        - 基于这两方面的改进，就能克服前面提到的问题（需要大量标签数据问题，采用prompt learning fewshot方案）
+      - 有三个方向，增量式(Addition-based)、指定式(Specification-based)和重参数化(Reparameterization)
+        - 增量式(Addition-based)
+          - 增加一些原始模型中不存在的额外可训练神经模块或参数。从加的内容和位置不同，又可细分为 Adapter-Tuning, Prefix Tuning，Prompt Tuning
+          - Adapter-Tuning本质上就是在原有模型结构上增加了一些适配器，而这个adapter的维度比原有维度低得多，这样就使得计算量得到很大减少，从而提升微调效率
+          - Prefix-Tuning 不修改原有模型结构和参数，只通过给模型每一层增加前缀，然后固定模型参数，仅仅训练prefix，从而减少训练成本，实现高效精调
+          - Prompt Tuning方法（和Prompt Learning注意区别，两者不同）仅在输入层增加soft prompt，相较于的基于每个任务的全参数微调，如图每个任务需要11B参数，而prompt tuning只需要20k参数，小了5个数量级，随着模型参数的增加（达到10B级），Prompt Tuning能与Fine-Tuning效果打平，但其在小模型上性能不佳。
+          - 三者的共同点是都是在原有模型结构上增加一些额外的参数，从而减少微调成本，提升微调效率
+        - 指定式(Specification-based)
+          - 指定原始模型中的特定的某些参数变得可训练，而其他参数则被冻结。最典型的为bitfit，仅仅更新bias
+        - 重参数化(Reparameterization)
+          - 重参数化式方法用低维子空间参数来重参数化原来存在的参数，这样就能在保证效果的情况下，减少计算量。
+          - 重参数化方法往往基于一类相似的假设：即预训练模型的适配过程本质上是低秩或者低维的。大白话讲，就是对它先进行精简计算然后再适配回原有结构并不会对模型影响很大。
+          - LORA
+            - Low-Rank Adaptation of Large Language Models
+            - 通过将预训练模型分解成低秩矩阵来进行微调，以提高模型的效率和泛化能力。该技术可以减少预训练模型的参数数量，同时保留模型的表示能力，从而提高模型的适应性和泛化能力。
+            - 在大型语言模型上对指定参数（权重矩阵）并行增加额外的低秩矩阵，并在模型训练过程中，仅训练额外增加的并行低秩矩阵的参数，从而减少计算量，提升微调效率
+          - QLORA: Efficient Finetuning of Quantized LLMs
+            - 可以在保持完整的16位微调任务性能的情况下，将内存使用降低到足以「在单个48GB GPU上微调650亿参数模型」
+            - QLORA通过冻结的4位量化预训练语言模型向低秩适配器(LoRA)反向传播梯度 采用了两种技术——4位NormalFloat (NF4)量化和Double Quantization 同时，引入了Paged Optimizers，它可以避免梯度检查点操作时内存爆满导致的内存错误。
+    - Summary
+      - ![img.png](ml_fine_tune_diff.png)
 - [LLM Tools]
   - [candle](https://github.com/huggingface/candle)
     - Minimalist ML framework for Rust
@@ -553,6 +580,9 @@
         - 知识蒸馏是由教师网络和学生网络组成。教师网络通常是一个更复杂的模型，使用整个训练数据集进行训练。网络中的大量参数使得收敛相对简单。然后，应用知识转移模块将教师网络学到的知识提炼到学生网络中。
         - 对于大模型（LLM）来讲，根据方法是否侧重于将 LLM 的涌现能力（EA）蒸馏到小模型（SLM）进行分类。分为：标准 KD 和基于 EA 的 KD。其中标准蒸馏即前面提到的模式，区别仅在于区别在于教师模型是大模型。
         - 量化就特指浮点算法转换为定点运算（定点，即小数点的位置是固定的，通常为纯小数或整数）或离散运算，如将fp16存储的模型量化为INT8或者INT4
+          - 量化是指用于执行计算并以低于浮点精度的位宽存储张量的技术
+          - 单个参数占用的 GPU 内存量取决于其“精度”(或更具体地说是 dtype)。最常见的 dtype 是 float32 (32 位) 、 float16 和 bfloat16 (16 位)。 要在 GPU 设备上加载一个模型，每十亿个参数在 float32 精度上需要 4GB，在 float16 上需要 2GB，在 int8 上需要 1GB。
+          - 为了保证较高的精度，大部分的科学运算都是采用浮点型进行计算，常见的是32位浮点型和64位浮点型，即float32和double64，显而易见，适当的降低计算精度，能够减少内存开销，提升计算速度，是大模型微调优化的一个很好思路
         - 所谓Offloading就是将GPU中的计算放置到CPU中，这样就能够减少GPU的占用
         - 低秩分解是将一个大的矩阵分解为两个小的矩阵的乘积，这样就能够减少模型的参数量
         - 并行策略有三种：数据并行，张量并行，流水线并行
