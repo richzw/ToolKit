@@ -1937,6 +1937,8 @@
   - Hexagonal Architecture
   - Domain-Driven Design
   - Modular Structure
+- [从头再读取 io.Reader]
+  - 我们知道io.Reader提供了Read方法，并没有将读取的数据再塞回去的方法，而且对于流式的 Reader,也绝无可能将数据塞回去
 
 
 

@@ -589,6 +589,11 @@
           - 数据并行（data parallelism, DP），即每张显卡上都完整保存一个模型，将数据分割成多个batch，然后独立计算梯度，最终再将梯度值平均化，作为最终梯度。在推理过程中，本质就是独立并行推理，可增加设备数来增加系统整体吞吐。
           - 张量并行，也叫模型并行（model parallelism/tensor parallelism, MP/TP）：模型张量很大，一张卡放不下，将tensor分割成多块，一张卡存一块，让每个卡分别计算，最后拼接（all gather）在一起。在推理过程中，可以将计算任务拆分到多个卡中并行计算,可横向增加设备数，从而提升并行度，以加少延迟。
           - 流水线并行，将网络按层切分，划分成多组，一张卡存一组。下一张显卡拿到上一张显卡计算的输出进行计算，通过纵向增加设备数量可以提高流水线的并行性，减少显卡的等待时间，从而提升设备的利用率。
+    - 端设备为主的推理引擎
+      - ggml、mlc-llm、ollama
+      - ggml可以说是llama.cpp和 whisper.cpp沉淀内化的产物
+      - mlc-llm建立在 Apache TVM Unity之上，并在此基础上进行了进一步优化
+    - 三个较为流行的Inference Server -Triton Server RayLLM OpenLLM 
 - LLM Limitations
   - Lacking domain-specific information
     - LLMs are trained solely on data that is publicly available. Thus, they may lack knowledge of domain-specific, proprietary, or private information that is not accessible to the public.
@@ -605,7 +610,15 @@
   - 向量搜索算法总体来说分为两类，
     - 第一类是精准搜索 KNN - FLAT，一个向量一个向量地去检索，然后取 top k，召回率会很高，但是它的执行的性能会比较差，因为要做全局扫描
     - approximate nearest neighbor，就是 ANN，那这类算法它可能回答的并不是最精准的 top k 的向量，但是这一类算法的好处是执行效率比较高。
-  
+- Learning
+  - 1. 阅读 Andrej Karpathy 的所有博客文章
+  - 阅读 Chris Olah 的所有博客文章 阅读你感兴趣的 Distill 上的任何帖子。或者看下我列出的帖子(https://Qreydanus.qithub.io/)
+  - 也许 - 参加像 Andrew Ng 的 Coursera 课程这样的在线课程
+  - 绝对 - 使用 Jupyter Notebook、NumPy 和 PyTorch 编写简单的个人项目。当你完成它们时 a) 发布良好的、记录良好的代码（参见我的 github） b) 写一篇关于你所做的事情的简短博客文章（参见我的博客）
+  - 下载Arx应用程序，浏览 Arxiv（机器学习预印本的在线存储库）上的论文。每天左右在通勤途中检查一下。遵循 cs.LG、cs.NE 和 stat.ML 标签。另外，请为以下作者加注星标：Yoshua Bengio、Yann LeCunn、Geoffery Hinton、Jason Yosinski、David Duvenaud、Andrej Karpathy、Pieter Abbeel、Quoc Lee、Alex Graves、Koray Kavukcuoglu、Gabor Melis、Oriol Vinyals、Jasch Sohl-Dickstein、Ian Goodfellow 和Adam Santoro。如果及时了解他们上传的论文，并浏览我提到的三个类别中论文的标题/摘要，就可以很快对 SOTA 研究有一个有效的了解。或者：开始每天浏览 Arxiv Sanity Preserver 的“热门炒作”和“最近热门”选项卡。
+  - 值得阅读的热门论文：AlexNet 论文、Alex Graves“生成序列”论文、Jason Yosinski（他是一位优秀作者）的任何论文、神经图灵机论文、DeepMind Atari 论文，也许还有 Goodfellow 的 GAN 论文，尽管我还没有读过。如果可以的话，远离 GAN。
+  - 在 ML 阶段，简单问题 + 超简单实验 » 大型、多 GPU 的工作。有很多好的研究（例如，到目前为止我几乎所有的工作）都可以在一台像样的 MacBook 上完成。
+  -  不要被这份清单淹没。你可能会找到更适合自己的道路。我能给出的最好建议就是重复Richard Feynman的建议：“以尽可能无纪律、无‍礼和原创的方式努力学习你最感兴趣的东西。”
 
 
 
