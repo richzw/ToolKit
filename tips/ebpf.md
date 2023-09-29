@@ -117,5 +117,11 @@
 - [eBPF 实现 OFF CPU Time 记录并生成火焰图](https://mp.weixin.qq.com/s/kPi78YnQkKkR0aShwjVViw)
 - [Tracing a packet journey using Linux tracepoints, perf and eBPF](https://blog.yadutaf.fr/2017/07/28/tracing-a-packet-journey-using-linux-tracepoints-perf-ebpf/)
   - [Chinese](https://mp.weixin.qq.com/s/yQIoc1GPpV14ATUKJxY5XQ)
-
+- [何时以及如何高效的使用经典的bpf](https://mp.weixin.qq.com/s/neJ9PohXjAWrop3s3T7bvw)
+  - Classical BPF 有以下优点:
+    - 效率高:因为它运行在内核空间,可以避免不必要的内核态和用户态切换,也省去多次数据复制的开销。
+    - 安全:它不能随意访问系统内存或修改数据包,只能根据规则过滤,不会引起安全隐患。
+    - 灵活:过滤规则可以动态更新,使包过滤功能更加灵活
+  - Classical BPF 通常应用于网络监控、防火墙、流量控制等场景 
+  - 它为包过滤提供了一个高效、安全、灵活的解决方案。但功能较为受限,只能过滤包不能修改
 

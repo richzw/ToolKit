@@ -88,6 +88,11 @@
       - To solve “<problem>”, we need to first solve: “<subproblem1>”, “<subproblem2>”, “<subproblem3>”, …
     - 另一个技巧是在prompt中加入了少量样例（few-shot），这样可以显著提升效果。这个技巧在CoT中也有，是个提升效果很通用的方法
   - [wonderful prompt](https://github.com/yzfly/wonderful-prompts)
+  - COD
+    - Ask for multiple summaries of increasing detail. Start with a short 1–2 sentence summary, then ask for a slightly more detailed version, and keep iterating until you get the right balance of conciseness and completeness for your needs.
+    - When asking ChatGPT to summarise something lengthy like an article or report, specify that you want an “informative yet readable” summary. This signals the ideal density based on the research.
+    - Pay attention to awkward phrasing, strange entity combinations, or unconnected facts when reading AI summaries. These are signs it may be too dense and compressed. Request a less dense version.
+    - For complex topics, don’t expect chatbots to convey every detail in a highly compressed summary – there are limits before coherence suffers. Ask for a slightly longer summary if needed.
 - [Parameter optimization in neural networks](https://www.deeplearning.ai/ai-notes/optimization/index.html?_hsmi=218814757&utm_campaign=The%20Batch&utm_medium=email&utm_content=218804890&utm_source=hs_email&_hsenc=p2ANqtz-_FluhJbN2619klYO-hikBLp6-aEAP60t0VaLzoiEItfCyfrdJguDchLz7Q6h5imUeQp3SkfQaBZnlD8_aUcP5U97FiMA)
 - [Introduction to Uplift Modeling](https://juanitorduz.github.io/uplift/)
 - [What is Uplift modelling and how can it be done with CausalML](https://analyticsindiamag.com/what-is-uplift-modelling-and-how-can-it-be-done-with-causalml/)
@@ -476,6 +481,7 @@
             - QLORA通过冻结的4位量化预训练语言模型向低秩适配器(LoRA)反向传播梯度 采用了两种技术——4位NormalFloat (NF4)量化和Double Quantization 同时，引入了Paged Optimizers，它可以避免梯度检查点操作时内存爆满导致的内存错误。
     - Summary
       - ![img.png](ml_fine_tune_diff.png)
+      - [PEFT and LoRA](https://www.mercity.ai/blog-post/fine-tuning-llms-using-peft-and-lora)
 - [LLM Tools]
   - [candle](https://github.com/huggingface/candle)
     - Minimalist ML framework for Rust
@@ -561,6 +567,16 @@
       - 基于相对轻量的模型和算法
   - [引入元数据(metadata)提升RAG](https://mp.weixin.qq.com/s/b8cMhdqSyC7O275GTLb4aQ)
     - 如果所有用户上传文档放到一个collection 是可以设置field 为用户id等标识, 然后通过langcchain封装的milvus里面的参数 search_params 来筛选出来  考虑建两个collection，public 和 individual, 然后根据用户鉴权判定查询的collection
+  - [数据预处理之——“局部向量化处理”的妙用](https://mp.weixin.qq.com/s/rBKsfUwokp3jZss6do7YRg?from=groupmessage&isappinstalled=0&scene=1&clicktime=1695784465&enterid=1695784465)
+    - 文档内容embedding
+      - 如你把切割后的embedding做一遍相似度对比，像冒泡一样去看看效果
+      - QA bot冷启动的 vector store 质量很关键, 质量比较高的话，后面你才能从用户输入和答案里面，找一些不错的添加到库中
+    - Issue
+      - 原始资料信息量太大，碰巧触发的相似成分比较多，那么生成的提示增强信息也会一扯一箩筐。
+      - 暴力输出给到大模型的增强Prompt太长（输入和输出都会消耗Token），造成响应慢、费Token、准确性大打折扣的后果
+      - 面对高度垂直的任务类型时，“局部向量化处理”也能获得不错的效果
+        - 前提：做好科学的文本分割，按照不重不漏(MECE）的原则，分门别类、以合理的颗粒度建立目录结构
+  - [Milvus + Towhee 搭建一个基础的 AI 聊天机器人](https://gist.github.com/egoebelbecker/07059b88a1c4daa96ec07937f8ca77b3)
 - [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
