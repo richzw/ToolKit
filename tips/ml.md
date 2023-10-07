@@ -56,6 +56,21 @@
         - 这是第一类错误：实际没有区别，但实验结果表示有区别，我们得到显著结果因此否定原假设，认为实验组更优，发生的概率用 𝛂 表示。
         - 这是第二类错误：实际有区别，但是实际结果表示没有区别，我们得到不显著的结果因此无法拒绝原假设，认为实验组和对照组没有区别，发生的概率用 𝜷 表示。
   - ![img.png](ml_abtest.png)
+- [特征重要性分析的常用方法](https://mp.weixin.qq.com/s/GQIjypyqw4LaSrkDivi23g)
+  - 特征重要性分析可以识别并关注最具信息量的特征，从而带来以下几个优势：
+    - 改进的模型性能
+    - 减少过度拟合
+    - 更快的训练和推理
+    - 增强的可解释性
+  - 排列重要性 PermutationImportance
+  - 内置特征重要性(coef_或feature_importances_)
+  - Leave-one-out 迭代地每次删除一个特征并评估准确性
+  - 相关性分析 计算各特征与目标变量之间的相关性。相关性越高的特征越重要。
+  - 递归特征消除 Recursive Feature Elimination 
+  - XGBoost特性重要性 - XGBOOST或者回归模型使用内置重要性来进行特征的重要性排列
+  - 主成分分析 PCA - PCA着眼于方差解释
+  - 方差分析 ANOVA 使用f_classif()获得每个特征的方差分析f值。f值越高，表明特征与目标的相关性越强
+  - 卡方检验  - 使用chi2()获得每个特征的卡方统计信息。得分越高的特征越有可能独立于目标
 - [ChatGPT如何获取的超能力](https://mp.weixin.qq.com/s/X5ZcCkuEVtrTz0lJnt5a7w)
   - ChatGPT有人类语言中的所有词（又称token），这是它的搜索空间。
   - 然后，精心选择高质量的文本数据（包括代码），训练Transformer模型，需要很多的GPU算力，进行大量的矩阵运算，达到预定的训练目标即可结束训练。这里，Transformer模型是一个包含所有token的概率模型或开放空间。
@@ -489,6 +504,11 @@
   - [semantic-kernel](https://github.com/microsoft/semantic-kernel)
     - [doc](https://learn.microsoft.com/en-us/semantic-kernel/overview/)
   - [Prompt Flow](https://microsoft.github.io/promptflow/how-to-guides/quick-start.html)
+  - [Streaming LLM](https://mp.weixin.qq.com/s/TDqr0xOzW-0msosjwpCDfQ)
+    - [repo](https://github.com/mit-han-lab/streaming-llm)
+    - StreamingLLM 的工作原理是识别并保存模型固有的「注意力池」（attention sinks）锚定其推理的初始 token。
+    - StreamingLLM 利用了注意力池具有高注意力值这一事实，保留这些注意力池可以使注意力分数分布接近正态分布。因此，StreamingLLM 只需保留注意力池 token 的 KV 值（只需 4 个初始 token 即可）和滑动窗口的 KV 值，就能锚定注意力计算并稳定模型的性能。
+    - 「注意力池」
 - [Kaggle] 
   - [时间序列](https://mp.weixin.qq.com/s/j4PsEdZ3VWhuWgPsIEST0A)
     - [蛋白功能预测大赛](https://www.kaggle.com/competitions/cafa-5-protein-function-prediction)

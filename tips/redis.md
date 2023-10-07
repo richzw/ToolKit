@@ -317,3 +317,49 @@
     - 扩展JedisConnectionConfiguration支持其他参
     - SpringBoot官方能够在配置文件里支持这些JedisPool/CommonsObjectPool2原生的参数
 - [开发redis module](https://mp.weixin.qq.com/s/W8qZo7C4IxO3D5To7_SRwg)
+- [Redis 服务排障]
+  - Issue
+    - A 模块的 B 阶段的处理耗时突然慢了
+  - 服务排障的基本方法
+    - 因为 B 阶段不是 A 模块的第一个阶段，所以基本排除是模块间的网络通信、带宽等问题。
+    - 首先排查 A 模块本身的问题，这里的经验是，横向看基础指标，纵向看代码变更。
+    - 先看 A 模块服务的基础资源数据, CPU、内存、网络 IO、磁盘 IO
+    - 再看看是不是数据量出现问题
+    - 问题出在 A 模块的 B 阶段，那首先进行细化，到底哪个方法出现了这么就耗时，排查耗时这里也有两个思路：
+      - 1.业务打点进行排查；
+      - 2.性能分析工具排查。
+    - 在模块的日志中进行耗时采集和输出 - 结果都基本上定位到函数是 Redis 的计数自增逻辑
+    - 用性能分析工具去定位精确函数 - pprof
+  - Redis 服务排障的基本方法
+    - Redis 服务本身问题——Redis 所在节点网路延迟问题确认
+      - 网络和通信导致的固有延迟：
+      - 客户端使用 TCP/IP 连接或 Unix 域连接连接到 Redis，在 1 Gbit/s 网络下的延迟约为200 us，而 Unix 域 Socket 的延迟甚至可低至 30 us，这实际上取决于网络和系统硬件；
+      - 在网络通信的基础之上，操作系统还会增加了一些额外的延迟（如线程调度、CPU 缓存、NUMA 等）；并且在虚拟环境中，系统引起的延迟比在物理机上也要高得多。
+    - Redis 服务本身问题——Redis 自身服务网路延迟问题确认
+      - redis-cli -h 127.0.0.1 -p 6379 --intrinsic-latency 60
+      - redis-cli -h 127.0.0.1 -p 6379 --latency-history -i 1
+      - 吞吐量（使用info stats）
+      - 使用 info Replication 命令查看主从复制的状态
+    - Redis 服务本身问题——CPU、Memory、磁盘 IO - info memory；info CPU；info Persistence
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
