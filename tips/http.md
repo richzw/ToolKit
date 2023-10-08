@@ -599,8 +599,32 @@
       - 使用 HTTP/3 之前需要进行 HTTP 版本协商，浏览器默认不支持 HTTP/3, 通常需要基于建立在 TCP 上的 HTTP/1 或 HTTP/2 来发送协商请求
       - 增加网络管理复杂度，由于 QUIC 会加密大部分数据，因此排查网络错误、优化网络性能和安全性、设置报警规则等工作都变得更加困难，由于这些原因，很多防火墙还未支持 QUIC
       - 许多网络攻击都是利用 UDP 发起的，据统计大概有 3% - 5% 的网络会直接过滤 UDP 请求 (DNS 等网络基础协议除外)
-
-
+- TLS关闭
+  - SSL_shutdown() shuts down an active TLS/SSL connection. It sends the `close_notify` shutdown alert to the peer.
+  - Issue
+    - 在TLS 握手时，Client发了Client Hello后，Server没回Server Hello？而是回了Level: Fatal, Description: Close Notify错误后，直接发了FIN包，进行关闭TCP SOCKET
+  - Debug
+    - 在Linux上，我们常用strace来对进程进行系统调用的跟踪探测; macOS上，也有想对应的工具，dtruss `dtruss -p 78158`
+    - accept的syscall很显眼accept(0x4, 0x700005CCE7A0, 0x700005CCE79C) = 25 0 重要的是RETURN VALUES的部分，这是TCP SOCKET连接后的所属FD文件描述符，也就是我们BUG重现时，这个网络连接在这个MOA进程中的FD。
+    - 从dtruss的日志accept(0x4, 0x700005CCE7A0, 0x700005CCE79C) = 25 0来看，这个FD是25，聪明的你立刻就想到，只要找到close的地方就能确定到BUG出现的syscall日志范围
+    - 直接搜索close的系统调用吧，很明显在close(0x19) = 0 0就是，只不过十进制的 25 被显示成十六进制的0x19了
+    - 从上面的dtruss结果来看，并没有找到准确的TCP SOCKET write的系统调用，只看到几处dtrace: error on enabled probe ID 2172 (ID 170: syscall::write:return): invalid kernel access in action #12 at DIF offset 68
+    - 回到dtruss的参数中，可以看到还有一个参数-s用来打印程序运行的stack backtraces。进行重新重现BUG `dtruss -p 78158 -adfs`
+    - 找到close(0x19)的地方，往上倒推几个syscall日志，可以定位到真正往TCP SOCKET 写入Fatal Close Notify的地方是在libcoretls.dylib\SSLEncodeServerKeyExchange+0x253`。 定位到服务端的密钥交换过程中，EncodeServer时出现了异常。
+    - 回到dtruss的其他日志，能看到在调用Security动态链接库中的impExpPkcs12Import方法里，有大量的/Users/cfc4n/Library/Keychains/login.keychain-db的读写。意味着MOA进程在频繁大量的读写keychain
+  - Root cause
+    - WSS的https server监听时，使用的tls证书，要走正规CA签发，避免自签self-sign的CA频繁读写keychain ，避免对keychain的root权限获取。(域名解析到127.0.0.1，拿到私钥的安全风险也很小)
+  - Issue
+    - 有时候TCP连接的关闭不是以图上这种FIN报文，而是以RST报文结束的。
+    - 应用经常会遇到connection was closed prematurely这样的报错
+  - Debug
+    - Tcpdump和Wireshark分析 看到了TCP RST报文，而在RST之前还有Encrypted Alert
+    - 这种Encrypted Alert，其实是TLS close notify消息。
+      - RFC规定，在应用层事务完成后，如果TLS通信的任意一端想要结束这次TLS通信，就需要显式地发送close notify，表明自己不会再往这个TLS信道里写入数据了
+      - 另一端在接收到close notify后需要做什么呢？主要有两件事 - 即使后续再接到更多的TLS数据信息，也需要丢弃 - 自己也需要发送close notify，完成双向的TLS信道关闭
+      - 不过现实却很骨感。我们可能会看到各种不遵守协议的情况，比如：
+        - 收到对端发出的TLS close notify消息后，自己没有发出TLS close notify，直接启动了TCP挥手
+        - 自己发出TLS close notify后，未等收到对端同样的TLS close notify，就直接启动了TCP挥手
 
 
 
