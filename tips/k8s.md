@@ -264,10 +264,36 @@
     - 内存回收
       - Memcg 直接内存回收：如果一个 Cgroup 的 Memory Usage 达到阈值，则会触发 Memcg 级别的同步内存回收来释放一些内存。如果还不成功，则会触发 Cgroup 级别的 OOM。
       - 全局快速内存回收：上文在介绍快速内存分配时提到了快速内存回收，其之所以快速，是因为只要求回收这次分配所需的页数量即可。
+      - ![img.png](k8s_memory_claim.png)
       - 全局异步内存回收：如上图所示，当整机的空闲内存降到 Low Watermark 时，会唤醒 Kswapd 在后台异步地回收内存，回收到 High Watermark 为止。
       - 全局直接内存回收：如上图所示，如果整机的空闲内存降到 Min Watermark，则会触发全局直接内存回收。因为该过程是同步的，发生在进程内存分配的上下文，对业务的性能影响较大。
-
-
+  - K8s 原生的内存管理机制
+    - Memory Limit
+      - Kubelet 依据 Pod 中各个 Container 声明的 Memory Limit 设置 Cgroup 接口  memory.limit_in_bytes ，约束了 Pod 和 Container 的内存用量上限
+      - 该机制的缺点是，当 Pod 中的 Container 未声明 Memory Limit 时，Kubelet 会将其设置为默认值，这样就会导致 Pod 和 Container 的内存用量上限不受约束，容易导致 OOM。
+    - 驱逐
+      - 当节点的内存不足时，K8s 将选择部分 Pod 进行驱逐，并为节点打上 Taint node.kubernetes.io/memory-pressure，避免将 Pod 再调度到该节点
+      - 在对待驱逐的 Pod 进行排序时，首先判断 Pod 的内存使用量是否超过其 Request，如果超过则优先被驱逐；
+      - 其次比较 Pod 的 Priority，优先级低的 Pod 先被驱逐；
+      - 最后比较 Pod 的内存使用量超过其 Request 的差值，超出越多则越先被驱逐。
+    - OOM
+      - Kubelet 在启动容器时，会根据其所属 Pod 的 QoS 级别与其对内存的申请量，为其配置 /proc/<pid>/oom_score_adj，从而影响其被 OOM Kill 的顺序
+      - 对于 Critical Pod 或 Guaranteed Pod 中的容器，将其 oom_score_adj 设置为 -997
+      - 对于 BestEffort Pod 中的容器，将其 oom_score_adj 设置为 1000
+      - 对于 Burstable Pod 中的容器，根据以下公式计算其 oom_score_adj
+    - Memory QoS
+      - K8s 从 v1.22 版本开始，基于 Cgroups v2 实现了 Memory QoS 特性 ，可以为容器的内存 Request 提供保障，进而保障了全局内存回收在 Pod 间的公平性
+      - 具体的 Cgroups 配置方式如下：
+        - memory.min: 依据 requests.memory 配置。
+        - memory.high: 依据 limits.memory * throttlingfactor (或 nodeallocatablememory * throttlingfactor) 配置。
+        - memory.max: 依据 limits.memory (或 nodeallocatablememory) 配置。
+      - 在 K8s v1.27 版本中，对 Memory QoS 特性进行了增强。主要是为了解决以下问题：
+        - 当容器的 Requests 和 Limits 比较接近时，由于 memory.high > memory.min 的限制，memory.high 中配置的 Throttle 阈值可能不生效。
+        - 按照上述方式计算出的 memory.high 可能较低，导致频繁的 Throttle，影响业务性能。
+        - throttlingfactor 的默认值 0.8 过于激进，一些 Java 应用通常会用到 85% 以上的内存，经常被 Throttle。
+      - 因此进行了以下优化：
+        - 对 memory.high 的计算方式进行改进： `memory.high = floor{[requests.memory + memory throttling factor * (limits.memory or node allocatable memory - requests.memory)]/pageSize} * pageSize`
+        - 将 throttlingfactor 的默认值调整为 0.9。
 
 
 

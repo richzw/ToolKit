@@ -341,7 +341,21 @@
       - 吞吐量（使用info stats）
       - 使用 info Replication 命令查看主从复制的状态
     - Redis 服务本身问题——CPU、Memory、磁盘 IO - info memory；info CPU；info Persistence
-
+      - memory 这里，主要关注三个指标
+        - used_memory_rss_human：表示目前的内存实际占用——表示当前的内存情况。
+        - used_memory_peak_human：表示内存峰值占用——表示曾经的内存情况（主要是用来抓不到现场的时候查问题用的
+        - mem_fragmentation_ratio 内存碎片率( mem_fragmentation_ratio )指标给出了操作系统( used_memory_rss )使用的内存与 Redis( used_memory )分配的内存的比率 mem_fragmentation_ratio = used_memory_rss / used_memory 
+          - 操作系统中的虚拟内存管理器保管着由内存分配器分配的实际内存映射 那么如果我们的 Redis 实例的内存使用量为1 GB，内存分配器将首先尝试找到一个连续的内存段来存储数据
+          - 如果找不到连续的段，则分配器必须将进程的数据分成多个段，从而导致内存开销增加
+          - Redis 内存碎片的产生与清理 内存碎片率大于1表示正在发生碎片，内存碎片率超过1.5表示碎片过多，Redis 实例消耗了其实际申请的物理内存的150%的内存；
+          - 如果内存碎片率低于1，则表示Redis需要的内存多于系统上的可用内存，这会导致 swap 操作。
+      - 作为内存型数据库，磁盘也是一个关键点：这里包含了两个方面（1.持久化 2.内存交换）
+        - 一是最大内存限制 maxmemory，如果不设这个值，可能导致内存超过了系统可用内存，然后就开始 swap，最终可能导致 OOM。
+        - 二是内存驱逐策略 maxmemory-policy，如果设了 maxmemory 这个值，还需要让系统知道，内存按照什么样策略来释放。
+        - 三是驱逐数：evicted_keys，这个可以通过 info stats 查看，即采用驱逐策略真正剔除的数据数目。
+        - 四是内存碎片率，在上面的引用已经给出了，内存碎片率低的情况下可能导致 swap。这里其实是内存和磁盘 IO 的联动点。
+  - CPU 高、hotkey 明显。这里隐含了一个点：与 CPU 相对的是 OPS 并没有很高。
+  - hotkey 其实就会导致 CPU 变高，而这时，因为大量的 CPU 都在数据切换和存储上，导致其他的请求比较慢。
 
 
 
