@@ -625,10 +625,24 @@
       - 不过现实却很骨感。我们可能会看到各种不遵守协议的情况，比如：
         - 收到对端发出的TLS close notify消息后，自己没有发出TLS close notify，直接启动了TCP挥手
         - 自己发出TLS close notify后，未等收到对端同样的TLS close notify，就直接启动了TCP挥手
-
-
-
-
+  - Deep dive
+    - 应用程序如何发起TCP挥手
+      - close()在被调用的时候，会对这个套接字描述符（socket fd）的引用计数减去一，并检查减后是否为零；若为零，则发起TCP挥手，即发出FIN报文
+      - shutdown()有几种不同的调用方式，分别是：
+        - 仅关闭读，此时不会发出FIN报文。
+        - 仅关闭写，此时会发出FIN报文，告知对方：“我不会继续发数据啦，你那头随意”。
+        - 同时关闭读和写，这就跟close()类似了，区别是shutdown()不看计数器，直接关闭连接
+    - 内核如何“制造”RST报文
+      - 在Linux内核中，发送RST报文的逻辑其实不算复杂，涉及两个函数。分别是：
+        - tcp_send_active_reset()：名称上看就是自己主动发送RST，经常在连接关闭阶段发生
+        - tcp_v4_send_reset()：相对而言，这个函数完成的是“被动式”的RST，其触发原因一般是对端过来的非正常报文
+      - 比较典型的一个触发RST的组合条件是：接收缓冲区还有数据没有被读取，而应用程序已经调用了close()
+      - ![img.png](http_tls_close.png)
+  - Root Cause
+    - 可行的办法其实有两个：
+      - 让客户端修改代码，不要把这种RST当作错误。
+      - 在服务端做一些修改，在tls_close()和close()之间增加延迟（比如1秒），使得客户端有机会读取收到的TLS close notify并能够发出自己的TLS close notify，从而让RFC设计的TLS优雅关闭落到实处，这样就不会产生RST。
+    - ![img.png](http_tls_close_2.png)
 
 
 
