@@ -108,6 +108,8 @@
     - When asking ChatGPT to summarise something lengthy like an article or report, specify that you want an “informative yet readable” summary. This signals the ideal density based on the research.
     - Pay attention to awkward phrasing, strange entity combinations, or unconnected facts when reading AI summaries. These are signs it may be too dense and compressed. Request a less dense version.
     - For complex topics, don’t expect chatbots to convey every detail in a highly compressed summary – there are limits before coherence suffers. Ask for a slightly longer summary if needed.
+  - Resource
+    - [高级prompt工程讲解](https://mp.weixin.qq.com/s/2wFOaKwzhZfHPNOhG1Mqhw)
 - [Parameter optimization in neural networks](https://www.deeplearning.ai/ai-notes/optimization/index.html?_hsmi=218814757&utm_campaign=The%20Batch&utm_medium=email&utm_content=218804890&utm_source=hs_email&_hsenc=p2ANqtz-_FluhJbN2619klYO-hikBLp6-aEAP60t0VaLzoiEItfCyfrdJguDchLz7Q6h5imUeQp3SkfQaBZnlD8_aUcP5U97FiMA)
 - [Introduction to Uplift Modeling](https://juanitorduz.github.io/uplift/)
 - [What is Uplift modelling and how can it be done with CausalML](https://analyticsindiamag.com/what-is-uplift-modelling-and-how-can-it-be-done-with-causalml/)
@@ -157,6 +159,7 @@
 - [Ray: 大模型时代的AI计算基础设施](https://mp.weixin.qq.com/s/nIi9M9aokPQ3sTIbJNGPgg)
 - [Ray 的大规模离线推理](https://mp.weixin.qq.com/s/2-jWtYcO0CVnttRrJOYcnA)
   - Ray Core：是 Ray 框架的底层框架，提供了一整套的分布式计算的框架，可以将普通的应用转化成分布式的系统
+    - [Ray Core 1](https://mp.weixin.qq.com/s/8yJ9CO61ZraAvfw8X0Rz-g)
     - [Ray Core](https://mp.weixin.qq.com/s?__biz=MzA5NTUxNzE4MQ==&mid=2659281279&idx=1&sn=42604ee42f6bad25321e8b38eae34d33&scene=21#wechat_redirect)
     - [Ray Core](https://mp.weixin.qq.com/s?__biz=MzA5NTUxNzE4MQ==&mid=2659281407&idx=1&sn=548bd7f7421714f6262fee7a3c94a8ab&scene=21#wechat_redirect)
   - Ray Serve：是一个可扩展的模型服务库，用于构建在线推理 API
@@ -293,6 +296,17 @@
     Question: Marty has 100 centimeters of ribbon that he must cut into 4 equal parts. Each of the cut parts must be divided into 5 equal parts. How long will each final cut be?
     Answer: Let's think step by step.
     ```
+  - [GOT](https://mp.weixin.qq.com/s/ZK6MWmKhiJuYLb183nUUtw)
+    - 思维图（GoT），这是一种通过网络推理增强LLM能力的方法。在GoT中，LLM思想被建模为顶点，而边是这些思想之间的依赖关系。使用 GoT可以通过构造具有多个传入边的顶点来聚合任意想法。
+    - 将GoT应用于LLMs的推理仍然存在一定的挑战。例如：
+      - 针对不同任务的最佳图结构是什么？
+      - 如何最好地聚合想法以最大限度地提高准确性并最大限度地降低成本？
+    - 「思想转换」 鉴于使用图来表示LLM执行的推理过程，对该图的任何修改都代表对底层推理过程的修改，作者将这些修改称为思维转换，具体定义为向图中添加新的顶点或边
+      - 「聚合」(Aggregation)：将任意的想法聚合成一个新的想法。
+      - 「提炼」(Refinement)：通过自我联系提炼思想中的内容。
+      - 「生成」(Generation)：基于一个想法产生多个新想法。
+    - 思维图(GoT)实现
+      - ![img.png](ml_got.png)
   - API
     - Temperature：
       - 越低temperature，结果越确定，因为总是选择最可能的下一个标记。在应用方面，您可能希望对基于事实的 QA 等任务使用较低的温度值，以鼓励更真实和简洁的响应
@@ -574,6 +588,7 @@
       - 第三步，将检索结果top n的数据传给chatbot，chatbot基于用户问题以及检索到的相关信息进行合并形成最终的prompt，
       - 第四步，将prompt提交给大模型，
       - 第五步，大模型产生输出返回给chatbot，进而返回给用户。
+      - ![img.png](ml_rag_pipeline.png)
     - 好处
       - 它能够基于这种模式，尽量减少大模型幻觉带来的问题。
       - 它减少了为了微调而准备问答对（带标记的样本数据），大大减少了复杂度。

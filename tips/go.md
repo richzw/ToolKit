@@ -1939,7 +1939,32 @@
   - Modular Structure
 - [从头再读取 io.Reader]
   - 我们知道io.Reader提供了Read方法，并没有将读取的数据再塞回去的方法，而且对于流式的 Reader,也绝无可能将数据塞回去
-
+- [速率限制](https://mp.weixin.qq.com/s/y4tdaaYU2MJdhLRL0PZZyg)
+   ```go
+   burstyLimiter := make(chan time.Time, 3)
+   
+   // 预先向通道中添加3个值，模拟脉冲速率限制的起始状态
+   for i := 0; i < 3; i++ {
+       burstyLimiter <- time.Now()
+   }
+   
+   // 每200毫秒向通道中添加一个新的值，直到达到3个限制
+   go func() {
+       for t := range time.Tick(time.Millisecond * 200) {
+           burstyLimiter <- t
+       }
+   }()
+   
+   burstyRequests := make(chan int, 5)
+   for i := 1; i <= 5; i++ {
+       burstyRequests <- i
+   }
+   close(burstyRequests)
+   for req := range burstyRequests {
+       <-burstyLimiter
+       fmt.Println("request", req, time.Now())
+   }
+   ```
 
 
 
