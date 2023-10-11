@@ -262,6 +262,7 @@
   - [主流大语言模型的技术原理](https://mp.weixin.qq.com/s/P1enjLqH-UWNy7uaIviWRA)
   - [Tokenization与Embedding](https://mp.weixin.qq.com/s?__biz=MzA5MTIxNTY4MQ==&mid=2461139643&idx=1&sn=cd16d5eea8a93113893320642ad0a204&chksm=87396095b04ee983fddae57c546d6f80830d399d6850d6b1ad5828c15d1bb76bbb11770c4207&scene=21#wechat_redirect)
   - [Vector Embeddings: From the Basics to Production](https://partee.io/2022/08/11/vector-embeddings/)
+  - [卷积神经网络（CNN）](https://mp.weixin.qq.com/s/ywQkV4VCh_30gCcdvfl1qw)
 - LLM Practice
   - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
   - ![img.png](ml_llm_demo.png)

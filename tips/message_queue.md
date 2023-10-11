@@ -214,7 +214,7 @@
       - 写 Journal 盘的同时，数据还会在 memotable 缓存中写一份，memotable 会对数据进行排序，一段时间后刷入 Entry Log 盘。
       - 这样不仅多了一层缓存，而且 Entry Log 盘中的数据有一定的有序性，在读取数据时可以一定程度上提高性能。
 - [消息队列对比](https://mp.weixin.qq.com/s/P8bt9JYIiQlVHzwZfjr0AQ)
-
+- 消息堆积
 
 
 

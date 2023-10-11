@@ -185,3 +185,29 @@
   - Summary
     -  尽量不要在常用 struct 的构造方法中留下有副作用的代码。
     - Default 只应该用于值类型 struct。
+- [rust重写mping](https://github.com/smallnest/mping-rs)
+  - [软硬件时间戳](https://mp.weixin.qq.com/s/F65-LD3NweBJt-VdIuIDMw)
+    - Go 版本的 mping 对于低版本的内核，不支持SO_TIMESTAMPING的话，会退化使用SO_TIMESTAMPNS,
+    - 而 mping-rs 会使用SO_TIMESTAMP,这并没有啥特殊的设计，两者都可以，知识从 Out-Of-Bound 控制数据中读取的数据结构略有不同。
+    - 要读取软硬件时间戳
+      - 你需要setsockopt把相应的参数设置上。比较新的 Linux 内核版本支持SO_TIMESTAMPING选项，你设置这个选项的时候需要设置一堆的 flags,指定要不要把发送和接收的软硬件时间戳的 flag 加上，把 CMSG 和 TSONLY flag 设置上，这就我们就能从控制信息中获取到时间戳了。
+  - OOB
+    - OOB 是 Out-Of-Band 的缩写，意思是在正常的数据流之外的数据流，这个数据流是在 TCP 协议中的，它是 TCP 协议的一部分，但是它不是 TCP 协议的数据流，而是在 TCP 协议的数据流之外的数据流。
+    - 控制信息中可能包含多条信息，我们需要遍历找出我们需要的控制信息。对于设置了SO_TIMESTAMPING的场景，我们可以通过(*cmsg).cmsg_level == SOL_SOCKET && (*cmsg).cmsg_type == SCM_TIMESTAMPING把控制信息筛选到
+    - 对于设置了SO_TIMESTAMP的场景，我们可以通过(*cmsg).cmsg_level == SOL_SOCKET && (*cmsg).cmsg_type == SO_TIMESTAMP筛选出来，它的值是一个类型为timeval的值，包含秒数和微秒数。
+    - 这样我们就获取了软硬件的时间戳。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
