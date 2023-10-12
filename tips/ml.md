@@ -110,6 +110,51 @@
     - For complex topics, don’t expect chatbots to convey every detail in a highly compressed summary – there are limits before coherence suffers. Ask for a slightly longer summary if needed.
   - Resource
     - [高级prompt工程讲解](https://mp.weixin.qq.com/s/2wFOaKwzhZfHPNOhG1Mqhw)
+  - [相关技术Summary](https://mp.weixin.qq.com/s/6a4zPEpU233PdVqkRHQ6Kg)
+    - Self-consistency COT
+      - 由于大模型生成的随机性本质，并不能保证每一次生成都是正确的，如何提高其鲁棒性，提升其准确率，成了一个大问题
+      - 但多生成了几次，LLM就回答出了正确答案。基于这样的思路，研究者提出了自一致COT的概念， 利用"自一致性"（self-consistency）的解码策略，以取代在思维链提示中使用的贪婪解码策略，也就是说让大模型通过多种方式去生产答案，最后根据多次输出进行加权投票的方式选择一种最靠谱的答案。
+    - Least-to-Most
+      - 在解决复杂问题时，先引导模型把问题拆分成子问题；然后再让大模型逐一回答子问题，并把子问题的回答作为下一个问题回答的上文，直到给出最终答案 - 一种循序渐进式的引导大模型解决问题的方式
+      - `What subproblem must be solved before answering the inquery`
+    - Self-Ask
+      - 对于一个大模型没有在训练时直接见到的问题，通过诱导大模型以自我提问的问题，将问题分解为更小的后续问题，而这些问题可能在训练数据中见到过，这样就可以通过自问自答的方式，最终获得正确答案
+      - ![img.png](ml_prompt_self_ask.png)
+    - Meta-Prompting
+      - 让大模型帮你写提示，然后使用大模型提供的prompt，再去操纵大模型，从而获得效果改进
+      - https://chat.openai.com/share/77c59aeb-a2d6-4df8-abf6-42c8d19aba3d
+        - Let's imagine I wanted to paint a near perfect copy of the Mona Lisa, on the same size canvas and paint type and colors, and wanted to ask Chat-GPT to help, but wasn't sure of the best prompt to use, in terms of what details I should include in the prompt. Can you provide an example detailed prompt that could best descriptive prompt that can help me achieve my goal of getting detailed instructions back from the agent so that nothing is missing?
+        - How can we improve this prompt further to increase the chances of a comprehensive reply with enough detail in each section so that nothing is overlooked, and to make sure that there are no hallucinations or inaccurate details added and so that nothing is removed inadvertently?
+    - Knowledge Generation Prompting
+      - 基本思路就是先基于问题让大模型给出问题相关的知识，再将知识整合到问题中，从而让大模型给予更细致有针对性的回答。它在一些特定领域的任务中有效果，比如问题本身比较笼统，这个时候就可以通过这种方法增强。
+      - 示例，让大模型推荐一份健康、方便制作的早餐食谱
+        - 1）创建一个提示模板，要求模型生成有关健康早餐选项的知识：
+           - Generate knowledge about healthy, easy-to-make breakfast recipes that are high in protein and low in sugar.
+        - 2）该模型可能会提供有关不同成分和配方的信息，例如：
+           - Healthy breakfast options that are high in protein and low in sugar include Greek yogurt with berries, oatmeal with nuts and seeds, and avocado toast with eggs. These recipes are easy to make and require minimal cooking.
+        - 3）根据生成的知识，创建一个新的prompt，其中包含大模型提供的信息，并要求基于此提供食谱。
+           - Based on the knowledge that Greek yogurt with berries, oatmeal with nuts and seeds, and avocado toast with eggs are healthy, high-protein, low-sugar breakfast options, provide a detailed recipe for making oatmeal with nuts and seeds."
+        - 4)如此，大模型将会提供一个相对更为细致，有针对性的回答。
+    - Iterative Prompting
+      - 迭代型提示，是指和大模型进行交互时，不要把它看作是独立的过程，而是将前一次的回答作为上下文提供给大模型，这样的方式可以有效的提高模型信息的挖掘能力，并消除一些无关的幻觉。
+    - TOT
+      - COT是和大模型的一次交互，但复杂问题，并不能一次搞定，那么，可以诱导大模型将复杂问题拆分为多层的树结构，这样每一步选择，都可以以树的模式（广度优先搜索（BFS）和深度优先搜索（DFS））动态选择最合适的路径，它 允许 大模型通过考虑多种不同的推理路径和自我评估选择来决定下一步行动方案，并在必要时进行前瞻或回溯以做出全局选择，从而执行深思熟虑的决策。
+      - 其基本过程是首先，系统会将一个问题分解，并生成一个潜在推理“思维”候选者的列表。然后，对这些思维进行评估，系统会衡量每个想法产生所需解决方案的可能性，最后方案进行排序。
+      - Sample
+        - Step1 : Prompt: I have a problem related to [describe your problem area]. Could you brainstorm three distinct solutions? Please consider a variety of factors such as [Your perfect factors]
+        - Step 2: Prompt: For each of the three proposed solutions, evaluate their potential. Consider their pros and cons, initial effort needed, implementation difficulty, potential challenges, and the expected outcomes. Assign a probability of success and a confidence level to each option based on these factors
+        - Step 3: Prompt: For each solution, deepen the thought process. Generate potential scenarios, strategies for implementation, any necessary partnerships or resources, and how potential obstacles might be overcome. Also, consider any potential unexpected outcomes and how they might be handled.
+        - Step 4: Prompt: Based on the evaluations and scenarios, rank the solutions in order of promise. Provide a justification for each ranking and offer any final thoughts or considerations for each solution
+    - [GOT](https://github.com/spcl/graph-of-thoughts)
+      - 人类在进行思考时，不会像 CoT 那样仅遵循一条思维链，也不是像 ToT 那样尝试多种不同途径，而是会形成一个更加复杂的思维网
+      - 相较于TOT，主要的变化为：
+        - 聚合，即将几个想法融合成一个统一的想法；
+        - 精化，对单个思想进行连续迭代，以提高其精度；
+        - 生成，有利于从现有思想中产生新的思想。
+    - Algorithm-of-Thoughts[AoT](https://github.com/kyegomez/Algorithm-Of-Thoughts)
+      - 其查询大模型的次数有了明显的下降，效果仅比TOT略低，可能是因为模型的回溯能力未能得到充分的激活，而相比之下，ToT具有利用外部内存进行回溯的优势。
+    - Program-aided Language Model (PAL)
+
 - [Parameter optimization in neural networks](https://www.deeplearning.ai/ai-notes/optimization/index.html?_hsmi=218814757&utm_campaign=The%20Batch&utm_medium=email&utm_content=218804890&utm_source=hs_email&_hsenc=p2ANqtz-_FluhJbN2619klYO-hikBLp6-aEAP60t0VaLzoiEItfCyfrdJguDchLz7Q6h5imUeQp3SkfQaBZnlD8_aUcP5U97FiMA)
 - [Introduction to Uplift Modeling](https://juanitorduz.github.io/uplift/)
 - [What is Uplift modelling and how can it be done with CausalML](https://analyticsindiamag.com/what-is-uplift-modelling-and-how-can-it-be-done-with-causalml/)
