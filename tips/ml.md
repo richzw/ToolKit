@@ -154,7 +154,23 @@
     - Algorithm-of-Thoughts[AoT](https://github.com/kyegomez/Algorithm-Of-Thoughts)
       - 其查询大模型的次数有了明显的下降，效果仅比TOT略低，可能是因为模型的回溯能力未能得到充分的激活，而相比之下，ToT具有利用外部内存进行回溯的优势。
     - Program-aided Language Model (PAL)
-
+      - 早期大模型对于加减乘除这些小学生的问题都难以稳定准确的回答。而相反，普通的程序却善于逻辑执行和计算，于是就有了一个思路，就是让大模型根据问题生成解决该问题的程序
+      - 将程序放在Python等程序解释器上运行，从而产生实际的结果。这就是后来Open Code Interpreter的基本思想
+    - Automatic Prompt Engineer（APE）
+      - 既然人写不好prompt也不知道什么样的prompt更好，那么就让模型来写，然后模型来评价
+      - 基于这个思路，提出了Automatic Prompt Engineer（APE），这是一个用于自动指令生成和选择的框架。指令生成问题被构建为自然语言合成问题，使用LLMs作为黑盒优化问题的解决方案来生成和搜索候选解
+      - 首先 大模型生成后选的指令，然后把这些指令提交给大模型打分，然后打分完成后，选择打分高的作为最后的指令
+      - https://colab.research.google.com/drive/1oL1CcvzRybAbmeqs--2csaIvSOpjH072?usp=sharing
+    - ART（Automatic Reasoning and Tool-use）
+      - 使用 LLM 完成任务时，交替运用 CoT 提示和工具已经被证明是一种即强大又稳健的方法。
+      - 在PAL中，大模型通过生成程序经过外部执行后，再交给大模型来执行，然而生成的程序的稳定性以及复杂问题的工具使用方法对于大模型来讲并不完全理解，而ART（Automatic Reasoning and Tool-use）可以认为是PAL的增强
+        - 接到一个新任务的时候，从任务库中选择多步推理和使用工具的示范。
+        - 在测试中，调用外部工具时，先暂停生成，将工具输出整合后继续接着生成
+    - RAG（Retrieval Augmented Generation
+      - 其核心思路就是通过检索的方式，将问题相关的背景知识作为上下文一并传给大模型，这样能够有效的提供模型的准确性以及减轻幻觉。
+    - ReAct（Reasoning and Acting）
+      - 解决语言模型语言理解和交互式决策制定等任务中推理（例如思维链提示）和行动（例如行动计划生成）能力结合的问题，现在已经是Agent流行的框架模式。
+      - ReAct的核心思想是将推理和行动分为两个阶段，首先是推理阶段，通过CoT提示，生成一个行动计划，然后在行动阶段，执行这个行动计划，从而完成任务。
 - [Parameter optimization in neural networks](https://www.deeplearning.ai/ai-notes/optimization/index.html?_hsmi=218814757&utm_campaign=The%20Batch&utm_medium=email&utm_content=218804890&utm_source=hs_email&_hsenc=p2ANqtz-_FluhJbN2619klYO-hikBLp6-aEAP60t0VaLzoiEItfCyfrdJguDchLz7Q6h5imUeQp3SkfQaBZnlD8_aUcP5U97FiMA)
 - [Introduction to Uplift Modeling](https://juanitorduz.github.io/uplift/)
 - [What is Uplift modelling and how can it be done with CausalML](https://analyticsindiamag.com/what-is-uplift-modelling-and-how-can-it-be-done-with-causalml/)
@@ -371,6 +387,8 @@
       - 指定完成任务所需的步骤 （Specify the steps required to complete a task）
       - 在匆忙得出结论之前，让模型自己找出解决方案（Instruct the model to work out its own solution before rushing to a conclusion）
     - 模型的限制：幻觉（Model Limitations: Hallucinations）
+      - “hallucination” refers to a phenomenon where the model generates text that is incorrect, nonsensical, or not real. 
+      - Since LLMs are not databases or search engines, they would not cite where their response is based on. These models generate text as an extrapolation from the prompt you provided.
       - 一个比较有效的方法可以缓解模型的幻觉问题：让模型给出相关信息，并基于相关信息给我回答。比如告诉模型：“First find relevant information, then answer the question based on the relevant information”。
   - 技巧 - 黑魔法
     - 思维连(CoT)提示
@@ -399,9 +417,24 @@
 - LangChain vs LlamaIndex
   - As you can tell, LlamaIndex has a lot of overlap with LangChain for its main selling points, i.e. data augmented summarization and question answering. LangChain is imported quite often in many modules, for example when splitting up documents into chunks. You can use data loaders and data connectors from both to access your documents.
   - LangChain offers more granular control and covers a wider variety of use cases. However, one great advantage of LlamaIndex is the ability to create hierarchical indexes. Managing indexes as your corpora grows in size becomes tricky and having a streamlined logical way to segment and combine individual indexes over a variety of data sources proves very helpful.
-  - LlamaIndex
+  - [LlamaIndex](https://mp.weixin.qq.com/s/fSssn9uHhbBMCxn0NIuC6g)
     - LlamaIndex 是开发者和 LLM 交互的一种工具。LlamaIndex 接收输入数据并为其构建索引，随后会使用该索引来回答与输入数据相关的任何问题。
     - LlamaIndex 还可以根据手头的任务构建许多类型的索引，例如向量索引、树索引、列表索引或关键字索引。
+    - 提供以下工具:
+      - 数据摄取：LlamaIndex提供数据连接器来摄取您现有的数据源和数据格式(api, pdf，文档，SQL等)，以便您可以与大语言模型一起使用它们。
+      - 数据构建：LlamaIndex提供了构建数据(索引，图表)的方法，以便可以轻松地与大语言模型一起使用。
+      - 检索和查询接口：LlamaIndex为您的数据提供了高级检索/查询接口。您可以输入任何LLM输入prompt，LlamaIndex将返回检索到的上下文和知识增强的输出。
+      - 与其他框架集成：LlamaIndex允许轻松集成与您的外部应用程序框架
+    - 什么是index
+      - LlamaIndex中的索引是一种数据结构，它允许您从大量文本语料库中快速搜索和检索数据。它的工作原理是在语料库中的关键字或短语与包含这些关键字或短语的文档之间创建映射
+      - List Index
+        - List Index是一个简单的数据结构，它将文档存储为节点序列。在索引构建期间，文档文本被分块、转换为节点并存储在一个列表中
+      - Vector Index
+        - Vector Index是一种数据结构，它将文档存储为向量。在索引构建期间，文档文本被分块、转换为向量并存储在一个向量中
+        - Vector Index的优点是它可以在向量空间中对文档进行聚类，从而提高检索效率。它还可以在向量空间中对文档进行相似性搜索，从而提高检索准确性。
+      - Tree Index
+        - 它将文档的文本存储在树状结构中。树中的每个节点表示其子文档的摘要
+      - 关键字表索引是一种将文档的关键字存储在表中的索引，我觉得这更加类似Map<k,v>或者字典的结构。表中的每一行代表一个关键字，每一列代表一个文档。通过在表中查找关键字，可以使用表索引来查找包含给定关键字的文档。
 - [Paper connections](https://www.connectedpapers.com/)
 - Tuning
   - 调参是LLM训练过程中的一个重要环节，目的是找到最优的超参数组合，以提高模型在测试集上的性能
