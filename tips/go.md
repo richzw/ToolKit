@@ -1000,7 +1000,8 @@
     - In CSP we use "channels" for communication and synchronization. Although there is decoupling between the processes, they are still coupled to the channel.
     - It is fully synchronous, a channel writer must block until a channel reader reads. The advantage of that blocking based mechanism is that a channel only needs to ever hold one message.
   - Actor model 
-    - It is inherently asynchronous, a message sender will not block whether the reader is ready to pull from the mailbox or not, instead the message goes into a queue usually called a "mailbox". Which is convenient, but it's a bit harder to reason about and mailboxes potentially have to hold a lot of messages.
+    - It is inherently asynchronous, a message sender will not block whether the reader is ready to pull from the mailbox or not, instead the message goes into a queue usually called a "mailbox". 
+    - Which is convenient, but it's a bit harder to reason about and mailboxes potentially have to hold a lot of messages.
     - Each process has a single mailbox, messages are put into the receiver's mailbox by the sender, and fetched by the receiver.
     - 并发性： 每个Actor都可以独立地执行，不受其他Actor的影响，从而实现并发执行。
     - 无共享状态： 每个Actor都有自己的状态，不与其他Actor共享内存，避免了共享状态带来的并发问题。

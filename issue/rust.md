@@ -171,6 +171,7 @@
   - Runtime 对比
     - 对于较大量的轻任务，thread-per-core 模式是适合的。特别是代理、网关和文件 IO 密集的应用，使用 Monoio 就非常合适。
     - ![img.png](rust_runtime_diff.png)
+- [Rust程序内存布局](https://mp.weixin.qq.com/s/igQDY3VX5dV7GIWDIOkLDw)
 - [Rust 内存泄漏排查](https://mp.weixin.qq.com/s/l5l6o0xUNJNdFyzzNm82GQ)
   - Heap Profiling
     - Rust 有两种方式可以进行堆内存分析，一种是使用 Valgrind，另一种是使用 tcmalloc
