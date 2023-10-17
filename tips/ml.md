@@ -459,6 +459,28 @@
           
           Output the results in markdown
           ```
+      - Meta Prompt
+        ```shell
+        As an expert in natural language processing (NLP), with extensive experience in refining prompts for large-scale language models, your task is to analyze and enhance a prompt provided by the user.
+        
+        Step 1: Thoroughly read the prompt provided by the user to grasp its content and context. Come up with a persona that aligns with the user's goal.
+        Step 2: Recognize any gaps in context, ambiguities, redundancies, or complex language within the prompt.
+        Step 3: Revise the prompt by adopting the {persona} and integrating the identified enhancements.
+        Step 4: Deliver the improved prompt back to the user. You should start the optimized prompt with the words "I want you to act as a {persona}" . Keep in mind that the prompt we're crafting must be composed from my perspective, as the user, making a request to you, the ChatGPT interface (either GPT3 or GPT4 version).
+        
+        For example, an appropriate prompt might begin with 'You will serve as an expert architect, assisting me in designing innovative buildings and structures'.
+        Begin the process by requesting the user to submit the prompt they'd like optimized.
+        Then, methodically improve the user's prompt, returning the enhanced version immediately without the need to detail the specific changes made.
+        
+        作为自然语言处理 (NLP) 专家，您在完善大规模语言模型的提示方面拥有丰富的经验，您的任务是分析和增强用户提供的指令 (prompt)。
+        
+        步骤 1：仔细阅读用户提供的指令，掌握其内容和上下文。想出一个与用户目标一致的角色。
+        第 2 步： 识别指令中的任何上下文空白、歧义、冗余或复杂语言。
+        第 3 步：应用该{角色}并整合已确定的改进措施来修改指令。
+        第 4 步：将改进后的指令反馈给用户。优化后的指令应以 "我希望您扮演一个{角色}"开始。请记住，我们制作的指令必须从我的角度出发，即作为用户，向您的 ChatGPT 界面（GPT3.5 或 GPT4 版本）提出请求。例如，合适的提示语可以从 "您将作为建筑专家，协助我设计创新的建筑和结构 "开始。
+        
+        开始时，请用户提交他们希望优化的指令。然后，有条不紊地改进用户的提示，并立即返回增强版本，无需详细说明所做的具体修改。
+        ```
   - custom instructions
     - 把一些常用指令变成一个模板，在提问之前就固定下来，从而简化之后每次提问的复杂程度，避免每次都写上「将答案控制在 1000 字以下」这类重复需求
     - ChatGPT 会在你设置时询问两个问题，一个用来了解你的基本信息（比如你的职业、兴趣爱好、喜欢的话题、所在的地点、想达成的目标等），另一个用来告诉 ChatGPT 你想要什么样的回复（正式 / 非正式、答案长短、模型该发表意见还是保持中立等）
@@ -832,7 +854,25 @@
   - 值得阅读的热门论文：AlexNet 论文、Alex Graves“生成序列”论文、Jason Yosinski（他是一位优秀作者）的任何论文、神经图灵机论文、DeepMind Atari 论文，也许还有 Goodfellow 的 GAN 论文，尽管我还没有读过。如果可以的话，远离 GAN。
   - 在 ML 阶段，简单问题 + 超简单实验 » 大型、多 GPU 的工作。有很多好的研究（例如，到目前为止我几乎所有的工作）都可以在一台像样的 MacBook 上完成。
   -  不要被这份清单淹没。你可能会找到更适合自己的道路。我能给出的最好建议就是重复Richard Feynman的建议：“以尽可能无纪律、无‍礼和原创的方式努力学习你最感兴趣的东西。”
-
+- Transformer
+  - 1.Transformer为何使用多头注意力机制？（为什么不使用一个头）
+    2.Transformer为什么Q和K使用不同的权重矩阵生成，为何不能使用同一个值进行自身的点乘？ （注意和第一个问题的区别）
+    3.Transformer计算attention的时候为何选择点乘而不是加法？两者计算复杂度和效果上有什么区别？
+    4.为什么在进行softmax之前需要对attention进行scaled（为什么除以dk的平方根），并使用公式推导进行讲解
+    5.在计算attention score的时候如何对padding做mask操作？
+    6.为什么在进行多头注意力的时候需要对每个head进行降维？（可以参考上面一个问题）
+    7.大概讲一下Transformer的Encoder模块？
+    8.为何在获取输入词向量之后需要对矩阵乘以embedding size的开方？意义是什么？
+    9.简单介绍一下Transformer的位置编码？有什么意义和优缺点？
+    10.你还了解哪些关于位置编码的技术，各自的优缺点是什么？
+    11.简单讲一下Transformer中的残差结构以及意义。
+    12.为什么transformer块使用LayerNorm而不是BatchNorm？LayerNorm 在Transformer的位置是哪里？
+    13.简答讲一下BatchNorm技术，以及它的优缺点。
+    14.简单描述一下Transformer中的前馈神经网络？使用了什么激活函数？相关优缺点？
+    15.Encoder端和Decoder端是如何进行交互的？（在这里可以问一下关于seq2seq的attention知识）
+    16.Decoder阶段的多头自注意力和encoder的多头自注意力有什么区别？（为什么需要decoder自注意力需要进行 sequence mask)
+    17.Transformer的并行化提现在哪个地方？Decoder端可以做并行化吗？
+    19.Transformer训练的时候学习率是如何设定的？Dropout是如何设定的，位置在哪里？Dropout 在测试的需要有什么需要注意的吗？
 
 
 
