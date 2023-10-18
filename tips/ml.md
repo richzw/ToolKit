@@ -846,7 +846,7 @@
     - 第一类是精准搜索 KNN - FLAT，一个向量一个向量地去检索，然后取 top k，召回率会很高，但是它的执行的性能会比较差，因为要做全局扫描
     - approximate nearest neighbor，就是 ANN，那这类算法它可能回答的并不是最精准的 top k 的向量，但是这一类算法的好处是执行效率比较高。
 - Learning
-  - 1. 阅读 Andrej Karpathy 的所有博客文章
+  - 阅读 Andrej Karpathy 的所有博客文章
   - 阅读 Chris Olah 的所有博客文章 阅读你感兴趣的 Distill 上的任何帖子。或者看下我列出的帖子(https://Qreydanus.qithub.io/)
   - 也许 - 参加像 Andrew Ng 的 Coursera 课程这样的在线课程
   - 绝对 - 使用 Jupyter Notebook、NumPy 和 PyTorch 编写简单的个人项目。当你完成它们时 a) 发布良好的、记录良好的代码（参见我的 github） b) 写一篇关于你所做的事情的简短博客文章（参见我的博客）
@@ -856,23 +856,46 @@
   -  不要被这份清单淹没。你可能会找到更适合自己的道路。我能给出的最好建议就是重复Richard Feynman的建议：“以尽可能无纪律、无‍礼和原创的方式努力学习你最感兴趣的东西。”
 - Transformer
   - 1.Transformer为何使用多头注意力机制？（为什么不使用一个头）
-    2.Transformer为什么Q和K使用不同的权重矩阵生成，为何不能使用同一个值进行自身的点乘？ （注意和第一个问题的区别）
-    3.Transformer计算attention的时候为何选择点乘而不是加法？两者计算复杂度和效果上有什么区别？
-    4.为什么在进行softmax之前需要对attention进行scaled（为什么除以dk的平方根），并使用公式推导进行讲解
-    5.在计算attention score的时候如何对padding做mask操作？
-    6.为什么在进行多头注意力的时候需要对每个head进行降维？（可以参考上面一个问题）
-    7.大概讲一下Transformer的Encoder模块？
-    8.为何在获取输入词向量之后需要对矩阵乘以embedding size的开方？意义是什么？
-    9.简单介绍一下Transformer的位置编码？有什么意义和优缺点？
-    10.你还了解哪些关于位置编码的技术，各自的优缺点是什么？
-    11.简单讲一下Transformer中的残差结构以及意义。
-    12.为什么transformer块使用LayerNorm而不是BatchNorm？LayerNorm 在Transformer的位置是哪里？
-    13.简答讲一下BatchNorm技术，以及它的优缺点。
-    14.简单描述一下Transformer中的前馈神经网络？使用了什么激活函数？相关优缺点？
-    15.Encoder端和Decoder端是如何进行交互的？（在这里可以问一下关于seq2seq的attention知识）
-    16.Decoder阶段的多头自注意力和encoder的多头自注意力有什么区别？（为什么需要decoder自注意力需要进行 sequence mask)
-    17.Transformer的并行化提现在哪个地方？Decoder端可以做并行化吗？
-    19.Transformer训练的时候学习率是如何设定的？Dropout是如何设定的，位置在哪里？Dropout 在测试的需要有什么需要注意的吗？
+    - 多头注意力机制使得模型能够同时关注输入序列的不同位置的信息，从而捕捉更丰富的信息和不同级别的抽象。如果只使用一个头，那么模型可能会忽略一些重要的信息。
+  - 2.Transformer为什么Q和K使用不同的权重矩阵生成，为何不能使用同一个值进行自身的点乘？ （注意和第一个问题的区别）
+    - Q和K使用不同的权重矩阵生成是为了使模型能够学习到不同的表示，从而捕捉更丰富的信息。如果使用同一个值进行自身的点乘，那么生成的注意力分数可能会过于单一，无法捕捉到足够的信息
+  - 3.Transformer计算attention的时候为何选择点乘而不是加法？两者计算复杂度和效果上有什么区别？
+    - 点乘和加法在计算复杂度上没有太大的区别，但是在效果上，点乘能够更好地衡量两个向量之间的相似度。而加法可能会导致一些重要的信息被忽略。
+  - 4.为什么在进行softmax之前需要对attention进行scaled（为什么除以dk的平方根），并使用公式推导进行讲解
+    - 进行softmax之前需要对attention进行scaled是为了防止在计算softmax时，由于点乘的结果过大导致的梯度消失问题。具体的公式推导如下：softmax(QK/dk)，其中dk是K的维度，通过除以dk的平方根，可以使得点乘的结果在一定的范围内，从而避免梯度消失。
+  - 5.在计算attention score的时候如何对padding做mask操作？
+    - 在计算attention score的时候，对padding进行mask操作是为了防止模型将padding的部分也考虑进去，从而影响了模型的性能。具体的操作是将padding的部分的attention score设置为负无穷，这样在进行softmax时，这部分的权重就会接近于0。
+  - 6.为什么在进行多头注意力的时候需要对每个head进行降维？（可以参考上面一个问题）
+    - 在进行多头注意力的时候需要对每个head进行降维是为了减少计算复杂度，同时也能够保证模型的性能。
+  - 7.大概讲一下Transformer的Encoder模块？
+    - Transformer的Encoder模块主要包括两部分：自注意力机制和前馈神经网络。自注意力机制用于捕捉输入序列的全局依赖关系，前馈神经网络则用于对自注意力的输出进行进一步的处理。
+  - 8.为何在获取输入词向量之后需要对矩阵乘以embedding size的开方？意义是什么？
+    - 在获取输入词向量之后需要对矩阵乘以embedding size的开方是为了使得词向量的范围在一定的范围内，从而避免梯度爆炸或者梯度消失的问题。
+  - 9.简单介绍一下Transformer的位置编码？有什么意义和优缺点
+    - Transformer的位置编码是为了给模型提供词的位置信息，因为Transformer模型本身是无法获取词的位置信息的。位置编码的优点是可以捕捉到词的相对位置和绝对位置的信息，缺点是对于超过预定义长度的序列，模型可能无法正确地获取位置信息。
+  - 10.你还了解哪些关于位置编码的技术，各自的优缺点是什么？
+    - 除了Transformer的位置编码，还有一些其他的位置编码技术，如学习式位置编码、固定式位置编码等。
+    - 学习式位置编码的优点是可以根据数据自动学习位置信息，缺点是需要额外的训练时间；固定式位置编码的优点是不需要额外的训练时间，缺点是可能无法捕捉到所有的位置信息。
+  - 11.简单讲一下Transformer中的残差结构以及意义。
+    - Transformer中的残差结构是为了防止模型在深度学习中出现的梯度消失和梯度爆炸的问题。通过将输入直接连接到输出，可以使得梯度直接流向前层，从而缓解梯度消失和梯度爆炸的问题。
+  - 12.为什么transformer块使用LayerNorm而不是BatchNorm？LayerNorm 在Transformer的位置是哪里？
+    - Transformer块使用LayerNorm而不是BatchNorm是因为LayerNorm是对每个样本进行归一化，而不是对整个batch进行归一化，这样可以更好地处理变长的序列。LayerNorm在Transformer的位置是在每个子层的输出和对应的残差连接之后。
+  - 13.简答讲一下BatchNorm技术，以及它的优缺点。
+    - BatchNorm技术是一种用于加速神经网络训练的技术，它通过对每一层的输入进行归一化，使得每一层的输入都有相同的分布。
+    - BatchNorm的优点是可以加速神经网络的训练，缓解梯度消失和梯度爆炸的问题，缺点是在处理变长序列时可能会出现问题。
+  - 14.简单描述一下Transformer中的前馈神经网络？使用了什么激活函数？相关优缺点？
+    - Transformer中的前馈神经网络是一个全连接的神经网络，它包括两个线性变换和一个ReLU激活函数。
+    - 前馈神经网络的优点是可以增加模型的复杂度，缺点是增加了模型的计算复杂度。
+  - 15.Encoder端和Decoder端是如何进行交互的？（在这里可以问一下关于seq2seq的attention知识）
+    - Encoder端和Decoder端的交互主要是通过注意力机制实现的。
+    - Encoder端的输出作为Decoder端的输入，Decoder端通过注意力机制对Encoder端的输出进行加权求和，从而获取到Encoder端的信息。
+  - 16.Decoder阶段的多头自注意力和encoder的多头自注意力有什么区别？（为什么需要decoder自注意力需要进行 sequence mask)
+    - Decoder阶段的多头自注意力和encoder的多头自注意力的主要区别在于，Decoder阶段的自注意力需要进行sequence mask，这是为了防止Decoder端在生成当前词的时候看到未来的信息。
+  - 17.Transformer的并行化提现在哪个地方？Decoder端可以做并行化吗？
+    - Transformer的并行化主要体现在Encoder端，因为Encoder端的每个位置的计算都是独立的，所以可以进行并行化。而Decoder端由于需要依赖于前面的输出，所以无法进行并行化
+  - 19.Transformer训练的时候学习率是如何设定的？Dropout是如何设定的，位置在哪里？Dropout 在测试的需要有什么需要注意的吗？
+    - Transformer训练的时候学习率是通过一个特定的公式进行设定的，这个公式会随着训练的进行动态调整学习率。
+    - Dropout是在每个子层的输出和对应的残差连接之后以及在最后的线性变换之后进行的。在测试的时候，Dropout需要被关闭，否则会影响模型的性能。
 
 
 
