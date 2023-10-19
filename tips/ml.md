@@ -324,6 +324,7 @@
   - [Tokenization与Embedding](https://mp.weixin.qq.com/s?__biz=MzA5MTIxNTY4MQ==&mid=2461139643&idx=1&sn=cd16d5eea8a93113893320642ad0a204&chksm=87396095b04ee983fddae57c546d6f80830d399d6850d6b1ad5828c15d1bb76bbb11770c4207&scene=21#wechat_redirect)
   - [Vector Embeddings: From the Basics to Production](https://partee.io/2022/08/11/vector-embeddings/)
   - [卷积神经网络（CNN）](https://mp.weixin.qq.com/s/ywQkV4VCh_30gCcdvfl1qw)
+  - [Large Language Models (in 2023)](https://mp.weixin.qq.com/s/Kwkn7H82QV7KaFma0r7SlQ)
 - LLM Practice
   - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
   - ![img.png](ml_llm_demo.png)
@@ -896,7 +897,17 @@
   - 19.Transformer训练的时候学习率是如何设定的？Dropout是如何设定的，位置在哪里？Dropout 在测试的需要有什么需要注意的吗？
     - Transformer训练的时候学习率是通过一个特定的公式进行设定的，这个公式会随着训练的进行动态调整学习率。
     - Dropout是在每个子层的输出和对应的残差连接之后以及在最后的线性变换之后进行的。在测试的时候，Dropout需要被关闭，否则会影响模型的性能。
-
+  - 激活函数
+    - 激活函数是模型整体结构的一部分，正向传播参与计算，反向传播参与梯度计算
+    - 在Transformer的encoder和decoder部分，激活函数主要用于前馈神经网络（Feed Forward Neural Network）。
+    - 在encoder部分，激活函数用于提取输入的非线性特征；
+    - 在decoder部分，除了提取非线性特征外，激活函数还用于处理encoder的输出和上一层decoder的输出，帮助模型生成最终的输出。
+  - 多头注意力机制
+    - 编码器一个自注意力多头，解码器的mask多头，非自注意力多头
+    - q（待查询的），k（理解为被查询的），q和k的点积算出来了当前token和其他token的相关性。然后除以个根号dk，消除下过多维度的影响。通过softmax做一个归一化，作为一个权重和v（value）相乘，最后这个矩阵里边就包含了各种相关性特征信息。
+    - 在公式Attention(Q, K, V) = softmax(Q * K^T / sqrt(d_k)) * V中，d_k进行sqrt操作的原因是为了防止Q和K的点积过大，导致softmax函数在反向传播时出现梯度消失的问题。
+    - 当d_k较大时，Q和K的点积可能会非常大，这时softmax函数的输出可能会非常接近0或1，导致梯度消失，通过除以sqrt(d_k)可以缓解这个问题。
+    - softmax函数的作用是将一组有限的实数映射到(0,1)区间内，使它们的总和为1，因此可以将softmax函数的输出看作是概率分布。在多分类问题中，softmax函数常用于输出层，将神经网络的输出转换为概率分布。
 
 
 
