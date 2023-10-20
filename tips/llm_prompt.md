@@ -106,6 +106,7 @@
   - What information are we missing? (我们缺失哪些信息) 
   -  Generate three ideas and rate them (提出三个想法并对其评分)
   - Show Alternatives and Justify Your Final Answer (展示替代方案并证明你的最终答案)
-
+- iterative bootstrapping in chain-of-thought-prompting
+  - ![img.png](llm_prompt_iterate.png)
 
 

@@ -1515,7 +1515,19 @@
     - 逃逸分析(Escape analysis)可以避免为局部作用域的对象分配堆内存,从而避免 GC 的开销。
     - 内联(Inlining)会将简单函数的函数体拷贝到调用者中,这通常可以在调用者中启用进一步的优化(例如额外的常量传播或更好的逃逸分析)。
     - 去虚拟化(Devirtualization)会将接口值上的间接调用(如果可以静态确定其类型)转换为对具体方法的直接调用(这通常可以内联该调用)。
-  - 
+  - (PGO)原理
+    - PGO 首先要对程序进行剖分(Profile)，收集程序实际运行的数据生成 profiling 文件，根据此文件来进行性能优化：
+    - 通过缩小代码大小，减少错误分支预测，重新组织代码布局减少指令缓存问题等方法。
+  - PGO 可以优化的非完全列表：
+    - 内联（这个已经很常规了）。
+    - 函数块排序，对函数块进行排序，聚焦热块改进分支预测。
+    - 寄存器分配，目前寄存器分配采用启发式确定热路径和移除，PGO 可以告知真正的热路径。
+    - 函数排序，在整个二进制的级别对函数进行排序和聚集，以后更好的局部性。
+    - 全局块排序，超越函数排序的一步，其集中形式可能是冷热分离，也有可能比这更激进。
+    - 间接调用去虚拟化，这里后面跟 C++ 的类似。
+    - 模版化，基于 profile 将模版化热通用函数。
+    - map/slice 的预分配。
+    - 生命周期分配，将具有相似生命周期的分配放在一起。
 - [Cost of a integer cast](https://boyter.org/posts/cost-of-integer-cast-in-go/)
   - a integer to integer cast it’s as close to “free” as any other CPU operation. Integer to float is about 3x slower, but again for most things you can consider it free.
 - [Is Go scalable]

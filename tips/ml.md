@@ -743,6 +743,10 @@
       - 它能够基于这种模式，尽量减少大模型幻觉带来的问题。
       - 它减少了为了微调而准备问答对（带标记的样本数据），大大减少了复杂度。
       - prompt的构造过程，给了我们很大的操作空间，对于我们后续干预模型效果，完成特定业务需求提供了必要的手段。
+  - [MutiVector Retriever支持RAG架构下表格文字混合内容问答](https://mp.weixin.qq.com/s/Rxwee3Hd-j1xcBqnW8PRDg)
+    - 1）利用 Unstructured库来解析pdf文档中的文本和表格。
+    - 2）利用multi_vector来存储更适合检索的原始表、文本以及表摘要。
+    - 3）利用LangChain Expression Language (LCEL)来实现chain。
   - [改进召回（Retrieval）和引入重排（Reranking）提升RAG架构下的LLM应用效果]
     - RAG架构很好的解决了当前大模型Prompt learning过程中context window限制等问题
     - Issue
@@ -908,7 +912,11 @@
     - 在公式Attention(Q, K, V) = softmax(Q * K^T / sqrt(d_k)) * V中，d_k进行sqrt操作的原因是为了防止Q和K的点积过大，导致softmax函数在反向传播时出现梯度消失的问题。
     - 当d_k较大时，Q和K的点积可能会非常大，这时softmax函数的输出可能会非常接近0或1，导致梯度消失，通过除以sqrt(d_k)可以缓解这个问题。
     - softmax函数的作用是将一组有限的实数映射到(0,1)区间内，使它们的总和为1，因此可以将softmax函数的输出看作是概率分布。在多分类问题中，softmax函数常用于输出层，将神经网络的输出转换为概率分布。
-
+  - BPE编码(Byte Pair Encoder/Decoder)
+    - 基本思想是将常见的字符组合（如单词或短语）编码为单个符号，从而减少模型需要处理的符号数量。BPE算法的具体步骤如下：
+      - 统计文本中所有字符的频率，初始化编码表为所有的字符。
+      - 在所有可能的字符对中，找出出现频率最高的字符对，将其合并为一个新的符号，添加到编码表中。
+      - 重复上一步，直到达到预设的符号数量限制，或者没有可以合并的字符对为止。
 
 
 

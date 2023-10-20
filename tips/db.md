@@ -1497,72 +1497,44 @@
       - Constantly monitor the performance of your indexes using tools and logs to understand how often they are being used, and whether they are being used effectively. PostgreSQL's `EXPLAIN` command can help you understand how a query is being executed and whether an index is being utilized.
     - Remember that best practices can differ depending on your specific workload, data volume, and query patterns. Always measure the impact of your indexing strategies through profiling and performance monitoring to ensure they meet your application’s needs.
   - Best practice for configuration APG VACUUM
-
-    Vacuuming is an essential maintenance operation in PostgreSQL databases, including Aurora PostgreSQL (APG), to reclaim storage occupied by dead tuples (rows) and to optimize the database for better performance. Here are the top 5 best practices for handling vacuum operations in Aurora PostgreSQL:
-
+    - Vacuuming is an essential maintenance operation in PostgreSQL databases, including Aurora PostgreSQL (APG), to reclaim storage occupied by dead tuples (rows) and to optimize the database for better performance. Here are the top 5 best practices for handling vacuum operations in Aurora PostgreSQL:
     ### 1. Automate Vacuum Operations:
-
-    In a busy database, data is continually inserted, updated, and deleted, leading to the accumulation of dead tuples. Therefore, it's good to automate vacuum operations to run during periods of low activity, if possible. While PostgreSQL comes with an "autovacuum" feature, you should fine-tune its settings like `autovacuum_vacuum_scale_factor` and `autovacuum_analyze_scale_factor` to suit your specific workload and data volume.
-
+      - In a busy database, data is continually inserted, updated, and deleted, leading to the accumulation of dead tuples. Therefore, it's good to automate vacuum operations to run during periods of low activity, if possible. While PostgreSQL comes with an "autovacuum" feature, you should fine-tune its settings like `autovacuum_vacuum_scale_factor` and `autovacuum_analyze_scale_factor` to suit your specific workload and data volume.
     ### 2. Use `VACUUM` Variants Appropriately:
-
     - **Standard VACUUM**: This frees up space and makes it available for reuse within the database. It does not return the space to the operating system.
     - **VACUUM FULL**: This compacts the table and returns space to the operating system but is resource-intensive and locks the table during its operation.
     - **ANALYZE**: This option can be added to update statistics, helping the query planner make optimization decisions.
-
     Choose the variant that best suits your needs, considering factors like how much downtime is acceptable, how much space needs to be reclaimed, etc.
-
     ### 3. Use Cost-Based Vacuum Delay:
-
     To minimize the impact of vacuum operations on running queries, you can set a cost-based vacuum delay using `vacuum_cost_delay` and `vacuum_cost_limit`. This will make the vacuum operation pause for a defined amount of time when it reaches a certain "cost," thereby reducing its impact on database performance.
-
     ### 4. Monitor Bloat:
-
     Table and index "bloat" refers to the space taken up by dead tuples. Excessive bloat can degrade performance and should be addressed promptly. Use scripts or monitoring tools to keep an eye on table and index bloat, and run vacuum operations when necessary. Knowing the extent of the bloat can help you choose between a regular `VACUUM` and a `VACUUM FULL`.
-
     ### 5. Test and Tune:
-
     Before applying any vacuum settings globally, test them in a development or staging environment that mimics your production workload. Monitor key metrics like CPU usage, I/O activity, query performance, etc., during and after the vacuum operation to ensure that the settings are optimal for your specific use case.
 
     Following these best practices will help you maintain a high-performing, efficient Aurora PostgreSQL database system. Keep in mind that while many of these practices are general for all PostgreSQL databases, the managed nature of Aurora may impose some limitations or offer additional features, so always consult the latest Aurora-specific documentation.
   - Best practice of hot and cold data using partitions
-
-    Partitioning is a technique in database management systems that can improve performance and simplify data management. By dividing a large table into smaller, more manageable pieces, or partitions, you can optimize query performance and facilitate easier data maintenance. Aurora PostgreSQL (APG) supports table partitioning, and it can be particularly useful for managing hot (frequently accessed) and cold (rarely accessed) data. Below are some best practices for using partitioning in APG for handling hot and cold data:
-
+    - Partitioning is a technique in database management systems that can improve performance and simplify data management. By dividing a large table into smaller, more manageable pieces, or partitions, you can optimize query performance and facilitate easier data maintenance. Aurora PostgreSQL (APG) supports table partitioning, and it can be particularly useful for managing hot (frequently accessed) and cold (rarely accessed) data. Below are some best practices for using partitioning in APG for handling hot and cold data:
     ### 1. Identify Access Patterns:
-
     Before you implement partitioning, identify the data access patterns within your application. Determine which columns are most commonly used in WHERE clauses, as these are usually good candidates for partition keys. If you find that recent data is accessed more frequently, time-based partitioning may be useful.
-
     ### 2. Choose the Right Partitioning Method:
-
     - **List Partitioning**: Useful when the data distribution is not uniform, and you can clearly separate hot and cold data based on distinct column values.
-
     - **Range Partitioning**: Useful for time-series data where new data is more frequently accessed than old data.
-
     - **Hash Partitioning**: Effective when data needs to be equally distributed but is generally not recommended for separating hot and cold data.
-
     ### 3. Time-Based Partitioning for Time-Series Data:
-
     If you are dealing with time-series data, where new data is "hot" and older data turns "cold" over time, consider using time-based partitioning. You could partition by day, week, month, or another appropriate time interval, based on your access patterns.
-
     ### 4. Implement Partition Pruning:
-
     Make sure that your queries are written in such a way that Aurora PostgreSQL can prune unnecessary partitions during query execution. This improves query performance as only the relevant partitions are scanned.
-
     ### 5. Maintain Your Partitions:
-
     - **Data Archival and Deletion**: Cold data partitions that are no longer needed can be easily detached and archived or deleted.
-
     - **Data Loading**: When dealing with bulk insert operations, you can load data directly into a specific partition, making it easier to manage hot data.
-
     ### Additional Points:
-
     - **Indexes**: You may also use different indexing strategies for hot and cold partitions. For example, hot partitions might benefit from more indexes for quicker read operations, while cold partitions could have fewer indexes to speed up write operations and reduce storage.
-
     - **Monitoring**: Continually monitor the system to ensure that the partitioning strategy remains effective as data grows and access patterns change. Tools like Performance Insights can help in this regard.
-
     By thoughtfully applying partitioning techniques, you can optimize Aurora PostgreSQL for different data temperatures, enhancing both performance and maintainability. Always test your partitioning strategy thoroughly to make sure it meets your application's needs.
-
+- [ScyllaDB](https://mp.weixin.qq.com/s/lojRIRdz5pvyjNYvYTEPlA)
+  - 下一代 NoSQL 数据库，采用 C++编写充分利用 Linux 底层原语优势，利用现代多核、多处理器 NUMA 服务器硬件 API 兼容 Cassandra 和 DynamoDB
+  - 支持和 Cassandra 一样的 CQL 查询语言和驱动，一样的 SSTable 存储格式。同样也支持和 DynamoDB 一样的 JSON-style 查询和驱动
 
 
 
