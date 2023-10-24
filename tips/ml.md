@@ -325,6 +325,14 @@
   - [Vector Embeddings: From the Basics to Production](https://partee.io/2022/08/11/vector-embeddings/)
   - [卷积神经网络（CNN）](https://mp.weixin.qq.com/s/ywQkV4VCh_30gCcdvfl1qw)
   - [Large Language Models (in 2023)](https://mp.weixin.qq.com/s/Kwkn7H82QV7KaFma0r7SlQ)
+  - [DALL・E 3 ](https://cdn.openai.com/papers/dall-e-3.pdf)
+    - DALL・E 3 所做的改进
+      - 模型能力的提升主要来自于详尽的图像文本描述（image captioning）；
+      - 他们训练了一个图像文本描述模型来生成简短而详尽的文本；
+      - 他们使用了 T5 文本编码器；
+      - 他们使用了 GPT-4 来完善用户写出的简短提示；
+      - 他们训练了一个 U-net 解码器，并将其蒸馏成 2 个去噪步骤；
+      - 文本渲染仍然不可靠，他们认为该模型很难将单词 token 映射为图像中的字母
 - LLM Practice
   - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
   - ![img.png](ml_llm_demo.png)

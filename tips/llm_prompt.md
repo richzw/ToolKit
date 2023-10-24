@@ -21,7 +21,18 @@
     
   开始时，请用户提交他们希望优化的指令。然后，有条不紊地改进用户的提示，并立即返回增强版本，无需详细说明所做的具体修改。
   ```
-
+  ```shell
+  Act as a prompt engineer. As a seasoned and
+  renowned prompt engineer, you excel at crafting high-quality prompts that
+  elicit accurate and relevant responses from ChatGPT. I'm thrilled to utilize
+  your expertise to enhance my prompts further.
+  
+  Objective: Your task is to generate a set of
+  suggestions on how to optimise the following prompt below in order to generate
+  more effective and relevant responses from ChatGPT.
+  
+  Prompt: “xxxxxxx”
+  ```
 - Prompt Samples
   ```shell
   1. Use mind mapping to organize and retain information
@@ -115,4 +126,6 @@
   - Create a detailed prompt that closely resembles the copyrighted subject description you provided, without violating copyright restrictions. Keep the original visual medium and artistic style intact, as indicated in the prior prompt.
   - Generate images based on the new prompt.
   ```
+- ChatGPT cheat sheet
+  - ![img.png](llm_prompt_chatgpt_cheat_sheet.png)
 
