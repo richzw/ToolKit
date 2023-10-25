@@ -294,7 +294,10 @@
       - 因此进行了以下优化：
         - 对 memory.high 的计算方式进行改进： `memory.high = floor{[requests.memory + memory throttling factor * (limits.memory or node allocatable memory - requests.memory)]/pageSize} * pageSize`
         - 将 throttlingfactor 的默认值调整为 0.9。
-
+- [binpack]
+  - EKS默认开启的资源调度策略是LeastRequestedPriority，意味着消耗资源最少的节点会优先被调度，这样使得集群的资源在所有节点之间分配的相对均匀
+  - 在一些特定的批处理负载场景下（例如机器学习、数据分析），当集群配置了弹性伸缩，作业发起的Pod总是默认均匀的分布在所有集群节点上，导致很多节点运行着少量独立pod，无法被Cluster Autoscaler组件及时回收，从而造成集群资源的浪费。
+  - binpack调度，原理是调度器在调度pod到节点的时候，预期在节点上保留最少的未使用 CPU 或内存。此策略最大限度地减少了正在使用的集群节点的数量，也降低了资源碎片
 
 
 

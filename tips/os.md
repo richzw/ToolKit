@@ -1513,7 +1513,18 @@
     - 内存池 ， 在启动时立即分配所有的内存。在对象（object）、线程（thread）和socket的基础上分配（内存）。
     - 超线程，提高CPU使用率，减少延迟，比如当在内存访问中一个线程等待另一个全速线程，这种情况，超线程CPU可以并行执行，不用等待。
     - 大内存页, 减小页表的大小。从一开始就预留内存，并且让应用程序管理内存。
-
+- [理解指令乱序]
+  - 读后写（Read After Write，RAW）：第二条指令读取第一条指令写入的数据
+  - 写后读（Write After Read，WAR）：第二条指令写入第一条指令读取的数据
+  - 写后写（Write After Write，WAW）：两条指令都写入同一块数据
+  - Solution
+    - 在记分牌算法中，采用ScoreBoard这样的存储、控制单元精确地监控了各条指令之间的三种数据冒险：写后读、读后写、写后写
+    - 要充分发挥乱序执行的性能，就要消除假依赖（ WAR 和 WAW ），消除假数据相关的主要方法是寄存器重命名。也就是Tomasulo算法。
+    - 为了防止乱序，需要用一个内存屏障（Memory barrier）
+      - 采用写屏障(write memory barrier)，它只是约束执行CPU上的store操作的顺序，具体的效果就是CPU一定是完成write memory barrier之前的store写操作之后，才开始执行write memory barrier之后的store写操作。
+      - 内存屏障 (Memory Barrier)其作用有两个：
+        - 防止指令之间的重排序
+        - 保证数据的可见性
 
 
 
