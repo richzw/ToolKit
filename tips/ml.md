@@ -809,6 +809,34 @@
           - 递归分块使用一组分隔符以分层和迭代的方式将输入文本分成更小的块
         - 专门的分块
           - Markdown和LaTeX是您可能遇到的结构化和格式化内容的两个例子。在这些情况下，可以使用专门的分块方法在分块过程中保留内容的原始结构。
+  - [基于 RAG 的 LLM 可生产应用 Ray](https://mp.weixin.qq.com/s/rjBa2CQxDK2dvdE53ShyOw)
+  - [RAG 问题](https://mp.weixin.qq.com/s/2dwnwQGsqKWZQX8gEUV0Sw)
+    - 朴素的RAG通常将文档分成块，嵌入它们，并检索与用户问题具有高语义相似性的块。但是，这会带来一些问题
+      - 文档块可能包含降低检索效果的无关内容
+        - Multi representation indexing：创建一个适合检索的文档表示（如摘要），并将其与原始文档一起存储在向量数据库中
+      - 用户问题可能表达不清，难以进行检索
+        - Query transformation：在本文中，我们将回顾一些转换人类问题的方法，以改善检索
+      - 可能需要从用户问题中生成结构化查询
+        - Query construction：将人类问题转换为特定的查询语法或语言
+    - Solutions
+      - Rewrite-Retrieve-Read
+        - 使用LLM来重写用户查询，而不是直接使用原始用户查询进行检索
+        - https://github.com/langchain-ai/langchain/blob/master/cookbook/rewrite.ipynb
+      - Step back prompting
+        - 使用LLM生成一个“退后一步”的问题。这可以与或不使用检索一起使用。使用检索时，将使用“退后一步”问题和原始问题进行检索，然后使用两个结果来确定语言模型的响应
+        - https://github.com/langchain-ai/langchain/blob/master/cookbook/stepback-qa.ipynb
+      - Follow Up Questions
+        - 在对话链中处理后续问题时，最基本和核心的地方查询转换的应用是非常重要的。在处理后续问题时，基本上有三种选择：
+          - 只需嵌入后续问题。这意味着如果后续问题建立在或参考了之前的对话，它将失去那个问题。例如，如果我先问“在意大利我可以做什么”，然后问“那里有什么类型的食物” - 如果我只嵌入“那里有什么类型的食物”，我将无法知道“那里”指的是哪里。
+          - 将整个对话（或最后的 k 条消息）嵌入。这样做的问题在于，如果后续的问题与之前的对话完全无关，那么它可能会返回完全无关的结果，这在生成过程中可能会造成干扰。
+          - 使用LLM进行查询转换！
+      - Multi Query Retrieval
+        - LLM被用来生成多个搜索查询。然后，这些搜索查询可以并行执行，并将检索到的结果一起传递
+        - https://python.langchain.com/docs/modules/data_connection/retrievers/MultiQueryRetriever
+      - RAG-Fusion
+        - 一篇近期的文章基于多查询检索的概念进行拓展。然而，他们并未将所有文档一并处理，而是使用互惠排名融合来重新排序文档。
+        - https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb
+    - https://blog.langchain.dev/query-transformations/
 - [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
