@@ -1258,6 +1258,9 @@
     - [sonic](https://mp.weixin.qq.com/s?__biz=MzI1MzYzMjE0MQ==&mid=2247491325&idx=1&sn=e8799316d55c0951b0b54b404a3d87b8&scene=21#wechat_redirect) star: 2k
       - 兼容标准库；
       - 通过JIT（即时编译）和SIMD（单指令-多数据）加速；需要 go 1.15 及以上的版本，提供完成的 json 操作的 API，是一个比 json-iterator 更优的选择。
+        - 在 go 语言中，想要使用 SIMD，需要写 plan9 汇编，而编写 plan9 通常有[两种方式](https://mp.weixin.qq.com/s/rtHLSJawaI39pWxT0V_7tQ)：
+          - 手撕，可借助 avo 这样的工具
+          - C code 转 plan9，可借助 goat、c2goasm 这样的工具
       - JIT、lazy-load 与 SIMD, 细节优化
         - RCU 替换 sync.Map 提升 codec cache 的加载速度，
         - 使用内存池减少 encode buffer 的内存分配
@@ -1927,7 +1930,14 @@
       - Using this, it's easy to move the large static arrays out of the Go code itself and into an external file. When doing this, you will need to account for the serialization of the data itself into the external files
     - Lazy Loading Maps
       - The simplest way to accomplish this is to move the access of the map behind a function call, and to populate the map contents using a sync.Once invocation within that function
-    
+- 循环依赖
+  - 定位循环依赖
+    - `godepgraph -s import-cycle-example | dot -Tpng -o godepgraph.png`
+  - 如何解决循环依赖
+    - 在遇到循环依赖的时候，最先考虑的就是模块分层是否不清晰，领域划分是否准确。下图是最基础的DDD模型。
+    - 依赖倒置是解决循环依赖很常用的技巧，但是不是所有的循环依赖场景都适用依赖倒置来解决，我们通常会在架构设计或者通用能力接口的实现上使用到它，恰当的使用，可以降低代码耦合性，提高代码可读性和可维护性。
+    - 事件驱动架构是一种松耦合、分布式的架构。可以通过mq来实现
+
 
 
 

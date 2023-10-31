@@ -1,4 +1,5 @@
 - [AIGC知识库](https://longalong.feishu.cn/wiki/Jm3EwrFcIiNZW7k1wFDcGpkGnfg?table=tblMuhjq52WBho11&view=vewj3UlzIX)
+  - [Top AI cheatsheet](https://www.aifire.co/p/top-ai-cheatsheets)
 - [基于趋势和季节性的时间序列预测](https://mp.weixin.qq.com/s/Ln4E9iZd3b3EZqeEjNNsag)
   - 时间序列模式
     - 时间序列预测模型使用数学方程(s)在一系列历史数据中找到模式。然后使用这些方程将数据[中的历史时间模式投射到未来。
@@ -630,6 +631,7 @@
     - SeamlessM4T支持近100种语言的自动语音识别、语音到文本翻译、语音到语音翻译、文本到文本翻译和文本到语音翻译的多任务支持
   - [ControlNet](https://github.com/lllyasviel/ControlNet)
     - Adding Conditional Control to Text-to-Image Diffusion Models.
+  - [小型LLM——Mistral 7B](https://mp.weixin.qq.com/s/gASCImCD0tESjoP5yBKbVA)
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [ANN]
