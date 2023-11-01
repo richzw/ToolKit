@@ -1102,6 +1102,12 @@
     - There are two types of cgroups (controllers in Linux terms) for performing CPU isolation
       - CPU - CPU time quotas
       - cpuset - CPU pinning
+    - [Cgroup](https://mp.weixin.qq.com/s/zNbe34b7ckQ5NGho0CjytA) 是内核内置的一种设施，允许管理员在系统上设置任何进程的资源利用限制。
+    - Cgroup 主要控制：
+      - 每个进程的 CPU 份额数量。
+      - 每个进程的内存限制。
+      - 每个进程的块设备 I/O。
+      - 哪些网络数据包被识别为同一类型，以便其他应用程序可以强制执行网络流量规则。
   - CPU Quotas
     - quota = core_count * period  (period (typically 100 ms))
   - CPU Quotas and Throttling

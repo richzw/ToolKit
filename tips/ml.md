@@ -821,6 +821,7 @@
       - 可能需要从用户问题中生成结构化查询
         - Query construction：将人类问题转换为特定的查询语法或语言
     - Solutions
+      - [Multi-Vector Retriever for RAG on tables, text, and images](https://blog.langchain.dev/semi-structured-multi-modal-rag/)
       - Rewrite-Retrieve-Read
         - 使用LLM来重写用户查询，而不是直接使用原始用户查询进行检索
         - https://github.com/langchain-ai/langchain/blob/master/cookbook/rewrite.ipynb
@@ -838,6 +839,12 @@
       - RAG-Fusion
         - 一篇近期的文章基于多查询检索的概念进行拓展。然而，他们并未将所有文档一并处理，而是使用互惠排名融合来重新排序文档。
         - https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb
+      - GATE [Generative Active Task Elicitation](https://mp.weixin.qq.com/s/eKmWN1NOUZBipQPwm8H_rw)
+        - 生成式主动任务激发，与当下大模型被动的获取用户输入生成问题不同，提出了通过主动与用户对话来帮助用户生成更有效的Prompt，从而提高LLMs的准确性和可用性。
+        - https://github.com/alextamkin/generative-elicitation
+        - 生成式主动学习（Generative active learning）：大模型（LM）生成示例输入供用户标记（label）。这种方法的优点是向用户提供具体的场景，其中包括他们可能没有考虑过的一些场景。例如，在内容推荐方面，LM可能会生成一篇文章，如：您对以下文章感兴趣吗？The Art of Fusion Cuisine: Mixing Cultures and Flavors。
+        - 生成“是”或“否”的问题（Generating yes-or-no questions）：我们限制LM生成二进制的是或否问题。这种方法使得模型能够引导用户提供更抽象的偏好，同时对用户来说也很容易回答。例如，模型可能通过询问用户的偏好来进行探测：Do you enjoy reading articles about health and wellness?
+        - 生成开放性问题（Generating open-ended questions ）：LM生成需要自由形式自然语言回答的任意问题。这使得LM能够引导获取最广泛和最抽象的知识，但可能会导致问题过于宽泛或对用户来说具有挑战性。例如，LM可能会生成这样一个问题：What hobbies or activities do you enjoy in your free time ..., and why do these hobbies or activities captivate you?
     - https://blog.langchain.dev/query-transformations/
 - [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
 - [Tools]
