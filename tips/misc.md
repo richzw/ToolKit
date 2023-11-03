@@ -3,4 +3,8 @@
   - https://www.ndss-symposium.org/wp-content/uploads/2020/02/24076-paper.pdf
   - 可以采集内置加速传感器的信号，然后通过深度学习算法来解析出语音文字
   - 智能手机加速度传感器的采样频率在持续提升，足以覆盖人的语音的频段
-
+- 37% rule 和 Optimal Stop Theory
+  - 选择一种策略，总计N个选项，拒绝前K个选项，从K+1个选项开始只要看到比前K个选项优的选项则选择；K为多少时我们的策略能选到最优解的概率最大？
+- copilot-explorer
+  - https://thakkarparth007.github.io/copilot-explorer/posts/copilot-internals
+  - https://mp.weixin.qq.com/s/dtfLeEfcwbz3fb4mLROVYQ

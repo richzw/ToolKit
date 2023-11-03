@@ -704,6 +704,27 @@
     - 我们不难得出ss跟内核交互的过程：
       - ss -> sendmsg() -进内核-> netlink逻辑 -> tcp_diag_get_info()更新inet_diag_msg结构体
       - ss <- recvmsg() <-出内核- netlink逻辑 <- 更新过的inet_diag_msg结构体
+- [TCP挥手乱序](https://mp.weixin.qq.com/s/vX0C-AmJ_tIddWbsWeizJA)
+  - 四次挥手中，由于fin包和ack包乱序，导致等了一次timeout才关闭连接。
+  - 过程细节：
+    - 同时关闭的场景，server和client几乎同时向对方发送fin包。
+    - client先收到了server的fin包，并回传ack包。
+    - 然而server处发生乱序，先收到了client的ack包，后收到了fin包。
+    - 结果表现为server未能正确处理client的fin包，未能返回正确的ack包。
+    - client没收到（针对fin的）ack包，因此等待超时后重传fin包，之后才回归正常关闭连接的流程。
+  
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
