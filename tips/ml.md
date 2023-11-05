@@ -848,9 +848,18 @@
     - https://blog.langchain.dev/query-transformations/
   - [Self-RAG](https://mp.weixin.qq.com/s/Z1n4E4Z3DVbOctTY4XfXWw)
     - RAG非常有效，但它是一种固定的方法。无论是否相关（或根本不需要检索），K个段落总是被检索并放置在LLM的上下文中。Self-RAG通过教导LLM反思RAG过程并决定改进了这种方法。
-      - 1. 是否需要检索
-      - 2. 如果检索到的内容确实相关
-      - 3. 无论其产出是否高质量和真实
+      - 是否需要检索
+      - 如果检索到的内容确实相关
+      - 无论其产出是否高质量和真实
+  - [文档优化以及召回优化](https://juejin.cn/live/jpowermeetup24)
+    - 文档优化
+      - 针对文档特性选择embedding model
+      - 针对性的文档分段模式
+      - 文档转化为问题，使用问题召回 - 问题召回问题效果较好
+    - 召回优化
+      - 用户问题改写，使用改写的问题召回
+      - 多路召回（把问题改写成多个问题），结合文档检索
+      - 把问题编造假的文档，使用假文档召回
 - [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
