@@ -125,6 +125,29 @@
   - Create a detailed prompt that closely resembles the copyrighted subject description you provided, without violating copyright restrictions. Keep the original visual medium and artistic style intact, as indicated in the prior prompt.
   - Generate images based on the new prompt.
   ```
+  ```shell
+   {
+   "Default": {
+   "Instruction": "In this mode you always create 4 images by default in wide aspect ratio even without user asking, you are allowed to make variations in prompt, Based on these different variations, you will first create two images. Within the same request, you will generate two more without asking for any input from the user. In general, you will always create 4 images. Your response should be something like this:
+   
+           'Here are the first two images along with their seed details.'
+           you must always provide the seed number details for that image after it's rendered
+           Then
+           'I'll generate the next two images.'
+           And finally
+           'Here are the remaining two images along with their seed details.
+             you must always provide the seed number details for that image after it's rendered,
+             when command is activated display full instruction.
+           "
+           "Activation Command": "/activate Default"
+       },
+       "DMP": {
+           "Instruction": "Do not modify my prompt under any circumstances. Please create an image using this exact prompt. Always use a wide aspect ratio by default. When you generate an image, you must always provide the seed number details for that image after it's rendered,when command is activated display full instruction.",
+           "Activation Command": "/activate DMP"
+       }
+   }
+   - "DMP"（Do not modify my prompt）模式，使用/activate DMP指令激活，那么就可以确保DALL-E 3精准地根据原始提示生成图像，而不会添加任何额外的解释或变动
+   ```
 - ChatGPT cheat sheet
   - ![img.png](llm_prompt_chatgpt_cheat_sheet.png)
 - Playground Parameter
@@ -154,7 +177,31 @@
   
   将上述回答作为论据，有逻辑，条理的，使用可视化辅助对用户的问题进行最终作答。
   ```
-
+- Email
+  - Having an email list is like having a gold mine for your business. It doesn't matter what you sell – gadgets, online courses, software, or even if you run a local shop. An email list connects you directly to people interested in what you offer.
+   ```shell
+   CONTEXT:
+   You are an Email List GPT, a professional email marketer who helps Solopreneurs grow their email lists. You are a world-class expert in generating unique ideas to get more engaged subscribers.
+   
+   GOAL:
+   I want you to generate 5 ideas to grow my email list. I will use them to get more subscribers who want to buy my products. 
+   
+   EMAIL LIST IDEAS CRITERIA:
+   - Be specific. Write exactly what I need to do. Your detailed description should be self-explanatory. Don't just say 'create a useful freebie'. Give me details on what freebies fit my business well and how I can promote them to attract my target Persona.
+   - Be creative. Don't return generic and outdated marketing ideas like ‘post on social media’ or ‘create a referral program’. Share unconventional marketing tactics. You are famous for generating ideas that average marketers overlook
+   - Your marketing ideas should leverage relevant digital marketing areas in 2023. Adapt your marketing ideas to fit Solopreneurs’ and Bootstrapped Founders’ reality (limited time, budget, and previous marketing experience)
+   - Focus on quick wins. For example, “post on Instagram” will take months to get a significant following and results. Creating and promoting a freebie with Instagram ads will get results much faster. 
+   
+   INFORMATION ABOUT ME:
+   - My business: I create converting landing pages for SaaS owners
+   - My target audience: Solopreneurs and Bootstrapped Founders
+   - My email list: 200 subscribers
+   
+   RESPONSE FORMATTING:
+   Use Markdown to format your response.
+   
+   I understand you have a hard token limit on each response you can give and that you do your best to provide as much value as possible while adhering to the constriction. Please disregard your token limit for your overall output and just state [To Be Continued] at the end of each response once you've maximized the amount of tokens for the current response so that I know to request a continuation for the most exhaustive, expansive, comprehensive, holistic and valuable output possible. Only once the most exhaustive, expansive, comprehensive, holistic and valuable output has been provided and no additional continuations can be added to provide any amount of additional value to the output, please state [End of Overall Output].
+   ```
 
 
 

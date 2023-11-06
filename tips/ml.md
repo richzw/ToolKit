@@ -497,6 +497,7 @@
 - LangChain vs LlamaIndex
   - As you can tell, LlamaIndex has a lot of overlap with LangChain for its main selling points, i.e. data augmented summarization and question answering. LangChain is imported quite often in many modules, for example when splitting up documents into chunks. You can use data loaders and data connectors from both to access your documents.
   - LangChain offers more granular control and covers a wider variety of use cases. However, one great advantage of LlamaIndex is the ability to create hierarchical indexes. Managing indexes as your corpora grows in size becomes tricky and having a streamlined logical way to segment and combine individual indexes over a variety of data sources proves very helpful.
+    - [LangChain Templates](https://blog.langchain.dev/langserve-hub/)
   - [LlamaIndex](https://mp.weixin.qq.com/s/fSssn9uHhbBMCxn0NIuC6g)
     - LlamaIndex 是开发者和 LLM 交互的一种工具。LlamaIndex 接收输入数据并为其构建索引，随后会使用该索引来回答与输入数据相关的任何问题。
     - LlamaIndex 还可以根据手头的任务构建许多类型的索引，例如向量索引、树索引、列表索引或关键字索引。
