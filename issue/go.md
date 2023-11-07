@@ -959,7 +959,8 @@
     - Mobility Support: MPTCP can maintain connectivity when mobile devices switch networks without having to re-establish connectivity, providing a smoother mobile experience.
 -  [慎写指针类型的全局变量](https://mp.weixin.qq.com/s/yz5d5onsAaVoRfc3-ralhQ)
   - 并发访问issue
-
+- context携带value是线程安全的吗
+  - context本身就是线程安全的，所以context携带value也是线程安全的
 
 
 
