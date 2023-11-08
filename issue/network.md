@@ -712,9 +712,26 @@
     - 然而server处发生乱序，先收到了client的ack包，后收到了fin包。
     - 结果表现为server未能正确处理client的fin包，未能返回正确的ack包。
     - client没收到（针对fin的）ack包，因此等待超时后重传fin包，之后才回归正常关闭连接的流程。
-  
-
-
+  - 问题出现的位置？
+    - server处出现乱序，结果连接未能正常关闭，而是等到client超时重传fin包，才关闭连接。
+  - 问题带来什么影响？
+    - server处连接关闭的时间变长了（额外增加200ms），对时延敏感的场景影响明显
+  - 问题排查
+    - 初步分析
+      - 本地复现-乱序不影响挥手；
+      - 问题场景-乱序导致超时重传
+    - 确定状态转移
+      - 结合复现过程，利用ss和ebpf，监控tcp的状态变化。确定了server在收到ack-20623后，由FIN_WAIT_1进入了FIN_WAIT_2状态，这意味着ack-20623被正确处理了。那么问题大概率出现在fin-20622的处理上，这也证实了我们最初的猜测
+    - shutdown和close的一个重要差异在于shutdown不会设置SOCK_DEAD。
+    - 确认，此处server确实是用了shutdown()关闭连接（通过nginx的lingering_close）
+  - 总结
+   - 该现象是否是内核的合法行为？
+     - 是合法行为，是内核检查ack的逻辑导致的；
+     - 内核会根据收到的ack值，更新发送窗口参数snd_una，并由snd_una判断ack包是否需要处理；
+     - 由于fin-20622的ack值小于ack-20623，且ack-20623先到达，更新了snd_una。后到达的fin在ack检查过程中，对比snd_una时被认为是已经ack过的包，不需要再处理，结果被直接丢弃，并回传一个challenge_ack。导致了问题场景。
+   - 为什么本地复现失败了？
+     - 关闭tcp连接时，使用了close()接口，而线上环境使用的是shutdown()
+     - shutdown不会设置SOCK_DEAD，而close则相反，导致复现时的代码路径与问题场景出现分歧。
 
 
 

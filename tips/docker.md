@@ -435,8 +435,36 @@
     - 通过设置 IP_PKTINFO socket 选项为 1，然后使用 recvmsg 和 sendmsg 传输数据就能保证源地址选择符合我们的期望
   
 - [容器网络原理](https://mp.weixin.qq.com/s/SC83ASJwT0Pm-lX6IVansw)
-
-
-
-
+- [容器内的 1 号进程](https://mp.weixin.qq.com/s/7RB9d2J1_bGJYaI_T-1h-A)
+  - Linux 发行版，无论是 RedHat 系的还是 Debian 系的，都会把 /sbin/init 作为符号链接指向 Systemd。Systemd 是目前最流行的 Linux init 进程
+  - 在容器中也有 1 号进程的概念，一旦容器建立了自己的 Pid Namespace（进程命名空间)，这个 Namespace 里的进程号也是从 1 开始标记的, 1 号进程是第一个用户态的进程，由它直接或者间接创建了容器中的其他进程
+  - Linux 信号
+    - 命令 kill ，直接向一个进程发送一个信号，缺省情况下不指定信号的类型，那么这个信号就是 SIGTERM。也可以指定信号类型，比如命令 kill -9，这里的 9，就是编号为 9 的信号，SIGKILL 信号
+    - 进程对它的处理都有下面三个选择。
+      - 忽略( Ignore ) 就是对这个信号不做任何处理，但是有两个信号例外，对于 SIGKILL 和 SIGSTOP 这个两个信号，进程是不能忽略的。这是因为它们的主要作用是为 Linux kernel 和超级用户提供删除任意进程的特权。
+      - 捕获( Catch )，这个是指让用户进程可以注册自己针对这个信号的 handler。对于捕获，SIGKILL 和 SIGSTOP 这两个信号也同样例外，这两个信号不能由用户自己的处理代码，只能执行系统的缺省行为。
+      - 缺省行为( Default )，Linux 为每个信号都定义了一个缺省的行为，你可以在 Linux 系统中运行 man 7 signal 来查看每个信号的缺省行为。对于大部分的信号而言，应用程序不需要注册自己的 handler，使用系统缺省定义行为就可以了。
+    - SIGTERM 这个信号是可以被捕获的，这里的捕获指的就是用户进程可以为这个信号注册自己的 handler，而 SIGTERM 信号一般是用于进程优雅退出
+    - SIGKILL (9)，这个信号是 Linux 里两个特权信号之一。特权信号就是 Linux 为 kernel 和超级用户去删除任意进程所保留的，不能被忽略也不能被捕获。那么进程一旦收到 SIGKILL，就要退出
+  - docker stop <containier-id> 背后其实先向容器进程发出 SIGTERM 信号，如果 10s 后进程还在，那么直接再发出 SIGKILL 信号
+  - init 进程就是 1 号进程，但是 1 号进程不一定是 init 进程
+    - 1 号进程
+      - 操作系统第一个进程
+      - 是所有用户态进程的父进程
+    - init 进程
+      - 操作系统第一个进程
+      - 是所有用户态进程的父进程
+      - 可以回收僵尸进程(失去了父进程的子进程就都会以 init 作为它们的父进程)
+      - 可以向子进程发送操作系统信号
+  - 容器中的 1 号进程是否具有 init 进程的特性取决于容器启动的命令。在 Dockerfile 中，CMD、ENTRYPOINT 可以启动容器，它们都有两种模式：shell 模式，exec 模式
+    - shell
+      - 模式下会开启一个 shell 来执行后面的命令，即使用 /bin/sh -c 启动业务进程，那么容器中的 1 号进程就是 shell。用法：ENTRYPOINT command
+      - 启动该容器后，容器的 1 号进程就是 sh
+    - exec
+      - 该模式下直接运行命令，容器中的 1 号进程就是业务应用进程。用法：ENTRYPOINT ["command"]
+    - shell 模式的一号进程是 sh，而且 sh 不能传递信号，所以就无法实现容器内进程优雅退出了( docker stop <container-id> 只能等待 10s 强制杀死)，这时候就可以就考虑使用 exec 模式 因为 exec 模式的 1号进程就是自身，自身实现 SIGTERM handler 即可
+    - exec 模式下，没有办法获取容器内的环境变量
+  - 如果容器需要实现优雅退出，要么也用进程作为 1号进程且实现 SIGTERM handler，要么启动 init 进程。下面看看如何在容器中启动 init 进程。
+    - 如果你想直接通过 docker 命令来运行容器，可以直接通过参数 --init 来使用 tini
+  
 
