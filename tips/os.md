@@ -1560,7 +1560,18 @@
     - IOPS，即每秒钟处理的IO请求数量
       - OS的一次IO请求对应物理硬盘一个IO吗？ 一个OS的IO在经过多个中间层以后，发生在物理磁盘上的IO是不确定的。可能是一对一个，也可能一个对应多个
       - IOPS能算出来吗？
-
+- [内存页面迁移](https://mp.weixin.qq.com/s/jL2LzRK7z6Zfr-v6MvP07g)
+  - 页面迁移（page migrate）最早是为 NUMA 系统提供一种将进程页面迁移到指定内存节点的能力用来提升访问性能。后来在内核中广泛被使用，如内存规整、CMA、内存hotplug
+  - 页面迁移对上层应用业务来说是不可感知的，因为其迁移的是物理页面，而应用只访问的是虚拟内存
+  - 典型场景
+    - NUMA Balancing引起的页面迁移
+      - NUMA 自动均衡机制会尝试将内存迁移到正在访问它的 CPU 节点所在的 node
+    - 内存碎片整理
+  - 迁移模式
+    - MIGRATE_ASYNC	异步迁移，过程中不会发生阻塞	内存分配slowpath
+    - MIGRATE_SYNC_LIGHT	轻度同步迁移，允许大部分的阻塞操作，唯独不允许脏页的回写操作	kcompactd触发的规整
+    - MIGRATE_SYNC	同步迁移，迁移过程会发生阻塞，若需要迁移的某个page正在writeback或被locked会等待它完成	sysfs主动触发的内存规整
+    - MIGRATE_SYNC_NO_COPY	同步迁移，但不等待页面的拷贝过程。页面的拷贝通过回调migratepage()，过程可能会涉及DMA操作，因此不能阻塞。	内存热插拔
 
 
 
