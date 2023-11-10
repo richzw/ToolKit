@@ -356,10 +356,25 @@
         - 四是内存碎片率，在上面的引用已经给出了，内存碎片率低的情况下可能导致 swap。这里其实是内存和磁盘 IO 的联动点。
   - CPU 高、hotkey 明显。这里隐含了一个点：与 CPU 相对的是 OPS 并没有很高。
   - hotkey 其实就会导致 CPU 变高，而这时，因为大量的 CPU 都在数据切换和存储上，导致其他的请求比较慢。
-
-
-
-
+- Redis 内部使用不同编码
+  - 当执行 hset/hmset 命令时，代码中会去检查哈希的对象编码以及相关条件来判断该采用哪种编码方式
+    - 检查 value 大小
+    - 检查 field 的个数
+  - 两种编码的时间复杂度对比
+    - HEXISTS/HGET/HDEL 命令使用 hashtable 时间复杂度为O(1)，而使用 ziplist 编码为O(N)
+  - 优化思路
+    - Redis 服务端优化：
+      - 通过调整 hash-max-ziplist-entries 或是 hash-max-ziplist-value 配置项，从而控制哈希对象的编码方式，例如把 hash-max-ziplist-entries 从512改成256，那么超过256个 field 就会自动转换成 hashtable
+    - Redis 客户端优化：
+      - 满足 hash-max-ziplist-value 条件
+        - 例如在哈希对象中存入一个特殊 field，让这个 field 的 value 超过64B，这样这个 key 就自动变成 hashtable 编码，但是需要业务能识别这个特殊的 field，避免出现 bug。
+      - 满足 hash-max-ziplist-entries 条件
+        - 很多业务的哈希对象是经过一次拆分了，通过取模 hash 的方式拆分到多个哈希对象，也可以通过将拆分的哈希对象减少，从而达到满足单个哈希对象中 field 个数超过512个的条件
+    - 业务使用建议：
+      - 尽量避免热 key 现象
+        - 我们使用的是 Redis 的 cluster 版本，如果把业务的大部分流量都集中在某个或某几个 key 上，就无法充分发挥分布式集群的作用，压力都集中在个别的 Redis 实例上，从而出现热点瓶颈。
+      - 使用 list/hash/set/zset 等数据结构时要注意性能问题
+        - 需要根据自己的单个 key 中的 field 个数，value 大小，以及使用的命令等综合考虑性能和成本，如果需要了解自己的 key 的实际编码个数可以通过命令：object encoding 查看
 
 
 

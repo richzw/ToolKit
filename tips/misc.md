@@ -8,3 +8,8 @@
 - copilot-explorer
   - https://thakkarparth007.github.io/copilot-explorer/posts/copilot-internals
   - https://mp.weixin.qq.com/s/dtfLeEfcwbz3fb4mLROVYQ
+- Google Tools
+  - [Market Finder](https://marketfinder.thinkwithgoogle.com/intl/en)
+  - [Google Trends](https://trends.google.com/trends?)
+  - [Tools](https://www.thinkwithgoogle.com/tools/)
+    - Find my audience
