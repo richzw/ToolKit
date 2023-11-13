@@ -1415,6 +1415,14 @@
       - If your database is taking too much space and there is no space left for your OS to perform any other operation then you need to do a VACUUM FULL
       - If you cant lock the whole database and you just need to free up space taken by a table Which does alot of updates/deletes. Then go for VACUUM FULL on specific table
       - If you are facing a problem, where your queries become slower over time, i.e if you run EXPLAIN on a query and sometime it uses sequential scan and the same query with different parameters uses index scan. `ANALYZE VERBOSE your_table_name`
+    - 在 PostgreSQL 中，autovacuum 的作用主要有如下四个方面：
+      - 清理 dead tuple，对页面进行重组
+      - 更新统计信息，保证执行计划的准确性
+      - 更新 VM，加速 index-only scans
+      - 避免 XID 回卷造成的数据丢失
+    - 触发 autovacuum 有如下两个条件：
+      - 表的年龄是否达到 autovacuum_freeze_max_age 配置值，如果达到，必须进行 aggresive vacuum
+      - 当表更新或者删除的元组数超过 autovacuum_vacuum_threshold + autovacuum_vacuum_scale_factor x table_size
   - REINDEX
     - REINDEX is used to rebuild indexes. It is useful when the index is corrupted or when the index is not used for a long time. REINDEX is also used to rebuild the index after a VACUUM FULL command.
     - Running VACUUM ANALYZE and then REINDEX commands on the biggest tables in the application database really helps to improve its performance.

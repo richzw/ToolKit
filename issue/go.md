@@ -961,10 +961,27 @@
   - 并发访问issue
 - context携带value是线程安全的吗
   - context本身就是线程安全的，所以context携带value也是线程安全的
-
-
-
-
+- [Golang GC耗时](https://mp.weixin.qq.com/s/EEDNuhEr0G4SbTzDhVBjbg)
+  - 问题现象 
+    - 某接口一段时间后，超时率的毛刺比较多，有时候成功率会突然掉到 99.5% 以下，触发业务告警
+    - 客户因为测试我们的接口时的平均耗时很低（18ms），所以在线上设置了比较严格的超时时间，150ms
+  - 确定原因
+    - 在排除了常见的可能问题（服务单点故障，依赖组件性能问题）之后，再看业务监控已经没什么帮助了，需要仔细分析服务自己的 Metrics 才可能找到原因
+    - 首先发现问题的是 GCCPUFraction 含义是 GC 使用的 CPU 占总 CPU 使用的比值,服务平均有 2% 以上的 CPU 使用在了 GC 上，最严重的机器甚至超过了 4%
+    - PauseNS 是 GC 的 STW 阶段耗时，这个值在 500us 左右。上报的是最近 256 次 GC 的平均值，如果平均值有 0.5ms，那么极大值达到几毫秒甚至十几毫秒也是有可能的。
+    - 猜测造成请求超时毛刺的原因可能是 GC 的 STW 阶段会偶尔耗时过长，导致一些本来可以处理的请求，因为 STW 而超过了客户端的超时时间，造成超时毛刺。
+  - 根因分析
+    - CPU 热点
+      - `go tool pprof -seconds 30 https://<测试域名>/debug/pprof/profile`
+      - 直接输入 top 10 可以输出 flat 占比最高的 10 个函数，可以看到 runtime.mallocgc 的 cum 占比已经达到了 15%，占用了快到 3s CPU 时间
+      - GC 占用的 CPU 在这次 Profiling 过程中占了 15%，比业务逻辑还高！到这里基本确认，GC 一定存在某些问题
+      - Flat vs Cum：
+        - Flat 占比是指这个函数自身的代码使用了多少 CPU，不计算子函数的耗时。
+        - 而 Cum 则代表这个函数实际执行消耗了多少 CPU，也就是包括了所有的子函数（和子函数的子函数...）的耗时。
+    - 内存分配
+      - `go tool pprof -seconds 30 https://<测试域名>/debug/pprof/allocs`
+      - 
+   
 
 
 
