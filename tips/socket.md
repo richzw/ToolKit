@@ -128,6 +128,11 @@
       - 对于监听的sockfd，最好使用水平触发模式（参考nginx），边缘触发模式会导致高并发情况下，有的客户端会连接不上，LT适合处理紧急事件；
       - 对于读写的connfd，水平触发模式下，阻塞和非阻塞效果都一样，不过为了防止特殊情况，还是建议设置非阻塞；
       - LT的编程与poll/select接近，符合一直以来的习惯，不易出错；
+    - epoll不足之处：
+      - 定时的精度不够，只到5ms级别，select可以到0.1ms；
+      - 当连接数少并且连接都十分活跃的情况下，select和poll的性能可能比epoll好；
+      - epoll_ctrl每次只能够修改一个fd（kevent可以一次改多个，每次修改，epoll需要一个系统调用，不能 batch 操作，可能会影响性能）。
+      - 可能会在定时到期之前返回，导致还需要下一个epoll_wait调用。
 - [异步I/O框架 io_uring](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247562787&idx=1&sn=471a0956249ca789afad774978522717&chksm=c1850172f6f28864474f9832bfc61f723b5f54e174417d570a6b1e3f9f04bda7b539662c0bed&scene=21#wechat_redirect)
   - Source [1](How io_uring and eBPF Will Revolutionize Programming in Linux), [2](An Introduction to the io_uring Asynchronous I/O Framework)
   - 概述
