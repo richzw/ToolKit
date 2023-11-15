@@ -318,7 +318,7 @@
         - 在资源分配方面：对于一些离线业务例如离线训练来说，因为作业在调度和非调度的过程中，可能会执行很多次 checkpoint dump 和 reload 操作，这个操作过程需要从 HDFS 上实现完整模型的上传和下载，非常耗时。因此对于离线训练业务，我们更倾向于提高单个作业的加速比，而不是运行更多的作业。
         - 在资源回收方面：为了解决资源回收的过程中无脑地杀死离线业务的问题，研发团队构建了弹性资源的优先级，基于优先级实现资源回收。
 - [ CPUShares 管理 Cgroup](https://mp.weixin.qq.com/s/heqCb-E0yi-uxE1bkLgRgw)
-
+- [手动管理 Cgroup](https://mp.weixin.qq.com/s/rr6vHPIqEqtfm-xOaE4jpw)
 
 
 

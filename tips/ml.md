@@ -69,6 +69,9 @@
   - 相关性分析 计算各特征与目标变量之间的相关性。相关性越高的特征越重要。
   - 递归特征消除 Recursive Feature Elimination 
   - XGBoost特性重要性 - XGBOOST或者回归模型使用内置重要性来进行特征的重要性排列
+    - [XGBoost 2.0](https://mp.weixin.qq.com/s/EBfPZvAbRhzCIClzKACv8w)
+      - 具有矢量叶输出的多目标树
+      - XGBoost中的决策树是如何使用二阶泰勒展开来近似目标函数的。在2.0中向具有矢量叶输出的多目标树转变
   - 主成分分析 PCA - PCA着眼于方差解释
   - 方差分析 ANOVA 使用f_classif()获得每个特征的方差分析f值。f值越高，表明特征与目标的相关性越强
   - 卡方检验  - 使用chi2()获得每个特征的卡方统计信息。得分越高的特征越有可能独立于目标
@@ -732,6 +735,20 @@
     - [Part 3](https://www.anyscale.com/blog/building-a-self-hosted-question-answering-service-using-langchain-ray)
     - [Code](https://github.com/ray-project/langchain-ray/tree/main/open_source_LLM_retrieval_qa)
   - [Milvus、Xinference、Llama 2-70B 开源模型和 LangChain，构筑出一个全功能的问答系统](https://mp.weixin.qq.com/s/cXBC0dikldNiGwOwPuJfUQ)
+  - [WasmEdge运行 LLM](https://mp.weixin.qq.com/s/vxWTiWJ7dNCi5tQmaIq99g)
+    ```shell
+    curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- --plugin wasi_nn-ggml
+    curl -LO https://github.com/second-state/llama-utils/raw/main/chat/llama-chat.wasm
+    curl -LO https://huggingface.co/second-state/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q5_K_M.gguf
+    wasmedge --dir .:. --nn-preload default:GGML:AUTO:llama-2-7b-chat-wasm-q5_k_m.gguf llama-chat.wasm
+    
+    curl -LO https://github.com/second-state/llama-utils/raw/main/api-server/llama-api-server.wasm
+    wasmedge --dir .:. --nn-preload default:GGML:AUTO:llama-2-7b-chat-wasm-q5_k_m.gguf llama-api-server.wasm -p llama-2-chat -s 0.0.0.0:8080
+    curl -X POST http://localhost:8080/v1/chat/completions \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{"messages":[{"role":"system", "content": "You are a helpful assistant. Answer each question in one sentence."}, {"role":"user", "content": "**What is Wasm?**"}], "model":"llama-2-chat"}'
+    ```
   - [LLM 回答更加准确的秘密：为检索增强生成（RAG）添加引用源](https://mp.weixin.qq.com/s/I01YcEs_dV8fkSD-HaQQxg)
     - LLM 的最大问题就是缺乏最新的知识和特定领域的知识。
     - 业界有两种主要解决方法：微调和检索增强生成（RAG）
@@ -982,7 +999,8 @@
       - 统计文本中所有字符的频率，初始化编码表为所有的字符。
       - 在所有可能的字符对中，找出出现频率最高的字符对，将其合并为一个新的符号，添加到编码表中。
       - 重复上一步，直到达到预设的符号数量限制，或者没有可以合并的字符对为止。
-
+- GPTs List
+  - https://supertools.therundown.ai/gpts
 
 
 
