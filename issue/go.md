@@ -961,6 +961,7 @@
   - 并发访问issue
 - context携带value是线程安全的吗
   - context本身就是线程安全的，所以context携带value也是线程安全的
+- [Future-Proof Go Packages](https://abhinavg.net/2023/09/27/future-proof-packages/)
 - [Golang GC耗时](https://mp.weixin.qq.com/s/EEDNuhEr0G4SbTzDhVBjbg)
   - 问题现象 
     - 某接口一段时间后，超时率的毛刺比较多，有时候成功率会突然掉到 99.5% 以下，触发业务告警
@@ -980,9 +981,43 @@
         - 而 Cum 则代表这个函数实际执行消耗了多少 CPU，也就是包括了所有的子函数（和子函数的子函数...）的耗时。
     - 内存分配
       - `go tool pprof -seconds 30 https://<测试域名>/debug/pprof/allocs`
-      - 
-   
-
+      - Allocs 的 Profile 会记录四个不同的信息，可以输入 o 查看 sample_index 的可选值
+        - alloc_object：新建对象数量记录；
+        - alloc_space：分配空间大小记录；
+        - inuse_object：常驻内存对象数量记录；
+        - inuse_space：常驻内存空间大小记录。
+      - inuse 相关的记录可以用于排查内存泄漏，OOM 等问题。这里我们是 GC 的问题，主要和内存申请和释放有关，所以先看下 alloc_space
+      - 输入命令，sample_index=alloc_space，然后再 top 10
+      - 首先，上面的 top 10 看不出任何问题，但是为了保险起见，看了一下 top 20，有三个我们业务代码里的函数，flat 都很少，占比加起来也不到 4.5%，不过既然发现了他们 ，就深入看一下函数里各行的分配情况，看看有没有什么问题
+      - 往 Map 里插入数据，如果 Map 本身空间足够，是不需要重新申请内存的，这里申请了内存必然是因为初始化的时候忘记设置 cap 了
+      - 主要耗费在了字符串拼接上。众所周知用 fmt.Sprintf 来做字符串拼接性能很差，内存占用也比较高，应该考虑换成 strings.Builder
+      - uc.Request.URL.Query() 这里是个函数调用，再一翻代码，果然这里这个 Query 函数并不会缓存解析结果，每次调用都会重新解析 querystring，构造 url.Values
+        - 请求入口处我们已经解析了 querystring 并且储存在了 uc.Request.Query 这个字段里，这里应该是（因为 IDE 的代码自动提示而）笔误了
+      - 每次 Profiling 都是 30s，也就是说我们程序每分钟会申请 2.5G 的内存。正常的策略，Golang 是 2 分钟进行一次 GC，但是服务线上使用的节点是 2C2G，所以肯定会因为内存快不足了而提前 GC
+    - GC 频率
+      - 想确定 GC 频率是否真的存在问题，有两种方法：
+        - 在运行的时候增加 GODEBUG=gctrace=1 的环境变量，让 Golang runtime 在每次 GC 时往 stderr 输出信息；
+        - 使用 runtime trace。
+        ```shell
+        curl 'https://<测试域名>/debug/pprof/trace?seconds=50' > trace.data
+        go tool trace -http 127.0.0.1:8080 trace.data
+        ```
+      - Heap 堆内存呈现很明显的锯齿状。而且 GC 也在每次下降沿出现，很明显，这就是 GC 在不停的回收内存
+      - 每次 GC 间的间隔是 550ms 总结一下，也就是说：现在我们的程序占用的内存非常小，但是 GC 却特别频繁，甚至达到了一秒两次。
+      - 我们回到 trace 首页，找到最底下的 MMU 链接 点进去可以看见一个图表，因为我们只关注影响程序执行的 STW 阶段，所以右边只勾选 STW：
+      - 所以根据这个 X 轴零点我们可以发现，在这段 trace 事件内，最长的 STW 时间有 15ms，然后我们看下以 1s 为时间窗口的情况 这里的比例大约是 96.9%，也就是说一秒的窗口内，最差会有 31ms 的时间被 GC 的 STW 占用，这个比例可以说很高了
+  - 刨根问底
+    - Golang runtime 的 GC 应该至少遵循三个策略：
+      - 在代码手动要求 GC 时执行；
+      - 间隔固定时间触发 GC，作为托底策略；
+      - 为了防止 OOM，在内存使用率比较高时触发 GC。
+    - Trace图 除了 Allocated 已分配堆内存大小这一项之外，还有一项叫做 NextGC，直觉告诉我们这个值貌似和 GC 频率有关
+    - 是什么在控制 NextGC 的大小呢 这个值是在上一轮 GC 结束时，基于可达数据和 GOGC 参数计算出来的
+    - 它的功能是控制 GC 的触发：会在每次新申请的内存大小和上次 GC 之后 Live Data（就是上面说过的不能被 GC 的数据） 的大小的比值达到 GOGC 设定的百分比时触发一次 GC。可能有点绕，写成公式其实就是 NextGC = LiveData * (1 + GOGC / 100)。
+  - 解决方案
+    - GOGC 调大就行了
+    - 可以用 SetGCPercent 在运行时修改这个策略参数
+    - 我们在 GOGC 设置为 1600 的基础上，将 Memory Limit 设置为 1600MB，来防止可能的 OOM
 
 
 

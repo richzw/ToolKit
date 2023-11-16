@@ -375,7 +375,8 @@
         - 我们使用的是 Redis 的 cluster 版本，如果把业务的大部分流量都集中在某个或某几个 key 上，就无法充分发挥分布式集群的作用，压力都集中在个别的 Redis 实例上，从而出现热点瓶颈。
       - 使用 list/hash/set/zset 等数据结构时要注意性能问题
         - 需要根据自己的单个 key 中的 field 个数，value 大小，以及使用的命令等综合考虑性能和成本，如果需要了解自己的 key 的实际编码个数可以通过命令：object encoding 查看
-
+- [Redis 异地多活](https://mp.weixin.qq.com/s/UcyO3J0XEEe1sH3frmmNDg)
+  - Redis 遇到了回环、重试、数据冲突、增量数据存储和读取等问题
 
 
 

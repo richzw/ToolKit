@@ -635,7 +635,13 @@
     - SeamlessM4T支持近100种语言的自动语音识别、语音到文本翻译、语音到语音翻译、文本到文本翻译和文本到语音翻译的多任务支持
   - [ControlNet](https://github.com/lllyasviel/ControlNet)
     - Adding Conditional Control to Text-to-Image Diffusion Models.
-  - [小型LLM——Mistral 7B](https://mp.weixin.qq.com/s/gASCImCD0tESjoP5yBKbVA)
+  - [小型LLM - Mistral 7B](https://mp.weixin.qq.com/s/gASCImCD0tESjoP5yBKbVA)
+  - [小型LLM：Zephyr-7B](https://mp.weixin.qq.com/s/9O6oHEMRCjt4VY7adFEBmg)
+    - 该模型由 Hugging Face 创建，实际上是在公共数据集上训练的 Mistral-7B 的微调版本，但也通过知识蒸馏技术进行了优化
+    - ZEPHYR-7B是Mistral-7B的对齐版本。这个过程包括三个关键步骤：
+      - 大规模数据集构建，采用自指导风格，使用UltraChat数据集，随后进行蒸馏式监督微调（dSFT）。
+      - 通过一系列聊天模型完成和随后的GPT-4（UltraFeedback）评分来收集人工智能反馈（AIF），然后将其转化为偏好数据。
+      - 将蒸馏直接偏好优化（dDPO）应用于使用收集的反馈数据的dSFT模型
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [ANN]
@@ -1001,7 +1007,12 @@
       - 重复上一步，直到达到预设的符号数量限制，或者没有可以合并的字符对为止。
 - GPTs List
   - https://supertools.therundown.ai/gpts
-
+  - Tips to create GPTs
+    - Don’t use the chat to build your GPT: This process can take longer time and you might lose your process. You can use Configure instead.
+    - Keep the instructions short and simple: The longer the instructions, the longer you have to wait and the more information GPT Builder will ignore
+    - Give conversation examples: This ensures the agent aligns with your desired interaction style.
+    - Use JSON instead of PDF or Word: The more data, the better. However, you can just upload 10 files so with JSON, you can provide more data compared to PDF and Word file
+  - search the Custom GPTs on Google by typing in the search bar: “chat.openai.com/g/<what you are looking for>”
 
 
 

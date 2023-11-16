@@ -1577,8 +1577,16 @@
   - Linux 内核提供 swap 机制来解决内存不足的情况, 通过 swap 机制，系统可以将内存分配给需求更迫切的进程。但由于 swap 机制需要进行 I/O 操作，所以一定程度上会影响系统性能
   - zRAM 机制建立在 swap 机制之上，swap 机制是将进程不常用的内存交换到磁盘中，而 zRAM 机制是将进程不常用的内存压缩存储在内存某个区域。所以 zRAM 机制并不会发生 I/O 操作，从而避免因 I/O 操作导致的性能下降。
   - 由于 zRAM 机制是建立在 swap 机制之上，而 swap 机制需要配置 文件系统 或 块设备 来完成的。所以 zRAM 虚拟一个块设备，当系统内存不足时，swap 机制将内存写入到这个虚拟的块设备中。也就是说，zRAM 机制本质上只是一个虚拟块设备
-
-
+- [Linux 的 I/O 系统](https://mp.weixin.qq.com/s/A9L1jOeSZ6CZUp6lDWWQQg)
+  - 传统的 System Call I/O
+    - 传统的访问方式是通过 write() 和 read() 两个系统调用实现
+    - 整个过程涉及 2 次 CPU 拷贝、2 次 DMA 拷贝，总共 4 次拷贝，以及 4 次上下文切换。
+  - 高性能优化的 I/O
+    - 零拷贝技术。
+    - 多路复用技术。
+    - 页缓存（PageCache）技术。
+  -  Linux 系统编程里用到的 Buffered IO、mmap、Direct IO
+    - ![img.png](os_page_cache.png)
 
 
 
