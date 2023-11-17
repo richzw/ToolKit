@@ -852,7 +852,8 @@
       - Rewrite-Retrieve-Read
         - 使用LLM来重写用户查询，而不是直接使用原始用户查询进行检索
         - https://github.com/langchain-ai/langchain/blob/master/cookbook/rewrite.ipynb
-      - Step back prompting
+      - [Step back prompting](https://medium.com/international-school-of-ai-data-science/enhancing-llms-reasoning-with-step-back-prompting-47fad1cf5968)
+        - Step-Back Prompting是一种用于增强语言模型，特别是大型语言模型（LLMs）的推理和解决问题能力的技术。它涉及鼓励LLM从给定的问题或问题中后退一步，并提出一个更抽象、更高层次的问题，这个问题包含了原始询问的本质
         - 使用LLM生成一个“退后一步”的问题。这可以与或不使用检索一起使用。使用检索时，将使用“退后一步”问题和原始问题进行检索，然后使用两个结果来确定语言模型的响应
         - https://github.com/langchain-ai/langchain/blob/master/cookbook/stepback-qa.ipynb
       - Follow Up Questions
@@ -1013,7 +1014,11 @@
     - Give conversation examples: This ensures the agent aligns with your desired interaction style.
     - Use JSON instead of PDF or Word: The more data, the better. However, you can just upload 10 files so with JSON, you can provide more data compared to PDF and Word file
   - search the Custom GPTs on Google by typing in the search bar: “chat.openai.com/g/<what you are looking for>”
-
+  - Advice to build GPTs
+    - Integrate actions — Using actions to create AI agents is the most powerful feature for GPTs, but few are actually using it. As we went over in an earlier edition, you can hook up 1000+ actions with zero coding using Zapier.
+    - Leverage unique data — Incorporate datasets to differentiate and provide an advantage over others. Just be sure to safeguard it properly (see below).
+    - Promote your offerings — Prompt your GPT to recommend your own products or services when relevant. An example of how we incorporated promos into our own GPT here.
+    - Protect your work — Use prompts that guard against others accessing your instructions and data, preventing replication of your hard work. A good example of instructions to help safeguard your GPT from being copied here.
 
 
 
