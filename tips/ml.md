@@ -560,6 +560,12 @@
     - 构建索引和内存资源是否充足
       - 性能优先，选择 HNSW 索引
 - [Milvus 2.0 数据插入与持久化](https://mp.weixin.qq.com/s/D0xdD9mqDgxFvNY19hvDgQ)
+  - 删数据逻辑
+    - 调用delete删除一条已存在的数据时，它只是在某个segment里把某条数据标记为deleted，但是这个segment的数据此时仍然是一个整体，那条被删的数在内存里仍然占着空间。
+    - 当你又调用insert增加一条数据时，这条新数据实际上是放入一个新的segment中，这条新数据也会占用额外内存空间。因此，随着你继续删除+insert，你会看到内存用量增加，新的这个segment执行的是暴搜，cpu用量会增加。
+    - 随着新的segment中的数据达到一定量可以建索引了，indexnode就开始给这个新segment建索引，建索引就会消耗cpu。只有当某个segment中被删的数据达到20%以上，datanode开始对这个segment进行compact，
+    - 把deleted的数据去除掉，剩下的数据存为一个新的segmemt。在compact之后有可能会发生小segment合并成大segment。总之，删除和更新数据会产生很多额外的工作，消耗内存消耗cpu，设计上就如此
+  - 如果用num_enrtities观察行数的话，是看不出变化的，因为num_entities不统计被删除的行数。如果你是删除之后再用query去查询主键，还能查到的话，那八成是因为你是删完就立即query，而consistency_level没有设为Strong
 - LLM Apps
   - ![img.png](ml_embedding_search.png)
   - [Generative Agents: Interactive Simulacra of Human Behavior](https://github.com/joonspk-research/generative_agents)

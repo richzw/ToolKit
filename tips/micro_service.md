@@ -790,6 +790,23 @@
       - 互斥：etcd 支持事务，通过事务创建 key 和检查 key 是否存在，可以保证互斥性；
       - 容错：etcd 基于 Raft 共识算法，写 key 成功至少需要超过半数节点确认，这就保证了容错性；
       - 死锁：etcd 支持租约(Lease)机制，可以对 key 设置租约存活时间(TTL)，到期后该 key 将失效删除，避免死锁；etc 也支持租约续期，如果客户端还未处理完可以继续续约；同时 etcd 也有自增 id，在下文介绍。
+  - 分布式锁的选择
+    - 数据库：db操作性能较差，并且有锁表的风险，一般不考虑。
+      - 优点：实现简单、易于理解
+      - 缺点：对数据库压力大
+    - Redis：适用于并发量很大、性能要求很高而可靠性问题可以通过其他方案去弥补的场景。
+      - 优点：易于理解
+      - 缺点：自己实现、不支持阻塞
+    - Redisson：相对于Jedis其实更多用在分布式的场景。
+      - 优点：提供锁的方法，可阻塞
+    - Zookeeper：适用于高可靠（高可用），而并发量不是太高的场景。
+      - 优点：支持阻塞
+      - 缺点：需理解Zookeeper、程序复杂
+    - Curator
+      - 优点：提供锁的方法
+      - 缺点：Zookeeper，强一致，慢
+    - Etcd：安全和可靠性上有保证，但是比较重。
+
 - [Go Micro, Go Kit, Gizmo, Kite 对比](https://mp.weixin.qq.com/s/KQ_qWBrW9MY0a3IL_Bv2kw)
 - [微服务架构设计模式](https://mp.weixin.qq.com/s/NpQIgh2VWVXqA6ab_Bo3TA)
 - [API Design Google](https://www.bookstack.cn/read/API-design-guide/API-design-guide-01-%E7%AE%80%E4%BB%8B.md)
