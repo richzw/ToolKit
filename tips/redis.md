@@ -377,8 +377,14 @@
         - 需要根据自己的单个 key 中的 field 个数，value 大小，以及使用的命令等综合考虑性能和成本，如果需要了解自己的 key 的实际编码个数可以通过命令：object encoding 查看
 - [Redis 异地多活](https://mp.weixin.qq.com/s/UcyO3J0XEEe1sH3frmmNDg)
   - Redis 遇到了回环、重试、数据冲突、增量数据存储和读取等问题
-
-
+- [Redis 内存泄漏](https://mp.weixin.qq.com/s/mlLr5RxDMH9d8HwwHQlGww)
+  - 使用工具定位
+    - memory doctor Redis4 引入的内存诊断命令，3系列未实现
+    - 3.2.8版本使用 jemalloc-4.0.3作为内存分配器，尝试使用 jeprof 工具分析内存使用情况，发现 jemalloc 编译时需要提前添加--enable-prof编译选项，此路不通
+    - 使用 perf 抓取 brk 系统调用，未发现异常（实际上最近两个月也未发生泄漏）
+    - valgrind 作为最后手段，不确定是否可以复现
+  - 使用 hexdump 观察昨天的内存 dump 文件，发现泄漏内存为 SDS 字符串数据类型，且连续分布
+  - 排除了 rax 树的泄漏，同时综合 redis 使用 sds key 的情况，此时把怀疑重点放在了 write 等 dict 的释放方法上，以及 rdb 的加载时 key 的临时结构体变量
 
 
 
