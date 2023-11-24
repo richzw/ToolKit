@@ -317,8 +317,10 @@
         - 在资源供应方面：我们在执行缩容操作的过程中，引入了 deletion cost 机制定义实例缩容的优先级。比如我们可以尽可能地缩容整机，甚至尽可能地保证这些缩容出来的资源处于同一个 Pod 或者使用了同质的 GPU ，从而减少资源碎片的问题。
         - 在资源分配方面：对于一些离线业务例如离线训练来说，因为作业在调度和非调度的过程中，可能会执行很多次 checkpoint dump 和 reload 操作，这个操作过程需要从 HDFS 上实现完整模型的上传和下载，非常耗时。因此对于离线训练业务，我们更倾向于提高单个作业的加速比，而不是运行更多的作业。
         - 在资源回收方面：为了解决资源回收的过程中无脑地杀死离线业务的问题，研发团队构建了弹性资源的优先级，基于优先级实现资源回收。
-- [ CPUShares 管理 Cgroup](https://mp.weixin.qq.com/s/heqCb-E0yi-uxE1bkLgRgw)
-- [手动管理 Cgroup](https://mp.weixin.qq.com/s/rr6vHPIqEqtfm-xOaE4jpw)
+- [Cgroup]()
+  - [CPUShares 管理 Cgroup](https://mp.weixin.qq.com/s/heqCb-E0yi-uxE1bkLgRgw)
+  - [手动管理 Cgroup](https://mp.weixin.qq.com/s/rr6vHPIqEqtfm-xOaE4jpw)
+  - [使用 systemd 管理 Cgroup](https://mp.weixin.qq.com/s/77qF0bY9neZrPDeFLOgy5w)
 - [Cluster Autoscaler 批处理作业的节点]()
   - 场景
     - 客户有自己的任务分发平台，不同计算任务通过任务平台下发到 Kubernetes 集群中，每批计算任务对应一堆的 Pod
