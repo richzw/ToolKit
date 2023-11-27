@@ -13,3 +13,4 @@
   - [Google Trends](https://trends.google.com/trends?)
   - [Tools](https://www.thinkwithgoogle.com/tools/)
     - Find my audience
+- [Node.js Addon](https://mp.weixin.qq.com/s/6Qm5DpNWEyCBkI9Fh_Z0CA)
