@@ -1028,7 +1028,17 @@
     - Leverage unique data — Incorporate datasets to differentiate and provide an advantage over others. Just be sure to safeguard it properly (see below).
     - Promote your offerings — Prompt your GPT to recommend your own products or services when relevant. An example of how we incorporated promos into our own GPT here.
     - Protect your work — Use prompts that guard against others accessing your instructions and data, preventing replication of your hard work. A good example of instructions to help safeguard your GPT from being copied here.
-
+- [openai Assistant接口](https://mp.weixin.qq.com/s/NsbIFBaLbuZF5KWgfD30Gg)
+  - Assistant
+    - 使用 OpenAI 模型和调用工具的特定目的的Assistant，它有多个属性，其中包括 tools 和 file_ids，分别对应 Tool 对象和 File 对象。
+  - Thread
+    - 对象表示一个聊天会话，它是有状态的，就像 ChatGPT 网页上的每个历史记录，我们可以对历史记录进行重新对话，它包含了多个 Message 对象。
+  - Message
+    - 表示一条聊天消息，分不同角色的消息，包括 user、assistant 和 tool 等。Message以列表形式存储在Thread中。
+  - Run
+    - 表示一次指令执行的过程，需要指定执行命令的对象 Assistant 和聊天会话 Thread，一个 Thread 可以创建多个 Run。
+  - Run Step
+    - 对象表示执行的步骤，一个 Run 包含多个 Run Step。查看"Run Step"可让您了解助手是如何取得最终结果的。
 
 
 

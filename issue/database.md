@@ -74,3 +74,20 @@
   - 增加 WAL segment size 大小，可降低日志轮转过程中加锁的频率，也可以降低 CPU 和 TPS 抖动，只是效果没那么明显。
   - PG 是多进程模型，引入 pgBouncer 可支持更大的并发链接数，并大幅提升稳定性，如果条件允许，可以开启 Huge Page，虽然原理不同，但效果和 pgBouncer 类似。
   - PG 在默认参数下，属于 IO-Bound，在经过上述优化后转化为 CPU-Bound。
+- [数据库死锁排查思路](https://mp.weixin.qq.com/s/gKcAEzf4pMmSJ-FHrDrePA)
+  - 死锁场景现场
+    - 把业务礼物表A的数据删除，然后修改用户ID后，然后插入到礼物B表。其中，A表和B表，表示同一个礼物逻辑表下的不同分表。
+    - 既然是死锁，为什么出现的却是Lock wait timeout exceeded; try restarting transaction 锁等待超时这个日志呢？这是因为在Innodb存储引擎中，当检测到死锁时，它会尝试自动解决死锁问题，通常是通过回滚(rollback)其中的一个或者多个事务来解除死锁。
+  - 死锁排查思路
+    - 用show engine innodb status，查看最近一次死锁日志。
+    - 分析死锁日志，找到关键词TRANSACTION
+    - 分析死锁日志，查看正在执行的SQL
+    - 看它持有什么锁，等待什么锁。
+
+
+
+
+
+
+
+
