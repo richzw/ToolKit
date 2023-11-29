@@ -1039,7 +1039,7 @@
     - 表示一次指令执行的过程，需要指定执行命令的对象 Assistant 和聊天会话 Thread，一个 Thread 可以创建多个 Run。
   - Run Step
     - 对象表示执行的步骤，一个 Run 包含多个 Run Step。查看"Run Step"可让您了解助手是如何取得最终结果的。
-
+- [Open Ai’s Q* (Q Star) Explained For Beginners](https://mp.weixin.qq.com/s/Ph-ayDBu73bar1MzfsxSeQ)
 
 
 

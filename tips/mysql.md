@@ -811,7 +811,9 @@
   - severless - 存储资源 释放 （弹性）
   - 平滑弹性扩缩容 - 移除毛刺
   - serverless = Faas + Baas
-
+- [分页](https://mp.weixin.qq.com/s/7laj01CkVXy6d9AYijA28g)
+  - 分页丢数据
+  - 如果你非常在意执行结果的顺序，那么在 ORDER BY 子句中包含一个额外的列，以确保顺序具有确定性。
 
 
 
