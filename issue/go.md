@@ -1018,7 +1018,7 @@
     - GOGC 调大就行了
     - 可以用 SetGCPercent 在运行时修改这个策略参数
     - 我们在 GOGC 设置为 1600 的基础上，将 Memory Limit 设置为 1600MB，来防止可能的 OOM
-
+- [visualizing the Go GC](https://www.aadhav.me/posts/visualizing-the-go-gc/)
 
 
 

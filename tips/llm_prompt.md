@@ -425,7 +425,41 @@
     FORMAT：格式 详细定义输出的格式和限制条件
     UPDATE：迭代 记录提示词版本并根据输出结果对提示词进行迭代
     ```
-
+- Prompts for Landing your Deam Jobs
+  ```shell
+  1. Job Applications with ChatGPT
+  ChatGPT prompt: "Can you identify my [Skills] experience from my resume [Paste Resume]? Please describe my specific [Skills] experience in conversational, clear language as if you were me."
+  
+  2. Preparing for Interviews
+  ChatGPT prompt: "What skills and experiences should I emphasize during an interview for the [Job Title] role in [Specific Industry]?"
+  
+  3. Answering Interview Questions
+  ChatGPT prompt: "Please provide an answer to the interview question: [Insert Question] using my resume [Paste Resume].  Make sure to use descriptive language and include measurable results."
+  
+  4. Common Interview Questions
+  ChatGPT prompt: "What are the top 10 questions that companies usually ask during an interview for a(n) [Job Title] position?"
+  
+  5. Crafting Your Cover Letter
+  ChatGPT prompt: "Can you write a personalized cover letter for the [Job Title] position at [Company]? Here's the job description: [Paste Job Description], and my current resume: [Paste Resume]."
+  
+  6. Writing a LinkedIn Summary
+  ChatGPT prompt: "Can you write a summary for my LinkedIn profile using my resume [Paste Resume]?"
+  
+  7. Creating a Professional Summary
+  ChatGPT prompt: "Using my resume, can you create a professional summary for me aligned to this [Job Title]."
+  [Paste Resume]
+  
+  8. Understanding Job Descriptions
+  ChatGPT prompt: "What are the main responsibilities for this job? Please list the top three responsibilities required for [Job Title]."
+  [Paste Job Description]
+  
+  9. Improving Your Resume Bullets
+  ChatGPT prompt: "Please rewrite this bullet point from my resume using clear and impactful language while highlighting my accomplishments. [Paste Resume]"
+  
+  10. Customizing Your Resume
+  ChatGPT prompt: "Can you make changes to my resume to fit the [Job Title] role at [Company]?
+  Here's the job description: [Paste Job Description], and resume: [Paste Resume]."
+  ```
 
 
 
