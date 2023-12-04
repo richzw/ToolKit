@@ -351,7 +351,16 @@
 - [Kubernetes HPA扩容比较慢原因](https://midbai.com/post/why-hpa-scale-slowly/)
   - HPA扩容慢的原因包括扩容的响应时间和每次扩容的副本数。响应时间受到metrics-server和kubelet收集监控信息的周期影响，而扩缩容的速度则由监控数据和扩缩容行为控制决定
   - HPA controller执行效率和应用ready时间也会影响扩缩容速度。在大量的HPA对象的集群中，HPA controller可能会有性能瓶颈，而pod从启动到ready的时间则取决于多个因素，包括pod调度、kubelet响应、镜像下载、容器创建、应用启动和应用readiness
-
+- [容器网络加速](https://mp.weixin.qq.com/s/bjQJrRX7WPwLpVLyfxhfOA)
+  - 智能网络加速
+    - 借助于支持 SR-IOV 的智能硬件，把网卡驱动卸载至物理网卡。通过调用 Netlink 包将 VF 修改到容器的 Namespace 下，使得物理机中 PF 扩展出来的 VF 可以被容器直接调用。
+    - 基于 Multus、SR-IOV Device Plugin 和 SR-IOV CNI （Kubernetes 1.24 之前的版本，CNI 的管理由 Kubelet 负责，新版 Kubernetes 版本 CNI 管理由 CRI 负责）实现网络 IO 卸载至物理网卡上的 VF，同时把 VF 另一端插入容器，作为容器的以太网网卡
+    - 容器网络数据包从容器用户态协议栈，经过容器内核态协议栈，通过 VF 卸载至物理网卡 PF，ByPass 容器主机内核和主机内核驱动从而实现网络加速。
+  - 内核态网络加速
+    - 基于支持 eBPF 的高内核版本（Kernel 4.19.57+，推荐5.10+ ）的 Linux 操作系统，在 XDP 原生驱动模式（Native-Routing）或卸载模式（Offload，需要智能网卡支持）下 ByPass 内核协议栈，通过 Cilium CNI 将容器网卡一端植入 eBPF 程序，另一端插入容器内作为容器以太网网卡，实现通信和容器网络加速。
+  - 用户态网络加速
+    - 可以通过 SRIOV+DPDK 方式，把内核态网卡驱动切换成用户态网卡驱动，实现“用户态网卡 -> DPDK 轮询 Pool 模式-> DPDK 库 -> 应用程序” 跳过容器内核态网络协议栈
+    - 可以 DPDK +VPP/VCL 协议栈自编程模式的用户态网络极速
 
 
 
