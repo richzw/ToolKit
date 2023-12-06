@@ -248,6 +248,7 @@
     - 将相同的思想应用于强化学习任务中的跨剧情轨迹，其中算法被封装在一个长期历史条件策略中。考虑到代理与环境的多次交互，每一集中代理都会表的更好一些，AD 将这个学习历史连接起来并将其输入到模型中。因此，我们应该期望下一个预测的动作比之前的试验表现更好。我们的目标是学习强化学习的过程，而不是训练一个用于特定任务的策略本身。
   - 思维链（CoT，Chain of thought）
     - 已成为一种标准prompting技术，用于增强复杂任务上的模型性能。指示该模型“逐步思考”，以利用更多的测试时间计算将困难任务分解为更小，更简单的步骤。COT将重大任务转换为多个可管理的任务，并将注意力放到对模型思考过程的可解释性中。
+    - [COT提升LLM](https://mp.weixin.qq.com/s/07X8cMbx6inRxZQCcl_RXg)
   - 思维树（Tree of Thoughts）
     - 通过探索每个步骤的多种推理可能性来扩展COT。它首先将问题分解为多个思考步骤，并且每个步骤都生成多个想法，从而可以创建一个树形结构。
     - 通过将思维树与算法蒸馏相结合，我们可以将多个思维树的输出连接起来，以形成一个更长的思维链。这种方法可以将复杂的任务分解为更小的任务，从而使模型能够更好地处理复杂的任务。
@@ -329,6 +330,7 @@
   - [Vector Embeddings: From the Basics to Production](https://partee.io/2022/08/11/vector-embeddings/)
   - [卷积神经网络（CNN）](https://mp.weixin.qq.com/s/ywQkV4VCh_30gCcdvfl1qw)
   - [Large Language Models (in 2023)](https://mp.weixin.qq.com/s/Kwkn7H82QV7KaFma0r7SlQ)
+  - [OpenAI spinning up](https://spinningup.openai.com/en/latest/index.html)
   - [DALL・E 3 ](https://cdn.openai.com/papers/dall-e-3.pdf)
     - DALL・E 3 所做的改进
       - 模型能力的提升主要来自于详尽的图像文本描述（image captioning）；
@@ -899,6 +901,12 @@
       - 把问题编造假的文档，使用假文档召回
   - [评估 RAG 的TruLens](https://mp.weixin.qq.com/s/4sBQeL0m09_V9Sya1voTqg)
     - https://colab.research.google.com/github/truera/trulens/blob/main/trulens_eval/examples/expositional/vector-dbs/milvus/milvus_evals_build_better_rags.ipynb
+  - 回归现实，从真实需求出发
+    - 世界知识&私有知识混淆的: 乙烯和丙烯的关系是什么？ 大模型应该回答两者都属于有机化合物，还是根据近期产业资讯回答，两者的价格均在上涨？
+    - 召回结果混淆
+    - 多条件约束失效: Q 昨天《独家新闻》统计的化学制品行业的关注度排名第几
+    - 全文/多文类意图失效
+    - 复杂逻辑推理: Q 近期碳酸锂和硫酸镍同时下跌的时候，哪个在上涨？
 - [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
@@ -1040,7 +1048,7 @@
   - Run Step
     - 对象表示执行的步骤，一个 Run 包含多个 Run Step。查看"Run Step"可让您了解助手是如何取得最终结果的。
 - [Open Ai’s Q* (Q Star) Explained For Beginners](https://mp.weixin.qq.com/s/Ph-ayDBu73bar1MzfsxSeQ)
-
+- [19个开源数据集](https://mp.weixin.qq.com/s/YZrUakj2I0rqVB1RIuzGPw)
 
 
 

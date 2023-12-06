@@ -1543,8 +1543,10 @@
 - [ScyllaDB](https://mp.weixin.qq.com/s/lojRIRdz5pvyjNYvYTEPlA)
   - 下一代 NoSQL 数据库，采用 C++编写充分利用 Linux 底层原语优势，利用现代多核、多处理器 NUMA 服务器硬件 API 兼容 Cassandra 和 DynamoDB
   - 支持和 Cassandra 一样的 CQL 查询语言和驱动，一样的 SSTable 存储格式。同样也支持和 DynamoDB 一样的 JSON-style 查询和驱动
-
-
+- Amazon Aurora Limitless
+  - Share Everything架构： 在"share everything"架构中，所有的节点都可以访问到系统中的所有资源，包括内存、存储、计算等。这种架构的优点是可以实现资源的最大化利用，因为任何节点都可以访问到所有的资源。然而，这种架构的缺点是在于需要复杂的协调和同步机制来保证数据的一致性和完整性。  
+  - Share Nothing架构： 在"share nothing"架构中，每个节点都有自己独立的资源，包括内存、存储、计算等，各个节点之间不共享任何资源。这种架构的优点是可以实现线性的扩展性，因为增加新的节点不会影响到已有的节点。此外，由于各个节点之间没有资源共享，因此不需要复杂的协调和同步机制，从而可以降低系统的复杂性。然而，这种架构的缺点是在于数据的分布和管理可能会变得比较复杂，因为数据需要在各个节点之间进行分布。 
+  - Aurora Limitless 的全局时间戳是通过 EC2 TimeSync Service 获得的，虽然协议上使用了 NTP，但是精度上更接近 Google 提出的 TrueTime 方案，把时间误差控制在了毫秒级别
 
 
 
