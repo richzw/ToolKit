@@ -1019,7 +1019,10 @@
     - 可以用 SetGCPercent 在运行时修改这个策略参数
     - 我们在 GOGC 设置为 1600 的基础上，将 Memory Limit 设置为 1600MB，来防止可能的 OOM
 - [visualizing the Go GC](https://www.aadhav.me/posts/visualizing-the-go-gc/)
-
+- [ratelimit bug]
+  - time.Sleep,请记得在 Linux 环境下，它的精度也就在1ms左右
+    - 我们使用time.Sleep 休眠 50 微秒的话，在 Go 1.16 之前，Linux 机器上基本上实际会休眠 80、90 微秒，但是在 Go 1.16 之后，Linux 机器上 1 毫秒，差距巨大，在 Windows 机器上，Go 1.16 之前是 1 毫秒，之后是 14 毫秒，差距也是巨大的。我在苹果的 MacPro M1 的机器测试，就没有这个问题。
+  - uber-go/ratelimit v0.3.0. 设置它的slack参数, 发现在发包一段时间后，突然限流不起作用了，发包频率狂飙导致程序 panic
 
 
 

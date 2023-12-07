@@ -351,6 +351,16 @@
 - [Kubernetes HPA扩容比较慢原因](https://midbai.com/post/why-hpa-scale-slowly/)
   - HPA扩容慢的原因包括扩容的响应时间和每次扩容的副本数。响应时间受到metrics-server和kubelet收集监控信息的周期影响，而扩缩容的速度则由监控数据和扩缩容行为控制决定
   - HPA controller执行效率和应用ready时间也会影响扩缩容速度。在大量的HPA对象的集群中，HPA controller可能会有性能瓶颈，而pod从启动到ready的时间则取决于多个因素，包括pod调度、kubelet响应、镜像下载、容器创建、应用启动和应用readiness
+  - HPA扩容机制
+    - horizontal pod autoscaler controller是kube-controller-manager的一部分，的它通过访问apiserver获得各个类型的资源监控数据。而这些监控数据是metrics-server提供的，metrics-server作为Aggregated API Servers扩展metrics.k8s.io 组下的API
+    - horizontal pod autoscaler controller默认每隔15秒执行一个HPA对象的调谐，即每隔15秒根据监控数据计算期望的副本数。如果期望的副本数不等于当前的副本数，则进行扩缩容。
+  - 扩容慢的原因
+    - 三个方面，一个是扩容的响应时间，另一个是每次扩容的副本数即扩容速度，还有扩容的敏感度。
+    - 扩缩容的响应时间
+      - 由于metrics-server是周期性的收集kubelet上的监控信息，这个周期默认是15s。而kubelet里的cadvisor周期性的收集pod相关的监控信息，这个周期是30s。HPA controller每15秒执行一次HPA对象的workload副本数计算。
+      - 所以resource和containerResource数据源类型的扩容延迟的时间在[0, 60s]，即延迟最大为60s。
+    - 扩容的敏感度
+      - --horizontal-pod-autoscaler-tolerance参数决定了扩缩容时可以容忍的抖动范围。该参数旨在防止因监控数据波动而引发的意外扩缩容行为，但同时也可能导致扩缩容的敏感度降低。默认值为0.1，意味着可容忍10%的监控数据变化。
 - [容器网络加速](https://mp.weixin.qq.com/s/bjQJrRX7WPwLpVLyfxhfOA)
   - 智能网络加速
     - 借助于支持 SR-IOV 的智能硬件，把网卡驱动卸载至物理网卡。通过调用 Netlink 包将 VF 修改到容器的 Namespace 下，使得物理机中 PF 扩展出来的 VF 可以被容器直接调用。

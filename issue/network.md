@@ -500,6 +500,7 @@
     - 查看nf_conntrack表最大连接数 `cat /proc/sys/net/netfilter/nf_conntrack_max`
     - 查看nf_conntrack表当前连接数 `cat /proc/sys/net/netfilter/nf_conntrack_count`
     - MTU
+- [网络丢包故障定位全景指南](https://mp.weixin.qq.com/s/_UjIv6pHLpU9np0G0r1eXA)
 - K8s network issue
   - 从 VPC a 访问 VPC b 的 TKE 集群的某个节点的 NodePort，有时候正常，有时候会卡住直到超时。
     - 抓包，抓 server 端 NodePort 的包，发现异常时 server 能收到 SYN，但没响应 ACK：
