@@ -461,23 +461,26 @@
   Here's the job description: [Paste Job Description], and resume: [Paste Resume]."
   ```
 - Prompt to To Master Any Topic And Apply It To Your Business
-```shell
-1. Mind-mapping mastery
-I want to learn about [specify the topic you're interested in] to apply it to my business for [mention the specific business objective or reason]. Can you create a text-based mind map that explains this topic in a visually structured way? The mind map should break down the key concepts, their interrelations, and practical applications in a format that's easy to understand and visually engaging. This will help me grasp the topic more effectively by appealing to my preference for visual learning and enabling me to implement these insights in my business context.
-
-2. Case study deep dive
-I am interested in [specify the area of interest or skill you want to develop] and its application in the business world. Can you provide a selection of case studies from different companies, as well as relevant examples from politics and history, where this knowledge has been applied successfully? These case studies should include a brief overview, the challenges faced, the solutions implemented, and the outcomes achieved. This will help me understand how these concepts work in practice, offering new ideas and insights that I can consider applying to my own business.
-
-3. Socratic questioning
-I am exploring the topic of [insert the new topic you're learning about] and its relevance to my business in [describe your business field or industry]. Using the Socratic questioning method, help me delve deeper into this subject. Start by asking probing questions about how and why this topic is relevant to my business, such as 'What specific aspects of [topic] can be directly applied to my business operations?' and 'Why is understanding [topic] important for the growth or sustainability of my business?' Continue with questions, one at a time, that challenge assumptions and explore implications, like 'What assumptions am I making about [topic] and its impact on my industry?' and 'What potential long-term effects could [topic] have on my business strategy?'
-
-4. Role playing scenarios
-I'm currently learning about [specify the new topic or concept] and want to deepen my understanding through role-playing scenarios. Create a series of 5 fictional scenarios where characters, inspired by people who motivate me in real life or in my business activities, explain and interact with this topic. For instance, develop a scenario where my dream customer explains the practical applications of [topic] in a business setting. Or, create a dialogue with a character based on my favorite mentor [name or describe them], who delves into the theoretical aspects of [topic]. These scenarios should be engaging and provide diverse perspectives on the subject, helping me grasp the concept in a more relatable and memorable way.
-
-5. Learn by teaching
-Now that I've learned about [specify the topic or concept], I need to solidify this knowledge by teaching it to others. Please help me create an outline for a presentation that I can give to my team members. The outline should cover the key concepts, methodologies, and any practical applications relevant to our business. Also, suggest interactive elements or questions I can use to engage my audience during the presentation. This approach will not only help reinforce my own understanding but also ensure I'm applying this new expertise effectively within my team.
-```
-
+  ```shell
+  1. Mind-mapping mastery
+  I want to learn about [specify the topic you're interested in] to apply it to my business for [mention the specific business objective or reason]. Can you create a text-based mind map that explains this topic in a visually structured way? The mind map should break down the key concepts, their interrelations, and practical applications in a format that's easy to understand and visually engaging. This will help me grasp the topic more effectively by appealing to my preference for visual learning and enabling me to implement these insights in my business context.
+  
+  2. Case study deep dive
+  I am interested in [specify the area of interest or skill you want to develop] and its application in the business world. Can you provide a selection of case studies from different companies, as well as relevant examples from politics and history, where this knowledge has been applied successfully? These case studies should include a brief overview, the challenges faced, the solutions implemented, and the outcomes achieved. This will help me understand how these concepts work in practice, offering new ideas and insights that I can consider applying to my own business.
+  
+  3. Socratic questioning
+  I am exploring the topic of [insert the new topic you're learning about] and its relevance to my business in [describe your business field or industry]. Using the Socratic questioning method, help me delve deeper into this subject. Start by asking probing questions about how and why this topic is relevant to my business, such as 'What specific aspects of [topic] can be directly applied to my business operations?' and 'Why is understanding [topic] important for the growth or sustainability of my business?' Continue with questions, one at a time, that challenge assumptions and explore implications, like 'What assumptions am I making about [topic] and its impact on my industry?' and 'What potential long-term effects could [topic] have on my business strategy?'
+  
+  4. Role playing scenarios
+  I'm currently learning about [specify the new topic or concept] and want to deepen my understanding through role-playing scenarios. Create a series of 5 fictional scenarios where characters, inspired by people who motivate me in real life or in my business activities, explain and interact with this topic. For instance, develop a scenario where my dream customer explains the practical applications of [topic] in a business setting. Or, create a dialogue with a character based on my favorite mentor [name or describe them], who delves into the theoretical aspects of [topic]. These scenarios should be engaging and provide diverse perspectives on the subject, helping me grasp the concept in a more relatable and memorable way.
+  
+  5. Learn by teaching
+  Now that I've learned about [specify the topic or concept], I need to solidify this knowledge by teaching it to others. Please help me create an outline for a presentation that I can give to my team members. The outline should cover the key concepts, methodologies, and any practical applications relevant to our business. Also, suggest interactive elements or questions I can use to engage my audience during the presentation. This approach will not only help reinforce my own understanding but also ensure I'm applying this new expertise effectively within my team.
+  ```
+- level up your job search with AI
+  ```shell
+  I am a [marketer] applying for [job title] at [company]. Attached is my current resume, and a job description of the role. You are an expert hiring manager/recruiter — please provide detailed feedback on my resume, optimizing it for the role provided.
+  ```
 
 
 

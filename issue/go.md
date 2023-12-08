@@ -1021,9 +1021,12 @@
 - [visualizing the Go GC](https://www.aadhav.me/posts/visualizing-the-go-gc/)
 - [ratelimit bug]
   - time.Sleep,请记得在 Linux 环境下，它的精度也就在1ms左右
-    - 我们使用time.Sleep 休眠 50 微秒的话，在 Go 1.16 之前，Linux 机器上基本上实际会休眠 80、90 微秒，但是在 Go 1.16 之后，Linux 机器上 1 毫秒，差距巨大，在 Windows 机器上，Go 1.16 之前是 1 毫秒，之后是 14 毫秒，差距也是巨大的。我在苹果的 MacPro M1 的机器测试，就没有这个问题。
+    - 我们使用time.Sleep 休眠 50 微秒的话，在 Go 1.16 之前，Linux 机器上基本上实际会休眠 80、90 微秒，但是在 Go 1.16 之后，Linux 机器上 1 毫秒，差距巨大，在 Windows 机器上，Go 1.16 之前是 1 毫秒，之后是 14 毫秒，差距也是巨大的。在苹果的 MacPro M1 的机器测试，就没有这个问题。
+    - 因为现代的操作系统都是分时操作系统，每个线程可能会分配一个或者多个时间片，Windows 默认线程时间精度在 15 毫秒，Linux 在 1 毫秒，所以time.Sleep的精度不可能那么高。
+    - 但是没有办法解释网友提出的在go 1.16之前的版本中，time.Sleep的精度更高，而go 1.16之后的版本中，time.Sleep的精度更低的问题。
   - uber-go/ratelimit v0.3.0. 设置它的slack参数, 发现在发包一段时间后，突然限流不起作用了，发包频率狂飙导致程序 panic
-
+  - [更高精度的 Sleep](https://mp.weixin.qq.com/s/xgEXaFT65fn3XCscErMwXA)
+  
 
 
 

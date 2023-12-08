@@ -920,6 +920,7 @@
   - [inference]
     - Xinference（https://github.com/xorbitsai/inference） 使得本地模型部署变得非常简单。用户可以轻松地一键下载和部署内置的各种前沿开源模型
     - [LLM 推理新优化策略：使用连续批处理](https://mp.weixin.qq.com/s/iTT5jJc3tiJ_YzyPf1tFWg)
+    - Deploy a large language model with OpenLLM and BentoML
     - [模型部署与推理](https://mp.weixin.qq.com/s/glPPSqHjsnDjC0DZSuuPzA)
       - 模型压缩
         - 模型压缩的方向大致分为剪枝（Pruning），知识蒸馏（Knowledge Distillation，KD），量化（Quantization），低秩分解（Low-Rank Factorization），权重共享（Weight sharing），神经网络架构搜索（NAS
