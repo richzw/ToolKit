@@ -323,6 +323,7 @@
   - https://github.com/heiyeluren/black-transformer
 - [Theory](https://mp.weixin.qq.com/s/oUe_Vw0vfMvXJ-w97dkK4w)
   - [LLM Agents架构](https://mp.weixin.qq.com/s/xgdMbYv__YNKFJ2n7yMDBQ)
+  - [Demystifying L1 & L2 Regularization](https://towardsdatascience.com/courage-to-learn-ml-demystifying-l1-l2-regularization-part-3-ee27cd4b557a)
   - [An introduction to Reinforcement Learning from Human Feedback (RLHF)](https://docs.google.com/presentation/d/1eI9PqRJTCFOIVihkig1voRM4MHDpLpCicX9lX1J2fqk/edit#slide=id.g12c29d7e5c3_0_0)
     - [Video](https://www.youtube.com/watch?v=2MBJOuVq380)
   - [主流大语言模型的技术原理](https://mp.weixin.qq.com/s/P1enjLqH-UWNy7uaIviWRA)

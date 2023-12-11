@@ -371,7 +371,11 @@
   - 用户态网络加速
     - 可以通过 SRIOV+DPDK 方式，把内核态网卡驱动切换成用户态网卡驱动，实现“用户态网卡 -> DPDK 轮询 Pool 模式-> DPDK 库 -> 应用程序” 跳过容器内核态网络协议栈
     - 可以 DPDK +VPP/VCL 协议栈自编程模式的用户态网络极速
-
+- NUMA in K8s
+  - NUMA 对齐，也就是在 NUMA 架构的服务器中，一个 NUMA 节点上运行的线程访问本地内存要比其它 NUMA 上的内存更快，如果业务的全部线程的运算和内存分配都在单个 NUMA 节点上，则可以尽量避免访问远端内存的情况
+  - K8S 提供的 NUMA 对齐策略包括 best-effort，restrcted 和 single-numa-node
+  - 原生的 NUMA 资源管理存在的一个问题是，它仅仅支持节点侧的 NUMA 管理，而调度侧缺乏相关的管理，这会导致调度侧将 Pod 调度到某个 Node 上，但 Node 上所有 NUMA 节点均不满足 Pod 的要求时，该 Pod 会被置为 terminated 状态
+  - Support Inter-Pod Affinity and Anti-Affinity at NUMA level of Katalyst
 
 
 
