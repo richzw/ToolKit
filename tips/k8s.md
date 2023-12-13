@@ -114,6 +114,29 @@
   - Kuberentes默认调度器有两个调度队列：
     - activeQ：凡事在该队列里的Pod，都是下一个调度周期需要调度的
     - unschedulableQ:  存放调度失败的Pod，当里面的Pod更新后就会重新回到activeQ，进行“重新调度”
+- [调度器](https://mp.weixin.qq.com/s/hmDzXPAUyF-x2rLKNchXPA?poc_token=HCh8dmWj81fQExu2zveIuS1uAPGiNCH8FHs4WEd-)
+  - kube-scheduler 负责分配调度 Pod 到集群内的节点上,它监听 kube-apiserver,查询还未分配 Node 的 Pod,然后根据调度策略为这些 Pod 分配节点(更新 Pod 的 NodeName 字段)。
+  - kube-scheduler 调度分为两个阶段, predicate 和 priority:
+    - predicate: 过滤不符合条件的节点;
+    - priority:优先级排序，选择优先级最高的节点。
+  - 资源需求
+    - CPU 和内存: request & limit 和 cgroups
+    - k8s 中 request 作为调度用，节点剩余资源满足 request 值即可调度，limit 在 k8s 系统中没有作用，只是会传递给 cri。
+  - 磁盘资源需求
+    - Pod 调度完成后，计算节点对临时存储的限制不是基于 CGroup的，而是由 kubelet 定时获取容器的日志 和容器可写层的磁盘使用情况，如果超过限制，则会对 Pod 进行驱逐。
+  - init container 资源需求
+    - 当 kube-scheduler 调度带有多个 init 容器的 Pod 时，只计算 cpu.request 最多的 init 容器，而不是计 算所有的 init 容器总和
+    - 由于多个 init 容器按顺序执行，并且执行完成立即退出，所以申请最多的资源 init 容器中的所需资源即可满足所有 init 容器需求
+    - 
+  - 把 Pod 调度到指定 Node 上
+    - 可以通过 nodeSelector、nodeAffinity、 podAffinity 以及 Taints 和 tolerations 等来将 Pod 调度到需要的 Node上。也可以通过设置 nodeName 参数，将 Pod 调度到指定 node 节点上。
+  - Taints & Tolerations
+    - Taints 和 Tolerations 用于保证 Pod 不被调度到不合适的 Node上，其中 Taint 应用于 Node 上，而 Toleration 则应用于Pod 上。
+    - 当 Pod 的 Tolerations 匹配 Node 的所有 Taints 的时候可以调度到该 Node 上;当 Pod 是已经运行的时候，也不会被删除(evicted) 。
+    - 对于NoExecute,如果Pod增加了一个 tolerationSeconds,则会在该时间之后才删除Pod。
+  - 计算密集型Pod如何锁死 CPU
+    - cpuset，将 Pod 和某个 CPU 核进行绑定，kubelet 支持 static cpu config
+    - 将 pod 的 request 和 limits 配置为一样的，该 pod 在 k8s 中的 Qos 等级就是 BestEffort，对应该等级的 Pod，如果 kubelet 配置了 static cpu config，就会自动绑定
 - [KubeGateway](https://mp.weixin.qq.com/s/FEvZwAXj9giSgHhvKPz1EA)
   - https://github.com/kubewharf/kubegateway
   - Why

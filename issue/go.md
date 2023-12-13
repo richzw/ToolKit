@@ -1026,7 +1026,8 @@
     - 但是没有办法解释网友提出的在go 1.16之前的版本中，time.Sleep的精度更高，而go 1.16之后的版本中，time.Sleep的精度更低的问题。
   - uber-go/ratelimit v0.3.0. 设置它的slack参数, 发现在发包一段时间后，突然限流不起作用了，发包频率狂飙导致程序 panic
   - [更高精度的 Sleep](https://mp.weixin.qq.com/s/xgEXaFT65fn3XCscErMwXA)
-  
+- [Go函数指针](https://mp.weixin.qq.com/s/bcmvPbWV7nBi7wIfr-MR8w)
+  - 在golang里，如何理解 当函数指针的数量不多时，通过 switch 语句直接调用，可以消除闭包和变量逃逸的开销。比如在 time 包的时间解析和格式化库中就用了这种方式：https://github.com/golang/go/blob/go1.19/src/time/format.go#L648
 
 
 
