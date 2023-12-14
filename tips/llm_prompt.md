@@ -1,4 +1,5 @@
 
+- [Prompt Engineering Tool](https://www.aifire.co/p/prompt-engineering-tools?utm_source=www.aifire.co&utm_medium=newsletter&utm_campaign=10-years-meta-s-ai-journey-from-facebook-s-ai-labs)
 - Meta Prompt
   ```shell
   As an expert in natural language processing (NLP), with extensive experience in refining prompts for large-scale language models, your task is to analyze and enhance a prompt provided by the user.

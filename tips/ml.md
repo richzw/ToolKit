@@ -850,6 +850,26 @@
           - Markdown和LaTeX是您可能遇到的结构化和格式化内容的两个例子。在这些情况下，可以使用专门的分块方法在分块过程中保留内容的原始结构。
     - [测试 LangChain 分块](https://mp.weixin.qq.com/s/-ZgM3wItZUtY6nU_9FmJnw)
       - 我添加了五个实验，这个教程测试的分块长度从 32 到 64、128、256、512 不等，分块 overlap 从 4 到 8、16、32、64 不等的分块策略
+  - [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
+    - Query Transformations - a set of approaches focused on modifying the user input in order to improve retrieval
+      - Query expansion - decomposes the input into sub-questions, each of which is a more narrow retrieval challenge
+        - The multi-query retriever performs sub-question generation, retrieval, and returns the unique union of the retrieved docs.
+        -  RAG fusion builds on by ranking of the returned docs from each of the sub-questions
+        - Step-back prompting offers a third approach in this vein, generating a step-back question to ground an answer synthesis in higher-level concepts or principles
+      - Query re-writing
+      - Query compression
+        - a user question follows a broader chat conversation. In order to properly answer the question, the full conversational context may be required. To address this, we use this prompt to compress chat history into a final question for retrieval
+    - [Routing](https://blog.langchain.dev/applying-openai-rag/)
+    - Query Construction
+      - Text-to-SQL
+      - Text-to-Cypher
+      - Text-to-metadata filters
+    - Indexing
+      - CHunk size
+      - [Document embedding strategy](https://github.com/langchain-ai/langchain/blob/master/cookbook/Multi_modal_RAG.ipynb?ref=blog.langchain.dev)
+    - Post-Processing
+      - [Re-ranking](https://github.com/langchain-ai/langchain/blob/master/cookbook/rag_fusion.ipynb?ref=blog.langchain.dev)
+      - Classification
   - [Multi-Vector Retriever for RAG on tables, text, and images](https://blog.langchain.dev/semi-structured-multi-modal-rag/)
   - [基于 RAG 的 LLM 可生产应用 Ray](https://mp.weixin.qq.com/s/rjBa2CQxDK2dvdE53ShyOw)
   - [RAG 问题](https://mp.weixin.qq.com/s/2dwnwQGsqKWZQX8gEUV0Sw)

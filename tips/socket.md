@@ -435,7 +435,9 @@
     - Conntrack table - increase the cap of total concurrent connections in the OS
 - [大端、小端](https://github.com/asong2020/Golang_Dream/blob/master/article/golang/%E8%AF%A6%E8%A7%A3%E5%A4%A7%E7%AB%AF%E5%B0%8F%E7%AB%AF.md)
   - 大端模式：高位字节排放在内存的低地址端，低位字节排放在内存的高地址端;
+    - 这种排列方式与数据用字节表示时的书写顺序一致，符合人类的阅读习惯
   - 小端模式：低位字节排放在内存的低地址端，高位字节排放在内存的高地址端；
+    - 符合计算机读取内存的方式，因为CPU读取内存中的数据时，是从低地址向高地址方向进行读取的。
     ```go
     func IsLittleEndian()  bool{
         var value int32 = 1 // 占4byte 转换成16进制 0x00 00 00 01 

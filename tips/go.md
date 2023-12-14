@@ -1535,6 +1535,8 @@
   - sync.Map: 高性能场景下性能不佳  整体unscalable - skipmap 基于skiplist实现scalable的 sorted map
   - channel：高性能场景下性能不佳  整体unscalable - LSCQ scalalbe FIFO queue
 - [大端序 - 有序 Key 的构造](https://mp.weixin.qq.com/s/WyIP6M4-z9onI_WHqQs5RQ)
+  - Go 里面 string 是可以用运算符号直接比较的，默认用的“字典序”
+  - 自己写一个序列化，核心的地方用大端序，这样就可以保证有序了
 - [GC]()
   - 内存分配方式
     - 线性分配
