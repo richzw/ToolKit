@@ -399,7 +399,9 @@
   - K8S 提供的 NUMA 对齐策略包括 best-effort，restrcted 和 single-numa-node
   - 原生的 NUMA 资源管理存在的一个问题是，它仅仅支持节点侧的 NUMA 管理，而调度侧缺乏相关的管理，这会导致调度侧将 Pod 调度到某个 Node 上，但 Node 上所有 NUMA 节点均不满足 Pod 的要求时，该 Pod 会被置为 terminated 状态
   - Support Inter-Pod Affinity and Anti-Affinity at NUMA level of Katalyst
-
+- Kubernetes 1.29
+  -  使用 nftables 作为 kube-proxy 新的后端（替代 iptables 和 ipvs）
+  -  Kubernetes 调度程序以支持与 ReadWriteOncePod 存储相关的 pod 抢占
 
 
 

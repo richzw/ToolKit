@@ -490,5 +490,22 @@
     - c）问题（你提出相关问题，询问我需要哪些额外信息来改进 Prompt）
   - 3.你提供的 Prompt应该采用我发出请求的形式，由ChatGPT执行。
   - 4.我们将继续这个迭代过程，我会提供更多的信息，你会更新“修订后的Prompt”部分的请求，直到它完整为止。
-
-
+-  A Prompt to Create New Products for The Brand
+  ```shell
+  Generate a digital art image of a [Object] inspired by the [Brand] brand. The [Object] should have a [Design Qualities] design, 
+  with [Brand's] signature color palette of [Color Palette], reflecting the brand's [Brand Attributes]. 
+  Incorporate the iconic [Brand] logo and stylistic elements reminiscent of the brand's [Specific Brand Elements]. 
+  The [Object] should be set against a background that complements the [Brand] brand colors and enhances the [Object's Feature]. 
+  The mood is [Mood Description], with an atmosphere of [Atmosphere Description]. Illuminate with [Type of Lighting].
+  
+  [Object]: The main focus of your image (e.g., bracelet).
+  [Brand]: The brand that inspires the design (e.g., KFC).
+  [Design Qualities]: Descriptive attributes of the design (e.g., luxury and twinkle).
+  [Color Palette]: Specific colors associated with the brand (e.g., red and white).
+  [Brand Attributes]: Key characteristics or values of the brand (e.g., luxury and performance).
+  [Specific Brand Elements]: Unique features or elements associated with the brand (e.g., red and white stripes).
+  [Object's Feature]: Specific aspects of the object to be highlighted (e.g., diamonds).
+  [Mood Description]: The overall feel or emotion of the image (e.g., precious).
+  [Atmosphere Description]: The general ambiance or tone of the scene (e.g., luxurious store).
+  [Type of Lighting]: How the scene is illuminated (e.g., warm light).
+  ```

@@ -45,7 +45,7 @@
     - 结构体类型 typeid、length、data三部分长度会根据实际情况发生改变
   - protobuf既然有了int32 为什么还要用sint32 和 fixed32 ？
     - int32使用varint编码，对于小正数有较好的压缩效果，对于大整数和负数会导致额外的字节开销。因此引入fixed32，该类型不会对数值进行任何编码，对大于2^28-1的整数比int32占用更少的字节。而对于负数使用zigzag编码，这样绝对值较小的负数都能被有效压缩。
-
+- [Protobuf 动态反射 - Dynamicgo](https://mp.weixin.qq.com/s/OeQwlgZJtYOGTHnN50IdOA)
 
 
 
