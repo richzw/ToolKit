@@ -1046,6 +1046,8 @@
       - 统计文本中所有字符的频率，初始化编码表为所有的字符。
       - 在所有可能的字符对中，找出出现频率最高的字符对，将其合并为一个新的符号，添加到编码表中。
       - 重复上一步，直到达到预设的符号数量限制，或者没有可以合并的字符对为止。
+  - chatgpt和chatglm底层原理和实现细节有什么相同与区别
+  - 
 - GPTs List
   - https://supertools.therundown.ai/gpts
   - Tips to create GPTs

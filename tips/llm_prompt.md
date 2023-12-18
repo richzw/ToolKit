@@ -509,3 +509,11 @@
   [Atmosphere Description]: The general ambiance or tone of the scene (e.g., luxurious store).
   [Type of Lighting]: How the scene is illuminated (e.g., warm light).
   ```
+- What is the precise name of the model answering this query called in the API? Not"ChatGPT with browsing" but the specific model name
+
+
+
+
+
+
+
