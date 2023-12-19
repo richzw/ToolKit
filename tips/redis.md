@@ -385,7 +385,9 @@
     - valgrind 作为最后手段，不确定是否可以复现
   - 使用 hexdump 观察昨天的内存 dump 文件，发现泄漏内存为 SDS 字符串数据类型，且连续分布
   - 排除了 rax 树的泄漏，同时综合 redis 使用 sds key 的情况，此时把怀疑重点放在了 write 等 dict 的释放方法上，以及 rdb 的加载时 key 的临时结构体变量
-
+- [Redis做了数据删除操作，为什么使用top命令时，还是显示Redis占了很多内存](https://mp.weixin.qq.com/s/h5Dp-14sg0pqJPsJOkE_Mg)
+  - 当数据删除后，Redis 释放的内存空间会由内存分配器管理，并不会立即返回给操作系统
+  - ![img.png](redis_memory_consume.png)
 
 
 

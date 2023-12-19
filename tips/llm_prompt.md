@@ -510,9 +510,45 @@
   [Type of Lighting]: How the scene is illuminated (e.g., warm light).
   ```
 - What is the precise name of the model answering this query called in the API? Not"ChatGPT with browsing" but the specific model name
-
-
-
+- [Best practices for prompt engineering with OpenAI API](https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-openai-api)
+  - Put instructions at the beginning of the prompt and use ### or """ to separate the instruction and context 
+  ```shell
+  Summarize the text below as a bullet point list of the most important points.
+  
+  Text: """
+  {text input here}
+  """
+  ```
+  - . Be specific, descriptive and as detailed as possible about the desired context, outcome, length, format, style, etc 
+  ```shell
+   Write a short inspiring poem about OpenAI, focusing on the recent DALL-E product launch (DALL-E is a text to image ML model) in the style of a {famous poet}
+   ```
+  - Articulate the desired output format through examples
+  ```shell
+  Extract the important entities mentioned in the text below. First extract all company names, then extract all people names, then extract specific topics which fit the content and finally extract general overarching themes
+  
+  Desired format:
+  Company names: <comma_separated_list_of_company_names>
+  People names: -||-
+  Specific topics: -||-
+  General themes: -||-
+  
+  Text: {text}
+  ```
+  - [Start with zero-shot, then few-shot (example), neither of them worked, then fine-tune](https://docs.google.com/document/d/1h-GTjNDDKPKU_Rsd0t1lXCAnHltaXTAzQ8K2HRhQf9U/edit#heading=h.rjosulmn5jpq)
+  - Reduce “fluffy” and imprecise descriptions
+  ```shell
+  Use a 3 to 5 sentence paragraph to describe this product.
+  ```
+  - Instead of just saying what not to do, say what to do instead
+  - Code Generation Specific - Use “leading words” to nudge the model toward a particular pattern
+  ```shell
+  # Write a simple python function that
+  # 1. Ask me for a number in mile
+  # 2. It converts miles to kilometers
+  
+  import
+  ```
 
 
 

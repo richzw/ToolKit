@@ -46,7 +46,11 @@
   - protobuf既然有了int32 为什么还要用sint32 和 fixed32 ？
     - int32使用varint编码，对于小正数有较好的压缩效果，对于大整数和负数会导致额外的字节开销。因此引入fixed32，该类型不会对数值进行任何编码，对大于2^28-1的整数比int32占用更少的字节。而对于负数使用zigzag编码，这样绝对值较小的负数都能被有效压缩。
 - [Protobuf 动态反射 - Dynamicgo](https://mp.weixin.qq.com/s/OeQwlgZJtYOGTHnN50IdOA)
-
+- [优秀程序员的共性特征](https://mp.weixin.qq.com/s/FKRedldguFVPred7johg8A)
+  - 偏执 - 当所有人都真的在给你找麻烦的时候，偏执就是一个好主意
+  - 控制软件的熵 
+  - 为测试做设计 - 在编码时就考虑怎么测试。不然，你永远没有机会考虑了 
+  - 不要面向需求编程 - 应该面向业务模型编程
 
 
 
