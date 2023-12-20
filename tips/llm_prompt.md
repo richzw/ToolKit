@@ -549,6 +549,58 @@
   
   import
   ```
+- [Six strategies for getting better results - prompt engineer guild](https://platform.openai.com/docs/guides/prompt-engineering)
+  - Write clear instructions
+  - Provide reference text
+  - Split complex tasks into simpler subtasks
+  - Give the model time to "think"
+  - Use external tools
+  - Test changes systematically
+- 用 ChatGPT 做指代消解
+  ```shell
+  prompt = f'''Please return a new question with the following requirements:
+  1. If there are pronouns or conditions are missing in the question, please make a complete question according to the context.
+  2. If the question is complete, please keep the original question.
+  
+  {history}
+  Question: {question}'''
+  ```
+  - Few shot + COT
+  ```shell
+  REWRITE_TEMP = f'''
+  HISTORY:
+  []
+  NOW QUESTION: Hello, how are you?
+  NEED COREFERENCE RESOLUTION: No => THOUGHT: So output question is the same as now question. => OUTPUT QUESTION: Hello, how are you?
+  -------------------
+  HISTORY:
+  [Q: Is Milvus a vector database?
+  A: Yes, Milvus is a vector database.]
+  NOW QUESTION: How to use it?
+  NEED COREFERENCE RESOLUTION: Yes => THOUGHT: I need to replace 'it' with 'Milvus' in now question. => OUTPUT QUESTION: How to use Milvus?
+  -------------------
+  HISTORY:
+  []
+  NOW QUESTION: What is the features of it?
+  NEED COREFERENCE RESOLUTION: Yes => THOUGHT: I need to replace 'it' in now question, but I can't find a word in history to replace it, so the output question is the same as now question. => OUTPUT QUESTION: What is the features of it?
+  -------------------
+  HISTORY:
+  [Q: What is PyTorch?
+  A: PyTorch is an open-source machine learning library for Python. It provides a flexible and efficient framework for building and training deep neural networks. 
+  Q: What is Tensorflow?
+  A: TensorFlow is an open-source machine learning framework. It provides a comprehensive set of tools, libraries, and resources for building and deploying machine learning models.]
+  NOW QUESTION: What is the difference between them?
+  NEED COREFERENCE RESOLUTION: Yes => THOUGHT: I need replace 'them' with 'PyTorch and Tensorflow' in now question. => OUTPUT QUESTION: What is the different between PyTorch and Tensorflow?
+  -------------------
+  HISTORY:
+  [{history}]
+  NOW QUESTION: {question}
+  NEED COREFERENCE RESOLUTION: '''
+  ```
+
+
+
+
 
 
 

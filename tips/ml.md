@@ -114,6 +114,7 @@
     - For complex topics, don’t expect chatbots to convey every detail in a highly compressed summary – there are limits before coherence suffers. Ask for a slightly longer summary if needed.
   - Resource
     - [高级prompt工程讲解](https://mp.weixin.qq.com/s/2wFOaKwzhZfHPNOhG1Mqhw)
+    - [Video](https://www.youtube.com/watch?v=dOxUroR57xs)
   - [相关技术Summary](https://mp.weixin.qq.com/s/6a4zPEpU233PdVqkRHQ6Kg)
     - Self-consistency COT
       - 由于大模型生成的随机性本质，并不能保证每一次生成都是正确的，如何提高其鲁棒性，提升其准确率，成了一个大问题
@@ -819,6 +820,7 @@
       - 面对高度垂直的任务类型时，“局部向量化处理”也能获得不错的效果
         - 前提：做好科学的文本分割，按照不重不漏(MECE）的原则，分门别类、以合理的颗粒度建立目录结构
   - [Milvus + Towhee 搭建一个基础的 AI 聊天机器人](https://gist.github.com/egoebelbecker/07059b88a1c4daa96ec07937f8ca77b3)
+  - [指代消解](https://mp.weixin.qq.com/s/QYSdrMO6dGRy9_czCgqcKQ)
   - [文本分块(Chunking)](https://mp.weixin.qq.com/s?__biz=MzIyOTA5NTM1OA==&mid=2247484262&idx=1&sn=430270e10268c4b97c3b5d983fdfb75b&chksm=e846a1b7df3128a139091d31e4793e2fdcb391da2e866cd914d0f0ecf38ce2d9f285d78c9a03&scene=21#wechat_redirect)
     - 分块（chunking）是将大块文本分解成小段的过程。
       - 当我们使用LLM embedding内容时，这是一项必要的技术，可以帮助我们优化从向量数据库被召回的内容的准确性。
