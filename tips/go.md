@@ -1939,6 +1939,24 @@
 - [Why does `IsSorted` in the standard library iterate over the slice in reverse]
   - because more efficient code can be generated from a downward loop, specifically for the condition part.
   - `go tool compile -S play.go > play.s`
+- [Slices](https://www.dolthub.com/blog/2023-10-20-golang-pitfalls-3/)
+  - Only declare new slices without a value `(var s []int)`
+    - Related Misconception: If nil is the empty slice, then all empty slices are nil.
+    - Where this bit me: using if (slice == nil) to check if a slice is empty.
+  - Extend slices by writing `s = append(s, …)`, and never use a slice after passing it as an input to append
+    - Related Misconception: Calling append returns a new slice unconnected to the old one.
+     ```go
+     sliceA := []int{1, 2, 3}
+     sliceB := append(sliceA, 4)
+     sliceC := append(sliceA, 5)
+     sliceC[0] = 0
+     
+     fmt.Println(sliceA) // prints [1 2 3]
+     fmt.Println(sliceB) // prints [1 2 3 4]
+     fmt.Println(sliceC) // prints [0 2 3 5]
+     ```
+    - Where this bit me: appending to a slice that was returned from a method.
+    - Honorable Mention: subslicing a slice (eg. s2 := s1[1:3])
 - [net/http]
   - golang则会为每个网络句柄创建两个goroutine，一个用于读数据，一个用于写数据
   - 连接与协程数量的关系
