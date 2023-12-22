@@ -597,7 +597,10 @@
   NOW QUESTION: {question}
   NEED COREFERENCE RESOLUTION: '''
   ```
-
+- Mimic Your Writing Style with Bard
+  ```shell
+  Prompt: "Find my Google Docs '[Name of your Google Docs]' and analyze the writing style, voice tone, and structure of the [Content type] examples in this document. Then write a new [Content type] with exactly the same writing style, structure, and elements to talk about [Topic].
+  ```
 
 
 
