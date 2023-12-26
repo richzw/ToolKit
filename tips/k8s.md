@@ -402,8 +402,12 @@
 - Kubernetes 1.29
   -  使用 nftables 作为 kube-proxy 新的后端（替代 iptables 和 ipvs）
   -  Kubernetes 调度程序以支持与 ReadWriteOncePod 存储相关的 pod 抢占
-
-
+- [Ray规模化落地](https://mp.weixin.qq.com/s/YwQoKNGWVjqUgnVPbKvVPw)
+  - 多租户
+    - Virtual Cluster用来从节点维度切分Ray集群，而Runtime Env用来解决节点内的环境隔离和物理资源隔离。
+    - 提供了「混部」和「独占」两类Virtual Cluster
+    - Runtime Env框架是蚂蚁Ray团队在开源社区共建开发的一套面向一站式解决多租户场景下运行时环境构建问题的框架
+  - 多元调度
 
 
 
