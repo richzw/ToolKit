@@ -58,6 +58,18 @@
   - 双重差分法(Diff in Diff): 双重差分法是一种用于处理观察数据的统计技术，主要用于估计处理效应。它通过比较处理组和对照组在处理前后的变化，来估计处理的效应。这种方法的应用场景包括：政策评估，经济研究，社会科学研究等。  
   - CUPED (Controlled-experiment Using Pre-Experiment Data): CUPED 是一种用于处理实验数据的统计技术，主要用于减少实验结果的方差，从而提高实验的效力。它通过使用实验前的数据来调整实验后的数据，从而减少实验结果的方差。这种方法的应用场景包括：A/B 测试，临床试验，市场研究等。
 - [AB测试资料](https://www.volcengine.com/docs/6287/1175850)
+- [AB测试中的流量互斥与流量正交]()
+  - [Overlapping Experiment Infrastructure: More, Better, Faster Experimentation](https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/36500.pdf)
+
+
+
+
+
+
+
+
+
+
 
 
 
