@@ -163,6 +163,25 @@
       - nr_periods — Total schedule period
       - nr_throttled — Total throttled period out of nr_periods
       - throttled_time — Total throttled time in ns
+  - [CPU request 和 limit ](https://mp.weixin.qq.com/s/OinmIMOr5W0BWOUrC-LVTA)
+    - 为 Pod 和容器管理资源
+      - 为 Pod 中的 Container 指定了资源 request（请求） 时， kube-scheduler 就利用该信息决定将 Pod 调度到哪个节点上
+      - 为 Container 指定了资源 limit（限制） 时，kubelet 就可以确保运行的容器不会使用超出所设限制的资源。kubelet 还会为容器预留所 request（请求） 数量的系统资源，供其使用。
+    - CPU request 和 limit
+      - CPU 限制定义的是容器可使用的 CPU 时间的硬性上限。在每个调度周期（时间片）期间，Linux 内核检查是否已经超出该限制；
+      - 内核会在允许该 cgroup 恢复执行之前会等待 （这就是我们常说的 CPU Throttling，节流）
+    - CPU share
+      - CPU share 是一个相对值，用于指定容器相对于其他容器可使用的 CPU 时间的比例。CPU share 的默认值为 1024，而且只有在 CPU request 和 CPU limit 都未指定时才会生效。
+      - CPU is handled in Kubernetes with shares. Each CPU core is divided into 1024 shares, then divided between all processes running by using the cgroups (control groups) feature of the Linux kernel.
+      - As any Linux Kernel, Kubernetes uses the CFS (Completely Fair Scheduler) mechanism, so the processes with more shares will get more CPU time.
+    - cpu.shares
+      - 一个整数值，指定 cgroup 中任务可用的 CPU 时间的相对份额。例如，两个 cgroup 中 cpu.shares 设置为 100 的任务将获得相同的 CPU 时间，但 cgroup 中 cpu.shares 设置为 200 的任务获得的 CPU 时间是 cpu.shares 设置为 100 的 cgroup 中任务的两倍
+    - cpu.cfs_period_us
+      - 指定一个以微秒（μs，此处表示为“us”）为单位的时间段，用于指示应重新分配 cgroup 对 CPU 资源的访问的频率。
+      - 如果 cgroup 中的任务每 1 秒能够访问单个CPU的时间为 0.2 秒，则将 cpu.cfs_quota_us 设置为200000，cpu.cfs_period_us 设置为 1000000。cpu.cfs_quota_us 参数的上限为1秒，下限为1秒 限制为 1000 微秒。默认值为 100000 微秒（即 100 毫秒）
+    - cpu.cfs_quota_us
+      - 指定 cgroup 中的所有任务在一个周期（由 cpu.cfs_period_us 定义）内可以运行的总时间，以微秒（μs，此处表示为“us”）为单位。
+      - 一旦 cgroup 中的任务用完配额指定的所有时间，它们就会在该周期指定的剩余时间内受到限制，直到下一个周期才允许运行（这个就是 CPU 节流）
 - Misc
   - 通过 Kubernetes 集群提供 device plugin framework，可以实现 GPU 共享能力
   - Kubernetes 在大规模集群下的挑战
