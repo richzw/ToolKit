@@ -198,6 +198,30 @@
     - 对于设置了SO_TIMESTAMP的场景，我们可以通过(*cmsg).cmsg_level == SOL_SOCKET && (*cmsg).cmsg_type == SO_TIMESTAMP筛选出来，它的值是一个类型为timeval的值，包含秒数和微秒数。
     - 这样我们就获取了软硬件的时间戳。
 - [基本并发原语](https://mp.weixin.qq.com/s/fV8cnzh9U3XmPWciQX1Ihg)
+- [rust 的 partial copy](https://mp.weixin.qq.com/s/xD4YmOy1jpmh8fDacb7iew)
+  - 在 rust 2021 中，一个使用了 move 的闭包在捕获一个 struct 的时候，会尽可能少地去捕获 struct 中的字段。
+    - 如果一个 struct 没有实现 Drop，这意味着他里面的字段可以被分开 move，而闭包只会捕获闭包中用到的字段。
+    - 如果某个被闭包使用的字段实现了 Copy，那他闭包并不会捕获这个字段的 ownership，而是将这个字段 copy 一份放在闭包中。
+    - 如果一个 struct 实现了 Drop，那他里面的字段只能作为一个整体被捕获。但如果闭包只使用了这个闭包中实现了 Copy 的字段，那这个闭包不会捕获这个 struct，而是将使用到的字段 copy 一份。
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

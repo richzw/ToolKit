@@ -427,8 +427,15 @@
     - 提供了「混部」和「独占」两类Virtual Cluster
     - Runtime Env框架是蚂蚁Ray团队在开源社区共建开发的一套面向一站式解决多租户场景下运行时环境构建问题的框架
   - 多元调度
-
-
+- [Kubernetes memory limit 产生的 OOM](https://mp.weixin.qq.com/s/s-OKhQ1qa7w1muUQAUuyTQ)
+  - 容器中的进程被 OOM 了，但是容器却没有退出
+  - 容器的 CPU 和 内存资源做了限制，可以看到其中的 request 和 limit 相等，因此它的 QoS 级别时 guaranteed。
+  - 容器中的 1 号进程退出了，则容器就会结束。如果是父进程不是 1 号的进程退出，通常不影响 1 号进程，因此容器也不会退出。
+  - 为什么 docker exec 的进程会被 OOM，这里的关键就是要得到容器的 cgroup 结构，以及我们上面配置的 memory limit 是在哪个层级。
+    - kubectl exec 或者 docker exec 启动的进程，它的父进程是容器中的 0 号进程，而非 1 号进程；
+    - 通过 kubectl exec 或者 docker exec 启动的进程，它会被容器的 cgroup 限制；
+    - 当容器中所有进程的内存超过 memory cgroup 的 memory.limit_in_bytes 限制的时候，就会走 Linux OOM kill 过程；
+    - 只要 1 号进程不退出，容器就不会退出。
 
 
 
