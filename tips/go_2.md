@@ -1938,7 +1938,12 @@
     - 依赖倒置是解决循环依赖很常用的技巧，但是不是所有的循环依赖场景都适用依赖倒置来解决，我们通常会在架构设计或者通用能力接口的实现上使用到它，恰当的使用，可以降低代码耦合性，提高代码可读性和可维护性。
     - 事件驱动架构是一种松耦合、分布式的架构。可以通过mq来实现
 - [iterators in Go](https://medium.com/eureka-engineering/a-look-at-iterators-in-go-f8e86062937c)
-
+- [获取和利用 goroutine id, machine id 和 process id](https://mp.weixin.qq.com/s/dePs661VzQf_yi2aHsydIA)
+- [stack traces for errors](https://www.dolthub.com/blog/2023-11-10-stack-traces-in-go/)
+  - To get useful stack traces out of normal error handling code in Go, you need to do 3 things:
+    - Capture a stack trace in the error type when the error is created
+    - Implement fmt.Formatter on the error type to print the stack trace
+    - Print the error with fmt verb %+v
 
 
 

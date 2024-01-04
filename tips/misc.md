@@ -60,7 +60,10 @@
 - [AB测试资料](https://www.volcengine.com/docs/6287/1175850)
 - [AB测试中的流量互斥与流量正交]()
   - [Overlapping Experiment Infrastructure: More, Better, Faster Experimentation](https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/36500.pdf)
-
+- [常用的压缩库](https://mp.weixin.qq.com/s/bl1HbC6ti6Pw2FGxgstfBw)
+  - zlib的高性能分支，基于cloudflare优化 比 1.2.11的官方分支性能好，压缩CPU开销约为后者的37.5% - 采用SIMD指令加速计算
+  - zstd能够在压缩率低于zlib的情况下，获得更低的cpu开销，因此如果希望获得比当前更好的压缩率，可以考虑zstd算法
+  - 若不考虑压缩率的影响，追求极致低的cpu开销，那么snappy是更好的选择
 
 
 
