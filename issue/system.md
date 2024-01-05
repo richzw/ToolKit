@@ -325,8 +325,10 @@
         - 使用 cpusets 进行应用CPU绑核，缺点：资源利用率较低
         - 根据历史节流数据，推测出合理的 CPU limit 值，让开发改为推荐配置
         - 升级内核到 5.14 以上，支持CPU Burst技术（在传统的 CPU Bandwidth Controller quota 和 period 基础上引入 burst 的概念。当容器的 CPU 使用低于 quota 时，可用于突发的 burst 资源累积下来；当容器的 CPU 使用超过 quota，允许使用累积的 burst 资源。最终达到的效果是将容器更长时间的平均 CPU 消耗限制在 quota 范围内，允许短时间内的 CPU 使用超过其 quota。）
-
-
+- [线程池相关故障梳理&总结](https://mp.weixin.qq.com/s/fBHl2XShpBpvHofYK2i6JQ)
+  - ConnectionTimeout 建议1-3 秒最佳，最大不超过 5 秒。
+  - SocketTimeout 根据业务请求时间情况设置建议最大不超过 10 秒，
+  - MaxWait/ConnectionTimeout 建议 3~5 秒，最大不超过 6 秒。
 
 
 

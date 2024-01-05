@@ -601,6 +601,24 @@
   ```shell
   Prompt: "Find my Google Docs '[Name of your Google Docs]' and analyze the writing style, voice tone, and structure of the [Content type] examples in this document. Then write a new [Content type] with exactly the same writing style, structure, and elements to talk about [Topic].
   ```
+- [Prompt tips](https://drive.google.com/file/d/1Kqegb8jfMLCutPRj6tHiaIqFRI558PAQ/view)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -18,4 +18,35 @@
     - 避免维度单一
     - 利用黑白名单
     - 利用环比和同比
-
+- [Sidecar 的资源和性能管理]
+```shell
+record: "container_cpu_usage_against_request:pod:rate1m"
+   expr: |
+    (   
+      count(kube_pod_container_resource_requests{resource="cpu", container!=""}) by (container, pod, namespace)
+      *   
+      avg(
+        irate(
+          container_cpu_usage_seconds_total{container!=""}[1m]
+        )   
+      ) by (container, pod, namespace)
+    )   
+    /   
+    avg(
+      avg_over_time(
+        kube_pod_container_resource_requests{resource="cpu", container!=""}[1m]
+      )   
+    ) by (container, pod, namespace) * 100 
+    *   
+    on(pod) group_left(workload) (
+      avg by (pod, workload) (
+        label_replace(kube_pod_info{created_by_kind=~"ReplicaSet|Job"}, "workload", "$1", "created_by_name", "^(.*)-([^-]+)$")
+        or  
+        label_replace(kube_pod_info{created_by_kind=~"DaemonSet|StatefulSet"}, "workload", "$1", "created_by_name", "(.*)")
+        or  
+        label_replace(kube_pod_info{created_by_kind="Node"}, "workload", "node", "", "") 
+        or  
+        label_replace(kube_pod_info{created_by_kind=""}, "workload", "none", "", "") 
+      )   
+    )
+```

@@ -1087,6 +1087,17 @@
       - 设置  /proc/sys/vm/zone_reclaim_mode，调整 NUMA 架构下内存回收策略，建议设置为 0，这样在回收本地内存之前，会在其他 Node 寻找空闲内存，从而避免在系统还有很多空闲内存的情况下，因本地 Node 的本地内存不足，发生频繁直接内存回收导致性能下降的问题；
     - 在经历完直接内存回收后，空闲的物理内存大小依然不够，那么就会触发 OOM 机制，OOM killer 就会根据每个进程的内存占用情况和 oom_score_adj 的值进行打分，得分最高的进程就会被首先杀掉。
     - 我们可以通过调整进程的 /proc/[pid]/oom_score_adj 值，来降低被 OOM killer 杀掉的概率。
+- [Linux内核内存性能调优](https://mp.weixin.qq.com/s?__biz=Mzg3Mjg2NjU4NA==&mid=2247483993&idx=1&sn=acfecc45da1ab37d8ba77ae0d20cfbd1&scene=21#wechat_redirect)
+  - 内存回收
+    - 内存回收分为两个层面：整机和 memory cgroup
+    - 整机层面
+      - 设置了三条水线：min、low、high；当系统 free 内存降到 low 水线以下时，系统会唤醒kswapd 线程进行异步内存回收，一直回收到 high 水线为止，这种情况不会阻塞正在进行内存分配的进程
+      - 但如果 free 内存降到了 min 水线以下，就需要阻塞内存分配进程进行回收，不然就有 OOM（out of memory）的风险，这种情况下被阻塞进程的内存分配延迟就会提高，从而感受到卡顿
+      - 这些水线可以通过内核提供的 /proc/sys/vm/watermark_scale_factor 接口来进行调整
+      - 针对 page cache 型的业务场景，我们可以通过该接口抬高 low 水线，从而更早的唤醒 kswapd 来进行异步的内存回收，减少 free 内存降到 min 水线以下的概率，从而避免阻塞到业务进程，以保证影响业务的性能指标。
+    - memory cgroup 层面
+  - Huge Page
+    - 
 - [Linux 工具来确定服务器上的性能瓶颈]
   - mpstat -P ALL 1 – 显示每个 CPU 的 CPU 细分时间，您可以用它来检查不平衡性。单个热 CPU 或许是某个单线程应用程序的证据。
   - pidstat 1 – 显示每个进程的 CPU 利用率并打印滚动摘要，这对于长期观察模式非常有用。

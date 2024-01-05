@@ -930,6 +930,10 @@
       - 把问题编造假的文档，使用假文档召回
   - [评估 RAG 的TruLens](https://mp.weixin.qq.com/s/4sBQeL0m09_V9Sya1voTqg)
     - https://colab.research.google.com/github/truera/trulens/blob/main/trulens_eval/examples/expositional/vector-dbs/milvus/milvus_evals_build_better_rags.ipynb
+  - [评估 RAG](https://mp.weixin.qq.com/s/OnfSxBJx_lVYV_MtyViUMw)
+    - Ragas（https://docs.ragas.io/en/latest/concepts/metrics/context_recall.html）是专注于评估 RAG 应用的工具
+    - Trulens-Eval（https://www.trulens.org/trulens_eval/install/）也是专门用于评估 RAG 指标的工具，它对 LangChain 和 Llama-Index 都有比较好的集成，可以方便地用于评估这两个框架搭建的 RAG 应用
+    - Phoenix（https://docs.arize.com/phoenix/）有许多评估 LLM 的功能，比如评估 Embedding 效果、评估 LLM 本身
   - 回归现实，从真实需求出发
     - 世界知识&私有知识混淆的: 乙烯和丙烯的关系是什么？ 大模型应该回答两者都属于有机化合物，还是根据近期产业资讯回答，两者的价格均在上涨？
     - 召回结果混淆
@@ -1081,6 +1085,37 @@
     - 对象表示执行的步骤，一个 Run 包含多个 Run Step。查看"Run Step"可让您了解助手是如何取得最终结果的。
 - [Open Ai’s Q* (Q Star) Explained For Beginners](https://mp.weixin.qq.com/s/Ph-ayDBu73bar1MzfsxSeQ)
 - [19个开源数据集](https://mp.weixin.qq.com/s/YZrUakj2I0rqVB1RIuzGPw)
+- [显卡A100不用4090](https://mp.weixin.qq.com/s/nsTL07D5Npn14L18GiC-fQ)
+- [学习率设置]
+  - 当学习率设置的较小，训练收敛较慢，需要更多的epoch才能到达一个较好的局部最小值；
+  - 当学习率设置的较大，训练可能会在接近局部最优的附件震荡，无法更新到局部最优处；
+  - 当学习率设置的非常大，正如上一篇文章提到可能直接飞掉，权重变为NaN
+  - 那么如何去设置学习率这个超参数呢？总体上可以分为两种：人工调整或策略调整
+    - 人工调整学习率一般是根据我们的经验值进行尝试，首先在整个训练过程中学习率肯定不会设为一个固定的值，原因如上图描述的设置大了得不到局部最优值，设置小了收敛太慢也容易过拟合。
+      - 通常我们会尝试性的将初始学习率设为：0.1，0.01，0.001，0.0001等来观察网络初始阶段epoch的loss情况
+    - 策略调整学习率包括固定策略的学习率衰减和自适应学习率衰减，由于学习率如果连续衰减，不同的训练数据就会有不同的学习率。
+    - 当学习率衰减时，在相似的训练数据下参数更新的速度也会放慢，就相当于减小了训练数据对模型训练结果的影响。为了使训练数据集中的所有数据对模型训练有相等的作用，通常是以epoch为单位衰减学习率。
+  - [Cyclical Learning Rates for Training Neural Networks](https://arxiv.org/abs/1506.01186)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
