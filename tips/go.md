@@ -2009,6 +2009,30 @@
 - [Getting Friendly With Your CPU Cache](https://github.com/353words/cpu_cache)
 - [channel中批量读取数据](https://mp.weixin.qq.com/s/nHzlQnZJH-9AMC6iXIxgug)
 - [Go 1.22 features](https://antonz.org/go-1-22/)
+- [性能优化](https://mp.weixin.qq.com/s/SlPdSoMs1po1l19uaNMrIQ)
+  - 性能进行度量与分析
+  - 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

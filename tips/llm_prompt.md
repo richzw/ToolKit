@@ -602,6 +602,40 @@
   Prompt: "Find my Google Docs '[Name of your Google Docs]' and analyze the writing style, voice tone, and structure of the [Content type] examples in this document. Then write a new [Content type] with exactly the same writing style, structure, and elements to talk about [Topic].
   ```
 - [Prompt tips](https://drive.google.com/file/d/1Kqegb8jfMLCutPRj6tHiaIqFRI558PAQ/view)
+  - Basic Etiquette and Phrasing
+    - 1. **No Politeness Needed**: There's no need to be overly polite with language models. Avoid using phrases like "please", "if you don't mind", "thank you", "I would like to", etc., and get straight to the point.
+    - 2. **Break Down Tasks**: When faced with complex tasks, break them down into simpler prompts in a step-by-step interactive conversation.
+    - 3. **Clarity and Simplicity**: If you need a clearer understanding, ask for explanations in simple terms, as if you were explaining to an 11-year-old or a beginner, or as if it’s being explained to a 5-year-old.
+    - 4. **Incentives**: Mention the incentive for better solutions, e.g., "I'm going to tip $xx for a better solution!"
+  - Task and Prompt Structure
+    - 5. **Task Statement**: Use phrases like "Your task is" and "You MUST" to clearly define tasks.
+    - 6. **Penalties**: State that there will be penalties for not following instructions with "You will be penalized."
+    - 7. **Step-by-Step Guidance**: Begin instructions with "think step by step".
+    - 8. **Human-like Responses**: Request answers in a natural, human-like manner.
+    - 9. **Avoid Stereotypes**: Ensure your prompt is unbiased and avoids stereotypes.
+    - 10. **Teach and Test**: When seeking information, ask the model to teach you and then test you without giving away the answers.
+    - 11. **Style Consistency**: To correct or change text, instruct the model to try to preserve the user's grammar and style, without making it too casual.
+    - 12. **Consistent Flow**: When you want to initiate or continue a text using specific words, phrases, or sentences, instruct the model to keep the flow consistent.
+    - 13. **Clear Requirements**: Clearly state the requirements the model must follow in order to produce content that follows the provided instructions.
+  - Advanced Prompting Techniques
+    - 14. **Audience Awareness**: Integrate the intended audience in the prompt, especially if they are experts in the field.
+    - 15. **Positive Directives**: Use affirmative directives like "do", avoiding negative language like "don’t".
+    - 16. **Coding Prompts**: For complex coding tasks, specify that the generated code should span multiple files or create an automatic script.
+    - 17. **Role Assignment**: Assign a role to the language models.
+    - 18. **Example-driven Prompting**: Use few-shot prompting, providing examples.
+    - 19. **Use Delimiters**: Utilize delimiters in prompts.
+    - 20. **Repetition for Emphasis**: Repeat a specific word or phrase multiple times within a prompt.
+    - 21. **Chain-of-Thought with Few-Shot**: Combine Chain-of-Thought (CoT) with few-shot prompts.
+    - 22. **Precise Requirements**: Clearly state the requirements that the model must follow in order to produce content, including keywords, regulations, hints, or instructions.
+    - 23. **Formatted Prompting**: Start prompts with "###Instruction###", "###Example###", or "###Question###" when relevant. Present your content using one or more line breaks to separate instructions, examples, questions, context, and input data.
+    - 24. **Text Similarity**: To write text similar to a provided sample, instruct the model based on the provided paragraph using the same language/flow/instructions.
+    - 25. **Detail Elicitation**: Allow the model to ask you questions to gather more precise details and requirements.
+    - 26. **Essay/Text Creation**: To write an essay or paragraph, ask the model to write a detailed essay/text/paragraph on the specified topic in your desired style.
+
+
+
+
+
 
 
 
