@@ -64,7 +64,9 @@
   - zlib的高性能分支，基于cloudflare优化 比 1.2.11的官方分支性能好，压缩CPU开销约为后者的37.5% - 采用SIMD指令加速计算
   - zstd能够在压缩率低于zlib的情况下，获得更低的cpu开销，因此如果希望获得比当前更好的压缩率，可以考虑zstd算法
   - 若不考虑压缩率的影响，追求极致低的cpu开销，那么snappy是更好的选择
-
+- [向量化代码SIMD](https://mp.weixin.qq.com/s/Lih7tWv9tZvuTevdHgVC0Q)
+  - SIMD(Single Instruction Multiple Data) 单指令多数据流，是一种并行计算技术，它可以在一个时钟周期内对多个数据进行相同的操作，从而提高计算效率。SIMD 通常用于向量化代码，以提高代码的执行效率。
+  - SIMD(Single Instruction Multiple Data)指令是一类特殊的CPU指令类型，这种指令可以在一条指令中同时操作多个数据
 
 
 

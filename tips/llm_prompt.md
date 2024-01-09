@@ -631,7 +631,8 @@
     - 24. **Text Similarity**: To write text similar to a provided sample, instruct the model based on the provided paragraph using the same language/flow/instructions.
     - 25. **Detail Elicitation**: Allow the model to ask you questions to gather more precise details and requirements.
     - 26. **Essay/Text Creation**: To write an essay or paragraph, ask the model to write a detailed essay/text/paragraph on the specified topic in your desired style.
-
+- [LangChain Auto-Prompt Builder](https://github.com/hwchase17/auto-openai-prompter)
+  - [playground](https://openai-prompting-helper-e924c62387f55170bc7836f9f-ffoprvkqsa-uc.a.run.app/auto-prompter/playground/)
 
 
 

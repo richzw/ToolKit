@@ -2009,10 +2009,34 @@
 - [Getting Friendly With Your CPU Cache](https://github.com/353words/cpu_cache)
 - [channel中批量读取数据](https://mp.weixin.qq.com/s/nHzlQnZJH-9AMC6iXIxgug)
 - [Go 1.22 features](https://antonz.org/go-1-22/)
+- [切片集锦](https://mp.weixin.qq.com/s/dy0Gu4hNokD8rqYpRv6FOw)
 - [性能优化](https://mp.weixin.qq.com/s/SlPdSoMs1po1l19uaNMrIQ)
   - 性能进行度量与分析
+    - 运行 go test -bench 命令执行 benchmark, --bench='BenchmarkConvertReflect'， 要执行的 benchmark。需注意:该参数支持模糊匹配，如--bench='Get|Set' ，支持./...-run=none，只进行 Benchmark，不执行单测
+    - -benchtime=2s'， 依次递增 b.N 直至运行时间超过 2s-count=3，执行 3 轮-benchmem,b.ReportAllocs，展示堆分配信息，0 B/op, 0 allos/op 分别代表每次分配了多少空间，每个 op 有多少次空间分配-cpu='2,4'，依次在 2 核、4 核下进行测试-cpuprofile=xxxx -memprofile=xxx -trace=trace.out，benmark 时生成 profile、trace 文件-gcflags=all=-l
+    - go profile 主要是通过对快照中数据进行采样实现，采样命中越多说明函数越是热点 Go 中 profile 包括: cpu、heap、mutex、goroutine
+    - profile 工具基于快照的统计信息，存在精度问题. Go 还提供了 trace 工具，其基于事件的统计能够提供更加详细的信息。注意，基于事件的数据采集方式，会导致性能有25%左右下降
+  - interface、reflect
+    - 很多对 interface 类型的赋值(并非所有)，都会导致空间的分配和拷贝，这也是 Interface 函数为什么可能会导致逃逸的原因 go 这么做的主要原因：逃逸的分析位于编译阶段，对于不确定的类型在堆上分配最为合适。
+    - Go 中 reflect 机制涉及到2个类型，reflect.Type、reflect.Value，reflect.Type 是 Interface。reflect.Value 是通过 reflect.ValueOf 生成，reflect.ValueOf 也可能会导致数据逃逸
+- [Go Tricks](https://blog.devtrovert.com/p/12-personal-go-tricks-that-transformed)
+  - Time elapsed trick
+    -  just a single line of code using the “defer” keyword
+    - Two-Stage Defer
+    ```go
+    func setupTeardown() func() {
+      fmt.Println("Run initialization")
+      return func() {
+        fmt.Println("Run cleanup")
+      }
+    }
+    
+    func main() {
+      defer setupTeardown()() // <--------
+      fmt.Println("Main function called")
+    }
+    ```
   - 
-
 
 
 
