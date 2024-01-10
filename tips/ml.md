@@ -914,6 +914,15 @@
     - 多条件约束失效: Q 昨天《独家新闻》统计的化学制品行业的关注度排名第几
     - 全文/多文类意图失效
     - 复杂逻辑推理: Q 近期碳酸锂和硫酸镍同时下跌的时候，哪个在上涨？
+  - [A Cheat Sheet and Some Recipes For Building Advanced RAG](https://blog.llamaindex.ai/a-cheat-sheet-and-some-recipes-for-building-advanced-rag-803a9d94c41b)
+    - ![img.png](ml_rag_overview.png)
+    - 基础 RAG
+      - RAG 包括一个检索组件、一个外部知识库和一个生成组件。
+      - 高级检索技术必须能够找到与用户查询最相关的文档
+      - 块大小优化（Chunk-Size Optimization）：由于 LLM 受上下文长度的限制，因此在建立外部知识库时有必要对文档进行分块。分块过大或过小都会给生成组件带来影响，导致响应不准确。
+      - 结构化的外部知识（Structured External Knowledge）：在复杂的情况下，可能有必要建立比基本向量索引更具结构性的外部知识，以便在处理合理分离的外部知识源时允许递归检索或路由检索。
+      - 信息压缩（Information Compression）：LLM 不仅受到上下文长度的限制，而且如果检索到的文档包含太多噪音（即无关信息），响应速度也会下降
+      - 结果重排（Result Re-Rank）：LLM 存在所谓的 "迷失在中间 "现象，即 LLM 只关注Prompt的两端。有鉴于此，在将检索到的文档交给生成组件之前对其重新排序是有好处的。
 - [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)

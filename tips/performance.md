@@ -1149,5 +1149,33 @@
     ```
   - Changing Ruleset from being []Rule to []*Rule, which would mean we no longer need to explicitly take a reference to the rule.
   - Returning a Rule rather than a *Rule. This would still copy the Rule, but it should stay on the stack instead of moving to the heap.
+- [性能优化思路及常用工具及手段](https://mp.weixin.qq.com/s/MsqqFFkb1L4T8LlHIS97Kw)
+  - CPU的开销，有限的cpu无法支撑更大的业务 （性能问题）
+  - CPU利用不充分，有限的CPU，无法更好的支撑业务（RT问题）
+  - 发现需要性能优化的点
+    - 放大系统的流量
+    - 利用工具采集系统热点
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
