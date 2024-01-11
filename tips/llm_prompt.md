@@ -633,7 +633,8 @@
     - 26. **Essay/Text Creation**: To write an essay or paragraph, ask the model to write a detailed essay/text/paragraph on the specified topic in your desired style.
 - [LangChain Auto-Prompt Builder](https://github.com/hwchase17/auto-openai-prompter)
   - [playground](https://openai-prompting-helper-e924c62387f55170bc7836f9f-ffoprvkqsa-uc.a.run.app/auto-prompter/playground/)
-
+- [Detecting LLM Prompt Injections and Jailbreaks](https://docs.google.com/presentation/d/1VZBTsUTacDUh750O_km9G_6nI1HqABGx/edit?_hsmi=289353375&_hsenc=p2ANqtz--Q3_QznHae4X2W4JQub48C3cWfkCkM4fzgmhXi0ftA_YcGBkl93DRYBhonVpGSrYYWGnL4vNBk-c0QxenaSXCFbV-XCQ#slide=id.g1ee59bba37b_2_154)
+  - [Sample](https://colab.research.google.com/drive/1RMjiJK9Nd-tP7kBXo8h9A0vtCCdY1ikS?usp=sharing&utm_campaign=Events%20Follow%20Up&utm_medium=email&_hsmi=289353375&_hsenc=p2ANqtz-_V4xOMEFR1T3kAPTqRrImat1KcLT5UIWYtshN4g7ObeCDsyog_L5qLYDyecLOhVCkqSHKgtm_fjeOT89CxwY33ekuukQ&utm_content=289353375&utm_source=hs_email)
 
 
 

@@ -2013,12 +2013,26 @@
 - [What We Got Right, What We Got Wrong](https://commandcenter.blogspot.com/2024/01/what-we-got-right-what-we-got-wrong.html)
   - [Video](https://www.youtube.com/watch?v=yE5Tpp2BSGw)
 - [Go Testing By Example](https://mp.weixin.qq.com/s/DMtrdOC-7mctJNuUWZ3KXQ)
-  - 使用测试覆盖率来发现未经测试的代码 - go test -coverprofile
-  - 覆盖率驱动的模糊测试(fuzzing test)
-  - 编写全面的测试
-  - 将测试用例与测试逻辑分开
-  - 寻找特殊情况
-  - 使用txtar进行多文件测试用例 导入txtar：import "golang.org/x/tools/txtar"
+  - Make it easy to add new test cases.
+  - Use test coverage to find untested code.
+  - Coverage is no substitute for thought.
+  - Write exhaustive tests.
+  - Separate test cases from test logic.
+  - Look for special cases.
+  - If you didn’t add a test, you didn’t fix the bug.
+  - Not everything fits in a table.
+  - Test cases can be in testdata files.
+  - Compare against other implementations.
+  - Make test failures readable.
+  - If the answer can change, write code to update them.
+  - Use txtar for multi-file test cases.
+  - Annotate existing formats to create testing mini-languages.
+  - Write parsers and printers to simplify tests.
+  - Code quality is limited by test quality.
+  - Scripts make good tests.
+  - Try rsc.io/script for your own script-based test cases.
+  - Improve your tests over time.
+  - Aim for continuous deployment.
 - [Go运行时的并发原语](https://mp.weixin.qq.com/s/Lhw_VFL8UHD9edfbKt_QjQ)
   - gopark会将 goroutine 放到等待队列中，从调度器的运行队列中移出去，等待被唤醒。
   - goready会将 goroutine 放到可运行队列中，加入到调度器的运行队列，等待被调度。

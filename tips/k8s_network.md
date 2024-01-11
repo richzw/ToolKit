@@ -910,5 +910,7 @@
     - 注意XDP的性能提升是有代价的，它牺牲了通用型和公平性
       - XDP不提供缓存队列（qdisc），TX设备太慢时直接丢包，因而不要在RX比TX快的设备上使用XDP
       - XDP程序是专用的，不具备网络协议栈的通用性
-
+- [ipsec](https://mp.weixin.qq.com/s/-3sfmKbGOSPILlAAus_x8g)
+  - IP Sec有ESP和AH两种封装协议
+  - IPSec有如下两种数据封装模式： 传输模式(Transport mode)  隧道模式(Tunnel mode)
 

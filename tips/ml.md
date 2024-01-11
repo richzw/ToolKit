@@ -332,6 +332,7 @@
   - [Vector Embeddings: From the Basics to Production](https://partee.io/2022/08/11/vector-embeddings/)
   - [VBASE: Unifying Online Vector Similarity Search and Relational Queries via Relaxed Monotonicity](https://www.usenix.org/conference/osdi23/presentation/zhang-qianxi)
   - [卷积神经网络（CNN）](https://mp.weixin.qq.com/s/ywQkV4VCh_30gCcdvfl1qw)
+    - [Convolutional Neural Network Explainer](https://poloclub.github.io/cnn-explainer/)
   - [Large Language Models (in 2023)](https://mp.weixin.qq.com/s/Kwkn7H82QV7KaFma0r7SlQ)
   - [OpenAI spinning up](https://spinningup.openai.com/en/latest/index.html)
   - [DALL・E 3 ](https://cdn.openai.com/papers/dall-e-3.pdf)
