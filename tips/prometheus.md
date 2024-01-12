@@ -50,3 +50,26 @@ record: "container_cpu_usage_against_request:pod:rate1m"
       )   
     )
 ```
+- [Metrics 系统架构演进](https://mp.weixin.qq.com/s/ezG3VQLgE2e0AWSxsoBHRg)
+  -  Thanos
+    - 可以从多个 Prometheus 集群查询数据，统一了查询入口，提高了用户的体验。同时提供长期数据，另外 Thanos 可以通过 Prometheus-Operator 来管理，所以大大降低了整体管理成本和入侵性
+  - 优化：
+    - 升级了 Thanos 的版本，为 query-frontend 和 storegateway 服务增加了 Redis 缓存，从而提升查询的性能。
+    - 为 store gateway 做了基于时间的分片
+  - 面临以下几个问题：
+    - 超 100+ 倍数据点增长导致查询缓慢
+    - 架构复杂，参数调优困难
+    - 频繁 OOM
+  - VictoriaMetrics 
+    - 根据容器可用的 CPU 数量计算协程数量
+    - 区分 IO 协程和计算协程，同时提供了协程优先级策略
+    - 使用 ZSTD 压缩传输内容降低磁盘性能要求
+    - 根据可用物理内存限制对象的总量，避免 OOM
+    - 区分 fast path 和 slow path，优化 fast path 避免 GC 压力过大
+
+
+
+
+
+
+

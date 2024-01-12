@@ -436,9 +436,27 @@
     - 通过 kubectl exec 或者 docker exec 启动的进程，它会被容器的 cgroup 限制；
     - 当容器中所有进程的内存超过 memory cgroup 的 memory.limit_in_bytes 限制的时候，就会走 Linux OOM kill 过程；
     - 只要 1 号进程不退出，容器就不会退出。
-
-
-
+- [如何让我的容器/进程不要被 OOM Kill](https://mp.weixin.qq.com/s/AoyWzaXQcgCPGTTBHjQzRQ)
+  - Linux OOM Kill，这又分为两种：
+    - 一种是 cgroup 级别的：容器内所有进程使用的总内存超过了容器设置的内存上限，此时会触发该 cgroup 范围内的 OOM Kill
+    - 一种是节点级别的：没有出现 cgroup OOM，但是整个操作系统的内存不足了，此时会在所有用户态进程中挑选进程进行 OOM kill
+  - Memory Request and Limit
+    - Cadvisor 中提供和内存使用量相关的指标
+      - container_memory_usage_bytes 和 container_memory_working_set 基本是重合的，当container_memory_usage_bytes 到达 limit 后便不再增长；
+      - container_memory_rss 一直保持增长直到触及 limit 后发生了 oomkill （cgroup oom kill）；
+      - container_memory_cache 先随着文件内容增加而增长，当总使用量到达 limit 后，便开始下降，下降到 0 后容器被 oomkill（不一定能降到0）；
+      - container_memory_usage_bytes基本等于container_memory_rss + container_memory_cache 的和，在总的内存到达使用量限制后，cache会不断减少以让出内存空间给 rss，释放更多内存给到进程使用。
+  - Linux 操作系统选择”bad”进程是通过调用 oom_badness()，挑选的算法和想法都很简单很朴实：最 bad 的那个进程就是那个最占用内存的进程。
+    - oom_adj 和 oom_score_adj 是与内核的 OOM（Out of Memory）机制相关的两个参数。
+    - oom_score_adj 更低的优先级值表示进程更容易成为 OOM Killer 的目标。oom_score_adj 的值范围是 -1000 到 1000，其中 -1000 表示最高优先级，1000 表示最低优先级，而 0 表示默认优先级
+  - kubelet 根据 Pod 的服务质量（QoS）为每个容器设置一个 oom_score_adj 值。
+    - Guaranteed -997
+      - 如果 Pod 中的每个容器都有内存或 CPU 的 limit 和 request，并且它们相等，那么 Pod 的 QoS 类别就是 Guaranteed
+    - BestEffort 1000
+      - 如果 Pod 中的容器都没有设置内存和 CPU 的 limit 和 request，那么 Pod 的 QoS 类别就是 BestEffort
+    - Burstable min(max(2, 1000 - (1000 * memoryRequestBytes) / machineMemoryCapacityBytes), 999)
+      - 如果 Pod 中的至少一个容器有内存或 CPU 的 request，但所有容器的 limit 和 request 不完全相等，那么 Pod 的 QoS 类别就是 Burstable
+- [加快 Pod 启动速度](https://mp.weixin.qq.com/s/BKXJP9gmp0ALIvwLftwpgQ)
 
 
 

@@ -67,7 +67,33 @@
 - [向量化代码SIMD](https://mp.weixin.qq.com/s/Lih7tWv9tZvuTevdHgVC0Q)
   - SIMD(Single Instruction Multiple Data) 单指令多数据流，是一种并行计算技术，它可以在一个时钟周期内对多个数据进行相同的操作，从而提高计算效率。SIMD 通常用于向量化代码，以提高代码的执行效率。
   - SIMD(Single Instruction Multiple Data)指令是一类特殊的CPU指令类型，这种指令可以在一条指令中同时操作多个数据
-
+- [放弃使用UUID，ULID](https://mp.weixin.qq.com/s/cvQvvNIB2lzpXg73hREekw)
+  - ULID：Universally Unique Lexicographically Sortable Identifier（通用唯一词典分类标识符
+    - 结构
+      - 时间戳
+        - 48位整数
+        - UNIX时间（以毫秒为单位）
+        - 直到公元10889年，空间都不会耗尽。
+      - 随机性
+        - 80位随机数
+        - 如果可能的话，采用加密技术保证随机性
+      - 排序
+        - 最左边的字符必须排在最前面，最右边的字符必须排在最后（词汇顺序）。必须使用默认的ASCII字符集。在同一毫秒内，不能保证排序顺序
+    - 与UUID的128位兼容性
+    - 每毫秒1.21e + 24个唯一ULID
+    - 按字典顺序(也就是字母顺序)排序！
+    - 规范地编码为26个字符串，而不是UUID的36个字符
+    - 使用Crockford的base32获得更好的效率和可读性（每个字符5位）
+    - 不区分大小写
+    - 没有特殊字符（URL安全）
+    - 单调排序顺序（正确检测并处理相同的毫秒）
+    - 应用场景
+      - 替换数据库自增id，无需DB参与主键生成
+      - 分布式环境下，替换UUID，全局唯一且毫秒精度有序
+      - 比如要按日期对数据库进行分区分表，可以使用ULID中嵌入的时间戳来选择正确的分区分表
+      - 如果毫秒精度是可以接受的（毫秒内无序），可以按照ULID排序，而不是单独的created_at字段
+  - 为什么不选择UUID
+    - 通过 SHA-1 哈希算法生成，生成随机分布的ID需要唯一的种子，这可能导致许多数据结构碎片化；
 
 
 
