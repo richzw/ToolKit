@@ -344,6 +344,10 @@
       - 他们训练了一个 U-net 解码器，并将其蒸馏成 2 个去噪步骤；
       - 文本渲染仍然不可靠，他们认为该模型很难将单词 token 映射为图像中的字母
   - Weak-To-Strong Generalization: Eltciting Strong Capabilities With Weak Supervision
+  - [负样本对大模型蒸馏的价值](https://mp.weixin.qq.com/s/KUa3Yn3DTkXaFQ2JKHvlZw)
+    - 1）思维链蒸馏（Chain-of-Thought Distillation），使用 LLMs 生成的推理链训练小模型。
+    - 2）自我增强（Self-Enhancement），进行自蒸馏或数据自扩充，以进一步优化模型。
+    - 3）自洽性（Self-Consistency）被广泛用作一种有效的解码策略，以提高推理任务中的模型性能。
 - LLM Practice
   - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
   - ![img.png](ml_llm_demo.png)

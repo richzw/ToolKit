@@ -94,7 +94,11 @@
       - 如果毫秒精度是可以接受的（毫秒内无序），可以按照ULID排序，而不是单独的created_at字段
   - 为什么不选择UUID
     - 通过 SHA-1 哈希算法生成，生成随机分布的ID需要唯一的种子，这可能导致许多数据结构碎片化；
-
+- [minimum number of steps to reduce number to 1](https://stackoverflow.com/questions/39588554/minimum-number-of-steps-to-reduce-number-to-1/39589499#39589499)
+  - If you look at the binary representation of n, and its least significant bits, you can make some conclusions about which operation is leading to the solution. In short:
+    - if the least significant bit is zero, then divide by 2
+    - if n is 3, or the 2 least significant bits are 01, then subtract
+    - otherwise, add 1
 
 
 
