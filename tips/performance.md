@@ -1155,7 +1155,8 @@
   - 发现需要性能优化的点
     - 放大系统的流量
     - 利用工具采集系统热点
-
+- [double buffering 并发模式](https://mp.weixin.qq.com/s/OrFw2yJuN-Syngpi6rLMzg)
+  - 双缓冲(double buffering)是高效处理 I/O 操作的一种并发技术，它使用两个 buffer,一个 goroutine 使用其中一个 buffer 进行写，而另一个 goroutine 使用另一个 buffer 进行读，然后进行交换。这样两个 goroutine 可能并发的执行，减少它们之间的等待和阻塞。
 
 
 

@@ -919,6 +919,8 @@
     - 多条件约束失效: Q 昨天《独家新闻》统计的化学制品行业的关注度排名第几
     - 全文/多文类意图失效
     - 复杂逻辑推理: Q 近期碳酸锂和硫酸镍同时下跌的时候，哪个在上涨？
+  - [Seven Failure Points When Engineering a Retrieval Augmented Generation System](https://mp.weixin.qq.com/s/iMTgxYELvESUnCFOglhcYg)
+    - ![img.png](ml_rag_failure_points.png)
   - [A Cheat Sheet and Some Recipes For Building Advanced RAG](https://blog.llamaindex.ai/a-cheat-sheet-and-some-recipes-for-building-advanced-rag-803a9d94c41b)
     - ![img.png](ml_rag_overview.png)
     - 基础 RAG

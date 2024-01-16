@@ -482,6 +482,7 @@
   ![img.png](micro_service_hytrix.png)
 - [Raft 分布式共识算法讲义](https://mp.weixin.qq.com/s/JOzK15Y85FFwIuMwJifIAw)
   - [Source](https://www.youtube.com/watch?v=vYp4LYbnnW8)
+  - [Summary](https://mp.weixin.qq.com/s/FFkGKaNpNwJtkpaO5yyYrg)
 - Raft vs Paxos
   - Multi-Paxos是自下而上（bottom-up）设计的弱Leader，而Raft是自上而下（top-down）设计的强Leader
     - Raft算法为了设计出易于理解的算法，采用了问题分解和简化状态空间的方法。问题分解体现在它将Leader选举、日志复制和成员变更拆解成子问题，分而治之
