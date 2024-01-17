@@ -270,6 +270,12 @@
        - 集群扩容困难：Redis Cluster模式下，集群的扩容需要进行数据迁移和重新分片，这会带来一定的复杂性和风险，尤其是在集群规模较大的情况下。
        - 部分功能受限：Redis Cluster模式下，一些Redis的功能受到了限制，例如事务、Lua脚本、pub/sub等功能，这些功能只能在单个节点上使用，不能跨节点使用
 - [go-redis connection pool timeout](https://redis.uptrace.dev/guide/go-redis-debugging.html#connection-pool-size)
+  - 从 Redis 连接池里拿 conn 的时候超时，原因可能有下面几个：
+    - 1）连接池设置太小，连接被其他Goroutine拿去使用了，没有来得及归还；
+    - 2）Redis 性能瓶颈，导致每次请求要很长时间；
+    - 3）网络延迟过大，同样有可能导致每次请求要很长时间。
+  - 内存数据库 - `最大连接数 = 最大并发量 / (1000ms / 每次请求耗时ms)`
+  - 磁盘数据库 - `connections = ((core_count * 2) + effective_spindle_count)`
 - [Redis变慢]
   - 为了避免业务服务器到 Redis 服务器之间的网络延迟，你需要直接在 Redis 服务器上测试实例的响应延迟情况
     `redis-cli -h 127.0.0.1 -p 6379 --intrinsic-latency 60` `redis-cli -h 127.0.0.1 -p 6379 --latency-history -i 1`
