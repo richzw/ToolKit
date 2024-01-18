@@ -98,6 +98,10 @@
       (dlv) bt
       (dlv) frame 5
       ```
+- [Delve调试](https://mp.weixin.qq.com/s/Ed39t5I0k0ynfPch-ex7Ag)
+  - 使用 dlv 进行调试，需要关闭编译器的内联、优化： `1.10及以后，编译时需指定-gcflags="all=-N -l"`
+  - `dlv attach pid `
+  - `dlv core <executable> <core> `
 - [Make synchronous code asynchronous with context.Context and channels](https://pauldigian.hashnode.dev/advanced-go-make-synchronous-code-asynchronous-with-contextcontext-and-channels)
   - The main point of this pattern is to wait, at the same time, for either the result of the blocking function, or for a context cancellation. If the context is cancelled, the result from the blocking function is not needed anymore, and we can gracefully and quickly shut down the code path and free valuable resources. If the result comes in time, we can move on with the default execution.
     ```go

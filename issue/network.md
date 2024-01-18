@@ -148,6 +148,21 @@
     - MTU: Maximum Transmit Unit，最大传输单元。 由网络接口层（数据链路层）提供给网络层最大一次传输数据的大小；一般 MTU=1500 Byte
     - MSS：Maximum Segment Size 。TCP 提交给 IP 层最大分段大小，不包含 TCP Header 和  TCP Option，只包含 TCP Payload ，MSS 是 TCP 用来限制应用层最大的发送字节数。
     ![img.png](network_mtu_mss.png)
+    - [MTU vs MSS](https://www.kawabangga.com/posts/4983)
+    - IP 分 Class 有什么意义，后来看到 RIP 才明白原来这古老的路由协议假设全世界的网络号都是 classful 的，让路由结构简单了很多
+    - 为什么 MTU 都设置成 1500 呢？1500 其实是一个 Trade Off
+    - 超过 MTU 的 Frame 会发生什么？ Drop. 这是最简单的处理方法。也是现实世界很多软件，硬件的处理方式
+    - 什么时候发送的数据会超过 MTU？最常见的是 VPN 和 overlay 网络。
+      - 这种网络本质上就是将二层包再包一层，在底层互联网上建一个虚拟的二层网络。比如说 VXLan 它会在原来的 Ethernet Frame 基础上加一个 VXLan header，然后变成 UDP 包发出去。
+    - 如何保证发送的数据不超过 MTU？
+      - 我们需要分成多份发送
+      -  TCP 层要怎么知道 2 层的 MTU 是多少呢？TCP 层的最大传输数据大小，就叫做 MSS (Maximum segment size).
+      - TCP 在握手的时候，会把自己的 MSS 宣告给对方。
+    - MSS Clamping
+      - 除了 TCP 的两端，中间的路由设备也可以做 MSS Clamping，影响两端选择 MSS 的过程，以确保网络中为其他协议的 overhead 预留出来了足够的空间。
+    - 如果你通过抓包去看一下 MSS 是否是有效的，里面每一个包的大小是否最大是 1500 bytes
+      - TSO，TCP Segment Offload 网卡 Driver 告诉 Kernel，这个工作可以交给我 于是，Kernel 就发大包到网卡，网卡完成大包拆小包
+      - 关闭 TSO 功能: ethtool -K eth0 tx off
   - [IPv4 分段、MTU、MSS 和 PMTUD](https://www.cisco.com/c/zh_cn/support/docs/ip/generic-routing-encapsulation-gre/25885-pmtud-ipfrag.html)
   - 为什么会出现粘包
     - TCP，Transmission Control Protocol。传输控制协议，是一种面向连接的、可靠的、**基于字节流**的传输层通信协议。
