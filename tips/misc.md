@@ -94,6 +94,20 @@
       - 如果毫秒精度是可以接受的（毫秒内无序），可以按照ULID排序，而不是单独的created_at字段
   - 为什么不选择UUID
     - 通过 SHA-1 哈希算法生成，生成随机分布的ID需要唯一的种子，这可能导致许多数据结构碎片化；
+- [Generate Unique IDs in Distributed Systems: 6 Key Strategies](https://blog.devtrovert.com/p/how-to-generate-unique-ids-in-distributed)
+  - UUID
+    - Pros
+      - It’s simple, there’s no need for initial setups or a centralized system to manage the ID.
+      - Every service in your distributed system can roll out its own unique ID, no chit-chat needed.
+    - Cons
+      - With 128 bits, it’s a long ID and it’s not something you’d easily write down or remember.
+      - It doesn’t reveal much information about itself. UUIDs aren’t sortable (except for versions 1 and 2).
+  - NanoID
+    - NanoID uses characters (A-Za-z0–9_-) which is friendly with URLs.
+    - At just 21 characters, it’s more compact than UUID, shaving off 15 characters to be precise (though it’s 126 bits versus UUID’s 128)
+  - ObjectID (96 bits)
+  - Twitter Snowflake (64 bits)
+  - Sonyflake (64 bits)
 - [minimum number of steps to reduce number to 1](https://stackoverflow.com/questions/39588554/minimum-number-of-steps-to-reduce-number-to-1/39589499#39589499)
   - If you look at the binary representation of n, and its least significant bits, you can make some conclusions about which operation is leading to the solution. In short:
     - if the least significant bit is zero, then divide by 2

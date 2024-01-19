@@ -263,6 +263,8 @@
       - 当链路丢包高于一定阈值时，吞吐量断崖式下跌；
       - 抗抖动能力一般；
       - 反向链路丢包延时影响上行带宽估计；
+- [TCP 拥塞控制对数据延迟的影响](https://www.kawabangga.com/posts/5181)
+- [TCP 长连接 CWND reset](https://www.kawabangga.com/posts/5217)
 - [连接一个 IP 不存在的主机时，握手过程是怎样的](https://mp.weixin.qq.com/s/BSU9j-TIpfFkHlZRLhLoYA)
   - 连一个 IP 不存在的主机时，握手过程是怎样的
     - 局域网内
