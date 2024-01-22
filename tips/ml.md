@@ -1026,7 +1026,7 @@
     - 策略调整学习率包括固定策略的学习率衰减和自适应学习率衰减，由于学习率如果连续衰减，不同的训练数据就会有不同的学习率。
     - 当学习率衰减时，在相似的训练数据下参数更新的速度也会放慢，就相当于减小了训练数据对模型训练结果的影响。为了使训练数据集中的所有数据对模型训练有相等的作用，通常是以epoch为单位衰减学习率。
   - [Cyclical Learning Rates for Training Neural Networks](https://arxiv.org/abs/1506.01186)
-
+- [LLM4Rec](https://bytedance.larkoffice.com/docx/OdGOdfsIPooznDx5ZvfcFqJjnne)
 
 
 

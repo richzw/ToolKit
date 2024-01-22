@@ -466,5 +466,7 @@
     - exec 模式下，没有办法获取容器内的环境变量
   - 如果容器需要实现优雅退出，要么也用进程作为 1号进程且实现 SIGTERM handler，要么启动 init 进程。下面看看如何在容器中启动 init 进程。
     - 如果你想直接通过 docker 命令来运行容器，可以直接通过参数 --init 来使用 tini
-  
-
+- [修改容器的内核参数](https://mp.weixin.qq.com/s/04O2Y66_JyXhBR9bd4Uzuw)
+  - 容器内 sysctl -a 能看到的参数，仅namepsaced参数可通过增加kubelet的系统参数白名单，通过 securityContext 修改
+  - 容器内 sysctl -a 看不到的参数，通过修改宿主机内核参数修改
+  - 容器内 sysctl -a 能看到的参数，根据内核版本有变更
