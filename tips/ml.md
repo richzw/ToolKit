@@ -348,6 +348,8 @@
     - 1）思维链蒸馏（Chain-of-Thought Distillation），使用 LLMs 生成的推理链训练小模型。
     - 2）自我增强（Self-Enhancement），进行自蒸馏或数据自扩充，以进一步优化模型。
     - 3）自洽性（Self-Consistency）被广泛用作一种有效的解码策略，以提高推理任务中的模型性能。
+  - [深度强化学习课程](https://mp.weixin.qq.com/s/w99dQXk8dDoXDYLcE2F0ww)
+    - https://huggingface.co/learn/deep-rl-course/unit5/how-mlagents-works
 - LLM Practice
   - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
   - ![img.png](ml_llm_demo.png)
@@ -1027,7 +1029,9 @@
     - 当学习率衰减时，在相似的训练数据下参数更新的速度也会放慢，就相当于减小了训练数据对模型训练结果的影响。为了使训练数据集中的所有数据对模型训练有相等的作用，通常是以epoch为单位衰减学习率。
   - [Cyclical Learning Rates for Training Neural Networks](https://arxiv.org/abs/1506.01186)
 - [LLM4Rec](https://bytedance.larkoffice.com/docx/OdGOdfsIPooznDx5ZvfcFqJjnne)
-
+  - [小红书流量算法](https://mp.weixin.qq.com/s/cAxohCGF2mpYBn5rU3S1Ew)
+    - 与传统推荐系统追逐的「全局最优」不同，小红书将流量分层，寻求「局部最优」，通过识别不同的人群，让好的内容从各个群体中涌现出来，跑出了适合社区的新一代推荐系统。
+    - 关键的问题包括在冷启／爬坡阶段，如何进行内容理解从而定位种子人群并进行高效的人群扩散；在召回／排序环节，如何提升模型预测的精准度，以及如何进行实时流量调控；还有如何保证内容的多样性，使用户的短期兴趣和长期兴趣得到平衡。
 
 
 

@@ -457,7 +457,15 @@
     - Burstable min(max(2, 1000 - (1000 * memoryRequestBytes) / machineMemoryCapacityBytes), 999)
       - 如果 Pod 中的至少一个容器有内存或 CPU 的 request，但所有容器的 limit 和 request 不完全相等，那么 Pod 的 QoS 类别就是 Burstable
 - [加快 Pod 启动速度](https://mp.weixin.qq.com/s/BKXJP9gmp0ALIvwLftwpgQ)
-
+- [Gödel Scheduler在离线统一调度器](https://mp.weixin.qq.com/s/csPhuXXvkzCyBwVsPDH4mw)
+  - Kubernetes 原生调度器
+    - 基于 Pod 调度，对更上一级 “Job” 级别的调度语义支持能力有限；
+    - 同时由于原生调度器是单体调度器，性能优化的天花板也较低，比较难满足部分批式计算任务的需求
+  - Gödel Scheduler 是一个能统一调度在线和离线业务的分布式调度器，能在满足在离线业务功能和性能需求的前提下，提供良好的扩展性和调度质量
+    - 基于 K8s Scheduler，结合乐观并发思想，把最耗时的应用到节点匹配（filtering and scoring）操作放在 scheduler 组件，可以并发执行，提高大规模集群调度吞吐；
+    - 两层调度语义抽象（Unit 和 Pod）和二级调度框架实现：提供更灵活的“批”调度能力，更好支持离线业务
+  - TODO
+    - 通过重调度的方式，我们也希望解决调度性能和调度质量难兼顾的难题，在保证调度吞吐的基础上，大幅提升调度质量
 
 
 
