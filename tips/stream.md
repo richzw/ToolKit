@@ -60,3 +60,49 @@
     - 在流计算系统中通过某些 timeout 或其他策略指定注入 Watermark。比如在 RisingWave 中可以通过如下 SQL 定义 timeout 为 5s 的 Watermark。
 - [RisingWave 打造 Feature Store](https://mp.weixin.qq.com/s/KojIae28RGat-Wi_sVaqRA)
 - [RisingWave 窗口函数](https://mp.weixin.qq.com/s/rgJTR6Ynn8FmkfvCAQZIwA)
+- [多流 Join](https://mp.weixin.qq.com/s/YZzAqgHXsii3lBow_dE7ug)
+  - 流处理 Join 使用的算法基本上都是 Symmetric Hash Join（需要有等值连接条件）
+  - Unbounded state
+    - 由于 Join 输入是 unbounded 的，可以推导出 Join 的状态也是 unbounded的。显然这会导致存储上的问题
+    - RisingWave 通过存算分离的架构，可以把 Join 的状态存储到对象存储 (Object store) 当中。
+    - 为了弥补对象存储访问延迟较高的问题，Risingwave 会利用内存和本地盘来缓存对象存储的文件，并通过 LRU 策略管理这些缓存
+  - Watermark & Window
+    - 我们不希望 Join 的状态大小也是 Unbounded 的。通过水位线和窗口 Join 技术可以将 Join 状态控制在一个有限的大小之内
+    - 窗口在流处理上一般是通过 TUMBLE 或者 HOP Window 函数的方式为数据划分时间窗口，如果划分的时间字段带有 Watermark 信息，那么经过窗口函数后优化器也可以进一步推导出窗口时间列的 Watermark信息
+  - Interval Join
+    - 假如你正在处理的是用户的点击流数据，你可能想要连接用户的点击事件和他们的购买事件，但是这两个事件可能不会在严格的窗口期间内发生。在这种情况下，使用 Interval Join 就会更加合适
+    - Interval Join 允许两个事件在一定的时间间隔内连接，而不是在严格的窗口期间内
+  - Temporal Join
+    - 传统数据库中的 Hash Join 只需要选择一边建立 Hash Table。为了提高性能，一个思考方向是打破对 Join 两边输入的对等关系
+    - Temporal Join它可以将一边流 Join 一个 Risingwave 内部表或者物化视图，流的一边可以不再维护状态，当有数据过来时，可以直接查询另外一边的表，同时表则充当了 Join 状态本身
+  - Join Ordering
+    - 传统数据库很重要的一个思想是利用CBO（Cost Based Optimizer）来枚举执行计划搜索空间， 利用表的统计信息，估算每个算子的需要处理的数据量，计算出执行计划的代价，最后采用估算代价最低的执行计划
+    - RisingWave 目前使用的 Join Ordering 算法是**尽量地将这棵树变成 Bushy Tree 并使得它的树高最低**
+  - 子查询
+    - RisingWave 的子查询 Unnesting 技术是按照 Paper：Unnesting arbitrary queries 来实现的。
+    - 所有的子查询都会被转成 Apply 算子，并将 Apply算子不断往下推直到所有关联项都被改写成普通引用后就可以转成Join
+  - Delta Join
+    - 通过前文我们可以了解到 Join 是一个重状态的算子，每个 Join 有需要维护自身的 Join 状态。那如果有多条 SQL 都使用了同一个表输入，并且 Join Key 都一样，我们可以复用它的状态
+  - Multi-Way Joins 
+  - 快慢流
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

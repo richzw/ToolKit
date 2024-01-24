@@ -2055,7 +2055,7 @@
 - [Go Tricks](https://blog.devtrovert.com/p/12-personal-go-tricks-that-transformed)
   - Time elapsed trick
     -  just a single line of code using the “defer” keyword
-    - Two-Stage Defer
+    - Two-Stage Defer - Acquiring and later releasing a distributed lock
     ```go
     func setupTeardown() func() {
       fmt.Println("Run initialization")
@@ -2069,8 +2069,24 @@
       fmt.Println("Main function called")
     }
     ```
+  - Slice pre-allocation
+  - Chaining - By returning the modified object itself, we can easily chain multiple function receivers together without having to add unnecessary lines of code:
+  - Go 1.20 enables parsing of slices into arrays or array pointers
+    - `b := [3]int(a[0:3])`
+  - Using import with ‘_’ for package initialization
+  - verify if an interface is truly nil
+  ```go
+  func IsNil(x interface{}) bool {
+    if x == nil {
+      return true
+    }
+    return reflect.ValueOf(x).IsNil() // bug https://stackoverflow.com/questions/13476349/check-for-nil-and-nil-interface-in-go
+  }
+  ```
+- go mistakes
+  - init 函数会在全局变量之后被执行 
+  - Go 中以 0 开头的整数表示八进制
   - 
-
 
 
 

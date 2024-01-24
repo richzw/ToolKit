@@ -457,6 +457,14 @@
     - Burstable min(max(2, 1000 - (1000 * memoryRequestBytes) / machineMemoryCapacityBytes), 999)
       - 如果 Pod 中的至少一个容器有内存或 CPU 的 request，但所有容器的 limit 和 request 不完全相等，那么 Pod 的 QoS 类别就是 Burstable
 - [加快 Pod 启动速度](https://mp.weixin.qq.com/s/BKXJP9gmp0ALIvwLftwpgQ)
+- [Pod 的生命周期](https://mp.weixin.qq.com/s/unVwBprr0UeuWNpXVdgdxg)
+  - 初始化阶段，Pod 的 init 容器运行。
+  - 运行阶段，Pod 的常规容器在该阶段运行。
+  - 终止阶段，Pod 的容器被终止
+    -  当执行 kubectl delete pod 开始后，Pod 终止过程开始了；
+    - 容器 A 的 preStop hook 停止了容器内的进程，因此就不需要 Kubelet 来发送 TERM 信号；
+    - 容器 B 没有定义 preStop hook，因此 kubelet 直接发送了 TERM 信号；
+    - 容器 C 没有及时退出，因此会被直接杀死；
 - [Gödel Scheduler在离线统一调度器](https://mp.weixin.qq.com/s/csPhuXXvkzCyBwVsPDH4mw)
   - Kubernetes 原生调度器
     - 基于 Pod 调度，对更上一级 “Job” 级别的调度语义支持能力有限；
@@ -466,15 +474,64 @@
     - 两层调度语义抽象（Unit 和 Pod）和二级调度框架实现：提供更灵活的“批”调度能力，更好支持离线业务
   - TODO
     - 通过重调度的方式，我们也希望解决调度性能和调度质量难兼顾的难题，在保证调度吞吐的基础上，大幅提升调度质量
-
-
-
-
-
-
-
-
-
+- [K8s 一条默认参数引起的性能问题](https://mp.weixin.qq.com/s/w6ufHeQqf4I2IygJ_yg9zg)
+  - 问题
+    - 接口响应超时 接口偶发性超时
+    - 容器化后，CPU 使用率一直较高
+  - 问题排查
+    - 首先使用排除法：确定了与网络、代码没有关系
+    - 然后进行差异分析：
+      - 在虚拟机上启动相同应用做测试，结果正常，矛头直指容器 
+    - 思考：
+      - 容器对比虚拟机，应用运行环境发生了哪些改变呢  →  经验告诉我：Service 环境变量 会自动注入到 Pod 里面
+    - 检验：
+      - 进入常规集群 Pod 查看环境变量的数目 env | wc -l， 结果有 1.6 w 个环境变量，基本都是 Service 自动注入的
+      - 关闭 Service 自动注入参数，enableServiceLinks: false，测试检验，CPU 使用率回归正常，接口响应正常
+  - 根因分析
+    - 分析性能的一般步骤
+      - 系统资源的瓶颈，可以通过 USE 法，即 使用率、饱和度以及错误数这三类指标来衡量
+        - 如 CPU、内存、磁盘和文件系统以及网络等，都是最常见的硬件资源。
+        - 而文件描述符数、连接跟踪数、套接字缓冲区大小等，则是典型的软件资源。
+      - 应用程序性能问题，就是吞吐量（并发请求数）下降、错误率升高以及响应时间增大
+        - 第一种资源瓶颈， CPU、内存、磁盘和文件系统 I/O、网络以及内核资源等各类软硬件资源出现了瓶颈，从而导致应用程序的运行受限。
+        - 第二种依赖服务的瓶颈，也就是诸如数据库、分布式缓存、中间件等应用程序，直接或者间接调用的服务出现了性能问题，从而导致应用程序的响应变慢，或者错误率升高。
+        - 最后一种，应用程序自身的性能问题，包括了多线程处理不当、死锁、业务算法的复杂度过高等等。对于这类问题，通过应用程序指标监控以及日志监控，观察关键环节的耗时和内部执行过程中的错误，就可以帮你缩小问题的范围
+      - 如果这些手段过后还是无法找出瓶颈，你还可以用系统资源模块提到的各类进程分析工具，来进行分析定位
+        - 你可以用 strace，观察系统调用；
+        - 使用 perf 和火焰图，分析热点函数；
+        - 甚至使用动态追踪技术，来分析进程的执行状态。
+    - 问题现象追踪
+      - 通过 time + curl 命令实时测试 API 响应耗时情况
+      - 使用 strace 、  perf  排查 - strace 排查发现：子进程执行同步任务阻塞了主进程，子进程里面执行系统命令free 和 df
+      ```shell
+      # 在 Pod 所在宿主机，查询 Pid
+      docker inspect -f {{.State.Pid}} ${ContainerID}
+      # 查询是否有子进程,层层找出 CPU 占用高的子进程
+      pstree -p ${Pid}
+      ps -aux | head -1;  ps -aux | grep ${Pid}
+      # 在 Pod 所在宿主机，使用 strace 观察系统调用
+      ## -f表示跟踪子进程和子线程，-T表示显示系统调用的时长，-tt表示显示跟踪时间
+      strace -f -T -tt -p ${Pid} -o trace.log
+      # strace 命令找不到具体的热点函数，此时 perf 上,看火焰图
+      perf record -a -g -p {$PID} -- sleep 60
+      git clone https://github.com/brendangregg/FlameGraph
+      cd FlameGraph/
+      perf script -i /root/perf.data | ./stackcollapse-perf.pl --all |  ./flamegraph.pl > ksoftirqd.svg
+      # 将 ksoftirqd.svg 传输到本地，用浏览器打开，如下,发现找不到具体的热点函数
+      ```
+      - 使用 nodejs --prof   + flamebearer  排查 通过 flamebearer 可以定位定最后是 child_process.js 文件中函数的相关调度， execSync --> spawnSync --> normalizeSpawnArguments
+      ```shell
+      kubectl -n work exec -it ${PodName} -- /bin/sh
+      # 修改启动端口, 找到 app.listen 修改，然后再启动一个实例
+      node /data/node_modules/.bin/cross-env NODE_ENV=work node --prof --jitless --no-lazy src/main
+      # 运行一段时间，生成火焰图，在浏览器打开
+      npm install -g flamebearer --registry=https://registry.npmmirror.com
+      node --prof-process --preprocess -j isolate*.log | flamebearer
+      ```
+  - Solution
+    - 将 YAML 文件中 enableServiceLinks 置为 false ,禁止向 Pod 自动注入 Service 环境变量
+    - child_process.execSync 以同步的方式衍生子进程， 会阻塞 Node.js 事件循环，在大多数情况下，同步的方法会对性能产生重大影响，可以使用 child_process.exec 改为异步方法
+    - child_process.execSync 调用时，指定需要的 env 传进去，不要用默认的系统 env ，https://github.com/nodejs/node/blob/v14.x/lib/child_process.js#L586
 
 
 
