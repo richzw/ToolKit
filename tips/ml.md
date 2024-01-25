@@ -266,7 +266,8 @@
   - 近似最近邻 (ANN)算法
     - 「LSH」（Locality-Sensitive Hashing）」它引入了一种哈希函数，使得相似的输入能以更高的概率映射到相同的桶中，其中桶的数量远小于输入的数量。
     - 「ANNOY（Approximate Nearest Neighbors）」它的核心数据结构是随机投影树，实际是一组二叉树，其中每个非叶子节点表示一个将输入空间分成两半的超平面，每个叶子节点存储一个数据。二叉树是独立且随机构建的，因此在某种程度上，它模仿了哈希函数。ANNOY会在所有树中迭代地搜索最接近查询的那一半，然后不断聚合结果。这个想法与 KD 树非常相关，但更具可扩展性。
-    - 「HNSW（Hierarchical Navigable Small World）」它受到小世界网络思想的启发，其中大多数节点可以在很少的步骤内被任何其他节点到触达；例如社交网络的“六度分隔”理论。HNSW构建这些小世界图的层次结构，其中底层结构包含实际数据。中间的层创建快捷方式以加快搜索速度。执行搜索时，HNSW从顶层的随机节点开始，导航至目标。当它无法靠近时，它会向下移动到下一层，直到到达最底层。上层中的每个移动都可能覆盖数据空间中的很长一段距离，而下层中的每个移动都可以细化搜索质量。
+    - 「HNSW（Hierarchical Navigable Small World）」它受到小世界网络思想的启发，其中大多数节点可以在很少的步骤内被任何其他节点到触达；例如社交网络的“六度分隔”理论。
+      - HNSW构建这些小世界图的层次结构，其中底层结构包含实际数据。中间的层创建快捷方式以加快搜索速度。执行搜索时，HNSW从顶层的随机节点开始，导航至目标。当它无法靠近时，它会向下移动到下一层，直到到达最底层。上层中的每个移动都可能覆盖数据空间中的很长一段距离，而下层中的每个移动都可以细化搜索质量。
     - 「FAISS（facebook AI Similarity Search）」它运行的假设是：高维空间中节点之间的距离服从高斯分布，因此这些数据点之间存在着聚类点。faiss通过将向量空间划分为簇，然后在簇内使用用向量量化。faiss首先使用粗粒度量化方法来查找候选簇，然后进一步使用更精细的量化方法来查找每个簇。
       - [上手Faiss](https://mp.weixin.qq.com/s/GxxPqa1pjDvt9PvAMuebkA)
     - 「ScaNN（Scalable Nearest Neighbors）」的主要创新在于各向异性向量量化。它将数据点量化为一个向量，使得它们的内积与原始距离尽可能相似，而不是选择最接近的量化质心点。
@@ -514,6 +515,7 @@
   - As you can tell, LlamaIndex has a lot of overlap with LangChain for its main selling points, i.e. data augmented summarization and question answering. LangChain is imported quite often in many modules, for example when splitting up documents into chunks. You can use data loaders and data connectors from both to access your documents.
   - LangChain offers more granular control and covers a wider variety of use cases. However, one great advantage of LlamaIndex is the ability to create hierarchical indexes. Managing indexes as your corpora grows in size becomes tricky and having a streamlined logical way to segment and combine individual indexes over a variety of data sources proves very helpful.
     - [LangChain Templates](https://blog.langchain.dev/langserve-hub/)
+    - [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
   - [LlamaIndex](https://mp.weixin.qq.com/s/fSssn9uHhbBMCxn0NIuC6g)
     - LlamaIndex 是开发者和 LLM 交互的一种工具。LlamaIndex 接收输入数据并为其构建索引，随后会使用该索引来回答与输入数据相关的任何问题。
     - LlamaIndex 还可以根据手头的任务构建许多类型的索引，例如向量索引、树索引、列表索引或关键字索引。
@@ -803,6 +805,26 @@
       - Classification
   - [Multi-Vector Retriever for RAG on tables, text, and images](https://blog.langchain.dev/semi-structured-multi-modal-rag/)
   - [基于 RAG 的 LLM 可生产应用 Ray](https://mp.weixin.qq.com/s/rjBa2CQxDK2dvdE53ShyOw)
+  - [Advanced RAG Techniques](https://pub.towardsai.net/advanced-rag-techniques-an-illustrated-overview-04d193d8fec6)
+    - Advanced RAG
+      - ![img.png](ml_advance_rag.png)
+      - Chunking & vectorisation
+        -  Search index
+          - Vector store index
+          - Hierarchical indices
+      - Context enrichment
+        - Sentence Window Retrieval
+        - Auto-merging Retriever (aka Parent Document Retriever)
+        - Fusion retrieval or hybrid search
+        - Reranking & filtering
+      - Query transformations
+      - Fusion Retrieval or Hybrid Search: This section likely discusses the combination of different retrieval methods or the integration of various search techniques in RAG systems.
+      - Reranking & Filtering: A discussion on methods for rearranging the order of retrieved information and filtering out irrelevant data.
+      - Query Transformations: This part might explore how queries are modified or transformed to improve the retrieval process.
+      - Chat Engine: A section that could focus on the application of RAG techniques in the development of chat engines.
+      - Query Routing: Discusses the routing of queries to the most appropriate source or system component in a RAG setup.
+      - Agents in RAG: This could delve into the role of agents (autonomous or semi-autonomous entities) in RAG systems.
+      - Response Synthesizer: A section on how responses are generated or synthesized in RAG systems.
   - [RAG 问题](https://mp.weixin.qq.com/s/2dwnwQGsqKWZQX8gEUV0Sw)
     - 朴素的RAG通常将文档分成块，嵌入它们，并检索与用户问题具有高语义相似性的块。但是，这会带来一些问题
       - 文档块可能包含降低检索效果的无关内容
@@ -877,7 +899,7 @@
       - 结构化的外部知识（Structured External Knowledge）：在复杂的情况下，可能有必要建立比基本向量索引更具结构性的外部知识，以便在处理合理分离的外部知识源时允许递归检索或路由检索。
       - 信息压缩（Information Compression）：LLM 不仅受到上下文长度的限制，而且如果检索到的文档包含太多噪音（即无关信息），响应速度也会下降
       - 结果重排（Result Re-Rank）：LLM 存在所谓的 "迷失在中间 "现象，即 LLM 只关注Prompt的两端。有鉴于此，在将检索到的文档交给生成组件之前对其重新排序是有好处的。
-- [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
+
 - [Tools]
   - [MetaGPT](https://deepwisdom.feishu.cn/wiki/Q8ycw6J9tiNXdHk66MRcIN8Pnlg)
     - [MetaGPT：让每个人拥有专属智能体](https://mp.weixin.qq.com/s/U8YU1vQVdUprOspRdpiGNQ)
@@ -1032,7 +1054,7 @@
   - [小红书流量算法](https://mp.weixin.qq.com/s/cAxohCGF2mpYBn5rU3S1Ew)
     - 与传统推荐系统追逐的「全局最优」不同，小红书将流量分层，寻求「局部最优」，通过识别不同的人群，让好的内容从各个群体中涌现出来，跑出了适合社区的新一代推荐系统。
     - 关键的问题包括在冷启／爬坡阶段，如何进行内容理解从而定位种子人群并进行高效的人群扩散；在召回／排序环节，如何提升模型预测的精准度，以及如何进行实时流量调控；还有如何保证内容的多样性，使用户的短期兴趣和长期兴趣得到平衡。
-
+- [Note for Deep learning](https://www.slideshare.net/TessFerrandez/notes-from-coursera-deep-learning-courses-by-andrew-ng)
 
 
 

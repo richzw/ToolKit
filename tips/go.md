@@ -2086,6 +2086,9 @@
 - go mistakes
   - init 函数会在全局变量之后被执行 
   - Go 中以 0 开头的整数表示八进制
+  - copy slice 
+    - dst := make([]int, len(src)) copy(dst, src)
+    - dst := append([]int(nil), src...)
   - 
 
 

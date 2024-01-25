@@ -404,6 +404,7 @@
             - sendfile 能够将用户态与内核态之间的上下文切换从 4 次讲到 2 次
           - 我们需要注意 sendfile 系统调用的局限性。如果应用程序需要对从磁盘读取的数据进行写操作，例如解密或加密，那么 sendfile 系统调用就完全没法用。这是因为用户线程根本就不能够通过 sendfile 系统调用得到传输的数据。
       - mmap
+        - [mmap内存映射的本质](https://mp.weixin.qq.com/s/sLoiOevTxIonrgLa7yWJkw)
         - 特点：
           - 利用 DMA 技术来取代 CPU 来在内存与其他组件之间的数据拷贝，例如从磁盘到内存，从内存到网卡；
           - 用户空间的 mmap file 使用虚拟内存，实际上并不占据物理内存，只有在内核空间的 kernel buffer cache 才占据实际的物理内存；

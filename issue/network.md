@@ -749,6 +749,29 @@
    - 为什么本地复现失败了？
      - 关闭tcp连接时，使用了close()接口，而线上环境使用的是shutdown()
      - shutdown不会设置SOCK_DEAD，而close则相反，导致复现时的代码路径与问题场景出现分歧。
+- [网络问题排查ebpf](https://mp.weixin.qq.com/s/o9nP0aRHCxO_d3f4sIeUlA)
+  -  Connection time out 的问题
+    - 1）目标服务器不可达或者无法连接：目标服务器的防火墙或路由器可能会阻止一些入站连接。
+    -（2）连接请求过多：如果客户端频繁向服务器发送连接请求，可能会被服务器防火墙或者流量控制器识别为攻击，拒绝连接请求。
+    -（3）网络延迟过高：连接过程中，如果网络延迟太高，连接请求可能会被超时。
+    - （4）磁盘 IO 负载过高：如果服务器磁盘 IO 负载过高，可能会导致连接超时。
+    - （5）DNS 解析失败：如果目标主机名无法被解析，可能会导致连接超时。 
+  - 过程
+    - 在可疑点的主机上执行下面的 bpftrace 命令 `sudo bpftrace -e 'kprobe:kfree_skb /comm=="curl"/ {printf("kstack: %s\n", kstack);}'`
+      - kprobe:kfree_skb 指定跟踪的内核函数为 kfree_skb 网络连接执行完成会释放最核心的 SKB（Socket Buffer）数据结构
+      - kfree_skb ，它经常在网络异常丢包时调用
+      - consume_skb ，它在正常网络连接完成时调用
+    - 内核版本不同，跟踪点定义可能是不同的 `sudo bpftrace -l | grep kfree_skb`
+    - `sudo bpftrace -e 'tracepoint:skb:kfree_skb /comm=="curl"/ {printf("kstack: %s\n", kstack);}'`
+    - 打开一个新终端，并在终端中执行 curl <SERVER_IP_ADDR> 命令 `curl --connect-timeout 1 110.242.68.3`
+    - 将上面的 bpftrace 脚本存为后缀为 .bt的文件 `sudo bpftrace tcpdrop.bt`
+    - 可以使用 https://elixir.bootlin.com/ 这个网站来查看内核源码 代码不用完全理解，但从调用 NF_DROP_GETERR 函数看，nf_hook_slow 函数应该跟 netfilter 相关的，也就是在 iptables 层，数据包被 Drop 掉啦
+    - `sudo iptables -nvL OUTPUT`
+
+
+
+
+
 
 
 
