@@ -418,6 +418,23 @@
   - K8S 提供的 NUMA 对齐策略包括 best-effort，restrcted 和 single-numa-node
   - 原生的 NUMA 资源管理存在的一个问题是，它仅仅支持节点侧的 NUMA 管理，而调度侧缺乏相关的管理，这会导致调度侧将 Pod 调度到某个 Node 上，但 Node 上所有 NUMA 节点均不满足 Pod 的要求时，该 Pod 会被置为 terminated 状态
   - Support Inter-Pod Affinity and Anti-Affinity at NUMA level of Katalyst
+- Katalyst
+  - 潮汐混部（Tidal Colocation）
+    - 基于设定好的策略对潮汐节点池中的节点做 binpacking，将腾出的资源折合成整机出让给离线业务
+  - 在线超分
+    - 在线业务的资源使用量往往会随着访问数量的波动而变化，具备明显的潮汐特性
+  - NUMA 粒度混部内存管控框架
+    - 通过 sysadvisor 计算 memory provisions，并与 qrm memory plugin 交互，实现更细致的 NUMA 内存管理。
+    - 这将使 qrm memory plugin 能够根据 memory provisions 进行 NUMA 细粒度内存控制。
+  - 支持 OOM 优先级作为 QoS 增强
+    - Kubernetes 中 pod 的 OOM 优先级主要受其 QoS 级别与其对内存的申请量、使用量影响。然而，当前混部场景下，kubelet 原生的 oom_score_adj 计算策略已经不能很好的满足需求，例如：
+      - 需要给两个都映射到原生的 Burstable 级别的 shared_cores pods 设定 OOM 优先级
+      - 需要在两个原生都是 Guaranteed 级别的 dedicated_cores pod 和 shared_cores pod 之间设定 shared_cores pod 要早于 dedicated_cores pod OOM
+    - kubelet 中提供的静态 oom_score_adj 计算机制，不支持 OOM 优先级的动态调整。因此 Katalyst 提供了一个关于 OOM 优先级的 QoS Enhancement，支持更加灵活地为 pods 设置 OOM 优先级。
+  - 支持拓扑感知调度
+    - 拓扑感知调度功能，支持两种模式：
+      - Native 策略：兼容 K8s 原生的 NUMA 亲和和绑核策略
+      - Dynamic 策略：混部场景下增强的绑核策略，对于 dedicated_cores QoS 级别，支持了 NUMA 亲和 (numa_binding) 以及 NUMA 独占 (numa_exclusive) 两种语义
 - Kubernetes 1.29
   -  使用 nftables 作为 kube-proxy 新的后端（替代 iptables 和 ipvs）
   -  Kubernetes 调度程序以支持与 ReadWriteOncePod 存储相关的 pod 抢占

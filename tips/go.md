@@ -2083,6 +2083,7 @@
     return reflect.ValueOf(x).IsNil() // bug https://stackoverflow.com/questions/13476349/check-for-nil-and-nil-interface-in-go
   }
   ```
+- [Zero-sized Field at the Rear of a Struct Has Non-zero Size](https://i.hsfzxjy.site/zst-at-the-rear-of-go-struct/)
 - go mistakes
   - init 函数会在全局变量之后被执行 
   - Go 中以 0 开头的整数表示八进制
