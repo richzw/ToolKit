@@ -767,7 +767,18 @@
     - 将上面的 bpftrace 脚本存为后缀为 .bt的文件 `sudo bpftrace tcpdrop.bt`
     - 可以使用 https://elixir.bootlin.com/ 这个网站来查看内核源码 代码不用完全理解，但从调用 NF_DROP_GETERR 函数看，nf_hook_slow 函数应该跟 netfilter 相关的，也就是在 iptables 层，数据包被 Drop 掉啦
     - `sudo iptables -nvL OUTPUT`
-
+  - [第二篇](https://mp.weixin.qq.com/s/DfIDVJXruTOIOXYtOJf6bQ)
+    - `sudo bpftrace tcptracer.bt` error Unknown identifier: 'AF_INET'
+      - 解决这个问题，我们就需要把所需的内核头文件引入进来，可以在 https://elixir.bootlin.com/ 查找相应的类型
+    - error: 'linux/skbuff.h' file not found
+      - 因为 kernel-devel 包的版本跟当前的内核版本不同
+      - rpm -Uvh --replacefiles --force --nodeps kernel-devel-5.10.0-136.12.0.86.oe2203sp1.x86_64.rpm
+    - 内核调用链没有走到 kfree_skb 调用，需要使用其他办法，跟踪 kfree_skb 的内核调用链是有局限性的。
+    - 可以使用 cilium 的 pwru 工具，它要求主机内核 > 5.3，它是 eBPF 调试网络问题的一个利器工具。
+    - iptables 规则的问题，可以运行 conntrack 工具，查看一下 `conntrack -L|grep 198.166.2.1`
+    - 1、跟踪 kfree_skb 内核调用栈有局限性的。新版本内核还提供了 kfree_skb_reason、tcpdrop 函数，用以跟踪数据包丢弃，也同样存在这样的局限性。
+    - 2、使用 pwru 可以跟踪数据包全路径的函数调用栈，还可以提供数据包丢失的原因（reason）。《eBPF 实战笔记》专栏后续也会对 pwru 进行更详细的介绍。
+    - 3、可以只使用 bpftrace 工具实现 pwru 的功能吗？答案是肯定的，你可以自己开发 eBPF 程序定位问题。但随着 Linux 发行版本不断支持最新的内核版本，大多数用户不会直接编写 eBPF 程序，而基于 eBPF 的工具会越来越多被我们使用。
 
 
 

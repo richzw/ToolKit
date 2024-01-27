@@ -998,7 +998,12 @@
       - 在所有可能的字符对中，找出出现频率最高的字符对，将其合并为一个新的符号，添加到编码表中。
       - 重复上一步，直到达到预设的符号数量限制，或者没有可以合并的字符对为止。
   - chatgpt和chatglm底层原理和实现细节有什么相同与区别
-  - 
+  - 为什么现在的大模型大都是decoder-only架构？
+    - 计算效率：Decoder-only架构只需要一次前向传播就可以生成序列，而不需要像seq2seq这样的encoder-decoder架构进行多次前向和反向传播，这大大提高了计算效率。  
+    - 训练稳定性：Decoder-only架构在训练过程中更稳定，因为它不需要进行编码和解码之间的复杂交互，这使得模型更容易训练。  
+    - 生成质量：Decoder-only架构可以直接生成整个序列，而不需要像encoder-decoder架构那样逐步生成，这使得生成的序列更连贯，质量更高。  
+    - 灵活性：Decoder-only架构可以很容易地适应各种任务，只需要改变输入序列的格式就可以，而不需要像encoder-decoder架构那样为每种任务设计特定的模型。
+    - 
 - GPTs List
   - https://supertools.therundown.ai/gpts
   - Tips to create GPTs
