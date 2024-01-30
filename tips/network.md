@@ -1414,4 +1414,5 @@
     - 而重点是此时服务器端清楚客户端所能接收的 MSS 为 1200，之后服务器发送的数据分段会按 1200 大小来分。之后服务器端的 SYN/ACK 到了客户端，客户端接收以后再发送 ACK 完成三次握手，此时客户端根据 SYN/ACK 中 MSS 1460，对比本端 MSS 1200 取小值，仍为 1200，之后客户端发送的数据分段也会按 1200 大小来分，因为 MSS 实际上是有发送和接收两方面的限制。
   - [Win 字段](https://mp.weixin.qq.com/s/M4-s_eQYIWqcTN4fOWkUTA)
   - [ Win 字段续](https://mp.weixin.qq.com/s/5nK8Wkj43gbEqAr-APz4Ig)
+  - [SYN/ACK MSS](https://mp.weixin.qq.com/s/QeJyBb3rRg0K6Fzm2oQA9w)
 
