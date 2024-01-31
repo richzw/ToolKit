@@ -1641,9 +1641,23 @@
       - kthreadd 进程由 idle 通过 kernel_thread 创建，并始终运行在内核空间, 负责所有内核线程的调度和管理；
       - 它的任务就是管理和调度其他内核线程 kernel_thread, 会循环执行一个 kthread 的函数，该函数的作用就是运行 kthread_create_list 全局链表中维护的 kthread, 当我们调用 kernel_thread 创建的内核线程会被加入到此链表中，因此所有的内核线程都是直接或者间接的以 kthreadd 为父进程。
   - `ps -e -o pid,ppid,cmd | awk '$2 == 2 && $1 != 1 {print $3}' | sort | uniq | sed 's/\[\([^/]*\)\/[^]]*\]/\1/;s/\[\([^]]*\)\]/\1/' | uniq`
-
-
-
+- [系统的 I/O 瓶颈](https://mp.weixin.qq.com/s/X1WVRWSgUUyYbVyelnf_Nw)
+  - IO operation
+    - 读写 IO：写磁盘为写 IO，读数据为读 IO；
+    - 随机访问(Random Access) 与顺序访问(Sequential Access)：由此 IO 给出的扇区地址与上次 IO 结束的扇区地址相差是否较大决定
+    - 队列 IO 模式(Queue Mode)/并发 IO 模式(Burst Mode): 由磁盘组一次能执行的IO 命令个数决定；
+  - 带宽（Throughput）
+    - 带宽是指磁盘在实际使用的时候从磁盘系统总线上流过的数据量，也称为磁盘的实际传输速率； 带宽 = IOPS * IO大小。
+    - IOPS是IO系统每秒所执行IO操作的次数，是一个重要的用来衡量系统IO能力的参数，对于单个磁盘，计算其完成一次IO所需要的时间来推算其IOPS
+  - 磁盘 I/O 性能指标
+    - 使用率，是指磁盘忙于处理 I/O 请求的百分比。过高的使用率（比如超过 60%）通常意味着磁盘 I/O 存在性能瓶颈。
+    - IOPS（Input/Output Per Second），是指每秒的 I/O 请求数。
+    - 吞吐量，是指每秒的 I/O 请求大小。
+    - 响应时间，是指从发出 I/O 请求到收到响应的间隔时间。
+  - 如何迅速分析 I/O 的性能瓶颈
+    - 先用 iostat 发现磁盘 I/O 性能瓶颈；
+    - 再借助 pidstat ，定位出导致瓶颈的进程；
+    - 随后分析进程的 I/O 行为； 最后，结合应用程序的原理，分析这些 I/O 的来源。
 
 
 
