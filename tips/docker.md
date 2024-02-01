@@ -470,3 +470,58 @@
   - 容器内 sysctl -a 能看到的参数，仅namepsaced参数可通过增加kubelet的系统参数白名单，通过 securityContext 修改
   - 容器内 sysctl -a 看不到的参数，通过修改宿主机内核参数修改
   - 容器内 sysctl -a 能看到的参数，根据内核版本有变更
+- [容器化对数据库性能影响](https://mp.weixin.qq.com/s/URH8D3jWy_fblEA1US24Bg)
+  - 容器化
+    - 标准容器，符合 OCI （Open Container Initiative）规范，如 docker/containerd，容器运行时为 runc
+    - 用户态内核容器，如 gVisor，也符合 OCI 规范，容器运行时为 runsc，有比较好的隔离性和安全性，但是性能比较差
+    - 微内核容器，使用了 hypervisor，如 Firecracker、Kata-Container，也符合 OCI 规范，容器运行时为 runc 或 runv，有比较好的安全性和隔离性，性能介于标准容器和用户态内核容器之间
+  - runc
+    - runc 是一个符合 OCI 标准的容器运行时，它是 Docker/Containerd 核心容器引擎的一部分。它使用 Linux 的命名空间（Namespace）和控制组（Cgroup）技术来实现容器的隔离。
+    - Kata Containers 是一个使用虚拟机技术实现的容器运行时，它提供了更高的隔离性和安全性。
+  - 数据库性能
+    - Disk I/O hang
+      - 当有大量 BufferedIO 下发时，比如 MySQL 写外排临时文件的场景，写的是 page cache，并会频繁更新 Ext4 文件系统的元数据，此时 CPU 和 I/O 可能都会很忙，MySQL 进程会被频繁 CPU Throttle，脏页持续增多，然后触发文件系统 flush 脏页，大量刷脏 I/O 占满硬件通道，
+      - 如果进程被 CPU Throttle 调度走时又恰巧持有了 Ext4 Journal Lock，那么其他共享该 Ext4 文件系统的进程都被挂起，当被挂起的次数和时间足够久，就会造成 IO hang
+      - 主流的解决方案就是给 BufferedIO 限流，Cgroup V2 已支持该功能。
+    - OOM
+      - Page reclaim slow path 还不仅仅影响一个 Cgroup Namespace，由于 OS 中的很多数据结构在 Host 这一层是共享的， 比如虽然 Pod 内存逻辑上属于某个 Cgroup Namespace，但是在 Host Kernel 中，真实的内存管理还是基于同一个 Buddy System，
+      - 对这些物理内存的管理需要全局的锁机制，所以一个内存压力很大的 Pod 触发的 page reclaim slow path 也会影响其它健康 Pod 的内存管理路径，有的时候整个 Node 上的数据库都变慢可能只是因为有一个 Pod 的 limit 内存太小了。
+    - Too many Connections
+      - 对于多进程模型的数据库如 Postgresql 和 Oracle，一条 Connection 对应一个进程
+      - 当使用的 buffer pool 本身就很大时，fork 一个进程所需的页表项也非常可观，假设 page 4k，页表项 8 字节，那么页表和 buffer pool 的比例关系是 8/4k = 1/512，当有 512 条链接时，OS 需要的页表内存就和 buffer pool 一样大
+      - 解决方案一般分为两种，一是在数据库前面增加一层 prox;还有一种是采用 Hugepage 的方案，假设 Hugepage size 为 2M，那么页表和 buffer pool 的比例关系就是 8/2M = 1/256k
+    - TCP Retran
+      - 延迟：网络延迟会影响数据的传输时长
+      - 带宽：无论是单个 TCP 链接的有效带宽，还是网卡和交换机网口的最大传输带宽，都对网络传输质量和延迟有重大的影响
+    - CPU schedule wait
+  - Summary
+    - PostgreSQL 是多进程模式，所以需要十分关注链接数和页表大小，虽然使用 Hugepage 方案可以降低页表的负担，但是 Hugepage 本身还是有比较多的副作用，利用 pgBouncer 之类的 proxy 做链接复用是一种更好的解法；
+      - 当开启 full page 时，PostgreSQL 对 I/O 带宽的需求非常强烈，此时的瓶颈为 I/O 带宽；当 I/O 和链接数都不是瓶颈时，PostgreSQL 在更高的并发下瓶颈来自内部的锁实现机制。
+    - MongoDB 整体表现比较稳定，主要的问题一般来自 Disk I/O 和链接数，WiredTiger 在 cache 到 I/O 的流控上做得比较出色，虽然有 I/O 争抢，但是 IO hang 的概率比较小，
+      - 当然 OLTP 数据库的 workload 会比 MongoDB 更复杂一些，也更难达到一种均衡。
+    - Redis 的瓶颈主要在网络，所以需要特别关注应用和 Redis 服务之间的网络延迟，这部分延迟由网络链路决定，
+      - Redis 满载时 70%+ 的 CPU 消耗在网络栈上，所以为了解决网络性能的扩展性问题，Redis 6.0 版本引入了网络多线程功能，真正的 worker thread 还是单线程，这个功能在大幅提升 Redis 性能的同时也保持了 Redis 简单优雅的特性。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

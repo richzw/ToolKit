@@ -66,8 +66,23 @@ record: "container_cpu_usage_against_request:pod:rate1m"
     - 使用 ZSTD 压缩传输内容降低磁盘性能要求
     - 根据可用物理内存限制对象的总量，避免 OOM
     - 区分 fast path 和 slow path，优化 fast path 避免 GC 压力过大
-
-
+- metric 
+  - database
+    - PostgreSQL 是多进程模式，所以需要十分关注链接数和页表大小，虽然使用 Hugepage 方案可以降低页表的负担，但是 Hugepage 本身还是有比较多的副作用，利用 pgBouncer 之类的 proxy 做链接复用是一种更好的解法；
+      - 当开启 full page 时，PostgreSQL 对 I/O 带宽的需求非常强烈，此时的瓶颈为 I/O 带宽；当 I/O 和链接数都不是瓶颈时，PostgreSQL 在更高的并发下瓶颈来自内部的锁实现机制。
+    - MongoDB 整体表现比较稳定，主要的问题一般来自 Disk I/O 和链接数，WiredTiger 在 cache 到 I/O 的流控上做得比较出色，虽然有 I/O 争抢，但是 IO hang 的概率比较小，
+      - 当然 OLTP 数据库的 workload 会比 MongoDB 更复杂一些，也更难达到一种均衡。
+    - Redis 的瓶颈主要在网络，所以需要特别关注应用和 Redis 服务之间的网络延迟，这部分延迟由网络链路决定，
+      - Redis 满载时 70%+ 的 CPU 消耗在网络栈上，所以为了解决网络性能的扩展性问题，Redis 6.0 版本引入了网络多线程功能，真正的 worker thread 还是单线程，这个功能在大幅提升 Redis 性能的同时也保持了 Redis 简单优雅的特性。
+  - Pod
+    - CPU
+      - `sum(rate(container_cpu_usage_seconds_total{namespace=~"alpha|beta|prod", image!="", container_name!="POD", pod=~".*$project.*"}[1m])) by (pod) /
+         sum(container_spec_cpu_quota{namespace=~"alpha|beta|prod", image!="", container_name!="POD", pod=~".*$project.*"}/container_spec_cpu_period{namespace=~"alpha|beta|prod", image!="", container_name!="POD", pod=~".*$project.*"}) by (pod) * 100`
+    - Memory
+      - `avg(container_memory_working_set_bytes{namespace=~"alpha|beta|prod", pod=~".*$project.*", container!="POD"} > 0) by (pod) /
+        avg(kube_pod_container_resource_requests_memory_bytes{namespace=~"alpha|beta|prod", pod=~".*$project.*", container!="POD"} > 0) by (pod) * 100`
+    - Network
+    - 
 
 
 

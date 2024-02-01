@@ -2090,8 +2090,18 @@
   - copy slice 
     - dst := make([]int, len(src)) copy(dst, src)
     - dst := append([]int(nil), src...)
-  - 
-
+- [From slow to SIMD](https://sourcegraph.com/blog/slow-to-simd)
+  - 计算两个向量点积
+  - 循环展开 (Loop unrolling)
+    - CPU 都有一个叫做指令流水的东西，它可以同时运行多条指令，如果它们之间没有数据依赖的话。数据依赖只是意味着一个指令的输入取决于另一个指令的输出。
+  - 边界检查消除 (Bounds-checking elimination)
+  - 量化 (Quantization)
+    - 将4 字节的float32向量元素转换为1 字节的int8来减少精度
+  - SIMD
+    - SIMD 代表“单指令多数据”(Single Instruction Multiple Data)
+    - 它允许你用一条指令在一堆数据上运行一个操作。举个例子，要对两个int32向量逐元素相加，我们可以用ADD指令一个一个地加起来，或者我们可以用VPADDD指令一次加上 64 对，延迟相同
+- [10亿行的挑战](https://github.com/gunnarmorling/1brc)
+  - https://mp.weixin.qq.com/s/_z801oBwANP27C-BXbHNZA
 
 
 

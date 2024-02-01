@@ -995,7 +995,12 @@
   - dynamic weighted round robin
   - least connections
   - "peak exponentially weighted moving average" (or PEWMA)
-
+- [SYN 和 SYN/ACK 超时重传](https://mp.weixin.qq.com/s/kIPzzw6ToA2cVcEoYJZjYg)
+  - 初始超时重传时间 1 秒
+    - SYN 超时重传次数  tcp_syn_retries = 6
+    - SYN/ACK 超时重传次数 tcp_synack_retries = 5
+  - 客户端发起 TCP 三次握手，但通过 iptables 过滤了 SYN/ACK，此时会在客户端和服务器端同时产生 SYN 和 SYN/ACK 超时重传的现象。
+  - 疑问的产生在于超时重传的 SYN 同样会触发服务器端响应 SYN/ACK，再结合服务器端 SYN/ACK 自身的超时重传。 RTO 如何变化?
 
 
 
