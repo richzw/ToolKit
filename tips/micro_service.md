@@ -1105,6 +1105,7 @@
     - 通过用户扩展信息存储在服务端，有效规避了jwt携带大量用户扩展信息导致降低传输效率问题；
     - 有效避免jwt需要客户端实现续签功能，增加客户端复杂度；支持服务端自动续期，客户端不需要关心续签逻辑；
 - [Kitex Proxyless 配合 Istio 与 OpenTelemetry 实现全链路泳道](https://mp.weixin.qq.com/s/SAn-H5p53IfvSy_Y3Mcz_Q)
+- [Istio 中保留客户端请求的源 IP](https://mp.weixin.qq.com/s/muL7ZGDS77dslaSXzvHXig)
 - [评论系统架构设计](https://mp.weixin.qq.com/s/s99ZWuSi0Lu6ivfpBHvLWQ)
 - [How Not To Sort By Average Rating](https://www.evanmiller.org/how-not-to-sort-by-average-rating.html)
   - Score = Lower bound of Wilson score confidence interval for a Bernoulli parameter
