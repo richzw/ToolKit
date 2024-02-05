@@ -308,10 +308,45 @@
     - Memorizing Transformer（MT） 与我们的方法密切相关。但有两个关键的区别是：
       - 训练协议。
       - 内存如何集成到模型中。
-- [Transformer模型之输入处理](https://mp.weixin.qq.com/s/ryjV4IVLbjUO-QVieOrW3A)
-- [Transformer模型之Encoder-Decoder](https://mp.weixin.qq.com/s/MPFq_-Jqu0DC7QffSK4oNg)
-  - https://github.com/heiyeluren/black-transformer
 - [Theory](https://mp.weixin.qq.com/s/oUe_Vw0vfMvXJ-w97dkK4w)
+  - [Transformer模型之输入处理](https://mp.weixin.qq.com/s/ryjV4IVLbjUO-QVieOrW3A)
+  - [Transformer模型之Encoder-Decoder](https://mp.weixin.qq.com/s/MPFq_-Jqu0DC7QffSK4oNg)
+    - https://github.com/heiyeluren/black-transformer
+  - [Transformer](https://mp.weixin.qq.com/s/4WtoHGegZY6o4Jaa3bz66Q)
+    - Transformer 模型在推理过程中的数学原理
+      - 编码器
+        - 编码器的目标是生成输入文本的丰富嵌入表示。这个嵌入将捕捉输入的语义信息，并传递给解码器生成输出文本,编码器由 N 层堆叠而成
+        - Embedding 
+          - 词嵌入层将输入的词转换为一个向量表示
+        - 位置编码
+          - 同一单词出现在句子的不同位置可能会表示不同的语义，上述的文本嵌入没有表示单词在句子中位置的信息
+          - 使用固定的向量。正弦和余弦函数具有波状模式，并且随着长度的推移重复出现。通过使用这些函数，句子中的每个位置都会得到一组独特但一致的数字编码表示。
+        - 将位置编码加入文本嵌入
+          - 我们将位置编码添加到文本嵌入中。通过将这两个向量相加来实现
+      - 自注意力机制
+        - 矩阵定义
+          - 注意力是一种机制，模型可以通过这种机制来控制输入的不同部分的重要程度。
+          - 多头注意力指的是通过使用多个注意力头使模型能够同时关注来自不同表示子空间信息的方法。
+          - 每个注意力头都有自己的 K、V 和 Q 矩阵。通过将多个注意力头的输出合并在一起，模型可以综合考虑来自不同注意力头的信息，从而获得更全局的理解和表达能力。
+        - 自注意力计算
+          - 计算 Q 向量与每个 K 向量的点积
+          - 将结果除以 K 向量维度的平方根
+          - 将结果输入 softmax 函数以获得注意力权重
+          - 将每个 V 向量乘以注意力权重
+      - 前馈层
+        - 编码器有一个前馈神经网络 (FFN) 包含两个线性变换和一个 ReLU 激活函数
+        - 第一个线性层: 通常会扩展输入的维度 为了使模型能够学习更复杂的函数
+        - ReLU 激活: 这是一个非线性激活函数 用于增加模型的表达能力
+        - 第二个线性层: 这是第一个线性层的逆操作。它将维度降低回原始维度
+      - 残差连接和层归一化
+        - 梯度爆炸
+          - 当传递给下一个编码器时，它们变得太大从而发散了 在没有任何归一化的情况下，早期层输入的微小变化会在后续层中被放大。
+          - 这是深度神经网络中常见的问题。有两种常见的技术可以缓解这个问题: 残差连接和层归一化
+          - 残差连接: 残差连接就是将层的输入与其输出相加。例如，我们将初始嵌入添加到注意力的输出中。残差连接可以缓解梯度消失问题
+          - 层归一化 (Layer normalization): 层归一化是一种对层输入进行归一化的技术。它在文本嵌入维度上进行归一化
+    - 解码器
+      - 解码器是自回归的，这意味着解码器将使用先前生成的 token 再次生成第二个 token
+    - https://osanseviero.github.io/hackerllama/blog/posts/random_transformer/
   - [LLM Agents架构](https://mp.weixin.qq.com/s/xgdMbYv__YNKFJ2n7yMDBQ)
   - [Demystifying L1 & L2 Regularization](https://towardsdatascience.com/courage-to-learn-ml-demystifying-l1-l2-regularization-part-3-ee27cd4b557a)
   - [An introduction to Reinforcement Learning from Human Feedback (RLHF)](https://docs.google.com/presentation/d/1eI9PqRJTCFOIVihkig1voRM4MHDpLpCicX9lX1J2fqk/edit#slide=id.g12c29d7e5c3_0_0)
