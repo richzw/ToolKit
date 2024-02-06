@@ -1043,7 +1043,13 @@
     - 训练稳定性：Decoder-only架构在训练过程中更稳定，因为它不需要进行编码和解码之间的复杂交互，这使得模型更容易训练。  
     - 生成质量：Decoder-only架构可以直接生成整个序列，而不需要像encoder-decoder架构那样逐步生成，这使得生成的序列更连贯，质量更高。  
     - 灵活性：Decoder-only架构可以很容易地适应各种任务，只需要改变输入序列的格式就可以，而不需要像encoder-decoder架构那样为每种任务设计特定的模型。
-    - 
+  - Code
+    - 手撕 numpy写线性回归的随机梯度下降（stochastic gradient descent，SGD）
+    - 手撕反向传播(backward propagation，BP)法
+    - 手撕单头注意力机制（ScaledDotProductAttention）函数
+    - 手撕多头注意力（MultiHeadAttention）
+    - 手撕自注意力机制函数（SelfAttention）
+    - 手撕 beamsearch 算法 Layer Normalization 算法 k-means 算法
 - GPTs List
   - https://supertools.therundown.ai/gpts
   - Tips to create GPTs
