@@ -347,6 +347,15 @@
     - 解码器
       - 解码器是自回归的，这意味着解码器将使用先前生成的 token 再次生成第二个 token
     - https://osanseviero.github.io/hackerllama/blog/posts/random_transformer/
+  - [Sentence Transformers](https://mp.weixin.qq.com/s/DUI5Szeh7xVkJTQHbk9kXw)
+    - 两种类型的模型: Bi-encoders 和 Cross-encoders
+    - Bi-encoders 更适合搜索
+      - 双向编码器将输入文本编码成固定长度的向量。当我们计算两个句子的相似性时，我们通常将两个句子编码成两个向量，然后计算它们之间的相似性 (比如，使用余弦相似度)
+      - 训练双向编码器去优化，使得在问题和相关句子之间的相似度增加，而在其他句子之间的相似度减少。这也解释了为啥双向编码器更适合搜索
+    - Cross-encoders 更适合分类和高精度排序
+      - 交叉编码器同时编码两个句子，并输出一个分类标签。交叉编码器第一次生成一个单独的嵌入，它捕获了句子的表征和相关关系
+      - 与双向编码器生成的嵌入 (它们是独立的) 不同，交叉编码器是互相依赖的。这也是为什么交叉编码器更适合分类，并且其质量更高，他们可以捕获两个句子之间的关系
+      - 如果你需要比较上千个句子的话，交叉编码器会很慢，因为他们要编码所有的句子对。
   - [LLM Agents架构](https://mp.weixin.qq.com/s/xgdMbYv__YNKFJ2n7yMDBQ)
   - [Demystifying L1 & L2 Regularization](https://towardsdatascience.com/courage-to-learn-ml-demystifying-l1-l2-regularization-part-3-ee27cd4b557a)
   - [An introduction to Reinforcement Learning from Human Feedback (RLHF)](https://docs.google.com/presentation/d/1eI9PqRJTCFOIVihkig1voRM4MHDpLpCicX9lX1J2fqk/edit#slide=id.g12c29d7e5c3_0_0)

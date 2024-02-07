@@ -140,7 +140,9 @@
   - Milvus
     - mmap功能在collection.load的时候会把s3上的数据文件下载到本地硬盘，所以首先本地硬盘得有同等大小。然后内存还是要的，最好能达到数据量的1/4以上。
     - 然后如果你用的是hnsw索引，性能可能会比纯内存慢一到两倍这样。如果用的ivf索引，性能会比纯内存慢一到两个数量级
-- 查询节点内存自动均衡的几种策略？当前默认是scorebase
+- [Milvus]
+  - 查询节点内存自动均衡的几种策略？当前默认是scorebase
+  -  milvus的过滤做法是先按条件里的标量过一遍，把符合条件的条目标为1，不符合的标为0，然后做ANN搜索，碰到1的就计算距离，碰到0的就忽略。过滤的性能跟索引有关系，HNSW索引如果标为1的数量很少，就很慢。IVF索引不受这个影响，比较快
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。
@@ -178,7 +180,7 @@
         - 由于使用惰性删除策略，搜索得到的一些向量已经被删除了，因此在第二步使用后置过滤的策略将被删除的向量过滤掉
         - 用更高精度的量化向量进行 refine 得到最终结果。
   - https://github.com/harsha-simhadri/big-ann-benchmarks/pulls?q=Zilliz+Solution+author%3Ahhy3
-
+- [向量检索大赛](https://mp.weixin.qq.com/s/pngwV1Ibe4rxmtWrcr_D2g)
 
 
 
