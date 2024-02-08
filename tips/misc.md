@@ -114,7 +114,9 @@
     - if n is 3, or the 2 least significant bits are 01, then subtract
     - otherwise, add 1
 - [Web 终极拦截技巧](https://mp.weixin.qq.com/s/qQbPkrov3wcCjDbGtPQSMA)
-
+- git
+  - git rebase vs git merge vs git merge --squash
+    - ![img.png](img.png)
 
 
 

@@ -521,11 +521,42 @@
     - 所有容器结束后，Pod 也结束了，随后会被杀死。
 - runc 存在内部文件描述泄露漏洞
   - 攻击者可以利用该漏洞，越权访问容器所在主机的整个文件系统。
-
-
-
-
-
+- [当某个容器内的服务重启后page cache是否会释放](https://mp.weixin.qq.com/s/GURyfJTQPld3VG87reRfqQ)
+  - free命令
+    - total — 系统总内存（其实就是从 /proc/meminfo 获取的）
+    - used — 已使用内存, 这个不包含buffer和cache
+    - free — 未使用的内存，也也不包括buffers和cache
+    - shared — 共享内存的大小，主要是 tmpfs
+    - buffers / cache — buffers和cache使用的内存之和
+    - available — 可用内存，为未使用的内存和可释放的内存之和（buffer、cache 可以释放大部分，所以这里近似等于 free + buffer / cache 的大小, 实际上此三者大小是1134，现在可用的是943
+  - /proc/meminfo 详解
+    - MemTotal — 总的全局可用内存大小（即物理RAM减去保留的以及内核代码占用的，系统启动后一般固定不变）
+    - MemFree — 总的全局未使用内存大小
+    - MemAvailable — 内核估计出来的全局可用内存大小，非精确值（MemFree不代表所有可用的内存，Cache/Buffer、Slab 均有部分可以临时释放的内存要计算在内）
+  - 用户进程的内存页分为两种：
+    - 与文件关联的内存页（File-backed Pages）, 比如程序文件、读取文件时数据对应的缓存页
+      - 所有Page Cache里的页面都是File-backed Pages，File-backed Pages在内存不足的时候可以直接写回对应的硬盘文件里，即Page-out
+    - 与文件无关的匿名内存页（Anonymous Pages），比如进程的堆、栈等分配的内存
+      - Anonymous Pages在内存不足时就只能写到硬盘上的交换区Swap里来释放内存，称之为Swap-out
+    - Anonymous Pages与用户进程共存，进程退出则Anonymous pages释放，而Page Cache即使在进程退出后还可以缓存
+  - 共享内存的页面属于File-backed Pages，但是被放在Inactive(anon)和Active(anon)链表里，统计也不算在AnonPages里，而是算在Cached和Mapped里
+  - 与文件关联的页也有可能是匿名页（MAP_PRIVATE 映射的页面被修改时会产生一个匿名页拷贝），会被算到AnonPages里
+    - AnonPages — 匿名页（Anonymous pages）的大小，同时也包含Transparent HugePages (THP)对应的 AnonHugePages
+    - Mapped — 设备和文件等映射的大小，Mapped统计了Cached中所有的Mapped页面，是Cached的子集（满足Cached - Mapped = Unmapped）。共享内存、可执行程序的文件、动态库、mmap的文件等都统计在这里
+    - Shmem — 共享内存的大小，包括Shared Memory、tmpfs和devtmpfs
+  - 进程级别的统计
+    - VSS - Virtual Set Size，虚拟内存大小，包含共享库占用的全部内存，以及分配但未使用内存
+    - RSS - Resident Set Size，实际使用物理内存，包含了共享库占用的全部内存
+    - PSS - Proportional Set Size，实际使用的物理内存，共享库占用的内存按照进程数等比例划分
+    - USS - Unique Set Size，进程独自占用的物理内存，不包含共享库占用的内存  /proc/{pid}/smaps 文件
+  - top 命令
+    - VIRT — Virtual Memory Size，虚拟内存大小，包括所有代码、数据和共享库，以及已交换的页面和已映射但未使用的内存
+    - RES — Resident Memory Size，驻留内存大小，共享的内存比如动态库也会计算在内
+    - SHR — Shared Memory Size，共享的内存大小，并非所有共享的内存都是常驻的
+    - SWAP — Swapped Size，非驻留内存大小
+    - CODE — Code Size，程序可执行代码的大小
+    - DATA — Data + Stack Size，可执行代码以外的物理内存量，也称为数据驻留集大小
+    - USED — Memory in Use，RES + SWAP 的大小
 
 
 

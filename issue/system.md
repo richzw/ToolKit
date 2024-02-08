@@ -114,7 +114,7 @@
   - **增大了磁盘 IO**。因为uuid 不是自增的，所以有可能需要读更多的索引页去查找合适的位置。
   - **插入耗时变长**。因为 uuid 不是自增的，导致以 B+ 树为基础的索引树会在插入时，索引节点分裂的概率更高。
   - **内存碎片变多**，根据（2）中说的，分裂的越多，导致页变得稀疏，最终导致数据有碎片。
-
+  - [UUID7 is better than UUID4 as clustered index in RDBMS](https://medium.com/@rtawadrous/why-uuid7-is-better-than-uuid4-as-clustered-index-edb02bf70056)
 - 如果请求超时可能的原因有哪些？
   - 应用层代码问题
     - 数据库压力
