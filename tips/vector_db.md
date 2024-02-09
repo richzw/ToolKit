@@ -146,6 +146,10 @@
   - 物理文件删除？这个需要数据文件（segment） 上的数据都失效才能删掉。而segment失效，要么是上面的数据全被delete，要么是被compact。
     - 不要期望物理文件在删除后立即缩小。被删除的量要达到一定量才行，比如某个segment里被删除的数据达到了10%以上，才会触发一个动作把这10%的数据真正地从磁盘上清除。
     - 清除的流程是：用那90%的数据构建一个新的segment，然后把旧的segment标记为删除，等待垃圾清理机制做最终清除。
+  - search返回的结果里不带有partition信息。可以建表时用一个字段来存partition的名字或者标记，然后search的时候在output_fields里填写这个字段的名字。
+  - qps
+    - qps受影响的因素很多，数据量，维度，索引类型参数，搜索参数，是否有过滤，是否有output_fields，milvus. yaml里面的queryNode.group里的配置，querynode数量，load的参数replica_number，等等。
+    - 要获得更高的qps可以从上面这些方面入手。cpu的核数和性能也会影响qps，甚至NUMA架构也会影响qps。单机版的indexnode datanode如果有建索引或者compaction的任务在执行，也会影响qps。
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。

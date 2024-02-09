@@ -347,6 +347,7 @@
     - 解码器
       - 解码器是自回归的，这意味着解码器将使用先前生成的 token 再次生成第二个 token
     - https://osanseviero.github.io/hackerllama/blog/posts/random_transformer/
+  - [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html)
   - [Sentence Transformers](https://mp.weixin.qq.com/s/DUI5Szeh7xVkJTQHbk9kXw)
     - 两种类型的模型: Bi-encoders 和 Cross-encoders
     - Bi-encoders 更适合搜索
