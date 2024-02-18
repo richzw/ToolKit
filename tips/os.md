@@ -329,6 +329,7 @@
     - read：把数据从磁盘读取到内核缓冲区，再拷贝到用户缓冲区
     - write：先把数据写入到socket缓冲区，最后写入网卡设备。
     ![img.png](os_write_read.png)
+    - ![img.png](os_zero_copy_overview.png)
     - DMA，英文全称是Direct Memory Access，即直接内存访问。DMA本质上是一块主板上独立的芯片，允许外设设备和内存存储器之间直接进行IO数据传输，其过程不需要CPU的参与。
   - 零拷贝并不是没有拷贝数据，而是减少用户态/内核态的切换次数以及CPU拷贝的次数。零拷贝实现有多种方式，分别是
     - mmap+write：2次DMA拷贝和1次CPU拷贝

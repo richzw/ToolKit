@@ -117,8 +117,13 @@
 - git
   - git rebase vs git merge vs git merge --squash
     - ![img.png](img.png)
-
-
+- tools
+  - obsidian 免费的笔记工具
+  - excalidraw
+- [魔术的模拟程序](https://mp.weixin.qq.com/s/hPes8WbwNX0SitPBxb_GKw)
+  - 考虑最简单的情况 假设牌是2张，编号分别是1 2
+  - 稍微复杂一点的情况，牌的张数是2的n次方
+  - 考虑任意的情况，牌的张数是2^n+m
 
 
 
