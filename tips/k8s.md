@@ -549,7 +549,11 @@
     - 将 YAML 文件中 enableServiceLinks 置为 false ,禁止向 Pod 自动注入 Service 环境变量
     - child_process.execSync 以同步的方式衍生子进程， 会阻塞 Node.js 事件循环，在大多数情况下，同步的方法会对性能产生重大影响，可以使用 child_process.exec 改为异步方法
     - child_process.execSync 调用时，指定需要的 env 传进去，不要用默认的系统 env ，https://github.com/nodejs/node/blob/v14.x/lib/child_process.js#L586
-
+- 探针
+  -  liveness探针：影响的是单个容器，如果检查失败，将杀死容器，根据pod的restartPolicy来操作。
+    - liveness探测失败并一定不会重启pod，pod是否会重启由你的restart policy 控制。
+  - readiness探针：影响的是整个pod，即如果pod中有多个容器，只要有一个容器的readiness探针诊断失败，那么整个pod都会处于unready状态。
+  - startup探针：指示容器中的应用是否已经启动。如果提供了启动探针(startup probe)，则禁用所有其他探针，直到它成功为止。如果启动探针失败，kubelet 将杀死容器，容器服从其重启策略进行重启。如果容器没有提供启动探针，则默认状态为成功Success
 
 
 
