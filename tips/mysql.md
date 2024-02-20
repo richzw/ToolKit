@@ -816,7 +816,14 @@
 - [分页](https://mp.weixin.qq.com/s/7laj01CkVXy6d9AYijA28g)
   - 分页丢数据
   - 如果你非常在意执行结果的顺序，那么在 ORDER BY 子句中包含一个额外的列，以确保顺序具有确定性。
-
-
-
+- [SQL优化](https://mp.weixin.qq.com/s/j8tarAZaIj2eOijmKGD7Fw)
+  - SQL语句中查询变量和字段定义类型不匹配是另一个常见的错误
+  - 联更新、删除 虽然 MySQL5.6 引入了物化特性，但需要特别注意它目前仅仅针对查询语句的优化。对于更新或删除需要手工重写成 JOIN
+  - MySQL 对待 EXISTS 子句时，仍然采用嵌套子查询的执行方式 - 去掉 exists 更改为 join，能够避免嵌套子查询
+  - 条件下推
+    - 外部查询条件不能够下推到复杂的视图或子查询的情况有：
+      - 聚合子查询；
+      - 含有 LIMIT 的子查询；
+      - UNION 或 UNION ALL 子查询；
+      - 输出字段中的子查询；
 

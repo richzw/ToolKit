@@ -1548,7 +1548,14 @@
   - Share Nothing架构： 在"share nothing"架构中，每个节点都有自己独立的资源，包括内存、存储、计算等，各个节点之间不共享任何资源。这种架构的优点是可以实现线性的扩展性，因为增加新的节点不会影响到已有的节点。此外，由于各个节点之间没有资源共享，因此不需要复杂的协调和同步机制，从而可以降低系统的复杂性。然而，这种架构的缺点是在于数据的分布和管理可能会变得比较复杂，因为数据需要在各个节点之间进行分布。 
   - Aurora Limitless 的全局时间戳是通过 EC2 TimeSync Service 获得的，虽然协议上使用了 NTP，但是精度上更接近 Google 提出的 TrueTime 方案，把时间误差控制在了毫秒级别
 - [去重Cube计算优化](https://mp.weixin.qq.com/s/WaEb1A5iRwzktgIg5TQiIA)
-
+- Postgresql
+  - 使用 Postgres 替代 Redis 作为缓存，使用 UNLOGGED Table[3] 并用 TEXT 类型存储 JSON 数据，并使用存储过程来添加并强制执行过期时间，正如 Redis 所做的那样。
+  - 使用 Postgres 作为消息队列，采用 SKIP LOCKED[4] 来代替Kafka（如果你只需要消息队列的能力）。
+  - 使用加装了 TimescaleDB[5] 扩展的 Postgres 作为数据仓库。
+  - 使用 PostgreSQL 的 JSONB[6] 类型来存储、索引、搜索 JSON 文档，从而替代 MongoDB。
+  - 使用加装 pg_cron[7] 扩展的 Postgres 作为定时任务守护程序，在特定时间执行特定任务，例如发送邮件，或向消息队列中添加事件。
+  - 使用 Postgres 进行全文搜索[9]，加装 ParadeDB 替代 ElasticSearch。
+  - 使用 Postgres 在数据库中生成JSON[10]，免去服务器端代码编写，直接供 API 使用
 
 
 

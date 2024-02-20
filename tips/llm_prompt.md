@@ -730,7 +730,7 @@
   限定输出格式，方便程序解析，例如 JSON，或者特殊字符隔开的文本，没有无关信息
   这条消息只要回复 OK，我将在接下来的消息中提出需要你帮助设计和撰写的 Prompt。
   ```
-
+- [GPTs prompt](https://github.com/linexjlin/GPTs/blob/main/prompts/Grimoire.md)
 
 
 

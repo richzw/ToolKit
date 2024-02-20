@@ -554,6 +554,32 @@
     - liveness探测失败并一定不会重启pod，pod是否会重启由你的restart policy 控制。
   - readiness探针：影响的是整个pod，即如果pod中有多个容器，只要有一个容器的readiness探针诊断失败，那么整个pod都会处于unready状态。
   - startup探针：指示容器中的应用是否已经启动。如果提供了启动探针(startup probe)，则禁用所有其他探针，直到它成功为止。如果启动探针失败，kubelet 将杀死容器，容器服从其重启策略进行重启。如果容器没有提供启动探针，则默认状态为成功Success
+- [Kubernetes中CPU过载](https://mp.weixin.qq.com/s/7iHaslxOpHQY1TgqwYn8Vg)
+  - client-go中的cache ListAll() 函数可能会引发CPU密集型操作
+  - 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
