@@ -556,7 +556,10 @@
   - startup探针：指示容器中的应用是否已经启动。如果提供了启动探针(startup probe)，则禁用所有其他探针，直到它成功为止。如果启动探针失败，kubelet 将杀死容器，容器服从其重启策略进行重启。如果容器没有提供启动探针，则默认状态为成功Success
 - [Kubernetes中CPU过载](https://mp.weixin.qq.com/s/7iHaslxOpHQY1TgqwYn8Vg)
   - client-go中的cache ListAll() 函数可能会引发CPU密集型操作
-  - 
+- [如何停止某个pod的流量](https://mp.weixin.qq.com/s/IOlhUKs_857EHGJd79wckw)
+  - AvailabilityChangeEvent提供了publish方法，可以将ReadinessState变更为REFUSING_TRAFFIC
+  - 变更之后可以发现，k8s的get pods显示其中一个pod的ready为0，这里有个延时，取决于periodSeconds参数值，默认为10(s)
+  - 通过配置pod的liveness和readiness，并在运行时变更springboot的ReadinessState变更为REFUSING_TRAFFIC，可以将该pod从流量中移除，同时整个服务的副本个数不会像变更label那样多出来pod。
 
 
 

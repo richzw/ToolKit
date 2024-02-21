@@ -1106,7 +1106,18 @@
 - [Mixtral-8x7B Pytorch 实现](https://mp.weixin.qq.com/s/HProBDSA9WxyD-JuKpJ9ew)
   - base的模型结构为Transformers的改版Mistral-7B
   - MoE 作用在Feed Forward Blocks上
-
+- [Sora]
+  - [简单总结主要是以下三个模块：](https://mp.weixin.qq.com/s/Q6SuTFXYlbX4U2M-8DereQ)
+    - 一种将视频数据压缩到潜在空间，然后将其转换为“时空潜在图块”的技术，可以作为token输入到Transformer中。
+    - 基于Transformer的视频扩散模型。
+    - 使用DALLE3创建具有高精度视频字幕的数据集。
+- [大模型推理加速](https://mp.weixin.qq.com/s/W9iVW7niyi_HvEWxOcnwuA)
+  - 多轮对话复用KV cache
+    - 多轮对话场景存在一个共同点：前一轮对话的输出构成后一轮对话输入的一部分，或者存在较长的公共前缀
+    - 大部分自回归模型（除了chatglm-6b）的Attention Mask都是下三角矩阵：即某一位置token的注意力与后续token无关，因此两轮对话公共前缀部分的KV cache是一致的
+    - 解决办法是：保存上一轮对话产生的KV cache，供下一轮对话时复用，就能减少下一轮需要生成KV cache的token数，从而减少FTT
+    - 办法是增加一层转发层，用户将多轮请求携带同样的标识id并发送给转发层，转发层感知集群信息并匹配标识id和下游机器。
+  - 投机采样方法
 
 
 

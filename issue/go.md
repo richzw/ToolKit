@@ -1028,6 +1028,41 @@
   - [更高精度的 Sleep](https://mp.weixin.qq.com/s/xgEXaFT65fn3XCscErMwXA)
 - [Go函数指针](https://mp.weixin.qq.com/s/bcmvPbWV7nBi7wIfr-MR8w)
   - 在golang里，如何理解 当函数指针的数量不多时，通过 switch 语句直接调用，可以消除闭包和变量逃逸的开销。比如在 time 包的时间解析和格式化库中就用了这种方式：https://github.com/golang/go/blob/go1.19/src/time/format.go#L648
+- [DNS Failover 策略在 Go 中竟然带来了反效果](https://mp.weixin.qq.com/s/BqNLR9rsWSPtTJpzOX1uOw)
+  - Background
+    - 我们在 /etc/resolv.conf 中配置了两个 nameserver，其中 server2 在灾备机房 ，作为一种 failover 策略
+    - 们在线上观察到一直有 AAAA 类型的 DNS 请求发送到 server2，而且如果 client 到 server2 的网络异常时，业务的 http 请求耗时会增加 1s，这并不符合预期
+  - Debug
+    - 请求使用的是 Go 原生 net 库 无论是 http.Get 还是 net.Dial 最终都会到 func (d *Dialer) DialContext() 这个方法。
+    - 然后层层调用到 func (r *Resolver) lookupIP() 方法，这里定义了何时使用 Go 内置解析器或调用操作系统 C lib 库提供的解析方法，以及 /etc/hosts 的优先级。
+    - 同时补充一个比较重要的信息：windows 、darwin(MacOS等)优先使用 C lib 库解析
+    - 我们的 DNS Server 是支持递归请求的，经过排查，我们发现是因为在 DNS Server 有一层 NetScaler 作为负载均衡器，负载均衡是以 DNS proxy server 的方式运行，默认并没有开启对递归请求的支持。
+  - Solution
+    -  对于 Go 程序中 AAAA 请求重试到下一个 server 的优化方案：
+      - a. 代价相对较小的方案，程序构建时添加 -tags 'netcgo' 编译参数，指定使用 cgo-based 解析器。
+      - b. DNS Server proxy 层支持递归请求。这里有必要说明递归支持不能在 proxy 层简单的直接开启，proxy 和 recursion 在逻辑上有冲突的地方，务必做好必要的验证和确认，否则可能会带来新的问题。
+  - Summary
+    - Go net 库中提供了两种解析逻辑：自实现的内置解析器和系统提供的解析函数。windows 、darwin(MacOS等)优先使用系统提供的解析函数，常见的 Debain、Centos 等优先使用内置解析器。
+    - Go net 库中的内置解析器和系统提供的解析函数行为和结果并不完全一致，它可能会影响到我们的服务。
+    - 业务应设置合理的超时时间，不易过短，以确保基础设施的 failover 策略有足够的响应时间。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

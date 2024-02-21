@@ -1948,7 +1948,14 @@
     - Capture a stack trace in the error type when the error is created
     - Implement fmt.Formatter on the error type to print the stack trace
     - Print the error with fmt verb %+v
-
+- [BCE, bounds check elimination](https://mp.weixin.qq.com/s/2AWWhbkEhwTJcgCjL-9pcQ)
+  - 为啥在使用 a[i:i+4:i+4] 而不是 a[i:i+4]
+    - `go build -gcflags="-d=ssa/check_bce" main.go"`
+    - 这样写不是为了边界检查消除，而是为了性能。
+    - 如果你不指定 cap，编译器需要计算新的newcap = oldcap - offset。如果你指定 cap 的值和 len 一样，编译器就可以少做点工作。
+  - 更好的边界检查消除方法
+    - Go 的边界检查有两个:索引a[i]和 slicea[i,j]。Go 编译器在访问这两种方式的时候会插入一些边界检查代码
+    - a[i:j] 会产生两个边界检查: 0 <= i <= j 和 0 <= j <= cap(a)
 
 
 

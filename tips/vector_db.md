@@ -150,6 +150,16 @@
   - qps
     - qps受影响的因素很多，数据量，维度，索引类型参数，搜索参数，是否有过滤，是否有output_fields，milvus. yaml里面的queryNode.group里的配置，querynode数量，load的参数replica_number，等等。
     - 要获得更高的qps可以从上面这些方面入手。cpu的核数和性能也会影响qps，甚至NUMA架构也会影响qps。单机版的indexnode datanode如果有建索引或者compaction的任务在执行，也会影响qps。
+  - Cardinal 搜索引擎
+    - Cardinal 是用现代 C++ 语言和实用的近似最近邻搜索（ANNS）算法构建的多线程、高效率向量搜索引擎
+    - 同时能够处理暴搜请求和 ANNS 索引修改请求；处理各种数据格式，包括 FP32、FP16 和 BF16
+    - Cardinal 利用 x86 的 AVX-512 扩展和 ARM 的 NEON 及 SVE 指令集等尖端技术，提供针对高效计算优化的代码
+  - Milvus 2.3
+    - Cosine 相似度类型： 无需向量归一化，简化数据搜索流程。
+    - Upsert 数据：提升更新和删除数据的管理流程效率，适用于频繁更新数据且追求数据一致性和原子性的场景。
+    - 范围搜索（Range Search）: 通过限制查询向量与其他向量之间的距离，范围搜索能够实现对搜索结果的有效细化，适用于搭建推荐引擎的场景。 
+    - 支持 Parquet 文件：提升数据处理能力，支持 Parquet 文件，通过其高效的列式存储格式，提供更好的查询性能，适用于具有复杂数据集的场景。 
+    - 支持 Array 数据类型：支持在搜索过程中基于多个属性进行精确的元数据过滤。在电商领域中，该功能支持根据不同产品标签进行搜索，为用户返回相关的搜索结果
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。
