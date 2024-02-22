@@ -569,8 +569,18 @@
       - 该命令会将node标记为SchedulingDisabled不可调度状态，影响最小，之后K8S再创建的pod资源，不会被调度到该节点。原有的 pod 不受影响，仍正常对外提供服务。
     - drain ：驱逐节点【设置不可调度，然后排干节点pod】
       - 会先驱逐Node上的pod资源到其他节点重新创建,将节点调为SchedulingDisabled不可调度状态
-
-
+- [Kubernetes 中Pod的退出码](https://mp.weixin.qq.com/s?__biz=MzIzNTU1MjIxMQ==&mid=2247484649&idx=1&sn=b5a2807944d3a90258e4812e8e2ef4ba&chksm=e8e42855df93a14329d2d3e9e716b992ef61c3d07a1213758a7f0060959b9cc83393a98e83d9&scene=21#wechat_redirect)
+  - [Source](https://komodor.com/learn/exit-codes-in-containers-and-kubernetes-the-complete-guide/)
+  - ![img.png](k8s_pod_exit_codes.png)
+- [Pod Pending 问题](https://mp.weixin.qq.com/s/_Ongqth_ZhhJLJaTSUU3iA)
+  - Pod Pending 的含义
+    - 创建 pod 后，它会进入阶段Pending。 一旦 pod 被调度并且容器已启动，pod 就会更改到该Running阶段
+  - pod pending 常见原因分析及故障排除
+    - 调度问题： pod 无法被调度到任何节点上（不满足要求）；
+    - 镜像问题：下载容器镜像时出现问题；
+    - 依赖性问题： pod 需要卷、密钥或配置映射才能运行。
+    - Taints and tolerations
+      - Taints 是 Kubernetes 的一种机制，它允许我们指定分配给节点的 pod。当节点有 taint时，只有包含相应toleration的 Pod 才能在该节点中运行。
 
 
 

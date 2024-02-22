@@ -348,6 +348,7 @@
       - 解码器是自回归的，这意味着解码器将使用先前生成的 token 再次生成第二个 token
     - https://osanseviero.github.io/hackerllama/blog/posts/random_transformer/
   - [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html)
+    - Harvard NLP 的 The Annotated Transformer 是一个非常好的学习 Transformer 的资源
   - [Sentence Transformers](https://mp.weixin.qq.com/s/DUI5Szeh7xVkJTQHbk9kXw)
     - 两种类型的模型: Bi-encoders 和 Cross-encoders
     - Bi-encoders 更适合搜索
@@ -609,6 +610,7 @@
       - 大规模数据集构建，采用自指导风格，使用UltraChat数据集，随后进行蒸馏式监督微调（dSFT）。
       - 通过一系列聊天模型完成和随后的GPT-4（UltraFeedback）评分来收集人工智能反馈（AIF），然后将其转化为偏好数据。
       - 将蒸馏直接偏好优化（dDPO）应用于使用收集的反馈数据的dSFT模型
+  - [Gemma](https://mp.weixin.qq.com/s/E52nPpWrhnU7wMLpOhVz5Q)
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]

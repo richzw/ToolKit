@@ -38,4 +38,89 @@
     - If the sole reason for using a regex is case insensitivity, use a case insensitive index instead, as those are faster.
   - Use Index Optimizations Available in the WiredTiger Storage Engine
     - If you are self-managing MongoDB, you can optionally place indexes on their own separate volume, allowing for faster disk paging and lower contention. See wiredTiger options for more information.
+- [Tips and Tricks++ for Querying and Indexing MongoDB](https://www.youtube.com/watch?v=5mBY27wVau0&list=PL4RCxklHWZ9u_xtprouvxCvzq2m6q_0_E&index=10)
+  - ESR rule
+    - A good starting place applicable to most user cases
+    - Place keys in the following order
+      - Equality first
+      - Sort next
+      - Range last
+    - Remember
+      - Some operators may be range instead of equality
+      - Having consecutive keys used in the index is important
+  - Operator Type Check
+    - Inequality: $ne, $nin -> Range
+    - Regex Operator: /car/, /^car/i -> Range
+    - $in
+      - it depends with respect to key ordering
+      - Alone: a series of Equality matches
+      - Combines: possible a Range
+      - Mongo optimize it as Merge Sort instead of Blocking Sort
+  - Consecutive Index keys
+  - Is the ESR rule always optimal? Nope
+    - Check total keys examined from execute plan
+- [MongoDB中的锁](https://mp.weixin.qq.com/s/FxaUhtRho5YOpCFgmk1Mdg)
+  - 慢日志
+    - 一般将执行时间大于 100ms 的请求称为慢请求，内核会在执行时统计请求的执行时间，并记录下执行时间大于 100ms 的请求相关信息，打印至内核运行日志中，记录为慢日志
+    - MongoDB 中，可以通过以下语句设定 Database Profiler 用于过滤、采集请求，用于慢操作的分析。`db.getProfilingStatus()`
+    - 在设置 Profiler 后，满足条件的慢请求将会被记录在 system.profile 表中，该表为一个 capped collection，可以通过 db.system.profile.find() 来过滤与查询慢请求的记录
+  - 慢请求的产生无非以下几点原因：
+    - CPU负载高：如频繁的认证/建链接会使大量CPU消耗，导致请求执行慢；
+    - 等锁/锁冲突：一些请求需要获取锁，而如果有其他请求拿到锁未释放，则会导致请求执行慢；
+    - 全表扫描：查询未走索引，导致全表扫描，会导致请求执行慢；
+    - 内存排序：与上述情况类似，未走索引的情况下内存排序导致请求执行慢；
+    - 但开启分析器 Profiler 是需要一些代价的（如影响内核性能），且一般来说默认关闭，故在处理线上问题时，我们往往只能拿到内核日志中记录的慢日志信息
+  - 锁
+    - 从5.0开始，将 RESOURCE_PBWM、RESOURCE_RSTL、RESOURCE_GLOBAL 全部归为了 RESOURCE_GLOBAL，且使用一个 enum 对其进行划分
+    - 从5.0开始，还新增了一批 lock-free read 操作，这些操作在其他操作持有同 collection 的排他写锁时也不会被阻塞，如 find、count、distinct、aggregate、listCollections、listIndexes 等
+    - 在 MongoDB 中为了提高并发效率，提供了类似读写锁的模式，即共享锁（Shared, S）（读锁）以及排他锁（Exclusive, X）（写锁）
+    - 为了解决多层级资源之间的互斥关系，提高多层级资源请求的效率，还在此基础上提供了意向锁（Intent Lock）
+    ```
+    enum LockMode {
+    MODE_NONE = 0,
+    MODE_IS = 1, //意向共享锁，意向读锁，r
+    MODE_IX = 2, // 意向排他锁，意向写锁，w
+    MODE_S = 3, // 共享锁，读锁，R
+    MODE_X = 4, // 排它锁，写锁，W
+    ```
+    - 意向锁有什么用呢
+      - 如果另一个任务企图在某表级别上应用共享或排他锁，则受由第一个任务控制的表级别意向锁的阻塞，第二个任务在锁定该表前不需要检查各个页或行锁，而只需检查表上的意向锁。
+  - MongoDB 的锁矩阵
+    ```
+     /**
+     * MongoDB锁矩阵，可以根据锁矩阵快速查询当前想要加的锁与已经加锁的类型是否冲突
+     *
+     * | Requested Mode |                      Granted Mode                     |
+     * |----------------|:------------:|:-------:|:--------:|:------:|:--------:|
+     * |                |  MODE_NONE   | MODE_IS |  MODE_IX | MODE_S |  MODE_X  |
+     * | MODE_IS        |      +       |    +    |     +    |    +   |          |
+     * | MODE_IX        |      +       |    +    |     +    |        |          |
+     * | MODE_S         |      +       |    +    |          |    +   |          |
+     * | MODE_X         |      +       |         |          |        |          |
+       */
+    ```
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
