@@ -183,6 +183,7 @@
       - 分组预测机制  利用流水线并发 
       - 为了利用空间局部性 采用预取Prefetch，在数据被用到之前就将其调入缓存，增加缓存命中率
       - 充分挖掘网卡的潜能 借助现代网卡支持的分流（RSS, FDIR）和卸载（TSO，chksum）
+      - [Source](https://mp.weixin.qq.com/s/D7gNarR5DyB03QbHELTOSA)
     - RDMA 作为一种旁路内核的远程内存直接访问技术，被广泛应用于数据密集型和计算密集型场景中，是高性能计算、机器学习、数据中心、海量存储等领域的重要解决方案。
       - RDMA 具有零拷贝、协议栈卸载的特点。RDMA 将协议栈的实现下沉至RDMA网卡(RNIC)，绕过内核直接访问远程内存中的数据
   - [排障](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247505250&idx=1&sn=a854ee9a456e27e3bd4202380e4782c8&chksm=c1842233f6f3ab251f1a686e4f4bbeaa305a73ff3b09d5846b3ae536153ed22ba716c99f0ae5&scene=21#wechat_redirect)
@@ -1674,6 +1675,24 @@
     - 先用 iostat 发现磁盘 I/O 性能瓶颈；
     - 再借助 pidstat ，定位出导致瓶颈的进程；
     - 随后分析进程的 I/O 行为； 最后，结合应用程序的原理，分析这些 I/O 的来源。
+- [如何查看服务器磁盘IO性能](https://mp.weixin.qq.com/s/TCNu3joT1FWDMmpxkK033A)
+  - dd命令可以用于测试磁盘的读写速度，通过观察dd命令的执行时间，我们可以了解到磁盘的IO性能。此外，dd命令还可以用于测试磁盘的稳定性和可靠性。
+  ```
+  #!/bin/bash
+  echo "开始检查磁盘IO性能..." >> io_test.log
+  dd if=b.txt of=/dev/null bs=1M iflag=direct oflag=direct count=10240 >> io_test.log
+  echo "检查完成" >> io_test.log
+  ```
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -560,6 +560,15 @@
   - AvailabilityChangeEvent提供了publish方法，可以将ReadinessState变更为REFUSING_TRAFFIC
   - 变更之后可以发现，k8s的get pods显示其中一个pod的ready为0，这里有个延时，取决于periodSeconds参数值，默认为10(s)
   - 通过配置pod的liveness和readiness，并在运行时变更springboot的ReadinessState变更为REFUSING_TRAFFIC，可以将该pod从流量中移除，同时整个服务的副本个数不会像变更label那样多出来pod。
+- [临时设置节点为不可调度](https://mp.weixin.qq.com/s/LxZkT37eYSKuEVx9VyHypg)
+  - 使用场景
+    - 节点维护 在进行节点维护时，需要将节点暂时移除，确保Pod能够在其他节点上继续运行。有一点要注意，在节点驱逐前，要保持集群中服务多副本，否则驱逐过程中可能会导致业务不可用
+    - 节点升级 当需要对节点进行Kubernetes版本升级或者操作系统升级时，可以使用节点驱逐来确保服务的可用性。
+  - 命令说明
+    - cordon : 停止调度【不可调度，临时从K8S集群隔离】
+      - 该命令会将node标记为SchedulingDisabled不可调度状态，影响最小，之后K8S再创建的pod资源，不会被调度到该节点。原有的 pod 不受影响，仍正常对外提供服务。
+    - drain ：驱逐节点【设置不可调度，然后排干节点pod】
+      - 会先驱逐Node上的pod资源到其他节点重新创建,将节点调为SchedulingDisabled不可调度状态
 
 
 
