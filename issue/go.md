@@ -1045,7 +1045,10 @@
     - Go net 库中提供了两种解析逻辑：自实现的内置解析器和系统提供的解析函数。windows 、darwin(MacOS等)优先使用系统提供的解析函数，常见的 Debain、Centos 等优先使用内置解析器。
     - Go net 库中的内置解析器和系统提供的解析函数行为和结果并不完全一致，它可能会影响到我们的服务。
     - 业务应设置合理的超时时间，不易过短，以确保基础设施的 failover 策略有足够的响应时间。
-
+- [Questions](https://blog.devtrovert.com/p/15-go-interview-questions-from-the)
+  - What does the len() function return if passed a UTF-8 encoded string? the number of bytes
+  - What does a sync.Mutex block while it is locked? any other call to lock that Mutex? any other call to lock that Mutex
+  - What is a side effect of using time.After in a select statement?
 
 
 

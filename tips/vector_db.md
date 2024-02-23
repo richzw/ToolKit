@@ -150,10 +150,19 @@
   - qps
     - qps受影响的因素很多，数据量，维度，索引类型参数，搜索参数，是否有过滤，是否有output_fields，milvus. yaml里面的queryNode.group里的配置，querynode数量，load的参数replica_number，等等。
     - 要获得更高的qps可以从上面这些方面入手。cpu的核数和性能也会影响qps，甚至NUMA架构也会影响qps。单机版的indexnode datanode如果有建索引或者compaction的任务在执行，也会影响qps。
-  - Cardinal 搜索引擎
+  - Knowhere 是 Milvus 的内部核心引擎，负责向量搜索，是基于行业标准开源库（如 Faiss、DiskANN 和 hnswlib 等）的增强版本
+    -  Knowhere 属于开源，其部署环境更多样，可在所有主机类型上运行
+    - Knowhere 依赖于 OSS 库（如 Faiss、DiskANN 和 hnswlib）
+  - [Cardinal 搜索引擎](https://mp.weixin.qq.com/s/4xx2U8Xyr1RetTkMtRrxyw)
     - Cardinal 是用现代 C++ 语言和实用的近似最近邻搜索（ANNS）算法构建的多线程、高效率向量搜索引擎
-    - 同时能够处理暴搜请求和 ANNS 索引修改请求；处理各种数据格式，包括 FP32、FP16 和 BF16
+    - 同时能够处理暴搜请求和 ANNS 索引修改请求；处理各种数据格式，包括 FP32、FP16 和 BF16;执行索引 Top-K 和索引范围搜索（Range Search）;使用内存中数据或提供基于内存、磁盘和 MMap 等不同方式的索引
     - Cardinal 利用 x86 的 AVX-512 扩展和 ARM 的 NEON 及 SVE 指令集等尖端技术，提供针对高效计算优化的代码
+    - 它引入了 AUTOINDEX 机制，自动选择适合于数据集最佳的搜索策略和索引。开发者无需手动调优，能够节省时间和精力
+    - 内部算法
+      - 搜索算法，包括基于 IVF 和基于图的方法 
+      - 帮助搜索保持所需召回率的算法，不论过滤样本的百分比如
+      - 更高效的 Best-First 搜索算法迭代方
+      - 定制了优先队列数据结构中的算法
   - 估算容量
     - 5百万128维，原始数据量大约是2.5g，工具估算时会乘以一个安全系数，这个系数一般是2到3之间，所以你看到的Loading Memory是5G多点
     - 工具是按cluster估的，每个节点都给了推荐，如果不算etcd/minio/plasar这些的话，milvus的节点的推荐内存配置大约总共27. 5g  etcd推荐3*4g，minio推荐2*8g，pulsar的比较多，因为它本身也是个分布式系统 所以如果500万128维的向量其实必要用cluster，一个standalone就好了
@@ -202,7 +211,9 @@
         - 用更高精度的量化向量进行 refine 得到最终结果。
   - https://github.com/harsha-simhadri/big-ann-benchmarks/pulls?q=Zilliz+Solution+author%3Ahhy3
 - [向量检索大赛](https://mp.weixin.qq.com/s/pngwV1Ibe4rxmtWrcr_D2g)
-
+- Zilliz
+  - Unstructured Data Meetup
+    - [Feb](https://www.youtube.com/watch?v=42wZa3NasoM)
 
 
 
