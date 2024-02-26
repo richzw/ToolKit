@@ -806,6 +806,7 @@
   - 大型单线程写入优于许多小型并发写入
   - 当写入量很小并且无法分组或缓冲时，才使用多线程写
   - 对于读写负载很高的工作，应该配置更大的预留空间
+  - [SSD硬件速度飙升，唯独云存储未能跟上](https://mp.weixin.qq.com/s/hsh0y4eyPD2Rq1fjGK8jkg)
 - [如何排查问题](https://mp.weixin.qq.com/s/g6UuqlWb-0h3eW69-VG52Q)
   - CPU过高，怎么排查问题
     - CPU 指标解析

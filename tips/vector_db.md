@@ -154,7 +154,7 @@
     -  Knowhere 属于开源，其部署环境更多样，可在所有主机类型上运行
     - Knowhere 依赖于 OSS 库（如 Faiss、DiskANN 和 hnswlib）
   - [Cardinal 搜索引擎](https://mp.weixin.qq.com/s/4xx2U8Xyr1RetTkMtRrxyw)
-    - Cardinal 是用现代 C++ 语言和实用的近似最近邻搜索（ANNS）算法构建的多线程、高效率向量搜索引擎
+    - Cardinal 是用现代 C++ 语言和实用的近似最近邻搜索（ANNS）算法构建的多线程、高效率向量搜索引擎， 将搜索引擎的性能比原来提升了 3 倍，搜索性能（QPS）是 Milvus 的 10 倍
     - 同时能够处理暴搜请求和 ANNS 索引修改请求；处理各种数据格式，包括 FP32、FP16 和 BF16;执行索引 Top-K 和索引范围搜索（Range Search）;使用内存中数据或提供基于内存、磁盘和 MMap 等不同方式的索引
     - Cardinal 利用 x86 的 AVX-512 扩展和 ARM 的 NEON 及 SVE 指令集等尖端技术，提供针对高效计算优化的代码
     - 它引入了 AUTOINDEX 机制，自动选择适合于数据集最佳的搜索策略和索引。开发者无需手动调优，能够节省时间和精力
