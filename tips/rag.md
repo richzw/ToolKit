@@ -3,6 +3,11 @@
     - 数据清洗的重要性
     - 精心设计的提示有助于提高准确性
   - 关键文档被遗漏
+    - 通过调整 chunk_size 和 similarity_top_k 参数优化检索效果 -  [LlamaIndex 实现超参数自动调整](https://levelup.gitconnected.com/automating-hyperparameter-tuning-with-llamaindex-72fdd68e3b90)
+    - 检索结果的优化排序 - CohereRerank 进行优化排序
+  - 文档整合限制 —— 超出上下文
+    
+
 
 
 

@@ -205,7 +205,7 @@
     - 如果一个 struct 实现了 Drop，那他里面的字段只能作为一个整体被捕获。但如果闭包只使用了这个闭包中实现了 Copy 的字段，那这个闭包不会捕获这个 struct，而是将使用到的字段 copy 一份。
 - [用 Rust 过程宏魔法简化 SQL 函数实现](https://mp.weixin.qq.com/s/tk31Vd45xkRx7z5hJI8VpA)
   - 设计了 #[function] 过程宏在编译期做类型反射和代码生成，最终暴露给用户一个尽可能简单直观的接口。
-  - 
+- [The Rust Performance Book](https://nnethercote.github.io/perf-book/benchmarking.html)
 
 
 

@@ -182,6 +182,31 @@
     - cpu.cfs_quota_us
       - 指定 cgroup 中的所有任务在一个周期（由 cpu.cfs_period_us 定义）内可以运行的总时间，以微秒（μs，此处表示为“us”）为单位。
       - 一旦 cgroup 中的任务用完配额指定的所有时间，它们就会在该周期指定的剩余时间内受到限制，直到下一个周期才允许运行（这个就是 CPU 节流）
+  - [如何合理设置 request 大小](https://mp.weixin.qq.com/s/1hd9B6ZP5_VOf4hm9Z3hJg)
+    - 两个开源工具可以用于进行 Kubernetes 容量规划：
+      - kube-state-metrics：用于生成和对外暴露集群级指标；
+      - CAdvisor：容器的资源使用分析器
+    - 检测空闲的 CPU 核心
+      - `sum((rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[30m]) - on (namespace,pod,container) group_left avg by (namespace,pod,container)(kube_pod_container_resource_requests{resource="cpu"})) * -1 >0)`
+    - 如何确定哪些命名空间浪费了较多的 CPU 核心
+      - `sum by (namespace)((rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[30m]) - on (namespace,pod,container) group_left avg by (namespace,pod,container)(kube_pod_container_resource_requests{resource="cpu"})) * -1 >0)`
+    - 查找使用 CPU 最多的前 10 个容器
+      - `topk(10,sum by (namespace,pod,container)((rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[30m]) - on (namespace,pod,container) group_left avg by (namespace,pod,container)(kube_pod_container_resource_requests{resource="cpu"})) * -1 >0))`
+    - 检测未使用的内存
+      - `sum((container_memory_usage_bytes{container!="POD",container!=""} - on (namespace,pod,container) avg by (namespace,pod,container)(kube_pod_container_resource_requests{resource="memory"})) * -1 >0 ) / (1024*1024*1024)`
+    - 查找内存使用最多的前 10 个容器
+      - `topk(10,sum by (namespace,pod,container)((container_memory_usage_bytes{container!="POD",container!=""} - on (namespace,pod,container) avg by (namespace,pod,container)(kube_pod_container_resource_requests{resource="memory"})) * -1 >0 ) / (1024*1024*1024))`
+    - 如何合理调整容器的请求大小
+      - `avg by (namespace,owner_name,container)((rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[5m])) * on(namespace,pod) group_left(owner_name) avg by (namespace,pod,owner_name)(kube_pod_owner{owner_kind=~"DaemonSet|StatefulSet|Deployment"}))`
+    - 如何衡量请求优化带来的影响
+      - `sum((rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[30m]) - on (namespace,pod,container) group_left avg by (namespace,pod,container)(kube_pod_container_resource_requests{resource="cpu"})) * -1 >0) - `
+      - `sum((rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[30m] offset 1w) - on (namespace,pod,container) group_left avg by (namespace,pod,container)(kube_pod_container_resource_requests{resource="cpu"} offset 1w )) * -1 >0)`
+  - [Go应用的CPU限制配置](https://mp.weixin.qq.com/s/wKC4K2_C3cpQkWWW5p4AqQ)
+    - [Source](https://www.ardanlabs.com/blog/2024/02/kubernetes-cpu-limits-go.html)
+    - ![img.png](k8s_go_cpu_bound.png)
+    - Go scheduler takes IO bound workloads (executed by G’s on M’s) and converts them into CPU bound workloads (executed by M’s on Cores).
+    - This means your Go programs are CPU bound and this is why the Go runtime creates as many OS threads as there are cores on the machine it’s running on.
+    - The Go runtime doesn’t know it’s running in K8s and by default will create an OS thread for every CPU that is on the node. If you are setting CPU limits for your service, it’s up to you to set the GOMAXPROCS value to match
 - Misc
   - 通过 Kubernetes 集群提供 device plugin framework，可以实现 GPU 共享能力
   - Kubernetes 在大规模集群下的挑战

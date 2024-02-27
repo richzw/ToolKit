@@ -68,9 +68,21 @@
     - ANN 最近邻检索
         - [Comprehensive Guide To Approximate Nearest Neighbors Algorithms](https://towardsdatascience.com/comprehensive-guide-to-approximate-nearest-neighbors-algorithms-8b94f057d6b6)
         - 树方法，如 KD-tree，Ball-tree，Annoy
+          - KD-Tree（K维树）：KD-Tree是一种用于多维空间的数据结构
+            - 在向量数据库中，KD-Tree对向量的各个维度进行划分，形成一种树状结构。每个节点都存储一个向量，并在某个维度上有一个分裂值，将数据空间分为两半
+            - 对于低维数据，KD-Tree查询效率高，占用的内存相对较少。然而，随着数据维度的增加，查询效率降低，受到“维度诅咒”的影响，不适合高维数据。
+          - Ball Trees：Ball Trees使用“超球体”（或简称“球”）来对数据进行分区
+            - 每个节点的球内都包含数据点的子集，而子节点的球则进一步细分该空间。Ball Trees 适用于任何度量空间，特别是在高维空间中，效果可能优于KD-Tree。
+            - 缺点是构建过程可能相对较慢，需要更多的内存
+          - Annoy（Approximate Nearest Neighbors Oh Yeah）：Annoy是一种为大型数据集创建持久性、静态、可查询的近似最近邻索引的方法
+            - 它通过构建多棵随机投影树实现。Annoy 提供了查询速度和精确度之间的良好平衡，适用于大型数据集 然而它是一个近似方法，可能不保证总是返回真正的最近邻。
         - 哈希方法，如 Local Sensitive Hashing (LSH)
         - 矢量量化方法，如 Product Quantization (PQ)
-        - 近邻图方法，如 Hierarchical Navigable Small World (HNSW)
+          - PQ将大向量空间分解为更小的子空间，并为这些子空间的每一个独立地学习一组有限的“代码簿”。向量被编码为这些子空间中最近的代码簿条目的索引
+          - PQ 极大地压缩了原始向量，从而实现了存储和查询的高效率。但凡事都有双面性，由于是有损压缩，PQ 可能会损失一些精确度。
+        - 近邻图方法，如 [Hierarchical Navigable Small World (HNSW)](https://towardsdatascience.com/similarity-search-part-4-hierarchical-navigable-small-world-hnsw-2aad4fe87d37)
+          - HNSW利用图结构，其中每个节点都是数据中的一个向量，通过一系列层次来确保快速访问。每一层都是原始数据的一个子集，上层的数据点数量比下层少。
+          - HNSW 提供了查询速度和精确度之间的良好平衡，适用于大型和高维数据集。但它需要更多的内存，构建索引的过程可能较慢。
     - 近似最近邻 (ANN)算法
       - - [ANN]
   - [Comprehensive Guide To Approximate Nearest Neighbors Algorithms](https://towardsdatascience.com/comprehensive-guide-to-approximate-nearest-neighbors-algorithms-8b94f057d6b6)
@@ -167,6 +179,9 @@
     - 5百万128维，原始数据量大约是2.5g，工具估算时会乘以一个安全系数，这个系数一般是2到3之间，所以你看到的Loading Memory是5G多点
     - 工具是按cluster估的，每个节点都给了推荐，如果不算etcd/minio/plasar这些的话，milvus的节点的推荐内存配置大约总共27. 5g  etcd推荐3*4g，minio推荐2*8g，pulsar的比较多，因为它本身也是个分布式系统 所以如果500万128维的向量其实必要用cluster，一个standalone就好了
   - 全量查询功能 - Query iterator
+  - 数据是分片管理，主要有两种分片(segment)
+    - 一种是growing segment，负责接收新插入的数据，没有索引，搜索时暴搜(在最新的版本里提供了临时索引，ivf，超过几千条数据时开始生效)
+    - 另一种是sealed segment，数据是固定的，不接受新数据，每个sesled分片建立一个独立的索引，建立索引的过程就是train，ivf索引是迭代若干次得到nlist个cluster
   - Milvus 2.3
     - Cosine 相似度类型： 无需向量归一化，简化数据搜索流程。
     - Upsert 数据：提升更新和删除数据的管理流程效率，适用于频繁更新数据且追求数据一致性和原子性的场景。
@@ -214,7 +229,7 @@
 - Zilliz
   - Unstructured Data Meetup
     - [Feb](https://www.youtube.com/watch?v=42wZa3NasoM)
-
+- [Vector DB Comparison](https://www.superlinked.com/vector-db-comparison)
 
 
 
