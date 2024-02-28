@@ -127,7 +127,7 @@
 - [QPS 的计算](https://mp.weixin.qq.com/s/m4HbCbkqZul-o-R5mxdVng)
   - 比较合理的 QPS 范围
     - 带了数据库的服务一般写性能在 5k 以下，读性能一般在 10k 以下，能到 10k 以上的话，那很可能是在数据库前面加了层缓存
-
+- [C++常见避坑指南](https://mp.weixin.qq.com/s/ivmOl-qGALnHEVbwKANiug)
 
 
 

@@ -606,8 +606,21 @@
     - 依赖性问题： pod 需要卷、密钥或配置映射才能运行。
     - Taints and tolerations
       - Taints 是 Kubernetes 的一种机制，它允许我们指定分配给节点的 pod。当节点有 taint时，只有包含相应toleration的 Pod 才能在该节点中运行。
-
-
+- [GC 设计与实现](https://mp.weixin.qq.com/s/34tEQwhl92ATQWRuOyaBdg)
+  - 概述
+    - Kubernetes 中的垃圾回收周期自动执行，集群内每个运行 kubelet 的节点上都会有一个垃圾回收器在运行
+    - 可以简单将其理解为一个独立运行的进程甚至一个 goroutine, 事实上，Kubernetes 的垃圾回收是以 控制器资源 的形式存在和运行的。
+    - Owner, Dependent
+      - Kubernetes 中被依赖的资源对象称之为 Owner (属主资源), 依赖其他资源的对象称之为 Dependent (依赖资源)
+      - 我们创建了一个副本数量为 3 的 Deployment
+        - Pod 作为 ReplicaSet 的 Dependent, 它的 Owner 为 ReplicaSet (Deployment 底层实现需要 ReplicaSet)
+        - ReplicaSet 作为 Owner 的同时也同样作为 Dependent, 它的 Owner 为 Deployment, Dependent 为 3 个依赖它的 Pod
+        - Deployment 作为 Owner, 它的 Dependent 为依赖的 ReplicaSet
+  - 回收机制
+    - 垃圾回收采用的是级联删除机制，例如删除 ReplicaSet 资源对象 R1 之后，会删除依赖 R1 资源对象的 Pod 资源对象， 级联删除有两种类型: 前台级联删除 和 后台级联删除。
+  - 孤儿资源对象
+    - 当 Kubernetes 删除某个资源 (Owner) 对象时，其全部依赖 (Dependent) 对象被称作被遗弃的 (Orphaned) 孤儿资源对象，该功能由下文中的 Finalizer 来实现
+    - Finalizer 用于防止误操作删除了集群依赖的正常运行资源，Finalizer 可以作为资源对象的属性和资源进行绑定，用于执行资源对象在删除之前的逻辑， 所有对象在删除之前，其 Finalizer 属性字段必须为 nil, API Server 才会删除该对象
 
 
 
