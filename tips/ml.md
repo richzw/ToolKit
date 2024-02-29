@@ -948,6 +948,7 @@
     - [Paper Summary](https://wdxtub.com/paper/paper-008/2023/04/25/)
   - [Using GPT-4 for content moderation](https://openai.com/blog/using-gpt-4-for-content-moderation) 用于互联网内容审核
   - [SynthID](https://www.deepmind.com/synthid) a tool for watermarking and identifying AI-generated images
+    - [人工智能水印](https://mp.weixin.qq.com/s/a7loCRioleww_X9nWeGisA)
   - [inference]
     - Xinference（https://github.com/xorbitsai/inference） 使得本地模型部署变得非常简单。用户可以轻松地一键下载和部署内置的各种前沿开源模型
     - [LLM 推理新优化策略：使用连续批处理](https://mp.weixin.qq.com/s/iTT5jJc3tiJ_YzyPf1tFWg)

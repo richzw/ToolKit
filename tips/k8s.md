@@ -621,12 +621,54 @@
   - 孤儿资源对象
     - 当 Kubernetes 删除某个资源 (Owner) 对象时，其全部依赖 (Dependent) 对象被称作被遗弃的 (Orphaned) 孤儿资源对象，该功能由下文中的 Finalizer 来实现
     - Finalizer 用于防止误操作删除了集群依赖的正常运行资源，Finalizer 可以作为资源对象的属性和资源进行绑定，用于执行资源对象在删除之前的逻辑， 所有对象在删除之前，其 Finalizer 属性字段必须为 nil, API Server 才会删除该对象
-
-
-
-
-
-
+- [外部 HTTP 请求到达 Pod 容器]
+  - 公网 IP 地址通常会绑定一个 Load Balancer 负载均衡器，此时请求会进入此负载均衡器。
+    - Load Balancer 负载均衡器可以是硬件，也可以是软件，它通常会保持稳定（固定的公网 IP 地址），因为如果切换 IP 地址会因为 DNS 缓存的原因导致服务某段时间内不可达。
+    - Load Balancer 负载均衡器是一个重要的中间层，对外承接公网流量，对内进行流量的管理和转发。
+  - Load Balancer 再将请求转发到 kubernetes 集群的某个流量入口点，通常是 ingress。
+    - ingress 负责集群内部的路由转发，可以看成是集群内部的网关。
+    - ingress 只是配置，具体进行流量转发的是 ingress-controller，后者有多种选择，比如 Nginx、HAProxy、Traefik、Kong 等等。
+  - ingress 根据用户自定义的路由规则进一步转发到 service
+  - service 根据 selector（匹配 label 标签）将请求转发到 pod。
+    - service 有多种类型，集群内部最常用的类型就是 ClusterIP。
+    - service 本质上也只是一种配置，这种配置最终会作用到 node 节点上的 kube-proxy 组件，后者会通过设置 iptables/ipvs 来完成实际的请求转发。
+    - service 可能会对应多个 pod，但最终请求只会被随机转发到一个 pod 上。
+  - pod 最后将请求发送给其中的 container 容器。
+    - 同一个 pod 内部可能有多个 container，但是多个容器不能共用同一个端口，因此这里会根据具体的端口号将请求发给对应的 container。
+- [Kubernetes 架构](https://mp.weixin.qq.com/s/7pxrub1WH68IUILOBolEBQ)
+  - master node
+    - • Kube-apiserver：Kube-apiserver 是 Kubernetes 的 API 入口，是集群流量入口；
+    - • Kube-controller-manager：Kube-controller-manager 包含很多个 Controller，用于调谐集群中的资源；
+      - Kubernetes 中采用声明式 API，即 API 不需要关心具体功能实现，只需关心最终状态。一个 API 对应一个 Controller，具体功能由 Controller 实现同时调谐至预期状态
+    - • Kube-scheduler：Kube-scheduler 是集群中默认调度器，给 Pod 选择最优节点调度；
+    - • Etcd：Kuebernetes 的后端存储，集群中所有可持久化数据都存储在 Etcd 中。
+  - worker node
+    - • CRI：容器运行时，管理容器生命周期；
+    - • Kubelet：管理 Pod 生命周期，Pod 是 Kubernetes 中最小调度单元；
+    - • CNI：容器网络接口，实现 Kubernetes 中 Pod 间网络联通；
+    - • CSI：容器存储接口，屏蔽底层存储实现，方便用户使用第三方存储；
+    - • Kube-proxy：该组件主要实现多组 Pod 的负载均衡；
+  - 创建一个 Pod 需要经历哪些流程
+    - • 用户通过 kubectl 创建一个 Deployment，请求会发给 Kube-apiserver；
+    - • Kube-apiserver 会将 Deployment 的描述信息写入 Etcd 中，Kube-apiserver 将请求结果返回给用户；
+    - • Kube-controller-manager 的 Deployment Controller 从 Kube-apiserver Watch 到 Deployment 的创建事件，并创建一个 ReplicaSet；
+    - • Kube-apiserver 会将 ReplicaSet 的描述信息写入 Etcd 中；
+    - • Kube-controller-manager 的 ReplicaSet Controller 从 Kube-apiserver Watch 到 ReplicaSet 的创建事件，并创建一个 Pod；
+    - • Kube-apiserver 会将 Pod 的描述信息写入 Etcd 中；
+    - • Kube-scheduler 从 Kube-apiserver Watch 到 Pod 的创建事件，并根据调度算法从集群中选择一个最优的节点，并更新 Pod 的 nodeName 字段；
+    - • Kube-apiserver 会将 Pod 的更新信息写入 Etcd 中；
+    - • 上述绑定的节点 Kubelet 从 Kube-apiserver Watch 到 Pod 绑定节点是自身，直接调用 CRI 创建容器；
+    - • 结果返回，并写入 Etcd。
+    - ![img.png](k8s_pod_creation_process.png)
+- 为什么需要 Ingress 
+  - 为了解决服务暴露的问题，Kubernetes 集群中的 Service 和 Pod 只能在集群中访问，集群外部需要通过 NodePort 类型的 Service 进行访问，
+  - 而且一般不是直接访问 NodePort 暴露的 Service, 而是通过 LoadBalancer 类型的 Service 转发到 NodePort
+  - 虽然 LoadBalancer 类型的 Service 可以解决服务发现和负载均衡问题，但是应用时还是会存在一些限制，
+    - LoadBalancer 仅支持四层负载均衡，不支持七层负载均衡，如果一个应用需要对外开放 N 个服务时，需要为每一个服务都创建一个 LoadBalancer，这会增加开销和管理成本
+    - LoadBalancer 要求 Kubernetes 集群必要运行在支持 LoadBalancer Cloud Provider 的云计算服务商的环境中
+  - 为了解决上面提到的限制和问题，可以通过引入 Ingress 来统一应用流量入口，将集群内服务暴露到集群外部，并且可以自定义服务的访问策略。
+  - Ingress 还可以提供一些附加功能，例如授权、限流、SSL 等七层协议对应的应用功能。
+  - Ingress 资源本身不会自动创建负载均衡器，必须要借助 Ingress Controller 才能控制 Kubernetes 集群的进出口流量，所以集群中必须有一个运行的 Ingress Controller， Ingress Controller 会根据 Ingress 的定义来管理负载均衡器
 
 
 

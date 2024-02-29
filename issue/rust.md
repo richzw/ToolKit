@@ -206,7 +206,17 @@
 - [用 Rust 过程宏魔法简化 SQL 函数实现](https://mp.weixin.qq.com/s/tk31Vd45xkRx7z5hJI8VpA)
   - 设计了 #[function] 过程宏在编译期做类型反射和代码生成，最终暴露给用户一个尽可能简单直观的接口。
 - [The Rust Performance Book](https://nnethercote.github.io/perf-book/benchmarking.html)
-
+- Rust Questions
+  - [Rust Questions](https://mp.weixin.qq.com/s/y_x1xTNOlS-oRUBWo5mZnw)
+    - 什么是匹配表达式？Rust 如何使用匹配表达式？
+    - trait bound 和 where 子句有什么区别?
+    - Rust 中的闭包捕获有哪些类型？ 移动捕获, 借用捕获
+    - 在 Rust 中可变闭包和不可变闭包有什么区别？
+      - 不可变闭包通过引用捕获变量，这意味着它可以读取变量但不能修改它们。
+      - 可变闭包通过可变引用捕获变量，这意味着它可以读取和修改捕获的变量。值得注意的是，可变闭包要求捕获的变量也是可变的。
+    - Rust 特征 (Traits) 和接口有什么区别？
+    - 什么是 Rust 中的生命周期？为什么需要生命周期？
+      - 防止悬垂引用和非法引用
 
 
 
