@@ -669,7 +669,11 @@
   - 为了解决上面提到的限制和问题，可以通过引入 Ingress 来统一应用流量入口，将集群内服务暴露到集群外部，并且可以自定义服务的访问策略。
   - Ingress 还可以提供一些附加功能，例如授权、限流、SSL 等七层协议对应的应用功能。
   - Ingress 资源本身不会自动创建负载均衡器，必须要借助 Ingress Controller 才能控制 Kubernetes 集群的进出口流量，所以集群中必须有一个运行的 Ingress Controller， Ingress Controller 会根据 Ingress 的定义来管理负载均衡器
-
+- [eBPF 的云原生深度可观测性]
+  - tcp_v4_connect/tcp_v6_connect：获取连接建立相关数据；
+  - tcp_sendmsg：获取 tcp 流量相关数据
+  - 统计接收数据包我们没有去 hook tcp_recvmsg
+  - 
 
 
 

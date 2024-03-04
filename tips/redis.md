@@ -467,7 +467,15 @@
     - 首先Redis底层数据结构里，根据Value的不同，会进行数据结构的重新选择；
     - 可以扩展新的数据结构，进行序列化构建，然后通过 restore 一次性写入；
     - 将大 key 分拆为多个 key，设置较长的过期时间
-
+- [高性能Redis集群](https://mp.weixin.qq.com/s/5BwWCekb_wIu6LrCdmoGCQ)
+  - 数据怕丢失 -> 持久化（RDB/AOF）
+  - 恢复时间久 -> 主从副本（副本随时可切）
+  - 故障手动切换慢 -> 哨兵集群（自动切换）
+  - 读存在压力 -> 扩容副本（读写分离）
+  - 写存在压力/容量瓶颈 -> 分片集群
+  - 分片集群社区方案 -> Twemproxy、Codis（Redis 节点之间无通信，需要部署哨兵，可横向扩容）
+  - 分片集群官方方案 -> Redis Cluster （Redis 节点之间 Gossip 协议，无需部署哨兵，可横向扩容）
+  - 业务侧升级困难 -> Proxy + Redis Cluster（不侵入业务侧）
 
 
 

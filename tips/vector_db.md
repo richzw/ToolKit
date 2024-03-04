@@ -153,6 +153,7 @@
     - mmap功能在collection.load的时候会把s3上的数据文件下载到本地硬盘，所以首先本地硬盘得有同等大小。然后内存还是要的，最好能达到数据量的1/4以上。
     - 然后如果你用的是hnsw索引，性能可能会比纯内存慢一到两倍这样。如果用的ivf索引，性能会比纯内存慢一到两个数量级
 - [Milvus]
+  - ![img.png](vector_db_milvus_overview.png)
   - indexnode，每个querynode，每个datanode都是单独的容器
     - indexnode只负责建索引任务，querynode只负责查询任务，datanode只负责数据的持久化和整理任务。indexnode建索引时总是会尽量用满cpu，以最快速度建好索引
   - Config参考 https://github.com/zilliztech/milvus-helm/blob/master/charts/milvus/values.yaml#L731C7-L731C45
