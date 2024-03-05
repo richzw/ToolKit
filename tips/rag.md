@@ -7,7 +7,10 @@
     - 检索结果的优化排序 - CohereRerank 进行优化排序
   - 文档整合限制 —— 超出上下文
     
-
+- [ Semantic Chunking for RAG](https://pub.towardsai.net/advanced-rag-05-exploring-semantic-chunking-97c12af20a4d)
+  - Embedding-based chunking 
+  -  BERT-based chunking techniques (naive, cross-segment, SeqModel)
+  -  LLM-based chunking
 
 
 

@@ -672,8 +672,22 @@
 - [eBPF 的云原生深度可观测性]
   - tcp_v4_connect/tcp_v6_connect：获取连接建立相关数据；
   - tcp_sendmsg：获取 tcp 流量相关数据
-  - 统计接收数据包我们没有去 hook tcp_recvmsg
-  - 
+  - 统计接收数据包我们没有去 hook tcp_recvmsg，tcp_cleanup_rbuf 的执行次数会远低于 tcp_recvmsg
+  - 内核 sock 对象里的 sk_max_ack_backlog 服务端的这个参数不可能为 0，基于这个原理，我们就可以轻松识别客户端和服务端身份。
+  - ![img.png](k8s_network_ebpf_metric.png)
+  - 元数据关联
+    - 基于 /proc 和 CRI 来构建 PID、 Netns、Container 元数据的本地缓存，然后根据 eBPF 拿到的原始 netns、pid 等信息进行反查即可
+    - 远端 IP 的关联。当远端 IP、Netns 在节点上找不到的情况，我们就会 fallback 到基于 Kubernetes APIServer的方案来获取。
+    - NAT 问题。在 K8s 场景下，部分 CNI 的实现会对数据包进行 NAT，我们拿到的可能是一个 K8s Service 的 VIP，无法知道真正流量流向的 POD
+      - 我们就需要 hook conntrack 相关函数来追踪 NAT 行为，并记录 NAT 之后的 IP。
+- K8s Events
+  - PodScheduled：当 pod 计划在集群中的节点上运行时，会发生此事件。它指示 Pod 的初始被调度的节点位置。
+  - UnhealthyContainer：当容器的健康探测失败时生成，表明容器处于不健康状态。
+  - NodeNotReady：此事件表示由于潜在问题，Kubelet 无法上报节点信息到 API Server。可能由网络问题或者硬件故障引发，也有可能由于容器运行时相应慢引发的 PLEG is not healthy。
+  - CrashLoopBackOff：当 Pod 重复启动、崩溃、重新启动、然后再次崩溃时，会发生此事件，表明容器应用启动时存在持续性问题（无法正常启动）。
+  - FailedScheduling：当 Kubernetes 调度程序无法找到合适的节点来运行 pod 时，通常会由于资源限制或其他调度限制而发生此事件。
+  - ImagePullBackOff：当节点无法下载（pull） pod 的指定容器的镜像时，会发生 ImagePullBackOff 事件，镜像可能不存在或者 pull 时的身份验证存在问题。
+
 
 
 

@@ -2102,8 +2102,14 @@
     - 它允许你用一条指令在一堆数据上运行一个操作。举个例子，要对两个int32向量逐元素相加，我们可以用ADD指令一个一个地加起来，或者我们可以用VPADDD指令一次加上 64 对，延迟相同
 - [10亿行的挑战](https://github.com/gunnarmorling/1brc)
   - https://mp.weixin.qq.com/s/_z801oBwANP27C-BXbHNZA
-
-
+- [ I/O聚合]
+  - 读请求的聚合
+    - singleflight 
+  - 写请求的聚合
+    - 文件的Sync会将当前时刻文件在内存中的全部数据一次性同步到磁盘。无论之前执行过多少次Write调用，一次Sync就能全部刷盘。
+    - 使用singleflight来优化写无法保证数据的安全性。
+    - 它必须保证 Sync 操作在 Write 操作之后。因此当发现有正在执行的Sync操作，那么就等待这次完成，然后必须重新开启一轮的 Sync 操作，等待的过程也是聚合的时机。
+    - 我们可以使用 sync.Cond（或者 Channel ）来实现阻塞和唤醒，使用 sync.Once 来保证同一时间单个执行。
 
 
 

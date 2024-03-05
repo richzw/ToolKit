@@ -826,6 +826,11 @@
       - 含有 LIMIT 的子查询；
       - UNION 或 UNION ALL 子查询；
       - 输出字段中的子查询；
+- Shuffle
+  - shuffle算法的基本原理，就是给输入的数据进行分桶，每个桶内的数据都可以单独处理并且输出结果。这样可以减少汇总数据时hash表的大小
+  - 为什么需要支持shuffle？原因主要有以下三点。
+     - 解决hash表太大导致分配内存失败的问题；提高计算节点的横向扩展性；
+     - 提升性能：当hash表太大时，随机访问hash表会导致非常高的cache miss概率，而cache miss会导致性能显著下降。通过shuffle将hash表切分成多个小hash表进行处理，对每个小hash表的随机访问cache命中率大大提高，进而提升整体性能
 - [奇思妙想的SQL]
   - [兼顾性能的数据倾斜处理](https://mp.weixin.qq.com/s/VGgT1faRKGnUuQ-HHQ3Q5g)
     - 常见的优化方法
