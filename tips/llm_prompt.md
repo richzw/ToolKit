@@ -731,7 +731,9 @@
   这条消息只要回复 OK，我将在接下来的消息中提出需要你帮助设计和撰写的 Prompt。
   ```
 - [GPTs prompt](https://github.com/linexjlin/GPTs/blob/main/prompts/Grimoire.md)
-
+- [Prompt injection and jailbreaking](https://simonwillison.net/2024/Mar/5/prompt-injection-jailbreaking/)
+  - Prompt injection is a class of attacks against applications built on top of Large Language Models (LLMs) that work by concatenating untrusted user input with a trusted prompt constructed by the application’s developer.
+  - Jailbreaking is the class of attacks that attempt to subvert safety filters built into the LLMs themselves.
 
 
 

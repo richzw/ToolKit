@@ -1112,6 +1112,7 @@
 - [Mixtral-8x7B Pytorch 实现](https://mp.weixin.qq.com/s/HProBDSA9WxyD-JuKpJ9ew)
   - base的模型结构为Transformers的改版Mistral-7B
   - MoE 作用在Feed Forward Blocks上
+  - [MoE with neural circuit Diagrams](https://github.com/vtabbott/Neural-Circuit-Diagrams/blob/main/mixtral.ipynb)
 - [Sora]
   - [简单总结主要是以下三个模块：](https://mp.weixin.qq.com/s/Q6SuTFXYlbX4U2M-8DereQ)
     - 一种将视频数据压缩到潜在空间，然后将其转换为“时空潜在图块”的技术，可以作为token输入到Transformer中。
