@@ -948,6 +948,12 @@
   - 客户端发送了一个目标 IP 地址存在但是端口不存在的 UDP 报文，UDP 没有像 TCP 那样的 RST 报文，此时会发生什么？
     - 如果目标端口不可达，那么数据包还没到传输层（UDP/TCP）就被丢弃了。网络层看到没有进程在监听指定的协议端口，就会送回一个“目标端口不可达”的 ICMP 报文。
 - [traceroute by golang](https://mp.weixin.qq.com/s/FKSNjIgkzmWoDPY5GIS8qg)
+  - 它利用了 IP 协议本身的特性：每一个 IP 包都有一个 TTL 字段，表示这个包还能在网络中被转发多少次，每次路由器转发一个 IP 包就将其 -1，
+  - 如果一个路由器发现 IP 包 -1 之后是 0 了，就直接丢弃，并且给 IP 包的 Source IP 发送一个 ICMP 包（包含此 hop 自己的 IP），说这个包气数已尽，无法送达目的地。
+  - traceroute 想要知道去往另一个 IP，中间都会经过哪些 IP 节点。
+  - 它发送一个 TTL=1 的 ping 包出去，包会挂在第一个 hop 上，第一个 hop 发回去 ICMP，traceroute 就知道了第一个 hop 的 IP 地址；
+  - 它再发送一个 TTL=2 的 ping 包，就知道了第二个 hop 的 IP 地址…… 直到收到正确的 ping 响应，就算到头了
+  - mtr 类似于一个 traceroute + ping 的工具，还能告诉我们中间每一个 hop 的延迟
 - [ping by golang](https://mp.weixin.qq.com/s/Zc0wKiQ_kJaO9IS5yis2lw)
 - [Linux core handle tcp_close]
   - ![img.png](socket_tcp_close.png)

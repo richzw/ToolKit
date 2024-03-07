@@ -734,7 +734,7 @@
 - [Prompt injection and jailbreaking](https://simonwillison.net/2024/Mar/5/prompt-injection-jailbreaking/)
   - Prompt injection is a class of attacks against applications built on top of Large Language Models (LLMs) that work by concatenating untrusted user input with a trusted prompt constructed by the application’s developer.
   - Jailbreaking is the class of attacks that attempt to subvert safety filters built into the LLMs themselves.
-
+- [Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models](https://www.edhec.edu/sites/default/files/2023-12/ChatGPT_Paper_Slides%20%281%29%20%281%29%20%281%29.pdf)
 
 
 
