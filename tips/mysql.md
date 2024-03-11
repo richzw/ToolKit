@@ -826,7 +826,7 @@
       - 含有 LIMIT 的子查询；
       - UNION 或 UNION ALL 子查询；
       - 输出字段中的子查询；
-- Shuffle
+- [Shuffle](https://mp.weixin.qq.com/s/edUYhTX3062dNLUcx08GIA)
   - shuffle算法的基本原理，就是给输入的数据进行分桶，每个桶内的数据都可以单独处理并且输出结果。这样可以减少汇总数据时hash表的大小
   - 为什么需要支持shuffle？原因主要有以下三点。
      - 解决hash表太大导致分配内存失败的问题；提高计算节点的横向扩展性；

@@ -687,7 +687,8 @@
   - CrashLoopBackOff：当 Pod 重复启动、崩溃、重新启动、然后再次崩溃时，会发生此事件，表明容器应用启动时存在持续性问题（无法正常启动）。
   - FailedScheduling：当 Kubernetes 调度程序无法找到合适的节点来运行 pod 时，通常会由于资源限制或其他调度限制而发生此事件。
   - ImagePullBackOff：当节点无法下载（pull） pod 的指定容器的镜像时，会发生 ImagePullBackOff 事件，镜像可能不存在或者 pull 时的身份验证存在问题。
-
+- [DRA (Dynamic Resource Allocation)](https://mp.weixin.qq.com/s/uxkDnNZ9JeS2F9F0K0emBw)
+  - Device-plugin 机制在某些特殊场景下的不足
 
 
 

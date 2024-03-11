@@ -611,6 +611,7 @@
       - 通过一系列聊天模型完成和随后的GPT-4（UltraFeedback）评分来收集人工智能反馈（AIF），然后将其转化为偏好数据。
       - 将蒸馏直接偏好优化（dDPO）应用于使用收集的反馈数据的dSFT模型
   - [Gemma](https://mp.weixin.qq.com/s/E52nPpWrhnU7wMLpOhVz5Q)
+    - [Gemma 模型中文指令微调](https://mp.weixin.qq.com/s/jXymgChgWbfj4k9zr2vqmw)
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]
@@ -916,6 +917,8 @@
     - https://colab.research.google.com/github/truera/trulens/blob/main/trulens_eval/examples/expositional/vector-dbs/milvus/milvus_evals_build_better_rags.ipynb
   - [评估 RAG 的Ragas ](https://mp.weixin.qq.com/s/gFr0zYyOeIEtYgcM9olIYQ)
     - https://github.com/milvus-io/bootcamp/tree/master/evaluation
+    - https://github.com/weaviate/recipes/blob/main/integrations/ragas/RAGAs-RAG-langchain.ipynb
+    - https://towardsdatascience.com/evaluating-rag-applications-with-ragas-81d67b0ee31a
   - [评估 RAG](https://mp.weixin.qq.com/s/OnfSxBJx_lVYV_MtyViUMw)
     - Ragas（https://docs.ragas.io/en/latest/concepts/metrics/context_recall.html）是专注于评估 RAG 应用的工具
     - Trulens-Eval（https://www.trulens.org/trulens_eval/install/）也是专门用于评估 RAG 指标的工具，它对 LangChain 和 Llama-Index 都有比较好的集成，可以方便地用于评估这两个框架搭建的 RAG 应用
