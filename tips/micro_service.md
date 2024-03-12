@@ -1194,6 +1194,14 @@
   - 六边形架构（Ports and Adapters
   - 洋葱架构
 - [DDD实践](https://mp.weixin.qq.com/s/QRq_mnifw62LMoHey-tMiQ)
+  - [MVC到DDD的轻量化重构](https://mp.weixin.qq.com/s/qjJNees5VowgnIUdkDGTJA)
+    - DDD 架构能解决，现阶段 MVC 贫血结构中所遇到的众多问题
+    - MVC 分层结构是一种贫血模型设计，它将“状态”和“行为”分离到不同的包结构中进行开发使用
+    - 首先我们要将 service 里的功能进行拆解
+      - service 中具备领域特性的服务实现，抽离到原本贫血模型的 domain 中。
+      - service 中的基础功能组件，如：缓存Redis、配置中心等，迁移到 dao 层。
+      - service 本身最后被当做 application/case 层，来调用 domain 层做服务的编排处理
+    - 每一个 domain 下的领域包内，都包括；model 模型、仓储、接口、事件和服务的处理
 - [存储治理：Redis分库和异地多活](https://mp.weixin.qq.com/s/azIR61meAJxMggB4dMgZ6g)
 - [更精准的时延：使用软件时间戳和硬件时间戳](https://mp.weixin.qq.com/s/s4m0Nw7OrWMalEL_zqs8-A)
   - 网络时延

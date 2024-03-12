@@ -141,6 +141,14 @@
   - WebAssembly 可以更好利用 CPU 特性， WebAssembly 可以完全自由发挥，使得其可以利用更多 CPU 特性，其中例如：64位整数、加载/存储偏移量以及各种 CPU 指令。在这一部分，WebAssembly 能比 asm.js 平均提速5%左右。
   - 编译工具链的优化，WebAssembly 的运行效率同时取决于两部分，第一个是生成代码的编译器，第二个是运行它的虚拟机。WebAssembly 对其编译器进行了更多的优化，使用 Binaryen 编译器代替了 Emscripten，这部分所带来的的速度提升大约在5%-7%。
 - [ANR 问题治理](https://mp.weixin.qq.com/s/ZMkj-VvG5sFfTCfIcFa4mg)
+- Shell
+  - sh 跟bash的区别，实际上是bash有没开启POSIX模式的区别。 简单说，sh是bash的一种特殊的模式，sh就是开启了POSIX标准的bash， /bin/sh 相当于/bin/bash --posix
+  - login shell加载环境变量的顺序是：
+    - ① /etc/profile
+    - ② ~/.bash_profile
+    - ③ ~/.bashrc
+    - ④ /etc/bashrc
+  - non-login shell加载环境变量的顺序是： ① ~/.bashrc ② /etc/bashrc
 
 
 

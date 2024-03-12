@@ -99,7 +99,8 @@
      * | MODE_X         |      +       |         |          |        |          |
        */
     ```
-  
+-  [硬件和操作系统配置](https://mp.weixin.qq.com/s/FKfbg1qw0XAvK_xc_G6u6A)
+  - WiredTiger存储引擎的内部缓存大小可以通过storage.wiredTiger.engineConfig.cacheSizeGB进行设置，其大小应足以容纳整个工作集
 
 
 
