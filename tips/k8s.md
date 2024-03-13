@@ -114,6 +114,10 @@
   - Kuberentes默认调度器有两个调度队列：
     - activeQ：凡事在该队列里的Pod，都是下一个调度周期需要调度的
     - unschedulableQ:  存放调度失败的Pod，当里面的Pod更新后就会重新回到activeQ，进行“重新调度”
+  - [控制 pod 调度到指定节点](https://mp.weixin.qq.com/s/okYZpL8rK7TFxOSdXR0G7w)
+    - 通过 nodeName 调度到指定单个节点、
+    - 通过 nodeSelector 调度到拥有指定标签的节点
+    - 通过 nodeAffinity 实现更复杂的调度规则
 - [调度器](https://mp.weixin.qq.com/s/hmDzXPAUyF-x2rLKNchXPA?poc_token=HCh8dmWj81fQExu2zveIuS1uAPGiNCH8FHs4WEd-)
   - kube-scheduler 负责分配调度 Pod 到集群内的节点上,它监听 kube-apiserver,查询还未分配 Node 的 Pod,然后根据调度策略为这些 Pod 分配节点(更新 Pod 的 NodeName 字段)。
   - kube-scheduler 调度分为两个阶段, predicate 和 priority:
@@ -127,7 +131,6 @@
   - init container 资源需求
     - 当 kube-scheduler 调度带有多个 init 容器的 Pod 时，只计算 cpu.request 最多的 init 容器，而不是计 算所有的 init 容器总和
     - 由于多个 init 容器按顺序执行，并且执行完成立即退出，所以申请最多的资源 init 容器中的所需资源即可满足所有 init 容器需求
-    - 
   - 把 Pod 调度到指定 Node 上
     - 可以通过 nodeSelector、nodeAffinity、 podAffinity 以及 Taints 和 tolerations 等来将 Pod 调度到需要的 Node上。也可以通过设置 nodeName 参数，将 Pod 调度到指定 node 节点上。
   - Taints & Tolerations

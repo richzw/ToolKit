@@ -128,6 +128,19 @@
     - Query Routing: Discusses the routing of queries to the most appropriate source or system component in a RAG setup.
     - Agents in RAG: This could delve into the role of agents (autonomous or semi-autonomous entities) in RAG systems.
     - Response Synthesizer: A section on how responses are generated or synthesized in RAG systems.
+  - [advanced RAG](https://towardsdatascience.com/advanced-retrieval-augmented-generation-from-theory-to-llamaindex-implementation-4de1464a9930)
+    - Pre-retrieval optimization: Sentence window retrieval
+      - Sliding window uses an overlap between chunks and is one of the simplest techniques.
+      -  Enhancing data granularity applies data cleaning techniques, such as removing irrelevant information, confirming factual accuracy, updating outdated information, etc.
+      -  Adding metadata, such as dates, purposes, or chapters, for filtering purposes.
+      -  Optimizing index structures involves different strategies to index data, such as adjusting the chunk sizes or using multi-indexing strategies.
+    - Retrieval optimization: Hybrid search
+      - Fine-tuning embedding models customizes embedding models to domain-specific contexts, especially for domains with evolving or rare terms.
+      - Dynamic Embedding adapts to the context in which words are used, unlike static embedding, which uses a single vector for each word
+    - Post-retrieval optimization: Re-ranking
+      - Prompt compression reduces the overall prompt length by removing irrelevant and highlighting important context.
+      - Re-ranking uses machine learning models to recalculate the relevance scores of the retrieved contexts
+    - https://github.com/weaviate/recipes/blob/main/integrations/llamaindex/retrieval-augmented-generation/advanced_rag.ipynb
 - [RAG 问题](https://mp.weixin.qq.com/s/2dwnwQGsqKWZQX8gEUV0Sw)
   - 朴素的RAG通常将文档分成块，嵌入它们，并检索与用户问题具有高语义相似性的块。但是，这会带来一些问题
     - 文档块可能包含降低检索效果的无关内容
@@ -216,9 +229,12 @@
     - 精心设计的提示有助于提高准确性
   - 关键文档被遗漏
     - 通过调整 chunk_size 和 similarity_top_k 参数优化检索效果 -  [LlamaIndex 实现超参数自动调整](https://levelup.gitconnected.com/automating-hyperparameter-tuning-with-llamaindex-72fdd68e3b90)
-    - 检索结果的优化排序 - CohereRerank 进行优化排序
+    - 检索结果的优化排序 
+      - 先提取前十个节点，再用 CohereRerank 进行优化排序，精选出最相关的两个节点。
+      - Boosting RAG: Picking the Best Embedding & Reranker models
+      - Improving Retrieval Performance by Fine-tuning Cohere Reranker with LlamaIndex
   - 文档整合限制 —— 超出上下文
-    
+    - 调整检索策略 高级检索与搜索、自动检索、知识图谱检索
 - [ Semantic Chunking for RAG](https://pub.towardsai.net/advanced-rag-05-exploring-semantic-chunking-97c12af20a4d)
   - Embedding-based chunking 
   -  BERT-based chunking techniques (naive, cross-segment, SeqModel)
@@ -234,6 +250,15 @@
   - 嵌入适配器（Embedding adaptors），可以支持检索到更多与用户查询密切匹配的相关文档
     - 适配器是以小型前馈神经网络的形式实现的，插入到预训练模型的层之间。训练适配器的根本目的是改变嵌入查询，从而为特定任务产生更好的检索结果。
     - 嵌入适配器是在嵌入阶段之后、检索之前插入的一个阶段。可以把它想象成一个矩阵（带有经过训练的权重），它采用原始嵌入并对其进行缩放。
+- [When Simple RAG Fails](https://docs.google.com/presentation/d/12iRlcv-m47cCxEaIMwexrZ1a1xzg4QE9eUwVoafLvvY/edit#slide=id.g2a22202e9fb_0_167)
+  - Questions are not relevant to corpus
+  - Questions are vague
+  - Questions are not about fact retrieval
+  - Questions contain multiple sub questions
+  - Questions require multi-hop logic
+  - Questions include some non-semantic components
+  - Conflicting information
+  - [Langchain query analysis](https://python.langchain.com/docs/use_cases/query_analysis/)
 
 
 
