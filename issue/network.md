@@ -787,7 +787,11 @@
     - 理论上线就到了2的32次方（ip数）×2的16次方（port数）×2的16次方（服务器port数）个
     - Linux每维护一条TCP连接都要花费内存资源的，每一条静止状态（不发送数据和不接收数据）的 TCP 连接大约需要吃 3.44K 的内存，那么 8 GB 物理内存的服务器，最大能支持的 TCP 连接数=8GB/3.44KB=2,438,956（约240万）
 - [WireShark 过滤包含特定字符串的流](https://mp.weixin.qq.com/s/--G7kZfFJ0zNqATys2kjbQ)
-
+- Commands
+  - netstat -o 查看keepalive、重传
+  - netstat -t 查看收包（自身）慢，还是发包走后对方慢
+  - 强大的丢包统计，保命的命令：netstat -s |egrep -i "drop|route|overflow|filter|retran|fails|listen"
+  - tcp队列是否溢出：netstat -s | egrep "listen|LISTEN" 
 
 
 

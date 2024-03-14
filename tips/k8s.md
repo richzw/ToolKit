@@ -687,6 +687,14 @@
   - PodScheduled：当 pod 计划在集群中的节点上运行时，会发生此事件。它指示 Pod 的初始被调度的节点位置。
   - UnhealthyContainer：当容器的健康探测失败时生成，表明容器处于不健康状态。
   - NodeNotReady：此事件表示由于潜在问题，Kubelet 无法上报节点信息到 API Server。可能由网络问题或者硬件故障引发，也有可能由于容器运行时相应慢引发的 PLEG is not healthy。
+    - kubelet的日志 single pvc can not twice the "same" pod
+    - 一个Pod可以包含一个或多个紧密相关的容器，这些容器共享网络和存储资源。PersistentVolumeClaim（PVC）是用户对存储资源的申请，它可以被Pod中的容器作为持久化存储挂载使用
+    - 尽管Kubernetes支持在同一个Pod中运行多个容器，但如果这些容器尝试通过volumeDevices或volumeMounts 同时挂载同一个PVC，就会出现问题
+    - PVC是一种抽象的存储资源，它背后对应的PersistentVolume（PV）可能支持或不支持多个访问模式，包括ReadWriteOnce（RWO）、ReadOnlyMany（ROX）和ReadWriteMany（RWX）
+    - 当多个容器尝试在同一个Pod内部同时以ReadWriteOnce模式挂载同一个PVC时，就会违反这一限制，导致“ContainersNotReady”的错误。
+    - 解决方案
+      - 如果Pod内的多个容器确实需要访问同一存储资源，可以考虑为每个容器创建独立的PVC，然后将这些PVC分别挂载到各自的容器上。
+      - 使用支持ReadWriteMany（RWX）访问模式的存储解决方案，如NFS、CephFS等。这样，多个容器即使同时挂载同一个PVC也不会有问题
   - CrashLoopBackOff：当 Pod 重复启动、崩溃、重新启动、然后再次崩溃时，会发生此事件，表明容器应用启动时存在持续性问题（无法正常启动）。
   - FailedScheduling：当 Kubernetes 调度程序无法找到合适的节点来运行 pod 时，通常会由于资源限制或其他调度限制而发生此事件。
   - ImagePullBackOff：当节点无法下载（pull） pod 的指定容器的镜像时，会发生 ImagePullBackOff 事件，镜像可能不存在或者 pull 时的身份验证存在问题。

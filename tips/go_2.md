@@ -1956,7 +1956,7 @@
   - 更好的边界检查消除方法
     - Go 的边界检查有两个:索引a[i]和 slicea[i,j]。Go 编译器在访问这两种方式的时候会插入一些边界检查代码
     - a[i:j] 会产生两个边界检查: 0 <= i <= j 和 0 <= j <= cap(a)
-
+- [High-Speed Packet Processing in Go: From net.Dial to AF_XDP](https://levelup.gitconnected.com/high-speed-packet-transmission-in-go-from-net-dial-to-af-xdp-2699452efef9)
 
 
 
