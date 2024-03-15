@@ -1528,6 +1528,9 @@
     - 模版化，基于 profile 将模版化热通用函数。
     - map/slice 的预分配。
     - 生命周期分配，将具有相似生命周期的分配放在一起。
+  - https://andrewwphillips.github.io/blog/pgo.html#background
+  - 案例
+    - [Testing out Profile-Guided Optimization on Dolt's SQL Benchmarks](https://www.dolthub.com/blog/2024-02-02-profile-guided-optimization/)
 - [Cost of a integer cast](https://boyter.org/posts/cost-of-integer-cast-in-go/)
   - a integer to integer cast it’s as close to “free” as any other CPU operation. Integer to float is about 3x slower, but again for most things you can consider it free.
 - [Is Go scalable]

@@ -250,6 +250,8 @@
   - 嵌入适配器（Embedding adaptors），可以支持检索到更多与用户查询密切匹配的相关文档
     - 适配器是以小型前馈神经网络的形式实现的，插入到预训练模型的层之间。训练适配器的根本目的是改变嵌入查询，从而为特定任务产生更好的检索结果。
     - 嵌入适配器是在嵌入阶段之后、检索之前插入的一个阶段。可以把它想象成一个矩阵（带有经过训练的权重），它采用原始嵌入并对其进行缩放。
+  - [Retrieval-Augmented Generation for Large Language Models: A Survey](https://mp.weixin.qq.com/s/3WAWy4ZV6Ezft_2MJHMgtg)
+    - 
 - [When Simple RAG Fails](https://docs.google.com/presentation/d/12iRlcv-m47cCxEaIMwexrZ1a1xzg4QE9eUwVoafLvvY/edit#slide=id.g2a22202e9fb_0_167)
   - Questions are not relevant to corpus
   - Questions are vague

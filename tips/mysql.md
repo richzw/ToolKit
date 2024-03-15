@@ -853,8 +853,20 @@
       - 数据倾斜的核心在于数据处理不均匀，而数据处理的不均匀往往又来自数据重分发，也就是shuffle
       - 我们联想到了Distmapjoin的能力，通过对中小规模的表（为便于理解，后文用维表进行替代）构建远程分布式查询节点，大表再通过网络远程查询相关维表数据，从而实现了类似于Mapjoin的方式，大表无须shuffle即能完成Join操作
       - Mapjoin用于处理热点数据，将维表热点记录广播至大表所在计算节点；Distmapjoin用于处理非热点数据，用于通过构建远程分布式查询节点，实现大表在无需移动的情况下完成数据关联操作
-
-
+- [where 条件后 写上1=1]
+  - SQL注入
+  - 语法规范
+    ```
+    String sql="select * from table_name where 1=1";
+    if( condition 1) {
+      sql=sql+"  and  var2=value2";
+    }
+    if(condition 2) {
+      sql=sql+"  and var3=value3";
+    }
+    ```
+  - 拷贝表
+  - 复制表结构 `select  * from  Source_table where   1 <> 1;`
 
 
 

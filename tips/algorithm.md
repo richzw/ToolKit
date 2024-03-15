@@ -639,6 +639,10 @@
     - FIFO
     - LRU
     - LFU
+      - [The cache stores:](https://github.com/teivah/go-lfu/blob/main/lfu.go)
+        - Each item in a map
+        - A linked list to store the frequencies (squares)
+        - Each frequency references another linked list containing the items (circles)
     - LRU-K
       - LRU 算法有个缺陷在于对于偶发的访问操作，比如说批量查询某些数据，可能使缓存中热门数据被这些偶发使用的数据替代，造成缓存污染，导致缓存命中率下降。
       - LFU 能够避免偶发性的操作导致缓存命中率下降的问题，但它也有缺陷，比如对于一开始有高访问率而之后长时间没有被访问的数据，它会一直占用缓存空间，因此一旦数据访问模式改变，LFU 可能需要长时间来适用新的访问模式，即 LFU 存在历史数据影响将来数据的"缓存污染"问题。另外对于对于交替出现的数据，缓存命中不高。
@@ -650,6 +654,30 @@
       - LIRS（Low Inter-reference Recency Set）算法将缓存分为两部分区域：热数据区与冷数据区。LIRS 算法利用冷数据区做了一层隔离，目的是即使在有偶发性的访问操作时，保护热数据区的数据不会被频繁地被置换，以提高缓存的命中。
 - [tree-shaking的原理](https://juejin.cn/post/7265125368553685050#heading-0)
   - 核心原理就是AST语法树
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
