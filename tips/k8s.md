@@ -700,7 +700,17 @@
   - ImagePullBackOff：当节点无法下载（pull） pod 的指定容器的镜像时，会发生 ImagePullBackOff 事件，镜像可能不存在或者 pull 时的身份验证存在问题。
 - [DRA (Dynamic Resource Allocation)](https://mp.weixin.qq.com/s/uxkDnNZ9JeS2F9F0K0emBw)
   - Device-plugin 机制在某些特殊场景下的不足
-
+- 如何指定要被删除的 Pod
+  - 算法会比较所有 Pod 并按照以下标准对它们进行排序：
+    - 未分配 < 已分配；
+    - Pending < Unknown < Running;
+    - not ready < ready；
+    - 较低的 pod 删除成本 < 较高的 pod 删除成本；
+    - 单节点数量多 < 单节点数量少；
+    - ready 时间为空 < 较少的 ready 时间< 较多的 ready 时间；
+    - 较多重启次数 < 较少重启次数；
+    - 没有创建时间的 pod <  较新的 pod < 较旧的 pod；
+    - 列表中的第一个 pod 将最先被删除；
 
 
 
