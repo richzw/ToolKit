@@ -1957,10 +1957,32 @@
     - Go 的边界检查有两个:索引a[i]和 slicea[i,j]。Go 编译器在访问这两种方式的时候会插入一些边界检查代码
     - a[i:j] 会产生两个边界检查: 0 <= i <= j 和 0 <= j <= cap(a)
 - [High-Speed Packet Processing in Go: From net.Dial to AF_XDP](https://levelup.gitconnected.com/high-speed-packet-transmission-in-go-from-net-dial-to-af-xdp-2699452efef9)
+- [for Loop Semantic Changes in Go 1.22](https://go101.org/blog/2024-03-01-for-loop-semantic-changes-in-go-1.22.html)
+  - The change only affects for k, v := range .. {...} loops, in which the := symbol strongly suggests that the loop variables are per-iteration scoped.
+  ```go
+    for k, v = range aContainer {...}
+	for a, b, c = f(); condition; statement {...}
 
-
-
-
+	for k, v := range aContainer {...}
+	for a, b, c := f(); condition; statement {...}
+  ```
+  - The `a, b, c := anExpression` statement is only executed once during the execution of the loop, so it is intuitive that the loop variables are only explicitly instantiated once during the execution of the loop.
+  - The new semantics make the the loop variables instantiated at **each iteration**, which means there must be some implicit code to do the job. 
+  - https://go.dev/play/p/-CWf_1Xc9-x
+- Go trace
+  - trace 轻松揭示程序中一些通过其他方式很难发现的问题
+    - 大量 goroutine 在同一个 channel 上阻塞导致的并发瓶颈,在 CPU 分析中可能很难发现,因为没有执行(execution)需要采样
+  - 以下四个主要问题一直阻碍着跟踪的使用:
+    - 跟踪开销很高。
+    - 跟踪的扩展性差,分析时可能会变得太大。
+    - 通常难以确定何时开始跟踪以捕获特定的错误行为。
+    - 由于缺乏解析和解释执行跟踪的公共包,只有最勇敢的 gopher 才能以编程方式分析跟踪。
+  - 优化
+    - 低开销跟踪
+      - https://blog.felixge.de/reducing-gos-execution-tracer-overhead-with-frame-pointer-unwinding/
+      - 执行跟踪的运行时 CPU 开销已经显著降低,对许多应用程序而言,降至 1-2%
+    - 可扩展的跟踪
+    - 飞行记录(flight recording) golang.org/x/exp/trace
 
 
 

@@ -867,8 +867,16 @@
     ```
   - 拷贝表
   - 复制表结构 `select  * from  Source_table where   1 <> 1;`
-
-
+- [ in 和 not in]
+  - IN 和 NOT IN 是比较常用的关键字，为什么要尽量避免呢？
+    - 效率低
+    - 如果是确定且有限的集合时，可以使用。如 IN （0，1，2）。
+  - Solution
+    - 用 EXISTS 或 NOT EXISTS 代替
+    - 用JOIN 代替
+- [自增主键一定是连续]
+  - MySQL 8.0 版本，将自增值的变更记录在了 redo log 中，重启的时候依靠 redo log 恢复重启之前的值。
+  - MySQL8.0之后版本，已经默认设置为 innodb_autoinc_lock_mode=2 ， binlog_format=row.。这样更有利与我们在 insert … select 这种批量插入数据的场景时，既能提升并发性，又不会出现数据一致性问题。
 
 
 
