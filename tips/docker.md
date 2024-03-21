@@ -49,7 +49,13 @@
       - 另一方面，比较重要的一点，用来计算 Node 的 CPU 的已经分配的量就是通过计算所有容器的 requests 的和得到的，那么该 Node 还可以分配的量就是该 Node 的 CPU 核数减去前面这个值。当创建一个 Pod 时，Kubernetes 调度程序将为 Pod 选择一个 Node。每个 Node 具有每种资源类型的最大容量：可为 Pods 提供的 CPU 和内存量。调度程序确保对于每种资源类型，调度的容器的资源请求的总和小于 Node 的容量。尽管 Node 上的实际内存或 CPU 资源使用量非常低，但如果容量检查失败，则调度程序仍然拒绝在节点上放置 Pod。
   - 在 Docker-container 和 Kubernetes 集群中，存在 GOMAXPROCS 会错误识别容器 cpu 核心数的问题
     - Uber 的这个库 automaxprocs，大致原理是读取 CGroup 值识别容器的 CPU quota，计算得到实际核心数，并自动设置 GOMAXPROCS 线程数量
- 
+      - If the GOMAXPROCS environment variable is not set, the package tries to find out the CPU quota for the current process
+      - It first figures out if the system uses Cgroups v1 or v2 by checking the filesystem and reading specific files.
+      - For cgroups v1, it reads parameters from files in the cgroup filesystem, usually mounted under /sys/fs/cgroup
+        - It searches for 'cpu.cfs_quota_us' and 'cpu.cfs_period_us' to calculate the CPU quota
+      -  For cgroups v2, it checks the cpu.max file in the cgroup directory, which lists both the quota and period on a single line.
+        - If the calculated value falls below a minimum threshold (defaulting to 1 but customizable), it defaults to the minimum.
+
 - [为什么容器内存占用居高不下，频频 OOM](https://eddycjy.com/posts/why-container-memory-exceed/)
 
   排查方向

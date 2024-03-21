@@ -185,6 +185,7 @@
     - cpu.cfs_quota_us
       - 指定 cgroup 中的所有任务在一个周期（由 cpu.cfs_period_us 定义）内可以运行的总时间，以微秒（μs，此处表示为“us”）为单位。
       - 一旦 cgroup 中的任务用完配额指定的所有时间，它们就会在该周期指定的剩余时间内受到限制，直到下一个周期才允许运行（这个就是 CPU 节流）
+  - [How to rightsize the Kubernetes resource limits](https://sysdig.com/blog/kubernetes-resource-limits/)
   - [如何合理设置 request 大小](https://mp.weixin.qq.com/s/1hd9B6ZP5_VOf4hm9Z3hJg)
     - 两个开源工具可以用于进行 Kubernetes 容量规划：
       - kube-state-metrics：用于生成和对外暴露集群级指标；
@@ -368,6 +369,11 @@
   - EKS默认开启的资源调度策略是LeastRequestedPriority，意味着消耗资源最少的节点会优先被调度，这样使得集群的资源在所有节点之间分配的相对均匀
   - 在一些特定的批处理负载场景下（例如机器学习、数据分析），当集群配置了弹性伸缩，作业发起的Pod总是默认均匀的分布在所有集群节点上，导致很多节点运行着少量独立pod，无法被Cluster Autoscaler组件及时回收，从而造成集群资源的浪费。
   - binpack调度，原理是调度器在调度pod到节点的时候，预期在节点上保留最少的未使用 CPU 或内存。此策略最大限度地减少了正在使用的集群节点的数量，也降低了资源碎片
+  - [Pod 进行分箱](https://mp.weixin.qq.com/s/XJPt3_CVEFuMmjRwsz8kEQ)
+    - Kubernetes 默认调度器在将待处理的 pod 调度到可用节点上时，使用 LeastAllocated 评分策略对节点进行评分。LeastAllocated 评分策略更喜欢具有更多可用资源的节点，这导致集群节点上的 pod 分布稀疏。
+    - 将 kube-scheduler（默认的 Kubernetes 调度器）评分策略从 LeastAllocated 更改为 MostAllocated,此策略是 NodeResourcesFit 插件的一部分，默认在 Kubernetes 中启用
+      - 当需要创建新的 pod 时，调度器现在更倾向于具有更高利用率比例的节点。这使得集群的整体利用率随着时间的推移而提高。
+      - 当旧的 pod 在一个节点上终止时，该节点不太可能被考虑，因此更有可能达到低利用率阈值。最终，集群自动扩展器可以将此节点从集群中移除，从而降低总成本
 - [潮汐混部](https://mp.weixin.qq.com/s/dRqge-_BnbK1WsmXo6OuBw)
   - 弹性伸缩 弹性伸缩的流程中最重要的就是实时性和稳定性
     - 需要底层系统的配合来提供一整套的机制进行保证，主要包括几个方面：

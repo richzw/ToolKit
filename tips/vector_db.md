@@ -156,6 +156,7 @@
   - ![img.png](vector_db_milvus_overview.png)
   - indexnode，每个querynode，每个datanode都是单独的容器
     - indexnode只负责建索引任务，querynode只负责查询任务，datanode只负责数据的持久化和整理任务。indexnode建索引时总是会尽量用满cpu，以最快速度建好索引
+    - 一个querynode节点sesrch时可以用多张gpu卡同时算。但建索引的任务，一个indexnode默认是一个任务一个任务执行，所以只用到一张显卡
   - Config参考 https://github.com/zilliztech/milvus-helm/blob/master/charts/milvus/values.yaml#L731C7-L731C45
   - 查询
     - 如果你不用过滤查询的话，hnsw索引会比ivf_flat快。动态数据是要比静态数据查询慢的。对于动态数据，如果partition多的话，性能会更差一些
@@ -171,9 +172,13 @@
       - 有时候能搜到有时不能搜到，多半是因为底下的segment做了compaction之后重建了索引。几个有索引的小分片和一个有索引的大分片，过滤搜索出来的东西很可能不同。
   - 查询节点内存自动均衡的几种策略？当前默认是scorebase
   - milvus的过滤做法是先按条件里的标量过一遍，把符合条件的条目标为1，不符合的标为0，然后做ANN搜索，碰到1的就计算距离，碰到0的就忽略。过滤的性能跟索引有关系，HNSW索引如果标为1的数量很少，就很慢。IVF索引不受这个影响，比较快
-  - 物理文件删除？这个需要数据文件（segment） 上的数据都失效才能删掉。而segment失效，要么是上面的数据全被delete，要么是被compact。
-    - 不要期望物理文件在删除后立即缩小。被删除的量要达到一定量才行，比如某个segment里被删除的数据达到了10%以上，才会触发一个动作把这10%的数据真正地从磁盘上清除。
-    - 清除的流程是：用那90%的数据构建一个新的segment，然后把旧的segment标记为删除，等待垃圾清理机制做最终清除。
+  - milvus里主要有两种数据，一种是元数据存在etcd，另一种是数据文件存在minio
+    - 数据是分片管理，主要有两种分片(segment)
+      - 一种是growing segment，负责接收新插入的数据，没有索引，搜索时暴搜(在最新的版本里提供了临时索引，ivf，超过几千条数据时开始生效)
+      - 另一种是sealed segment，数据是固定的，不接受新数据，每个sesled分片建立一个独立的索引，建立索引的过程就是train，ivf索引是迭代若干次得到nlist个cluster
+    - 物理文件删除？这个需要数据文件（segment） 上的数据都失效才能删掉。而segment失效，要么是上面的数据全被delete，要么是被compact。
+      - 不要期望物理文件在删除后立即缩小。被删除的量要达到一定量才行，比如某个segment里被删除的数据达到了10%以上，才会触发一个动作把这10%的数据真正地从磁盘上清除。
+      - 清除的流程是：用那90%的数据构建一个新的segment，然后把旧的segment标记为删除，等待垃圾清理机制做最终清除。
   - search返回的结果里不带有partition信息。可以建表时用一个字段来存partition的名字或者标记，然后search的时候在output_fields里填写这个字段的名字。
   - qps
     - qps受影响的因素很多，数据量，维度，索引类型参数，搜索参数，是否有过滤，是否有output_fields，milvus. yaml里面的queryNode.group里的配置，querynode数量，load的参数replica_number，等等。
@@ -195,9 +200,7 @@
     - 5百万128维，原始数据量大约是2.5g，工具估算时会乘以一个安全系数，这个系数一般是2到3之间，所以你看到的Loading Memory是5G多点
     - 工具是按cluster估的，每个节点都给了推荐，如果不算etcd/minio/plasar这些的话，milvus的节点的推荐内存配置大约总共27. 5g  etcd推荐3*4g，minio推荐2*8g，pulsar的比较多，因为它本身也是个分布式系统 所以如果500万128维的向量其实必要用cluster，一个standalone就好了
   - 全量查询功能 - Query iterator
-  - 数据是分片管理，主要有两种分片(segment)
-    - 一种是growing segment，负责接收新插入的数据，没有索引，搜索时暴搜(在最新的版本里提供了临时索引，ivf，超过几千条数据时开始生效)
-    - 另一种是sealed segment，数据是固定的，不接受新数据，每个sesled分片建立一个独立的索引，建立索引的过程就是train，ivf索引是迭代若干次得到nlist个cluster
+  - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取
   - Milvus 2.3
     - Cosine 相似度类型： 无需向量归一化，简化数据搜索流程。
     - Upsert 数据：提升更新和删除数据的管理流程效率，适用于频繁更新数据且追求数据一致性和原子性的场景。

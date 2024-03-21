@@ -60,6 +60,7 @@
 - [AB测试资料](https://www.volcengine.com/docs/6287/1175850)
   - 实验系统中三个最关键的环节是：干预、测量和分析
   - [未来AB测试系统](https://mp.weixin.qq.com/s/Z54PYpN2NTeKGwjKW16jSg)
+  - [A/B测试12问](https://mp.weixin.qq.com/s/o0Chnfs4Rsu93ZQqDGvcNw)
 - [AB测试中的流量互斥与流量正交]()
   - [Overlapping Experiment Infrastructure: More, Better, Faster Experimentation](https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/36500.pdf)
 - [常用的压缩库](https://mp.weixin.qq.com/s/bl1HbC6ti6Pw2FGxgstfBw)

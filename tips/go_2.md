@@ -1980,12 +1980,29 @@
   - 优化
     - 低开销跟踪
       - https://blog.felixge.de/reducing-gos-execution-tracer-overhead-with-frame-pointer-unwinding/
+        - Why is stack unwinding so expensive in Go
+        - Go uses a form of asynchronous unwinding tables called gopclntab that require a relatively expensive lookup in order to traverse the stack frames.
+        - To optimize the implementation : frame pointer unwinding.
       - 执行跟踪的运行时 CPU 开销已经显著降低,对许多应用程序而言,降至 1-2%
     - 可扩展的跟踪
     - 飞行记录(flight recording) golang.org/x/exp/trace
-
-
-
+- [Goroutine Scheduler Revealed](https://blog.devtrovert.com/p/goroutine-scheduler-revealed-youll)
+  - GMP
+    -  P 的数量设置为可用的 CPU 核心数,你可以使用 runtime.GOMAXPROCS(int)检查或更改这些处理器的数量
+      - 每个 P 都有自己的可运行 goroutine 列表,称为本地运行队列(Local Run Queue),最多可容纳 256 个 goroutine
+    - M 如果你想改变默认的线程限制,可以使用runtime/debug.SetMaxThreads()函数,它允许你设置 Go 程序可使用的最大操作系统线程数
+    - G 三种主要状态:
+      - Waiting:在这个阶段,goroutine 处于静止状态,可能是由于等待某个操作(如 channel 或锁),或者是被系统调用阻塞。
+      - Runnable:goroutine 已准备就绪,但尚未开始运行,它正在等待轮到在线程(M)上运行。
+      - Running:现在 goroutine 正在线程(M)上积极执行。它将一直运行直到任务完成,除非调度器中断它或其他事物阻碍了它的运行。
+  - 如果一个线程被阻塞了怎么办
+    - 如果一个 goroutine 启动了一个需要一段时间的系统调用(比如读取文件),M 会一直等待
+    - 调度器不喜欢一直等待,它会将被阻塞的 M 从它的 P 上分离,然后将队列中另一个可运行的 goroutine 连接到一个新的或已存在的 M 上,M 再与 P 团队合作
+  - 如果 M 已与其 P 绑定,它怎么能从其他处理器获取任务呢?M 会改变它的 P 吗?
+    - 不会。 即使 M 从另一个 P 的队列中获取任务,它也是使用原来的 P 来运行该任务。因此,尽管 M 获取了新任务,但它仍然忠于自己的 P。
+  - Network Poller)
+    - 网络轮询器也是 Go 运行时的一个组件,负责处理与网络相关的调用(例如网络 I/O)。
+    - 当一个 goroutine 执行网络 I/O 操作时,它不会阻塞当前线程,而是向网络轮询器注册。轮询器异步等待操作完成,一旦完成,该 goroutine 就可以再次变为可运行状态,并在某个线程上继续执行
 
 
 

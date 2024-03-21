@@ -792,7 +792,7 @@
   - netstat -t 查看收包（自身）慢，还是发包走后对方慢
   - 强大的丢包统计，保命的命令：netstat -s |egrep -i "drop|route|overflow|filter|retran|fails|listen"
   - tcp队列是否溢出：netstat -s | egrep "listen|LISTEN" 
-
+- [Wireshark Troubleshooting](https://mp.weixin.qq.com/s/2M0k7up2OqQBcyWvQj-1JA)
 
 
 
