@@ -141,6 +141,20 @@
       - Prompt compression reduces the overall prompt length by removing irrelevant and highlighting important context.
       - Re-ranking uses machine learning models to recalculate the relevance scores of the retrieved contexts
     - https://github.com/weaviate/recipes/blob/main/integrations/llamaindex/retrieval-augmented-generation/advanced_rag.ipynb
+  - [Advance RAG- Improve RAG performance](https://luv-bansal.medium.com/advance-rag-improve-rag-performance-208ffad5bb6a)
+    - Pre-Retrieval Optimisation
+      - Enhancing data granularity: Improve quality of Data; Adding Metadata; Optimizing index structures
+      - Chunking Optimisation: 
+        - High-level tasks like summarization requires bigger chunk size and low-level tasks like coding requires smaller chunks
+        - Small2big or Parent Ducument Retrieval, Sentence Window Retrieval
+    - Retrieval Optimisation
+      - Query Rewriting and MultiQuery Retrievers
+      - StepBack-prompt
+      - Fine-tune Embedding
+      - Hybrid Search Exploration
+    - Post-Retrieval Optimisation
+      - Re-ranking
+      - Prompt Compression
 - [RAG 问题](https://mp.weixin.qq.com/s/2dwnwQGsqKWZQX8gEUV0Sw)
   - 朴素的RAG通常将文档分成块，嵌入它们，并检索与用户问题具有高语义相似性的块。但是，这会带来一些问题
     - 文档块可能包含降低检索效果的无关内容
@@ -196,6 +210,14 @@
   - https://github.com/milvus-io/bootcamp/tree/master/evaluation
   - https://github.com/weaviate/recipes/blob/main/integrations/ragas/RAGAs-RAG-langchain.ipynb
   - https://towardsdatascience.com/evaluating-rag-applications-with-ragas-81d67b0ee31a
+  - Ragas 提供了七个关键指标从不同方面来评估 RAG 系统
+    - 忠实度：该指标评估生成的文本准确反映 RAG 系统检索的源文档中存在的信息的程度。忠实对于确保增强过程不会引入不准确或扭曲、保持生成内容的完整性至关重要。
+    - 答案相关性：它衡量生成的答案与提出的查询的相关程度。该指标对于确定 RAG Pipeline在实际应用中的效用至关重要，其目标是为用户提供不仅准确而且直接适用于他们的问题的信息。
+    - 上下文调用：这评估 RAG 系统从外部数据源检索所有相关信息的能力。高上下文回忆表明系统可以综合利用可用数据，这是生成消息灵通且完整的响应的关键因素。
+    - 上下文精确度：与召回相反，上下文精确度衡量的是与当前任务相关的检索信息的比例。该指标确保 RAG 系统有效过滤掉无关数据，在增强过程中注重质量而不是数量。
+    - 上下文相关性：它结合了召回率和精确度两个方面，评估RAG系统所使用的上下文的整体相关性。该指标强调了平衡数据检索方法的重要性，其中信息的广度和特异性都得到了优化。
+    - 答案语义相似性：该指标衡量生成的答案与真实答案（或预期答案）之间的语义一致性，同时考虑到语言的细微差别。对于验证 RAG 系统是否捕获响应的潜在含义而不仅仅是表面方面至关重要。
+    - 答案正确性：除了相关性和语义相似性之外，答案正确性还直接评估生成文本中提供的信息的准确性。该指标对于确保 RAG 增强LLM作为可靠的信息来源至关重要。
 - [评估 RAG](https://mp.weixin.qq.com/s/OnfSxBJx_lVYV_MtyViUMw)
   - Ragas（https://docs.ragas.io/en/latest/concepts/metrics/context_recall.html）是专注于评估 RAG 应用的工具
   - Trulens-Eval（https://www.trulens.org/trulens_eval/install/）也是专门用于评估 RAG 指标的工具，它对 LangChain 和 Llama-Index 都有比较好的集成，可以方便地用于评估这两个框架搭建的 RAG 应用

@@ -185,6 +185,13 @@
     - cpu.cfs_quota_us
       - 指定 cgroup 中的所有任务在一个周期（由 cpu.cfs_period_us 定义）内可以运行的总时间，以微秒（μs，此处表示为“us”）为单位。
       - 一旦 cgroup 中的任务用完配额指定的所有时间，它们就会在该周期指定的剩余时间内受到限制，直到下一个周期才允许运行（这个就是 CPU 节流）
+    - 在 /sys/fs/cgroup/cpu/cpu.stat 中检查 CPU 统计信息
+    - 监控 Kubernetes CPU 限制
+    ```
+    (sum by (namespace,pod,container)(rate(container_cpu_usage_seconds_total
+    {container!=""}[5m])) / sum by (namespace,pod,container)
+    (kube_pod_container_resource_limits{resource="cpu"})) > 0.8
+    ```
   - [How to rightsize the Kubernetes resource limits](https://sysdig.com/blog/kubernetes-resource-limits/)
   - [如何合理设置 request 大小](https://mp.weixin.qq.com/s/1hd9B6ZP5_VOf4hm9Z3hJg)
     - 两个开源工具可以用于进行 Kubernetes 容量规划：
@@ -507,6 +514,13 @@
       - 如果 Pod 中的容器都没有设置内存和 CPU 的 limit 和 request，那么 Pod 的 QoS 类别就是 BestEffort
     - Burstable min(max(2, 1000 - (1000 * memoryRequestBytes) / machineMemoryCapacityBytes), 999)
       - 如果 Pod 中的至少一个容器有内存或 CPU 的 request，但所有容器的 limit 和 request 不完全相等，那么 Pod 的 QoS 类别就是 Burstable
+  - 监控 Kubernetes OOM
+    ```
+    (sum by (namespace,pod,container)
+    (rate(container_cpu_usage_seconds_total{container!=""}[5m])) / sum by 
+    (namespace,pod,container)
+    (kube_pod_container_resource_limits{resource="cpu"})) > 0.8
+    ```
 - [加快 Pod 启动速度](https://mp.weixin.qq.com/s/BKXJP9gmp0ALIvwLftwpgQ)
 - [Pod 的生命周期](https://mp.weixin.qq.com/s/unVwBprr0UeuWNpXVdgdxg)
   - 初始化阶段，Pod 的 init 容器运行。

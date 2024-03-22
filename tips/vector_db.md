@@ -157,6 +157,9 @@
   - indexnode，每个querynode，每个datanode都是单独的容器
     - indexnode只负责建索引任务，querynode只负责查询任务，datanode只负责数据的持久化和整理任务。indexnode建索引时总是会尽量用满cpu，以最快速度建好索引
     - 一个querynode节点sesrch时可以用多张gpu卡同时算。但建索引的任务，一个indexnode默认是一个任务一个任务执行，所以只用到一张显卡
+  - Deployment
+    - standalone是内置的rocksdb实现message queue，
+    - cluster是用pulsar或者kafka来做为message queue。而cdc是通过操作kafka/pulsar来同步数据的，所以standalone不能用
   - Config参考 https://github.com/zilliztech/milvus-helm/blob/master/charts/milvus/values.yaml#L731C7-L731C45
   - 查询
     - 如果你不用过滤查询的话，hnsw索引会比ivf_flat快。动态数据是要比静态数据查询慢的。对于动态数据，如果partition多的话，性能会更差一些
@@ -170,7 +173,11 @@
       - 如果是IP的话，在向量都做了归一化的前提下，distance越接近1越相似。详情参考官网文档的metric type。
     - 有向量索引的情况下，过滤查询是有可能搜不出结果。
       - 有时候能搜到有时不能搜到，多半是因为底下的segment做了compaction之后重建了索引。几个有索引的小分片和一个有索引的大分片，过滤搜索出来的东西很可能不同。
-  - 查询节点内存自动均衡的几种策略？当前默认是scorebase
+    - 查询节点内存自动均衡的几种策略？当前默认是scorebase
+    - 全量查询功能 - Query iterator
+  - 索引
+    - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
+    - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap
   - milvus的过滤做法是先按条件里的标量过一遍，把符合条件的条目标为1，不符合的标为0，然后做ANN搜索，碰到1的就计算距离，碰到0的就忽略。过滤的性能跟索引有关系，HNSW索引如果标为1的数量很少，就很慢。IVF索引不受这个影响，比较快
   - milvus里主要有两种数据，一种是元数据存在etcd，另一种是数据文件存在minio
     - 数据是分片管理，主要有两种分片(segment)
@@ -199,8 +206,6 @@
   - 估算容量
     - 5百万128维，原始数据量大约是2.5g，工具估算时会乘以一个安全系数，这个系数一般是2到3之间，所以你看到的Loading Memory是5G多点
     - 工具是按cluster估的，每个节点都给了推荐，如果不算etcd/minio/plasar这些的话，milvus的节点的推荐内存配置大约总共27. 5g  etcd推荐3*4g，minio推荐2*8g，pulsar的比较多，因为它本身也是个分布式系统 所以如果500万128维的向量其实必要用cluster，一个standalone就好了
-  - 全量查询功能 - Query iterator
-  - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取
   - Milvus 2.3
     - Cosine 相似度类型： 无需向量归一化，简化数据搜索流程。
     - Upsert 数据：提升更新和删除数据的管理流程效率，适用于频繁更新数据且追求数据一致性和原子性的场景。
