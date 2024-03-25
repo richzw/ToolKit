@@ -179,6 +179,7 @@
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap
   - milvus的过滤做法是先按条件里的标量过一遍，把符合条件的条目标为1，不符合的标为0，然后做ANN搜索，碰到1的就计算距离，碰到0的就忽略。过滤的性能跟索引有关系，HNSW索引如果标为1的数量很少，就很慢。IVF索引不受这个影响，比较快
+  - load是否有并发的设置呢？milvus.yaml里的queryCoord.taskExecutionCap，这个设小点每批送给一个querynode加载的segment的最大数量，每个segment里有多个数据文件，querynode也有自己的并发读取的限制，跟cpu核数相关
   - milvus里主要有两种数据，一种是元数据存在etcd，另一种是数据文件存在minio
     - 数据是分片管理，主要有两种分片(segment)
       - 一种是growing segment，负责接收新插入的数据，没有索引，搜索时暴搜(在最新的版本里提供了临时索引，ivf，超过几千条数据时开始生效)
