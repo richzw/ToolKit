@@ -643,9 +643,27 @@
       - 让客户端修改代码，不要把这种RST当作错误。
       - 在服务端做一些修改，在tls_close()和close()之间增加延迟（比如1秒），使得客户端有机会读取收到的TLS close notify并能够发出自己的TLS close notify，从而让RFC设计的TLS优雅关闭落到实处，这样就不会产生RST。
     - ![img.png](http_tls_close_2.png)
-
-
-
+- [网络攻击]()
+  - Application Layer 7
+    - SQL注入 (SQL Injection)：攻击者在网站输入表单中输入恶意SQL代码，如果后端数据库系统未正确过滤用户输入，这些代码就可能被执行，导致数据泄露或损坏。
+    - 跨站脚本（Cross-site Scripting, XSS)：攻击者在网页中注入恶意脚本，当其他用户浏览该网页时，脚本执行，可能导致用户信息被窃取或者会话被劫持。
+    - DDoS攻击：通过利用大量受控制的网络设备（僵尸网络）向目标发送大量请求，导致目标服务不可用。
+  - Presentation Layer 6
+    - 字符编码/解码攻击 (Character Encoding/Decoding Attacks)：通过改变字符编码方式，攻击者可以绕过应用程序的输入过滤机制，执行恶意代码。
+    - SSL剥离 (SSL Striping)：攻击者在客户端和服务器之间强制使用非加密连接，而不是安全的HTTPS连接，以便窃听或篡改数据。
+    -  数据压缩操作(Data Compression Manipulation)：利用数据压缩算法的特性来推断传输中的数据，可能导致敏感信息泄露。
+  - Session Layer 5
+    - 会话重放 (Session Replay)：攻击者截获合法的数据包然后重新发送，以尝试非法认证或执行未授权的操作。
+    -  会话固定攻击 (Session Fixation Attacks)：攻击者强制用户在服务器上使用一个由攻击者定义的会话ID，然后劫持用户的会话。
+    -  中间人攻击 (Man-in-the-Middle Attacks)：攻击者置身于通信双方之间，秘密监听或篡改他们之间的信息交换。
+  - Network 
+    - IP欺骗 (IP Spoofing)：攻击者伪造IP地址的数据包，使目标计算机或网络设备认为该数据包来自可信源。
+    -  路由表篡改 (Route Table Manipulation)：通过修改网络路由表，攻击者可以控制数据包的流向，进行数据窃听或流量劫持。
+    -  蓝精灵攻击 (Smurf Attacks)：利用ICMP协议的漏洞，通过发送畸形的ICMP数据包来使目标系统崩溃。
+  - Data Link Layer 2
+    - MAC地址欺骗 (MAC Address Spoofing)：攻击者更改其设备的MAC地址以模仿另一设备，可能导致对网络访问控制的绕过。
+    -  ARP欺骗 (ARP Spoofing)：通过发送伪造的ARP消息，攻击者可以将自己的MAC地址与另一IP地址关联起来，从而劫持流量或进行中间人攻击。
+    -  交换机泛洪 (Switch Flooding)：通过向交换机发送大量的以太网帧，每个帧都有不同的源MAC地址，导致交换机的地址表溢出，使其退化为一个集线器，广播所有流量。
 
 
 

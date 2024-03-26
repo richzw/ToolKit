@@ -128,6 +128,7 @@
     - Query Routing: Discusses the routing of queries to the most appropriate source or system component in a RAG setup.
     - Agents in RAG: This could delve into the role of agents (autonomous or semi-autonomous entities) in RAG systems.
     - Response Synthesizer: A section on how responses are generated or synthesized in RAG systems.
+  - [advanced RAG series](https://div.beehiiv.com/)
   - [advanced RAG](https://towardsdatascience.com/advanced-retrieval-augmented-generation-from-theory-to-llamaindex-implementation-4de1464a9930)
     - Pre-retrieval optimization: Sentence window retrieval
       - Sliding window uses an overlap between chunks and is one of the simplest techniques.
@@ -276,7 +277,6 @@
   - [句子窗口检索](https://mp.weixin.qq.com/s/crYM5_xdZD7Rh3snnLWphg)
     - 首先在文档切分时，将文档以句子为单位进行切分，同时进行 Embedding 并保存数据库。
     - 然后在检索时，通过问题检索到相关的句子，但并不只是将检索到的句子作为检索结果，而是将该句子前面和后面的句子一起作为检索结果，包含的句子数量可以通过参数来进行设置，最后将检索结果再一起提交给 LLM 来生成答案。
-    - 
 - [When Simple RAG Fails](https://docs.google.com/presentation/d/12iRlcv-m47cCxEaIMwexrZ1a1xzg4QE9eUwVoafLvvY/edit#slide=id.g2a22202e9fb_0_167)
   - Questions are not relevant to corpus
   - Questions are vague
@@ -286,6 +286,12 @@
   - Questions include some non-semantic components
   - Conflicting information
   - [Langchain query analysis](https://python.langchain.com/docs/use_cases/query_analysis/)
+- [RAG 2.0]
+  - 将所有组件作为单个集成系统进行预训练、微调和对齐，通过语言模型和检索器进行反向传播以最大化性能：对齐为一个集成的系统，通过语言模型和检索器进行反向传播以最大化性能
+  - 需要端到端的从召回，粗排，精排，重排环节作为整体来优化，避免形成错配. RAG 2.0方法就是克服这样的局部优化办法，通过将预训练、微调和对齐所有组件形成一个统一系统，通过反向传播同时优化语言模型和检索器，以最大化系统性能
+  - 开放域问答：使用标准的Natural Questions（NQ）和TriviaQA数据集来测试每个模型正确检索相关知识并准确生成答案的能力。我们还评估了模型在HotpotQA（HPQA）数据集上单步检索设置下的表现。所有数据集均使用完全匹配（EM）指标。
+  - 忠实度：HaluEvalQA和TruthfulQA被用来衡量每个模型保持基于检索证据的忠实度以及避免产生幻觉的能力。
+  - 新颖度：通过使用网络搜索索引来衡量每个RAG系统对快速变化的世界知识的泛化能力，并展示了在最近的FreshQA基准测试中的准确性。
 
 
 
