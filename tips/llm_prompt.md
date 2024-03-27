@@ -740,7 +740,7 @@
   - How to get knowledge files?
   - How to protect GPT instructions?
   - How to get GPT's action schema?
-
+- [Openai Prompt Resource](https://github.com/openai/openai-cookbook/blob/main/articles/related_resources.md)
 
 
 

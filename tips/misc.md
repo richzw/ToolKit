@@ -117,6 +117,7 @@
     - if n is 3, or the 2 least significant bits are 01, then subtract
     - otherwise, add 1
 - [Web 终极拦截技巧](https://mp.weixin.qq.com/s/qQbPkrov3wcCjDbGtPQSMA)
+- [DiDi Summary](https://book.yunzhan365.com/mvfub/tbvv/mobile/index.html)
 - git
   - git rebase vs git merge vs git merge --squash
     - ![img.png](img.png)
@@ -150,7 +151,17 @@
     - ③ ~/.bashrc
     - ④ /etc/bashrc
   - non-login shell加载环境变量的顺序是： ① ~/.bashrc ② /etc/bashrc
-
+- [假设检验（Hypothesis Testing)](https://mp.weixin.qq.com/s/c476-QYoX6OgexG0SJdyCA)
+  - 假设检验是一种统计方法，用于判断样本数据是否足够支持对总体参数的一个特定假设。
+    - 这个过程涉及到对两个相互对立的假设进行评估：零假设（H0）和备择假设（H1）。
+    - 零假设通常表示没有效应或者没有差异，而备择假设则表示有显著效应或者差异。
+  - 零假设（H0）通常表示没有效应、没有差异或者没有关联。换句话说，它通常假定观察结果是偶然发生的，或者两个比较组之间没有本质的区别
+  - 备择假设（H1）是与零假设相对的假设，它表示有显著效应、有差异或者有关联。备择假设基于研究者的研究假设，通常是研究的目的所在
+  - 统计显著性通常通过P值来评估，P值表示在零假设成立的条件下，观察到的数据或更极端情况发生的概率。
+    - 如果这个概率低于预定的显著性水平（α），通常是0.05或5%，则认为结果具有统计显著性
+    - P值越低，意味着在零假设为真的情况下观察到这样的数据（或更极端）的概率越小 我们有足够的证据拒绝零假设，认为观察到的结果不太可能仅由随机变异所引起，从而支持备择假设。
+  - 显著性水平（α）是在进行假设检验时事先设定的阈值，用于确定观察到的数据在多大程度上可以反驳零假设。
+    - 显著性水平定义了拒绝零假设的标准，通常设定为0.05（或5%），意味着研究者愿意接受5%的错误拒绝零假设的风险，即犯类型I错误的概率。
 
 
 
