@@ -688,6 +688,7 @@
          - 尽量使用缓存和缓冲区来访问数据。如用堆栈明确声明内存空间来存储需要缓存的数据，或者用Redis外部缓存组件来优化数据的访问
          - cgroups等方式来限制进程的内存使用情况，确保系统内存不被异常进程耗尽
          - /proc/pid/oom_adj调整核心应用的oom_score，保证即使内存紧张核心应用也不会被OOM杀死
+    - [Linux 内存相关问题](https://mp.weixin.qq.com/s/xge99lp9Uswr-MbFaAxU_Q)
   - [Tools](https://www.ctq6.cn/linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/)
     - vmstat使用详解
       - vmstat命令是最常见的Linux/Unix监控工具，可以展现给定时间间隔的服务器的状态值,包括服务器的CPU使用率，内存使用，虚拟内存交换情况,IO读写情况。

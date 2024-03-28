@@ -175,6 +175,7 @@
       - 有时候能搜到有时不能搜到，多半是因为底下的segment做了compaction之后重建了索引。几个有索引的小分片和一个有索引的大分片，过滤搜索出来的东西很可能不同。
     - 查询节点内存自动均衡的几种策略？当前默认是scorebase
     - 全量查询功能 - Query iterator
+    - `collection.query(expr="id==xx", output_fields=["*"])`  这是取出一整行数据
   - 索引
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap

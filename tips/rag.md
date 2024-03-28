@@ -292,8 +292,20 @@
   - 开放域问答：使用标准的Natural Questions（NQ）和TriviaQA数据集来测试每个模型正确检索相关知识并准确生成答案的能力。我们还评估了模型在HotpotQA（HPQA）数据集上单步检索设置下的表现。所有数据集均使用完全匹配（EM）指标。
   - 忠实度：HaluEvalQA和TruthfulQA被用来衡量每个模型保持基于检索证据的忠实度以及避免产生幻觉的能力。
   - 新颖度：通过使用网络搜索索引来衡量每个RAG系统对快速变化的世界知识的泛化能力，并展示了在最近的FreshQA基准测试中的准确性。
-
-
+- [RAG: LLM Prompting Techniques For Reducing Hallucinations](https://www.rungalileo.io/blog/mastering-rag-llm-prompting-techniques-for-reducing-hallucinations)
+  - Thread of Thought(ThoT)
+    - `Walk me through this context in manageable parts step by step, summarizing and analyzing as we go`
+  - Chain of Note(CoN)
+    - The steps in CoN involve generating sequential reading notes for retrieved documents, 
+    - facilitating a comprehensive evaluation of their relevance, and integrating this information to formulate the final answer.
+  - Chain of Verification(CoVe)
+    - Baseline Response Generation: In response to a given query, the model generates a baseline response. 
+    - Verification Planning: Considering both the query and baseline response, a list of verification questions is generated to facilitate self-analysis and identify potential errors in the original response.
+    - Verification Execution: Each verification question is systematically answered, allowing for a comparison with the original response to identify inconsistencies or mistakes.
+    - Final Verified Response Generation: Based on any discovered inconsistencies, if present, a revised response is generated, incorporating the results of the verification process.
+  - EmotionPrompt
+    - `This is very important to my career`
+  - ExpertPrompting
 
 
 
