@@ -1007,8 +1007,14 @@
     - SYN/ACK 超时重传次数 tcp_synack_retries = 5
   - 客户端发起 TCP 三次握手，但通过 iptables 过滤了 SYN/ACK，此时会在客户端和服务器端同时产生 SYN 和 SYN/ACK 超时重传的现象。
   - 疑问的产生在于超时重传的 SYN 同样会触发服务器端响应 SYN/ACK，再结合服务器端 SYN/ACK 自身的超时重传。 RTO 如何变化?
-
-
+- Reset
+  - active rst
+    - 主动方调用close()的时候，上层却没有取走完数据；这个属于上层user自己犯下的错。
+    - 主动方调用close()的时候，setsockopt设置了linger；这个标识代表我既然设置了这个，那close就赶快结束吧。
+    - 主动方调用close()的时候，发现全局的tcp可用的内存不够了
+  - passive rst
+    - 如果从抓包上来看表现就是（如下图）rst的报文中无ack标识，而且RST的seq等于它否定的报文的ack号
+    - RST的Ack号为1
 
 
 

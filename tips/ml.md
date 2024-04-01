@@ -263,6 +263,11 @@
   - Chain of Hindsight，CoH
     - （Hindsight可以翻译为“事后诸葛亮”）通过明确呈现一系列过去的输出序列，并为每个输出注释反馈，鼓励模型改进自己的输出
     - 为了避免过拟合，CoH添加了一个正则化项来最大化预训练数据集的对数似然。为了避免捷径和复制（因为反馈序列中有许多常见单词），他们在训练期间随机mask 0%-5%的历史token。
+  - [Agent Workflow 以及 4 种主流设计模式](https://mp.weixin.qq.com/s/W20747oh_rin6dJlB1y8jw)
+    - 1）Reflection：让 Agent 审视和修正自己生成的输出；
+    - 2）Tool Use：LLM 生成代码、调用 API 等进行实际操作；
+    - 3）Planning：让 Agent 分解复杂任务并按计划执行；
+    - 4）Multiagent Collaboration：多个 Agent 扮演不同角色合作完成任务；
 - 时间序列异常值检测
   - 正确体现各种指标多样的变化趋势和行为特性
     - 为消除每个分组中的趋势和季节性影响因素，我们利用了 statsmodels 库中强大的 seasonal_decompose（季节性分解函数）
