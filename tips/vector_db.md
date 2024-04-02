@@ -161,6 +161,7 @@
     - standalone是内置的rocksdb实现message queue，
     - cluster是用pulsar或者kafka来做为message queue。而cdc是通过操作kafka/pulsar来同步数据的，所以standalone不能用
   - Config参考 https://github.com/zilliztech/milvus-helm/blob/master/charts/milvus/values.yaml#L731C7-L731C45
+    - milvus rpc的传输限制，这个可以在milvus.yaml的proxy. grpc. serverMaxRecvSize/clientMaxSendSize
   - 查询
     - 如果你不用过滤查询的话，hnsw索引会比ivf_flat快。动态数据是要比静态数据查询慢的。对于动态数据，如果partition多的话，性能会更差一些
     - nlist取2048比较好，nprobe按你之前的比例取10左右。ivfpq，一亿的数据，nlist 可以设置成多少合适，2048吗？
@@ -176,11 +177,14 @@
     - 查询节点内存自动均衡的几种策略？当前默认是scorebase
     - 全量查询功能 - Query iterator
     - `collection.query(expr="id==xx", output_fields=["*"])`  这是取出一整行数据
+    - 如果检索不出，一有可能是embedding不太好，二有可能索引参数搜索参数设的不合理，三有可能consistency level是eventually
+    - 向量搜索不保证你想要的那条数据一定会在结果集里的第一个，也会会在第五第六个甚至第10个 向量搜索是ANNS，“近似近邻搜索”这几个词的简写，它不叫精确搜索
   - 索引
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap
   - milvus的过滤做法是先按条件里的标量过一遍，把符合条件的条目标为1，不符合的标为0，然后做ANN搜索，碰到1的就计算距离，碰到0的就忽略。过滤的性能跟索引有关系，HNSW索引如果标为1的数量很少，就很慢。IVF索引不受这个影响，比较快
   - load是否有并发的设置呢？milvus.yaml里的queryCoord.taskExecutionCap，这个设小点每批送给一个querynode加载的segment的最大数量，每个segment里有多个数据文件，querynode也有自己的并发读取的限制，跟cpu核数相关
+  - delete()接口返回时，里面的删除操作是异步的，所以这接口返回时没法立即告诉你到底有没有删除有几条被删除
   - milvus里主要有两种数据，一种是元数据存在etcd，另一种是数据文件存在minio
     - 数据是分片管理，主要有两种分片(segment)
       - 一种是growing segment，负责接收新插入的数据，没有索引，搜索时暴搜(在最新的版本里提供了临时索引，ivf，超过几千条数据时开始生效)

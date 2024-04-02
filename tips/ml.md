@@ -749,6 +749,7 @@
     - [Video](https://www.youtube.com/watch?v=nKCJ3BMUy1s)
     - [Paper Summary](https://wdxtub.com/paper/paper-008/2023/04/25/)
   - [Using GPT-4 for content moderation](https://openai.com/blog/using-gpt-4-for-content-moderation) 用于互联网内容审核
+  - [Evaluate LLMs in real time with Street Fighter](https://github.com/OpenGenerativeAI/llm-colosseum)
   - [SynthID](https://www.deepmind.com/synthid) a tool for watermarking and identifying AI-generated images
     - [人工智能水印](https://mp.weixin.qq.com/s/a7loCRioleww_X9nWeGisA)
   - [inference]

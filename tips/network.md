@@ -1311,7 +1311,8 @@
     - 如果一台client仅有一个IP，server端也仅有一个IP但是server端启动多个程序，每个程序监听一个端口的情况下（比如server端启动了m个程序，监听了m个不同端口），一台client机器最大能建立的连接数量为：65535 * m
     - 其余情况类推，但是客户端的可用端口范围一般达不到65535个，受内核参数net.ipv4.ip_local_port_range限制，如果要修改client所能使用的端口范围，可以修改这个内核参数的值。
 - [RDMA](http://reports.ias.ac.in/report/12829/understanding-the-concepts-and-mechanisms-of-rdma)
-  - RDMA（ Remote Direct Memory Access ）意为远程直接地址访问，通过RDMA，本端节点可以“直接”访问远端节点的内存
+  - RDMA（ Remote Direct Memory Access ）意为远程直接地址访问，通过RDMA，本端节点可以“直接”访问远端节点的内存 [1](https://mp.weixin.qq.com/s/u6O7BgzDlO9_FihRgXr8EA)
+  - RDMA 直接将服务器应用数据从内存传输到智能网卡 (INIC)（通过稳固的 RDMA 协议），再由 INIC 硬件完成 RDMA 传输报文的封装工作，从而解放了操作系统和 CPU
   - 把本端内存中的一段数据，复制到对端内存中，在使用了RDMA技术时，两端的CPU几乎不用参与数据传输过程（只参与控制面），数据传输的过程完全由RDMA适配器完成
   - RDMA的优势
     - 0拷贝：指的是不需要在用户空间和内核空间中来回复制数据
@@ -1324,6 +1325,18 @@
     - QP（队列偶），我们需要多提几句。它是 RDMA 技术中通信的基本单元
       - 队列偶就是一对队列，SQ（Send Queue，发送工作队列）和 RQ（Receive Queue，接收工作队列）
       - 用户调用 API 发送接收数据的时候，实际上是将数据放入 QP 当中，然后以轮询的方式，将 QP 中的请求一条条的处理
+    - Summary
+      - 采用直通转发模式以减少转发延迟。
+      - 基于信用的流控机制确保不丢包。
+      - 它需要专用的 InfiniBand 网络适配器、交换机和路由器，因此网络建设的成本最高。
+  - RoCE（RDMA over Converged Ethernet，基于融合以太网的 RDMA）
+    - 传输层采用 InfiniBand 协议。
+    -  RoCE 有两个版本：RoCEv1 是在以太网链路层上实现的，只能在第二层传输；RoCEv2 基于 UDP 实现 RDMA，可以部署在第三层网络上。
+    -  支持 RDMA 专用的智能网络适配器，无需专用的交换机和路由器（支持 ECN/PFC 技术，降低丢包率），因此网络建设成本最低
+  - iWARP（RDMA over TCP，基于 TCP 的 RDMA）
+    - 传输层采用 iWARP 协议。
+    - iWARP 是在以太网 TCP/IP 协议栈的 TCP 层上实现的，支持在第二层和第三层网络中传输。然而，由于在大规模网络上建立和维护 TCP 连接会消耗大量的 CPU 资源，这在一定程度上限制了 iWARP 的应用范围。
+    - iWARP 仅需网络适配器支持 RDMA，无需专用的交换机和路由器，其建设成本介于 InfiniBand 和 RoCE 之间。
 - [TCP 协议]()
   - 计算机网络是不可靠的，存在 丢包、乱序、延时 。
   - 可靠传输的基础机制
@@ -1422,6 +1435,7 @@
   - [Win 字段](https://mp.weixin.qq.com/s/M4-s_eQYIWqcTN4fOWkUTA)
   - [ Win 字段续](https://mp.weixin.qq.com/s/5nK8Wkj43gbEqAr-APz4Ig)
   - [SYN/ACK MSS](https://mp.weixin.qq.com/s/QeJyBb3rRg0K6Fzm2oQA9w)
+  - [Window Full](https://mp.weixin.qq.com/s/UPjTeRiJG50aaOg-YEO02w)
 - [Wireshark != 和 !==](https://mp.weixin.qq.com/s/yXbnCjelmdBOG1BgUFAexA)
   - 显示过滤表达式 ip.addr != 192.168.0.1 的结果显示为空，意味着没有源和目的 IP 值都不是 192.168.0.1 的数据包，也就是 all ；
   - 显示过滤表达式 ip.addr !== 192.168.0.1 的结果显示为源或者目的 IP 任意一个值是 192.168.0.1 的数据包，也就是 any
