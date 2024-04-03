@@ -162,8 +162,13 @@
     - P值越低，意味着在零假设为真的情况下观察到这样的数据（或更极端）的概率越小 我们有足够的证据拒绝零假设，认为观察到的结果不太可能仅由随机变异所引起，从而支持备择假设。
   - 显著性水平（α）是在进行假设检验时事先设定的阈值，用于确定观察到的数据在多大程度上可以反驳零假设。
     - 显著性水平定义了拒绝零假设的标准，通常设定为0.05（或5%），意味着研究者愿意接受5%的错误拒绝零假设的风险，即犯类型I错误的概率。
-
-
+- [加密数据如何进行模糊查询](https://ningyu1.github.io/20201230/encrypted-data-fuzzy-query.html)
+  - 在数据库实现加密算法函数，在模糊查询的时候使用decode(key) like '%partial%
+  - 对密文数据进行分词组合，将分词组合的结果集分别进行加密，然后存储到扩展列，查询时通过key like '%partial%'
+  - 算法支持：Hill密码处理和模糊匹配加密方法FMES
+  - 可搜索加密（Searchable Encryption）或同态加密（Homomorphic Encryption）
+- [认知偏差知识手册](https://s75w5y7vut.feishu.cn/docs/doccn3BatnScBJe7wD7K3S5poFf)
+  - https://alanhg.github.io/cognitive-bias/
 
 
 

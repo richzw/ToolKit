@@ -84,7 +84,6 @@
           - HNSW利用图结构，其中每个节点都是数据中的一个向量，通过一系列层次来确保快速访问。每一层都是原始数据的一个子集，上层的数据点数量比下层少。
           - HNSW 提供了查询速度和精确度之间的良好平衡，适用于大型和高维数据集。但它需要更多的内存，构建索引的过程可能较慢。
     - 近似最近邻 (ANN)算法
-      - - [ANN]
   - [Comprehensive Guide To Approximate Nearest Neighbors Algorithms](https://towardsdatascience.com/comprehensive-guide-to-approximate-nearest-neighbors-algorithms-8b94f057d6b6)
         - 「LSH」（Locality-Sensitive Hashing）」它引入了一种哈希函数，使得相似的输入能以更高的概率映射到相同的桶中，其中桶的数量远小于输入的数量。
         - 「ANNOY（Approximate Nearest Neighbors）」它的核心数据结构是随机投影树，实际是一组二叉树，其中每个非叶子节点表示一个将输入空间分成两半的超平面，每个叶子节点存储一个数据。二叉树是独立且随机构建的，因此在某种程度上，它模仿了哈希函数。ANNOY会在所有树中迭代地搜索最接近查询的那一半，然后不断聚合结果。这个想法与 KD 树非常相关，但更具可扩展性。
@@ -175,29 +174,32 @@
     - 有向量索引的情况下，过滤查询是有可能搜不出结果。
       - 有时候能搜到有时不能搜到，多半是因为底下的segment做了compaction之后重建了索引。几个有索引的小分片和一个有索引的大分片，过滤搜索出来的东西很可能不同。
     - 查询节点内存自动均衡的几种策略？当前默认是scorebase
+    - Search()
+      - milvus的过滤做法是先按条件里的标量过一遍，把符合条件的条目标为1，不符合的标为0，然后做ANN搜索，碰到1的就计算距离，碰到0的就忽略。过滤的性能跟索引有关系，HNSW索引如果标为1的数量很少，就很慢。IVF索引不受这个影响，比较快
     - 全量查询功能 - Query iterator
     - `collection.query(expr="id==xx", output_fields=["*"])`  这是取出一整行数据
     - 如果检索不出，一有可能是embedding不太好，二有可能索引参数搜索参数设的不合理，三有可能consistency level是eventually
     - 向量搜索不保证你想要的那条数据一定会在结果集里的第一个，也会会在第五第六个甚至第10个 向量搜索是ANNS，“近似近邻搜索”这几个词的简写，它不叫精确搜索
+    - search返回的结果里不带有partition信息。可以建表时用一个字段来存partition的名字或者标记，然后search的时候在output_fields里填写这个字段的名字。
+    - qps
+      - qps受影响的因素很多，数据量，维度，索引类型参数，搜索参数，是否有过滤，是否有output_fields，milvus. yaml里面的queryNode.group里的配置，querynode数量，load的参数replica_number，等等。
+      - 要获得更高的qps可以从上面这些方面入手。cpu的核数和性能也会影响qps，甚至NUMA架构也会影响qps。单机版的indexnode datanode如果有建索引或者compaction的任务在执行，也会影响qps。
   - 索引
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap
-  - milvus的过滤做法是先按条件里的标量过一遍，把符合条件的条目标为1，不符合的标为0，然后做ANN搜索，碰到1的就计算距离，碰到0的就忽略。过滤的性能跟索引有关系，HNSW索引如果标为1的数量很少，就很慢。IVF索引不受这个影响，比较快
+    - hnsw索引的向量类型只能用floatvector？ float16Vector可以使用和floatVector一样的索引，hnsw ivf都行
   - load是否有并发的设置呢？milvus.yaml里的queryCoord.taskExecutionCap，这个设小点每批送给一个querynode加载的segment的最大数量，每个segment里有多个数据文件，querynode也有自己的并发读取的限制，跟cpu核数相关
-  - delete()接口返回时，里面的删除操作是异步的，所以这接口返回时没法立即告诉你到底有没有删除有几条被删除
-  - milvus里主要有两种数据，一种是元数据存在etcd，另一种是数据文件存在minio
+  - 重启的时候会把之前loaded状态的表全部加载进内存。load的速度不可控，跟内部的调度和存储的读带宽相关。一般来说，千万级别的数据量load耗时分钟级的都是正常
+  - milvus的集群热备方案，可以看下github.com/zilliztech/milvus-cdc 
+  - milvus里主要有两种数据，一种是元数据存在etcd，另一种是数据文件存在minio (元数据存在etcd，数据文件存在minio/s3; 就好比etcd里存着账本，minio里存着钞票)
     - 数据是分片管理，主要有两种分片(segment)
       - 一种是growing segment，负责接收新插入的数据，没有索引，搜索时暴搜(在最新的版本里提供了临时索引，ivf，超过几千条数据时开始生效)
       - 另一种是sealed segment，数据是固定的，不接受新数据，每个sesled分片建立一个独立的索引，建立索引的过程就是train，ivf索引是迭代若干次得到nlist个cluster
     - 物理文件删除？这个需要数据文件（segment） 上的数据都失效才能删掉。而segment失效，要么是上面的数据全被delete，要么是被compact。
       - 不要期望物理文件在删除后立即缩小。被删除的量要达到一定量才行，比如某个segment里被删除的数据达到了10%以上，才会触发一个动作把这10%的数据真正地从磁盘上清除。
       - 清除的流程是：用那90%的数据构建一个新的segment，然后把旧的segment标记为删除，等待垃圾清理机制做最终清除。
-  - search返回的结果里不带有partition信息。可以建表时用一个字段来存partition的名字或者标记，然后search的时候在output_fields里填写这个字段的名字。
-  - qps
-    - qps受影响的因素很多，数据量，维度，索引类型参数，搜索参数，是否有过滤，是否有output_fields，milvus. yaml里面的queryNode.group里的配置，querynode数量，load的参数replica_number，等等。
-    - 要获得更高的qps可以从上面这些方面入手。cpu的核数和性能也会影响qps，甚至NUMA架构也会影响qps。单机版的indexnode datanode如果有建索引或者compaction的任务在执行，也会影响qps。
   - Knowhere 是 Milvus 的内部核心引擎，负责向量搜索，是基于行业标准开源库（如 Faiss、DiskANN 和 hnswlib 等）的增强版本
-    -  Knowhere 属于开源，其部署环境更多样，可在所有主机类型上运行
+    - Knowhere 属于开源，其部署环境更多样，可在所有主机类型上运行
     - Knowhere 依赖于 OSS 库（如 Faiss、DiskANN 和 hnswlib）
   - [Cardinal 搜索引擎](https://mp.weixin.qq.com/s/4xx2U8Xyr1RetTkMtRrxyw)
     - Cardinal 是用现代 C++ 语言和实用的近似最近邻搜索（ANNS）算法构建的多线程、高效率向量搜索引擎， 将搜索引擎的性能比原来提升了 3 倍，搜索性能（QPS）是 Milvus 的 10 倍
