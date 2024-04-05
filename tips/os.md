@@ -1154,7 +1154,6 @@
     - 通过 numactl 等工具把进程绑定在某个 node 以及对应的 CPU 上，这样该进程只会从该本地 node 上分配内存
     - 内核还提供了 numa balancing 机制，可以通过 /proc/sys/kernel/numa_balancing 文件或者 cmdline 参数 numa_balancing=进行开启
       - 该机制可以动态的将进程访问的 page 从远端 node 迁移到本地 node 上，从而使进程可以尽可能的访问本地内存。
-
 - [Linux 工具来确定服务器上的性能瓶颈]
   - mpstat -P ALL 1 – 显示每个 CPU 的 CPU 细分时间，您可以用它来检查不平衡性。单个热 CPU 或许是某个单线程应用程序的证据。
   - pidstat 1 – 显示每个进程的 CPU 利用率并打印滚动摘要，这对于长期观察模式非常有用。
@@ -1695,7 +1694,15 @@
   dd if=b.txt of=/dev/null bs=1M iflag=direct oflag=direct count=10240 >> io_test.log
   echo "检查完成" >> io_test.log
   ```
-
+- 硬件知识
+  - cache line
+  - prefetching
+  - cache associativity
+    - cache 的大小是要远小于主存的。这就意味着我们需要通过某种方式将主存的不同位置映射到缓存中.共有 3 种不同的映射方式
+      - 全相联映射 - 全相联映射允许主存中的行可以映射到缓存中的任意一行。这种映射方式灵活性很高，但会使得缓存的查找速度下降。
+      - 直接映射 - 直接映射则规定主存中的某一行只能映射到缓存中的特定行。这种映射方式查找速度高，但灵活性很低，会经常导致缓存冲突，从而导致频繁 cache miss 。
+      - 组相联映射 - 组相联映射则尝试吸收前两者的优点，将缓存中的缓存行分组，主存中某一行只能映射到特定的一组，在组内则采取全相联的映射方式。
+  - false share
 
 
 

@@ -167,8 +167,17 @@
   - 对密文数据进行分词组合，将分词组合的结果集分别进行加密，然后存储到扩展列，查询时通过key like '%partial%'
   - 算法支持：Hill密码处理和模糊匹配加密方法FMES
   - 可搜索加密（Searchable Encryption）或同态加密（Homomorphic Encryption）
+- [GC垃圾回收算法](https://mp.weixin.qq.com/s/M8R4QPidlCrr6vix4JUWmg)
+  - GC 标记-清除法、引用计数法、GC 标记-复制算法、GC 标记-压缩算法、保守式 GC、分代垃圾回收、增量式垃圾回收(三色标记法)
 - [认知偏差知识手册](https://s75w5y7vut.feishu.cn/docs/doccn3BatnScBJe7wD7K3S5poFf)
   - https://alanhg.github.io/cognitive-bias/
+
+
+
+
+
+
+
 
 
 

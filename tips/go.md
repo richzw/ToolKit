@@ -2113,7 +2113,7 @@
     - 使用singleflight来优化写无法保证数据的安全性。
     - 它必须保证 Sync 操作在 Write 操作之后。因此当发现有正在执行的Sync操作，那么就等待这次完成，然后必须重新开启一轮的 Sync 操作，等待的过程也是聚合的时机。
     - 我们可以使用 sync.Cond（或者 Channel ）来实现阻塞和唤醒，使用 sync.Once 来保证同一时间单个执行。
-
+- [Calling C from Go](https://ericchiang.github.io/post/cgo/)
 
 
 

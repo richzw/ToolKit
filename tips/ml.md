@@ -871,6 +871,7 @@
     - 手撕多头注意力（MultiHeadAttention）
     - 手撕自注意力机制函数（SelfAttention）
     - 手撕 beamsearch 算法 Layer Normalization 算法 k-means 算法
+  - [Transformer释义](https://mp.weixin.qq.com/s/LL56WxCGnDaJ4Jp-4y9QDA)
 - GPTs List
   - https://supertools.therundown.ai/gpts
   - Tips to create GPTs
