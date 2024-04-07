@@ -2114,7 +2114,9 @@
     - 它必须保证 Sync 操作在 Write 操作之后。因此当发现有正在执行的Sync操作，那么就等待这次完成，然后必须重新开启一轮的 Sync 操作，等待的过程也是聚合的时机。
     - 我们可以使用 sync.Cond（或者 Channel ）来实现阻塞和唤醒，使用 sync.Once 来保证同一时间单个执行。
 - [Calling C from Go](https://ericchiang.github.io/post/cgo/)
-
+- http2: close connections when receiving too many headers
+  - 维护 HPACK 状态需要我们解析和处理连接上的所有 HEADERS 和 CONTINUATION 帧。当请求的标头超过 MaxHeaderBytes 时，我们不会分配内存来存储多余的 headers，但会解析它们。
+  - 这允许攻击者导致 HTTP/2 端点读取任意数量的 headers 数据，所有这些数据都与将被拒绝的请求相关联。这些 headers 可以包含霍夫曼编码的数据，接收者解码该数据的成本比攻击者发送的成本高得多。
 
 
 

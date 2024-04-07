@@ -231,6 +231,8 @@
       - 2.4 采用了基于 Tantivy 的倒排索引，它可以应用于所有数字和字符串数据类型。此版本还支持模糊匹配标量过滤使用前缀，中缀和后缀
     - 内存映射存储: 不是将文件内容直接加载到内存中，而是将文件内容映射到内存中
     - 元数据过滤中支持使用正则表达式对子字符串进行匹配、全新的标量倒排索引（由 Tantivy 贡献）以及用于检测并同步 Milvus Collection 中数据变化的 Change Data Capture 工具
+    - HNSW 还没有全链路支持 float16，底层 knn search的时候，是把 float16转换成 float32 再运算的，所以你看到内存使用量下降不多.下个版本，HNSW 全链路都支持 float16 之后，预期内存使用量会下降一半
+    - 全链路支持float16和bfloat16的只有diskann。下一步支持的是hnsw，ivf和scann还排在后面
   - Error Check list
     - "deny to write: memory limit exceeded" 意思是某个querynode或者datanode的内存快用光了
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
