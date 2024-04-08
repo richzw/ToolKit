@@ -245,6 +245,9 @@
     - unique_ptr是独占管理权，而shared_ptr则是共享管理权，即多个shared_ptr可以共用同一块关联对象，其内部采用的是引用计数
     - weak_ptr的出现，主要是为了解决shared_ptr的循环引用，其主要是与shared_ptr一起来私用。和shared_ptr不同的地方在于，其并不会拥有资源，也就是说不能访问对象所提供的成员函数，不过，可以通过weak_ptr.lock()来产生一个拥有访问权限的shared_ptr。
 - [iowait](https://mp.weixin.qq.com/s/9ao1O7CR0tHNTIKAPLIfbQ)
+  - CPU 只有两种状态：busy 和 idle
+    - Busy 又分成了两种，user 和 system，可以表示 CPU 目前正在执行用户空间的代码，还是正在执行 kernel 空间的代码
+    - Idle 又分成了两种：idle 和 iowait。笼统来说，idle 就是目前系统中没有 Runnable 的进程了, iowait 就是目前系统中没有 Runnable 进程（所以说 iowait 是 idle 的一种），并且，有进程卡在 IO 上
   - 如果系统处于 iowait 状态，那么必须满足以下两个条件：
     - 系统中存在等待 I/O 请求完成的进程。
     - 系统当前正处于空闲状态，也就是说没有可运行的进程。
@@ -258,7 +261,13 @@
     - iowait 会导致系统的响应时间变长，从而导致系统的延迟增大。
     - iowait 会导致系统的 CPU 利用率下降，从而导致系统的资源利用率下降。
     - iowait 会导致系统的负载升高，从而导致系统的负载变大。
-
+  - iowait 是一种 idle，如果比例过高
+    - 系统正在做的工作，大部分时间都是在等待 io 了，io 系统的性能不够高（也有可能是硬盘坏了）；
+    -  CPU 没有更多的工作可以做了，我们可以给系统分配更多的计算工作；
+    - 它不是 CPU 的一种“阻塞”状态，它不能说明：CPU 现在在等待 IO，无法运行其他进程。而是没有可以运行的进程能给 CPU 做；
+  - iowiat 是 CPU 角度的一个状态，它不是进程角度的状态。iowait 很低，不能代表进程没有卡在 IO 上
+    - 假设有一个进程需要花 70% 的时间做 io操作，把它放到一个空闲的，单 CPU 的系统中，显示的 iowait 是 70%，但是我在这个系统中增加一个不依赖 io 的计算任务，iowait 就变成 0 了
+  - https://blog.pregos.info/wp-content/uploads/2010/09/iowait.txt
 - [Linux Performance Analysis](https://netflixtechblog.com/linux-performance-analysis-in-60-000-milliseconds-accc10403c55)
   - USE Method: a methodology for locating performance bottlenecks. This involves checking utilization, saturation, and error metrics for all resources (CPUs, memory, disks, e.t.c.)
   - uptime

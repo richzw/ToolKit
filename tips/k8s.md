@@ -743,6 +743,10 @@
     - 当控制器处理完自己相关的收尾动作，会把和自己相关的 finalizers 标记从被删除对象中移除，K8S 垃圾回收器观察到资源的 .metadata.finalizers 被置空，就会真正的把资源从 Etcd 中删除。
     - 编写的控制器需要对关心的资源实现删除前回调的能力，也就是给资源加上特定的 finalizers 标记
   - kubectl 到底做了什么 - 使用 -v 10 查看详细信息
+  - 删除过程
+    - 发出删除命令：Kubernetes 将对象标记为待删除。这会使资源处于只读“Terminating”状态。
+    - 运行与对象的 Finalizers 相关的每个操作：每次 Finalizer 操作完成时，Finalizer都会与资源对象分离，因此它将不再会出现在 metadata.finalizers 字段中。
+    - Kubernetes 持续监控附加到对象的 Finalizers 字段：一旦 metadata.finalizers 为空，该对象将被删除，因为所有 Finalizers 都已完成其操作并被删除了。
 
 
 

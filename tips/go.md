@@ -2117,7 +2117,9 @@
 - http2: close connections when receiving too many headers
   - 维护 HPACK 状态需要我们解析和处理连接上的所有 HEADERS 和 CONTINUATION 帧。当请求的标头超过 MaxHeaderBytes 时，我们不会分配内存来存储多余的 headers，但会解析它们。
   - 这允许攻击者导致 HTTP/2 端点读取任意数量的 headers 数据，所有这些数据都与将被拒绝的请求相关联。这些 headers 可以包含霍夫曼编码的数据，接收者解码该数据的成本比攻击者发送的成本高得多。
-
+- 包级变量初始化次序
+  - 包级元素的初始化顺序是：常量 -> 变量 -> init函数
+  - https://github.com/golang/go/issues/66575
 
 
 

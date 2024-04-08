@@ -1016,6 +1016,9 @@
       - Keepalived软件起初是专为LVS负载均衡软件设计的，用来管理并监控LVS集群系统中各个服务节点的状态，后来又加入了可以实现高可用的VRRP (Virtual Router Redundancy Protocol ,虚拟路由器冗余协议）功能
       - 管理LVS负载均衡软件实现LVS集群节点的健康检查作为系统网络服务的高可用性（failover）
       - Keepalived高可用服务之间的故障切换转移，是通过 VRRP 来实现的。在 Keepalived服务正常工作时，主 Master节点会不断地向备节点发送（多播的方式）心跳消息，用以告诉备Backup节点自己还活着，当主 Master节点发生故障时，就无法发送心跳消息，备节点也就因此无法继续检测到来自主 Master节点的心跳了，于是调用自身的接管程序，接管主Master节点的 IP资源及服务。而当主 Master节点恢复时，备Backup节点又会释放主节点故障时自身接管的IP资源及服务，恢复到原来的备用角色。
+  - [nginx、haproxy 反向代理 HTTP服务，如果  反向代理挂了，了怎么办？](https://mp.weixin.qq.com/s/Bv_NvMKXhdDYXEYdxDDYfA)
+    - 使用 nginx-keepalived双机热备机制，vip主机可以进行漂移，这样主机挂掉了，还有备用机可以顶上
+  - KeepAlived 如何实现 IP的漂移 / IP的跳跃
     
 - [分布式系统设计模式](https://colobu.com/2022/06/26/distributed-system-design-patterns/)
   - 布隆过滤器
