@@ -887,7 +887,11 @@
       - 若行格式为 DYNAMIC 或 COMPRESSED 时，限制值为 3072，而行格式 REDUNDANT 或 COMPACT 时，限制值为 767。
   - 字符集对索引长度影响
     - UTF8编码占用3个字节，能表示除了表情符之外的其他字符，UFT8mb4占用4个字节，既能表示汉字也能表示表情符
-
+- 清理错误数据
+  - create table as这个语句的不熟悉，这个语句建表导致的表主键、索引、auto_increment的丢失。
+  - DELETE FROM MY_TABLE 
+  - truncate语句，保留原表结构
+  - CREATE TABLE LIKE 语句创建临时表，复制原表结构
 
 
 

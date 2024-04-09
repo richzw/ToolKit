@@ -233,7 +233,7 @@
     - 高吞吐 ：BMQ 将数据拆分成多个 Segment 文件，存储在不同的分布式存储系统的不同机器上的不同磁盘上，从而提高了吞吐性能。
     - 低延迟 ：BMQ 的 Broker 节点自动感知写入文件尾部的消息延迟变高，会创建新的 Segment 文件来降低延迟。
 - [AutoMQ 是如何通过云原生的架构设计来避免原 Kafka 冷读带来的副作用](https://mp.weixin.qq.com/s/u-3oHMNJqRahFdAJlXCyNg)
-
+- [消息积压](https://mp.weixin.qq.com/s/gl5nNNiLrmgtTkp59ciQSw)
 
 
 
