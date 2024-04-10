@@ -217,8 +217,11 @@
     - Rust 特征 (Traits) 和接口有什么区别？
     - 什么是 Rust 中的生命周期？为什么需要生命周期？
       - 防止悬垂引用和非法引用
-
-
+- [Protobuf解析优化](https://mp.weixin.qq.com/s/ktOGySi9HJ31G2-IOfxHZw)
+  - 首先我们使用了池化技术避免反复的内存分配和释放，从而直接将耗时降低到 baseline 的 36% 左右。
+  - 接着为了使用零拷贝的特性，我们将 Label 的 String 字段替换为了 Bytes 类型，但是发现性能却下降了。
+    - 通过火焰图我们发现 Prost 为了让 Bytes 在 BytesAdapter 和 Buf 两个 trait 之间转换引入了一些额外的开销。通过把类型特化我们得以去除这些开销
+    - 在火焰图中发现了 Bytes:slice 自身为了确保内存安全引入的一些额外的开销。考虑到我们的用法，我们 hack 了 slice 的实现从而最终将耗时降低到 baseline 的 20% 左右。
 
 
 

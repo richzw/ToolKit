@@ -1016,10 +1016,19 @@
       - Keepalived软件起初是专为LVS负载均衡软件设计的，用来管理并监控LVS集群系统中各个服务节点的状态，后来又加入了可以实现高可用的VRRP (Virtual Router Redundancy Protocol ,虚拟路由器冗余协议）功能
       - 管理LVS负载均衡软件实现LVS集群节点的健康检查作为系统网络服务的高可用性（failover）
       - Keepalived高可用服务之间的故障切换转移，是通过 VRRP 来实现的。在 Keepalived服务正常工作时，主 Master节点会不断地向备节点发送（多播的方式）心跳消息，用以告诉备Backup节点自己还活着，当主 Master节点发生故障时，就无法发送心跳消息，备节点也就因此无法继续检测到来自主 Master节点的心跳了，于是调用自身的接管程序，接管主Master节点的 IP资源及服务。而当主 Master节点恢复时，备Backup节点又会释放主节点故障时自身接管的IP资源及服务，恢复到原来的备用角色。
-  - [nginx、haproxy 反向代理 HTTP服务，如果  反向代理挂了，了怎么办？](https://mp.weixin.qq.com/s/Bv_NvMKXhdDYXEYdxDDYfA)
+  - [nginx、haproxy 反向代理 HTTP服务，如果反向代理挂了怎么办](https://mp.weixin.qq.com/s/Bv_NvMKXhdDYXEYdxDDYfA)
     - 使用 nginx-keepalived双机热备机制，vip主机可以进行漂移，这样主机挂掉了，还有备用机可以顶上
   - KeepAlived 如何实现 IP的漂移 / IP的跳跃
-    
+    - Keepalived 是一款轻量级HA集群应用，它的设计初衷是为了做LVS集群的HA，即探测LVS健康情况，从而进行主备切换，不仅如此，还能够探测LVS代理的后端主机的健康状况，动态修改LVS转发规则
+    - 健康检查和失败切换是keepalived的两大核心功能
+      - 健康检查，就是采用tcp三次握手，icmp请求，http请求，udp echo请求等方式对负载均衡器后面的实际的服务器(通常是承载真实业务的服务器)进行保活
+      - 失败切换主要是应用于配置了主备模式的负载均衡器，利用VRRP维持主备负载均衡器的心跳，当主负载均衡器出现问题时，由备负载均衡器承载对应的业务，从而在最大限度上减少流量损失，并提供服务的稳定性。
+    - VRRP虚拟路由冗余协议
+      - VRRP（VritrualRouterRedundancyProtocol,虚拟路由冗余协议)出现的目的是解决静态路由出现的单点故障问题
+        - 主机之间的通信都是通过配置静态路由或者(默认网关)来完成的，而主机之间的路由器一旦发生故障，通信就会失效，因此这种通信模式当中，路由器就成了一个单点瓶颈，为了解决这个问题，就引入了VRRP协议。
+      - 设计目标是支持特定情况下IP数据流量失败转移不会引起混乱，允许主机使用单路由器，以及即使在实际第一跳路由器使用失败的情形下仍能够维护路由器间的连通性
+    - IPVS内核模块
+      - Linux 的 IPVS内核模块基本上是一种高效的Layer-4交换机，它提供负载平衡的功能
 - [分布式系统设计模式](https://colobu.com/2022/06/26/distributed-system-design-patterns/)
   - 布隆过滤器
     - Bloom 过滤器是一种节省空间的概率数据结构，用于测试元素是否为某集合的成员。它用于我们只需要检查元素是否属于对象的场景。
@@ -1109,6 +1118,7 @@
     - 有效避免jwt需要客户端实现续签功能，增加客户端复杂度；支持服务端自动续期，客户端不需要关心续签逻辑；
 - [Kitex Proxyless 配合 Istio 与 OpenTelemetry 实现全链路泳道](https://mp.weixin.qq.com/s/SAn-H5p53IfvSy_Y3Mcz_Q)
 - [Istio 中保留客户端请求的源 IP](https://mp.weixin.qq.com/s/muL7ZGDS77dslaSXzvHXig)
+- [Istio的L7规则的生产化实践](https://mp.weixin.qq.com/s/BdcUC32lxZF1AGGXTZiz4g)
 - [评论系统架构设计](https://mp.weixin.qq.com/s/s99ZWuSi0Lu6ivfpBHvLWQ)
 - [How Not To Sort By Average Rating](https://www.evanmiller.org/how-not-to-sort-by-average-rating.html)
   - Score = Lower bound of Wilson score confidence interval for a Bernoulli parameter

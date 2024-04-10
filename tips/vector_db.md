@@ -171,6 +171,7 @@
       - 选的metric_type是L2还是IP。
       - 如果是L2的话，distance越接近0就越相似，排第一个的最相似。
       - 如果是IP的话，在向量都做了归一化的前提下，distance越接近1越相似。详情参考官网文档的metric type。
+    - 使用IP必须要把向量都归一化，不然没有意义。对于归一化的向量，IP算出来的结果和COSINE理论上是相同的。如果你自己做了归一化，那就可以用IP。没做，那就用COSINE或者L2
     - 有向量索引的情况下，过滤查询是有可能搜不出结果。
       - 有时候能搜到有时不能搜到，多半是因为底下的segment做了compaction之后重建了索引。几个有索引的小分片和一个有索引的大分片，过滤搜索出来的东西很可能不同。
     - 查询节点内存自动均衡的几种策略？当前默认是scorebase
@@ -187,6 +188,7 @@
   - 索引
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap
+    - 集群开了mmap，创建集合索引的时候是默认就开启了，还是需要collection.set_properties({'mmap.enabled': True})参数指定
     - hnsw索引的向量类型只能用floatvector？ float16Vector可以使用和floatVector一样的索引，hnsw ivf都行
   - load是否有并发的设置呢？milvus.yaml里的queryCoord.taskExecutionCap，这个设小点每批送给一个querynode加载的segment的最大数量，每个segment里有多个数据文件，querynode也有自己的并发读取的限制，跟cpu核数相关
   - 重启的时候会把之前loaded状态的表全部加载进内存。load的速度不可控，跟内部的调度和存储的读带宽相关。一般来说，千万级别的数据量load耗时分钟级的都是正常

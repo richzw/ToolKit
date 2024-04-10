@@ -31,7 +31,7 @@
     - 在设置手动提交时，如果我们是在处理完消息后提交commit，那么在commit这一步发生了失败，就会导致重复消费的问题。
 
   方案：
-  - 解决push消息丢失问题
+  - 解决push消息丢失问题 - 生产者配置适当的 "acks "和 "retries"，以确保消息被发送到代理
     - 通过设置RequiredAcks模式来解决，选用WaitForAll可以保证数据推送成功，不过会影响时延时
     - 引入重试机制，设置重试次数和重试间隔
      ```go
@@ -42,9 +42,12 @@
       cfg.Producer.Retry.Max = 3 // 设置重试3次
       cfg.Producer.Retry.Backoff = 100 * time.Millisecond
      ```
+  - Broker
+    - 为了提高 I/O 吞吐量，消息通常会异步刷到磁盘上，因此如果实例在刷新之前宕机，消息就会丢失。
+    - Kafka 集群中的副本需要正确配置，以保持数据的有效副本。数据同步的确定性非常重要。
   - 解决pull消息丢失问题
     - 直接使用自动提交的模式，使用幂等性操作应对产生重复消费的问题
-    - 手动提交与自动提交结合 TODO
+    - 手动提交与自动提交结合- 一个好的做法是将同步提交和异步提交结合起来，在处理消息的循环中使用异步提交以提高吞吐量，在异常处理中使用同步提交以确保最后的偏移始终被提交
     
      ```go
       cfg.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange

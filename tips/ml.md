@@ -777,6 +777,7 @@
       - mlc-llm建立在 Apache TVM Unity之上，并在此基础上进行了进一步优化
     - 三个较为流行的Inference Server -Triton Server RayLLM OpenLLM 
   - [大模型需要怎样的硬件算力](https://mp.weixin.qq.com/s/NoREsyLXNVk1aABtSkhBDA)
+  - [Needle In A Haystack](https://github.com/gkamradt/LLMTest_NeedleInAHaystack)
 - LLM Limitations
   - Lacking domain-specific information
     - LLMs are trained solely on data that is publicly available. Thus, they may lack knowledge of domain-specific, proprietary, or private information that is not accessible to the public.
