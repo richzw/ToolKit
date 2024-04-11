@@ -203,6 +203,8 @@
   - Knowhere 是 Milvus 的内部核心引擎，负责向量搜索，是基于行业标准开源库（如 Faiss、DiskANN 和 hnswlib 等）的增强版本
     - Knowhere 属于开源，其部署环境更多样，可在所有主机类型上运行
     - Knowhere 依赖于 OSS 库（如 Faiss、DiskANN 和 hnswlib）
+  - attu
+    -  attu里显示的approx entities number相当于用pymilvus的collection.num_entities获取行数，这个是从etcd中快速统计已落盘的行数。加载在内存里的数量有可能不一样，因为有些数据可能没落盘
   - [Cardinal 搜索引擎](https://mp.weixin.qq.com/s/4xx2U8Xyr1RetTkMtRrxyw)
     - Cardinal 是用现代 C++ 语言和实用的近似最近邻搜索（ANNS）算法构建的多线程、高效率向量搜索引擎， 将搜索引擎的性能比原来提升了 3 倍，搜索性能（QPS）是 Milvus 的 10 倍
     - 同时能够处理暴搜请求和 ANNS 索引修改请求；处理各种数据格式，包括 FP32、FP16 和 BF16;执行索引 Top-K 和索引范围搜索（Range Search）;使用内存中数据或提供基于内存、磁盘和 MMap 等不同方式的索引

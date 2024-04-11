@@ -892,8 +892,12 @@
   - DELETE FROM MY_TABLE 
   - truncate语句，保留原表结构
   - CREATE TABLE LIKE 语句创建临时表，复制原表结构
-
-
+- [MySQL replication lag is too big due to miss to warm up innodb buffer pool](https://yishenggong.com/2024/04/09/mysql-replication-lag-is-too-big-due-to-miss-to-warm-up-innodb-buffer-pool/)
+  -  show processlist
+  - show slave status
+  - Root cause: miss to warm up MySQL innodb buffer pool —> slow queries —> lag too big
+    - warm up query: `select count(distinct index_id) from <TABLE>`
+  - ![img.png](mysql_replica_lag.png)
 
 
 
