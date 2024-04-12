@@ -173,7 +173,7 @@
   - https://alanhg.github.io/cognitive-bias/
 - inside .git
   - ![img.png](misc_git_1.png)
-
+- [vim cheat sheet](https://michael.peopleofhonoronly.com/vim/)
 
 
 

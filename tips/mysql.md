@@ -898,6 +898,29 @@
   - Root cause: miss to warm up MySQL innodb buffer pool —> slow queries —> lag too big
     - warm up query: `select count(distinct index_id) from <TABLE>`
   - ![img.png](mysql_replica_lag.png)
+- SELECT COUNT(*) 会造成全表扫描
+  - 针对无 where_clause 的 COUNT(*)，MySQL 是有优化的，优化器会选择成本最小的辅助索引查询计数
+  - 不管是 COUNT(1)，还是 COUNT(*)，MySQL 都会用成本最小的辅助索引查询方式来计数，也就是使用 COUNT(*) 由于 MySQL 的优化已经保证了它的查询性能是最好的
+  - SQL 选用索引的执行成本如何计算
+    - IO 成本：即从磁盘把数据加载到内存的成本，默认情况下，读取数据页的 IO 成本是 1
+    - CPU 成本：将数据读入内存后，还要检测数据是否满足条件和排序等 CPU 操作的成本，显然它与行数有关，默认情况下，检测记录的成本是 0.2
+  - 5.6 及之后的版本中，我们可以用 optimizer trace 功能来查看优化器生成计划的整个过程 ，它列出了选择每个索引的执行计划成本以及最终的选择结果
+  ```sql
+  SET optimizer_trace="enabled=on";  
+  SELECT create_time FROM person WHERE NAME >'name84059' AND create_time > '2020-05-23 14:39:18';  
+  SELECT * FROM information_schema.OPTIMIZER_TRACE;  
+  SET optimizer_trace="enabled=off";
+  ```
+
+
+
+
+
+
+
+
+
+
 
 
 

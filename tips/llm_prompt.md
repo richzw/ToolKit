@@ -744,6 +744,7 @@
   - How to get GPT's action schema?
 - [Openai Prompt Resource](https://github.com/openai/openai-cookbook/blob/main/articles/related_resources.md)
   - [解读Openai Prompt](https://waytoagi.feishu.cn/wiki/FoJJwvwBNiEJYjkx1ygccO2CnVe) 
+  - [Prompt Engineer](https://github.com/brexhq/prompt-engineering)
 
 
 

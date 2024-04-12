@@ -307,6 +307,31 @@
     - `This is very important to my career`
   - ExpertPrompting
 - [Is RAG Really Dead](https://docs.google.com/presentation/d/1mJUiPBdtf58NfuSEQ7pVSEQ2Oqmek7F1i4gBwR6JDss/edit#slide=id.g26c0cb8dc66_0_0)
+- [Mastering RAG](https://www.rungalileo.io/blog/mastering-rag-how-to-architect-an-enterprise-rag-system)
+  - ![img.png](rag_failure_point.png)
+    - Cognitive reviewer: Cognitive reviewer is a RAG system designed to assist researchers in analyzing scientific documents. Researchers define a research question or objective and upload a collection of related research papers
+    - AI Tutor, another RAG system, enables students to ask questions about a unit and receive answers sourced from learning content
+    - Biomedical Q&A, a RAG system was created using the BioASQ dataset, containing questions, document links, and answers
+  - Chunk
+   
+   | Technique                     | Usecase       | Pros                                                                                                             | Cons                                                                                          |
+   |-------------------------------|---------------|------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+   | **Character splitter**        | Text          | Versatile: Handles various separators<br>Flexible: Adapts to different languages<br>Cost-Effective: Does not require an ML model                                           | Performance: May have increased computational load<br>Complexity: Requires parameter tuning<br>Sentence Interruption: May cut sentences midway          |
+   | **Recursive character splitter** | Text, code    | Versatile: Handles various separators<br>Flexible: Adapts to different languages<br>Cost-Effective: Does not require an ML model                                           | Performance: Recursive nature may increase computational load<br>Complexity: Requires parameter tuning<br>Sentence Interruption: May cut sentences midway |
+   | **Sentence splitter**         | Text          | Considers Sentence Boundaries: Avoids cutting sentences prematurely<br>Customizable: Parameters for stride and overlap<br>Cost-Effective: Works with light sentence segmenter | Lack of Versatility: Limited to sentence-based chunks<br>Overlap Issues: May lead to redundancy                                                      |
+   | **Semantic splitter**         | Text, Chat    | Contextual Grouping: Organizes text based on semantic similarity<br>Overcomes Challenges: Handles chunk size and overlap                                                 | Complexity: Requires similarity model and tuning<br>Parameter Dependency: Relies on setting appropriate parameters<br>Resource Intensive: Demands computational resources         |
+   | **Propositions**              | Text, Chat    | Atomic Expression: Introduces novel retrieval unit (propositions)<br>Distinct Factoids: Each proposition is self-contained<br>Contextualization: Provides necessary context | Complexity: Requires LLM model<br>Parameter Dependency: Relies on setting appropriate prompt<br>Resource Intensive: Demands computational resources                              |
+  - Prompt
+    
+    | Name                 | How it works?                                                    | Ease of implementation | Increase of input token | Increase of output token |
+    |----------------------|------------------------------------------------------------------|------------------------|-------------------------|--------------------------|
+    | **Thread of Thought (ToT)** | Break down and analyzes extensive contexts for selecting relevant information | Easy                   | Yes                     | Yes                      |
+    | **Chain of Note (CoN)**     | Generate sequential reading notes for retrieved documents > evaluate their relevance to the given question > integrate information to formulate the final answer | Easy | Yes | Yes |
+    | **Chain of Verification (CoV)** | Draft a response > plan verification questions > answer those questions independently > generate final verified response | Hard | Yes | Yes |
+    | **EmotionPrompt**          | Add an emotional prompt to the original prompt                  | Easy                   | Yes                     | No                       |
+    | **ExpertPrompting**        | Add synthesized expert background generated with another few shot prompt | Easy | Yes | No |
+
+
 
 
 
