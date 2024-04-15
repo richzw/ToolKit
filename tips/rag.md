@@ -321,6 +321,7 @@
    | **Sentence splitter**         | Text          | Considers Sentence Boundaries: Avoids cutting sentences prematurely<br>Customizable: Parameters for stride and overlap<br>Cost-Effective: Works with light sentence segmenter | Lack of Versatility: Limited to sentence-based chunks<br>Overlap Issues: May lead to redundancy                                                      |
    | **Semantic splitter**         | Text, Chat    | Contextual Grouping: Organizes text based on semantic similarity<br>Overcomes Challenges: Handles chunk size and overlap                                                 | Complexity: Requires similarity model and tuning<br>Parameter Dependency: Relies on setting appropriate parameters<br>Resource Intensive: Demands computational resources         |
    | **Propositions**              | Text, Chat    | Atomic Expression: Introduces novel retrieval unit (propositions)<br>Distinct Factoids: Each proposition is self-contained<br>Contextualization: Provides necessary context | Complexity: Requires LLM model<br>Parameter Dependency: Relies on setting appropriate prompt<br>Resource Intensive: Demands computational resources                              |
+   
   - Prompt
     
     | Name                 | How it works?                                                    | Ease of implementation | Increase of input token | Increase of output token |
@@ -330,9 +331,19 @@
     | **Chain of Verification (CoV)** | Draft a response > plan verification questions > answer those questions independently > generate final verified response | Hard | Yes | Yes |
     | **EmotionPrompt**          | Add an emotional prompt to the original prompt                  | Easy                   | Yes                     | No                       |
     | **ExpertPrompting**        | Add synthesized expert background generated with another few shot prompt | Easy | Yes | No |
-
-
-
+  - Techniques for improving retrieval
+    - [Hypothetical document embeddings (HyDE)](https://docs.haystack.deepset.ai/docs/hypothetical-document-embeddings-hyde)
+      - The HyDE method is highly useful when:
+        - The performance of the retrieval step in your Pipeline is not good enough (for example, low Recall metric).
+        - Your retrieval step has a query as input and returns documents from a larger document base.
+        - Particularly worth a try if your data (documents or queries) come from a special domain that is very different from the typical datasets that Retrievers are trained on.
+    - Query routing
+      - Query routing proves advantageous when dealing with multiple indexes, directing queries to the most relevant index for efficient retrieval
+    - Reranker
+      - When retrieval from the encoder falls short of delivering optimal quality, a reranker is used to enhance the document ranking
+    - auto-merging retrieval
+      - a bunch of nearby context chunks are retrieved, merge them into one bigger “chunk” so the LLM has a holistic view of the larger document.
+      - https://generativeai.pub/advanced-rag-retrieval-strategies-auto-merging-retrieval-dc3f869654c4
 
 
 
