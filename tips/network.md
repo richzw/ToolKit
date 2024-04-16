@@ -1443,3 +1443,6 @@
     - != 和 !== 针对的是过滤出来的数据包，不是指的过滤掉的数据包。
   - [显示过滤中的比较值](https://mp.weixin.qq.com/s/JLuZVSnVwMboQQy4aenKAw)
     - Edit -> Preferences -> Protocols -> TCP -> Allow subdissector to reassemble TCP streams ，不勾选。
+  - TCP ACKed unseen segment 实质上没有任何真实的业务影响
+    - TCP ACKed unseen segment 定义
+    - 当为反方向设置了预期的下一个确认号并且它小于当前确认号时设置。

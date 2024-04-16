@@ -354,6 +354,10 @@
     - https://osanseviero.github.io/hackerllama/blog/posts/random_transformer/
   - [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html)
     - Harvard NLP 的 The Annotated Transformer 是一个非常好的学习 Transformer 的资源
+  - [Infini-attention transformer](https://arxiv.org/abs/2404.07143)
+    - 常规的注意力机制，是把注意力计算中所有的键值（KV）和查询状态丢弃；而经过改进的注意力机制, 将注意力的旧KV状态存储在压缩内存中，用于长期记忆中的巩固和检索。
+    - 在处理后续序列时，注意力查询可以从压缩内存中检索值，在最终的上下文输出中，Infini attention会聚合从长期记忆检索的值和局部注意力上下文
+    - Infini attention 让基于Transformer的模型能够在有限的内存占用和计算量下高效处理无限长的输入序列，它把压缩内存集成到标准的注意力机制中，并在单个Transformer块内构建了掩码局部注意力和长期线性注意力机制
   - [Sentence Transformers](https://mp.weixin.qq.com/s/DUI5Szeh7xVkJTQHbk9kXw)
     - 两种类型的模型: Bi-encoders 和 Cross-encoders
     - Bi-encoders 更适合搜索

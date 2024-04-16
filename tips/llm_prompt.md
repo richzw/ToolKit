@@ -745,7 +745,7 @@
 - [Openai Prompt Resource](https://github.com/openai/openai-cookbook/blob/main/articles/related_resources.md)
   - [解读Openai Prompt](https://waytoagi.feishu.cn/wiki/FoJJwvwBNiEJYjkx1ygccO2CnVe) 
   - [Prompt Engineer](https://github.com/brexhq/prompt-engineering)
-
+- Create a mind map of [Your Topic]. List topics as central ideas, main branches, and sub-branches
 
 
 
