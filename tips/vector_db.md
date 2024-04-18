@@ -165,6 +165,7 @@
     - 如果你不用过滤查询的话，hnsw索引会比ivf_flat快。动态数据是要比静态数据查询慢的。对于动态数据，如果partition多的话，性能会更差一些
     - nlist取2048比较好，nprobe按你之前的比例取10左右。ivfpq，一亿的数据，nlist 可以设置成多少合适，2048吗？
       - 在milvus里，每个分片都是独立的内存，所以nlist的取值是以每个分片所包含的行数来推荐。我们推荐是4*sqrt(每个分片里的行数)。faiss都是把数据整成一份，所以它那个很大
+      - nlist的推荐值是4*sqrt(n)，其中n是单个segment中的数据行数，如果milvus.yaml中的segment. maxSize为默认的512MB，则n可以用512MB/(dimension*4Bytes)来计算
       - nlist是聚类中心的数量，nprobe是搜索时查询的聚类中心的数量。nlist越大，聚类中心越多，搜索时需要查询的聚类中心也就越多，搜索的时间也就越长。nprobe是搜索时查询的聚类中心的数量，nprobe越大，搜索的时间也就越长。nlist和nprobe的取值要根据实际情况来调整，一般来说，nlist和nprobe的取值要根据数据量、数据维度、索引类型、搜索参数等因素来调整。
       - nlist 和 nprobe 都是针对一个segment里的数据来说的，这两个值调控的是一个segment里面参与搜索的数据比例。nlist 是把一个segment里的数据分成多少个堆，nprobe是决定从这nlist个堆里选多少个出来参与搜索计算。
       - nlist和nprobe匹配着用就问题不大。比如nlist=1024 nprobe=128能满足你对于召回率的要求，那么把nlist改成512后重建索引，也相应地把nprobe=64，那么召回率也大概率能满足你召回率的要求。
@@ -176,6 +177,7 @@
       - 如果是L2的话，distance越接近0就越相似，排第一个的最相似。
       - 如果是IP的话，在向量都做了归一化的前提下，distance越接近1越相似。详情参考官网文档的metric type。
     - 使用IP必须要把向量都归一化，不然没有意义。对于归一化的向量，IP算出来的结果和COSINE理论上是相同的。如果你自己做了归一化，那就可以用IP。没做，那就用COSINE或者L2
+    -  cosine是在数据被insert进来落盘的时候就计算好向量的length，然后在查询的时候会把两条向量的内积除以它们的length，所以是计算了一个余弦。由于length已经提前算好，所以查询性能和IP相比不会差多少
     - 有向量索引的情况下，过滤查询是有可能搜不出结果。
       - 有时候能搜到有时不能搜到，多半是因为底下的segment做了compaction之后重建了索引。几个有索引的小分片和一个有索引的大分片，过滤搜索出来的东西很可能不同。
     - 查询节点内存自动均衡的几种策略？当前默认是scorebase
@@ -184,8 +186,10 @@
     - 全量查询功能 - Query iterator
     - `collection.query(expr="id==xx", output_fields=["*"])`  这是取出一整行数据
     - 如果检索不出，一有可能是embedding不太好，二有可能索引参数搜索参数设的不合理，三有可能consistency level是eventually
+      -  insert数据到collection，数据的可见性跟message queue消费的速度有关，查询时想要确定数据可见就用consistency_level=Strong
     - 向量搜索不保证你想要的那条数据一定会在结果集里的第一个，也会会在第五第六个甚至第10个 向量搜索是ANNS，“近似近邻搜索”这几个词的简写，它不叫精确搜索
     - search返回的结果里不带有partition信息。可以建表时用一个字段来存partition的名字或者标记，然后search的时候在output_fields里填写这个字段的名字。
+    - 用gpu来做查询，必须要使用"GPU_"名字打头的索引
     - qps
       - qps受影响的因素很多，数据量，维度，索引类型参数，搜索参数，是否有过滤，是否有output_fields，milvus. yaml里面的queryNode.group里的配置，querynode数量，load的参数replica_number，等等。
       - 要获得更高的qps可以从上面这些方面入手。cpu的核数和性能也会影响qps，甚至NUMA架构也会影响qps。单机版的indexnode datanode如果有建索引或者compaction的任务在执行，也会影响qps。
@@ -216,6 +220,7 @@
     -  attu里显示的approx entities number相当于用pymilvus的collection.num_entities获取行数，这个是从etcd中快速统计已落盘的行数。加载在内存里的数量有可能不一样，因为有些数据可能没落盘
   - 编译
     - 编译可以看看milvus repo下的DEVELOPMENT.md, 可以去github milvus disscusions里搜索compile关键字看别人都踩了哪些坑
+    - 要编译和创建milvus镜像，参考这个帖子：https://github.com/milvus-io/milvus/discussions/31043
   - [Cardinal 搜索引擎](https://mp.weixin.qq.com/s/4xx2U8Xyr1RetTkMtRrxyw)
     - Cardinal 是用现代 C++ 语言和实用的近似最近邻搜索（ANNS）算法构建的多线程、高效率向量搜索引擎， 将搜索引擎的性能比原来提升了 3 倍，搜索性能（QPS）是 Milvus 的 10 倍
     - 同时能够处理暴搜请求和 ANNS 索引修改请求；处理各种数据格式，包括 FP32、FP16 和 BF16;执行索引 Top-K 和索引范围搜索（Range Search）;使用内存中数据或提供基于内存、磁盘和 MMap 等不同方式的索引
@@ -250,6 +255,7 @@
     - 全链路支持float16和bfloat16的只有diskann。下一步支持的是hnsw，ivf和scann还排在后面
   - Error Check list
     - "deny to write: memory limit exceeded" 意思是某个querynode或者datanode的内存快用光了
+    - "unrecognized dtype for key: labels"  这是因为langchain.MilvusVectorStore没法根据你在Document的metadata中的"labels"这个key所对应的vlaue推断出这是个什么类型的字段
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。
