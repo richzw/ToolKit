@@ -1330,7 +1330,11 @@
     - In some distributed systems, especially those involving consensus protocols like Paxos or Raft, the concept of a quorum (a majority of nodes) is used.
     - Heartbeats might be used to establish or maintain a quorum, ensuring that a sufficient number of nodes are operational for the system to make decisions. 
     - This brings complexity in implementation and managing quorum changes as nodes join or leave the system.
-
+- Data management
+  - CQRS（Command Query Responsibility Segregation）是一种将数据读写模型分开的架构模式。
+    - 用于查询数据（读取）的数据结构与用于更新数据（写入）的结构是分开的。这种分离允许对每种操作进行独立优化，从而提高性能、可扩展性和安全性
+  - Event Sourcing
+    - 事件源是一种将应用程序状态的变化存储为一系列事件的模式。事件源不存储域中数据的当前状态，而是存储随着时间推移发生的所有变化（事件）的日志
 
 
 

@@ -335,6 +335,11 @@
     - By contrast, with a lock-free collection, the scheduler never gets a chance to deschedule thread A or B. It is entirely possible that threads A and B will run concurrently through their entire timeslice, ping-ponging the same cache lines between their L2 caches the whole time.
   - Usage
     - Lock free tends to work out better in more or less the opposite situation: you have more hardware available at any given time than you have threads to run. In this case, a busy-wait with lock-free code can react very quickly when a resource becomes free, make its modification, and keep moving forward.
-
+- [无锁队列 C++](https://mp.weixin.qq.com/s/Cd0G7huDjY6oGeyupIno5Q)
+  - 无锁队列通常基于原子操作（atomic operations）或其他底层同步原语来实现，并且它们采用一些巧妙的方法来确保操作的正确性
+  - 典型的无锁队列算法有循环缓冲区（Circular Buffer）和链表（Linked List）
+    - 循环缓冲区通常使用两个指针（head 和 tail）来表示队列的开始和结束位置，利用自旋、CAS (Compare-and-Swap) 等原子操作来进行入队和出队操作
+    - 链表则通过利用 CAS 操作插入或删除节点来实现并发访问。
+  
 
 

@@ -268,6 +268,15 @@
     - 2）Tool Use：LLM 生成代码、调用 API 等进行实际操作；
     - 3）Planning：让 Agent 分解复杂任务并按计划执行；
     - 4）Multiagent Collaboration：多个 Agent 扮演不同角色合作完成任务；
+  - [Agent最常见的九种设计模式](https://mp.weixin.qq.com/s/EWdpOlzrgqOgHHWHdoFyGA)
+    - ReAct 实现  https://github.com/samwit/langchain-tutorials/blob/main/agents/YT_Exploring_ReAct_on_Langchain.ipynb
+    - Plan and solve 模式 
+    - Reason without Observation
+    - LLMCompiler 并行Function calling来提高效率
+    - Basic Reflection 类比于学生(Generator)写作业，老师(Reflector)来批改建议，学生根据批改建议来修改，如此反复
+    - Reflexion  本质上是强化学习的思路。和 Basic reflection 相比，引入了外部数据来评估回答是否准确，并强制生成响应中多余和缺失的方面，这使得反思的内容更具建设性。
+    - Language Agent Tree Search  ：是 Tree search + ReAct+Plan&solve 的融合体
+    - Self-Discover 让大模型在更小粒度上 task 本身进行反思，比如前文中的 Plan&Slove 是反思 task 是不是需要补充，而 Self-discover 是对 task 本身进行反思
 - 时间序列异常值检测
   - 正确体现各种指标多样的变化趋势和行为特性
     - 为消除每个分组中的趋势和季节性影响因素，我们利用了 statsmodels 库中强大的 seasonal_decompose（季节性分解函数）

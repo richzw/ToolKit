@@ -101,9 +101,20 @@
     ```
 -  [硬件和操作系统配置](https://mp.weixin.qq.com/s/FKfbg1qw0XAvK_xc_G6u6A)
   - WiredTiger存储引擎的内部缓存大小可以通过storage.wiredTiger.engineConfig.cacheSizeGB进行设置，其大小应足以容纳整个工作集
-
-
-
+- Mongo Index
+  - MongoDB 底层是如何存储数据的
+    - 一个 collection 对应到底层存储引擎就是一个文件，另外每个索引也是单独的文件，每个数据和索引文件的默认结构是 b 树
+  - 底层格式存储
+    - 在 MongoDB 中设计了 KeyString 结构，将所有类型可以归一化为 string， 然后使用 memcmp 进行二进制比较。
+    - 转换成二进制， 优秀的比较性能 / 可以实现不同类型的快速比较；/ 针对数值类型进行细化，解决了整数类型和浮点数类型转换的兼容性问题， 以及节省存储成本。
+  - MongoDB 中使用索引查询数据会有 2 个阶段：
+    - 查索引，通过索引字段的 KeyString 找到对应的 RecordId；
+    - 查数据, 根据 RecordId 找到 BSON 文档；
+    - 普通索引的 key 包含 RecordId
+  - 索引查询过程
+    - IXSCAN 和 FETCH 阶段
+    - IXSCAN 通过扫描索引 b 树，返回 RecordId； FETCH 得到 RecordId 后从数据 b 树取出对应的 BSON 文档，直接提交给上层
+  
 
 
 
