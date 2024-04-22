@@ -339,8 +339,18 @@
         - Particularly worth a try if your data (documents or queries) come from a special domain that is very different from the typical datasets that Retrievers are trained on.
     - Query routing
       - Query routing proves advantageous when dealing with multiple indexes, directing queries to the most relevant index for efficient retrieval
-    - Reranker
+    - [Reranker](https://mp.weixin.qq.com/s/LVoJ5uG0AiaRD6bAqJYRGQ)
       - When retrieval from the encoder falls short of delivering optimal quality, a reranker is used to enhance the document ranking
+      - 主要在拿到向量查询（ANN）的结果后使用 Reranker，能够更有效地确定文档和查询之间的语义相关性，更精细地对结果重排，最终提高搜索质量。
+        - Reranker 类型主要有两种——基于统计和基于深度学习模型的 Reranker
+          - 基于统计的 Reranker 会汇总多个来源的候选结果列表，使用多路召回的加权得分或倒数排名融合（RRF）算法来为所有结果重新算分
+          - 基于深度学习模型的 Reranker，通常被称为 Cross-encoder Reranker,这类 Reranker 可以为问题和文档之间的语义的相似度进行打分
+      - 使用 Reranker 的成本
+        - Reranker 会显著增加搜索延迟
+        - Reranker 会大幅度提高计算成本
+      - 哪种情况适合在 RAG 应用中使用 Reranker
+        - 追求回答高精度和高相关性的场景中特别适合使用 Reranker，例如专业知识库或者客服系统等应用。
+        - 在网页搜索、电商搜索这类场景中，响应速度和成本至关重要，因此不太适合使用代价高昂的 Cross-Encoder Reranker。此类应用场景更适合选用向量检索搭配更轻量的 Score-based Reranker，从而确保响应速度，在提升搜索质量的同时降低开销
     - auto-merging retrieval
       - a bunch of nearby context chunks are retrieved, merge them into one bigger “chunk” so the LLM has a holistic view of the larger document.
       - https://generativeai.pub/advanced-rag-retrieval-strategies-auto-merging-retrieval-dc3f869654c4

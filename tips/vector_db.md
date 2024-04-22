@@ -159,8 +159,10 @@
   - Deployment
     - standalone是内置的rocksdb实现message queue，
     - cluster是用pulsar或者kafka来做为message queue。而cdc是通过操作kafka/pulsar来同步数据的，所以standalone不能用
+    - deployment推荐的resources.limits,indexnode，datanode的内存限制，refer https://milvus.io/tools/sizing/
   - Config参考 https://github.com/zilliztech/milvus-helm/blob/master/charts/milvus/values.yaml#L731C7-L731C45
     - milvus rpc的传输限制，这个可以在milvus.yaml的proxy. grpc. serverMaxRecvSize/clientMaxSendSize
+    - autoindex是定义在milvus.yaml里的，默认好像是hnsw索引，数据有100gb的话，索引就要100gb+的内存
   - 查询
     - 如果你不用过滤查询的话，hnsw索引会比ivf_flat快。动态数据是要比静态数据查询慢的。对于动态数据，如果partition多的话，性能会更差一些
     - nlist取2048比较好，nprobe按你之前的比例取10左右。ivfpq，一亿的数据，nlist 可以设置成多少合适，2048吗？
