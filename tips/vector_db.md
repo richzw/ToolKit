@@ -155,6 +155,7 @@
   - ![img.png](vector_db_milvus_overview.png)
   - indexnode，每个querynode，每个datanode都是单独的容器
     - indexnode只负责建索引任务，querynode只负责查询任务，datanode只负责数据的持久化和整理任务。indexnode建索引时总是会尽量用满cpu，以最快速度建好索引
+    - load的时候，数据会load到querynode节点上
     - 一个querynode节点sesrch时可以用多张gpu卡同时算。但建索引的任务，一个indexnode默认是一个任务一个任务执行，所以只用到一张显卡
   - Deployment
     - standalone是内置的rocksdb实现message queue，
@@ -236,6 +237,20 @@
   - 估算容量
     - 5百万128维，原始数据量大约是2.5g，工具估算时会乘以一个安全系数，这个系数一般是2到3之间，所以你看到的Loading Memory是5G多点
     - 工具是按cluster估的，每个节点都给了推荐，如果不算etcd/minio/plasar这些的话，milvus的节点的推荐内存配置大约总共27. 5g  etcd推荐3*4g，minio推荐2*8g，pulsar的比较多，因为它本身也是个分布式系统 所以如果500万128维的向量其实必要用cluster，一个standalone就好了
+  - [优化](https://zilliz.com.cn/blog/milvus-%20community-keyword)
+    - 降低内存
+      - 牺牲性能 - Mmap, DiskANN
+      - 牺牲精度 - IVF_PQ, IVF_SQ8
+    - 分批插入数据，是每一批 collection.flush()，还是最后再 collection.flush()？
+      - 插入数据时，不要每一批都调用 flush()接口，Milvus 内部会定期调 flush() 接口，所有数据都插入完成之后，再调用一次 flush 即可
+      - 插入数据后，频繁调用 flush，会产生大量碎的 segment 文件，为系统带来较大的 compaction 压力
+    - 这个设置成主键之后，为什么还可以继续重复插入相同的值？
+      - Milvus 用 insert 接口做数据插入时，不会做主键去重，如果希望主键去重，可以使用 upsert 接口
+      - 但是，由于 upsert 内部多做了一次 query 操作，插入性能会比 insert 更差
+    - 半数使用问题是配置问题
+      - 怎么调？ https://mp.weixin.qq.com/s?__biz=MzUzMDI5OTA5NQ==&mid=2247496778&idx=1&sn=018256ae415356e3ed357ee473dc1627&chksm=fa5155f2cd26dce4095b57fa4eb5c7e67e9eb49ed2762ce618e1134bb33022049e75c25e49ab&scene=21#wechat_redirect
+      - Milvus 从 2.3.0 版本开始，就开始支持动态调整参数，具体操作方法参考：https://milvus.io/docs/dynamic_config.md
+    - [如何优化 Milvus 性能](https://mp.weixin.qq.com/s/4gDsAF4QnmXWzomrSFRLLg)
   - Milvus 2.3
     - Cosine 相似度类型： 无需向量归一化，简化数据搜索流程。
     - Upsert 数据：提升更新和删除数据的管理流程效率，适用于频繁更新数据且追求数据一致性和原子性的场景。

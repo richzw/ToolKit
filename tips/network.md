@@ -1436,6 +1436,12 @@
   - [ Win 字段续](https://mp.weixin.qq.com/s/5nK8Wkj43gbEqAr-APz4Ig)
   - [SYN/ACK MSS](https://mp.weixin.qq.com/s/QeJyBb3rRg0K6Fzm2oQA9w)
   - [Window Full](https://mp.weixin.qq.com/s/UPjTeRiJG50aaOg-YEO02w)
+  - TCP Port numbers reused
+    - 针对 SYN 数据包(而不是SYN+ACK)，如果已经有一个使用相同 IP+Port 的会话，并且这个 SYN 的序列号与已有会话的 ISN 不同时设置。
+    - 主要作用是处理 SYN 以及 SYN/ACK 数据包，判断是新连接还是已有连接的重传，并相应地创建新会话或更新会话的序列号等，并设置相关标志位
+    - 可能出现的场景，
+      - 一是短时间客户端以固定源端口进行连接，但不断被服务器端 RST 或者客户端自身 RST 的情形，
+      - 二是长时间捕获或者数据包很多时，客户端以同样的源端口又发起一次新连接，像是一些压测场景
 - [Wireshark手册](https://www.ilikejobs.com/posts/wireshark/)
   - [Wireshark != 和 !==](https://mp.weixin.qq.com/s/yXbnCjelmdBOG1BgUFAexA)
     - 显示过滤表达式 ip.addr != 192.168.0.1 的结果显示为空，意味着没有源和目的 IP 值都不是 192.168.0.1 的数据包，也就是 all ；
