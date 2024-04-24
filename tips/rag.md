@@ -345,12 +345,19 @@
         - Reranker 类型主要有两种——基于统计和基于深度学习模型的 Reranker
           - 基于统计的 Reranker 会汇总多个来源的候选结果列表，使用多路召回的加权得分或倒数排名融合（RRF）算法来为所有结果重新算分
           - 基于深度学习模型的 Reranker，通常被称为 Cross-encoder Reranker,这类 Reranker 可以为问题和文档之间的语义的相似度进行打分
+      - Reranker
+        - LLMRanker - In LLMRerank the query and nodes are passed to a Large language model which returns the relevance for the nodes.
+        - Cohere - uses semantic relevance to rerank the nodes
+        - SentenceTransformerRerank - Uses the cross-encoders from the sentence-transformer package to re-order nodes 
+        - KeywordNodePostprocessor - is Used to ensure certain keywords are either excluded or included in a node.
       - 使用 Reranker 的成本
         - Reranker 会显著增加搜索延迟
         - Reranker 会大幅度提高计算成本
       - 哪种情况适合在 RAG 应用中使用 Reranker
         - 追求回答高精度和高相关性的场景中特别适合使用 Reranker，例如专业知识库或者客服系统等应用。
         - 在网页搜索、电商搜索这类场景中，响应速度和成本至关重要，因此不太适合使用代价高昂的 Cross-Encoder Reranker。此类应用场景更适合选用向量检索搭配更轻量的 Score-based Reranker，从而确保响应速度，在提升搜索质量的同时降低开销
+      - [How to Select A Reranking Model](https://www.rungalileo.io/blog/mastering-rag-how-to-select-a-reranking-model)
+        - ![img.png](rag_reranker.png)
     - auto-merging retrieval
       - a bunch of nearby context chunks are retrieved, merge them into one bigger “chunk” so the LLM has a holistic view of the larger document.
       - https://generativeai.pub/advanced-rag-retrieval-strategies-auto-merging-retrieval-dc3f869654c4

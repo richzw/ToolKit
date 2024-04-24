@@ -251,6 +251,48 @@
       - 怎么调？ https://mp.weixin.qq.com/s?__biz=MzUzMDI5OTA5NQ==&mid=2247496778&idx=1&sn=018256ae415356e3ed357ee473dc1627&chksm=fa5155f2cd26dce4095b57fa4eb5c7e67e9eb49ed2762ce618e1134bb33022049e75c25e49ab&scene=21#wechat_redirect
       - Milvus 从 2.3.0 版本开始，就开始支持动态调整参数，具体操作方法参考：https://milvus.io/docs/dynamic_config.md
     - [如何优化 Milvus 性能](https://mp.weixin.qq.com/s/4gDsAF4QnmXWzomrSFRLLg)
+      - Milvus 会创建 256 个消息队列 topic。如果表数目比较少，可以调整 rootCoord.dmlChannelNum 减少 topic 数目降低消息队列负载
+      - 每个 collection 会使用 2 个消息队列 topic（shard），如果写入非常大或者数据量极大，需要调整 collection 的 shard 数目
+        - 建议每个 shard 写入/删除不超过 10M/s，单个 shard 的数据量不大于 1B 向量，shard 数目过大也会影响写入性能，因此不建议单表超过 8 个 shard。
+      - 使用多副本可以扩展查询性能，但建议副本数目不要超过 10 个
+      - 索引的选择
+        - 是否需要精确结果
+          - 只有 Faiss 的 Flat 索引支持精确结果, 查询性能通常比其他 Milvus 支持的索引类型低两个数量级以上，因此只适合千万级数据量的小查询
+        - 数据量是否能加载进内存？
+          - DiskANN
+            - DiskANN 依赖高性能的磁盘索引，借助 NVMe 磁盘缓存全量数据，在内存中只存储了量化后的数据。
+            - DiskANN 适用于对于查询 Recall 要求较高，QPS 不高的场景。
+            - 关键参数 search_list: search_list 越大，recall 越高而性能越差
+          - IVF_PQ
+            - 对于精确度要求不高的场景或者性能要求极高的场景。
+            - IVF 参数
+              - nlist：一般建议 nlist = 4*sqrt(N)，对于 Milvus 而言，一个 Segment 默认是 512M 数据，对于 128dim 向量而言，一个 segment 包含 100w 数据，因此最佳 nlist 在 1000 左右。
+              - nprobe：nprobe 可以 Search 时调整搜索的数据量，nprobe 越大，recall 越高，但性能越差
+            - PQ 参数
+              - m：向量做 PQ 的分段数目，一般建议设置为向量维数的 1/4，M 取值越小内存占用越小，查询速度越快，精度也变得更加低
+              - nbits： 每段量化器占用的 bit 数目，默认为 8，不建议调整
+        -  构建索引和内存资源是否充足
+          - 性能优先，选择 HNSW 索引
+            - HNSW 参数
+              - M：表示在建表期间每个向量的边数目，M 越大，内存消耗越高，在高维度的数据集下查询性能会越好。通常建议设置在 8-32 之间。
+              - ef_construction：控制索引时间和索引准确度，ef_construction 越大构建索引越长，但查询精度越高。要注意 ef_construction 提高并不能无限增加索引的质量，常见的 ef_constructio n 参数为 128。
+              - ef: 控制搜索精确度和搜索性能，注意 ef 必须大于 K。
+          - 资源优先，选择 IVF_FLAT 或者 IVF_SQ8 索引
+            - IVF 索引在 Milvus 分片之后也能拿到比较不错的召回率，其内存占用和建索引速度相比 HNSW 都要低很多
+            - IVF_SQ8 相比 IVF，将向量数据从 float32 转换为了 int8，可以减少 4 倍的内存用量，但对召回率有较大影响，如果要求 95% 以上的召回精度不建议使用。
+      - 合理选择流式插入和批量导入
+        - 尽可能批量写入，整体吞吐会更高，建议每次写入的大小控制在 10M
+        - 单个 Shard 的流式写入量不建议超过 10M/s
+        - Datanode 多于 Shard 的情况下，部分 DataNode 可能无法获得负载
+        - 导入目前支持的文件大小上限是 1GB，接下来会支持更大的导入文件大小上限
+        - 不建议频繁导入小文件，会给 compaction 带来比较大的压力
+      - 谨慎使用标量过滤，删除特性等特性
+        - Milvus 使用的是前过滤，即先做标量过滤生成 Bitset，在向量检索的过程中基于 Bitset 去除掉不满足条件的 entity。
+        - 对于 HNSW 这一类的图索引而言，标量过滤并不会加速查询，反而可能导致性能变差。
+      - 常见的参数调整
+        - Segment 大小：Segment 大小越大，查询性能越好，构建索引越慢，负载越不容易均衡。Milvus 默认选择 512M Segment 大小主要是考虑到了内存比较少的机型。对于内存在 8G-16G 的用户，建议 Segment 大小调整到 1024M，16G 以上的机型可以调整到 2G。
+        - Segment seal portion: 当 Growing Segment 达到 Segment 大小 * seal portion 后，流式数据就会被转换为批数据。通常情况下建议 Growing segment 的大小控制在 100-200M 左右，调小这个值有助于降低流式写入场景下的查询延迟。
+        - DataNode Segment SyncPeriod: Milvus 会定时将数据 Sync 到对象存储，Sync 越频繁故障恢复速度越快，但过于频繁的 sync 会导致 Milvus 生产大量小文件，给对象存储造成较大压力。
   - Milvus 2.3
     - Cosine 相似度类型： 无需向量归一化，简化数据搜索流程。
     - Upsert 数据：提升更新和删除数据的管理流程效率，适用于频繁更新数据且追求数据一致性和原子性的场景。

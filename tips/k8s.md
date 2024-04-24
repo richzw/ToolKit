@@ -747,7 +747,12 @@
     - 发出删除命令：Kubernetes 将对象标记为待删除。这会使资源处于只读“Terminating”状态。
     - 运行与对象的 Finalizers 相关的每个操作：每次 Finalizer 操作完成时，Finalizer都会与资源对象分离，因此它将不再会出现在 metadata.finalizers 字段中。
     - Kubernetes 持续监控附加到对象的 Finalizers 字段：一旦 metadata.finalizers 为空，该对象将被删除，因为所有 Finalizers 都已完成其操作并被删除了。
-
+- Issue
+  - 当 k8s 集群运行日久以后，有的 node 无法再新建 pod，并且出现如下错误 mkdir …no space left on device
+    - 查看是否存在内存泄露 cat: /sys/fs/cgroup/memory/kubepods/memory.kmem.slabinfo: Input/output error则说明不存在内存泄露的情况
+    - 关闭 runc 和 kubelet 的 kmem
+  - k8s 证书过期问题的两种处理方法
+    - kubeadm alpha certs check-expiration
 
 
 
