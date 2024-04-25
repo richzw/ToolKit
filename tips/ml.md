@@ -277,6 +277,7 @@
     - Reflexion  本质上是强化学习的思路。和 Basic reflection 相比，引入了外部数据来评估回答是否准确，并强制生成响应中多余和缺失的方面，这使得反思的内容更具建设性。
     - Language Agent Tree Search  ：是 Tree search + ReAct+Plan&solve 的融合体
     - Self-Discover 让大模型在更小粒度上 task 本身进行反思，比如前文中的 Plan&Slove 是反思 task 是不是需要补充，而 Self-discover 是对 task 本身进行反思
+  - [LLM_Agent_Memory_Survey](https://github.com/nuster1128/LLM_Agent_Memory_Survey)
 - 时间序列异常值检测
   - 正确体现各种指标多样的变化趋势和行为特性
     - 为消除每个分组中的趋势和季节性影响因素，我们利用了 statsmodels 库中强大的 seasonal_decompose（季节性分解函数）
@@ -622,6 +623,7 @@
     - SeamlessM4T支持近100种语言的自动语音识别、语音到文本翻译、语音到语音翻译、文本到文本翻译和文本到语音翻译的多任务支持
   - [ControlNet](https://github.com/lllyasviel/ControlNet)
     - Adding Conditional Control to Text-to-Image Diffusion Models.
+  - [What are Diffusion Models](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
   - [小型LLM - Mistral 7B](https://mp.weixin.qq.com/s/gASCImCD0tESjoP5yBKbVA)
   - [小型LLM：Zephyr-7B](https://mp.weixin.qq.com/s/9O6oHEMRCjt4VY7adFEBmg)
     - 该模型由 Hugging Face 创建，实际上是在公共数据集上训练的 Mistral-7B 的微调版本，但也通过知识蒸馏技术进行了优化
@@ -770,6 +772,10 @@
     - Xinference（https://github.com/xorbitsai/inference） 使得本地模型部署变得非常简单。用户可以轻松地一键下载和部署内置的各种前沿开源模型
     - [LLM 推理新优化策略：使用连续批处理](https://mp.weixin.qq.com/s/iTT5jJc3tiJ_YzyPf1tFWg)
     - Deploy a large language model with OpenLLM and BentoML
+    - [vLLM 原理](https://mp.weixin.qq.com/s/JqubXK1VbMaShrJY20aKMg)
+      - LLM Model Serving 
+      - 常规的LLM推理过程通常分为两个阶段：prefill和decode。通常会使用KV cache技术加速推理。
+      - [vLLM核心技术PagedAttention原理](https://mp.weixin.qq.com/s?__biz=Mzg2NjcwNjcxNQ==&mid=2247485614&idx=1&sn=5600ea665d942b7ff290caded1e2252f&chksm=ce47fcdaf93075cc4582bfb15eb822840c332d56122df5b59bd8722426d07ac5b097cf032ba4&scene=21#wechat_redirect)
     - [模型部署与推理](https://mp.weixin.qq.com/s/glPPSqHjsnDjC0DZSuuPzA)
       - 模型压缩
         - 模型压缩的方向大致分为剪枝（Pruning），知识蒸馏（Knowledge Distillation，KD），量化（Quantization），低秩分解（Low-Rank Factorization），权重共享（Weight sharing），神经网络架构搜索（NAS

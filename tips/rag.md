@@ -108,6 +108,10 @@
     - Classification
 - [Multi-Vector Retriever for RAG on tables, text, and images](https://blog.langchain.dev/semi-structured-multi-modal-rag/)
 - [基于 RAG 的 LLM 可生产应用 Ray](https://mp.weixin.qq.com/s/rjBa2CQxDK2dvdE53ShyOw)
+  - [Embedding Inference at Scale for RAG Applications with Ray Data](https://zilliz.com/blog/embedding-inference-at-scale-for-RAG-app-with-ray-data-and-milvus)
+    - BGM-M3 embedding model (generating 3 types of vectors in one round: sparse, dense, and multi-vector)
+    - Ray Data’s scalable data processing makes it easier and faster to process massive amounts of data in parallel across multiple machines (CPUs, GPUs, etc.).
+    - Ray Data is especially helpful when the data can be split into parallel processes, such as many simultaneous chunkin and embedding transformations
 - [Advanced RAG Techniques](https://pub.towardsai.net/advanced-rag-techniques-an-illustrated-overview-04d193d8fec6)
   - Advanced RAG
     - ![img.png](ml_advance_rag.png)
