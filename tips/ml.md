@@ -471,6 +471,10 @@
       - “hallucination” refers to a phenomenon where the model generates text that is incorrect, nonsensical, or not real. 
       - Since LLMs are not databases or search engines, they would not cite where their response is based on. These models generate text as an extrapolation from the prompt you provided.
       - 一个比较有效的方法可以缓解模型的幻觉问题：让模型给出相关信息，并基于相关信息给我回答。比如告诉模型：“First find relevant information, then answer the question based on the relevant information”。
+    - 模型的限制：逆转诅咒(reversal curse)。
+      - 逆转诅咒 (reversal curse) 是指 LLM 无法逆转他们训练时的因果陈述，如果 LLM 是在 "A is B" 上训练的，它无法直接推理出 "B is A"
+    - 模型的限制：遗忘中间 (lost in the middle)
+      - 如果"针"被插入在文本开始或文本结尾时，模型均可准确捕获；但当"针"被插入在文档前部 10-50% 的部分时，捕获准确率开始下降。
   - 技巧 - 黑魔法
     - 思维连(CoT)提示
       - 思想链 (CoT) 提示通过中间推理步骤启用复杂的推理能力。您可以将它与少量提示结合使用，以便在响应前需要推理的更复杂任务中获得更好的结果。

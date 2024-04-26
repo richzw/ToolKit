@@ -1694,7 +1694,7 @@
   dd if=b.txt of=/dev/null bs=1M iflag=direct oflag=direct count=10240 >> io_test.log
   echo "检查完成" >> io_test.log
   ```
-- 硬件知识
+- [硬件知识](https://www.youtube.com/watch?v=BP6NxVxDQIs)
   - cache line
   - prefetching
   - cache associativity
