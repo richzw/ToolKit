@@ -172,6 +172,7 @@
   - GC 标记-清除法、引用计数法、GC 标记-复制算法、GC 标记-压缩算法、保守式 GC、分代垃圾回收、增量式垃圾回收(三色标记法)
 - [认知偏差知识手册](https://s75w5y7vut.feishu.cn/docs/doccn3BatnScBJe7wD7K3S5poFf)
   - https://alanhg.github.io/cognitive-bias/
+- [设计原理](https://rpdc.xiaohongshu.com/52-design-principles)
 - inside .git
   - ![img.png](misc_git_1.png)
 - [vim cheat sheet](https://michael.peopleofhonoronly.com/vim/)

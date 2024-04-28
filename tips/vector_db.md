@@ -316,6 +316,14 @@
   - Error Check list
     - "deny to write: memory limit exceeded" 意思是某个querynode或者datanode的内存快用光了
     - "unrecognized dtype for key: labels"  这是因为langchain.MilvusVectorStore没法根据你在Document的metadata中的"labels"这个key所对应的vlaue推断出这是个什么类型的字段
+  - QA
+    - 为何不用float64来保证小数点后十几位？
+      - 一来因为float32计算起来比float64快得多，也省内存。
+      - 二来向量搜索简称ANNS，本身就是近似搜索，小数点后十几位的值没有意义，就好比我们比较两个人是否长得相似不会去一根根计算他们的头发数量是否相等。
+    - 日志里面待构建索引行数和已构建索引行数之和大于数据总行数是什么原因呢？而且这个pendingIndexRows的数量还会增加是怎么回事呢？ 索引的已构建行数最大是等于表的总行数
+      - pendingrow增加是因为里面有compaction，有些segment已经建好了索引，但它要和其他segment合并成更大的srgment，合并完之后又会再次建索引
+    - 按照标量查询数据，同样的表达式，为什么一个有结果一个没结果？
+      - 表达式过滤搜索时，如果带有索引比如ivf_flat索引，查出的结果可能有时有有时没有，因为内部是先过滤再做ann search。你换成FLAT就有稳定结果。
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。
