@@ -637,6 +637,7 @@
       - 将蒸馏直接偏好优化（dDPO）应用于使用收集的反馈数据的dSFT模型
   - [Gemma](https://mp.weixin.qq.com/s/E52nPpWrhnU7wMLpOhVz5Q)
     - [Gemma 模型中文指令微调](https://mp.weixin.qq.com/s/jXymgChgWbfj4k9zr2vqmw)
+    - [Gemma test/ fine tune samples](https://docs.google.com/document/d/1-RYrywitplAHGteiWxvzwREAUdSGr8CJz-DUOWsaoAs/edit)
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]

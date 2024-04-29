@@ -191,6 +191,12 @@
          - io_uring_register(2)
          - io_uring_enter(2)
     - [io_uring worker pool](https://blog.cloudflare.com/missing-manuals-io_uring-worker-pool/)
+  - [Netpoll vs io_uring](https://mp.weixin.qq.com/s/QKppTm5j2202qYhpLifc0g)
+    - Netpoll 目前是基于事件循环和同步数据流 API 设计的 NIO 网络库，而 io_uring 是基于异步 I/O 设计的 NIO 网络库
+    - io_uring 具备以下优势
+      - 减少系统调用：通过 batch 的模式，可以将多次请求合并成一次，减少了系统调用次数
+      - 可扩展性好：通过提供一个统一的异步 IO 框架，可以支持各种类型的IO 操作
+    - 通过集成 io_uring 给 Netpoll 带来的价值
 - [Linux 网络包发送过程](https://mp.weixin.qq.com/s?__biz=MjM5Njg5NDgwNA==&mid=2247485146&idx=1&sn=e5bfc79ba915df1f6a8b32b87ef0ef78&scene=21#wechat_redirect)
 - [Linux网络包接收过程](https://mp.weixin.qq.com/s?__biz=MjM5Njg5NDgwNA==&mid=2247484058&idx=1&sn=a2621bc27c74b313528eefbc81ee8c0f&scene=21#wechat_redirect)
 - [127.0.0.1 之本机网络通信过程](https://mp.weixin.qq.com/s/_yRC90iThCsP_zlLA6J12w)

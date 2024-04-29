@@ -237,7 +237,11 @@
     - 低延迟 ：BMQ 的 Broker 节点自动感知写入文件尾部的消息延迟变高，会创建新的 Segment 文件来降低延迟。
 - [AutoMQ 是如何通过云原生的架构设计来避免原 Kafka 冷读带来的副作用](https://mp.weixin.qq.com/s/u-3oHMNJqRahFdAJlXCyNg)
 - [消息积压](https://mp.weixin.qq.com/s/gl5nNNiLrmgtTkp59ciQSw)
-
+- [Why is Kafka fast?]
+  - There are many design decisions that contributed to Kafka’s performance
+    - 1. The first one is Kafka’s reliance on Sequential I/O.
+    - 2. The second design choice that gives Kafka its performance advantage is its focus on efficiency: zero copy principle.
+  - ![img.png](message_queue_kafka_zc.png)
 
 
 
