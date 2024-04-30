@@ -1442,6 +1442,12 @@
     - 可能出现的场景，
       - 一是短时间客户端以固定源端口进行连接，但不断被服务器端 RST 或者客户端自身 RST 的情形，
       - 二是长时间捕获或者数据包很多时，客户端以同样的源端口又发起一次新连接，像是一些压测场景
+  - ZeroWindow
+    - 定义当接收窗口大小为 0 且 SYN、FIN、RST 均未设置时设置，是接收方发送，用以通知发送方暂停发送数据
+    - Case
+      - TCP Window Full + TCP ZeroWindow + TCP Window Update
+      - TCP Window Full + TCP ZeroWindow + TCP ZeroWindowProbe + TCP Window Update
+        - 接收端出现 Win 为 0 的情形，发送 TCP ZeroWindow 通知，发送端在经过一段时间后发出 TCP ZeroWindowProbe 数据包，但接收端收到探测后，由于已经打开窗口，因此直接回复 TCP Window Update 数据包。
 - [Wireshark手册](https://www.ilikejobs.com/posts/wireshark/)
   - [Wireshark != 和 !==](https://mp.weixin.qq.com/s/yXbnCjelmdBOG1BgUFAexA)
     - 显示过滤表达式 ip.addr != 192.168.0.1 的结果显示为空，意味着没有源和目的 IP 值都不是 192.168.0.1 的数据包，也就是 all ；

@@ -204,7 +204,12 @@
     - hnsw索引的向量类型只能用floatvector？ float16Vector可以使用和floatVector一样的索引，hnsw ivf都行
     - ivf_flat建索引的时间跟nlist的大小相关，设小点就快，大点就慢，1G的耗时1分钟也是有可能的
       - 推荐值是4*sqrt(n)，n是单个segment里的行数。4096 dim，默认单个segment 512MB，那每个segment里大约有15000条数据，那么nlist大约为4*sqrt(15000)=480，最好是转成2的比方数，那就选512。
-  - load是否有并发的设置呢？milvus.yaml里的queryCoord.taskExecutionCap，这个设小点每批送给一个querynode加载的segment的最大数量，每个segment里有多个数据文件，querynode也有自己的并发读取的限制，跟cpu核数相关
+  - load
+    - load是否有并发的设置呢？
+      - milvus.yaml里的queryCoord.taskExecutionCap，这个设小点每批送给一个querynode加载的segment的最大数量，每个segment里有多个数据文件，querynode也有自己的并发读取的限制，跟cpu核数相关
+    -  load时是加载索引列到内存还是全量字段数据到内存呢？
+      - 对于向量字段来说，如果没建好索引的分片，原始向量数据会保持在内存里做搜索，建好索引的就把索引加载进内存，原先那些原始向量就会从内存释放掉。
+      - 对于非向量字段，也是有索引就加载索引，没索引就把原始数据加载进内存。基本上你可以认为全量数据都在内存里。
   - 重启的时候会把之前loaded状态的表全部加载进内存。load的速度不可控，跟内部的调度和存储的读带宽相关。一般来说，千万级别的数据量load耗时分钟级的都是正常
   - insert_log
     - insert_log里的东西就是每个表的原始数据，包括向量数据，各个字段的数据。分片合并时，旧的分片数据不会立刻删除，要等待GC机制大约2—3小时后删除。
@@ -316,6 +321,7 @@
   - Error Check list
     - "deny to write: memory limit exceeded" 意思是某个querynode或者datanode的内存快用光了
     - "unrecognized dtype for key: labels"  这是因为langchain.MilvusVectorStore没法根据你在Document的metadata中的"labels"这个key所对应的vlaue推断出这是个什么类型的字段
+    - "MilvusException: (code=65535, message=efConstruction out of range" HNSW索引的参数设的有问题，要设在区间里。milvus以segment为单位管理数据。同一个collection的segments有可能被放在不同的querynode里
   - QA
     - 为何不用float64来保证小数点后十几位？
       - 一来因为float32计算起来比float64快得多，也省内存。

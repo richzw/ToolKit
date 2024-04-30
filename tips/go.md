@@ -2126,6 +2126,26 @@
 - 包级变量初始化次序
   - 包级元素的初始化顺序是：常量 -> 变量 -> init函数
   - https://github.com/golang/go/issues/66575
+- [From net.Dial to AF_XDP](https://toonk.io/sending-network-packets-in-go/)
+  - Go program that sends ICMP ping messages to millions of IP addresses
+    - net.Dial
+    - Raw Socket syscall.Socket
+    - AF_INET Syscall Method
+    - AF_XDP
+- [One Billion Rows Challenge](https://www.bytesizego.com/blog/one-billion-row-challenge-go)
+  - ![img.png](go_read_million.png)
+  - https://benhoyt.com/writings/go-1brc/
+
+
+
+
+
+
+
+
+
+
+
 
 
 
