@@ -83,9 +83,10 @@
     - 分析死锁日志，找到关键词TRANSACTION
     - 分析死锁日志，查看正在执行的SQL
     - 看它持有什么锁，等待什么锁。
-
-
-
+- [SQL优化](https://mp.weixin.qq.com/s/VKccZmx9Gd6RgsyDEBbBQA)
+  - 数据倾斜
+  - 分桶解决大表与大表的关联
+  - BitMap在多维汇总中的应用
 
 
 
