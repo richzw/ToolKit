@@ -1458,3 +1458,4 @@
   - TCP ACKed unseen segment 实质上没有任何真实的业务影响
     - TCP ACKed unseen segment 定义
     - 当为反方向设置了预期的下一个确认号并且它小于当前确认号时设置。
+- Wireshark抓包，前面发生TCP Retransmission，如何确认相应包ACK确认哪个

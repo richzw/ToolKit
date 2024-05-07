@@ -777,6 +777,8 @@
     - Xinference（https://github.com/xorbitsai/inference） 使得本地模型部署变得非常简单。用户可以轻松地一键下载和部署内置的各种前沿开源模型
     - [LLM 推理新优化策略：使用连续批处理](https://mp.weixin.qq.com/s/iTT5jJc3tiJ_YzyPf1tFWg)
     - Deploy a large language model with OpenLLM and BentoML
+    - [Kubernetes 上部署 llama3](https://mp.weixin.qq.com/s/brfhnM3rox-3KulkZrTjxA)
+      - Ollama 与 OpenWebUI
     - [vLLM 原理](https://mp.weixin.qq.com/s/JqubXK1VbMaShrJY20aKMg)
       - LLM Model Serving 
       - 常规的LLM推理过程通常分为两个阶段：prefill和decode。通常会使用KV cache技术加速推理。
