@@ -753,8 +753,19 @@
     - 关闭 runc 和 kubelet 的 kmem
   - k8s 证书过期问题的两种处理方法
     - kubeadm alpha certs check-expiration
-
-
+- k8s 11 trap
+  - 不设置资源请求
+    - BestEffort配置（pod的requests与limits均为0
+    - 过度限制CPU带来的问题比它解决的问题多得多
+  - 忽略健康检查
+    - startup -> readiness -> liveness
+  - 滥用latest标签
+  - 权限过高的容器
+    - 避免为容器提供CAP_SYS_ADMIN功能
+  - poddisruptionbudget缺失
+    - 为避免因节点耗尽而导致的不必要服务中断，强烈建议您创建PDB
+  - pod 的自我反亲缘性（self anti-affinities）
+    - 确保 pod 被调度到不同的节点上（仅在调度时检查，而不是在执行时，因此需要在调度时忽略执行期间检查）
 
 
 

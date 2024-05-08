@@ -464,3 +464,5 @@
   - Misusing b.N
     - Forgetting to loop until b.N. Each benchmark invocation only performs the tested operations once. No matter how many times the benchmark harness repeats the benchmark with increasing b.N, the function takes a millisecond to run! Therefore, eventually the benchmark harness hits its N limit of a billion invocations, and divides the execution time (1 ms) by this N to get a nonsensical result.
     - Using the value of b.N for something other than "how many times to repeat the benchmark". rand.Prime is very fast when its input length is small, but gets pretty slow for large inputs. The harness starts by running the function once to get its bearings, and then 100 times. For size 100 the run-time of rand.Prime is moderate, so the next time the harness can increase b.N by another factor of 100. But for higher inputs, rand.Prime also takes much longer. We end up with a quadratic run-time explosion! Our benchmark function isn't literally hanging - it will finish eventually, but it may take long minutes or hours.
+-  heap profile, 都是在默认值 512 * 1024 这个阈值下采样统计的
+  - [heap profile 不能正确反应当前分配的内存?](https://mp.weixin.qq.com/s/TlYXFXid5JVxUNAWsugnwQ)

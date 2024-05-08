@@ -328,6 +328,13 @@
     - "deny to write: memory limit exceeded" 意思是某个querynode或者datanode的内存快用光了
     - "unrecognized dtype for key: labels"  这是因为langchain.MilvusVectorStore没法根据你在Document的metadata中的"labels"这个key所对应的vlaue推断出这是个什么类型的字段
     - "MilvusException: (code=65535, message=efConstruction out of range" HNSW索引的参数设的有问题，要设在区间里。milvus以segment为单位管理数据。同一个collection的segments有可能被放在不同的querynode里
+    -  表加载不起来，要用一个debug工具来release。具体步骤：
+      - 1. 下载这个repo到本地 github.com/milvus-io/birdwatcher
+      - 2. 进入repo目录，命令行执行  go build -o btidwatcher main.go ，前提是安装了go，执行成功后在該目录下会有一个birdwatcher的可执行程序
+      - 3. 命令行运行 bridwatcher，进入commandline模式
+      - 4. 执行 connect，前提是你的milvus所使用的那个etcd在运行状态，并且容器端口2379暴露出来
+      - 5. 如果connect成功，再执行force-release
+      - 6. 重启milvus容器
   - QA
     - 为何不用float64来保证小数点后十几位？
       - 一来因为float32计算起来比float64快得多，也省内存。

@@ -746,7 +746,17 @@
   - [解读Openai Prompt](https://waytoagi.feishu.cn/wiki/FoJJwvwBNiEJYjkx1ygccO2CnVe) 
   - [Prompt Engineer](https://github.com/brexhq/prompt-engineering)
 - Create a mind map of [Your Topic]. List topics as central ideas, main branches, and sub-branches
+- Smmarize the user comments
+   ```
+    You are an AI assistant tasked with summarizing user comments for a mobile app.
 
+    1. Identify the main themes or topics discussed in each comment.
+    2. Highlight the most frequently mentioned positive and negative aspects of the app.
+    3. Provide an overall sentiment analysis (positive, negative, or neutral) based on the comments.
+    4. Caculate the ratio of sentiment analysis (positive, negative, or neutral) based on the comments.
+    5. Keep the summary concise, ideally within 100 words.
+    6. Output the summary in JSON format.
+   ```
 
 
 
