@@ -1459,3 +1459,43 @@
     - TCP ACKed unseen segment 定义
     - 当为反方向设置了预期的下一个确认号并且它小于当前确认号时设置。
 - Wireshark抓包，前面发生TCP Retransmission，如何确认相应包ACK确认哪个
+- [TCP的RST](https://mp.weixin.qq.com/s/KelITBqxYplQrTJLAmt6XA)
+  - RST分为两种，一种是active rst，另一种是passive rst
+    - active rst 
+      - 主动方调用close()的时候，上层却没有取走完数据；这个属于上层user自己犯下的错。
+      - 主动方调用close()的时候，setsockopt设置了linger；这个标识代表我既然设置了这个，那close就赶快结束吧。 
+      - 主动方调用close()的时候，发现全局的tcp可用的内存不够了
+      - 使用bpf*相关的工具抓捕tcp_send_active_reset()函数并打印堆栈即可 
+    - passive rst
+      - 从抓包上来看表现就是rst的报文中无ack标识，而且RST的seq等于它否定的报文的ack号
+      - 使用bpf*相关的工具抓捕抓捕tcp_v4_send_reset()和其他若干小的地方即可
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

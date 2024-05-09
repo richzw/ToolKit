@@ -757,8 +757,36 @@
     5. Keep the summary concise, ideally within 100 words.
     6. Output the summary in JSON format.
    ```
-
-
+- [How I Won Singapore’s GPT-4 Prompt Engineering Competition](https://baoyu.io/translations/prompt-engineering/how-i-won-singapores-gpt-4-prompt-engineering-competition)
+  - CO-STAR 框架
+    - (C) 上下文：为任务提供背景信息 通过为大语言模型（LLM）提供详细的背景信息，可以帮助它精确理解讨论的具体场景，确保提供的反馈具有相关性。
+    - (O) 目标：明确你要求大语言模型完成的任务 清晰地界定任务目标，可以使大语言模型更专注地调整其回应，以实现这一具体目标。
+    - (S) 风格：明确你期望的写作风格 你可以指定一个特定的著名人物或某个行业专家的写作风格，如商业分析师或 CEO。这将指导大语言模型以一种符合你需求的方式和词汇选择进行回应。
+    - (T) 语气：设置回应的情感调 设定适当的语气，确保大语言模型的回应能够与预期的情感或情绪背景相协调。可能的语气包括正式、幽默、富有同情心等。
+    - (A) 受众：识别目标受众 针对特定受众定制大语言模型的回应，无论是领域内的专家、初学者还是儿童，都能确保内容在特定上下文中适当且容易理解。
+    - (R) 响应：规定输出的格式 确定输出格式是为了确保大语言模型按照你的具体需求进行输出，便于执行下游任务
+    - Sample
+    ```
+    # CONTEXT（上下文） #
+    我想推广公司的新产品。我的公司名为 Alpha，新产品名为 Beta，是一款新型超快速吹风机。
+    
+    # OBJECTIVE（目标） #
+    帮我创建一条 Facebook 帖子，目的是吸引人们点击产品链接进行购买。
+    
+    # STYLE（风格） #
+    参照 Dyson 等成功公司的宣传风格，它们在推广类似产品时的文案风格。
+    
+    # TONE（语调） #
+    说服性
+    
+    # AUDIENCE（受众） #
+    我们公司在 Facebook 上的主要受众是老年人。请针对这一群体在选择护发产品时的典型关注点来定制帖子。
+    
+    # RESPONSE（响应） #
+    保持 Facebook 帖子简洁而深具影响力。
+    ```
+  - 使用分隔符进行文本分段 将分隔符用作 XML 标签
+  - 
 
 
 

@@ -87,6 +87,18 @@
   - 数据倾斜
   - 分桶解决大表与大表的关联
   - BitMap在多维汇总中的应用
+- Postgresql数据库里的索引使用情况
+  ```sql
+  SELECT 
+      relname AS table_name, 
+      indexrelname AS index_name, 
+      idx_scan as times_index_used, 
+      pg_size_pretty(pg_relation_size(indexrelname::regclass)) as index_size
+  FROM 
+      pg_stat_user_indexes 
+  ORDER BY 
+      idx_scan DESC;
+  ```
 
 
 

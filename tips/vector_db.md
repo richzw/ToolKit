@@ -184,6 +184,10 @@
     - 有向量索引的情况下，过滤查询是有可能搜不出结果。
       - 有时候能搜到有时不能搜到，多半是因为底下的segment做了compaction之后重建了索引。几个有索引的小分片和一个有索引的大分片，过滤搜索出来的东西很可能不同。
     - 查询节点内存自动均衡的几种策略？当前默认是scorebase
+    - milvus查看行数有两种方式，
+      - 一种是collection.num_entities，只是从etcd中拿取每个segment创建时所记录的行数，不会统计delete的数量
+      - 第二种是collection.query(output_fields=["count(*)"])。做一次详细统计，并把delete数量也统计在内。
+      - Attu上看到的approximate count是用的前一种方式，所以不会统计delete的数量
     - Search()
       - milvus的过滤做法是先按条件里的标量过一遍，把符合条件的条目标为1，不符合的标为0，然后做ANN搜索，碰到1的就计算距离，碰到0的就忽略。过滤的性能跟索引有关系，HNSW索引如果标为1的数量很少，就很慢。IVF索引不受这个影响，比较快
     - 全量查询功能 - Query iterator
