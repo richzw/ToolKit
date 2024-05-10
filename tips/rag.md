@@ -151,7 +151,7 @@
       - Enhancing data granularity: Improve quality of Data; Adding Metadata; Optimizing index structures
       - Chunking Optimisation: 
         - High-level tasks like summarization requires bigger chunk size and low-level tasks like coding requires smaller chunks
-        - Small2big or Parent Ducument Retrieval, Sentence Window Retrieval
+        - Small2big or Parent Document Retrieval, Sentence Window Retrieval
     - Retrieval Optimisation
       - Query Rewriting and MultiQuery Retrievers
       - StepBack-prompt
@@ -211,7 +211,7 @@
     - 把问题编造假的文档，使用假文档召回
 - [评估 RAG 的TruLens](https://mp.weixin.qq.com/s/4sBQeL0m09_V9Sya1voTqg)
   - https://colab.research.google.com/github/truera/trulens/blob/main/trulens_eval/examples/expositional/vector-dbs/milvus/milvus_evals_build_better_rags.ipynb
-- [评估 RAG 的Ragas ](https://mp.weixin.qq.com/s/gFr0zYyOeIEtYgcM9olIYQ)
+- [评估 RAG 的Ragas](https://mp.weixin.qq.com/s/gFr0zYyOeIEtYgcM9olIYQ)
   - https://github.com/milvus-io/bootcamp/tree/master/evaluation
   - https://github.com/weaviate/recipes/blob/main/integrations/ragas/RAGAs-RAG-langchain.ipynb
   - https://towardsdatascience.com/evaluating-rag-applications-with-ragas-81d67b0ee31a
@@ -262,7 +262,7 @@
       - Improving Retrieval Performance by Fine-tuning Cohere Reranker with LlamaIndex
   - 文档整合限制 —— 超出上下文
     - 调整检索策略 高级检索与搜索、自动检索、知识图谱检索
-- [ Semantic Chunking for RAG](https://pub.towardsai.net/advanced-rag-05-exploring-semantic-chunking-97c12af20a4d)
+- [Semantic Chunking for RAG](https://pub.towardsai.net/advanced-rag-05-exploring-semantic-chunking-97c12af20a4d)
   - Embedding-based chunking 
   -  BERT-based chunking techniques (naive, cross-segment, SeqModel)
   -  LLM-based chunking
@@ -365,8 +365,25 @@
     - auto-merging retrieval
       - a bunch of nearby context chunks are retrieved, merge them into one bigger “chunk” so the LLM has a holistic view of the larger document.
       - https://generativeai.pub/advanced-rag-retrieval-strategies-auto-merging-retrieval-dc3f869654c4
-
-
+- [Enhance the Performance of Your RAG Pipeline](https://zilliz.com/learn/how-to-enhance-the-performance-of-your-rag-pipeline)
+  - Query Enhancement: Modifying and manipulating the query process of the RAG input to better express or process the query intent.
+    - Creating Hypothetical Questions
+    - HyDE (Hypothetical Document Embeddings)
+    - Creating Sub-Queries
+    - Creating Stepback Prompts: involves abstracting complicated user queries into "stepback questions" using an LLM
+  - Indexing Enhancement: Optimizing the creation of chunking indexes using techniques such as multi-chunking, step-wise indexing, or multi-way indexing.
+    - Merging Document Chunks Automatically
+    - Constructing Hierarchical Indices - two-level index: one for document summaries and another for document chunks
+    - Hybrid Retrieval and Reranking
+  - Retriever Enhancement: Applying optimization techniques and strategies during the retrieval process.
+    - Sentence Window Retrieval - decouples the document chunk used for embedding retrieval from the chunk provided to the LLM.
+    - Meta-data Filtering - 
+  - Generator Enhancement: Adjusting and optimizing prompts when assembling prompts for the LLM to provide better responses.
+    - Compressing the LLM prompt
+    - Adjusting the chunk order in the prompt - `Lost in th middle`
+  - RAG Pipeline Enhancement: Dynamically switching processes within the entire RAG pipeline, including using agents or tools to optimize key steps in the RAG pipeline.
+    - Self-reflection
+    - Query Routing with an Agent
 
 
 

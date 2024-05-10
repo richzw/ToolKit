@@ -1378,6 +1378,21 @@
   - redis使用跳表来实现ZSET，而不是树结构
     - redis的读写全在内存里进行操作，不涉及磁盘IO，同时跳表实现简单，相比B+树、AVL树、少了旋转树结构的开销
   - RocksDB内部使用了跳表，对比使用B+树的innodb，虽然写性能更好，但读性能属实差了些
+  - 1. Structure:
+    - B-Tree: A B-Tree is a self-balancing tree data structure that keeps data sorted and allows searches, insertions, and deletions in logarithmic time. It is a generalization of a binary search tree, where each node can have more than two children.
+    - Skip List: A Skip List is a probabilistic data structure that resembles a hierarchical linked list. It provides an efficient way to search and insert elements in a sorted data set by maintaining multiple levels of linked lists, where each level acts as an "express lane" for traversal.
+  - 2. Balancing:
+    - B-Tree: B-Trees are self-balancing, meaning they automatically reorganize their structure to maintain a balanced height, ensuring logarithmic time complexity for operations.
+    - Skip List: Skip Lists are probabilistically balanced, meaning they rely on random coin flips during insertion to determine the level of each node. While not perfectly balanced, Skip Lists maintain an expected logarithmic time complexity for operations with high probability.
+  - 3. Memory Usage:
+    - B-Tree: B-Trees typically have a higher memory overhead due to their node structure, which stores multiple keys and pointers to child nodes.
+    - Skip List: Skip Lists have a lower memory overhead compared to B-Trees since they only maintain a series of linked lists and some additional pointers for the skip levels.
+  - 4. Disk Access:
+    - B-Tree: B-Trees are particularly well-suited for disk-based storage systems, as they minimize disk accesses by keeping data clustered and reducing the number of nodes that need to be traversed.
+    - Skip List: While Skip Lists can be used in disk-based systems, they are generally more suitable for main memory applications due to their simpler structure and lower memory overhead.
+  - 5. Concurrency:
+    - B-Tree: B-Trees can be more challenging to implement for concurrent access due to their complex node structure and rebalancing operations.
+    - Skip List: Skip Lists are generally easier to implement for concurrent access because their linked list structure allows for simpler locking schemes and atomic operations.
 - [Postgresql VACUUM, ANALYZE, and REINDEX]
   - ANALYZE
     - ANALYZE collects statistics about the contents of all or several columns in a table or entire database. These statistics are then used by the query planner to produce efficient execution plans for queries.
