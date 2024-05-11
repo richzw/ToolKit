@@ -143,6 +143,8 @@
 - [Go vs Rust Idioms](https://programming-idioms.org/cheatsheet/Go/Rust)
 - [Using unwrap() in Rust is Okay](https://blog.burntsushi.net/unwrap/)
 - [Error Handling in Rust](https://blog.burntsushi.net/rust-error-handling/)
+- [Rust 错误处理在 GreptimeDB 的实践](https://mp.weixin.qq.com/s/jBPD3C0quxwpQY5RgpBY5A)
+  - 构建一个高效且精确的错误堆栈来取代系统 Backtrace 的堆栈；（2）如何在大型项目中组织错误定义；以及（3）如何在不同的方案中打印错误日志，并向最终用户报告错误
 - [Rust Runtime 设计与实现](https://www.ihcblog.com/rust-runtime-design-1/)
 - [Monoio ：基于 io-uring 的高性能 Rust Runtime](https://mp.weixin.qq.com/s/84EiGzKZG3DHWLsefJZT6Q)
   - Rust 异步机制
@@ -223,7 +225,8 @@
   - 接着为了使用零拷贝的特性，我们将 Label 的 String 字段替换为了 Bytes 类型，但是发现性能却下降了。
     - 通过火焰图我们发现 Prost 为了让 Bytes 在 BytesAdapter 和 Buf 两个 trait 之间转换引入了一些额外的开销。通过把类型特化我们得以去除这些开销
     - 在火焰图中发现了 Bytes:slice 自身为了确保内存安全引入的一些额外的开销。考虑到我们的用法，我们 hack 了 slice 的实现从而最终将耗时降低到 baseline 的 20% 左右。
-
+- [Rust 的 IO性能](https://mp.weixin.qq.com/s/unGVUk-02RiQfoNnytBveA)
+  
 
 
 

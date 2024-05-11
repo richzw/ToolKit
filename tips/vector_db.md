@@ -201,6 +201,8 @@
     - 向量搜索不保证你想要的那条数据一定会在结果集里的第一个，也会会在第五第六个甚至第10个 向量搜索是ANNS，“近似近邻搜索”这几个词的简写，它不叫精确搜索
     - search返回的结果里不带有partition信息。可以建表时用一个字段来存partition的名字或者标记，然后search的时候在output_fields里填写这个字段的名字。
     - 用gpu来做查询，必须要使用"GPU_"名字打头的索引
+      - gpu的显存没有机器内存那么大，能加载的数据量相对较小，所以不适合巨型数据集。gpu在nq比较大的时候比较有优势，比如单次查询输入一千条以上的向量去搜
+      - 每次搜索时要把目标向量从内存拷到显存，搜索完成后把结果从显存拷到内存，这些都是有成本的
     - qps
       - qps受影响的因素很多，数据量，维度，索引类型参数，搜索参数，是否有过滤，是否有output_fields，milvus. yaml里面的queryNode.group里的配置，querynode数量，load的参数replica_number，等等。
       - 要获得更高的qps可以从上面这些方面入手。cpu的核数和性能也会影响qps，甚至NUMA架构也会影响qps。单机版的indexnode datanode如果有建索引或者compaction的任务在执行，也会影响qps。
@@ -260,7 +262,7 @@
   - [优化](https://zilliz.com.cn/blog/milvus-%20community-keyword)
     - 降低内存
       - 牺牲性能 - Mmap, DiskANN
-      - 牺牲精度 - IVF_PQ, IVF_SQ8
+      - 牺牲精度 - IVF_PQ, IVF_SQ8(基于Faiss)
     - 分批插入数据，是每一批 collection.flush()，还是最后再 collection.flush()？
       - 插入数据时，不要每一批都调用 flush()接口，Milvus 内部会定期调 flush() 接口，所有数据都插入完成之后，再调用一次 flush 即可
       - 插入数据后，频繁调用 flush，会产生大量碎的 segment 文件，为系统带来较大的 compaction 压力

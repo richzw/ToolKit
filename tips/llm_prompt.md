@@ -786,7 +786,13 @@
     保持 Facebook 帖子简洁而深具影响力。
     ```
   - 使用分隔符进行文本分段 将分隔符用作 XML 标签
-  - 
+- ChatGPT memory
+  ```
+  Store in your memory that when I start a prompt using: 
+  ‘!si’ means that I want you to search on the Internet; 
+  ‘!ci’ means that I want you to create an image; 
+  and `!da’ means that I want you to use your Advanced Data Analysis feature
+  ```
 
 
 
