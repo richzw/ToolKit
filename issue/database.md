@@ -99,7 +99,46 @@
   ORDER BY 
       idx_scan DESC;
   ```
-
+- [SQL优化](https://mp.weixin.qq.com/s/_s0hpGKSzSrSrHSUaLkIvA)
+  - Case
+    - 一张小表A，里面存储了一些ID，大约几百个. 有一张日志表B，每条记录中的ID是来自前面那张小表的，但不是每个ID都出现在这张日志表中
+    - 那么我怎么快速的找出今天没有出现的ID呢
+  - Solution
+    - 递归查询，A表全扫，B表索引扫描了若干次（若干 = 唯一AID在B中出现的次数）。
+      - 对B的取值区间，做递归的收敛查询，然后再做NOT IN就很快
+        ```sql
+        explain (analyze,verbose,timing,costs,buffers) 
+          select a.id from a left join b on (a.id=b.aid) where b.* is null;
+        
+        explain (analyze,verbose,timing,costs,buffers) 
+        select * from a where id not in 
+        (
+        with recursive skip as (  
+          (  
+            select min(aid) aid from b where aid is not null  
+          )  
+          union all  
+          (  
+            select (select min(aid) aid from b where b.aid > s.aid and b.aid is not null)   
+              from skip s where s.aid is not null  
+          )  -- 这里的where s.aid is not null 一定要加,否则就死循环了.  
+        )   
+        select aid from skip where aid is not null
+        );
+        ```
+    - SUB QUERY，A表全扫，B表索引扫描了若干次（若干 = A表记录数）
+      - 采用sub query，A表数据量小，查询A表的QUERY中使用SUB QUERY使得SUB QUERY的扫描次数下降到与A行数一致，SUB QUERY中采用LIMIT 1限定返回数，is null限定得出B表中未出现的aid
+      ```sql
+      explain analyze 
+      select * from 
+      (
+        select 
+          a.* ,  
+          (select aid from b where b.aid=a.id limit 1) as aid   -- sub query, limit 1控制了扫描次数
+        from a   -- a表很小  
+      ) as t 
+      where t.aid is null;  
+      ```
 
 
 
