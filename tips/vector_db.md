@@ -188,6 +188,7 @@
     - 有向量索引的情况下，过滤查询是有可能搜不出结果。
       - 有时候能搜到有时不能搜到，多半是因为底下的segment做了compaction之后重建了索引。几个有索引的小分片和一个有索引的大分片，过滤搜索出来的东西很可能不同。
     - 查询节点内存自动均衡的几种策略？当前默认是scorebase
+    - search()接口是用向量做近似搜索，必须要传入向量。query()接口应该比较符合你想查标量的功能
     - milvus查看行数有两种方式，
       - 一种是collection.num_entities，只是从etcd中拿取每个segment创建时所记录的行数，不会统计delete的数量
       - 第二种是collection.query(output_fields=["count(*)"])。做一次详细统计，并把delete数量也统计在内。
@@ -238,9 +239,14 @@
     - 物理文件删除？这个需要数据文件（segment） 上的数据都失效才能删掉。而segment失效，要么是上面的数据全被delete，要么是被compact。
       - 不要期望物理文件在删除后立即缩小。被删除的量要达到一定量才行，比如某个segment里被删除的数据达到了10%以上，才会触发一个动作把这10%的数据真正地从磁盘上清除。
       - 清除的流程是：用那90%的数据构建一个新的segment，然后把旧的segment标记为删除，等待垃圾清理机制做最终清除。
+    - milvus的文件格式是在parquet格式外面包了一层，外部工具没法直接读的
+    - nfs 不能做业务存储
+      - nfs没有完全实现posix 文件语义。一旦一个系统有大量的文件删除，文件重命名的请求，nfs就会出故障。nfs，只能做追加，新建的和小规模的文件删除。而且删了以后最好就是再也不管了
+      - 如果把业务数据库放到nfs这种系统，只能跑跑1-2 tps这种demo。吞吐低
   - Knowhere 是 Milvus 的内部核心引擎，负责向量搜索，是基于行业标准开源库（如 Faiss、DiskANN 和 hnswlib 等）的增强版本
     - Knowhere 属于开源，其部署环境更多样，可在所有主机类型上运行
     - Knowhere 依赖于 OSS 库（如 Faiss、DiskANN 和 hnswlib）
+    - milvus的ivfsq8，实际用的就是faiss的IndexIvfScalarQuantizer
   - attu
     -  attu里显示的approx entities number相当于用pymilvus的collection.num_entities获取行数，这个是从etcd中快速统计已落盘的行数。加载在内存里的数量有可能不一样，因为有些数据可能没落盘
   - 编译

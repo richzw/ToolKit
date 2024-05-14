@@ -793,7 +793,13 @@
   - 强大的丢包统计，保命的命令：netstat -s |egrep -i "drop|route|overflow|filter|retran|fails|listen"
   - tcp队列是否溢出：netstat -s | egrep "listen|LISTEN" 
 - [Wireshark Troubleshooting](https://mp.weixin.qq.com/s/2M0k7up2OqQBcyWvQj-1JA)
-
+  - [TCP Spurious Retransmission](https://mp.weixin.qq.com/s/nlTCcSYqsDJ-O0FAFzQmPw)
+    - 在数据包跟踪文件中已经被 ACK 确认过的数据分段，又再一次被重传发送，那么这个重传的数据分段会被标记为 [TCP Spurious Retransmission]
+    - 对于 TCP Spurious Retransmission 是与 TCP Out-Of-Order、TCP Fast Retransmission、TCP Retransmission 等在一起综合判断，并标记乱序或重传类型的，复杂场景下确实可能出现判断错误的情况
+    - 点选该重传数据包，右键 Protocol Preferences -> Transmission Control Protocol -> Force interpretation to selected packet(s) ，然后可以选择
+- [Investigation of a Cross-regional Network Performance Issue](https://netflixtechblog.medium.com/investigation-of-a-cross-regional-network-performance-issue-422d6218fdf1)
+  - 内核升级去掉了内核参数 sysctl_tcp_adv_win_scale，换了一个新的计算方式，导致原来30秒 内能传输完毕的请求在新内核机制下传输不完，从而导致了业务端的请求超时
+  - 
 
 
 

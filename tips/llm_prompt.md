@@ -736,6 +736,7 @@
   - Jailbreaking is the class of attacks that attempt to subvert safety filters built into the LLMs themselves.
   - [Many-shot jailbreaking](https://www.anthropic.com/research/many-shot-jailbreaking?utm_source=www.therundown.ai&utm_medium=newsletter&utm_campaign=open-sourced-ai-coding-agent)
     - ![img.png](llm_prompt_many_shot_jailbreaking.png)
+  - [jailbreaking sample](https://github.com/elder-plinius/L1B3RT45/blob/main/OPENAI.mkd)
 - [Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models](https://www.edhec.edu/sites/default/files/2023-12/ChatGPT_Paper_Slides%20%281%29%20%281%29%20%281%29.pdf)
 - [Big Prompt Library](https://github.com/0xeb/TheBigPromptLibrary?tab=readme-ov-file#how-to-protect-gpt-instructions)
   - How to get system prompt?
@@ -786,6 +787,7 @@
     保持 Facebook 帖子简洁而深具影响力。
     ```
   - 使用分隔符进行文本分段 将分隔符用作 XML 标签
+    - Prompt内容越复杂，分隔符的作用就越重要。分隔符可以自己设计，但不应与标点符号等相同，容易发生歧义，常见的分隔符可以是###、===、<<<>>>等。同时，也可以使用xml标签来分隔Prompt。
 - ChatGPT memory
   ```
   Store in your memory that when I start a prompt using: 
@@ -819,7 +821,7 @@
   – Use zero shots for simple examples and multi-shot examples for complex.
   – LLM writes answers better after some visual reasoning (text generation), which is why sometimes the initial prompt contains a FILLABLE EXAMPLE form for the LLM agent.
   ```
-
+- [Gemini Prompt Guild](https://services.google.com/fh/files/misc/gemini-for-google-workspace-prompting-guide-101.pdf)
 
 
 

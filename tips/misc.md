@@ -178,8 +178,8 @@
 - [vim cheat sheet](https://michael.peopleofhonoronly.com/vim/)
 - [Bayesian Theorem]
   - ![img.png](misc_bayesian.png)
-
-
+- [RESTful API and Event Guidelines](https://opensource.zalando.com/restful-api-guidelines/#_zalando_restful_api_and_event_guidelines)
+- [推荐资源冷启动实践](https://mp.weixin.qq.com/s/_3CkflIJtsyndBqHhm8w3Q)
 
 
 
