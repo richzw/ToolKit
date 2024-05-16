@@ -184,7 +184,7 @@
       - 如果是L2的话，distance越接近0就越相似，排第一个的最相似。
       - 如果是IP的话，在向量都做了归一化的前提下，distance越接近1越相似。详情参考官网文档的metric type。
     - 使用IP必须要把向量都归一化，不然没有意义。对于归一化的向量，IP算出来的结果和COSINE理论上是相同的。如果你自己做了归一化，那就可以用IP。没做，那就用COSINE或者L2
-    -  cosine是在数据被insert进来落盘的时候就计算好向量的length，然后在查询的时候会把两条向量的内积除以它们的length，所以是计算了一个余弦。由于length已经提前算好，所以查询性能和IP相比不会差多少
+    - cosine是在数据被insert进来落盘的时候就计算好向量的length，然后在查询的时候会把两条向量的内积除以它们的length，所以是计算了一个余弦。由于length已经提前算好，所以查询性能和IP相比不会差多少
     - 有向量索引的情况下，过滤查询是有可能搜不出结果。
       - 有时候能搜到有时不能搜到，多半是因为底下的segment做了compaction之后重建了索引。几个有索引的小分片和一个有索引的大分片，过滤搜索出来的东西很可能不同。
     - 查询节点内存自动均衡的几种策略？当前默认是scorebase
@@ -208,7 +208,10 @@
       - qps受影响的因素很多，数据量，维度，索引类型参数，搜索参数，是否有过滤，是否有output_fields，milvus. yaml里面的queryNode.group里的配置，querynode数量，load的参数replica_number，等等。
       - 要获得更高的qps可以从上面这些方面入手。cpu的核数和性能也会影响qps，甚至NUMA架构也会影响qps。单机版的indexnode datanode如果有建索引或者compaction的任务在执行，也会影响qps。
     -  count(*)是精确值，但它得出的结果会受consistency_level的影响。如果Strong，则是完全精确的。如果是Bounded/Eventually，有可能少数数据还在pulsar里未消费完成，就不被计入行数
+    - try_search_fill方法是当缓存里的结果集不多的时候，执行若干次search（搜索半径会向外扩一圈）以获取更多的结果集
+      - 初始化iterator的时候有个batch_size参数，如果缓存里的结果集仍然小于batch_size，它就会再次执行search(半径继续往外扩)来获取更多的结果集
   - 索引
+    - milvus里面，每个向量字段最多只能建立一种索引，如果要换，要把旧的删除再建新的。执行search的时候总是会使用那唯一指定的索引。 查询计划无法被外界感知
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap
     - 集群开了mmap，创建集合索引的时候是默认就开启了，还是需要collection.set_properties({'mmap.enabled': True})参数指定
@@ -243,6 +246,9 @@
     - nfs 不能做业务存储
       - nfs没有完全实现posix 文件语义。一旦一个系统有大量的文件删除，文件重命名的请求，nfs就会出故障。nfs，只能做追加，新建的和小规模的文件删除。而且删了以后最好就是再也不管了
       - 如果把业务数据库放到nfs这种系统，只能跑跑1-2 tps这种demo。吞吐低
+    - 对于standalone 的milvus来说，rdb_data里存放的数据就相当于write-ahead-log，就等同于cluster的milvus存放在pulsar里的数据
+      - 所有的insert请求都会被先存入rdb_data。也就是说，你插入多少数据，rdb_data里面就有多少数据
+      - rdb_data里的数据由milvus.yaml里的rockmq.retentionTimeInMinutes控制，默认是保留3天rdb_data里主要是wal，还有些time tickets message，删掉问题不大
   - Knowhere 是 Milvus 的内部核心引擎，负责向量搜索，是基于行业标准开源库（如 Faiss、DiskANN 和 hnswlib 等）的增强版本
     - Knowhere 属于开源，其部署环境更多样，可在所有主机类型上运行
     - Knowhere 依赖于 OSS 库（如 Faiss、DiskANN 和 hnswlib）
