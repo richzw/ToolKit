@@ -199,6 +199,8 @@
     - `collection.query(expr="id==xx", output_fields=["*"])`  这是取出一整行数据
     - 如果检索不出，一有可能是embedding不太好，二有可能索引参数搜索参数设的不合理，三有可能consistency level是eventually
       -  insert数据到collection，数据的可见性跟message queue消费的速度有关，查询时想要确定数据可见就用consistency_level=Strong
+      - collection创建时设置的consistency_level是做为默认值使用，不能修改
+      - search和query接口都有consistency_level参数指定本次查询的level，如果没填search/query的consistency_level参数，才会使用collection的默认设定。
     - 向量搜索不保证你想要的那条数据一定会在结果集里的第一个，也会会在第五第六个甚至第10个 向量搜索是ANNS，“近似近邻搜索”这几个词的简写，它不叫精确搜索
     - search返回的结果里不带有partition信息。可以建表时用一个字段来存partition的名字或者标记，然后search的时候在output_fields里填写这个字段的名字。
     - 用gpu来做查询，必须要使用"GPU_"名字打头的索引

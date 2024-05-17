@@ -799,7 +799,64 @@
     - 点选该重传数据包，右键 Protocol Preferences -> Transmission Control Protocol -> Force interpretation to selected packet(s) ，然后可以选择
 - [Investigation of a Cross-regional Network Performance Issue](https://netflixtechblog.medium.com/investigation-of-a-cross-regional-network-performance-issue-422d6218fdf1)
   - 内核升级去掉了内核参数 sysctl_tcp_adv_win_scale，换了一个新的计算方式，导致原来30秒 内能传输完毕的请求在新内核机制下传输不完，从而导致了业务端的请求超时
-  - 
+  - Issue
+    - the client application is located in an internal subnet in the US region while the server application is located in an external subnet in a European region
+  - Blame the Neighbors
+    - These noisy neighbors consume excessive network resources, causing other containers on the same host to suffer from degraded network performance
+    - We attempted to resolve the issue by removing these bandwidth limits, allowing the application to utilize as much bandwidth as necessary
+  - Blame the Network
+    - We observed some TCP packets in the network marked with the RST flag
+    - We spotted one TCP stream that was closed after exactly 30 seconds.
+    - The packet capture results clearly indicated that it was the client application that initiated the connection termination by sending a FIN packet
+    - the server continued to send data; however, since the client had already decided to close the connection, it responded with RST packets to all subsequent data from the server.
+    - we needed to identify the TCP stream on the client side, locate the raw TCP sequence number, and then use this number as a filter on the server side to find the corresponding TCP stream
+  - Blame the Application
+  - Blame the Kernel
+    - Linux kernel upgrade from version 6.5.13 to 6.6.10. `sysctl_tcp_adv_win_scale` removed...
+    -  On the old kernel, this cross-region transfer completed in 22 seconds, whereas on the new kernel, it took 39 seconds to finish
+  - Root Cause
+    - TCP Receive Window
+      - the TCP receive window is how the receiver tells the sender “This is how many bytes you can send me without me ACKing any of them
+      - The Window Size -  This is configured using SO_RCVBUF socket option 
+      - when the user gives a value X, then the kernel stores 2X in the variable sk->sk_rcvbuf.
+      - sysctl_tcp_adv_win_scale
+        - the kernel provided this sysctl_tcp_adv_win_scale which you can use to tell the kernel what the actual overhead is
+        - we’re just using the default value 1, which in turn means the overhead is calculated by rcvbuf/2^tcp_adv_win_scale = 1/2 * rcvbuf. This matches the assumption when setting the SO_RCVBUF value
+    - Recap
+      - Assume you set SO_RCVBUF to 65536, which is the value set by the application as shown in the setsockopt syscall. Then we have:
+        - SO_RCVBUF = 65536
+        - rcvbuf = 2 * 65536 = 131072
+        - overhead = rcvbuf / 2 = 131072 / 2 = 65536
+        - receive window size = rcvbuf — overhead = 131072–65536 = 65536
+      - the receive window size before the kernel upgrade was 65536. With this window size, the application was able to transfer 10M data within 30 seconds.
+      - The Change 
+        - obsoleted sysctl_tcp_adv_win_scale and introduced a scaling_ratio that can more accurately calculate the overhead or window size
+        - With the change, the window size is now rcvbuf * scaling_ratio.
+        - scaling_ratio calculated? It is calculated using skb->len/skb->truesize
+          - where skb->len is the length of the tcp data length in an skb and truesize is the total size of the skb
+        - during the TCP handshake before any data is transferred, how do we decide the initial scaling_ratio? 
+          - The answer is, a magic and conservative ratio was chosen with the value being roughly 0.25
+        - However, another variable, window_clamp, is not updated accordingly. window_clamp is the maximum receive window allowed to be advertised, which is also initialized to 0.25 * rcvbuf using the initial scaling_ratio
+  - Fix
+    - update window_clamp along with scaling_ratio
+    - in order to have a simple fix that doesn’t introduce other unexpected behaviors, our final fix was to increase the initial scaling_ratio from 25% to 50%.
+    - created a kafka ticket to change receive.buffer.bytes to -1 to allow Linux to auto tune the receive window.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
