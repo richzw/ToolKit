@@ -841,7 +841,10 @@
     - update window_clamp along with scaling_ratio
     - in order to have a simple fix that doesn’t introduce other unexpected behaviors, our final fix was to increase the initial scaling_ratio from 25% to 50%.
     - created a kafka ticket to change receive.buffer.bytes to -1 to allow Linux to auto tune the receive window.
-
+- [窗口尚未完全开放时，TCP 堆栈能实现超预期的功能](https://blog.cloudflare.com/zh-cn/when-the-window-is-not-fully-open-your-tcp-stack-is-doing-more-than-you-think-zh-cn/)
+  - 利用 net.ipv4.tcp_rmem 的默认设置，Linux 最初会为接收数据和元数据设置 128KiB 的内存预算
+  - Linux 使接收窗口保持较小，因为它会试图预测元数据开销并避免超出内存预算，进而达到 TCP 折叠
+  - 默认情况下，利用 net.ipv4.tcp_adv_win_scale=1，公告窗口的上限是“空闲”内存的 50%。rcv_ssthresh 一开始使用 64KiB，并线性增长到该限值。
 
 
 

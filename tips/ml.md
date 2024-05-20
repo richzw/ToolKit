@@ -265,9 +265,15 @@
     - 为了避免过拟合，CoH添加了一个正则化项来最大化预训练数据集的对数似然。为了避免捷径和复制（因为反馈序列中有许多常见单词），他们在训练期间随机mask 0%-5%的历史token。
   - [Agent Workflow 以及 4 种主流设计模式](https://mp.weixin.qq.com/s/W20747oh_rin6dJlB1y8jw)
     - 1）Reflection：让 Agent 审视和修正自己生成的输出；
+      - Reflection模式适用于让LLM自行审视和修正自己生成的输出，对生成内容进行多次自我调优，进而生成更加优质的内容。
     - 2）Tool Use：LLM 生成代码、调用 API 等进行实际操作；
-    - 3）Planning：让 Agent 分解复杂任务并按计划执行；
-    - 4）Multiagent Collaboration：多个 Agent 扮演不同角色合作完成任务；
+    - 3）Planning：让 Agent 分解复杂任务并按计划执行
+      - Planning模式适用于让LLM基于计划好的任务步骤，对生成内容进行多次自我调优和加工处理，进而生成更加优质的内容
+    - 4）Multiagent Collaboration：多个 Agent 扮演不同角色合作完成任务
+      - 定义3个用于旅行规划场景的专家Agents
+        - 目的地推荐专家： 调用搜索等能力，基于用户的需求推荐目的地。
+        - 机票酒店专家： 调用机票、酒店的查询工具，根据用户的背景信息和诉求，推荐合适的机票酒店。
+        - 行程规划专家： 根据用户的信息和其他专家产出的结果，帮助用户制定完整的行程规划，并将内容输出到PDF中。
   - [Agent最常见的九种设计模式](https://mp.weixin.qq.com/s/EWdpOlzrgqOgHHWHdoFyGA)
     - ReAct 实现  https://github.com/samwit/langchain-tutorials/blob/main/agents/YT_Exploring_ReAct_on_Langchain.ipynb
     - Plan and solve 模式 

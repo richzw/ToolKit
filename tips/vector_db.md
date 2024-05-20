@@ -169,6 +169,7 @@
       - 也可以是：建表，建索引，insert，load，search
       - 还可以是：建表，建索引，load，insert，search 
       - 无论何种顺序，建索引必须在load之前，load必须在search之前
+    - milvus每次查询最多只能返回16384条结果，分页也要遵循这个限制
     - 如果你不用过滤查询的话，hnsw索引会比ivf_flat快。动态数据是要比静态数据查询慢的。对于动态数据，如果partition多的话，性能会更差一些
     - nlist取2048比较好，nprobe按你之前的比例取10左右。ivfpq，一亿的数据，nlist 可以设置成多少合适，2048吗？
       - 在milvus里，每个分片都是独立的内存，所以nlist的取值是以每个分片所包含的行数来推荐。我们推荐是4*sqrt(每个分片里的行数)。faiss都是把数据整成一份，所以它那个很大
@@ -201,6 +202,9 @@
       -  insert数据到collection，数据的可见性跟message queue消费的速度有关，查询时想要确定数据可见就用consistency_level=Strong
       - collection创建时设置的consistency_level是做为默认值使用，不能修改
       - search和query接口都有consistency_level参数指定本次查询的level，如果没填search/query的consistency_level参数，才会使用collection的默认设定。
+      - consistency_level是控制数据可见性的
+        - milvus各个节点通过同步时间戳的方式来确认达到某个时间点的数据可见性，由一个rootcoord节点每隔200毫秒发送一个时间戳消息到消息中间件，如果某个时间戳被所有的querynode节点看到，那就说明这个时间戳之前的数据都已可见。
+        - 设为Strong意思是等待当前最近的时间戳消息被所有querynode消费之后再开始搜索。有可能会等待200到400毫秒。
     - 向量搜索不保证你想要的那条数据一定会在结果集里的第一个，也会会在第五第六个甚至第10个 向量搜索是ANNS，“近似近邻搜索”这几个词的简写，它不叫精确搜索
     - search返回的结果里不带有partition信息。可以建表时用一个字段来存partition的名字或者标记，然后search的时候在output_fields里填写这个字段的名字。
     - 用gpu来做查询，必须要使用"GPU_"名字打头的索引
@@ -377,6 +381,7 @@
         - 对于之前以原始数据加载进内存的segment，一旦它的索引构建完成，这个索引将会被加载进内存，然后之前在内存里的原始数据会被free，也就是一个内存中的替换。
       - 开了 mmap 即便超出内存一般也不会 oom，但是会影响 latency，我们测下来 hnsw 可以放 4 倍左右性能还能保持不错的水位，这个和你的 workload 有关。
         - diskann和mmap其实都挺依赖磁盘性能。mmap如果内存太少的话性能也会很差
+        - mmap开启以后，内存资源可以降低到之前的1/4左右
       - 另一种节省内存的方式是使用ivf_sq8或者ivf_pq，但是召回率可能不太好
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片

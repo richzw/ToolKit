@@ -822,6 +822,11 @@
   – LLM writes answers better after some visual reasoning (text generation), which is why sometimes the initial prompt contains a FILLABLE EXAMPLE form for the LLM agent.
   ```
 - [Gemini Prompt Guild](https://services.google.com/fh/files/misc/gemini-for-google-workspace-prompting-guide-101.pdf)
+- [撰写prompt步骤]
+  - Write quick, simple prompts and see how it does.
+  - Based on where the output falls short, flesh out the prompt iteratively. This often leads to a longer, more detailed, prompt, perhaps even a mega-prompt.
+  - If that’s still insufficient, consider few-shot or many-shot learning (if applicable) or, less frequently, fine-tuning.
+  - If that still does’t yield the results you need, break down the task into subtasks and apply an agent workflow.
 
 
 
