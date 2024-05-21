@@ -886,6 +886,7 @@
     - BCC 是一个框架，它使用户能够编写嵌入其中的 eBPF 程序的 Python 程序。该框架主要针对涉及应用程序和系统分析/跟踪的用例，其中 eBPF 程序用于收集统计信息或生成事件，用户空间中的对应部分收集数据并以人类可读的形式显示。运行 python 程序将生成 eBPF 字节码并将其加载到内核中。
   - bpftrace
     - bpftrace 是一种用于 Linux eBPF 的高级跟踪语言，可在最近的 Linux 内核 (4.x) 中使用。bpftrace 使用 LLVM 作为后端将脚本编译为 eBPF 字节码，并利用 BCC 与 Linux eBPF 子系统以及现有的 Linux 跟踪功能进行交互：内核动态跟踪 (kprobes)、用户级动态跟踪 (uprobes) 和跟踪点. bpftrace 语言的灵感来自 awk、C 和前身跟踪器，例如 DTrace 和 SystemTap。
+    - 简单来说就是在函数上挂个钩子，挂上钩子后就可以将函数的入参和返回值取出来再放入程序进行二次编程，最终能让程序按照我们的意图来对函数进行观测
   - XDP的全称是： eXpress Data Path
     - XDP 是Linux 内核中提供高性能、可编程的网络数据包处理框架。
     - ![img.png](k8s_network_xdp.png)

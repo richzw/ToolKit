@@ -349,6 +349,40 @@
        - mysql的事务没有正确处理，例如：rollback 或者 commit
     - 使用 perf 把所有的调用关系使用火焰图给绘制出来。既然我们推断代码中没有释放mysql连接
     - 由于那一行代码没有对事务进行回滚，导致服务端没有主动发起close。因此 MySQL负载均衡器 在达到 60s 的时候主动触发了close操作，但是通过tcp抓包发现，服务端并没有进行回应，这是因为代码中的事务没有处理，因此从而导致大量的端口、连接资源被占用。
+  - CLOSE_WAIT 状态拆解
+    - CLOSE_WAIT 状态在服务器停留时间很短，如果你发现大量的 CLOSE_WAIT 状态，那么就意味着被动关闭的一方没有及时发出 FIN 包，一般有如下几种可能
+      - 程序问题：如果代码层面忘记了 close 相应的 socket 连接，那么自然不会发出 FIN 包，从而导致 CLOSE_WAIT 累积；或者代码不严谨，出现死循环之类的问题，导致即便后面写了 close 也永远执行不到。
+      - 响应太慢或者超时设置过小：如果连接双方不和谐，一方不耐烦直接 timeout，另一方却还在忙于耗时逻辑，就会导致 close 被延后。响应太慢是首要问题，不过换个角度看，也可能是 timeout 设置过小。
+      - BACKLOG 太大：此处的 backlog 不是 syn backlog，而是 accept 的 backlog，如果 backlog 太大的话，设想突然遭遇大访问量的话，即便响应速度不慢，也可能出现来不及消费的情况，导致多余的请求还在队列里就被对方关闭了。
+    - 通过「netstat -ant」或者「ss -ant」命令发现了很多 CLOSE_WAIT 连接，请注意结果中的「Recv-Q」和「Local Address」字段，通常「Recv-Q」会不为空，它表示应用还没来得及接收数据
+    - 连接都没有被accept(), client端就能发送数据了？
+      - 是的。只要这个连接在OS看来是ESTABLISHED的了就可以，因为握手、接收数据都是由内核完成的，内核收到数据后会先将数据放在内核的tcp buffer中，然后os回复ack。
+      - 三次握手之后client端是没法知道server端是否accept()了
+    - 一个连接如果在accept queue中了，但是还没有被应用 accept，那么这个时候在server上看这个连接的状态他是ESTABLISHED的吗？
+      - 是的，这个时候这个连接在server上看是ESTABLISHED的，因为三次握手已经完成，连接已经建立，只是还没有被应用accept
+    - 如果server的os参数 open files到了上限（就是os没法打开新的文件句柄了）会导致这个accept queue中的连接一直没法被accept对吗？
+      - 不会，accept queue中的连接是不占用open files的，只有被accept之后才会占用open files
+    - 什么时候连接状态变成 ESTABLISHED
+      - 三次握手成功就变成 ESTABLISHED 了，不需要用户态来accept
+      - 如果握手第三步的时候OS发现全连接队列满了，这时OS会扔掉这个第三次握手ack，并重传握手第二步的syn+ack, 在OS端这个连接还是 SYN_RECV 状态的，但是client端是 ESTABLISHED状态的了。
+      - 这是在4000（tearbase）端口上全连接队列没满，但是应用不再accept了，nc用12346端口去连4000（tearbase）端口的结果
+       ```
+       # netstat -at |grep ":12346 "
+       tcp   0      0 dcep-blockchain-1:12346 dcep-blockchai:terabase ESTABLISHED //server
+       tcp   0      0 dcep-blockchai:terabase dcep-blockchain-1:12346 ESTABLISHED //client
+       [root@dcep-blockchain-1 cfl-sm2-sm3]# ss -lt
+       State       Recv-Q Send-Q      Local Address:Port         Peer Address:Port   
+       LISTEN      73     1024            *:terabase                 *:*
+      ```
+     - 这是在4000（tearbase）端口上全连接队列满掉后，nc用12346端口去连4000（tearbase）端口的结果
+      ```
+      # netstat -at |grep ":12346 "  
+      tcp   0      0 dcep-blockchai:terabase dcep-blockchain-1:12346 SYN_RECV    //server
+      tcp   0      0 dcep-blockchain-1:12346 dcep-blockchai:terabase ESTABLISHED //client
+      # ss -lt
+      State       Recv-Q Send-Q      Local Address:Port       Peer Address:Port   
+      LISTEN      1025   1024             *:terabase              *:*
+      ```
 - [504错误码，你觉得这个服务是出了什么问题]
   - 最常见的原因，可能是网络出现异常了。比如：偶然的网络抖动，或者是带宽被占满了。
   - 线程池满了

@@ -40,6 +40,22 @@
       - 这种方式有局限性：需要一种类似连续自增的字段。
     - 使用between...and...
       - 可以将limit查询转换为已知位置的查询，这样MySQL通过范围扫描between...and，就能获得到对应的结果
+  - [Elasticsearch](https://zhuanlan.zhihu.com/p/647451683?utm_medium=social&utm_psn=1775831217055031296&utm_source=qq)
+    - Elasticsearch 的From/Size方式提供了基本的分页的功能，
+    - 也有相应的问题。举个例子，一个索引，有10亿数据，分10个 shards，然后，一个搜索请求，from=1000000，size=100，这时候，会带来严重的性能问题：CPU，内存，IO，网络带宽。
+    - 在 query 阶段，每个shards需要返回 1000100 条数据给 coordinating node，而 coordinating node 需要接收10 * 1000，100 条数据，即使每条数据只有 _doc _id 和 _score
+    - 深度分页问题大致可以分为两类
+      - 「随机深度分页：随机跳转页面」
+      - 「滚动深度分页：只能一页一页往下查询」
+    - Scroll
+      - scroll_id会占用大量的资源（特别是排序的请求
+    - Scroll Scan
+      - ES提供了scroll scan方式进一步提高遍历性能，但是scroll scan不支持排序，因此scroll scan适合不需要排序的场景
+      - Scroll-Scan初始化时只返回 _scroll_id，没有具体的hits结果
+      - Scroll-Scan的size参数控制的是每个分片的返回的数据量，而不是整个请求返回的数据量。
+    - Sliced Scroll
+      - 每个Scroll请求，可以分成多个Slice请求，可以理解为切片，各Slice独立并行，比用Scroll遍历要快很多倍。
+    - SEARCH_AFTER不是自由跳转到任意页面的解决方案，而是并行滚动多个查询的解决方案
 - [Redis主节点的Key已过期，但从节点依然读到过期数据](https://mp.weixin.qq.com/s?__biz=Mzg2NzYyNjQzNg==&mid=2247487738&idx=1&sn=e7e6b10b81736ba9775f485ce39585a6&chksm=ceb9ec51f9ce6547ce6378692b11cc09d3c46ded964bddf5052373b1c8cbf5b02a2327f4d23e&scene=132#wechat_redirect)
   - 大部分的业务场景都是读多写少，为了利用好这个特性，提升Redis集群系统的吞吐能力，通常会采用主从架构、读写分离
   - 主从架构的风险

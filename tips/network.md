@@ -1459,6 +1459,11 @@
     - TCP ACKed unseen segment 定义
     - 当为反方向设置了预期的下一个确认号并且它小于当前确认号时设置。
 - Wireshark抓包，前面发生TCP Retransmission，如何确认相应包ACK确认哪个
+- 如果数据包包含数据或者设置了 SYN/FIN 标志，且 Seq Num 没有递增，那它必然属于以下三种情况之一：
+   - 1. 重传
+   - 2. 快速重传
+   - 3. 乱序
+   - 当然，先要排除 TCP Keep-Alive 数据包。
 - [TCP的RST](https://mp.weixin.qq.com/s/KelITBqxYplQrTJLAmt6XA)
   - RST分为两种，一种是active rst，另一种是passive rst
     - active rst 

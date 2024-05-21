@@ -213,9 +213,11 @@
     - qps
       - qps受影响的因素很多，数据量，维度，索引类型参数，搜索参数，是否有过滤，是否有output_fields，milvus. yaml里面的queryNode.group里的配置，querynode数量，load的参数replica_number，等等。
       - 要获得更高的qps可以从上面这些方面入手。cpu的核数和性能也会影响qps，甚至NUMA架构也会影响qps。单机版的indexnode datanode如果有建索引或者compaction的任务在执行，也会影响qps。
-    -  count(*)是精确值，但它得出的结果会受consistency_level的影响。如果Strong，则是完全精确的。如果是Bounded/Eventually，有可能少数数据还在pulsar里未消费完成，就不被计入行数
+    - count(*)是精确值，但它得出的结果会受consistency_level的影响。如果Strong，则是完全精确的。如果是Bounded/Eventually，有可能少数数据还在pulsar里未消费完成，就不被计入行数
     - try_search_fill方法是当缓存里的结果集不多的时候，执行若干次search（搜索半径会向外扩一圈）以获取更多的结果集
       - 初始化iterator的时候有个batch_size参数，如果缓存里的结果集仍然小于batch_size，它就会再次执行search(半径继续往外扩)来获取更多的结果集
+    - 多列向量查询
+      - 2.4版本的多列向量查询是先分别计算每个子查询的结果，再把子结果rerank。根据topk再做reranking。不是简单的取交集，有 fusion 策略的
   - 索引
     - milvus里面，每个向量字段最多只能建立一种索引，如果要换，要把旧的删除再建新的。执行search的时候总是会使用那唯一指定的索引。 查询计划无法被外界感知
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
@@ -382,6 +384,7 @@
       - 开了 mmap 即便超出内存一般也不会 oom，但是会影响 latency，我们测下来 hnsw 可以放 4 倍左右性能还能保持不错的水位，这个和你的 workload 有关。
         - diskann和mmap其实都挺依赖磁盘性能。mmap如果内存太少的话性能也会很差
         - mmap开启以后，内存资源可以降低到之前的1/4左右
+        - mmap开了确实会减少内存使用。不开的话理论值是25—30gb，sizing tool会乘以一个安全系数（一般是2，有的索引可能系数大一点）
       - 另一种节省内存的方式是使用ivf_sq8或者ivf_pq，但是召回率可能不太好
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
