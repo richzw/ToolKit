@@ -120,7 +120,14 @@ record: "container_cpu_usage_against_request:pod:rate1m"
     - 对 Prometheus 使用范围查询（range query），就必然涉及 step（步长）
       - Grafana 需要渲染整条曲线，可以理解为 Grafana 在时间轴上按 step 每走一步，就要做一次查询/evaluation，得到一个值，生成曲线上的一个
       - 当 step 的步长，叠加 Prometheus scrape interval，再叠加 PromQL 里的 range 时间范围窗口
-
+  - Summary
+    - 在一个分布式的世界，网络抖动、对端延迟等引起的数据丢失问题，会给本就不精确的 Prometheus 指标值雪上加霜。
+      - 例如：虽则 rate 计算斜率需要至少两个点，但最佳实践建议将 rate 的时间范围至少设为 Prometheus scrape interval（抓取周期/间隔）的 4 倍。这将确保即使抓取速度缓慢、且发生了一次抓取故障，也始终可以使用两个样本。
+      - 再例如：网络抖动可能导致丢点，也可能导致点的延迟。那么当延迟的点到达时，它就出现在了本不属于它的统计周期内。这可能导致 rate 出现波动，尤其是在监控较短时间范围的 rate 时。
+    - 文章里只关注了对 PromQL 的一次查询/evaluation。而在现实中对 Prometheus 使用范围查询（range query），就必然涉及 step（步长）。
+      - 比如 Grafana 需要渲染整条曲线，可以理解为 Grafana 在时间轴上按 step 每走一步，就要做一次查询/evaluation，得到一个值，生成曲线上的一个点。那么当 step 的步长，叠加 Prometheus scrape interval，再叠加 PromQL 里的 range 时间范围窗口……可以设想，这几个参数不同的排列组合，会导致曲线更加充满惊喜意外……
+    - Prometheus 的增量外推（extrapolation），其实也不是纯粹地无脑外推；它有时还会考虑到距离窗口边界的距离，而做一些其他微调。
+    - 本文未涉及 Prometheus counter 重置（reset）对 increase/rate 准确度的影响。也即：counter 如遇归零（如服务器重启导致），Prometheus 会有应对机制自动来处理，正常情况下不用担心。但若好巧不巧，数据点存在乱序，则可能因为数值下降而误触 Prometheus 重置后的补偿机制，被“脑补”计算出一个极大的异常 increase/rate。
 
 
 

@@ -139,7 +139,9 @@
       ) as t 
       where t.aid is null;  
       ```
-
+- [In-memory disk for PostgreSQL temporary files](https://pgstef.github.io/2024/05/20/in_memory_tmp_files.html)
+  - while debugging a performance issue of a CREATE INDEX operation, I was reminded that PostgreSQL might produce temporary files when executing a parallel query, 
+  - including parallel index creation, because each worker process has its own memory and might need to use disk space for sorting or hash tables.
 
 
 
