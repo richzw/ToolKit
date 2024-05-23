@@ -2135,6 +2135,7 @@
 - [One Billion Rows Challenge](https://www.bytesizego.com/blog/one-billion-row-challenge-go)
   - ![img.png](go_read_million.png)
   - https://benhoyt.com/writings/go-1brc/
+  - https://r2p.dev/b/2024-03-18-1brc-go/
 
 
 

@@ -188,6 +188,14 @@
   - 由于 page cache 存在内核空间中，还需要将其拷贝到用户空间中才能为进程所用（同样的，写入消息也要写将消息写入用户空间的 buffer，再拷贝到 内核空间中的 page cache），于是我们使用了 mmap 来避免了这次拷贝，这样的话 producer 发送消息只要先把消息写入 page cache 再异步刷盘，而 consumer 只要保证消息进度能跟得上 producer 产生消息的进度，就可以直接从 page cache 中读取消息进行消费，于是 producer 与 consumer 都可以直接从 page cache 中读写消息，极大地提升了消息的读写性能。
   - 那怎么保证 consumer 消费足够快以跟上 producer 产生消息的速度的，显然，让消息分布式，分片存储是一种通用方案，这样的话通过增加 consumer 即可达到并发消费消息的目的
   - 最后，为了避免每次创建 Topic 或者 broker 宕机都得修改 producer/consumer 上的配置，我们引入了 nameserver， 实现了服务的自动发现功能。
+  - [和 Kafka 相比，RocketMQ 在架构上做了减法，在功能上做了加法](https://mp.weixin.qq.com/s/oje7PLWHz_7bKWn8M72LUw)
+    - Kafka
+      - 为了提升单个 topic 的并发性能，将单个 topic 拆为多个 partition。
+      - 为了提升系统扩展性，将多个 partition 分别部署在不同 broker 上
+      -  为了提升系统的可用性，为 partition 加了多个副本。
+      - 为了协调和管理 Kafka 集群的数据信息，引入Zookeeper作为协调节点
+    - RocketMQ
+      - RocketMQ 直接将 Zookeeper 去掉，换成了 nameserver，用一种更轻量的方式，管理消息队列的集群信息。
 - [重构 Kafka?](https://mp.weixin.qq.com/s/_RIvZwK1sJJP8xnUDyAk1Q)
   - Kafka 架构的缺陷
     - Kafka 把 broker 和 partition 的数据存储牢牢绑定在一起，会产生很多问题。

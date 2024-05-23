@@ -180,6 +180,7 @@
   - ![img.png](misc_bayesian.png)
 - [RESTful API and Event Guidelines](https://opensource.zalando.com/restful-api-guidelines/#_zalando_restful_api_and_event_guidelines)
 - [推荐资源冷启动实践](https://mp.weixin.qq.com/s/_3CkflIJtsyndBqHhm8w3Q)
+- [How to Write A GitHub README](https://www.daytona.io/dotfiles/how-to-write-4000-stars-github-readme-for-your-project)
 
 
 
