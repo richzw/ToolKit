@@ -233,15 +233,21 @@
       - 对于向量字段来说，如果没建好索引的分片，原始向量数据会保持在内存里做搜索，建好索引的就把索引加载进内存，原先那些原始向量就会从内存释放掉。
       - 对于非向量字段，也是有索引就加载索引，没索引就把原始数据加载进内存。基本上你可以认为全量数据都在内存里。
     - 重启的时候会把之前loaded状态的表全部加载进内存。load的速度不可控，跟内部的调度和存储的读带宽相关。一般来说，千万级别的数据量load耗时分钟级的都是正常
-  - 客户端发送一个insert请求
-    - 客户端发送一个insert请求，milvus server的proxy接到请求，proxy把数据转发给pulsar/kafka，转发完之后就立刻返回，告诉客户端说insert完成
-    - 数据还在kafka里，然后querynode/datanode都要向kafka订阅数据，这里就是异步的。kafka就好比milvus的WAL组件，保证插入的数据不丢
-  - auto_id
-    - 建表时设置主键的auto_id=true，主键就由milvus来产生，所产生的主键数值确实是往上增的，但跟那种每次+1的递增不一样
-    - 自动产生的主键值是基于时间戳的，是一个很大的数字，每次insert都会用当前的时间戳来产生一批主键，同一批次里的主键是+1递增。但不同批次的主键的值有可能有间隔
-  - insert_log
-    - insert_log里的东西就是每个表的原始数据，包括向量数据，各个字段的数据。分片合并时，旧的分片数据不会立刻删除，要等待GC机制大约2—3小时后删除。
-    - 如果停止了数据输入，等那些旧的分片都被GC清理之后，insert_log的大小就是真实的原始数据大小
+    - 开启milvus以后，数据不加载到内存是什么问题?
+      - 如果用的是 python 的 Milvus Client，create_collection 如果没输入 index param 是不会 load 到内存里的.
+      - 如果没有设置这个参数，你可以单独调用create_index()和load_collection()接口
+  - insert
+    - 客户端发送一个insert请求
+      - 客户端发送一个insert请求，milvus server的proxy接到请求，proxy把数据转发给pulsar/kafka，转发完之后就立刻返回，告诉客户端说insert完成
+      - 数据还在kafka里，然后querynode/datanode都要向kafka订阅数据，这里就是异步的。kafka就好比milvus的WAL组件，保证插入的数据不丢
+    - auto_id
+      - 建表时设置主键的auto_id=true，主键就由milvus来产生，所产生的主键数值确实是往上增的，但跟那种每次+1的递增不一样
+      - 自动产生的主键值是基于时间戳的，是一个很大的数字，每次insert都会用当前的时间戳来产生一批主键，同一批次里的主键是+1递增。但不同批次的主键的值有可能有间隔
+    - insert_log
+      - insert_log里的东西就是每个表的原始数据，包括向量数据，各个字段的数据。分片合并时，旧的分片数据不会立刻删除，要等待GC机制大约2—3小时后删除。
+      - 如果停止了数据输入，等那些旧的分片都被GC清理之后，insert_log的大小就是真实的原始数据大小
+    - milvus跟客户端之间的rpc请求，默认单次传输的数据上限是64MB.
+      - 假设每行只有一条向量加一个id，向量维度是512，那么每条向量是2048字节，加上id是2056字节。64MB除以2056就是大约的行数
   - milvus的集群热备方案，可以看下github.com/zilliztech/milvus-cdc 
   - milvus里主要有两种数据，一种是元数据存在etcd，另一种是数据文件存在minio (元数据存在etcd，数据文件存在minio/s3; 就好比etcd里存着账本，minio里存着钞票)
     - 数据是分片管理，主要有两种分片(segment)
@@ -360,7 +366,7 @@
     - "MilvusException: (code=65535, message=efConstruction out of range" HNSW索引的参数设的有问题，要设在区间里。milvus以segment为单位管理数据。同一个collection的segments有可能被放在不同的querynode里
     -  表加载不起来，要用一个debug工具来release。具体步骤：
       - 1. 下载这个repo到本地 github.com/milvus-io/birdwatcher
-      - 2. 进入repo目录，命令行执行  go build -o btidwatcher main.go ，前提是安装了go，执行成功后在該目录下会有一个birdwatcher的可执行程序
+      - 2. 进入repo目录，命令行执行  go build -o birdwatcher main.go ，前提是安装了go，执行成功后在該目录下会有一个birdwatcher的可执行程序
       - 3. 命令行运行 bridwatcher，进入commandline模式
       - 4. 执行 connect，前提是你的milvus所使用的那个etcd在运行状态，并且容器端口2379暴露出来
       - 5. 如果connect成功，再执行force-release

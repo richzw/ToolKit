@@ -181,7 +181,11 @@
 - [RESTful API and Event Guidelines](https://opensource.zalando.com/restful-api-guidelines/#_zalando_restful_api_and_event_guidelines)
 - [推荐资源冷启动实践](https://mp.weixin.qq.com/s/_3CkflIJtsyndBqHhm8w3Q)
 - [How to Write A GitHub README](https://www.daytona.io/dotfiles/how-to-write-4000-stars-github-readme-for-your-project)
-
+- [红包算法](https://mp.weixin.qq.com/s/7ffyl2_NtiUhtSTxaK6IOw)
+  - 普通随机法，简单来说其实就是剩余值随机. shuffle一下随机数组，让看起来不那么递减明显。
+  - 二倍均值：实际上就是，用剩下金额的两倍均值为最大区间进行随机，相对正态分布，区间相对合适。
+  - 线段分割是相对合理的红包算法，但实现逻辑会更复杂一些。红包金额如果想随机分成 N 份，可以处理为：一个线段，随机选择 N-1 点进行切割。
+  - 线段分割普通版，随着红包总额与红包人数相近时（即切点接近总值时），随机碰撞率显著升高，性能下降。但经过优化后的线段分割算法，性能比二倍均值还优秀
 
 
 
