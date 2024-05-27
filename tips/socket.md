@@ -422,6 +422,8 @@
     - 当 udp 服务端程序关闭，但系统还存在时，对方系统通过 icmp ECONNREFUSE 返回错误，客户端会报错。
     - 当对方有操作 iptables udp port drop 时，客户端也会显示成功。
     - 客户端和服务端互通数据，当服务进程挂了时，UDP 客户端不能立马感知关闭状态，只有当再次发数据时才会被对方系统回应 icmp ECONNREFUSE 异常报文，客户端才能感知对方挂了。)
+  - [UDP sockets](https://blog.cloudflare.com/everything-you-ever-wanted-to-know-about-udp-sockets-but-were-afraid-to-ask-part-1)
+    - ![img.png](socket_udp.png)
 - [WebSocket 1M](https://github.com/eranyanay/1m-go-websockets)
   - Resource limit
     - The kernel enforces the soft limit for the corresponding resource
@@ -578,6 +580,17 @@
   - When to use SO_LINGER with timeout 0 - SO_LINGER socket option to 0. This causes pending data to be discarded and the connection to be aborted with an RST rather than for the pending data to be transmitted and the connection closed cleanly with a FIN.
     - If a client of your server application misbehaves (times out, returns invalid data, etc.) an abortive close makes sense to avoid being stuck in CLOSE_WAIT or ending up in the TIME_WAIT state.
     - If you must restart your server application which currently has thousands of client connections you might consider setting this socket option to avoid thousands of server sockets in TIME_WAIT (when calling close() from the server end) as this might prevent the server from getting available ports for new client connections after being restarted.
+  - [Resetting a TCP connection and SO_LINGER](https://ndeepak.com/posts/2016-10-21-tcprst/)
+    - the BSD network programmer?
+       - Use SO_LINGER with linger interval of zero to send a reset immediately, whether your socket is blocking or non-blocking.
+       - Use SO_LINGER with non-zero linger interval to block your program until that time to send the data. It can wake up before that if it is able to drain the data. If your socket is non-blocking, it returns immediately but the OS will still try to drain the data.
+       - Make sure you set l_onoff field in the linger structure to a non-zero value, else none of this applies.
+    - Linux
+      - Zero linger interval resulted in a TCP reset packet
+      -  Client program was blocked until the sleep interval or data was drained
+      -  After that, the OS continued to try to drain the data
+      -  When it was done, it sent a FIN to initiate a close
+      - If you’re using non-blocking sockets, note that calling close() may block the program
 - [What really is the "linger time" that can be set with SO_LINGER on sockets](https://stackoverflow.com/questions/71975992/what-really-is-the-linger-time-that-can-be-set-with-so-linger-on-sockets)
   - When a TCP socket is disconnected, there are three things the system has to consider:
     - There might still be unsent data in the send-buffer of that socket which would get lost if the socket is closed immediately.
