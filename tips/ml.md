@@ -318,6 +318,16 @@
       - 步骤 3 的指数移动平均 MACD 信号曲线减去 MACD 曲线，我们会得到 MACD 直方图。这个直方图有助于我们检测时间序列数据中的渐变变化。
 - [GPT-4 Architecture, Infrastructure, Training Dataset, Costs, Vision, MoE](https://hub.baai.ac.cn/view/27744)
 - [What Is ChatGPT Doing … and Why Does It Work](https://writings.stephenwolfram.com/2023/02/what-is-chatgpt-doing-and-why-does-it-work/)
+  - 当我们训练一个大型神经网络来准确预测互联网上许多不同文本中的下一个单词时，我们所做的就是学习一个世界模型。
+  - 从表面上看，可能只是在学习文本中的统计相关性。
+  - 但事实证明，为了“只是学习”文本中的统计相关性，为了压缩它们，神经网络需要学习的是文本生成过程的某种表示。 很好地预测下一个token，意味着了解创造该token的深层现实。
+  - 这不仅是统计学，而是理解创造了这些统计数字的那个世界。
+  - 如果真的很擅长预测下一个token，就可能根据普通人如何行动的数据，外推出拥有非凡智慧和洞察力的人如何行动，尽管这种人可能并不存在。大模型做的是寻找共同结构，使用共同结构编码事物，这样效率更高。
+    - 如果你问GPT-4堆肥和原子弹相似性在哪，大多数人类都回答不出来，认为它们是非常不同的两种东西。
+    - GPT-4会告诉你，虽然他们的能量规模不同，时间尺度不同，但仍有相同之处：
+       - 当堆肥变热时，产生热量的速度就更快。
+       - 当原子弹产生更多中子时，产生中子的速度也更快。
+    - 通过类比，AI就理解了“链式反应”的概念。一但AI这样做了，那么它就有能力理解数百种人类还未见过的类比，这就是创造力的来源。
 - [元学习（Meta-Learning）](https://mp.weixin.qq.com/s/7o2kj29KQzg_R6gn2n0Ntw)
 - [LongLLaMA模型](https://mp.weixin.qq.com/s/K8ExTUUXDruZGwr-PA4oFQ)
   - [LongLLaMA: Long-Range Language Model Augmentation for Low-Resource Domains](https://arxiv.org/abs/2307.03170)

@@ -388,8 +388,17 @@
   - RAG Pipeline Enhancement: Dynamically switching processes within the entire RAG pipeline, including using agents or tools to optimize key steps in the RAG pipeline.
     - Self-reflection
     - Query Routing with an Agent
-
-
+- 稠密、稀疏和二进制 embedding 向量，它们各自的优势和劣势
+- [ColBert](https://mp.weixin.qq.com/s/rvTkr2ttyxqo6TvyCxMx_A)
+  - 稠密向量生成和检索的 BERT，以及用于稀疏向量生成和检索的 SPLADE 和BGE-M3。
+  - ColBERT——专为高效相似性搜索而设计的创新型 embedding 和排序（ranking）
+    - Bert
+      - BERT 从句子的左侧到右侧或相反方向进行移动，通过同时分析整个单词序列结合单词上下文信息，从而生成稠密向量
+      - BERT 通过 embedding 矩阵将token变为向量，并且通过多层编码器将其进行深层次的编码。
+      - 这些层根据序列中所有其他token提供的上下文信息，对每个token的表示进行基于注意力机制的细化。
+      - 最后，使用池化操作将所有 token 向量转化成单一的稠密向量
+    - ColBERT 保留了 token 级别的 embedding，通过其创新的后期交互机制实现了更精确和细粒度的相似性计算
+    - ColBERTv2——通过 PQ 和基于质心的编码来减轻存储消耗的优化版ColBERT。这些改进有效提高了存储效率，并保持了模型的检索效果。
 
 
 

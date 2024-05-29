@@ -248,6 +248,8 @@
       - 如果停止了数据输入，等那些旧的分片都被GC清理之后，insert_log的大小就是真实的原始数据大小
     - milvus跟客户端之间的rpc请求，默认单次传输的数据上限是64MB.
       - 假设每行只有一条向量加一个id，向量维度是512，那么每条向量是2048字节，加上id是2056字节。64MB除以2056就是大约的行数
+    - Proxy也可以做多副本的。
+      - Milvus里面没有自带LoadBalancer，需要咱们自己做一个，不然扩展proxy节点还是只有一个节点有负载。这个lb 可以通过kubernetes 来实现的，可以通过service 和ingress
   - milvus的集群热备方案，可以看下github.com/zilliztech/milvus-cdc 
   - milvus里主要有两种数据，一种是元数据存在etcd，另一种是数据文件存在minio (元数据存在etcd，数据文件存在minio/s3; 就好比etcd里存着账本，minio里存着钞票)
     - 数据是分片管理，主要有两种分片(segment)
@@ -434,7 +436,7 @@
   - Unstructured Data Meetup
     - [Feb](https://www.youtube.com/watch?v=42wZa3NasoM)
 - [Vector DB Comparison](https://www.superlinked.com/vector-db-comparison)
-
+- 稠密、稀疏和二进制 embedding 向量，它们各自的优势和劣势
 
 
 
