@@ -128,7 +128,7 @@ record: "container_cpu_usage_against_request:pod:rate1m"
       - 比如 Grafana 需要渲染整条曲线，可以理解为 Grafana 在时间轴上按 step 每走一步，就要做一次查询/evaluation，得到一个值，生成曲线上的一个点。那么当 step 的步长，叠加 Prometheus scrape interval，再叠加 PromQL 里的 range 时间范围窗口……可以设想，这几个参数不同的排列组合，会导致曲线更加充满惊喜意外……
     - Prometheus 的增量外推（extrapolation），其实也不是纯粹地无脑外推；它有时还会考虑到距离窗口边界的距离，而做一些其他微调。
     - 本文未涉及 Prometheus counter 重置（reset）对 increase/rate 准确度的影响。也即：counter 如遇归零（如服务器重启导致），Prometheus 会有应对机制自动来处理，正常情况下不用担心。但若好巧不巧，数据点存在乱序，则可能因为数值下降而误触 Prometheus 重置后的补偿机制，被“脑补”计算出一个极大的异常 increase/rate。
-
+- [Flame graph AI](https://grafana.com/docs/grafana-cloud/monitor-applications/profiles/flamegraph-ai/?pg=blog&plcmt=body-txt)
 
 
 

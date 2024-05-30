@@ -164,6 +164,9 @@
   - Config参考 https://github.com/zilliztech/milvus-helm/blob/master/charts/milvus/values.yaml#L731C7-L731C45
     - milvus rpc的传输限制，这个可以在milvus.yaml的proxy. grpc. serverMaxRecvSize/clientMaxSendSize
     - autoindex是定义在milvus.yaml里的，默认好像是hnsw索引，数据有100gb的话，索引就要100gb+的内存
+    - indexbasedCompaction设为true，compaction的时候就只针对建好索引的分片，没建好索引的分片没资格参与compaction
+    - bloomfiltersize应该是针对单个segment。默认是十万行。就是说如果每个分片里的行数是十万行左右的话，布隆过滤器的效果最好最适合
+      - milvus内部，每个分片都有一个布隆过滤器，用于快速判断一个主键是否可能存在于该分片中。bloomfiltersize用于控制布隆过滤器的适用范围，影响布隆过滤器器的效果。
   - 查询
     - milvus的调用顺序可以是：建表，insert，建索引，load，search
       - 也可以是：建表，建索引，insert，load，search
@@ -193,13 +196,14 @@
     - milvus查看行数有两种方式，
       - 一种是collection.num_entities，只是从etcd中拿取每个segment创建时所记录的行数，不会统计delete的数量
       - 第二种是collection.query(output_fields=["count(*)"])。做一次详细统计，并把delete数量也统计在内。
+        - query(output_fields="count(*)")是统计已落盘以及被querynode消费到的那部分数据。有些数据如果仍然在pulsar中就不会被统计到
       - Attu上看到的approximate count是用的前一种方式，所以不会统计delete的数量
     - Search()
       - milvus的过滤做法是先按条件里的标量过一遍，把符合条件的条目标为1，不符合的标为0，然后做ANN搜索，碰到1的就计算距离，碰到0的就忽略。过滤的性能跟索引有关系，HNSW索引如果标为1的数量很少，就很慢。IVF索引不受这个影响，比较快
     - 全量查询功能 - Query iterator
     - `collection.query(expr="id==xx", output_fields=["*"])`  这是取出一整行数据
     - 如果检索不出，一有可能是embedding不太好，二有可能索引参数搜索参数设的不合理，三有可能consistency level是eventually
-      -  insert数据到collection，数据的可见性跟message queue消费的速度有关，查询时想要确定数据可见就用consistency_level=Strong
+      - insert数据到collection，数据的可见性跟message queue消费的速度有关，查询时想要确定数据可见就用consistency_level=Strong
       - collection创建时设置的consistency_level是做为默认值使用，不能修改
       - search和query接口都有consistency_level参数指定本次查询的level，如果没填search/query的consistency_level参数，才会使用collection的默认设定。
       - consistency_level是控制数据可见性的
@@ -218,6 +222,11 @@
       - 初始化iterator的时候有个batch_size参数，如果缓存里的结果集仍然小于batch_size，它就会再次执行search(半径继续往外扩)来获取更多的结果集
     - 多列向量查询
       - 2.4版本的多列向量查询是先分别计算每个子查询的结果，再把子结果rerank。根据topk再做reranking。不是简单的取交集，有 fusion 策略的
+    - 索引中做向量相似性检索
+      - 本质上都是通过预先对向量数据的分布做了一个统计，然后在搜索的时候仅计算很小的范围就能找到绝大部分结果。不管是hnsw还是ivf，搜索的时候都只计算很小一部分数据就能找到结果
+      - 那如果加上过滤条件，把一大批数据都排除在计算之外，那么本来要搜索的那小范围里也会有向量被排除在外，就凑不出足够的结果
+      -  localstorage对diskann有效，当你调用load的时候就会把diskann索引数据都下载到localstorage里。
+      - 内存里有小部分量化过的数据，搜索的时候先在内存里做一次快速搜索，然后在localstorage里找到对应的分块文件，读出原始向量做精确检索
   - 索引
     - milvus里面，每个向量字段最多只能建立一种索引，如果要换，要把旧的删除再建新的。执行search的时候总是会使用那唯一指定的索引。 查询计划无法被外界感知
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
@@ -226,6 +235,9 @@
     - hnsw索引的向量类型只能用floatvector？ float16Vector可以使用和floatVector一样的索引，hnsw ivf都行
     - ivf_flat建索引的时间跟nlist的大小相关，设小点就快，大点就慢，1G的耗时1分钟也是有可能的
       - 推荐值是4*sqrt(n)，n是单个segment里的行数。4096 dim，默认单个segment 512MB，那每个segment里大约有15000条数据，那么nlist大约为4*sqrt(15000)=480，最好是转成2的比方数，那就选512。
+    - Normalization
+      - 归一化是指将嵌入（向量）转换为范数等于1的过程。如果内积（IP）用于计算嵌入相似性，则所有嵌入都必须标准化。归一化后，内积等于余弦相似性
+    - hnsw/ivfflat所需的内存稍大于向量数据的size。ivfsq8/ivfpq所需内存大约相当于向量数据size的1/4。diskann所需内存大约相当于向量数据size的1/4到1/6。
   - load
     - load是否有并发的设置呢？
       - milvus.yaml里的queryCoord.taskExecutionCap，这个设小点每批送给一个querynode加载的segment的最大数量，每个segment里有多个数据文件，querynode也有自己的并发读取的限制，跟cpu核数相关
@@ -377,6 +389,7 @@
     - 为何不用float64来保证小数点后十几位？
       - 一来因为float32计算起来比float64快得多，也省内存。
       - 二来向量搜索简称ANNS，本身就是近似搜索，小数点后十几位的值没有意义，就好比我们比较两个人是否长得相似不会去一根根计算他们的头发数量是否相等。
+      - milvus处理向量是以float32位来传输、存储以及计算，你就算输入的是float64的值，传输到server那边就已经变成float32
     - 日志里面待构建索引行数和已构建索引行数之和大于数据总行数是什么原因呢？而且这个pendingIndexRows的数量还会增加是怎么回事呢？ 索引的已构建行数最大是等于表的总行数
       - pendingrow增加是因为里面有compaction，有些segment已经建好了索引，但它要和其他segment合并成更大的srgment，合并完之后又会再次建索引
     - 按照标量查询数据，同样的表达式，为什么一个有结果一个没结果？

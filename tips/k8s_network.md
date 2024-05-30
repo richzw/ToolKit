@@ -662,6 +662,7 @@
       - 第一个缺陷在于 VLAN Tag 的设计，定义 VLAN 的 802.1Q规范是在 1998 年提出的，只给 VLAN Tag 预留了 32 Bits 的存储空间，其中只有12 Bits 才能用来存储 VLAN ID。
       - VLAN 第二个缺陷在于它本身是一个二层网络技术，但是在两个独立数据中心之间信息只能够通过三层网络传递，云计算的发展普及很多业务有跨数据中心运作的需求，所以数据中心间传递 VLAN Tag 又是一件比较麻烦的事情；
   - VXLAN 
+    - VXLAN 在 VXLAN 帧头中引入了类似 VLAN ID的网络标识，称为 VXLAN 网络标识 VNI（VXLAN Network ID），由 24 比特组成，理论上可支持多达 16M 的VXLAN段，从而满足了大规模不同网络之间的标识、隔离需求
     - 协议报文
       - VXLAN（Virtual eXtensible LAN）虚拟可扩展局域网采用 L2 over L4 （MAC in UDP）的报文封装模式，把原本在二层传输的以太帧放到四层 UDP 协议的报文体内，同时加入了自己定义的 VXLAN Header。
       - ![img.png](k8s_network_vxlan_packet.png)
@@ -914,4 +915,84 @@
 - [ipsec](https://mp.weixin.qq.com/s/-3sfmKbGOSPILlAAus_x8g)
   - IP Sec有ESP和AH两种封装协议
   - IPSec有如下两种数据封装模式： 传输模式(Transport mode)  隧道模式(Tunnel mode)
+- [连接跟踪 conntrack ](https://mp.weixin.qq.com/s/zaS3F5LVwj4ASIZN5gMaNg)
+  - 连接跟踪所做的事情就是发现并跟踪这些连接的状态，具体包括：
+    - 从数据包中提取元组（tuple）信息，辨别数据流（flow）和对应的连接（connection）
+    - 为所有连接维护一个状态数据库（conntrack table），例如连接的创建时间、发送 包数、发送字节数等等
+    - 回收过期的连接（GC） - 
+    - 为更上层的功能（例如 NAT）提供服务
+  - `cat /proc/net/nf_conntrack`
+  - conntrack 是许多高级网络应用的基础，譬如经常使用的 NAT（Network Address Translation，网络地址转换）、iptables 的状态匹配等
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
