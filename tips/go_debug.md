@@ -466,3 +466,31 @@
     - Using the value of b.N for something other than "how many times to repeat the benchmark". rand.Prime is very fast when its input length is small, but gets pretty slow for large inputs. The harness starts by running the function once to get its bearings, and then 100 times. For size 100 the run-time of rand.Prime is moderate, so the next time the harness can increase b.N by another factor of 100. But for higher inputs, rand.Prime also takes much longer. We end up with a quadratic run-time explosion! Our benchmark function isn't literally hanging - it will finish eventually, but it may take long minutes or hours.
 -  heap profile, 都是在默认值 512 * 1024 这个阈值下采样统计的
   - [heap profile 不能正确反应当前分配的内存?](https://mp.weixin.qq.com/s/TlYXFXid5JVxUNAWsugnwQ)
+- [pprof 和 trace 工具](https://mp.weixin.qq.com/s/8LdG26ZWxzoyAwymH2UmUg)
+  - profile 采样原理
+    - 采样原理：在 Go 语言中，runtime/pprof 包提供了一种采样的方式，即在一段时间内，每隔一段时间就会中断程序，记录当前程序的堆栈信息。这样就可以得到程序在这段时间内的堆栈信息，从而可以分析程序的性能瓶颈。
+    - 采样频率：runtime/pprof 包提供了 SetCPUProfileRate 函数，可以设置采样的频率。默认情况下，采样频率是 100 Hz，即每隔 10ms 就会中断程序，记录当前程序的堆栈信息。
+    - 采样时机：runtime/pprof 包会在程序启动时，调用 runtime.SetCPUProfileRate 函数设置采样频率，然后启动一个 goroutine，每隔一段时间就会中断程序，记录当前程序的堆栈信息。这样就可以得到程序在这段时间内的堆栈信息，从而可以分析程序的性能瓶颈。
+    
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

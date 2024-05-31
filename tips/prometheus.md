@@ -129,7 +129,9 @@ record: "container_cpu_usage_against_request:pod:rate1m"
     - Prometheus 的增量外推（extrapolation），其实也不是纯粹地无脑外推；它有时还会考虑到距离窗口边界的距离，而做一些其他微调。
     - 本文未涉及 Prometheus counter 重置（reset）对 increase/rate 准确度的影响。也即：counter 如遇归零（如服务器重启导致），Prometheus 会有应对机制自动来处理，正常情况下不用担心。但若好巧不巧，数据点存在乱序，则可能因为数值下降而误触 Prometheus 重置后的补偿机制，被“脑补”计算出一个极大的异常 increase/rate。
 - [Flame graph AI](https://grafana.com/docs/grafana-cloud/monitor-applications/profiles/flamegraph-ai/?pg=blog&plcmt=body-txt)
-
+  - Performance bottlenecks: What’s causing the slowdown?
+  - Root causes: Why is it happening?
+  - Recommended fixes: How would you resolve it?
 
 
 

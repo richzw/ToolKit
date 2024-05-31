@@ -167,6 +167,8 @@
     - indexbasedCompaction设为true，compaction的时候就只针对建好索引的分片，没建好索引的分片没资格参与compaction
     - bloomfiltersize应该是针对单个segment。默认是十万行。就是说如果每个分片里的行数是十万行左右的话，布隆过滤器的效果最好最适合
       - milvus内部，每个分片都有一个布隆过滤器，用于快速判断一个主键是否可能存在于该分片中。bloomfiltersize用于控制布隆过滤器的适用范围，影响布隆过滤器器的效果。
+      - 布隆过滤器会被持久化，储存在每个segment的stat_log里
+    - interimindex是给growing segment用的临时索引，是IVF_FLAT，参数定义在milvus.yaml的queryNode.segcore.intermindex里
   - 查询
     - milvus的调用顺序可以是：建表，insert，建索引，load，search
       - 也可以是：建表，建索引，insert，load，search
@@ -193,6 +195,9 @@
       - 有时候能搜到有时不能搜到，多半是因为底下的segment做了compaction之后重建了索引。几个有索引的小分片和一个有索引的大分片，过滤搜索出来的东西很可能不同。
     - 查询节点内存自动均衡的几种策略？当前默认是scorebase
     - search()接口是用向量做近似搜索，必须要传入向量。query()接口应该比较符合你想查标量的功能
+    - 关于query/search的结果里output_fields返回原始向量的功能
+      - 从2.3.0版本开始，对于hnsw/ivf_flat索引，可以返回原始向量，直接从内存中的索引获取原始向量
+      - 从2.3.2版本开始，对于ivf_sq8/ivf_pq索引，可以返回原始向量，从缓存到本地的原始向量数据文件里读取原始向量
     - milvus查看行数有两种方式，
       - 一种是collection.num_entities，只是从etcd中拿取每个segment创建时所记录的行数，不会统计delete的数量
       - 第二种是collection.query(output_fields=["count(*)"])。做一次详细统计，并把delete数量也统计在内。
