@@ -250,7 +250,8 @@
     - 1. The first one is Kafka’s reliance on Sequential I/O.
     - 2. The second design choice that gives Kafka its performance advantage is its focus on efficiency: zero copy principle.
   - ![img.png](message_queue_kafka_zc.png)
-
+- [RocksDB 高性能](https://mp.weixin.qq.com/s/40JnearOCVDaGbU7WpxB1g)
+  - 
 
 
 

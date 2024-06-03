@@ -163,6 +163,7 @@
     - Post-Retrieval Optimisation
       - Re-ranking
       - Prompt Compression
+  - [A Cheat Sheet and Some Recipes For Building Advanced RAG](https://www.llamaindex.ai/blog/a-cheat-sheet-and-some-recipes-for-building-advanced-rag-803a9d94c41b)
 - [RAG 问题](https://mp.weixin.qq.com/s/2dwnwQGsqKWZQX8gEUV0Sw)
   - 朴素的RAG通常将文档分成块，嵌入它们，并检索与用户问题具有高语义相似性的块。但是，这会带来一些问题
     - 文档块可能包含降低检索效果的无关内容
@@ -399,7 +400,37 @@
       - 最后，使用池化操作将所有 token 向量转化成单一的稠密向量
     - ColBERT 保留了 token 级别的 embedding，通过其创新的后期交互机制实现了更精确和细粒度的相似性计算
     - ColBERTv2——通过 PQ 和基于质心的编码来减轻存储消耗的优化版ColBERT。这些改进有效提高了存储效率，并保持了模型的检索效果。
-
+- [生成式AI应用架构和成熟度模型](https://mp.weixin.qq.com/s/z7cdcJVcMRB-PvwMVnxRJg)
+  - https://dr-arsanjani.medium.com/the-genai-reference-architecture-605929ab6b5a
+- A Survey of Techniques for Maximizing LLM Performance
+  - https://www.youtube.com/watch?v=ahnGLM-RC1Y
+  - notes
+    - https://ihower.tw/notes/%E6%8A%80%E8%A1%93%E7%AD%86%E8%A8%98-AI/2023/A+Survey+of+Techniques+for+Maximizing+LLM+Performance+(OpenAI+DevDay)
+  - 先從 Prompt engineering 開始做，得到 evaluation
+    - 如果是 context 問題，做 RAG
+    - 如果是 model act problem，需要更一致的遵守指示，做 Fine-tuning
+    - 或是兩者都需要
+  - RAG
+    - HyDE: 產生 fake answers 來做相似性搜尋
+    -  微調 Embeddings: 從準確率來說有幫助，但太貴太慢了，所以放棄 (non-functional 理由)
+    -  實驗不同大小的 chunks、embedding 不同 bits 的內容
+    -  嘗試了 20 次迭代才增強到 65%
+    -  re-ranking: cross encoder 或 relues-based stuff
+    -  classification step: 先讓模型分類是哪一種 domain，再增加額外不同的 metadata 到 prompt，來幫助找到最相關的內容 看看是哪些類型的問題答錯
+    -  query expansion: 產生多種 query 平行查，再合併結果
+- [What We Learned from a Year of Building with LLMs](https://www.oreilly.com/radar/what-we-learned-from-a-year-of-building-with-llms-part-i/)
+  - tactical,
+    - Prompting
+      - Focus on getting the most out of fundamental prompting techniques
+      - n-shot prompts + in-context learning, chain-of-thought, and providing relevant resources
+      - tips
+        - If n is too low, the model may over-anchor on those specific examples, hurting its ability to generalize. As a rule of thumb, aim for n ≥ 5. Don’t be afraid to go as high as a few dozen.
+        - Examples should be representative of the expected input distribution. If you’re building a movie summarizer, include samples from different genres in roughly the proportion you expect to see in practice.
+        - You don’t necessarily need to provide the full input-output pairs. In many cases, examples of desired outputs are sufficient.
+        - If you are using an LLM that supports tool use, your n-shot examples should also use the tools you want the agent to use.
+      
+  - operational
+  - and strategic
 
 
 
