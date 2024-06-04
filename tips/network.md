@@ -1448,6 +1448,10 @@
       - TCP Window Full + TCP ZeroWindow + TCP Window Update
       - TCP Window Full + TCP ZeroWindow + TCP ZeroWindowProbe + TCP Window Update
         - 接收端出现 Win 为 0 的情形，发送 TCP ZeroWindow 通知，发送端在经过一段时间后发出 TCP ZeroWindowProbe 数据包，但接收端收到探测后，由于已经打开窗口，因此直接回复 TCP Window Update 数据包。
+  - [TCP Keep-Alive ](https://mp.weixin.qq.com/s/AFCbx8ifEFb2t3sPKY5JZA)
+    - TCP Keep-Alive
+      - 当 TCP 数据段大小为 0 或 1 时设置，当前序列号比预期的下一个序列号小 1 字节，并且没有设置 SYN、FIN 或 RST
+    - TCP Keep-Alive 数据包 TCP Len 为 0 的场景相对来说更容易碰到。如下 TCP 流在经过 45 秒间隔
 - [Wireshark手册](https://www.ilikejobs.com/posts/wireshark/)
   - [Wireshark != 和 !==](https://mp.weixin.qq.com/s/yXbnCjelmdBOG1BgUFAexA)
     - 显示过滤表达式 ip.addr != 192.168.0.1 的结果显示为空，意味着没有源和目的 IP 值都不是 192.168.0.1 的数据包，也就是 all ；

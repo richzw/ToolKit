@@ -188,6 +188,7 @@
       - 建表：每个槽位轮流用自己的偏好序列填充查找表。
       - 查表：哈希后取余数的方法做映射。
     - 难以实现后端节点的数据备份逻辑，因此工程上更适合弱状态后端的场景
+    - [四层负载均衡分析：Google Maglev](https://www.kawabangga.com/posts/5759)
   - ![img.png](data_structure_consistent_hash_summary.png)
 - [Go 语言高性能哈希表的设计与实现](https://mp.weixin.qq.com/s/KB-VwshP7FlzO-OutuT-2w)
   - 碰撞处理

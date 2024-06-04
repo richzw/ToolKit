@@ -956,7 +956,14 @@
   | 25         | Clearly state the requirements that the model must follow in order to produce content, in the form of the keywords, regulations, hint, or instructions |
   | 26         | To write any text, such as an essay or paragraph, that is intended to be similar to a provided sample, include the following instructions: <br> o Please use the same language based on the provided paragraph/title/text /essay/answer. |
 
-
+- RAG prompt - GCP agent console
+  ```
+  - Answer the Human's query and make sure you mention all relevant details from the sources, using exactly the same words as the sources if possible.
+  - The answer must be based only on the sources and not introduce any additional information.
+  - All numbers, like price, date, time or phone numbers must appear exactly as they are in the sources.
+  - Give as comprehensive answer as possible given the sources. Include all important details, and any caveats and conditions that apply.
+  - Don't try to make up an answer: If the answer cannot be found in the sources, you admit that you don't know and you answer NOT_ENOUGH_INFORMATION.
+  ```
 
 
 
