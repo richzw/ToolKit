@@ -942,7 +942,11 @@
     - LooseScan是在内表有索引存在的情况下，通过做内表上的LooseScan(仅扫描索引记录不相同的行)来达到对内表记录去重的目的，然后和外表进行连接，这样也不会导致外表出现重复行
   - 为什么要有四种执行策略呢？
     - 因为在内外表不同的JOIN ORDER、索引存在性、不同的JOIN条件情况下，只有特定的执行策略才能被应用，四种组合起来才构成了semijoin JOIN ORDER的灵活性
-  
+- [mysql innodb 锁机制实现原理](https://mp.weixin.qq.com/s/0GixiOIurb1TVDHZ7b-aeQ)
+  - 行锁；自增长键锁；间隙锁、临键锁；表级意向锁；插入意向锁
+  - innodb 中的 lock 从占有模式上也可以分为：
+    - 共享锁 Share Lock（简称 S Lock） ：S Lock 之间可以共享
+    - 排它锁 Exclusive Lock（简称 X Lock） ：必须保证独占，和其他 Lock 均为互斥关系
 
 
 
