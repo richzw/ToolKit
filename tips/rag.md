@@ -164,6 +164,19 @@
       - Re-ranking
       - Prompt Compression
   - [A Cheat Sheet and Some Recipes For Building Advanced RAG](https://www.llamaindex.ai/blog/a-cheat-sheet-and-some-recipes-for-building-advanced-rag-803a9d94c41b)
+    - Advanced techniques for Retrieval must be able to find the most relevant documents to a user query
+      - Chunk-Size Optimization
+      - Structured External Knowledge
+    - Advanced techniques for Generation must be able to make good use of the retrieved documents
+      - Information Compression: Not only are LLMs are restricted by context length, but there can be response degradation if the retrieved documents carry too much noise
+      - Result Re-Rank: LLMs suffer from the so-called “Lost in the Middle” phenomena which stipulates that LLMs focus on the extreme ends of the prompts.
+    - Advanced techniques for simultaneously addressing Retrieval and Generation success requirements
+      - Generator-Enhanced Retrieval: These techniques make use of the LLM’s inherent reasoning abilities to refine the user query before retrieval is performed so as to better indicate what exactly it requires to provide a useful response.
+      - Iterative Retrieval-Generator RAG: For some complex cases, multi-step reasoning may be required to provide a useful and relevant answer to the user query.
+  - [Advanced Retriever Techniques to Improve Your RAGs](https://towardsdatascience.com/advanced-retriever-techniques-to-improve-your-rags-1fac2b86dd61)
+    - Parent Document Retriever
+    - Self-Query Retriever
+    - Contextual Compression Retriever (Reranking)
 - [RAG 问题](https://mp.weixin.qq.com/s/2dwnwQGsqKWZQX8gEUV0Sw)
   - 朴素的RAG通常将文档分成块，嵌入它们，并检索与用户问题具有高语义相似性的块。但是，这会带来一些问题
     - 文档块可能包含降低检索效果的无关内容
@@ -431,7 +444,21 @@
       
   - operational
   - and strategic
-
+- [Beyond RAG: Building Advanced Context-Augmented LLM Applications](https://docs.google.com/presentation/d/1IWjo8bhoatWccCfGLYw_QhUI4zfF-MujN3ORIDCBIbc/edit#slide=id.g2bac367b3d6_0_0)
+  - RAG Pains
+    - Summarization Questions: “Give me a summary of the entire <company> 10K annual report”
+    - Comparison Questions: “Compare the open-source contributions of candidate A and candidate B”
+    - Structured Analytics + Semantic Search: “Tell me about the risk factors of the highest-performing rideshare company in the US”
+    - General Multi-part Questions: “Tell me about the pro-X arguments in article A, and tell me about the pro-Y arguments in article B, make a table based on our internal style guide, then generate your own conclusion based on these facts.”
+  - Agent ingredients
+    - Let’s put them together for a full agent system
+    - Query planning
+    - Memory
+    - Tool Use
+  - Let’s add additional components
+    - Reflection
+    - Controllability
+    - Observability
 
 
 

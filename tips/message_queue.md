@@ -251,7 +251,29 @@
     - 2. The second design choice that gives Kafka its performance advantage is its focus on efficiency: zero copy principle.
   - ![img.png](message_queue_kafka_zc.png)
 - [RocksDB 高性能](https://mp.weixin.qq.com/s/40JnearOCVDaGbU7WpxB1g)
-  - 
+  - RocksDB 是内嵌的数据库，所以它是没有独立进程的
+  - RocksDB 基础的组件是MemTable、SSTable和 预写日志（WAL）日志
+    - SSTables 都是是不可变的和有序的，每一层SSTable被组织成固定大小的块存放，每个SSTable都包含一个数据段和一个索引，可以通过二分查找快速查找数据，并且还可以通过布隆过滤器过滤无效数据
+  - RocksDB的 Compaction 包含两方面：一是MemTable写满后flush到磁盘；二是从L0 层开始往下层合并数据。
+  - compaction策略就两种：Size-Tiered Compaction 和 Leveled Compaction
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

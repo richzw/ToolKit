@@ -142,6 +142,16 @@
 - [In-memory disk for PostgreSQL temporary files](https://pgstef.github.io/2024/05/20/in_memory_tmp_files.html)
   - while debugging a performance issue of a CREATE INDEX operation, I was reminded that PostgreSQL might produce temporary files when executing a parallel query, 
   - including parallel index creation, because each worker process has its own memory and might need to use disk space for sorting or hash tables.
+- [Postgresql Index](https://www.bestblogs.dev/article/d84aef)
+
+  | Index Type       | Efficient for                    | Advantages                                  | Use Cases                                               |
+  |------------------|----------------------------------|---------------------------------------------|---------------------------------------------------------|
+  | B-Tree           | Equality and range searches      | Supporting ordering and searching           | Single-column indexes on frequently used columns         |
+  | Hash             | Very fast for equality comparisons | Constant time search                        | Composite indexes on multiple columns in WHERE clauses  |
+  | GIST             | Support indexing of complex data types (e.g., geometric objects) | Allows for custom indexing methods | Exact match lookups                                     |
+  | GIN              | Optimized for indexing arrays and full-text search data types | Supports advanced search operations | Not suitable for queries or sorting                     |
+  | BRIN             | Compact representation of data blocks | Efficient for very large tables          | Full-text search                                        |
+  | Single-column    | Supports advanced search operations |                                             |                                                         |
 
 
 
