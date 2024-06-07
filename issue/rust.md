@@ -226,10 +226,24 @@
     - 通过火焰图我们发现 Prost 为了让 Bytes 在 BytesAdapter 和 Buf 两个 trait 之间转换引入了一些额外的开销。通过把类型特化我们得以去除这些开销
     - 在火焰图中发现了 Bytes:slice 自身为了确保内存安全引入的一些额外的开销。考虑到我们的用法，我们 hack 了 slice 的实现从而最终将耗时降低到 baseline 的 20% 左右。
 - [Rust 的 IO性能](https://mp.weixin.qq.com/s/unGVUk-02RiQfoNnytBveA)
-  
-
-
-
+- [Rust tips](https://mp.weixin.qq.com/s/8r_8k6mN54obPSs1lUkz6Q)
+  - Rust 不支持静态 vec(static vec),但是最接近的是静态数组。例如,如果你想存储三个字符串的数组,可以尝试这样: static STRINGS : [&str;3] = ["a", "b", "c"]
+  - 什么是可选值(optional)和 unwrap()? 可以将可选值想象成一个信封,它可以包含一个值(Some(item))或者什么都没有(None)。对可选值调用 unwrap() 要么返回包含的值,要么如果可选值是 None 的话就会使程序 panic
+  - 可选值( optional)的安全解包方式:
+    - 使用 match 语句明确处理不同情况
+    - unwrap_or_default: 要么解包得到值,要么返回默认值
+    - unwrap_or_else: 允许你指定一个函数来处理 None/Error 解包结果
+  - 如果你没有时间完成特定的一段代码,但仍然希望程序可以编译,可以考虑使用 todo!() 或 unimplemented!() 宏
+  - 测试一个枚举类型的实例是否符合枚举的特定变体,你可以使用 matches! 宏,例如:let match_res = matches!(my_variable, enum_type)
+  - {} 块可以像函数一样返回结果?这使得基于条件的赋值变得非常容易,例如: let x = { if condition { 1 } else { 2 } }
+  - const 和 static 之间有什么区别?
+     - const 值在编译期间会被替换("内联")到你的代码中。这对于在代码的各个地方使用的常量值来说是理想的。
+     - static 值在运行时有一个内存地址,并且会在整个应用程序的生命周期中存在。它们可以是可变的。如果你需要一个固定的位置来存放共享资源,例如硬件驱动程序或数据库接口,那么静态变量就很有用
+  - String 和 str。
+    - String: (也称为 Owned String),在堆上分配内存并且可变。String 在运行时使用,当你想要创建和修改字符串时。你可以将 String 作为 &str 引用传递给只读函数。
+    - str: (也称为 String Slice) 是对一序列 UTF8 数据的引用。你可以在编译时以常量、静态字面量的形式创建 str,或者在运行时从 String 对象获取它们。str 总是不可变的。
+  - 在闭包中使用 move 可以从周围作用域捕获变量。这意味着闭包将获取这些变量的所有权,而无需传递任何参数:
+  - 
 
 
 

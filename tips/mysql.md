@@ -947,7 +947,19 @@
   - innodb 中的 lock 从占有模式上也可以分为：
     - 共享锁 Share Lock（简称 S Lock） ：S Lock 之间可以共享
     - 排它锁 Exclusive Lock（简称 X Lock） ：必须保证独占，和其他 Lock 均为互斥关系
-
+- [MySQL进行模糊查询](https://mp.weixin.qq.com/s/awwAQsHtzWx5MXA5HFKhHA)
+  - 我们在做模糊查询的时候，并非要想查询的关键词都在开头，所以如果不是特别的要求，"keywork%"并不合适所有的模糊查询
+  - LOCATE(substr,str), LOCATE(substr,str,pos)
+    - SELECT `column` FROM `table` WHERE LOCATE('keyword', `field`)>0
+  - .POSITION('substr' IN `field`)方法
+  - INSTR(`str`,'substr')方法
+  - SQL查询语句优化方法
+    - 避免在 where 子句中使用!=或<>操作符，否则将引擎放弃使用索引而进行全表扫描
+    - 尽量避免在 where 子句中对字段进行 null 值判断，否则将导致引擎放弃使用索引而进行全表扫描
+    - 避免在 where 子句中使用 or 来连接条件，否则将导致引擎放弃使用索引而进行全表扫描
+    - in 和 not in 也要慎用，否则会导致全表扫描
+    - 避免在 where 子句中对字段进行表达式操作 函数操作，这将导致引擎放弃索引而进行全表扫描
+    - 很多时候用 exists 代替 in 是一个好的选择
 
 
 

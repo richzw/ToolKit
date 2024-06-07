@@ -993,8 +993,11 @@
   - Use sections and bold font for better organize content.
   - Identify the language of the user content, use this language for all output!!!.
   ```
-
-
+- [什么是提示词注入攻击](https://www.bestblogs.dev/article/a170d4)
+  - 提示词注入的成因
+    - 传统的系统我们会预设好程序，我们会预先设定好指令，它们是不会变化的。用户可以输入他们的信息，但是程序的编码和输入是保持独立的。
+    - 对于大语言模型并非如此。说实话，指令和输入的边界变得模糊，因为我们用输入来训练系统。因此，我们没有过去那样清晰、明确的界限。这带给它极大的灵活性，同时也有可能让他做出一些不应该的事情。
+- [What is a prompt injection attack](https://www.ibm.com/topics/prompt-injection)
 
 
 
