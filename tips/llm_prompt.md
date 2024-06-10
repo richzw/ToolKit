@@ -998,7 +998,21 @@
     - 传统的系统我们会预设好程序，我们会预先设定好指令，它们是不会变化的。用户可以输入他们的信息，但是程序的编码和输入是保持独立的。
     - 对于大语言模型并非如此。说实话，指令和输入的边界变得模糊，因为我们用输入来训练系统。因此，我们没有过去那样清晰、明确的界限。这带给它极大的灵活性，同时也有可能让他做出一些不应该的事情。
 - [What is a prompt injection attack](https://www.ibm.com/topics/prompt-injection)
-
+- Claude
+  - Application
+    - 客服质检…embedding判断问题与答案的相似度
+    - 游戏评论审核
+    - agent优化工作流
+  - Prompt
+    - 1，综合考虑特殊用例。2，初始promopt，使用用例测试，然后迭代。3，评估测试。首先使用好模型，降低模型，然后删减prompt，减少token。
+    - claude使用 xml标签，明确的指令以及结构化prompt
+    - 回答之前使用 <think> <\think>给出问题过程, 比think step by step效果好
+    - n-shot给出例子多样化， 让claude生成例子
+    - 超长文本必须用xml标签
+    - 除了json格式，不要添加任何额外输出
+    - prompt里重要点可以重复，另外，（位置）放在最后重要性大
+    - langchain分两个chain分析数据…评论数据，先提取关键词，后summary
+    - metadata在rag里的应用
 
 
 

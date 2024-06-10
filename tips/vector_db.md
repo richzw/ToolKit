@@ -233,6 +233,7 @@
       -  localstorage对diskann有效，当你调用load的时候就会把diskann索引数据都下载到localstorage里。
       - 内存里有小部分量化过的数据，搜索的时候先在内存里做一次快速搜索，然后在localstorage里找到对应的分块文件，读出原始向量做精确检索
   - 索引
+    - [index overview](https://www.slideshare.net/slideshow/introduction-to-multilingual-retrieval-augmented-generation-rag/267957576)
     - milvus里面，每个向量字段最多只能建立一种索引，如果要换，要把旧的删除再建新的。执行search的时候总是会使用那唯一指定的索引。 查询计划无法被外界感知
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap
