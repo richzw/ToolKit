@@ -70,9 +70,14 @@
     - 您使用的是哪种Embedding模型，它在多大的块大小上表现最佳？例如，sentence-transformer模型在单个句子上工作得很好，但像text- embedt-ada -002~[2]~这样的模型在包含256或512个tokens的块上表现得更好。
     - 你对用户查询的长度和复杂性有什么期望？用户输入的问题文本是简短而具体的还是冗长而复杂的？这也直接影响到我们选择分组内容的方式，以便在嵌入查询和嵌入文本块之间有更紧密的相关性。
     - 如何在您的特定应用程序中使用检索结果？ 例如，它们是否用于语义搜索、问答、摘要或其他目的？例如，和你底层连接的LLM是有直接关系的，LLM的tokens限制会让你不得不考虑分块的大小。
-  - 分块的方法
+  - [分块的方法](https://stackoverflow.blog/2024/06/06/breaking-up-is-hard-to-do-chunking-in-rag-applications/)
     - 固定大小分块
       - 我们会在块之间保持一些重叠，以确保语义上下文不会在块之间丢失。在大多数情况下，固定大小的分块将是最佳方式
+    - random chunk sizes
+      - his approach can potentially capture a wider variety of semantic contexts and topics without relying on the conventions of any given document type
+    - sliding windows
+    - adaptive chunking
+      - It chunks based on the content of each document. Many adaptive chunking techniques use machine learning themselves to determine the best size for any given chunk and where they overlap
     - Content-Aware：基于内容意图分块
       - 句分割——Sentence splitting
         - Naive splitting: 最幼稚的方法是用句号(。) 和 “换行”来分割句子
