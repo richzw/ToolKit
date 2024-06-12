@@ -879,7 +879,7 @@
      typ := reflect.TypeOf(s)
      fmt.Println(typ.Size()) // 0
      ```
-  - 所有空结构体类型的变量地址都是一样的 - zerobase 的地址
+  - 所有空结构体类型的变量地址(多个空结构体内存地址可能相同) 
     ```go
         a := struct{}{}
         b := struct{}{}
@@ -893,6 +893,8 @@
      
         fmt.Println(a == b) //true
     ```
+  - 空结构体影响内存对齐
+    - 空结构体字段顺序可能影响外层结构体的大小，建议将空结构体放在外层结构体的第一个字段。
   - 空结构体的应用场景
     - 基于map实现集合功能
       ```go
@@ -919,6 +921,10 @@
           }
       }
       ```
+    - 无操作的方法接收器
+    - 用 struct{} 作为方法接收器，还有另一个用途，就是作为接口的实现。常用于忽略不需要的输出，和单元测试
+    - 标识符 - noCopy 即为一个空结构体，其实现也非常简单
+      - 字段的主要作用是阻止 sync.Pool 被意外复制。它是一种通过编译器静态分析来防止结构体被不当复制的技巧，以确保正确的使用和内存安全性。
 - [slice tricks](https://mp.weixin.qq.com/s/IQRHWNUnxiaCDleayNVRVg)
   - [slice tricks official](https://github.com/golang/go/wiki/SliceTricks)
   - [slice tricks legend](https://ueokande.github.io/go-slice-tricks/)

@@ -85,17 +85,17 @@
           - HNSW 提供了查询速度和精确度之间的良好平衡，适用于大型和高维数据集。但它需要更多的内存，构建索引的过程可能较慢。
     - 近似最近邻 (ANN)算法
   - [Comprehensive Guide To Approximate Nearest Neighbors Algorithms](https://towardsdatascience.com/comprehensive-guide-to-approximate-nearest-neighbors-algorithms-8b94f057d6b6)
-        - 「LSH」（Locality-Sensitive Hashing）」它引入了一种哈希函数，使得相似的输入能以更高的概率映射到相同的桶中，其中桶的数量远小于输入的数量。
-        - 「ANNOY（Approximate Nearest Neighbors）」它的核心数据结构是随机投影树，实际是一组二叉树，其中每个非叶子节点表示一个将输入空间分成两半的超平面，每个叶子节点存储一个数据。二叉树是独立且随机构建的，因此在某种程度上，它模仿了哈希函数。ANNOY会在所有树中迭代地搜索最接近查询的那一半，然后不断聚合结果。这个想法与 KD 树非常相关，但更具可扩展性。
-        - 「HNSW（Hierarchical Navigable Small World）」它受到小世界网络思想的启发，其中大多数节点可以在很少的步骤内被任何其他节点到触达；例如社交网络的“六度分隔”理论。
-            - HNSW构建这些小世界图的层次结构，其中底层结构包含实际数据。中间的层创建快捷方式以加快搜索速度。执行搜索时，HNSW从顶层的随机节点开始，导航至目标。当它无法靠近时，它会向下移动到下一层，直到到达最底层。上层中的每个移动都可能覆盖数据空间中的很长一段距离，而下层中的每个移动都可以细化搜索质量。
-        - 「FAISS（facebook AI Similarity Search）」它运行的假设是：高维空间中节点之间的距离服从高斯分布，因此这些数据点之间存在着聚类点。faiss通过将向量空间划分为簇，然后在簇内使用用向量量化。faiss首先使用粗粒度量化方法来查找候选簇，然后进一步使用更精细的量化方法来查找每个簇。
-            - [上手Faiss](https://mp.weixin.qq.com/s/GxxPqa1pjDvt9PvAMuebkA)
-        - 「ScaNN（Scalable Nearest Neighbors）」的主要创新在于各向异性向量量化。它将数据点量化为一个向量，使得它们的内积与原始距离尽可能相似，而不是选择最接近的量化质心点。
-            - [blog](https://blog.research.google/2020/07/announcing-scann-efficient-vector.html) [Vector Search ANN 服务](https://cloud.google.com/vertex-ai/docs/matching-engine/ann-service-overview?hl=zh-cn)
-            - ScaNN 算法的核心思想是使用一种称为 Product Quantization（PQ）的技术将高维向量压缩成多个低维向量，并使用这些低维向量进行相似性搜索。PQ 技术可以将高维向量划分成多个子向量，并对每个子向量进行量化，从而将高维向量压缩成多个低维向量。这样可以大大降低相似性搜索的计算复杂度，提高搜索效率。
-            - ScaNN 算法还使用了一种称为 Clustering Graph（CG）的技术，将数据集划分成多个子集，并构建一个图来表示这些子集之间的相似性关系。这样可以将相似的向量聚集在一起，从而提高搜索效率。
-            - ScaNN 算法的优点在于它可以在大规模数据集上进行高效的相似性搜索，同时具有较高的搜索准确率。ScaNN 算法还支持增量式更新，可以动态地添加和删除向量，从而适应数据集的变化。
+    - 「LSH」（Locality-Sensitive Hashing）」它引入了一种哈希函数，使得相似的输入能以更高的概率映射到相同的桶中，其中桶的数量远小于输入的数量。
+    - 「ANNOY（Approximate Nearest Neighbors）」它的核心数据结构是随机投影树，实际是一组二叉树，其中每个非叶子节点表示一个将输入空间分成两半的超平面，每个叶子节点存储一个数据。二叉树是独立且随机构建的，因此在某种程度上，它模仿了哈希函数。ANNOY会在所有树中迭代地搜索最接近查询的那一半，然后不断聚合结果。这个想法与 KD 树非常相关，但更具可扩展性。
+    - 「HNSW（Hierarchical Navigable Small World）」它受到小世界网络思想的启发，其中大多数节点可以在很少的步骤内被任何其他节点到触达；例如社交网络的“六度分隔”理论。
+      - HNSW构建这些小世界图的层次结构，其中底层结构包含实际数据。中间的层创建快捷方式以加快搜索速度。执行搜索时，HNSW从顶层的随机节点开始，导航至目标。当它无法靠近时，它会向下移动到下一层，直到到达最底层。上层中的每个移动都可能覆盖数据空间中的很长一段距离，而下层中的每个移动都可以细化搜索质量。
+    - 「FAISS（facebook AI Similarity Search）」它运行的假设是：高维空间中节点之间的距离服从高斯分布，因此这些数据点之间存在着聚类点。faiss通过将向量空间划分为簇，然后在簇内使用用向量量化。faiss首先使用粗粒度量化方法来查找候选簇，然后进一步使用更精细的量化方法来查找每个簇。
+      - [上手Faiss](https://mp.weixin.qq.com/s/GxxPqa1pjDvt9PvAMuebkA)
+    - 「ScaNN（Scalable Nearest Neighbors）」的主要创新在于各向异性向量量化。它将数据点量化为一个向量，使得它们的内积与原始距离尽可能相似，而不是选择最接近的量化质心点。
+      - [blog](https://blog.research.google/2020/07/announcing-scann-efficient-vector.html) [Vector Search ANN 服务](https://cloud.google.com/vertex-ai/docs/matching-engine/ann-service-overview?hl=zh-cn)
+      - ScaNN 算法的核心思想是使用一种称为 Product Quantization（PQ）的技术将高维向量压缩成多个低维向量，并使用这些低维向量进行相似性搜索。PQ 技术可以将高维向量划分成多个子向量，并对每个子向量进行量化，从而将高维向量压缩成多个低维向量。这样可以大大降低相似性搜索的计算复杂度，提高搜索效率。
+      - ScaNN 算法还使用了一种称为 Clustering Graph（CG）的技术，将数据集划分成多个子集，并构建一个图来表示这些子集之间的相似性关系。这样可以将相似的向量聚集在一起，从而提高搜索效率。
+      - ScaNN 算法的优点在于它可以在大规模数据集上进行高效的相似性搜索，同时具有较高的搜索准确率。ScaNN 算法还支持增量式更新，可以动态地添加和删除向量，从而适应数据集的变化。
     - Faiss 
         - 我们可以将向量想象为包含在 Voronoi 单元格中 - 当引入一个新的查询向量时，首先测量其与质心 (centroids) 之间的距离，然后将搜索范围限制在该质心所在的单元格内。
         - 为了解决搜索时可能存在的遗漏问题，可以将搜索范围动态调整，例如当 nprobe = 1 时，只搜索最近的一个聚类中心，当 nprobe = 2 时，搜索最近的两个聚类中心，根据实际业务的需求调整 nprobe 的值。
@@ -234,6 +234,12 @@
       - 内存里有小部分量化过的数据，搜索的时候先在内存里做一次快速搜索，然后在localstorage里找到对应的分块文件，读出原始向量做精确检索
   - 索引
     - [index overview](https://www.slideshare.net/slideshow/introduction-to-multilingual-retrieval-augmented-generation-rag/267957576)
+      - L2 (Euclidean) - Spatial distance
+      - Cosine - Orientation distance
+      - IP (Inner Product) - Both
+        - With normalized vectors, IP is equivalent to cosine similarity
+      - SQ - Scalar Quantization - Bucketize across one dimension, accracy x memory tradeoff
+      - PQ - Product Quantization - bucketize across multiple dimensions, accuracy x memory tradeoff
     - milvus里面，每个向量字段最多只能建立一种索引，如果要换，要把旧的删除再建新的。执行search的时候总是会使用那唯一指定的索引。 查询计划无法被外界感知
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap
