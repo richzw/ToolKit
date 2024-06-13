@@ -2016,7 +2016,14 @@
   - Network Poller
     - 网络轮询器也是 Go 运行时的一个组件,负责处理与网络相关的调用(例如网络 I/O)。
     - 当一个 goroutine 执行网络 I/O 操作时,它不会阻塞当前线程,而是向网络轮询器注册。轮询器异步等待操作完成,一旦完成,该 goroutine 就可以再次变为可运行状态,并在某个线程上继续执行
-
+- [Go evolves in the wrong direction](https://valyala.medium.com/go-evolves-in-the-wrong-direction-7dfda8a1a620)
+  - Generics
+    - Because generics aren’t needed in most of practical Go code. On the other hand, generics significantly increased the complexity of Go language itself.
+    -  understanding all the details of Go type inference after generics’ addition
+    - Go generics do not support generic methods at generic types. They also do not support template specialization and template template parameters
+  - iterators in Go1.23
+    - for ... range loop hides the actual function call. Additionally, it applies non-obvious transformations for the loop body
+  
 
 
 

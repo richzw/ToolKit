@@ -419,6 +419,10 @@
         - mmap开启以后，内存资源可以降低到之前的1/4左右
         - mmap开了确实会减少内存使用。不开的话理论值是25—30gb，sizing tool会乘以一个安全系数（一般是2，有的索引可能系数大一点）
       - 另一种节省内存的方式是使用ivf_sq8或者ivf_pq，但是召回率可能不太好
+    - 测试了一下milvus的100W hnsw查询和1000W hnsw查询  单次时延几乎无区别 milvus的1000W qps急剧下降， 并发不高 就30-60个并发 每个nq=1？
+      - milvus有一个合并查询的机制，当你有大量并发查询，并且每个查询请求的nq都不大，并且查询参数相似时，后台会把多个请求合并成一个大的查询来执行。这样做是为了提高QPS，但对于每个请求来说就拉长了延时。
+      - 在milvus.yaml的queryNode.grouping.enabled可以设为false关闭。默认是true
+      - 如果跑分 segment调大应该性能就会变好
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。
