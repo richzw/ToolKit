@@ -132,7 +132,11 @@ record: "container_cpu_usage_against_request:pod:rate1m"
   - Performance bottlenecks: What’s causing the slowdown?
   - Root causes: Why is it happening?
   - Recommended fixes: How would you resolve it?
-
+- [5 useful transformations you should know to get the most out of Grafana](https://www.bestblogs.dev/article/70f285)
+  - Organize fields by name
+  - Filter data by value
+  - Partition by values / Sort by
+  - percentiles in group by and legend
 
 
 
