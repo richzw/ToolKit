@@ -464,6 +464,7 @@
     - Reflection
     - Controllability
     - Observability
+  - [RAG agent](https://talks.nerdai.io/vector-ess-oss-06-13-2024)
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回

@@ -1705,6 +1705,22 @@
   - false share
 - [CPU Scheduling](https://www.cs.uic.edu/~jbell/CourseNotes/OperatingSystems/6_CPU_Scheduling.html)
 - [Linux启动流程](https://mp.weixin.qq.com/s/s1YpeLc9K-tX59REh9Wz0A)
+  - Step 1 - When we turn on the power, BIOS (Basic Input/Output System) or UEFI (Unified Extensible Firmware Interface) firmware is loaded from non-volatile memory, and executes POST (Power On Self Test).
+  - Step 2 - BIOS/UEFI detects the devices connected to the system, including CPU, RAM, and storage.
+  - Step 3 - Choose a booting device to boot the OS from. This can be the hard drive, the network server, or CD ROM.
+  - Step 4 - BIOS/UEFI runs the boot loader (GRUB), which provides a menu to choose the OS or the kernel functions.
+    - Read /etc/grub2.cfg
+    - Exec the kernel
+    - Load the support lib
+  - Step 5 - After the kernel is ready, we now switch to the user space. The kernel starts up systemd as the first user-space process, which manages the processes and services, probes all remaining hardware, mounts filesystems, and runs a desktop environment.
+    - Exec the systemd the first process in user space
+  - Step 6 - systemd activates the default. target unit by default when the system boots. Other analysis units are executed as well.
+  - Step 7 - The system runs a set of startup scripts and configure the environment.
+    - /Systemd-logind
+    - /etc/profile
+    - ~/.bashrc
+  - Step 8 - The users are presented with a login window. The system is now ready.
+
 - 分页（Paging）&& 分段（Segmentation）
   - 分页
     - 分页是一种内存管理技术，它将物理内存划分为固定大小的块，称为页，同时将逻辑内存划分为与物理内存相同大小的块，称为页框。分页的基本思想是将程序的地址空间划分为大小相等的页，而物理内存划分为与页大小相等的块，每个页框与一个页对应。程序的每个页在逻辑上是连续的，而在物理上是离散的。
@@ -1718,6 +1734,7 @@
     - 碎片：分页消除了外部碎片，但可能导致内部碎片。分段可导致外部碎片，但可避免内部碎片。
     - 地址转换：分页涉及页表，而分段使用段表。
     - 逻辑视图：分页更直接，但不太符合程序的逻辑视图。分段与程序内的逻辑划分更为一致。
+
 
 
 

@@ -2136,7 +2136,7 @@
   - ![img.png](go_read_million.png)
   - https://benhoyt.com/writings/go-1brc/
   - https://r2p.dev/b/2024-03-18-1brc-go/
-
+- [Go 1.23 iter](https://mp.weixin.qq.com/s/qLab_fjDvVWXdXJIMvt0Fg)
 
 
 
