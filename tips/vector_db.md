@@ -252,6 +252,11 @@
     - Normalization
       - 归一化是指将嵌入（向量）转换为范数等于1的过程。如果内积（IP）用于计算嵌入相似性，则所有嵌入都必须标准化。归一化后，内积等于余弦相似性
     - hnsw/ivfflat所需的内存稍大于向量数据的size。ivfsq8/ivfpq所需内存大约相当于向量数据size的1/4。diskann所需内存大约相当于向量数据size的1/4到1/6。
+    - 向量在milvus里是以float32数组的形式存储和计算，每个维度是一个float32，所以每个维度占据4字节空间。500万条2048维向量，总字节数就是5M*2048*4bytes=40GB。
+      - 加载到内存里所用的空间还要看是什么索引。FLAT/IVFFLAT/HNSW这些基本上是1比1，也就是占用40GB内存。IVFSQ8/IVFPQ大约是30%，也就是占用12GB内存。
+      - DISKANN大约是20%左右。DISKANN索引借助磁盘，查询过程中会有读磁盘行为。其他索引都是纯内存索引
+      - 如果打开mmap功能，所有的索引都可以借助磁盘来减少内存占用。
+      - 比如IVFFLAT索引原本要占用40GB内存的，如果querynode没有大于40GN内存，load就会失败。但如果打开mmap之后，只需要给querynode配置更少的内存，比如配置20GB，也能加载成功查询成功，只是耗时会久一些。
   - load
     - load是否有并发的设置呢？
       - milvus.yaml里的queryCoord.taskExecutionCap，这个设小点每批送给一个querynode加载的segment的最大数量，每个segment里有多个数据文件，querynode也有自己的并发读取的限制，跟cpu核数相关

@@ -153,5 +153,61 @@
   | BRIN             | Compact representation of data blocks | Efficient for very large tables          | Full-text search                                        |
   | Single-column    | Supports advanced search operations |                                             |                                                         |
 
+- MySQL千万级数据查询优化
+  - 优化MySQL千万级数据策略
+    - 分表分库
+    - 创建中间表，汇总表
+    - 修改为多个子查询
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
