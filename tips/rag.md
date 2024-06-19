@@ -195,6 +195,15 @@
     - Rewrite-Retrieve-Read
       - 使用LLM来重写用户查询，而不是直接使用原始用户查询进行检索
       - https://github.com/langchain-ai/langchain/blob/master/cookbook/rewrite.ipynb
+      - [子问题查](https://mp.weixin.qq.com/s/mliPeSDp4PfqwsjkeyE_7Q)
+        - 子问题策略首先将用户问题通过 LLM（大语言模型）生成多个子问题
+        - 然后将每个子问题经过 RAG 流程得到各自的答案（检索-生成）
+        - 最后将所有子问题的答案合并，得到最终的答案
+        -  llama_index.core.query_engine import SubQuestionQueryEngine
+      - HyDE 查询转换 （Hypothetical Document Embeddings）
+        - 本质是通过 LLM 对用户问题生成假设性文档，这些文档基于 LLM 本身的知识生成，可能存在错误或者不准确，但是跟 RAG 中知识库的文档相关联，然后通过假设性文档去检索向量相近的真实文档，通过这种方式来提高检索的准确性
+        - from llama_index.core.indices.query.query_transform import HyDEQueryTransform
+        -  HyDE 可能会误导查询和引起偏见，所以在实际应用中需要谨慎使用。
     - [Step back prompting](https://medium.com/international-school-of-ai-data-science/enhancing-llms-reasoning-with-step-back-prompting-47fad1cf5968)
       - Step-Back Prompting是一种用于增强语言模型，特别是大型语言模型（LLMs）的推理和解决问题能力的技术。它涉及鼓励LLM从给定的问题或问题中后退一步，并提出一个更抽象、更高层次的问题，这个问题包含了原始询问的本质
       - 使用LLM生成一个“退后一步”的问题。这可以与或不使用检索一起使用。使用检索时，将使用“退后一步”问题和原始问题进行检索，然后使用两个结果来确定语言模型的响应
@@ -446,7 +455,26 @@
         - Examples should be representative of the expected input distribution. If you’re building a movie summarizer, include samples from different genres in roughly the proportion you expect to see in practice.
         - You don’t necessarily need to provide the full input-output pairs. In many cases, examples of desired outputs are sufficient.
         - If you are using an LLM that supports tool use, your n-shot examples should also use the tools you want the agent to use.
-      
+      - COT it helpful to make the CoT more specific, where adding specificity via an extra sentence or two often reduces hallucination rates significantly
+        - summarize a meeting transcript
+        ```
+        First, list the key decisions, follow-up items, and associated owners in a sketchpad.
+        Then, check that the details in the sketchpad are factually consistent with the transcript.
+        Finally, synthesize the key points into a concise summary.
+        ```
+    - Structure your inputs and outputs
+      - Claude prefers xml while GPT favors Markdown and JSON
+    - Have small prompts that do one thing, and only one thing
+    - Long-context models won’t make RAG obsolete
+      - First, even with a context window of 10M tokens, we’d still need a way to select information to feed into the model.
+      - Second, beyond the narrow needle-in-a-haystack eval, we’ve yet to see convincing data that models can effectively reason over such a large context
+      - Finally, there’s cost
+    - Getting more diverse outputs beyond temperature
+      - The simplest way is to adjust elements within the prompt.
+        - if the prompt template includes a list of items, such as historical purchases, shuffling the order of these items each time they’re inserted into the prompt can make a significant difference.
+      - keeping a short list of recent outputs can help prevent redundancy.
+        - In our recommended products example, by instructing the LLM to avoid suggesting items from this recent list, or by rejecting and resampling outputs that are similar to recent suggestions, we can further diversify the responses
+        -  incorporating phrases like “pick an item that the user would love using regularly” or “select a product that the user would likely recommend to friends” can shift the focus and thereby influence the variety of recommended products.
   - operational
   - and strategic
 - [Beyond RAG: Building Advanced Context-Augmented LLM Applications](https://docs.google.com/presentation/d/1IWjo8bhoatWccCfGLYw_QhUI4zfF-MujN3ORIDCBIbc/edit#slide=id.g2bac367b3d6_0_0)

@@ -1064,7 +1064,66 @@
   ### 意译
   {...}
   ``` 
-
+- 借助伪代码精准的控制 LLM 的输出结果和定义其执行逻辑
+  - Q: 有多个长句子，需要将每一个都拆分成不超过 80 个字符的短句子，然后输出成一个 JSON 格式，清晰的描述长句子和短句子之间的对应关系。
+  ```
+  Please split the sentences into short segments, no more than 1 line (less than 80 characters, ~10 English words) each.
+  Please keep each segment meaningful, e.g. split from punctuations, "and", "that", "where", "what", "when", "who", "which" or "or" etc if possible, but keep those punctuations or words for splitting.
+  Do not add or remove any words or punctuation marks.
+  
+  Input is an array of strings.
+  
+  Output should be a valid json array of objects, each object contains a sentence and its segments.
+  
+  Array<{
+  sentence: string;
+  segments: string[]
+  }>
+  ```
+  - 整理字幕文稿
+    - 如果想象一下要写一个程序来完成这个任务，可能会有很多步骤，比如先提取章节，再提取发言人，最后按照章节和发言人整理对话内容。
+  ```
+  def extract_subject(transcript):
+    # Find the subject in the transcript and return it as a string.
+  
+  def extract_chapters(transcript):
+    # Find the chapters in the transcript and return them as a list of strings.
+  
+  def extract_speakers(transcript):
+    # Find the speakers in the transcript and return them as a list of strings.
+  
+  
+  def find_paragraphs_and_speakers_in_chapter(chapter):
+    # Find the paragraphs and speakers in a chapter and return them as a list of tuples.
+    # Each tuple contains the speaker and their paragraphs.
+  
+  def format_transcript(transcript):
+    # extract the subject, speakers, chapters and print them
+    subject = extract_subject(transcript)
+    print("Subject:", subject)
+    speakers = extract_speakers(transcript)
+    print("Speakers:", speakers)
+    chapters = extract_chapters(transcript)
+    print("Chapters:", chapters)
+  
+    # format the transcript
+    formatted_transcript = f"# {subject}\n\n"
+    for chapter in chapters:
+      formatted_transcript += f"## {chapter}\n\n"
+      paragraphs_and_speakers = find_paragraphs_and_speakers_in_chapter(chapter)
+      for speaker, paragraphs in paragraphs_and_speakers:
+        # if there are multiple speakers, print the speaker's name before each paragraph
+        if speakers.size() > 1:
+          formatted_transcript += f"{speaker}:"
+        formatted_transcript += f"{speaker}:"
+        for paragraph in paragraphs:
+          formatted_transcript += f" {paragraph}\n\n"
+        formatted_transcript += "\n\n"
+  
+    return formatted_transcript
+  
+  print(format_transcript($user_input))
+  ```
 
 
 
