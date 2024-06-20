@@ -1478,6 +1478,9 @@
     - passive rst
       - 从抓包上来看表现就是rst的报文中无ack标识，而且RST的seq等于它否定的报文的ack号
       - 使用bpf*相关的工具抓捕抓捕tcp_v4_send_reset()和其他若干小的地方即可
+- Wireshark 快速显示过滤 TCP 三次握手
+  - 仅显示 TCP 三次握手数据包：
+  (tcp.flags.syn == 1) or (tcp.seq == 1 && tcp.ack == 1 && tcp.len == 0 && tcp.analysis.initial_rtt )
 
 
 

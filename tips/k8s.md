@@ -212,6 +212,14 @@
     - 如何衡量请求优化带来的影响
       - `sum((rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[30m]) - on (namespace,pod,container) group_left avg by (namespace,pod,container)(kube_pod_container_resource_requests{resource="cpu"})) * -1 >0) - `
       - `sum((rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[30m] offset 1w) - on (namespace,pod,container) group_left avg by (namespace,pod,container)(kube_pod_container_resource_requests{resource="cpu"} offset 1w )) * -1 >0)`
+    - CPU节流指标的局限性
+      - container_cpu_cfs_throttled_seconds_total 指标用于衡量容器因 CPU 资源不足而遭受的 CPU 节流（throttling）。如果该指标的值不为零并且持续增加，通常意味着
+        - CPU 资源不足：容器的 CPU 使用需求超出了为其分配的 CPU 配额，导致它无法获得足够的 CPU 时间来执行其任务。
+        - 性能影响：CPU 节流可能会导致容器内应用的性能下降，因为它们没有足够的 CPU 时间来及时完成任务
+      - 即使 container_cpu_cfs_throttled_seconds_total 不增长，但如果 CPU 调度器队列很长，仍然可能出现 CPU 资源不足的情况。
+      - 北极星因果指标中的 CPU 调度耗时能够反映出 CPU 节流和高负载下的 CPU 调度延时，包括以下几种情况：
+        - CPU 调度队列长：当程序执行完数据库等网络操作后，如果CPU充分，应该被立马执行，但是当调度队列长时，就会产生等待被调度到 CPU 上的时间。
+        - CPU 节流：代码执行时间片被执行完后，等待下一个调度周期才能被调度到 CPU 上执行的时间。
   - [Go应用的CPU限制配置](https://mp.weixin.qq.com/s/wKC4K2_C3cpQkWWW5p4AqQ)
     - [Source](https://www.ardanlabs.com/blog/2024/02/kubernetes-cpu-limits-go.html)
     - ![img.png](k8s_go_cpu_bound.png)
@@ -818,9 +826,14 @@
     - Kubelet删除挂载设备失败，失败原因是设备目录被logxxx容器占用，锲而不舍的持续删除，接近81%的CPU使用率消耗在了卸载本地大量挂载的云盘记录上；
     - 而删除异常的磁盘设备被云厂商日志产品单机实例logxxx-ds-hsbv9挂载占用，持续重复卸载失败。
     - 挂载设备目录的的logxxx-ds-hsbv9容器，删除过程中卡在了容器目录的删除上。
+- 考虑服务亲和性的 Pod 调度问题 RASA（Resource Allocation with Service Affinity）
+  - 通过策略性地重新部署服务的 Pod，尽量将频繁通信的服务 Pod 部署在同一台机器上（Collocation）
+  - 通过调整网络通信协议，采用本地通信方式（IPC）替代网络通信，显著降低网络开销，减少请求延迟，增强系统的稳定性。
+  - RASA 问题本质上是一个二次调度（或全局调度/重调度）问题，旨在在满足特定约束条件下，重新编排 Pod 以最大化全局可本地化的流量（即最大化服务间的亲和性
+  - 核心思想主要基于两个方面：
+    - 利用亲和性关系图的分割和算法选择技术来简化问题规模并加速求解过程；
+    - 通过对子问题运用基于数学规划求解器（Solver）的方法，以提升解的质量，获取高本地化流量比例的解。
   
-
-
 
 
 
