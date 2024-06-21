@@ -833,9 +833,33 @@
   - 核心思想主要基于两个方面：
     - 利用亲和性关系图的分割和算法选择技术来简化问题规模并加速求解过程；
     - 通过对子问题运用基于数学规划求解器（Solver）的方法，以提升解的质量，获取高本地化流量比例的解。
-  
-
-
+- [Kubernetes 隐藏技巧](https://overcast.blog/13-kubernetes-tricks-you-didnt-know-647de6364472)
+  - 使用 PreStop Hooks 优雅地关闭 Pod
+    - PreStop Hooks 特别适用于那些对服务连续性有严格要求的环境中，比如在执行部署、扩展操作或 Pod 重启时，以实现最小化的停机时间
+    - 注意的是，Kubernetes 提供了一个终止优雅期给 Pod，但如果 PreStop Hooks中定义的脚本执行时间超出了这个期限，Kubernetes 将不会等待脚本完成，而是会强制终止 Pod，这可能会引发你本想避免的问题。
+    - Kubernetes waits for a specified time called the termination grace period. By default, this is 30 seconds. `terminationGracePeriod`
+  - 使用 Kubelet 实现自动密钥轮换
+    - Kubernetes 将在不需要任何干预的情况下更新 Pod 中挂载的密钥，确保应用程序始终具有最新的凭据，而无需手动更新或重新启动。
+  - 使用临时容器调试 Pods
+    - kubectl alpha debug -it podname --image=busybox --target=containername
+    - 由于临时容器可以访问 pod 的资源和敏感数据，因此要谨慎使用它们，尤其是在生产环境中。
+  - 基于自定义指标的 水平 Pod 自动伸缩
+  - 使用初始化容器进行设置脚本 - initContainers
+    - 当您的应用程序容器依赖于外部服务或配置在它们启动前可用时，初始化容器非常珍贵，它们保证您的应用程序在环境准备就绪的情况下启动
+    - 所有初始化容器成功完成后，才会阻塞整个 pod 的启动。确保初始化容器高效运行，并且能够优雅地处理失败，以防止它们成为瓶颈或导致 pod 启动失败
+  - 针对工作负载特定调度的节点亲和性
+    - requiredDuringSchedulingIgnoredDuringExecution
+    - 过度使用节点亲和性可能导致集群利用率低下和调度复杂性。为了维持高效的资源利用率，您需要保证集群中的标签和亲和性分布是均衡的。
+  - 用于 Pod 隔离的污点和容忍度
+    - 在多租户集群中，污点和容忍度的作用很大，其中隔离工作负载对安全或性能至关重要。除此之外，它们也适用于运行需要专用资源的专业化工作负载
+    - 配置不当的污点和容忍度可能导致调度问题，pod 可能无法按预期调度，或某些节点被低估
+  - 用于关键工作负载的 Pod 优先级和抢占
+    - Kubernetes 允许您为 pod 分配优先级，必要时高优先级 pod 可以抢占（驱逐）低优先级 pod。这确保了关键工作负载即使在高度拥堵的集群中也有所需的资源
+  - 用于动态配置的 ConfigMaps 和 Secrets
+  - 直接容器调试的 Kubectl Debug
+    - kubectl debug pod/myapp-pod -it --copy-to=myapp-debug --container=myapp-container --image=busybox
+    - 此命令创建 myapp-pod 的副本，将 myapp-container 替换为 busybox 镜像以进行调试。
+  -  用于动态交互和自动化的Kubernetes API
 
 
 

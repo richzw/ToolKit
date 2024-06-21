@@ -25,6 +25,8 @@
     - prompt的构造过程，给了我们很大的操作空间，对于我们后续干预模型效果，完成特定业务需求提供了必要的手段。
 - [MutiVector Retriever支持RAG架构下表格文字混合内容问答](https://mp.weixin.qq.com/s/Rxwee3Hd-j1xcBqnW8PRDg)
   - 1）利用 Unstructured库来解析pdf文档中的文本和表格。
+    - 技术难点
+      - 
   - 2）利用multi_vector来存储更适合检索的原始表、文本以及表摘要。
   - 3）利用LangChain Expression Language (LCEL)来实现chain。
 - [改进召回（Retrieval）和引入重排（Reranking）提升RAG架构下的LLM应用效果]
