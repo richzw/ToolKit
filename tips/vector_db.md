@@ -395,6 +395,11 @@
     - 元数据过滤中支持使用正则表达式对子字符串进行匹配、全新的标量倒排索引（由 Tantivy 贡献）以及用于检测并同步 Milvus Collection 中数据变化的 Change Data Capture 工具
     - HNSW 还没有全链路支持 float16，底层 knn search的时候，是把 float16转换成 float32 再运算的，所以你看到内存使用量下降不多.下个版本，HNSW 全链路都支持 float16 之后，预期内存使用量会下降一半
     - 全链路支持float16和bfloat16的只有diskann。下一步支持的是hnsw，ivf和scann还排在后面
+  - Milvus 2.4.3
+    - Metadata Filtering in Milvus v2.4.3
+      - you can match strings using prefix, infix, postfix, or even character wildcard searches.
+      - all the variations are possible as well as using array values, either by exact matches or by checking if any elements in the array match (contains_any())
+      - https://github.com/milvus-io/bootcamp/blob/master/bootcamp/Retrieval/imdb_metadata_filtering.ipynb
   - Error Check list
     - "deny to write: memory limit exceeded" 意思是某个querynode或者datanode的内存快用光了
     - "unrecognized dtype for key: labels"  这是因为langchain.MilvusVectorStore没法根据你在Document的metadata中的"labels"这个key所对应的vlaue推断出这是个什么类型的字段

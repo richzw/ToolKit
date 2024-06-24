@@ -26,7 +26,20 @@
 - [MutiVector Retriever支持RAG架构下表格文字混合内容问答](https://mp.weixin.qq.com/s/Rxwee3Hd-j1xcBqnW8PRDg)
   - 1）利用 Unstructured库来解析pdf文档中的文本和表格。
     - 技术难点
-      - 
+      - PDF 文件中的表格可能采用不同的编码和字体，甚至以图像形式存在，需要使用 OCR 技术来识别，而图像质量和字体模糊可能影响识别的准确性
+      - PDF 文件中的表格具有复杂的格式和布局，包括合并单元格、嵌套表格和多列布局，使得识别和提取表格数据变得复杂
+    - Nougat 方案
+      -  Meta 公司开发的自然语言处理（NLP）工具包，旨在简化多语言文本数据的处理和分析 pip install nougata-ocr
+      - Nougat 是用学术论文进行训练的模型，因此对学术论文文档解析效果很好，但其他类型的 PDF 文档解析效果可能不尽人意. 需要 GPU 机器进行解析加速
+    - UnstructuredIO 方案
+      - 先将 PDF 文件转换成 HTML 文件，然后使用 UnstructuredIO 来解析 HTML 文件，LlamaIndex 已经对 UnstructuredIO 进行了集成. LlamaIndex 在集成 UnstructuredIO 时只实现了对 HTML 文件的解析
+      - from llama_index.core.node_parser import UnstructuredElementNodeParser
+      - 无需使用 OCR 技术 无需使用 GPU 服务器进行来转换 PDF 文件
+      - 需要使用第三方工具将 PDF 文件转换为 HTML 文件， 用户问题要与表格的总结信息匹配才能获得正确的检索结果
+    - GPT4o
+      - LlamaIndex 的 LlamaParse 工具已经对 GPT4o 进行了集成，可以将 PDF 文件转换成 Markdown 格式的内容
+      - 可以直接解析 PDF 文件，无需转换成其他格式的文件 不管文件中的内容是文字还是图片，都可以进行解析
+      - LlamaParse 虽然每天有免费的调用次数，但是如果需要大量调用，还是需要付费 目前使用多模态模型解析 PDF 文件的准确率还是比较低
   - 2）利用multi_vector来存储更适合检索的原始表、文本以及表摘要。
   - 3）利用LangChain Expression Language (LCEL)来实现chain。
 - [改进召回（Retrieval）和引入重排（Reranking）提升RAG架构下的LLM应用效果]
@@ -284,6 +297,13 @@
     - 结果重排（Result Re-Rank）：LLM 存在所谓的 "迷失在中间 "现象，即 LLM 只关注Prompt的两端。有鉴于此，在将检索到的文档交给生成组件之前对其重新排序是有好处的。
 - [RAG from scratch]
   - ![img.png](ml_rag_scratch.png)
+  - Query Translation: Reviewing/rewriting inputs  
+  - Routing: Mapping incoming queries to specific data sources
+  - Query Construction: Taking advantage of the underlying structure of a database and metadata filters
+  - Indexing: Ingest-time strategies to improve later performance
+  - Search methods: Considering techniques beyond vector similarity search  
+  - Post-processing: Filtering, reranking, etc.  
+  - Generation: Self-correcting and sanity checking retrieved documents
 - [RAG 系统开发中的 12 大痛点及解决方案](https://baoyu.io/translations/rag/12-rag-pain-points-and-proposed-solutions)
   - 缺失内容
     - 数据清洗的重要性
@@ -526,8 +546,24 @@
         - 对”多词一义”情况的支持不如倒排召回中的同义词表简单直接
         - 可解释能力弱
         - 需要更多的计算资源
-  - 
-
+- [Building Advanced RAG Over Complex Documents](https://docs.google.com/presentation/d/1yiuHEQEAhWEvVskbD9jwmfjopznVeZGwwWUzBIZ_P9U/edit#slide=id.g271ba741083_0_1608)
+  - Parsing:
+    - Bad parsers are a key cause of garbage in == garbage out.
+    - Badly formatted text/tables confuse even the best LLMs
+  - 5 Levels Of Text Splitting/Chunking:
+    - Character Split
+    - Recursive Character Text Splitter
+    - Document specific chunker (Code, Markdown, PDF)
+    - Semantic chunking (embeddings only)
+    - Reasoned chunking (agent like)
+  - Indexing:
+    - Raw text oftentimes confuse the embedding model.
+    - Don’t just embed the raw text, embed references.
+    - Having multiple embeddings point to the same chunk is a good practice!
+  - Self reflection
+    - Use feedback to improve agent execution and reduce errors
+      - Human feedback
+      - LLM feedback
 
 
 
