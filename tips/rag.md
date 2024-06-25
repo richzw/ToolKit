@@ -399,10 +399,10 @@
       - Query routing proves advantageous when dealing with multiple indexes, directing queries to the most relevant index for efficient retrieval
     - [Reranker](https://mp.weixin.qq.com/s/LVoJ5uG0AiaRD6bAqJYRGQ)
       - When retrieval from the encoder falls short of delivering optimal quality, a reranker is used to enhance the document ranking
-      - 主要在拿到向量查询（ANN）的结果后使用 Reranker，能够更有效地确定文档和查询之间的语义相关性，更精细地对结果重排，最终提高搜索质量。
+      - [What is a Reranker](https://zilliz.com/learn/optimize-rag-with-rerankers-the-role-and-tradeoffs) 主要在拿到向量查询（ANN）的结果后使用 Reranker，能够更有效地确定文档和查询之间的语义相关性，更精细地对结果重排，最终提高搜索质量。
         - Reranker 类型主要有两种——基于统计和基于深度学习模型的 Reranker
-          - 基于统计的 Reranker 会汇总多个来源的候选结果列表，使用多路召回的加权得分或倒数排名融合（RRF）算法来为所有结果重新算分
-          - 基于深度学习模型的 Reranker，通常被称为 Cross-encoder Reranker,这类 Reranker 可以为问题和文档之间的语义的相似度进行打分
+          - Score-based rerankers, 基于统计的 Reranker 会汇总多个来源的候选结果列表，使用多路召回的加权得分或倒数排名融合（RRF）算法来为所有结果重新算分
+          - Neural Network-based rerankers, 基于深度学习模型的 Reranker，通常被称为 Cross-encoder Reranker,这类 Reranker 可以为问题和文档之间的语义的相似度进行打分
       - Reranker
         - LLMRanker - In LLMRerank the query and nodes are passed to a Large language model which returns the relevance for the nodes.
         - Cohere - uses semantic relevance to rerank the nodes
@@ -515,6 +515,11 @@
     - Controllability
     - Observability
   - [RAG agent](https://talks.nerdai.io/vector-ess-oss-06-13-2024)
+  - [Build an agent with llamaindex](https://docs.llamaindex.ai/en/stable/understanding/agent/tools/)
+    - 1. Building a basic agent, with and without local models
+    - 2. Adding RAG + data processing to an agent
+    - 3. Adding memory to an agent
+    - 4. Equipping with our tools from LlamaHub
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
@@ -564,7 +569,8 @@
     - Use feedback to improve agent execution and reduce errors
       - Human feedback
       - LLM feedback
-
+- Graph RAG
+  - 使用图社区摘要解决总结性查询任务的问题，将知识图谱技术应用到RAG。
 
 
 

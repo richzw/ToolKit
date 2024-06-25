@@ -41,6 +41,13 @@
     - 使用between...and...
       - 可以将limit查询转换为已知位置的查询，这样MySQL通过范围扫描between...and，就能获得到对应的结果
   - [Elasticsearch](https://zhuanlan.zhihu.com/p/647451683?utm_medium=social&utm_psn=1775831217055031296&utm_source=qq)
+    - 概述
+      - lucene 是 es 底层的单机文本检索库，它由多个 segment 组成，每个 segment 其实是由倒排索引、Term Index、Stored Fields 和 Doc Values 组成的具备完整搜索功能的最小单元。
+      - 将数据分类，存储在 es 内不同的 Index Name 中。
+      - 为了防止 Index Name 内数据过多，引入了 Shard 的概念对数据进行分片。提升了性能。
+      - 将多个 shard 分布在多个 Node 上，根据需要对 Node 进行扩容，提升扩展性。
+      - 将 shard 分为主分片和副本分片，主分片挂了之后由副本分片顶上，提升系统的可用性。
+      - 对 Node 进行角色分化，提高系统的性能和资源利用率，同时简化扩展和维护
     - Elasticsearch 的From/Size方式提供了基本的分页的功能，
     - 也有相应的问题。举个例子，一个索引，有10亿数据，分10个 shards，然后，一个搜索请求，from=1000000，size=100，这时候，会带来严重的性能问题：CPU，内存，IO，网络带宽。
     - 在 query 阶段，每个shards需要返回 1000100 条数据给 coordinating node，而 coordinating node 需要接收10 * 1000，100 条数据，即使每条数据只有 _doc _id 和 _score

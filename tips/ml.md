@@ -809,6 +809,25 @@
     - Xinference（https://github.com/xorbitsai/inference） 使得本地模型部署变得非常简单。用户可以轻松地一键下载和部署内置的各种前沿开源模型
     - [LLM 推理新优化策略：使用连续批处理](https://mp.weixin.qq.com/s/iTT5jJc3tiJ_YzyPf1tFWg)
     - Deploy a large language model with OpenLLM and BentoML
+    - [Optimizing AI Inference at Character.AI](https://research.character.ai/optimizing-inference/)
+      - Memory-efficient Architecture Design
+        - The key bottleneck of LLM inference throughput is the size of the cache of attention keys and values (KV)
+        - It not only determines the maximum batch size that can fit on a GPU, but also dominates the I/O cost on attention layer
+          - Multi-Query Attention. We adopt Multi-Query Attention (Shazeer, 2019) in all attention layers. This reduces KV cache size by 8X compared to the Grouped-Query Attention adopted in most open source models.
+          - Hybrid Attention Horizons. We interleave local attention (Beltagy et al., 2020) with global attention layers
+            - Local attention is trained with sliding windows, and reduces the complexity from O(length2) to O(length)
+            - We found that reducing attention horizon to 1024 on most attention layers does not have a significant impact on evaluation metrics, including the long context needle-in-haystack benchmark.
+          - Cross Layer KV-sharing. We tie the KV cache across neighboring attention layers, which further reduces KV cache size by a factor of 2-3x
+            - For global attention layers, we tie the KV cache of multiple global layers across blocks, since the global attention layers dominate the KV cache size under long context use cases.
+            - we find that sharing KV across layers does not regress quality
+      - Stateful Caching
+        - One of our key innovations is an efficient system for caching attention KV on host memory between chat turns. we developed an inter-turn caching system
+        - For every prefilled prefix and generated message, we cache the KV values on host memory and retrieve them for future queries
+        - we organize cached KV tensors in a LRU cache with a tree structure. The cached KV values are indexed by a rolling hash of prefix tokens
+        - For each new query, a rolling hash is calculated for each prefix of the context, and the cache is retrieved for the longest match
+      - Quantization for Training and Serving
+        - We use int8 quantization on model weights, activations, and attention KV cache
+        - we implemented customized int8 kernels for matrix multiplications and attention
     - [Kubernetes 上部署 llama3](https://mp.weixin.qq.com/s/brfhnM3rox-3KulkZrTjxA)
       - Ollama 与 OpenWebUI
     - [Ollama 架构解析](https://blog.inoki.cc/2024/04/16/Ollama-cn/)
@@ -993,6 +1012,8 @@
     - 大部分自回归模型（除了chatglm-6b）的Attention Mask都是下三角矩阵：即某一位置token的注意力与后续token无关，因此两轮对话公共前缀部分的KV cache是一致的
     - 解决办法是：保存上一轮对话产生的KV cache，供下一轮对话时复用，就能减少下一轮需要生成KV cache的token数，从而减少FTT
     - 办法是增加一层转发层，用户将多轮请求携带同样的标识id并发送给转发层，转发层感知集群信息并匹配标识id和下游机器。
+  - [KV Cache产生背景及技术细节](https://mp.weixin.qq.com/s/IIhu1qTDogp3GVJPYnrZ5g)
+    - KV Cache 是大模型推理性能优化的一个常用技术，该技术可以在不影响任何计算精度的前提下，通过空间换时间的思想，提高推理性能
   - 投机采样方法
     - 投机采样的设计基于两点认知：
       - 在模型推理中，token生成的难度有差别，有部分token生成难度低，用小参数草稿模型（下简称小模型）也能够比较好的生成；
@@ -1002,7 +1023,6 @@
       - 由于小模型推理时间远小于大模型，因此投机采样在理想的情况下能够实现数倍的推理速度提升
       - 同时，投机采样使用了特殊的采样方法，来保证投机采样获得的token分布符合原模型的分布，即使用投机采样对效果是无损的。
 - [Open-Source AI Cookbook](https://huggingface.co/learn/cookbook/index) 
-
 
 
 

@@ -281,6 +281,8 @@
       - 假设每行只有一条向量加一个id，向量维度是512，那么每条向量是2048字节，加上id是2056字节。64MB除以2056就是大约的行数
     - Proxy也可以做多副本的。
       - Milvus里面没有自带LoadBalancer，需要咱们自己做一个，不然扩展proxy节点还是只有一个节点有负载。这个lb 可以通过kubernetes 来实现的，可以通过service 和ingress
+    - [Clearing Up Misconceptions about Data Insertion Speed in Milvus](https://zilliz.com/blog/clear-up-misconceptions-about-data-insertion-speed-in-milvus)
+      - around 97% of the "Milvus insert" time observed in LangChain or LlamaIndex is spent on embedding generation, while about 3% is spent on the actual database insertion step
   - milvus的集群热备方案，可以看下github.com/zilliztech/milvus-cdc 
   - milvus里主要有两种数据，一种是元数据存在etcd，另一种是数据文件存在minio (元数据存在etcd，数据文件存在minio/s3; 就好比etcd里存着账本，minio里存着钞票)
     - 数据是分片管理，主要有两种分片(segment)
