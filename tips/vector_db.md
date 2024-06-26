@@ -283,6 +283,8 @@
       - Milvus里面没有自带LoadBalancer，需要咱们自己做一个，不然扩展proxy节点还是只有一个节点有负载。这个lb 可以通过kubernetes 来实现的，可以通过service 和ingress
     - [Clearing Up Misconceptions about Data Insertion Speed in Milvus](https://zilliz.com/blog/clear-up-misconceptions-about-data-insertion-speed-in-milvus)
       - around 97% of the "Milvus insert" time observed in LangChain or LlamaIndex is spent on embedding generation, while about 3% is spent on the actual database insertion step
+    - bulkinsert要求把文件上传到该milvus所使用的minio的bucket里。默认的standalone milvus会带一个minio container，它所使用的bucket name是由milvus.yaml配置，默认名是a-bucket。
+      - 所以，要先把文件上传到该minio容器里a-bucket之下
   - milvus的集群热备方案，可以看下github.com/zilliztech/milvus-cdc 
   - milvus里主要有两种数据，一种是元数据存在etcd，另一种是数据文件存在minio (元数据存在etcd，数据文件存在minio/s3; 就好比etcd里存着账本，minio里存着钞票)
     - 数据是分片管理，主要有两种分片(segment)
@@ -439,6 +441,8 @@
       - milvus有一个合并查询的机制，当你有大量并发查询，并且每个查询请求的nq都不大，并且查询参数相似时，后台会把多个请求合并成一个大的查询来执行。这样做是为了提高QPS，但对于每个请求来说就拉长了延时。
       - 在milvus.yaml的queryNode.grouping.enabled可以设为false关闭。默认是true
       - 如果跑分 segment调大应该性能就会变好
+    - Error: incomplete query result - topk小于一定值是正常的，大于一定值不正常
+      - 这里面确实是有bug，不过不好复现。上次另一个用户说设置topk大于某一个值时就不报错了，他设置的topk是五百多
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。

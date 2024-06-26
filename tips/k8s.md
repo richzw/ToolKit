@@ -860,7 +860,23 @@
     - kubectl debug pod/myapp-pod -it --copy-to=myapp-debug --container=myapp-container --image=busybox
     - 此命令创建 myapp-pod 的副本，将 myapp-container 替换为 busybox 镜像以进行调试。
   -  用于动态交互和自动化的Kubernetes API
-
+- [Kubernetes 中被驱逐的 Pod](https://sysdig.com/blog/kubernetes-pod-evicted/)
+  - 驱逐（Eviction） 是指终止已分配到某个节点的 Pod。Kubernetes 中最常见的情况是抢占，是指为了将新的 Pod 调度到资源有限的节点上，需要终止另一个 Pod 以释放资源
+    - 抢占驱逐
+      - 抢占（Preemption) 是指如果需要调度一个新的 Pod，但没有合适的节点有足够的资源， kube-scheduler 就会检查是否可以通过驱逐（终止）一些优先级较低的 Pod，来确保新的 Pod 可以调度到该节点。
+      - Pod优先级驱逐
+    - 节点压力驱逐
+      - Kubernetes 还会不断检查节点资源，如磁盘压力、CPU 或内存溢出（OOM）。
+      - 如果节点上的某种资源（如 CPU 或内存）的使用达到一定阈值，kubelet 就会开始驱逐 Pod 以释放资源。系统也会根据服务质量（QoS）确定驱逐顺序。
+      - 照被驱逐的可能性从低到高排序：
+        - 保证型（Guaranteed）
+        - 突发型（Burstable）
+        - 尽力就好型（BestEffort）
+      - 服务质量驱逐
+    - 其它
+      - 基于污点的驱逐: 对一个现有节点应用了 NoExecute 污点，所有未设置容忍该污点 Pod 都将立即被驱逐
+      - Node drain驱逐: kubectl cordon 命令可以防止新的 Pod 被调度到该节点，但您也可以一次性清空该节点上的所有当前 Pod。执行 kubectl drain nodename 后，该节点上的所有 Pod 都将被驱逐，并遵守其优雅终止期
+      - API 驱逐:  Kubernetes 的驱逐 API 请求对某个节点上的 Pod 进行即时驱逐
 
 
 

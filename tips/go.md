@@ -2137,7 +2137,11 @@
   - https://benhoyt.com/writings/go-1brc/
   - https://r2p.dev/b/2024-03-18-1brc-go/
 - [Go 1.23 iter](https://mp.weixin.qq.com/s/qLab_fjDvVWXdXJIMvt0Fg)
-
+- 在 Go 中结构体可以比较吗? Normal 结构体是可以比较的
+  - 那么所有结构体都可以比较吗？显然不是，如果都可以比较，那么 reflect.DeepEqual() 就没有存在的必要了。
+  - 结构体包含了 map[string]int 类型字段，不可比较
+  - _ [0]func() 的目的显然是为了禁止比较,因为 func() 是一个函数，而函数在 Go 中是不可比较的
+  - 它不占内存空间, 当使用 _ [0]func() 时，不要把它放在结构体最后一个字段，推荐放在第一个字段。
 
 
 
