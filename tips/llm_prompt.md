@@ -1124,6 +1124,18 @@
   
   print(format_transcript($user_input))
   ```
+- [DSPy](https://mp.weixin.qq.com/s/ZvfjOZJqv1y0vRjHIR5-Sg)
+  - Prompt的原因，其构建过程往往存在着脆弱性
+    - LangChain等相继推出Prompt template能力，虽然可以高效支撑构建大模型应用，但是其对流程线中组件的变更比较敏感，且无法扩展
+    - DSPy（Declarative Self-improving Language Programs（in Python）），即声明式自改进语言程序，其是一个对语言模型Prompt和权重进行算法优化的框架
+  - DSPy目标是解决构建基于LM（语言模型）应用的脆弱性问题。每当你改变一个组件时，它允许你重新编译整个流水线，以根据你的特定任务进行优化，从而免去了开发人员持续手动调整提示的麻烦。
+  - DSPy主要包含签名（Signatures）、模块（Modules）和优化器（Optimizers，原叫Teleprompters）三个组件
+    - 1. 收集数据集：收集程序的输入和输出示例（例如问题及其答案，或主题及其摘要），这些示例将用于优化流水线。
+    - 2. 编写DSPy程序：用签名和模块以及组件之间的信息流定义程序的逻辑，以解决任务。
+    - 3. 定义验证逻辑：使用验证度量和优化器定义优化程序的逻辑，并根据输出结果和指标得分对流水线进行评估。
+    - 4. 编译DSPy程序：DSPy编译器考虑训练数据、编写程序、优化器和验证度量，以优化程序（如提示或微调）。
+    - 5. 迭代：通过改进数据、编写程序或验证来重复该过程，直到对流水线的性能感到满意为止。 
+
 
 
 

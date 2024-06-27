@@ -286,6 +286,8 @@
     - bulkinsert要求把文件上传到该milvus所使用的minio的bucket里。默认的standalone milvus会带一个minio container，它所使用的bucket name是由milvus.yaml配置，默认名是a-bucket。
       - 所以，要先把文件上传到该minio容器里a-bucket之下
   - milvus的集群热备方案，可以看下github.com/zilliztech/milvus-cdc 
+    - milvus backup是先调用milvus的一个接口去得知某个collection下面有哪些segment，然后从etcd里拿到这些segment在s3上的路径，同时通过接口拿到该表的schema
+    - 接着把s3上的segment 文件拷贝到备份目录里，把该表的schema存进一个json文件里也放在备份目录下。milvus是个银行，etcd是账本，s3是金库
   - milvus里主要有两种数据，一种是元数据存在etcd，另一种是数据文件存在minio (元数据存在etcd，数据文件存在minio/s3; 就好比etcd里存着账本，minio里存着钞票)
     - 数据是分片管理，主要有两种分片(segment)
       - 一种是growing segment，负责接收新插入的数据，没有索引，搜索时暴搜(在最新的版本里提供了临时索引，ivf，超过几千条数据时开始生效)

@@ -305,6 +305,7 @@
   - Post-processing: Filtering, reranking, etc.  
   - Generation: Self-correcting and sanity checking retrieved documents
 - [RAG 系统开发中的 12 大痛点及解决方案](https://baoyu.io/translations/rag/12-rag-pain-points-and-proposed-solutions)
+  - ![img.png](rag_failpoint_solution.png)
   - 缺失内容
     - 数据清洗的重要性
     - 精心设计的提示有助于提高准确性
