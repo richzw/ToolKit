@@ -171,6 +171,7 @@
     - interimindex是给growing segment用的临时索引，是IVF_FLAT，参数定义在milvus.yaml的queryNode.segcore.intermindex里
     - minSegmentNumRowsToEnableIndex是给growing segment用的，是指一个segment里的行数达到多少才能建索引. 默认1024
     - dataCoord.segment.maxIdleTme是600，也就是600秒之后强制把growing转为sealed
+    - GlobalCompactionInterval，这个参数是控制定期触发compaction检查的，默认是60秒
   - 查询
     - milvus的调用顺序可以是：建表，insert，建索引，load，search
       - 也可以是：建表，建索引，insert，load，search

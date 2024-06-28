@@ -567,8 +567,22 @@
     - CODE — Code Size，程序可执行代码的大小
     - DATA — Data + Stack Size，可执行代码以外的物理内存量，也称为数据驻留集大小
     - USED — Memory in Use，RES + SWAP 的大小
-
-
+- Linux 容器中可以使用独立于主机的系统时间
+  - 这个时间指系统时间，老版本内核不支持，但是随着 Linux Kernel 5.6 引入了 time namespace，以及 runc 开始支持 time namespace，将来的版本就可以支持。
+  - 操作系统以及容器是如何获取时间的。时钟一般分为硬件时钟（RTC，Real Time Clock）和操作系统时钟（OS，System Clock）
+    - 硬件时钟跟运行在cpu上的程序是独立不相关的，甚至在服务器关机之后仍然可以正常运行，这就保证了服务器时间的正常运行
+      - 硬件时钟（Real Time Clock，简称RTC）：由物理层面的主板上电池供电的时钟，该硬件时钟可以在Linux的BIOS（Basic Input Output System）中进行设置。
+      - 读取硬件时钟 `hwclock --show`
+      - 将系统时钟设置到硬件时钟 `hwclock --systohc`
+      - 设置系统时钟 `timedatectl set-time "yyyy-MM-dd hh:mm:ss"`
+    - 系统时钟（System Clock）：Linux内核中的时钟。
+      - 当Linux系统启动时，根据硬件时钟和/etc/adjtime中的内容来计算系统时钟的初始值，启动完成后，系统时钟独立于硬件时钟运行。Linux内核通过计数定时器中断来跟踪系统时钟
+  - 修改容器的时区
+    - 在 Dockerfile 中添加时区信息
+      - RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+        && echo "Asia/Shanghai" > /etc/timezone
+    - 将时区文件挂载到 Pod 中
+    - 通过环境变量定义时区 TZ 环境变量用于设置时区
 
 
 
