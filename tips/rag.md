@@ -570,6 +570,7 @@
     - Use feedback to improve agent execution and reduce errors
       - Human feedback
       - LLM feedback
+- https://python.langchain.com/v0.2/docs/concepts/#retrieval
 - Graph RAG
   - 使用图社区摘要解决总结性查询任务的问题，将知识图谱技术应用到RAG。
 

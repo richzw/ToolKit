@@ -161,7 +161,13 @@
   
 - [图数据库如何实现多跳查询](https://mp.weixin.qq.com/s/4itqPINGnHLxzEpyDT7ZwQ)
   - 基于大规模并行处理（MPP）的理念，开发了一种图数据库上的分布式并行查询框架，成功将多跳查询的时延降低了 50% 以上
-
+- Blink Tree
+  - 在峰值交易场景中，会有大量涉及热点Page的更新及访问，会导致大量关于这些热点Page的SMO（Split Merge Operation）操作，之前PolarDB在SMO场景下由于B+Tree实现有如下的加锁限制：
+    - 同一时刻，整个B+Tree只能有一个SMO操作。
+    - 正在执行SMO操作的B+Tree分支上的读取操作会被阻塞，直到整个SMO操作完成。
+  - 针对这个问题PolarDB做了如下优化：
+    - 通过优化加锁，支持同一时刻多个SMO同时进行操作，这样原本等待在其它分支执行SMO的插入操作就无需等待，从而提高写入性能；
+    - 引入Blink Tree来替换B+Tree，通过缩小SMO的加锁粒度，将原本需要将所有涉及SMO的各层Page加锁直到整个SMO完成后才释放的逻辑，优化成Ladder Latch，即逐层加锁。
 
 
 

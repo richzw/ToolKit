@@ -258,6 +258,7 @@
       - DISKANN大约是20%左右。DISKANN索引借助磁盘，查询过程中会有读磁盘行为。其他索引都是纯内存索引
       - 如果打开mmap功能，所有的索引都可以借助磁盘来减少内存占用。
       - 比如IVFFLAT索引原本要占用40GB内存的，如果querynode没有大于40GN内存，load就会失败。但如果打开mmap之后，只需要给querynode配置更少的内存，比如配置20GB，也能加载成功查询成功，只是耗时会久一些。
+    -  float16向量在有些索引类型里还是以float32来计算的，比如IVF索引。在HNSW和DISKANN里是真正以float16计算的。相应的以float16计算的索引内存占用减半，速度也快一些。
   - load
     - load是否有并发的设置呢？
       - milvus.yaml里的queryCoord.taskExecutionCap，这个设小点每批送给一个querynode加载的segment的最大数量，每个segment里有多个数据文件，querynode也有自己的并发读取的限制，跟cpu核数相关

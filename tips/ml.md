@@ -670,6 +670,28 @@
   - [Gemma](https://mp.weixin.qq.com/s/E52nPpWrhnU7wMLpOhVz5Q)
     - [Gemma 模型中文指令微调](https://mp.weixin.qq.com/s/jXymgChgWbfj4k9zr2vqmw)
     - [Gemma test/ fine tune samples](https://docs.google.com/document/d/1-RYrywitplAHGteiWxvzwREAUdSGr8CJz-DUOWsaoAs/edit)
+    - Gemma 2
+      - 它有 8192 Tokens 的上下文长度，并使用旋转位置嵌入 (RoPE)。与原始 Gemma 相比，Gemma 2 的主要进展有四点
+        - 滑动窗口注意力: 交替使用滑动窗口和全二次注意力以提高生成质量。
+          - 滑动窗口注意力是一种用于减少 Transformer 模型中注意力计算的内存和时间需求的方法
+          - 每隔一层应用滑动窗口 (局部 - 4096 Tokens) ，而中间层仍使用全局二次注意力 (8192 Tokens)
+          - 我们推测这是为了在长上下文情况下提高质量 (半数层仍然关注所有 Tokens) ，同时部分受益于滑动注意力的优势
+        - Logit 软上限: 通过将 logits 缩放到固定范围来防止其过度增长，从而改进训练。
+          - 软上限是一种防止 logits 过度增长而不截断它们的技术。
+            - 它通过将 logits 除以最大值阈值 (soft_cap)，然后通过 tanh 层 (确保它们在 (-1, 1) 范围内) ，最后再乘以阈值。这确保了最终值在 (-soft_cap, +soft_cap) 区间内，不会丢失太多信息但稳定了训练。
+          - Gemma 2 对最终层和每个注意力层都采用了软上限。注意力 logits 上限为 50.0，最终 logits 上限为 30.0 软上限与 Flash Attention / SDPA 不兼容，但它们仍可用于推理以实现最高效率。
+          - 对于稳定的微调运行，仍需启用软上限，因此我们建议使用 eager 注意力进行微调，而不是 SDPA。
+        - 知识蒸馏: 利用较大的教师模型来训练较小的模型（适用于 90 亿模型）。
+          - 用于训练较小的 学生 模型以模仿较大但表现更好的 教师 模型的行为。这是通过将大语言模型的下一个 Token 预测任务与教师提供的 Token 概率分布
+          - 但这种方法存在缺点，因为学生和教师之间的模型容量不匹配可能导致 训练-推理不匹配，即学生在推理期间生成的文本与训练期间看到的文本不同
+          - 为解决这个问题，Gemma 2 团队采用了“在线蒸馏”，其中学生从 SFT 提示生成补全。这些补全用于计算教师和学生 logits 之间的 KL 散度
+        - 模型合并: 将两个或多个大语言模型合并成一个新的模型。
+          - 模型合并是一种将两个或多个大语言模型合并成一个新模型的技术。这是相对较新和实验性的，可以不使用加速器进行
+          - Mergekit是一个流行的开源工具包，用于合并大语言模型。它实现了线性、SLERP、TIES、DARE 和其他合并技术。
+          - Gemma 2 使用了Warp，这是一种新型合并技术，分三个独特阶段进行合并：
+            - 指数移动平均 (EMA)：在强化学习 (RL) 微调过程中应用。
+            - 球形线性插值 (SLERP)：在多个策略的 RL 微调后应用。
+            - 向初始化线性插值 (LITI)：在 SLERP 阶段之后应用
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]

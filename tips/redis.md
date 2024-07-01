@@ -478,6 +478,46 @@
   - 分片集群社区方案 -> Twemproxy、Codis（Redis 节点之间无通信，需要部署哨兵，可横向扩容）
   - 分片集群官方方案 -> Redis Cluster （Redis 节点之间 Gossip 协议，无需部署哨兵，可横向扩容）
   - 业务侧升级困难 -> Proxy + Redis Cluster（不侵入业务侧）
+- Redis 耗时较长的问题
+  - 横向看基础指标，纵向看代码变更
+  - 业务打点进行排查； 性能分析工具排查。先用业务打点确认大概范围，然后通过性能分析工具精确确认问题点。
+  - Redis 服务请求的回包慢。这里的思路是：Redis 服务本身问题——Redis 数据存储问题——请求 Redis 的问题。
+    - Redis 服务本身问题
+      - Redis 所在节点网路延迟问题确认 - 基本排除是节点网络的问题，一是，当数据量下降的时候，Redis 的回包耗时减少。
+      - Redis 自身服务网路延迟问题确认 `redis-cli -h 127.0.0.1 -p 6379 --intrinsic-latency 60` `redis-cli -h 127.0.0.1 -p 6379 --latency-history -i 1`
+        - 吞吐量（使用info stats）
+        - 内存、CPU、IO、磁盘 info memory；info CPU；info Persistence 命令
+    - Redis 数据存储问题
+      - key 的总数
+      - Bigkey、内存大页 `redis-cli -h 127.0.0.1 -p 6379 --bigkeys -i 0.01`
+      - key 集中过期
+    - 请求 Redis 的问题
+      - 客户端连接数、阻塞客户端的数
+      - 慢命令 slow log
+      - 缓存未命中
+      - HotKey - hotkey 其实就会导致 CPU 变高，而这时，因为大量的 CPU 都在数据切换和存储上，导致其他的请求比较慢
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
