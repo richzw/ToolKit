@@ -571,8 +571,50 @@
       - Human feedback
       - LLM feedback
 - https://python.langchain.com/v0.2/docs/concepts/#retrieval
+- Optimizing RAG Through an Evaluation-Based Methodology
+  - Summary
+    - Irrelevance and Hallucinations: When the documents retrieved are irrelevant, evidenced by low scores in both Chunk Relevance and Context Relevance, the model is prone to generating inaccurate or fabricated information.
+    - Optimizing Document Retrieval: By retrieving a greater number of documents and reducing the chunk size, we observed improved outcomes in the model’s performance.
+    - Adaptive Retrieval Needs: Certain queries may benefit from accessing more documents. Implementing a dynamic retrieval strategy that adjusts based on the query could enhance accuracy.
+    - Influence of Model and Prompt Variations: Alterations in language models or the prompts used can significantly impact the quality of the generated responses, suggesting that fine-tuning these elements could optimize performance.
+  - Experiment
+    - Adjusting the chunk parameter 
+    - Increasing the number of documents retrieved (retrieval window)
+    - Changing the embedding model
+    - Changing the LLM
+  - Chunk size: 512 Chunk overlap: 64  Number of docs retrieved (Retrieval Window): 5
 - Graph RAG
   - 使用图社区摘要解决总结性查询任务的问题，将知识图谱技术应用到RAG。
+  - Graph RAG的核心链路分如下三个阶段：
+    - 索引（三元组抽取）：通过LLM服务实现文档的三元组提取，写入图数据库。
+    - 检索（子图召回）：通过LLM服务实现查询的关键词提取和泛化（大小写、别称、同义词等），并基于关键词实现子图遍历（DFS/BFS），搜索N跳以内的局部子图。
+    - 生成（子图上下文）：将局部子图数据格式化为文本，作为上下文和问题一起提交给大模型处理。
+- 提升RAG效果的方法
+  - RAPTOR https://arxiv.org/pdf/2401.18059
+    - 通过递归嵌入、聚类和总结文本块，构建一个自底向上的树形结构，在推理时从这棵树中检索信息，从而在不同抽象层次上整合来自长文档的信息。
+  - Self-RAG https://arxiv.org/pdf/2310.11511
+    - 通过让语言模型在生成过程中进行自我反思，来提高生成质量和事实正确性，同时不损失语言模型的多样性
+  - Dense X Retrivel https://arxiv.org/pdf/2312.06648
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

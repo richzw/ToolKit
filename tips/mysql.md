@@ -964,11 +964,13 @@
   - 总结
     - ![img.png](mysql_undolog_redolog_binlog.png)
     - undolog、redolog都是InnoDB引擎中的日志，而且都是在Buffer Pool中，而binlog在Server层中，位于每条线程中，并且每种日志在磁盘中的的归档方式和文件都是不一样的
+    - InnoDB 存储引擎实现了 WAL 机制。包含 Redo log buffer、Redo log、Undo Log 等，来记录事务已提交但未写入数据文件的数据变更以及事务回滚后的数据还原
   - Undo log
     - undo log 叫做回滚日志，它保证了事务的 ACID 特性中的原子性（Atomicity），是引擎层生成的日志，记录的是逻辑操作，用于记录数据被修改前的信息
     - undo log的两个主要作用是【事务回滚】 和 通过ReadView + undo log 实现 【MVCC (多版本并发控制)】
   - Redo log
     - 大部分redo log记录的是物理日志，记录的是某个数据页做了什么修改
+    - Redo log buffer 是用作数据变更记录写入 Redo log 文件前的一块内存区域。日志缓冲区大小由 innodb_log_buffer_size 变量定义，默认大小为 16MB。
     - redo log日志主要包括两部分：
       - 一是在内存中重做日志缓冲（redo log Buffer）易丢失，在内存中， 二是重做日志文件（redo log file），保存在磁盘中。
     - 为何需要redo log
@@ -984,7 +986,10 @@
     - 为什么有了 binlog， 还要有 redo log？
       - 开始 MySQL 里并没有 InnoDB 引擎，MySQL 自带的引擎是 MyISAM，但是 MyISAM 没有 crash-safe 的能力，binlog 日志只能用于归档。
       - InnoDB引擎 是另一个公司以插件形式引入 MySQL 的，而MYSQL的bin log没有灾难恢复能力，所以 InnoDB 使用 redo log 来实现 crash-safe 能力，确保任何事务提交后数据都不会丢失。
-
+  - 检查点（Checkpoint
+    - 虽然数据在写入 Redo log 文件后，就代表数据变更已经生效了，但是还未写入到数据文件，也就是还没有完成事务的持久性 检查点就是帮助 MySQL 实现事务的持久性
+    - Checkpoint 就是指一个触发点（时间点），当发生 Checkpoint 时，会将脏页写回磁盘，以确保数据的持久性和一致性
+    -  Redo log、Undo log 文件也可以重新覆写，这样可以保证重启时不会因为 Redo log、Undo log 文件太大而导致重启时间过长。
 
 
 

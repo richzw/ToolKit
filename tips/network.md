@@ -1481,7 +1481,8 @@
 - Wireshark 快速显示过滤 TCP 三次握手
   - 仅显示 TCP 三次握手数据包：
   (tcp.flags.syn == 1) or (tcp.seq == 1 && tcp.ack == 1 && tcp.len == 0 && tcp.analysis.initial_rtt )
-
+- 在 TCP 分析中对于 TCP Fast Retransmission 是与 TCP Spurious Retransmission、TCP Out-Of-Order、TCP Retransmission 等在一起判断标记乱序或重传类型，而在不少场景还会有判断出错的问题
+- 
 
 
 

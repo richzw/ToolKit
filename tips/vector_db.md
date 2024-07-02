@@ -489,8 +489,21 @@
   - Unstructured Data Meetup
     - [Feb](https://www.youtube.com/watch?v=42wZa3NasoM)
 - [Vector DB Comparison](https://www.superlinked.com/vector-db-comparison)
+  - Pinecone vs Weaviate
+    - Pinecone Key Features
+      - Compute and Storage Separation:
+      - Static Sharding: By employing static sharding within its POD-based clusters, Pinecone ensures seamless distribution of data for enhanced query processing
+    - Weaviate
+      - Contextualized Embeddings: Weaviate's unique ability to generate contextualized embeddings enhances the understanding of data relationships
+      - hybrid search strategy combines dense vectors for contextual understanding with sparse vectors for keyword matching
 - 稠密、稀疏和二进制 embedding 向量，它们各自的优势和劣势
-
+- VectorDB challenge
+  - 工程
+    - 向量索引的 合并、拆分 - small index merge into large index
+    - 向量索引的 高效更新 - mutable vs immutable index
+  - 采用HNSW + DiskANN的混合检索策略
+    - HNSW delta + DiskANN
+  
 
 
 
