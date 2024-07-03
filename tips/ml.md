@@ -346,6 +346,12 @@
   - [Transformer模型之输入处理](https://mp.weixin.qq.com/s/ryjV4IVLbjUO-QVieOrW3A)
   - [Transformer模型之Encoder-Decoder](https://mp.weixin.qq.com/s/MPFq_-Jqu0DC7QffSK4oNg)
     - https://github.com/heiyeluren/black-transformer
+  - [Generative AI exists because of the transformer](https://ig.ft.com/generative-ai/)
+    - First a block of words is broken into tokens — basic units that can be encoded. Tokens often represent fractions of words, but we’ll turn each full word into a token.
+    - LLMs first observe it in context using enormous sets of training data, taking note of nearby words. 
+    - Eventually, we end up with a huge set of the words found alongside work in the training data, as well as those that weren’t found near it.
+    - As the model processes this set of words, it produces a vector — or list of values — and adjusts it based on each word’s proximity to work in the training data.
+    - A key concept of the transformer architecture is self-attention. This is what allows LLMs to understand relationships between words.
   - [Transformer](https://mp.weixin.qq.com/s/4WtoHGegZY6o4Jaa3bz66Q)
     - Transformer 模型在推理过程中的数学原理
       - 编码器

@@ -269,6 +269,7 @@
     - 开启milvus以后，数据不加载到内存是什么问题?
       - 如果用的是 python 的 Milvus Client，create_collection 如果没输入 index param 是不会 load 到内存里的.
       - 如果没有设置这个参数，你可以单独调用create_index()和load_collection()接口
+    - 把文件上传到S3上，然后把路径传给milvus让它去读取并解析。传路径的接口在pymilvus里叫utility.do_bulk_insert()
   - insert
     - 客户端发送一个insert请求
       - 客户端发送一个insert请求，milvus server的proxy接到请求，proxy把数据转发给pulsar/kafka，转发完之后就立刻返回，告诉客户端说insert完成
@@ -341,6 +342,19 @@
     - 半数使用问题是配置问题
       - 怎么调？ https://mp.weixin.qq.com/s?__biz=MzUzMDI5OTA5NQ==&mid=2247496778&idx=1&sn=018256ae415356e3ed357ee473dc1627&chksm=fa5155f2cd26dce4095b57fa4eb5c7e67e9eb49ed2762ce618e1134bb33022049e75c25e49ab&scene=21#wechat_redirect
       - Milvus 从 2.3.0 版本开始，就开始支持动态调整参数，具体操作方法参考：https://milvus.io/docs/dynamic_config.md
+    - [Performance Evaluation and Monitoring Metrics](https://zilliz.com/learn/how-to-spot-search-performance-bottleneck-in-vector-databases)
+      - important evaluation metrics are Recall, Latency, and Queries Per Second (QPS).
+      - Note
+        - Grafana's Minimum Intervals Can Impact Performance Monitoring Results - Change Min interval to 15s
+        - A NUMA-Design Machine Can Affect Milvus’s Performance
+      - The proxy can become the bottleneck if QPS is high and performs network-intensive tasks
+        - you can simply scale the Proxy vertically (use more CPU/Memory on the host) or horizontally (add more Proxy pods with a Load Balancer at the front).
+      - Performance is bounded by the CPU usage of QueryNode
+        - An excessive number of QueryNodes can detract from performance due to the increased number of messages the delegator must handle.
+      - IndexNote reaches 100% CPU usage
+        - If possible, use bulk insert rather than insert vectors one by one. This reduces network transmissions and skips the process of "growing" the segments.
+        - Ignore growing segments; pass ignore_growing in the search parameters like in https://milvus.io/docs/search.md.
+        - Change consistency levels to Eventually in the search API call.
     - [如何优化 Milvus 性能](https://mp.weixin.qq.com/s/4gDsAF4QnmXWzomrSFRLLg)
       - Milvus 会创建 256 个消息队列 topic。如果表数目比较少，可以调整 rootCoord.dmlChannelNum 减少 topic 数目降低消息队列负载
       - 每个 collection 会使用 2 个消息队列 topic（shard），如果写入非常大或者数据量极大，需要调整 collection 的 shard 数目
@@ -424,6 +438,8 @@
       - 一来因为float32计算起来比float64快得多，也省内存。
       - 二来向量搜索简称ANNS，本身就是近似搜索，小数点后十几位的值没有意义，就好比我们比较两个人是否长得相似不会去一根根计算他们的头发数量是否相等。
       - milvus处理向量是以float32位来传输、存储以及计算，你就算输入的是float64的值，传输到server那边就已经变成float32
+    - 如何查看日志？
+      -  https://github.com/milvus-io/milvus/tree/master/deployments/export-log 这里有脚本可以看日志 
     - 日志里面待构建索引行数和已构建索引行数之和大于数据总行数是什么原因呢？而且这个pendingIndexRows的数量还会增加是怎么回事呢？ 索引的已构建行数最大是等于表的总行数
       - pendingrow增加是因为里面有compaction，有些segment已经建好了索引，但它要和其他segment合并成更大的srgment，合并完之后又会再次建索引
     - 按照标量查询数据，同样的表达式，为什么一个有结果一个没结果？
