@@ -192,8 +192,12 @@
       - 选的metric_type是L2还是IP。
       - 如果是L2的话，distance越接近0就越相似，排第一个的最相似。
       - 如果是IP的话，在向量都做了归一化的前提下，distance越接近1越相似。详情参考官网文档的metric type。
-    - 使用IP必须要把向量都归一化，不然没有意义。对于归一化的向量，IP算出来的结果和COSINE理论上是相同的。如果你自己做了归一化，那就可以用IP。没做，那就用COSINE或者L2
-    - cosine是在数据被insert进来落盘的时候就计算好向量的length，然后在查询的时候会把两条向量的内积除以它们的length，所以是计算了一个余弦。由于length已经提前算好，所以查询性能和IP相比不会差多少
+    - metric_type
+      - COSINE，milvus会在建索引的时候为每一条向量计算一个模长，并把这些模长存在索引里，搜索的时候用这个模长来计算cosine的值。就相当于内部做了归一化。
+      - L2是欧式距离，没必要归一化，归一化也行，但是归一化或者不归一化得出来的topk结果有可能不同.
+      - IP都不会做归一化，只计算cosine公式的分子部分，如果向量是归一化的，那么分子除以分母1，结果必然和真正的cosine公式相同。 IP normalize之后就是cosine 本质上要看你关不关心模长
+      - 使用IP必须要把向量都归一化，不然没有意义。对于归一化的向量，IP算出来的结果和COSINE理论上是相同的。如果你自己做了归一化，那就可以用IP。没做，那就用COSINE或者L2
+      - cosine是在数据被insert进来落盘的时候就计算好向量的length，然后在查询的时候会把两条向量的内积除以它们的length，所以是计算了一个余弦。由于length已经提前算好，所以查询性能和IP相比不会差多少
     - 有向量索引的情况下，过滤查询是有可能搜不出结果。
       - 有时候能搜到有时不能搜到，多半是因为底下的segment做了compaction之后重建了索引。几个有索引的小分片和一个有索引的大分片，过滤搜索出来的东西很可能不同。
     - 查询节点内存自动均衡的几种策略？当前默认是scorebase
@@ -246,6 +250,7 @@
     - milvus里面，每个向量字段最多只能建立一种索引，如果要换，要把旧的删除再建新的。执行search的时候总是会使用那唯一指定的索引。 查询计划无法被外界感知
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap
+    - diskann加载到内存里的是类似于一个IVF_PQ索引。搜索时是先在内存里的索引粗略地搜索一下，然后到磁盘里取出部分向量数据做更精确的搜索
     - 集群开了mmap，创建集合索引的时候是默认就开启了，还是需要collection.set_properties({'mmap.enabled': True})参数指定
     - hnsw索引的向量类型只能用floatvector？ float16Vector可以使用和floatVector一样的索引，hnsw ivf都行
     - ivf_flat建索引的时间跟nlist的大小相关，设小点就快，大点就慢，1G的耗时1分钟也是有可能的
@@ -433,6 +438,7 @@
       - 4. 执行 connect，前提是你的milvus所使用的那个etcd在运行状态，并且容器端口2379暴露出来
       - 5. 如果connect成功，再执行force-release
       - 6. 重启milvus容器
+    - "channel not available" 报错可能是已知问题, 先release/load看一下行不行，不行的话重启一下querycoord/querynode
   - QA
     - 为何不用float64来保证小数点后十几位？
       - 一来因为float32计算起来比float64快得多，也省内存。

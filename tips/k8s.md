@@ -878,7 +878,33 @@
       - Node drain驱逐: kubectl cordon 命令可以防止新的 Pod 被调度到该节点，但您也可以一次性清空该节点上的所有当前 Pod。执行 kubectl drain nodename 后，该节点上的所有 Pod 都将被驱逐，并遵守其优雅终止期
         - API 驱逐: `kubectl drain` Kubernetes 的驱逐 API 请求对某个节点上的 Pod 进行即时驱逐
       - Node Not Ready 时，Controller Manager 发起的驱逐
-
+- [Native Sidecar Containers in Kubernetes](https://labs.iximiuz.com/tutorials/kubernetes-native-sidecars)
+  - Regular
+    - Multiple concurrent and restartable containers deployed together as a single "unit" is a powerful abstraction, but there are also situations when some of the containers in such a group may need to:
+      - Start before others (i.e., the startup order becomes important).
+      - Run to completion (i.e., restart upon termination is undesirable).
+  - init container
+    - Init containers:
+      - Triggered before regular containers.
+      - Started one by one in the order defined by their list.
+      - Run to completion before the next init container starts.
+    - ...and because of the above design, init containers:
+      - Can't respect the Pod's restart policy if it's set to Always - init containers then fallback to OnFailure.
+      - After their (successful) termination, don't affect the Pod's readiness - otherwise, the Pod with init containers would never become ready.
+      - Don't allow specifying the startup, liveness, and readiness probes - because they would be useless anyway.
+  - sidecar container
+    - Historically, init containers were used to perform some auxiliary "one-off" tasks before the main application container startup
+    - But there is more auxiliary functionality that is beneficial to keep outside of the main application container but still in the same Pod:
+      - Network proxies, adapters, and data transformers.
+      - Logging, metrics, and tracing collectors.
+      - Various monitoring agents
+  - native sidecar container
+    - 1.28 release introduced a new restartPolicy attribute for... containers
+    - The new type of init containers:
+      - Don't block the next (init or regular) container startup.
+      - Restarted upon termination.
+      - Support startup, readiness, and liveness probes!
+      - Terminate after all regular containers are done.
 
 
 

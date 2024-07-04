@@ -570,7 +570,11 @@
     - Use feedback to improve agent execution and reduce errors
       - Human feedback
       - LLM feedback
-- https://python.langchain.com/v0.2/docs/concepts/#retrieval
+  - https://python.langchain.com/v0.2/docs/concepts/#retrieval
+- [The Future of Knowledge Assistants](https://docs.google.com/presentation/d/1uDMj6iaMnJqcfSUVt5EnrPAzefSghzapSxQBcN2wR80)
+  - Advanced data and retrieval modules: Have an advanced set of capabilities for parsing, chunking, and retrieval even before you try out fancier orchestration techniques.
+  - Advanced single-agent query flows: Treat all data interfaces as tools, use agentic reasoning to build personalized QA systems.
+  - General multi-agent task solvers: Build a multi-agent system as event-driven microservices in order to better collectively solve a task, whether through an agentic orchestrator or through an explicitly defined orchestrator.
 - Optimizing RAG Through an Evaluation-Based Methodology
   - Summary
     - Irrelevance and Hallucinations: When the documents retrieved are irrelevant, evidenced by low scores in both Chunk Relevance and Context Relevance, the model is prone to generating inaccurate or fabricated information.
