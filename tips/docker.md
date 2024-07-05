@@ -107,6 +107,7 @@
     - 网络：隔离网络接口；
     - 用户：隔离 UID/GID 空间；
     - Cgroup：隔离 cgroup 根目录。
+      - ![img.png](docker_cgroup.png)
   - 容器网络（网络命名空间）
     - 在主流 Linux 操作系统中都可以简单地用 ip 命令创建网络命名空间
       ```shell

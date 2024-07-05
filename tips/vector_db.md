@@ -178,6 +178,7 @@
       - 还可以是：建表，建索引，load，insert，search 
       - 无论何种顺序，建索引必须在load之前，load必须在search之前
     - milvus每次查询最多只能返回16384条结果，分页也要遵循这个限制
+    - milvus2.3 search和query不走消息存储, 直接由proxy发送给query node
     - 如果你不用过滤查询的话，hnsw索引会比ivf_flat快。动态数据是要比静态数据查询慢的。对于动态数据，如果partition多的话，性能会更差一些
     - nlist取2048比较好，nprobe按你之前的比例取10左右。ivfpq，一亿的数据，nlist 可以设置成多少合适，2048吗？
       - 在milvus里，每个分片都是独立的内存，所以nlist的取值是以每个分片所包含的行数来推荐。我们推荐是4*sqrt(每个分片里的行数)。faiss都是把数据整成一份，所以它那个很大
