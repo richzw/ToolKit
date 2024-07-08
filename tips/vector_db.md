@@ -440,6 +440,9 @@
       - 5. 如果connect成功，再执行force-release
       - 6. 重启milvus容器
     - "channel not available" 报错可能是已知问题, 先release/load看一下行不行，不行的话重启一下querycoord/querynode
+    - minio里面noSuchKey？
+      - no suck key一般是在2.3早期的版本偶现。原因是某些bug导致gc把东西误删，导致load失败。主要有两种情况，一种是segment的bloomfilter被误删，另一种是segment的数据文件被误删。
+      - 前一种情况可以通过手动调用compact就能重建bloomfilter。后一种情况相当于数据丢了回不来了，只能用birdwatcher的segment drop命令把被误删的segment信息从etcd里清除。
   - QA
     - 为何不用float64来保证小数点后十几位？
       - 一来因为float32计算起来比float64快得多，也省内存。

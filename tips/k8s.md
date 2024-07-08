@@ -905,7 +905,8 @@
       - Restarted upon termination.
       - Support startup, readiness, and liveness probes!
       - Terminate after all regular containers are done.
-
+- K8s design principle
+  - https://github.com/kubernetes/design-proposals-archive/blob/main/architecture/principles.md
 
 
 

@@ -1482,7 +1482,10 @@
   - 仅显示 TCP 三次握手数据包：
   (tcp.flags.syn == 1) or (tcp.seq == 1 && tcp.ack == 1 && tcp.len == 0 && tcp.analysis.initial_rtt )
 - 在 TCP 分析中对于 TCP Fast Retransmission 是与 TCP Spurious Retransmission、TCP Out-Of-Order、TCP Retransmission 等在一起判断标记乱序或重传类型，而在不少场景还会有判断出错的问题
-- 
+- Wireshark 手动修正乱序和重传
+  - 可以通过两种方式进行手工修正：
+    - 1. 选取 TCP 数据包之后，通过 Menu -> Edit -> Preferences -> Protocols -> TCP -> Force interpretation to selected packet(s) ，包括以下选项：0(none)、1(Out-of-Order)、2(Retransmission)、3(Fast Retransmission)、4(Spurious Retransmission)。
+    - 2. 选取 TCP 数据包之后，直接右键 -> Protocol Preferences -> Transmission Control Protocol -> Force interpretation to selected packet(s) ，同样包括以下选项：0(none)、1(Out-of-Order)、2(Retransmission)、3(Fast Retransmission)、4(Spurious Retransmission)。
 
 
 

@@ -265,7 +265,8 @@
   - 当你在结构体上 #派生 Debug trait 时，你会得到两种用于 println! 的格式化方式：
     - {:?} 默认的调试格式化器
     - {:#?} “美化打印”的调试格式化器
-
+- Rust container cheat sheet
+  - ![img.png](rust_container_cheat_sheet.png)
 
 
 
