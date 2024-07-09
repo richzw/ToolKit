@@ -192,8 +192,10 @@
     - 基于进球数预测方法。基于进球数预测的方法把比赛结果的预测转化为利用泊松分布模型估计对战双方的攻防能力，进而通过进球数预测比赛最终的结果。
     - 基于概率回归模型。由多个不同的解释变量来组成一个概率回归模型，主要考虑球队水平、近期表现、比赛重要程度、主客队位置距离等。
     - 利用贝叶斯网络进行预测。主要采用与比赛相关的主观和客观数据对贝叶斯网络的进行训练建模，进而对比赛结果进行预测。
-
-
+- [X算法的工作原理](https://github.com/cholf5/random/issues/3)
+- systemd-run </path/to/exe>
+  - `systemd-run -u foobar -p MemoryLimit=1G -p OOMPolicy=continue /path/to/exe`
+  - `sytstemctl status foobar.service`
 
 
 

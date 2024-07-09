@@ -584,9 +584,49 @@
         && echo "Asia/Shanghai" > /etc/timezone
     - 将时区文件挂载到 Pod 中
     - 通过环境变量定义时区 TZ 环境变量用于设置时区
-
-
-
+- Docker镜像体积减小
+  - 多层镜像构建是指在一个Dockerfile中使用多个RUN指令来构建镜像。每个RUN指令会产生一个新的镜像层，而每个镜像层都会占用额外的存储空间
+    - 为了优化多层镜像构建，可以使用&&操作符将多个命令合并成一个RUN指令，避免产生额外的镜像层。同时，在一个RUN指令中执行多个命令可以减少Docker镜像的大小。
+  - 有效使用缓存
+    - ```
+      # 设置基础镜像
+      FROM node:14
+      # 设置工作目录
+      WORKDIR /app
+      # 将 package.json 复制到工作目录
+      COPY package*.json ./
+      
+      # 运行 npm install 安装依赖
+      RUN npm install
+      
+      # 将应用代码复制到工作目录
+      COPY . .
+      # 指定容器启动命令
+      CMD ["node", "app.js"]
+      ```
+    - 首次构建镜像时，Docker 会运行 npm install 安装依赖，并创建一个缓存层。
+    - 在后续构建过程中，如果只有 app.js 文件发生了改变，而 package.json 文件没有变化，Docker 将会重用之前的缓存层，直接复制 app.js 到镜像中，而无需重新安装依赖，从而加快构建速度
+  - 使用多阶段构建
+    - ```
+      # 构建阶段1
+      FROM golang:1.17 AS builder
+      
+      WORKDIR /ap
+      COPY . .
+      # 编译应用程序
+      RUN go build -o myapp
+      
+      # 构建阶段2
+      FROM alpine:latest
+      # 复制编译后的应用程序
+      COPY --from=builder /app/myapp /usr/local/bin/
+      
+      # 设置工作目录
+      WORKDIR /usr/local/bin
+      
+      # 容器启动时运行的命令
+      CMD ["myapp"]
+      ```
 
 
 

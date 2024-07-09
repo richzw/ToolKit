@@ -155,8 +155,11 @@
   - ![img.png](vector_db_milvus_overview.png)
   - indexnode，每个querynode，每个datanode都是单独的容器
     - indexnode只负责建索引任务，querynode只负责查询任务，datanode只负责数据的持久化和整理任务。indexnode建索引时总是会尽量用满cpu，以最快速度建好索引
+      - querynode负责搜索任务，要把整个表的索引都加载到自己的内存里。
+      - indexnode只负责建索引任务，你可以理解为它给segment一个一个地建索引，加载一个segment的向量进自己内存，建好索引后释放内存，再为下一个segment建索引。
+      - datanode主要负责segment的落盘，和合并。合并的时候会把几个小的segment数据加载进自己内存，然后合成一个大的落盘，然后释放内存。
     - load的时候，数据会load到querynode节点上
-    - 一个querynode节点sesrch时可以用多张gpu卡同时算。但建索引的任务，一个indexnode默认是一个任务一个任务执行，所以只用到一张显卡
+    - 一个querynode节点search时可以用多张gpu卡同时算。但建索引的任务，一个indexnode默认是一个任务一个任务执行，所以只用到一张显卡
   - Deployment
     - standalone是内置的rocksdb实现message queue，
     - cluster是用pulsar或者kafka来做为message queue。而cdc是通过操作kafka/pulsar来同步数据的，所以standalone不能用

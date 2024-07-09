@@ -388,6 +388,8 @@
     - 解码器
       - 解码器是自回归的，这意味着解码器将使用先前生成的 token 再次生成第二个 token
     - https://osanseviero.github.io/hackerllama/blog/posts/random_transformer/
+    - 图解
+      - ![img.png](ml_transformer_encoder1.png)
   - [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html)
     - Harvard NLP 的 The Annotated Transformer 是一个非常好的学习 Transformer 的资源
   - [Infini-attention transformer](https://arxiv.org/abs/2404.07143)

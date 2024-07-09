@@ -600,6 +600,7 @@
   - Self-RAG https://arxiv.org/pdf/2310.11511
     - 通过让语言模型在生成过程中进行自我反思，来提高生成质量和事实正确性，同时不损失语言模型的多样性
   - Dense X Retrivel https://arxiv.org/pdf/2312.06648
+- [Safeguarding Your RAG Pipelines](https://towardsdatascience.com/safeguarding-your-rag-pipelines-a-step-by-step-guide-to-implementing-llama-guard-with-llamaindex-6f80a2e07756)
 
  
 
