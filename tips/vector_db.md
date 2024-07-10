@@ -230,6 +230,7 @@
     - 用gpu来做查询，必须要使用"GPU_"名字打头的索引
       - gpu的显存没有机器内存那么大，能加载的数据量相对较小，所以不适合巨型数据集。gpu在nq比较大的时候比较有优势，比如单次查询输入一千条以上的向量去搜
       - 每次搜索时要把目标向量从内存拷到显存，搜索完成后把结果从显存拷到内存，这些都是有成本的
+      - 索引是带有GPU_前缀的索引，indexnode和querynode都需要gpu
     - qps
       - qps受影响的因素很多，数据量，维度，索引类型参数，搜索参数，是否有过滤，是否有output_fields，milvus. yaml里面的queryNode.group里的配置，querynode数量，load的参数replica_number，等等。
       - 要获得更高的qps可以从上面这些方面入手。cpu的核数和性能也会影响qps，甚至NUMA架构也会影响qps。单机版的indexnode datanode如果有建索引或者compaction的任务在执行，也会影响qps。
@@ -476,6 +477,8 @@
       - 如果跑分 segment调大应该性能就会变好
     - Error: incomplete query result - topk小于一定值是正常的，大于一定值不正常
       - 这里面确实是有bug，不过不好复现。上次另一个用户说设置topk大于某一个值时就不报错了，他设置的topk是五百多
+    - milvus单机版迁移到集群的方案（含数据迁移）
+      - milvus-backup项目是做milvus数据的备份恢复的，用这个工具把单机的数据备份出来，然后把备份目录上传到集群所使用的s3 bucket里，最后再用milvus-backup工具恢复数据到该集群。
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。
