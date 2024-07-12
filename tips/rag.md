@@ -102,6 +102,12 @@
         - 递归分块使用一组分隔符以分层和迭代的方式将输入文本分成更小的块
       - 专门的分块
         - Markdown和LaTeX是您可能遇到的结构化和格式化内容的两个例子。在这些情况下，可以使用专门的分块方法在分块过程中保留内容的原始结构。
+    - Recursive Character Text Splitting 
+      - Breaking text into chunks based on character count ensures each piece is manageable and coherent.
+    - Small-to-Big Text Splitting 
+      - Starting with larger chunks and progressively breaking them down into smaller ones. Search using small, but retrieve using Big.
+    - Semantic Text Splitting 
+      - Dividing text based on meaning so that each chunk represents a complete idea or topic, ensuring that the context is preserved.
   - 策略选择
     - 预处理数据，在确定应用程序的最佳块大小之前，您需要先预处理数据以确保质量
     - 选择一定范围的块大小，数据预处理完成后，下一步就是选择一定范围的潜在块大小进行测试

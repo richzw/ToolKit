@@ -512,6 +512,13 @@
       - “hallucination” refers to a phenomenon where the model generates text that is incorrect, nonsensical, or not real. 
       - Since LLMs are not databases or search engines, they would not cite where their response is based on. These models generate text as an extrapolation from the prompt you provided.
       - 一个比较有效的方法可以缓解模型的幻觉问题：让模型给出相关信息，并基于相关信息给我回答。比如告诉模型：“First find relevant information, then answer the question based on the relevant information”。
+      - [Extrinsic Hallucinations in LLMs](https://lilianweng.github.io/posts/2024-07-07-hallucination/)
+        - There are two types of hallucination:
+          - In-context hallucination: The model output should be consistent with the source content in context.
+          - Extrinsic hallucination: The model output should be grounded by the pre-training dataset.
+        - What Causes Hallucinations?
+          - Pre-training Data Issues
+          - Fine-tuning New Knowledge
     - 模型的限制：逆转诅咒(reversal curse)。
       - 逆转诅咒 (reversal curse) 是指 LLM 无法逆转他们训练时的因果陈述，如果 LLM 是在 "A is B" 上训练的，它无法直接推理出 "B is A"
     - 模型的限制：遗忘中间 (lost in the middle)
