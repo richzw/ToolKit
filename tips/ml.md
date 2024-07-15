@@ -753,7 +753,7 @@
     - 评测数据集
       - 数据集中信息是否有自相矛盾的， 数据分部是否多样，数据集是否可以代表你想要的场景，数据集的清洁度是否有重复或无用等
       - 一般我们会 1) 在高维空间上投影一下数据集，看下分布。 
-        - 2)数据集测试，使用现有模型或一个简单的基准模型，预测下数据集，分析下预测错误或不合理的数据条数，看看这些数据条数是标注问题还是典型问题。
+      - 2)数据集测试，使用现有模型或一个简单的基准模型，预测下数据集，分析下预测错误或不合理的数据条数，看看这些数据条数是标注问题还是典型问题。
     - Summary
       - ![img.png](ml_fine_tune_diff.png)
       - [PEFT and LoRA](https://www.mercity.ai/blog-post/fine-tuning-llms-using-peft-and-lora)
@@ -761,6 +761,7 @@
     - GPTQ vs AWQ
       - GPTQ (Gradient-based Post-training Quantization) 使用数据集，如C4，来进行权重的精细调整和量化，这是因为它依赖于数据驱动的方法来确定哪些权重对模型性能最为关键。通过在具体的数据集上进行微调，GPTQ可以更准确地确定哪些权重在量化时需要保持更高的精度。
       - AWQ (Adaptive Weight Quantization) 采用了一种不依赖于特定数据集的方法。它利用模型权重本身的统计信息来指导量化过程，而不是依赖于外部数据。这种方法的优势在于它不需要额外的数据来进行权重的量化，从而简化了量化过程。 AWQ关注权重的分布和重要性，使用这些信息来适应性地量化不同的权重，从而在不牺牲太多模型性能的情况下减少模型大小。
+  - [Training and Finetuning Embedding Models with Sentence Transformers v3](https://huggingface.co/blog/train-sentence-transformers)
 - [LLM Tools]
   - [candle](https://github.com/huggingface/candle)
     - Minimalist ML framework for Rust

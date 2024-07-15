@@ -447,6 +447,7 @@
     - minio里面noSuchKey？
       - no suck key一般是在2.3早期的版本偶现。原因是某些bug导致gc把东西误删，导致load失败。主要有两种情况，一种是segment的bloomfilter被误删，另一种是segment的数据文件被误删。
       - 前一种情况可以通过手动调用compact就能重建bloomfilter。后一种情况相当于数据丢了回不来了，只能用birdwatcher的segment drop命令把被误删的segment信息从etcd里清除。
+    - request limit exceeded[limit=1024] - 调整proxy.maxTaskNum这个参数
   - QA
     - 为何不用float64来保证小数点后十几位？
       - 一来因为float32计算起来比float64快得多，也省内存。
@@ -479,6 +480,8 @@
       - 这里面确实是有bug，不过不好复现。上次另一个用户说设置topk大于某一个值时就不报错了，他设置的topk是五百多
     - milvus单机版迁移到集群的方案（含数据迁移）
       - milvus-backup项目是做milvus数据的备份恢复的，用这个工具把单机的数据备份出来，然后把备份目录上传到集群所使用的s3 bucket里，最后再用milvus-backup工具恢复数据到该集群。
+    - datanode写minio的速度跟不上从pulsar读取数据的速度，导致datanode的内存不断升高直到oom，怎么能控制datanode读取pulsar的速度呢
+      - 一般可以通过quota反压 或者datanode加资源解决
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。

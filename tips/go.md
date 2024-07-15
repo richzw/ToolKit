@@ -2109,6 +2109,7 @@
   - SIMD
     - SIMD 代表“单指令多数据”(Single Instruction Multiple Data)
     - 它允许你用一条指令在一堆数据上运行一个操作。举个例子，要对两个int32向量逐元素相加，我们可以用ADD指令一个一个地加起来，或者我们可以用VPADDD指令一次加上 64 对，延迟相同
+  - [Binary Search Tree with SIMD](https://clement-jean.github.io/simd_binary_search_tree/)
 - [10亿行的挑战](https://github.com/gunnarmorling/1brc)
   - https://mp.weixin.qq.com/s/_z801oBwANP27C-BXbHNZA
 - [ I/O聚合]

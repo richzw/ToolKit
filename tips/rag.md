@@ -600,6 +600,9 @@
     - 检索（子图召回）：通过LLM服务实现查询的关键词提取和泛化（大小写、别称、同义词等），并基于关键词实现子图遍历（DFS/BFS），搜索N跳以内的局部子图。
     - 生成（子图上下文）：将局部子图数据格式化为文本，作为上下文和问题一起提交给大模型处理。
   - https://github.com/microsoft/graphrag
+    - Do a vector or keyword search to find an initial set of nodes.
+    - Traverse the graph to bring back information about related nodes.
+    - Optionally, re-rank documents using a graph-based ranking algorithm such as PageRank.
 - 提升RAG效果的方法
   - RAPTOR https://arxiv.org/pdf/2401.18059
     - 通过递归嵌入、聚类和总结文本块，构建一个自底向上的树形结构，在推理时从这棵树中检索信息，从而在不同抽象层次上整合来自长文档的信息。
@@ -607,7 +610,7 @@
     - 通过让语言模型在生成过程中进行自我反思，来提高生成质量和事实正确性，同时不损失语言模型的多样性
   - Dense X Retrivel https://arxiv.org/pdf/2312.06648
 - [Safeguarding Your RAG Pipelines](https://towardsdatascience.com/safeguarding-your-rag-pipelines-a-step-by-step-guide-to-implementing-llama-guard-with-llamaindex-6f80a2e07756)
-
+- [RAG for a Codebase with 10k Repos](https://www.codium.ai/blog/rag-for-large-scale-code-repos/)
  
 
 
