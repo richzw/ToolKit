@@ -1486,7 +1486,10 @@
   - 可以通过两种方式进行手工修正：
     - 1. 选取 TCP 数据包之后，通过 Menu -> Edit -> Preferences -> Protocols -> TCP -> Force interpretation to selected packet(s) ，包括以下选项：0(none)、1(Out-of-Order)、2(Retransmission)、3(Fast Retransmission)、4(Spurious Retransmission)。
     - 2. 选取 TCP 数据包之后，直接右键 -> Protocol Preferences -> Transmission Control Protocol -> Force interpretation to selected packet(s) ，同样包括以下选项：0(none)、1(Out-of-Order)、2(Retransmission)、3(Fast Retransmission)、4(Spurious Retransmission)。
-
+- TCP Retransmission 的定义如下，当以下所有条件都为真时设置：
+  - 不是 Keep-Alive 数据包
+  - TCP 段大小大于零或设置了 SYN/FIN
+  - 同方向之前下一个期望的 Seq Num 大于当前数据包的 Seq Num
 
 
 

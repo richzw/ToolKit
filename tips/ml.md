@@ -1033,6 +1033,7 @@
   - [小红书流量算法](https://mp.weixin.qq.com/s/cAxohCGF2mpYBn5rU3S1Ew)
     - 与传统推荐系统追逐的「全局最优」不同，小红书将流量分层，寻求「局部最优」，通过识别不同的人群，让好的内容从各个群体中涌现出来，跑出了适合社区的新一代推荐系统。
     - 关键的问题包括在冷启／爬坡阶段，如何进行内容理解从而定位种子人群并进行高效的人群扩散；在召回／排序环节，如何提升模型预测的精准度，以及如何进行实时流量调控；还有如何保证内容的多样性，使用户的短期兴趣和长期兴趣得到平衡。
+  - [基于因果推断的推荐系统](https://mp.weixin.qq.com/s/IkKMyDPOcUO3iCga5aMpQA)
 - [Note for Deep learning](https://www.slideshare.net/TessFerrandez/notes-from-coursera-deep-learning-courses-by-andrew-ng)
 - [Mixtral-8x7B Pytorch 实现](https://mp.weixin.qq.com/s/HProBDSA9WxyD-JuKpJ9ew)
   - [Source](https://www.vtabbott.io/mixtral/)

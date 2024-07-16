@@ -267,7 +267,12 @@
     - {:#?} “美化打印”的调试格式化器
 - Rust container cheat sheet
   - ![img.png](rust_container_cheat_sheet.png)
-
+- anyhow vs thiserror
+  - thiserror适用于库作者,用于定义明确的错误类型。
+    - thiserror 只能用于枚举和结构体。 错误可以是枚举、带命名字段的结构体、元组结构体或单元结构体。 thiserror 主要设计用于枚举和结构体
+    - 不支持泛型错误类型(虽然可以在枚举变体中使用泛型)。 thiserror 不直接支持在顶层使用泛型参数的错误类型。这意味着你不能创建一个泛型的错误枚举或结构体
+  - anyhow更适合应用程序开发,用于处理各种可能的错误情况。
+    - 使用 Result<T, anyhow::Error> 或 anyhow::Result<T> 作为任何可能失败的函数的返回类型。在函数内部，使用 ? 运算符可以轻松传播任何实现了 std::error::Error trait 的错误
 
 
 
