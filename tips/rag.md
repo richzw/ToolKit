@@ -115,6 +115,9 @@
     - llamaindex等框架为chunk增加描述性metadata，以及精心设计索引结构，比如treeindex等，进而解决因为chunking导致的跨chunk的上下文丢失问题
   - [测试 LangChain 分块](https://mp.weixin.qq.com/s/-ZgM3wItZUtY6nU_9FmJnw)
     - 我添加了五个实验，这个教程测试的分块长度从 32 到 64、128、256、512 不等，分块 overlap 从 4 到 8、16、32、64 不等的分块策略
+  - LlamaParse 
+    - with an API call you can store both cleanly parsed text and image chunks 
+    - the text can be pre-extracted by OCR/multimodal models but you can also dynamically feed the image directly into the model during query-time
 - [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
   - Query Transformations - a set of approaches focused on modifying the user input in order to improve retrieval
     - Query expansion - decomposes the input into sub-questions, each of which is a more narrow retrieval challenge
@@ -599,10 +602,27 @@
     - 索引（三元组抽取）：通过LLM服务实现文档的三元组提取，写入图数据库。
     - 检索（子图召回）：通过LLM服务实现查询的关键词提取和泛化（大小写、别称、同义词等），并基于关键词实现子图遍历（DFS/BFS），搜索N跳以内的局部子图。
     - 生成（子图上下文）：将局部子图数据格式化为文本，作为上下文和问题一起提交给大模型处理。
+  - 主要两个部分：Indexing 和 Query
+    - 索引 (Indexing) 使用 LLM 从文本文档中自动提取丰富的知识图谱。
+      - Source Documents → Text Chunks
+      - Text Chunks → Element Instances
+      - Element Instances → Element Summaries
+      - Element Summaries → Graph Communities
+    - 查询 (Query) 通过检测图中节点的"社区"来报告数据的语义结构,形成多层次的主题概述
+      - Graph Communities → Community Summaries
+      -  Community Summaries → Community Answers → Global Answer
   - https://github.com/microsoft/graphrag
     - Do a vector or keyword search to find an initial set of nodes.
     - Traverse the graph to bring back information about related nodes.
     - Optionally, re-rank documents using a graph-based ranking algorithm such as PageRank.
+  - 优势
+    - 能够更好地回答 "全局问题" (涉及整个数据集的问题)，而传统 RAG 方法在这方面表现不佳。
+    - 使用社区摘要和映射-归约方法来保留全局数据上下文中的所有相关内容。
+    - Graph RAG 的独特之处在于使用了能够自适应地对全局问题进行总结的图结构。
+  - RAG 方法和系统
+    - Naive RAG 方法通过文档转文本、切分文本块和嵌入向量空间实现，其中相似语义对应相似位置，然后查询也被嵌入同一空间，最近的 k 个文本块作为上下文。
+    - Advanced RAG 系统设计了预检索、检索和后检索策略来弥补朴素 RAG 的不足，而模块化 RAG 系统则采用迭代和动态循环检索生成模式。
+    - Graph RAG 结合了多个系统的概念，如社区概要作为自我记忆用于增强检索，以及社区答案的并行生成类似于迭代或联邦检索-生成策略。其他系统也集成了这些概念进行多文档摘要和多跳问答
 - 提升RAG效果的方法
   - RAPTOR https://arxiv.org/pdf/2401.18059
     - 通过递归嵌入、聚类和总结文本块，构建一个自底向上的树形结构，在推理时从这棵树中检索信息，从而在不同抽象层次上整合来自长文档的信息。
