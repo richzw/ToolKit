@@ -683,6 +683,25 @@
       - 大规模数据集构建，采用自指导风格，使用UltraChat数据集，随后进行蒸馏式监督微调（dSFT）。
       - 通过一系列聊天模型完成和随后的GPT-4（UltraFeedback）评分来收集人工智能反馈（AIF），然后将其转化为偏好数据。
       - 将蒸馏直接偏好优化（dDPO）应用于使用收集的反馈数据的dSFT模型
+  - BGE-M3, Splade 模型, BM25
+    - BGE-M3 和 Splade 均基于 BERT 架构发展
+    - BGE-M3
+      - BGE-M3 是一种先进的机器学习模型，它扩展了 BERT 的能力，注重通过多功能性（Multi-Functionality）、多语言性（Multi-Linguisticity）和多粒度性（Multi-Granularity）增强文本表示
+      - 该模型不仅仅用于生成稠密向量，还可以用于生成 Learned 稀疏向量，尤其适用于需要精准处理细微信息含义的信息检索任务
+    - SPLADE 标志着在生成 Learned 稀疏向量方面的进步，它基于 BERT 架构增加了一种独特的方法来优化 Embedding 的稀疏性
+      - MLM 是一种强大的无监督学习任务，隐去了部分输入的 Tokens，要求模型仅依据其上下文推断这些隐藏的词汇。这种技术增强了模型对语言的理解能力及对语言结构的认知，因为它需要依赖周围的 Tokens 来正确填补这些空缺。
+    - BM25
+      - an enhancement of TF-IDF due to two key factors:
+        - It takes into account the document length.
+        - It incorporates the concept of a keyword saturation term.
+    - BM25 vs SPLADE
+      - BM25, an intuitive information retrieval algorithm, offers predictable behavior and easily explainable results
+        - Its vector, containing fewer non-zero values compared to SPLADE, enhances the retrieval process, leading to superior search efficiency.
+        - BM25 also relies on exact string matching and does not depend on specific trainable deep learning models, meaning no additional fine-tuning is required.
+        - However, the vocabulary used in the query must also be found in the corpus; otherwise, it risks returning no matching results.
+      - Splade
+        - SPLADE, in contrast, generates a vector with more non-zero values, resulting in a slower retrieval process.
+        - this characteristic can potentially yield superior results, as SPLADE has the capability to include semantically similar terms for each input word.
   - [Gemma](https://mp.weixin.qq.com/s/E52nPpWrhnU7wMLpOhVz5Q)
     - [Gemma 模型中文指令微调](https://mp.weixin.qq.com/s/jXymgChgWbfj4k9zr2vqmw)
     - [Gemma test/ fine tune samples](https://docs.google.com/document/d/1-RYrywitplAHGteiWxvzwREAUdSGr8CJz-DUOWsaoAs/edit)

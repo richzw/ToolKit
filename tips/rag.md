@@ -606,8 +606,11 @@
     - 索引 (Indexing) 使用 LLM 从文本文档中自动提取丰富的知识图谱。
       - Source Documents → Text Chunks
       - Text Chunks → Element Instances
+        - 从切块的文本中提取三元组。LLM+Prompt。并且把三元组和文本切块关联起来
       - Element Instances → Element Summaries
+        - 用Community detection算法对文档生成的大图进行多层次切分。输出有层次结构的子图
       - Element Summaries → Graph Communities
+        - 对每层每个子图生成summary，而这些summaries则可以在回答问题的时候，作为Context被使用作为回答问题的依据。生成Summary的任务自然也是由LLM完成
     - 查询 (Query) 通过检测图中节点的"社区"来报告数据的语义结构,形成多层次的主题概述
       - Graph Communities → Community Summaries
       -  Community Summaries → Community Answers → Global Answer
@@ -623,6 +626,7 @@
     - Naive RAG 方法通过文档转文本、切分文本块和嵌入向量空间实现，其中相似语义对应相似位置，然后查询也被嵌入同一空间，最近的 k 个文本块作为上下文。
     - Advanced RAG 系统设计了预检索、检索和后检索策略来弥补朴素 RAG 的不足，而模块化 RAG 系统则采用迭代和动态循环检索生成模式。
     - Graph RAG 结合了多个系统的概念，如社区概要作为自我记忆用于增强检索，以及社区答案的并行生成类似于迭代或联邦检索-生成策略。其他系统也集成了这些概念进行多文档摘要和多跳问答
+  - [From Knowledge Graphs to GraphRAG: Advanced Intelligent Data Retrieval](https://div.beehiiv.com/p/knowledge-graphs-graphrag-advanced-intelligent-data-retrieval)
 - 提升RAG效果的方法
   - RAPTOR https://arxiv.org/pdf/2401.18059
     - 通过递归嵌入、聚类和总结文本块，构建一个自底向上的树形结构，在推理时从这棵树中检索信息，从而在不同抽象层次上整合来自长文档的信息。
@@ -631,7 +635,10 @@
   - Dense X Retrivel https://arxiv.org/pdf/2312.06648
 - [Safeguarding Your RAG Pipelines](https://towardsdatascience.com/safeguarding-your-rag-pipelines-a-step-by-step-guide-to-implementing-llama-guard-with-llamaindex-6f80a2e07756)
 - [RAG for a Codebase with 10k Repos](https://www.codium.ai/blog/rag-for-large-scale-code-repos/)
- 
+- Agentic RAG
+  - Routing (Adaptive RAG) - Allows the agent to intelligently route user queries to the most suitable retrieval method based on the question itself. 
+  - Fallback (Corrective RAG) - Ensures the agent has a backup plan if its initial retrieval methods fail to provide relevant results. 
+  - Self-correction (Self-RAG) - Enables the agent to identify and fix its own errors or misleading outputs. 
 
 
 
