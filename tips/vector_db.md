@@ -365,6 +365,18 @@
         - If possible, use bulk insert rather than insert vectors one by one. This reduces network transmissions and skips the process of "growing" the segments.
         - Ignore growing segments; pass ignore_growing in the search parameters like in https://milvus.io/docs/search.md.
         - Change consistency levels to Eventually in the search API call.
+    - [定位Milvus性能瓶颈](https://mp.weixin.qq.com/s/0q9PJi_pdOZKvjg_VrTivw)
+      - 客户端是性能瓶颈，请考虑增加请求的数量
+        - 检查并调整可能限制数据流的网络限制器。
+        - 如果您使用 PyMilvus：
+          - a.在多进程操作中，选择使用 spawn 方法而非 fork
+          - b.在每一个进程中，执行以下操作：导入 from pymilvus import connections，然后运行 connections.connect(args)。
+        -  进行水平扩展——增加客户端数量，直至 QPS 值稳定
+      - 带宽
+        - 启用压缩 Milvus 各组件间以及 Milvus 与 SDK 客户端间实施 gRPC 压缩
+      - 磁盘性能
+        - 推荐使用 NVMe SSD。在 SATA SSD 或 HDD 上创建和搜索磁盘索引可能会因为 I/O 操作受限而导致较大的 Latency 和较低的 QPS
+        - 虽然 EBS 采用 NVMe 驱动，但其提供的低延迟优势并不及本地 NVMe SSD。
     - [如何优化 Milvus 性能](https://mp.weixin.qq.com/s/4gDsAF4QnmXWzomrSFRLLg)
       - Milvus 会创建 256 个消息队列 topic。如果表数目比较少，可以调整 rootCoord.dmlChannelNum 减少 topic 数目降低消息队列负载
       - 每个 collection 会使用 2 个消息队列 topic（shard），如果写入非常大或者数据量极大，需要调整 collection 的 shard 数目

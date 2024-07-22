@@ -113,6 +113,11 @@
     - 选择一定范围的块大小，数据预处理完成后，下一步就是选择一定范围的潜在块大小进行测试
     - 评估每种分块大小的性能，为了测试各种分块大小，可以在向量数据库中使用多个索引或具有多个命名空间的单个索引
     - llamaindex等框架为chunk增加描述性metadata，以及精心设计索引结构，比如treeindex等，进而解决因为chunking导致的跨chunk的上下文丢失问题
+    - [Chunking for RAG: best practices](https://unstructured.io/blog/chunking-for-rag-best-practices)
+      - 基本分块策略：这种方法可以在遵守最大分块大小限制的前提下，将连续元素组合起来，最大限度地填充每个分块。如果单个孤立的元素超过了最大硬限制，就会被分成两个或更多块。
+      - 按标题分块策略：该策略利用分区过程中识别的文档元素类型来理解文档结构，并保留章节边界。这就意味着，单个数据块永远不会包含出现在两个不同章节中的文本，从而确保主题保持自足，提高检索精度。
+      - 按页面分块策略（仅支持API调用）：该策略专为每一页都能传递独特信息的文档而设计，可确保来自不同页面的内容绝不会混杂在同一个分块中。当检测到一个新页面时，即使下一个元素可以放在之前的内容块中，也会完成现有的内容块并开始一个新的内容块。
+      - 按相似性分块策略（仅支持API调用）：当文档结构无法提供明确的主题边界时，可以使用 "通过相似性 "策略。该策略使用 "sentence-transformers/multi-qa-mpnet-base-dot-v1 "嵌入模型来识别在主题上相似的顺序元素，并将它们组合成块。
   - [测试 LangChain 分块](https://mp.weixin.qq.com/s/-ZgM3wItZUtY6nU_9FmJnw)
     - 我添加了五个实验，这个教程测试的分块长度从 32 到 64、128、256、512 不等，分块 overlap 从 4 到 8、16、32、64 不等的分块策略
   - LlamaParse 
@@ -639,7 +644,7 @@
   - Routing (Adaptive RAG) - Allows the agent to intelligently route user queries to the most suitable retrieval method based on the question itself. 
   - Fallback (Corrective RAG) - Ensures the agent has a backup plan if its initial retrieval methods fail to provide relevant results. 
   - Self-correction (Self-RAG) - Enables the agent to identify and fix its own errors or misleading outputs. 
-
+- ![img.png](rag_ft.png)
 
 
 
