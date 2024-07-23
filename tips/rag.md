@@ -132,6 +132,17 @@
     - Query re-writing
     - Query compression
       - a user question follows a broader chat conversation. In order to properly answer the question, the full conversational context may be required. To address this, we use this prompt to compress chat history into a final question for retrieval
+    - 不规范的查询和短查询
+      - 意图分析：确定一个或多个用户意图，缩小召回范围
+        - 基于预定义的规则或关键字，通过正则表达式进行匹配
+        - 使用经典小模型分类，例如 Naive Bayes 分类器或 BERT。首先，我们需要训练一个分类器，BERT 的示例代码片段如下所示。然后，我们就可以用它对查询进行分类。
+        - Query相似性检索。为预定义意图生成embedding，然后使用相同的嵌入模型为用户查询生成embedding。
+        - LLM分类。构建一个提示，并利用 LLM 做出决策。此外，还可以提供用户的历史语境，以获得更准确的意图
+      - 关键词提取：确定查询的关键词，并根据关键词进行检索。
+        - TF-IDF：首先，进行标记化和停止词去除。然后，计算每个标记的反文档频率（IDF）和每个标记的 TF-IDF 分数。最后，根据计算出的 TF-IDF 分数对词语进行排序
+        - 训练Bert模型或使用现有模型，如 KeyBERT：直接提取关键词，形成最终的关键词列表
+        - 使用 LLM 提取关键词
+      - 澄清和询问：主动向用户提问，以获取更多信息
   - [Routing](https://blog.langchain.dev/applying-openai-rag/)
   - Query Construction
     - Text-to-SQL

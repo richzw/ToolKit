@@ -1573,6 +1573,32 @@
   - 使用加装 pg_cron[7] 扩展的 Postgres 作为定时任务守护程序，在特定时间执行特定任务，例如发送邮件，或向消息队列中添加事件。
   - 使用 Postgres 进行全文搜索[9]，加装 ParadeDB 替代 ElasticSearch。
   - 使用 Postgres 在数据库中生成JSON[10]，免去服务器端代码编写，直接供 API 使用
+  - [PostgreSQL as a Cache](https://martinheinz.dev/blog/105)
+    - UNLOGGED tables don't generate WAL (Write Ahead Log) information. That gives us huge improvements in write performance and saves us some disk space. 
+    - There's obviously a trade-off - UNLOGGED tables aren't crash-safe - without WAL record
+    - trigger
+    ```
+    CREATE OR REPLACE FUNCTION expire_rows_func (retention_hours integer) RETURNS void AS
+      $$
+      BEGIN
+      DELETE FROM cache
+      WHERE inserted_at < NOW() - (retention_hours || ' hours')::interval;
+      END;
+      $$ LANGUAGE plpgsql;
+      
+      CREATE OR REPLACE FUNCTION expire_rows_func_trigger() RETURNS trigger AS
+      $$
+      BEGIN
+      PERFORM expire_rows_func (1);
+      RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+      
+      CREATE TRIGGER cache_cleanup_trigger
+      AFTER INSERT ON cache
+      FOR EACH ROW
+      EXECUTE FUNCTION expire_rows_func_trigger();
+    ```
 - [数仓-SQL任务优化](https://mp.weixin.qq.com/s/_zmIb3t9qCRVHZKwHNgVGA)
 
 

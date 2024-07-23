@@ -627,8 +627,15 @@
       # 容器启动时运行的命令
       CMD ["myapp"]
       ```
-
-
+- 容器干扰检测与治理
+  - CPI
+    - CPI 即 Cycle Per Instruction 的缩写，它的含义就是每指令周期数。此外，在一些场合，也可以经常看到 IPC，即 Instruction Per Cycle，含义为每周期指令数
+    - CPI 值越小，表示计算机系统的指令执行效率越高。CPI 小于 1，程序通常是 CPU 密集型的；
+    - CPI 和 IPC 的关系为: CPI = 1 / IPC
+  - LLC
+    - LLC(last level cache)缓存资源作为影响作业性能的重要资源, 其上的干扰同样不可忽略.多个应用在共享缓存时可能出现相互替换的现象
+    - LLC 缓存命中率 = L3_CACHE_HITS / L3_CACHE_REFERENCES LLC 缓存缺失率 = L3_CACHE_MISSES / L3_CACHE_REFERENCES
+  
 
 
 
