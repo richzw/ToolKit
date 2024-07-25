@@ -152,6 +152,9 @@
     - IP 分 Class 有什么意义，后来看到 RIP 才明白原来这古老的路由协议假设全世界的网络号都是 classful 的，让路由结构简单了很多
     - 为什么 MTU 都设置成 1500 呢？1500 其实是一个 Trade Off
     - 超过 MTU 的 Frame 会发生什么？ Drop. 这是最简单的处理方法。也是现实世界很多软件，硬件的处理方式
+    - 测试
+      - 用 ping 发送一个满载的禁止分片的包来探测 `ping -M do -s 1472 -c 3 -i 0.2 ip`
+      - 如果想探测到具体是哪一跳的 MTU 异常，可以通过指定 TTL 来探测 `ping -M do -s 1472 -c 3 -i 0.2 -t 1 ip`
     - 什么时候发送的数据会超过 MTU？最常见的是 VPN 和 overlay 网络。
       - 这种网络本质上就是将二层包再包一层，在底层互联网上建一个虚拟的二层网络。比如说 VXLan 它会在原来的 Ethernet Frame 基础上加一个 VXLan header，然后变成 UDP 包发出去。
     - 如何保证发送的数据不超过 MTU？
@@ -879,7 +882,7 @@
   - 利用 net.ipv4.tcp_rmem 的默认设置，Linux 最初会为接收数据和元数据设置 128KiB 的内存预算
   - Linux 使接收窗口保持较小，因为它会试图预测元数据开销并避免超出内存预算，进而达到 TCP 折叠
   - 默认情况下，利用 net.ipv4.tcp_adv_win_scale=1，公告窗口的上限是“空闲”内存的 50%。rcv_ssthresh 一开始使用 64KiB，并线性增长到该限值。
-
+- A control bit (finis) occupying one sequence number, which indicates that the sender will send no more data or control occupying sequence space.
 
 
 

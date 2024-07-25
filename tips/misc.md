@@ -197,7 +197,8 @@
   - `systemd-run -u foobar -p MemoryLimit=1G -p OOMPolicy=continue /path/to/exe`
   - `sytstemctl status foobar.service`
 - [闰秒](https://mp.weixin.qq.com/s/LsHoTiwuQpxYoN5kKmTWug)
-
+- [Parquet格式]
+  - Parquet作为一种列式存储的开源文件格式
 
 
 
