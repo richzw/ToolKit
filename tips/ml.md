@@ -317,6 +317,14 @@
       - 使用两个不同的时间窗口参数，对数据使用指数加权移动平均（EWMA）函数。一个参数用于慢速滑动窗口，另一个参数用于快速滑动窗口，这有助于识别数据在不同时间尺度上的趋势。
       - 从慢速趋势中减去快速趋势得到 MACD 曲线，并再次应用指数加权平均，获得 MACD 信号曲线。
       - 步骤 3 的指数移动平均 MACD 信号曲线减去 MACD 曲线，我们会得到 MACD 直方图。这个直方图有助于我们检测时间序列数据中的渐变变化。
+  - Outlier Identify
+    - IQR
+      - Q3+1.5（Q3-Q1） Q1-1.5（Q3-Q1）
+    - 3sigma算法
+      - 3σ原则是指在正态分布的情况下，距离均值μ±3σ之内的数据占比约为99.73%，即在一组数据中，距离均值μ±3σ之内的数据占比约为99.73%。
+    - 观测指标的检测分为两步：
+      - 纵向，获取历史同一时刻30个点的观测值，通过3sigma算法来检测异常。
+      - 横向，zscore算法进行变点检测，横向获取某个时刻往前历史30个点的观测值。
 - [GPT-4 Architecture, Infrastructure, Training Dataset, Costs, Vision, MoE](https://hub.baai.ac.cn/view/27744)
 - [What Is ChatGPT Doing … and Why Does It Work](https://writings.stephenwolfram.com/2023/02/what-is-chatgpt-doing-and-why-does-it-work/)
   - 当我们训练一个大型神经网络来准确预测互联网上许多不同文本中的下一个单词时，我们所做的就是学习一个世界模型。
@@ -617,29 +625,6 @@
   - custom instructions
     - 把一些常用指令变成一个模板，在提问之前就固定下来，从而简化之后每次提问的复杂程度，避免每次都写上「将答案控制在 1000 字以下」这类重复需求
     - ChatGPT 会在你设置时询问两个问题，一个用来了解你的基本信息（比如你的职业、兴趣爱好、喜欢的话题、所在的地点、想达成的目标等），另一个用来告诉 ChatGPT 你想要什么样的回复（正式 / 非正式、答案长短、模型该发表意见还是保持中立等）
-- LangChain vs LlamaIndex
-  - As you can tell, LlamaIndex has a lot of overlap with LangChain for its main selling points, i.e. data augmented summarization and question answering. LangChain is imported quite often in many modules, for example when splitting up documents into chunks. You can use data loaders and data connectors from both to access your documents.
-  - LangChain offers more granular control and covers a wider variety of use cases. However, one great advantage of LlamaIndex is the ability to create hierarchical indexes. Managing indexes as your corpora grows in size becomes tricky and having a streamlined logical way to segment and combine individual indexes over a variety of data sources proves very helpful.
-    - [LangChain Templates](https://blog.langchain.dev/langserve-hub/)
-    - [The Problem With LangChain](https://minimaxir.com/2023/07/langchain-problem/)
-  - [LlamaIndex](https://mp.weixin.qq.com/s/fSssn9uHhbBMCxn0NIuC6g)
-    - LlamaIndex 是开发者和 LLM 交互的一种工具。LlamaIndex 接收输入数据并为其构建索引，随后会使用该索引来回答与输入数据相关的任何问题。
-    - LlamaIndex 还可以根据手头的任务构建许多类型的索引，例如向量索引、树索引、列表索引或关键字索引。
-    - 提供以下工具:
-      - 数据摄取：LlamaIndex提供数据连接器来摄取您现有的数据源和数据格式(api, pdf，文档，SQL等)，以便您可以与大语言模型一起使用它们。
-      - 数据构建：LlamaIndex提供了构建数据(索引，图表)的方法，以便可以轻松地与大语言模型一起使用。
-      - 检索和查询接口：LlamaIndex为您的数据提供了高级检索/查询接口。您可以输入任何LLM输入prompt，LlamaIndex将返回检索到的上下文和知识增强的输出。
-      - 与其他框架集成：LlamaIndex允许轻松集成与您的外部应用程序框架
-    - 什么是index
-      - LlamaIndex中的索引是一种数据结构，它允许您从大量文本语料库中快速搜索和检索数据。它的工作原理是在语料库中的关键字或短语与包含这些关键字或短语的文档之间创建映射
-      - List Index
-        - List Index是一个简单的数据结构，它将文档存储为节点序列。在索引构建期间，文档文本被分块、转换为节点并存储在一个列表中
-      - Vector Index
-        - Vector Index是一种数据结构，它将文档存储为向量。在索引构建期间，文档文本被分块、转换为向量并存储在一个向量中
-        - Vector Index的优点是它可以在向量空间中对文档进行聚类，从而提高检索效率。它还可以在向量空间中对文档进行相似性搜索，从而提高检索准确性。
-      - Tree Index
-        - 它将文档的文本存储在树状结构中。树中的每个节点表示其子文档的摘要
-      - 关键字表索引是一种将文档的关键字存储在表中的索引，我觉得这更加类似Map<k,v>或者字典的结构。表中的每一行代表一个关键字，每一列代表一个文档。通过在表中查找关键字，可以使用表索引来查找包含给定关键字的文档。
 - [Paper connections](https://www.connectedpapers.com/)
 - Tuning
   - 调参是LLM训练过程中的一个重要环节，目的是找到最优的超参数组合，以提高模型在测试集上的性能
@@ -727,6 +712,15 @@
             - 指数移动平均 (EMA)：在强化学习 (RL) 微调过程中应用。
             - 球形线性插值 (SLERP)：在多个策略的 RL 微调后应用。
             - 向初始化线性插值 (LITI)：在 SLERP 阶段之后应用
+  - [Llama3](https://m.weibo.cn/detail/5059754760081007)
+    - LLaMA 3模型结构
+      - LLaMA 3采用了标准的Dense LLM模型结构，类似于大多数LLM模型。尽管有些模型采用MOE结构，但其基本结构仍然是Transformer的变体。LLaMA 3的结构趋于行业标准，主要原因是Transformer结构的稳定性和现有生态系统的兼容性。
+    - LLaMA 3的预训练过程 预训练分为三个阶段：
+      - 初始预训练：常规的预训练阶段。
+      - 长上下文预训练：使用长文本数据训练，支持最多128K token的上下文窗口。
+      - 退火（Annealing）：在最后阶段调整学习率和数据混合配比，以增加高质量数据的影响。
+    - LLaMA 3的Post-Training
+      - Post-Training流程包括使用人工标注数据训练RM模型，通过拒绝采样筛选高质量SFT数据，并用DPO模型调整LLM参数。这个过程反复迭代，逐步提升模型质量。
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]

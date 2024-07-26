@@ -199,7 +199,25 @@
 - [闰秒](https://mp.weixin.qq.com/s/LsHoTiwuQpxYoN5kKmTWug)
 - [Parquet格式]
   - Parquet作为一种列式存储的开源文件格式
-
+- Bypassing Rate Limit Protection
+  - IP Rotator 
+    - If developer implemented rate limit in such a way that the application blocks the IP address of attacker after few requests, 
+    - then you may use any IP Rotator extension to change your IP in each requests.
+  - Add the following headers in the request:
+     - X-originating-IP: 127.0.0.1
+     - X-remote-IP: 127.0.0.1
+     - X-remote-addr: 127.0.0.1
+     - X-client-IP: 127.0.0.1
+     - X-forwarded-for: 127.0.0.1
+     - Try using 127.0.0.1, try using 127.0.0.2, 0.0.0.0, etc.
+    - You can also try adding a spoofed X-Forwarded-For header:
+      - X-Forwarded-For: 127.0.0.1
+      - X-Forwarded-For: 127.0.0.1, 0.0.0.0
+  - Try changing user-agent, cookies.
+  - Append null bytes (%00 %0C %09) to the original endpoint Ex `POST /forgot-password%20 HTTP/1.1`
+    - Adding the null bytes to the parameters like (email=test@gmail.com%00) can bypass the rate limit protection.
+  - Login to a valid account and the invalid one, Repeat this process to fool the server that you are sending different requests but submit 3 incorrect logins in a row.
+  - Add any random parameters in the request
 
 
 
