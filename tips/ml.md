@@ -318,6 +318,7 @@
       - 从慢速趋势中减去快速趋势得到 MACD 曲线，并再次应用指数加权平均，获得 MACD 信号曲线。
       - 步骤 3 的指数移动平均 MACD 信号曲线减去 MACD 曲线，我们会得到 MACD 直方图。这个直方图有助于我们检测时间序列数据中的渐变变化。
   - Outlier Identify
+    - https://archive.siam.org/meetings/sdm10/tutorial3.pdf
     - IQR
       - Q3+1.5（Q3-Q1） Q1-1.5（Q3-Q1）
     - 3sigma算法
@@ -420,6 +421,7 @@
     - [Video](https://www.youtube.com/watch?v=2MBJOuVq380)
   - [主流大语言模型的技术原理](https://mp.weixin.qq.com/s/P1enjLqH-UWNy7uaIviWRA)
   - [Tokenization与Embedding](https://mp.weixin.qq.com/s?__biz=MzA5MTIxNTY4MQ==&mid=2461139643&idx=1&sn=cd16d5eea8a93113893320642ad0a204&chksm=87396095b04ee983fddae57c546d6f80830d399d6850d6b1ad5828c15d1bb76bbb11770c4207&scene=21#wechat_redirect)
+    - [token emoji](https://colab.research.google.com/drive/1SVS-ALf9ToN6I6WmJno5RQkZEHFhaykJ#scrollTo=75OlT3yhf9p5)
   - [Embedding量化](https://mp.weixin.qq.com/s/qerIRaL6_4nJCY-2rKjTRA)
   - [Vector Embeddings: From the Basics to Production](https://partee.io/2022/08/11/vector-embeddings/)
   - [VBASE: Unifying Online Vector Similarity Search and Relational Queries via Relaxed Monotonicity](https://www.usenix.org/conference/osdi23/presentation/zhang-qianxi)
@@ -442,6 +444,7 @@
     - 3）自洽性（Self-Consistency）被广泛用作一种有效的解码策略，以提高推理任务中的模型性能。
   - [深度强化学习课程](https://mp.weixin.qq.com/s/w99dQXk8dDoXDYLcE2F0ww)
     - https://huggingface.co/learn/deep-rl-course/unit5/how-mlagents-works
+  - [利用大语言模型促进综合图学习能力](https://mp.weixin.qq.com/s/5S2D44V-fIe4Te5XtgOqhQ)
 - LLM Practice
   - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
   - ![img.png](ml_llm_demo.png)

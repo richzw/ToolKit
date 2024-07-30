@@ -656,9 +656,17 @@
   - Fallback (Corrective RAG) - Ensures the agent has a backup plan if its initial retrieval methods fail to provide relevant results. 
   - Self-correction (Self-RAG) - Enables the agent to identify and fix its own errors or misleading outputs. 
 - ![img.png](rag_ft.png)
-
-
-
+- [Musings on building a Generative AI product](https://www.linkedin.com/blog/engineering/generative-ai/musings-on-building-a-generative-ai-product)
+  - the basic framework up and running:
+    - Routing: decides if the query is in scope or not, and which AI agent to forward it to. Examples of agents are: job assessment, company understanding, takeaways for posts, etc.
+    - Retrieval: recall-oriented step where the AI agent decides which services to call and how (e.g. LinkedIn People Search, Bing API, etc.).
+    - Generation: precision-oriented step that sieves through the noisy data retrieved, filters it and produces the final response.
+  - Small models for routing/retrieval, bigger models for generation
+  - Embedding-Based Retrieval (EBR) powered by an in-memory database as our 'poor man's fine-tuning' to inject response examples directly into our prompts
+  - 怎么稳定的让 LLM 返回结构化的数据？
+    - 使用 YAML 格式而不是 JSON，相对来说容错率更高
+    - 用日志记录常见的 YAML 错误，优化自己的 YAML 解析器，可以解析 LLM 返回的不规范的 YAML
+    - 如果还是无法解析则将错误信息交给 LLM 修复，并且不断优化提示词，提升 LLM 修复的成功率
 
 
 

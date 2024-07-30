@@ -1002,7 +1002,7 @@
   - 全表扫描无排序情况下,两者性能无差异,在全表有排序的情况下, 两种性能差异巨大
     - 进行排序操作的时候，Mysql会根据该字段的设计的长度进行内存预估，如果设计过大的可变长度，会导致内存预估的值超出sort_buffer_size的大小，导致mysql采用磁盘临时文件排序,最终影响查询性能。
 - [innodb 事务](https://mp.weixin.qq.com/s/d5RJsSv0tPwzmvFw0vYb6Q)
-
+- MySQL innodb 插入记录是并发的。 MySQL innodb 插入记录不存在幻读问题，MySQL 通过 mvcc+ ReadView解决幻读问题
 
 
 

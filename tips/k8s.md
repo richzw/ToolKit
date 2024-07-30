@@ -907,6 +907,9 @@
       - Terminate after all regular containers are done.
 - K8s design principle
   - https://github.com/kubernetes/design-proposals-archive/blob/main/architecture/principles.md
+  - 控制器逻辑
+    - 功能必须是Level 触发，也就是说系统必须根据期望状态和当前观测状态来运作而不管在此过程中错过多少中间状态。Edge 触发只能用于系统优化
+    - 
 
 
 

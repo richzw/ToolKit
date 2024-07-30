@@ -324,6 +324,7 @@
   - 编译
     - 编译可以看看milvus repo下的DEVELOPMENT.md, 可以去github milvus disscusions里搜索compile关键字看别人都踩了哪些坑
     - 要编译和创建milvus镜像，参考这个帖子：https://github.com/milvus-io/milvus/discussions/31043
+    - 编译milvus源码的，在运行start_standalone.sh之前，先做两件事：一是改configs/milvus.yaml里配置项，把所有带有/var/lib路径的替换为一个你机器上合法的路径，比如/tmp/milvus。二是进入development/docker/dev目录运行docker-compose up -d 以启动etcd服务和minio服务
   - [Cardinal 搜索引擎](https://mp.weixin.qq.com/s/4xx2U8Xyr1RetTkMtRrxyw)
     - Cardinal 是用现代 C++ 语言和实用的近似最近邻搜索（ANNS）算法构建的多线程、高效率向量搜索引擎， 将搜索引擎的性能比原来提升了 3 倍，搜索性能（QPS）是 Milvus 的 10 倍
     - 同时能够处理暴搜请求和 ANNS 索引修改请求；处理各种数据格式，包括 FP32、FP16 和 BF16;执行索引 Top-K 和索引范围搜索（Range Search）;使用内存中数据或提供基于内存、磁盘和 MMap 等不同方式的索引
