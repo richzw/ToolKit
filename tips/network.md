@@ -1486,6 +1486,10 @@
   - 可以通过两种方式进行手工修正：
     - 1. 选取 TCP 数据包之后，通过 Menu -> Edit -> Preferences -> Protocols -> TCP -> Force interpretation to selected packet(s) ，包括以下选项：0(none)、1(Out-of-Order)、2(Retransmission)、3(Fast Retransmission)、4(Spurious Retransmission)。
     - 2. 选取 TCP 数据包之后，直接右键 -> Protocol Preferences -> Transmission Control Protocol -> Force interpretation to selected packet(s) ，同样包括以下选项：0(none)、1(Out-of-Order)、2(Retransmission)、3(Fast Retransmission)、4(Spurious Retransmission)。
+- Wireshark 手动修改 TCP 窗口缩放因子
+  - 可以通过以下两种方式进行手工修改指定该值，从默认值 Not known，再到 0-14 的相应取值，如下：
+    - 1. 选取 TCP 数据包之后，通过 Menu -> Edit -> Preferences -> Protocols -> TCP -> Scaling factor to use when not available from capture ，包括以下选项：Not known、0(no scaling)、1(multiply by 2)、2(multiply by 4)、3(multiply by 8)、... 14(multiply by 16384)。
+    - 2. 选取 TCP 数据包之后，直接右键 -> Protocol Preferences -> Transmission Control Protocol -> Scaling factor to use when not available from capture ，同样包括以下选项：Not known、0(no scaling)、1(multiply by 2)、2(multiply by 4)、3(multiply by 8)、... 14(multiply by 16384)
 - TCP Retransmission 的定义如下，当以下所有条件都为真时设置：
   - 不是 Keep-Alive 数据包
   - TCP 段大小大于零或设置了 SYN/FIN

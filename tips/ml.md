@@ -724,6 +724,7 @@
       - 退火（Annealing）：在最后阶段调整学习率和数据混合配比，以增加高质量数据的影响。
     - LLaMA 3的Post-Training
       - Post-Training流程包括使用人工标注数据训练RM模型，通过拒绝采样筛选高质量SFT数据，并用DPO模型调整LLM参数。这个过程反复迭代，逐步提升模型质量。
+  - [Apple Intelligence Foundation Language Models](https://machinelearning.apple.com/papers/apple_intelligence_foundation_language_models.pdf)
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]

@@ -218,8 +218,9 @@
     - Adding the null bytes to the parameters like (email=test@gmail.com%00) can bypass the rate limit protection.
   - Login to a valid account and the invalid one, Repeat this process to fool the server that you are sending different requests but submit 3 incorrect logins in a row.
   - Add any random parameters in the request
-
-
+- 不支持用户名用下划线开头的原因是这个：https://digicert.com/support/certificate-revocation-incident
+  - 可能被用户控制domain拿到证书
+- [踩内存案例分析](https://mp.weixin.qq.com/s/9OCFb2cH-H5zbaIT5VAS9w)
 
 
 

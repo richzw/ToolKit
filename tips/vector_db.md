@@ -499,6 +499,7 @@
       - milvus-backup项目是做milvus数据的备份恢复的，用这个工具把单机的数据备份出来，然后把备份目录上传到集群所使用的s3 bucket里，最后再用milvus-backup工具恢复数据到该集群。
     - datanode写minio的速度跟不上从pulsar读取数据的速度，导致datanode的内存不断升高直到oom，怎么能控制datanode读取pulsar的速度呢
       - 一般可以通过quota反压 或者datanode加资源解决
+    - 需要一个clip模型帮你做embedding，milvus只是做向量搜索。milvus是否支持通过大模型输文字到milvus里面搜索对应的图片的功能？
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。
