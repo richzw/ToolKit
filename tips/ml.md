@@ -356,6 +356,7 @@
   - [Transformer模型之输入处理](https://mp.weixin.qq.com/s/ryjV4IVLbjUO-QVieOrW3A)
   - [Transformer模型之Encoder-Decoder](https://mp.weixin.qq.com/s/MPFq_-Jqu0DC7QffSK4oNg)
     - https://github.com/heiyeluren/black-transformer
+  - [Transformer Math 101](https://blog.eleuther.ai/transformer-math/)
   - [Generative AI exists because of the transformer](https://ig.ft.com/generative-ai/)
     - First a block of words is broken into tokens — basic units that can be encoded. Tokens often represent fractions of words, but we’ll turn each full word into a token.
     - LLMs first observe it in context using enormous sets of training data, taking note of nearby words. 
@@ -1095,7 +1096,8 @@
     - 对参考信息的相关性进行排序，便于做上下文挂载时，有限截取权重最高的 top_k 条记录作为引用参考
   - 搜索内容读取 Read Content
   - 构建上下文内容池 Context Pool
-  
+- [The LLM Triangle Principles to Architect Reliable AI Apps](https://towardsdatascience.com/the-llm-triangle-principles-to-architect-reliable-ai-apps-d3753dd8542e)
+  - ![img.png](ml_app_sample.png)
 
 
 

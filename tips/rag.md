@@ -577,6 +577,10 @@
         - 对”多词一义”情况的支持不如倒排召回中的同义词表简单直接
         - 可解释能力弱
         - 需要更多的计算资源
+  - [召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-4/)
+    - 对称召回，一般是指通过两个句子的相似性来召回，比如输入的 query 匹配相似的另一个 question(query->question)，也可以是输入的陈述句匹配相似的另一个陈述句
+    - 非对称召回一般是检索数据， 一般是一个相对短的问句和一个相对长的答案（一般为一个文本段落） 
+    - 推荐同时考虑 QQ 和 QD 召回，对于 FAQ 的知识形态，对 Question 生成向量作为索引，同时把 Answer 作为 Doc 生成向量作为索引，在召回时同时走 QQ 和 QD 召回。对于文本文档的知识形态，除了对 Doc 生成向量以外，还可以通过知识增强的方式生成多组 Question
 - [Building Advanced RAG Over Complex Documents](https://docs.google.com/presentation/d/1yiuHEQEAhWEvVskbD9jwmfjopznVeZGwwWUzBIZ_P9U/edit#slide=id.g271ba741083_0_1608)
   - Parsing:
     - Bad parsers are a key cause of garbage in == garbage out.
@@ -667,8 +671,19 @@
     - 使用 YAML 格式而不是 JSON，相对来说容错率更高
     - 用日志记录常见的 YAML 错误，优化自己的 YAML 解析器，可以解析 LLM 返回的不规范的 YAML
     - 如果还是无法解析则将错误信息交给 LLM 修复，并且不断优化提示词，提升 LLM 修复的成功率
-
-
+- RAG 经验谈
+  - 分块大小：建议不要分块太大（<500），超过阈值加overlap
+  - 对文块内容进行预处理，抽取段落级别的内容，超过段落的内容，要求内容结构清晰
+  - Rerank还是很有必要
+  - topk的策略选最优值，太小一定缺省，召回率随便高了
+  - 增加embedding模型在rerank模型中融合的效果，不知道直接使用效果如何，embedding+rerank模型中包含得更好
+  - 句粒改写会有帮助，改写的策略和方向要根据具体业务来
+  - 要在检索/检索结果上下功夫
+  - 检索策略的改进：混合检索、索条引、检索检验、分层检索
+  - 清洗数据，在处理数据中清洗数据，不是检索范围过滤
+  - RAG较长的内容，检索到了一定内容的内容，检索到了一定内容（结合有知识检索）
+  - 增加prompt策略，增加prompt在检索策略中的应用
+  - Summary不一定在chunk需要summary，有的不要
 
 
 
