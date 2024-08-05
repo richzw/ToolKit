@@ -1432,6 +1432,7 @@
   - [TCP Options 字段](https://mp.weixin.qq.com/s/qt0-miD4ozDFccj04l-XyQ)
     - 客户端发送 SYN，SYN 中的 MSS 为 1200，服务器端收到了 SYN，之后回复 SYN/ACK，SYN/ACK 中的 MSS 是 1460。如果是协商，那么理论服务器所发的 SYN/ACK 中的 MSS 应为 1200（取小，因为 SYN MSS 1200 比本地 MSS 1460 小），但实际 SYN/ACK 中的 MSS 仍为 1460，这个现象说明了不是协商，而是通告，即通告本端的 MSS
     - 而重点是此时服务器端清楚客户端所能接收的 MSS 为 1200，之后服务器发送的数据分段会按 1200 大小来分。之后服务器端的 SYN/ACK 到了客户端，客户端接收以后再发送 ACK 完成三次握手，此时客户端根据 SYN/ACK 中 MSS 1460，对比本端 MSS 1200 取小值，仍为 1200，之后客户端发送的数据分段也会按 1200 大小来分，因为 MSS 实际上是有发送和接收两方面的限制。
+    - TCP options 中 TSOPT 字段 用于测量往返时间（RTT）和防止序列号回绕。TSOPT包含两个字段：时间戳值（TSval）和时间戳回显应答（TSecr）
   - [Win 字段](https://mp.weixin.qq.com/s/M4-s_eQYIWqcTN4fOWkUTA)
   - [ Win 字段续](https://mp.weixin.qq.com/s/5nK8Wkj43gbEqAr-APz4Ig)
   - [SYN/ACK MSS](https://mp.weixin.qq.com/s/QeJyBb3rRg0K6Fzm2oQA9w)

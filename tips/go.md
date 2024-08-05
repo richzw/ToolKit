@@ -2154,8 +2154,17 @@
   - 结构体包含了 map[string]int 类型字段，不可比较
   - _ [0]func() 的目的显然是为了禁止比较,因为 func() 是一个函数，而函数在 Go 中是不可比较的
   - 它不占内存空间, 当使用 _ [0]func() 时，不要把它放在结构体最后一个字段，推荐放在第一个字段。
+- Array
+  - Array are values, raw values
+    - This means an array variable in Go represents the entire array, not just a reference to its first element, even though printing &a gives the same address as &a[0].
+  ```
+  // With index, infer-length
+  arr3 := [...]int{11: 3} // [0 0 0 0 0 0 0 0 0 0 0 3]
 
-
+  // Combined index and value
+  arr4 := [5]int{1, 4: 5} // [1 0 0 0 5]
+  arr5 := [5]int{2: 3, 4, 4: 5} // [0 0 3 4 5]
+  ```
 
 
 
