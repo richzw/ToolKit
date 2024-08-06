@@ -1495,9 +1495,10 @@
   - 不是 Keep-Alive 数据包
   - TCP 段大小大于零或设置了 SYN/FIN
   - 同方向之前下一个期望的 Seq Num 大于当前数据包的 Seq Num
-- netdev 
+- netdev Linux网络开发者会议 
   - https://mp.weixin.qq.com/s/oGswwbhca6kDXzGnPF_I_Q
-
+- netcap netcap 可以几乎跟踪整个内核网络协议栈（有skb作为参数的函数）
+  - https://github.com/bytedance/netcap
 
 
 

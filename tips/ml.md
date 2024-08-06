@@ -1098,7 +1098,8 @@
   - 构建上下文内容池 Context Pool
 - [The LLM Triangle Principles to Architect Reliable AI Apps](https://towardsdatascience.com/the-llm-triangle-principles-to-architect-reliable-ai-apps-d3753dd8542e)
   - ![img.png](ml_app_sample.png)
-
+- [大模型分不清 9.9 与 9.11 ](https://mp.weixin.qq.com/s/wIm3loi5KcznFYTpgIl-Dg)
+  - https://colab.research.google.com/drive/11kUxYhHMLqYhw5HVKEYdHv0EfdZIyBBy?ref=jina-ai-gmbh.ghost.io#scrollTo=G7Cy9zSb2Ukg
 
 
 

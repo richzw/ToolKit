@@ -500,6 +500,9 @@
     - datanode写minio的速度跟不上从pulsar读取数据的速度，导致datanode的内存不断升高直到oom，怎么能控制datanode读取pulsar的速度呢
       - 一般可以通过quota反压 或者datanode加资源解决
     - 需要一个clip模型帮你做embedding，milvus只是做向量搜索。milvus是否支持通过大模型输文字到milvus里面搜索对应的图片的功能？
+    - 搜索结果不全，有可能是以下两种情况：
+      - 一种是刚insert的数据不一定能搜出来，把search的consistency_level参数设为Strong，能保证该时间点之前的数据都能搜出来，但latency会增加几百毫秒。
+      - 另一种是带索引加过滤条件，因为索引只搜一小块数据，加了过滤之后，那一小块里面有可能被过滤掉很多，导致结果不足。你把索引换成FLAT，也就是暴搜，就可以搜到。
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。

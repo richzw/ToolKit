@@ -221,7 +221,7 @@
 - 不支持用户名用下划线开头的原因是这个：https://digicert.com/support/certificate-revocation-incident
   - 可能被用户控制domain拿到证书
 - [踩内存案例分析](https://mp.weixin.qq.com/s/9OCFb2cH-H5zbaIT5VAS9w)
-
+- [社群推荐算法](https://mp.weixin.qq.com/s/5NVPoJ16VgFpJOUNQnBfew)
 
 
 

@@ -909,8 +909,9 @@
   - https://github.com/kubernetes/design-proposals-archive/blob/main/architecture/principles.md
   - 控制器逻辑
     - 功能必须是Level 触发，也就是说系统必须根据期望状态和当前观测状态来运作而不管在此过程中错过多少中间状态。Edge 触发只能用于系统优化
-    - 
-
+- Kubernetes 1.28, the OOM behavior was changed to terminate the entire container if any of its processes ran out of memory
+  - Kubernetes depends on linux to handle OOMs, but previously in cgroups v1 we didn’t have a reliable way to terminate every process inside a container
+  - cgroups v2 added that reliable mechanism, but we didn’t default to killing every process when we switched to v2 recently as the default
 
 
 

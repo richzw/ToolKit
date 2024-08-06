@@ -585,11 +585,23 @@
   - Parsing:
     - Bad parsers are a key cause of garbage in == garbage out.
     - Badly formatted text/tables confuse even the best LLMs
-  - 5 Levels Of Text Splitting/Chunking:
+  - [Text Splitting/Chunking:](https://mlpills.substack.com/p/issue-69-split-different-text-examples)
     - Character Split
+      - A straightforward method that splits text based on character count. 
+      - It's ideal when you need consistent chunk sizes without necessarily preserving the document's structure.
     - Recursive Character Text Splitter
+      - Splits text while respecting document structure. It starts with larger boundaries like paragraphs, then moves to finer ones like sentences if needed. 
+      - Useful for maintaining context and coherence.
+    - Token Text Splitter:
+      - Divides text based on token count rather than character count. 
+      - This is particularly useful when working with models that have token limits, ensuring each chunk fits within those limits.
     - Document specific chunker (Code, Markdown, PDF)
     - Semantic chunking (embeddings only)
+      - Uses embeddings to measure semantic similarity between sentences. 
+      - It aims to keep semantically related content together, resulting in more meaningful and coherent chunks.
+    - AI21 Semantic Text Splitter:
+      - Leverages AI21's language models to identify distinct topics within the text and create chunks accordingly. 
+      - This method produces topically coherent chunks, enhancing retrieval and context understanding
     - Reasoned chunking (agent like)
   - Indexing:
     - Raw text oftentimes confuse the embedding model.
