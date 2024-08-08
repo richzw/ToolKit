@@ -1003,7 +1003,9 @@
     - 进行排序操作的时候，Mysql会根据该字段的设计的长度进行内存预估，如果设计过大的可变长度，会导致内存预估的值超出sort_buffer_size的大小，导致mysql采用磁盘临时文件排序,最终影响查询性能。
 - [innodb 事务](https://mp.weixin.qq.com/s/d5RJsSv0tPwzmvFw0vYb6Q)
 - MySQL innodb 插入记录是并发的。 MySQL innodb 插入记录不存在幻读问题，MySQL 通过 mvcc+ ReadView解决幻读问题
-
+- [Delete同一行记录也会造成死锁](https://mp.weixin.qq.com/s/cPDwCt25eRhV9Wuu5PqgrA)
+  - 只有唯一索引会引发此类死锁问题，主键索引和普通索引均不会
+  - 在 MySQL 环境 8.x 版本环境中，DELETE 操作引发的死锁情况得到了改进。通过观察加锁日志发现，事务在对于 delete mark 的记录加锁时，如果已经持有了该记录的记录锁，他将获取间隙锁而不是临键锁，这一变化有效避免了死锁的发生。
 
 
 

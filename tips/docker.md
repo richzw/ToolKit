@@ -638,7 +638,7 @@
 - CPU Throttle 
   - CPU毛刺产生的原因通常是由于应用突发性的 CPU 资源需求
   - 为了避免 CPU Throttle 的问题，我们只能将容器的 CPU Limit 值调大。然而，若想彻底解决 CPU Throttle，通常需要将 CPU Limit 调大两三倍，有时甚至五到十倍，问题才会得到明显缓解
-
+- [Docker debug](https://iximiuz.com/en/posts/docker-debug-slim-containers/)
 
 
 
