@@ -639,6 +639,55 @@
   - CPU毛刺产生的原因通常是由于应用突发性的 CPU 资源需求
   - 为了避免 CPU Throttle 的问题，我们只能将容器的 CPU Limit 值调大。然而，若想彻底解决 CPU Throttle，通常需要将 CPU Limit 调大两三倍，有时甚至五到十倍，问题才会得到明显缓解
 - [Docker debug](https://iximiuz.com/en/posts/docker-debug-slim-containers/)
+- [删除Docker容器](https://mp.weixin.qq.com/s/ADIGDHw1pHUzNaJ80cvrHw)
+  - Docker容器常见退出码
+    - Exit Code 1
+      - 程序错误，或者Dockerfile中引用不存在的文件，如 entrypoint中引用了错误的包
+      - 程序错误可以很简单，例如“除以0”，也可以很复杂，比如空引用或者其他程序 crash
+    - Exit Code 137
+      - 表明容器收到了SIGKILL信号，进程被杀掉，对应kill -9
+      - 引发SIGKILL的是docker kill。这可以由用户或由docker守护程序来发起，手动执行：docker kill
+      - 137 比较常见，如果 pod 中的limit 资源设置较小，会运行内存不足导致OOMKilled，此时state 中的”OOMKilled”值为true，你可以在系统的 dmesg 中看到 oom 日志
+    - Exit Code 139
+      - 表明容器收到了SIGSEGV信号，无效的内存引用，对应kill -11
+      - 一般是代码有问题，或者 docker 的基础镜像有问题
+    - Exit Code 143
+      - 表明容器收到了SIGTERM信号，终端关闭，对应kill -15
+      - 一般对应docker stop 命令 有时docker stop也会导致Exit Code 137。发生在与代码无法处理SIGTERM的情况下，docker进程等待十秒钟然后发出SIGKILL强制退出。
+    - 不常用的一些 Exit Code
+      - Exit Code 126: 权限问题或命令不可执行
+      - Exit Code 127: Shell脚本中可能出现错字且字符无法识别的情况
+      - 外界将程序中断退出，状态码在 129-255
+      - 程序自身异常退出，状态码一般在 1-128
+      - 假如写代码指定的退出状态码时不在 0-255 之间，例如: exit(-1)，这时会自动做一个转换，最终呈现的状态码还是会在 0-255 之间。我们把状态码记为 code，当指定的退出时状态码为负数，那么转换公式如下：256 – (|code| % 256)
+      - 对于被信号终止的进程，操作系统会将信号编号加上128，作为进程的退出状态码。这是因为在Unix系统中，信号编号的范围通常是1到31，而进程退出状态码的范围是0到255，为了区分正常的退出状态码和信号终止导致的退出状态码，就将信号编号加上128。
+  - Docker stop 命令信号
+    - 会先向容器中PID为1的进程(main process)发送系统信号SIGTERM，然后等待容器中的应用程序终止执行，如果等待时间达到设定的超时时间，如默认的10秒，会继续发送SIGKILL的系统信号强行kill掉进程。
+  - docker kill命令不会给容器中的应用程序有任何gracefully shutdown的机会，它会直接发出SIGKILL的系统信号以强行终止容器中程序的运行
+  - Dockerfile中设置ENTRYPOINT或CMD时，应使用exec格式，以确保信号正确传递给应用程序
+    - exec 格式：CMD ["可执行文件", "参数1", "参数2"...]
+    - exec 格式这种写法避免了 Docker 自动将 CMD 转换为 sh -c 形式的操作，因为 JSON 数组格式的 CMD 已经明确指定了要执行的命令路径或文件
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

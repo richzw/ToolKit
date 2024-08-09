@@ -912,7 +912,7 @@
 - Kubernetes 1.28, the OOM behavior was changed to terminate the entire container if any of its processes ran out of memory
   - Kubernetes depends on linux to handle OOMs, but previously in cgroups v1 we didn’t have a reliable way to terminate every process inside a container
   - cgroups v2 added that reliable mechanism, but we didn’t default to killing every process when we switched to v2 recently as the default
-
+- [Node.js OOM under K8s that cgroup v2](https://github.com/nodejs/node/issues/47259)
 
 
 
