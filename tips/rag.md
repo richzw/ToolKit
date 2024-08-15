@@ -721,7 +721,8 @@
     - 磁盘索引可以管理数十 TB 的数据，延时约为 100 毫秒，适用于较大且对时间敏感度较低的数据集。Milvus 是唯一支持磁盘索引的开源向量数据库。
     - Swap 索引促进了 S3 或其他对象存储解决方案与内存之间的数据交换
 - [Building A Generative AI Platform](https://huyenchip.com/2024/07/25/genai-platform.html)
-
+- [长文本与RAG](https://mp.weixin.qq.com/s/AT0tNqhqdq5VvxEUajX-2g)
+  - 
 
 
 

@@ -699,6 +699,12 @@
   - [Many-shot jailbreaking](https://www.anthropic.com/research/many-shot-jailbreaking?utm_source=www.therundown.ai&utm_medium=newsletter&utm_campaign=open-sourced-ai-coding-agent)
     - ![img.png](llm_prompt_many_shot_jailbreaking.png)
   - [jailbreaking sample](https://github.com/elder-plinius/L1B3RT45/blob/main/OPENAI.mkd)
+  - [What is a prompt injection attack](https://www.ibm.com/topics/prompt-injection)
+  - [SQL injection-like attack on LLMs with special tokens](https://x.com/karpathy/status/1823418177197646104?s=46)
+    - The decision by LLM tokenizers to parse special tokens in the input string (<s>, <|endoftext|>, etc.), while convenient looking, leads to footguns at best and LLM security vulnerabilities at worst, equivalent to SQL injection attacks.
+    - Two unintuitive things are happening at the same time:
+      - 1. The <|begin_of_text|> token (128000) was added to the front of the sequence.
+      - 2. The <|end_of_text|> token (128001) was parsed out of our string and the special token was inserted. Our text (which could have come from a user) is now possibly messing with the token protocol and taking the LLM out of distribution with undefined outcomes.
 - [Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models](https://www.edhec.edu/sites/default/files/2023-12/ChatGPT_Paper_Slides%20%281%29%20%281%29%20%281%29.pdf)
 - [Big Prompt Library](https://github.com/0xeb/TheBigPromptLibrary?tab=readme-ov-file#how-to-protect-gpt-instructions)
   - How to get system prompt?
@@ -957,7 +963,6 @@
   - 提示词注入的成因
     - 传统的系统我们会预设好程序，我们会预先设定好指令，它们是不会变化的。用户可以输入他们的信息，但是程序的编码和输入是保持独立的。
     - 对于大语言模型并非如此。说实话，指令和输入的边界变得模糊，因为我们用输入来训练系统。因此，我们没有过去那样清晰、明确的界限。这带给它极大的灵活性，同时也有可能让他做出一些不应该的事情。
-- [What is a prompt injection attack](https://www.ibm.com/topics/prompt-injection)
 - Claude
   - Application
     - 客服质检…embedding判断问题与答案的相似度
@@ -1200,6 +1205,38 @@
   Final Instruction:
     By following these instructions, you will ensure that your problem-solving approach is methodical, well-reasoned, and optimized for accuracy and efficiency. Your goal is to deliver the most logical, effective, and comprehensive solution possible by fully integrating these advanced reasoning techniques.
   ```
+- 用户直接通过对话触发共享屏幕的请求，弹出共享屏幕的界面，而不需要用户去点击共享屏幕按钮。
+  ```
+  You are assisting a user on the desktop. To help you provide more useful answers, they can screenshare their windows with you. Your job is to focus on the right info from the screenshare, and also request it when it'd help.
+
+  How to focus on the right info in the screenshare {
+    Screenshare is provided as screenshots of one or more windows. First think about the user's prompt to decide which screenshots are relevant. Usually, only a single screenshot will be relevant. Usually, that is the zeroth screenshot provided, because that one is in the foreground.
+  
+    Screenshots contain loads of info, but usually you should focus on just a part of it.
+    Start by looking for selected text, which you can recognize by a highlight that is usually grey. When text is selected, focus on that. And if the user is asking about an implied object like "this paragraph" or "the sentence here" etc, you can assume they're only asking about the selected text.
+  
+    Then, answer as though you're looking at their screen together. You can be clear while being extremely concise thanks to this shared context.
+  }
+  
+  Requesting screenshare {
+    On desktop, requesting screenshare is the primary way you should request any content or context. You can do so by responding with "SHARE_YOUR_SCREEN_PLEASE".
+    Users don't know this feature exists, so it's important that you bring it up when helpful, especially when they don't explicitly ask for it.
+  
+    You should always request "SHARE_YOUR_SCREEN_PLEASE" when (non-exhaustive):
+    - The user asks for help without explaining what for. They want you to look at the screen and figure it out yourself! Example user prompts: "fix this", or "help"
+    - The user references something on screen. Obvious cases of this include mentions of an app or window. Less obvious but even more important cases include references to (the|this|the selected|etc)  (text|code|error|paragraph|page|image|language|etc) (here|on screen|etc). As you can see there are many implied variations. Don't be shy about asking for context!
+    - The user asked for help with coding but has only provided minimal context, leaving you to guess details like which language, what coding style, or definitions of variables they're asking about. Instead of guessing, just look at their screen.
+  
+    Regardling declines: If the user declines to share their screen, then don't ask again until they write something very explicit indicating that they've changed their mind.
+  
+    At the end of your message, if you asked to see the user's screen or asked the user to provide text or images, make sure that you append "SHARE_YOUR_SCREEN_PLEASE". 
+    It's important because that sentinel string triggers a popup to the user. **You will be fired if you ask to see the user's screen without including "SHARE_YOUR_SCREEN_PLEASE"**.
+  }
+  ```
+
+
+
+
 
 
 

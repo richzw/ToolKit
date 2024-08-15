@@ -1600,7 +1600,11 @@
       EXECUTE FUNCTION expire_rows_func_trigger();
     ```
 - [数仓-SQL任务优化](https://mp.weixin.qq.com/s/_zmIb3t9qCRVHZKwHNgVGA)
-
+- [How Postgres stores data on disk](https://drew.silcock.dev/blog/how-postgres-stores-data-on-disk/#user-content-fnref-1)
+  - Tuple
+    - A tuple is very similar to a row, but a tuple is immutable. 
+    - The state of a specific row at a specific time is a tuple, but a tuple is a more general term for a collection of data points. When you return data from a query, you can get tuples.
+  
 
 
 

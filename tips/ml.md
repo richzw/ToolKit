@@ -1100,6 +1100,40 @@
   - ![img.png](ml_app_sample.png)
 - [大模型分不清 9.9 与 9.11 ](https://mp.weixin.qq.com/s/wIm3loi5KcznFYTpgIl-Dg)
   - https://colab.research.google.com/drive/11kUxYhHMLqYhw5HVKEYdHv0EfdZIyBBy?ref=jina-ai-gmbh.ghost.io#scrollTo=G7Cy9zSb2Ukg
+- [预训练一个72b模型需要多久](https://mp.weixin.qq.com/s/E0OIgufVW8dm-fRhlRoA6A)
+  - 基础概念
+    - FLOPS
+      - floating point operations per second，每秒浮点运算次数。即常规理解中，硬件的性能(计算速度/算力)。
+      - A100，单卡单精度，利用率MFU一般在25到75%之间（FlashAttention2能拉到上限），取个居中的50%，约等于300 T FLOPS。
+      - H100，算力是A100的三倍多一点，利用率MFU需要最新出的FlashhAttention3才能拉到上限，一般可取1000 TFLOPS。
+    - FLOPs
+      - floating point operations，浮点运算数量，即常规理解中，训练一个大模型需要的算力。可以用来衡量算法/模型的复杂度。乘法和加法混同看待
+    - MACs
+      - Multiply-Accumulate Operations，乘法加法累积操作次数。是深度学习领域最常见的计算的一种抽象。即将两个数相乘，并将乘积累加到一个累加器上。
+      - 1MACs ≈ 2FLOPs。
+  - 结论
+    - 大模型的算力需求基本只看矩阵乘法。
+    - 抽取出需要的参数：
+      - batch size：用户自己定义，假设是4
+      - seq length序列长度：取个比较大的长度32768
+      - hidden_size隐藏层大小：8192
+      - num_hidden_layers：80
+      - vocab_size词表大小：152064
+    - 单个Transformer主要包括一个Attention块和一个FFN块，还有其他杂项，分别计算
+    - 单个Attention块(参数量占比16%，计算量占48%)
+    - 为什么扩大batch size，大模型输出速度先提高后不变
+      - 1.batch size过小时，gpu能发挥出的算力和batch size基本正比。
+        - a.结论是：卡内存带宽了。
+        - b.gpu处理数据在一个完整的batch分两个部分，数据转移，数据计算。其中数据转移部分吃内存带宽，需要转移完整的模型参数和一个batch的数据参数。计算部分吃gpu算力，和待计算数据量正相关。
+        - c.小batch下之所以卡在内存带宽，是因为每次转移完整的模型参数这步的处理时间是固定的。而转移batch数据，计算batch数据都和数据量正相关。导致batch越小，转移完整模型参数这步的带宽占比就越大。gpu处理每个batch时，如果batch size过小，数据计算会特别快的完成，但是还需要等待固定时间的模型数据转移完成，导致计算单元空置，算力利用率MFU自适应降低。
+        - d.理论上会有个batch size的切换点。这个点往上，显存占用增加，运算效率不变。但具体怎么算这个点，笔者还没什么思路。
+      - 2.batch size达到一定大小，能完全发挥gpu算力时，调用大模型的训练时间已经和batch size无关了。公式里并没有bs。
+    - 反向传播的算力需求一般是前向传播的2倍
+
+
+
+
+
 
 
 
