@@ -1008,7 +1008,12 @@
   - 在 MySQL 环境 8.x 版本环境中，DELETE 操作引发的死锁情况得到了改进。通过观察加锁日志发现，事务在对于 delete mark 的记录加锁时，如果已经持有了该记录的记录锁，他将获取间隙锁而不是临键锁，这一变化有效避免了死锁的发生。
 - [MySQL 8.0：filesort 性能退化的问题](https://mp.weixin.qq.com/s/qYkyzD79nQuNGe59M2wWgg)
   - 8.0 排序过程中发生了对无关列的数据转换，导致了性能退化。用户的实例中包含了溢出列，由于溢出列的数据转换格外耗时，最终将这个性能退化的问题放大。
-
+- MySQL 中的 distinct 和 group by 哪个效率更高
+  - 在语义相同，有索引的情况下：
+    - group by和distinct都能使用索引，效率相同。因为group by和distinct近乎等价，distinct可以被看做是特殊的group by。
+  - 在语义相同，无索引的情况下：
+    - distinct效率高于group by。原因是distinct 和 group by都会进行分组操作，但group by在Mysql8.0之前会进行隐式排序，导致触发filesort，sql执行效率低下。
+    - 但从Mysql8.0开始，Mysql就删除了隐式排序，所以，此时在语义相同，无索引的情况下，group by和distinct的执行效率也是近乎等价的。
 
 
 

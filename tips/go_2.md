@@ -2023,9 +2023,10 @@
     - Go generics do not support generic methods at generic types. They also do not support template specialization and template template parameters
   - iterators in Go1.23
     - for ... range loop hides the actual function call. Additionally, it applies non-obvious transformations for the loop body
-  
-
-
+- [An Applied Introduction to eBPF with Go](https://sazak.io/articles/an-applied-introduction-to-ebpf-with-go-2024-06-06) 
+- go 1.23
+  - HostLayout, as a field type, signals that the size, alignment, and order of fields conform to requirements of the host platform and may not match the Go compiler’s defaults.
+    ` _ structs.HostLayout`
 
 
 

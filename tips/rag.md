@@ -129,6 +129,26 @@
       - The multi-query retriever performs sub-question generation, retrieval, and returns the unique union of the retrieved docs.
       -  RAG fusion builds on by ranking of the returned docs from each of the sub-questions
       - Step-back prompting offers a third approach in this vein, generating a step-back question to ground an answer synthesis in higher-level concepts or principles
+      - https://haystack.deepset.ai/blog/query-expansion
+        - BM25 favors precision while embedding retrieval favors recall
+        - use BM25+query expansion to increase recall in cases where you want to rely on keyword search
+          """
+          You are part of an information system that processes users queries.
+          You expand a given query into {{ number }} queries that are similar in meaning.
+
+          Structure:
+          Follow the structure shown below in examples to generate expanded queries.
+          Examples:
+          1. Example Query 1: "climate change effects"
+             Example Expanded Queries: ["impact of climate change", "consequences of global warming", "effects of environmental changes"]
+
+          2. Example Query 2: ""machine learning algorithms""
+             Example Expanded Queries: ["neural networks", "clustering", "supervised learning", "deep learning"]
+
+          Your Task:
+          Query: "{{query}}"
+          Example Expanded Queries:
+          """
     - Query re-writing
     - Query compression
       - a user question follows a broader chat conversation. In order to properly answer the question, the full conversational context may be required. To address this, we use this prompt to compress chat history into a final question for retrieval
@@ -722,7 +742,17 @@
     - Swap 索引促进了 S3 或其他对象存储解决方案与内存之间的数据交换
 - [Building A Generative AI Platform](https://huyenchip.com/2024/07/25/genai-platform.html)
 - [长文本与RAG](https://mp.weixin.qq.com/s/AT0tNqhqdq5VvxEUajX-2g)
-  - 
+  - 准确率：通常情况下长文本优于RAG 
+  - 长文本：受限的因素比较多。
+    - 比如并发性能会随着上下文长度的增加反比下降，预填充的延迟也是会随上下文长度的增长平方级别的增长；
+    - 解码延迟和上下文切换的开销也是会线性的增加；
+    - 最成瓶颈的是预填充延迟，因为它是会平方级别的增长，这也是构成目前长上下文推理的主要难度。
+  - 长文本如何优化First Token延迟问题
+    - 工程层面：比如说Flash attention。
+    - 硬件层面：比如说英伟达有一些新的技术。
+    - 算法的层面：用的比较多的是KV cache
+  - Context window越大除了成本会增长之外，首 token 延迟会显著的增加。比如128K的模型，如果全用满，需要大概几十秒钟的时间才能返回首token
+  - RAG肯定是相对多一些准确度的损耗。因为最后还是要把过RAG的信息给到大模型（RAG本身的准确度损耗+大模型的准确度损耗 vs 只有大模型的准确度损耗）。
 
 
 
