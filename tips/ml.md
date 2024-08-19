@@ -357,6 +357,7 @@
   - [Transformer模型之Encoder-Decoder](https://mp.weixin.qq.com/s/MPFq_-Jqu0DC7QffSK4oNg)
     - https://github.com/heiyeluren/black-transformer
   - [Transformer Math 101](https://blog.eleuther.ai/transformer-math/)
+  - [图解 Transformer ](https://baoyu.io/translations/llm/illustrated-transformer)
   - [Generative AI exists because of the transformer](https://ig.ft.com/generative-ai/)
     - First a block of words is broken into tokens — basic units that can be encoded. Tokens often represent fractions of words, but we’ll turn each full word into a token.
     - LLMs first observe it in context using enormous sets of training data, taking note of nearby words. 
@@ -1129,7 +1130,8 @@
         - d.理论上会有个batch size的切换点。这个点往上，显存占用增加，运算效率不变。但具体怎么算这个点，笔者还没什么思路。
       - 2.batch size达到一定大小，能完全发挥gpu算力时，调用大模型的训练时间已经和batch size无关了。公式里并没有bs。
     - 反向传播的算力需求一般是前向传播的2倍
-
+- [50行正则就能切分“任何文档”的精妙分词器]
+  - https://gist.github.com/hanxiao/3f60354cf6dc5ac698bc9154163b4e6a
 
 
 

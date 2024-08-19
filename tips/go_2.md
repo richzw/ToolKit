@@ -2027,6 +2027,11 @@
 - go 1.23
   - HostLayout, as a field type, signals that the size, alignment, and order of fields conform to requirements of the host platform and may not match the Go compiler’s defaults.
     ` _ structs.HostLayout`
+- [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
+  - errors.Is() is expensive. If you use it, check the error is non-nil first to avoid a pretty big performance penalty on the happy path.
+  - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.
+  - Error wrapping makes using sentinel errors much more expensive, including making errors.Is() more expensive when the error is non-nil.
+  - Using sentinel errors is as performant as other techniques on the happy path if you take the above precautions, but unavoidably much more expensive on the error path.
 
 
 

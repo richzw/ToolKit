@@ -170,6 +170,13 @@
   - 可搜索加密（Searchable Encryption）或同态加密（Homomorphic Encryption）
 - [GC垃圾回收算法](https://mp.weixin.qq.com/s/M8R4QPidlCrr6vix4JUWmg)
   - GC 标记-清除法、引用计数法、GC 标记-复制算法、GC 标记-压缩算法、保守式 GC、分代垃圾回收、增量式垃圾回收(三色标记法)
+  - Python 的垃圾回收基于引用计数和循环垃圾回收器
+    - 引用计数：Python 主要使用引用计数进行内存管理。每个对象都会对指向它的引用进行计数；当计数降为零时，对象就会被去分配。
+    - 循环 GC：Python 有一个辅助垃圾回收机制，用于检测和回收循环引用（对象之间相互引用，但无法从根集访问）。gc 模块允许对循环垃圾回收器进行微调
+  - Go 使用的并发垃圾回收器 CMS 垃圾收集器（Concurrent Mark-and-Sweep Garbage Collector）
+    - 并发标记和扫描：Go 使用并发标记和清扫垃圾收集器，该收集器与应用程序代码同时运行，旨在最大限度地减少停顿时间，降低延迟。
+    - 无世代垃圾回收器：Go 不会将对象分成不同的世代。重点在于保持低延迟和可预测的性能。
+    - 自动调整：Go 的垃圾回收器会根据应用程序行为自动调整，与 Java 相比，手动调整选项非常有限。
 - [认知偏差知识手册](https://s75w5y7vut.feishu.cn/docs/doccn3BatnScBJe7wD7K3S5poFf)
   - https://alanhg.github.io/cognitive-bias/
 - [设计原理](https://rpdc.xiaohongshu.com/52-design-principles)
