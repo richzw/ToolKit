@@ -2024,9 +2024,13 @@
   - iterators in Go1.23
     - for ... range loop hides the actual function call. Additionally, it applies non-obvious transformations for the loop body
 - [An Applied Introduction to eBPF with Go](https://sazak.io/articles/an-applied-introduction-to-ebpf-with-go-2024-06-06) 
-- go 1.23
-  - HostLayout, as a field type, signals that the size, alignment, and order of fields conform to requirements of the host platform and may not match the Go compiler’s defaults.
-    ` _ structs.HostLayout`
+- go Version
+  - go 1.23
+    - https://www.bytesizego.com/view/courses/go-1-23-in-23-minutes
+    - HostLayout, as a field type, signals that the size, alignment, and order of fields conform to requirements of the host platform and may not match the Go compiler’s defaults.
+      ` _ structs.HostLayout`
+  - As of go 1.22, for string to bytes conversion, we can replace the usage of unsafe.Slice(unsafe.StringData(s), len(s)) with type casting []bytes(str), without the worry of losing performance.
+  - As of go 1.22, string to bytes conversion []bytes(str) is faster than using the unsafe package. Both methods have 0 memory allocation now.
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
   - errors.Is() is expensive. If you use it, check the error is non-nil first to avoid a pretty big performance penalty on the happy path.
   - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.
