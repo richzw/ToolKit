@@ -2029,6 +2029,7 @@
     - https://www.bytesizego.com/view/courses/go-1-23-in-23-minutes
     - HostLayout, as a field type, signals that the size, alignment, and order of fields conform to requirements of the host platform and may not match the Go compiler’s defaults.
       ` _ structs.HostLayout`
+    - 在 runtime/debug 库中新增了 debug.SetCrashOutput 方法. 来允许设置未被捕获的错误、异常的日志写入。可用于为所有 Go 进程意外崩溃构建自动报告机制
   - As of go 1.22, for string to bytes conversion, we can replace the usage of unsafe.Slice(unsafe.StringData(s), len(s)) with type casting []bytes(str), without the worry of losing performance.
   - As of go 1.22, string to bytes conversion []bytes(str) is faster than using the unsafe package. Both methods have 0 memory allocation now.
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)

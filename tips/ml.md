@@ -447,9 +447,6 @@
   - [深度强化学习课程](https://mp.weixin.qq.com/s/w99dQXk8dDoXDYLcE2F0ww)
     - https://huggingface.co/learn/deep-rl-course/unit5/how-mlagents-works
   - [利用大语言模型促进综合图学习能力](https://mp.weixin.qq.com/s/5S2D44V-fIe4Te5XtgOqhQ)
-- LLM Practice
-  - [m3e](https://huggingface.co/moka-ai/m3e-base) + milvus, 一个Embedding能力，一个提供存储和相似度召回能力，在加持下LLM 可以完成很多任务了
-  - ![img.png](ml_llm_demo.png)
 - [Prompt](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
   - `Prompt Engineering`, also known as `In-Context Prompting`, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes without updating the model weights.
   - `Instructed LM` (e.g. InstructGPT, natural instruction) finetunes a pretrained model with high-quality tuples of (task instruction, input, ground truth output) to make LM better understand user intention and follow instruction
@@ -850,6 +847,7 @@
     -H 'Content-Type: application/json' \
     -d '{"messages":[{"role":"system", "content": "You are a helpful assistant. Answer each question in one sentence."}, {"role":"user", "content": "**What is Wasm?**"}], "model":"llama-2-chat"}'
     ```
+  - [Transformers in music recommendation](https://research.google/blog/transformers-in-music-recommendation/)
 - [Tools]
   - [phoenix](https://github.com/Arize-ai/phoenix)
     - AI Observability & Evaluation - Evaluate, troubleshoot, and fine tune your LLM, CV, and NLP models in a notebook.
