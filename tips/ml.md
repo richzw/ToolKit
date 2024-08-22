@@ -688,6 +688,8 @@
         - However, the vocabulary used in the query must also be found in the corpus; otherwise, it risks returning no matching results.
       - Splade
         - SPLADE, in contrast, generates a vector with more non-zero values, resulting in a slower retrieval process.
+        - SPLADE is trained using the Microsoft MSMARCO dataset, where the data is organized into “question: answer lists” using traditional search engine recall methods like BM25, 
+          - and then manually annotated to prioritize more relevant answers at the top, totaling hundreds of thousands of such question-answer pairs.
         - this characteristic can potentially yield superior results, as SPLADE has the capability to include semantically similar terms for each input word.
   - [Gemma](https://mp.weixin.qq.com/s/E52nPpWrhnU7wMLpOhVz5Q)
     - [Gemma 模型中文指令微调](https://mp.weixin.qq.com/s/jXymgChgWbfj4k9zr2vqmw)
@@ -848,6 +850,11 @@
     -d '{"messages":[{"role":"system", "content": "You are a helpful assistant. Answer each question in one sentence."}, {"role":"user", "content": "**What is Wasm?**"}], "model":"llama-2-chat"}'
     ```
   - [Transformers in music recommendation](https://research.google/blog/transformers-in-music-recommendation/)
+    - 先前的用户操作通常作为输入特征添加到排序模型中。我们的方法使用了从生成模型中适应的 Transformer 架构来理解用户行为的顺序特性，并将其与个性化排序模型结合
+    - 使用 transformers 根据当前用户上下文集成不同的用户操作有助于直接将音乐推荐引导到用户的当前需求
+    - Transformers 理解序列
+      - Transformer 架构由自注意力层组成，能够理解顺序输入. 自注意力层捕捉句子中文本单词之间的关系，这表明它们也可能解决用户行为之间的关系
+    - Transformers 在 YouTube Music 中的排序应用
 - [Tools]
   - [phoenix](https://github.com/Arize-ai/phoenix)
     - AI Observability & Evaluation - Evaluate, troubleshoot, and fine tune your LLM, CV, and NLP models in a notebook.

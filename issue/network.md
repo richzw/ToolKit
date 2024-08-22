@@ -898,10 +898,39 @@
 - 服务器在间隔上次响应 SYN/ACK 500ms 后，才会对重传的 SYN 再次响应发出 SYN/ACK，而如果在 500ms 时间间隔之内，再次收到 SYN 的情况下，则不会响应 SYN/ACK。
   - 场景就像是 SYN Flood 攻击下，服务器由于安全策略控制了响应 SYN/ACK 的速率。
   - ipv4.sysctl_tcp_invalid_ratelimit
-
-
-
-
+- [App白屏优化系列](https://mp.weixin.qq.com/s/Q5EEzC1-yOel581fKuPpvA)
+  - 网络异常导致的图片白屏问题，往往和当时的环境有关，例如用户连的WIFI不支持IPv6但是DNS返回的大部分是V6的IP
+  - OkHttp基础监控
+    - 可以通过实现OkHttp自带的EventListener来获取，在各个阶段开始和结束点记录下时间戳即可
+    - 需要重点关注connectFailed，requestFailed和responseFailed这三个失败的回调，他们都会在失败之后重试，并重复执行阶段开始的回调（例如connectStart)
+  - 流量监控
+    - 通过系统API获取的当前App流量消耗，在排除了一些本地socket通信产生的干扰之后，最近N秒之内消耗的流量/N就可以认为是白屏问题发生时的网速。
+  - 网络诊断工具
+    - 依次进行DNS、Http、Ping（ICMP）与Ping（TCP）、TraceRoute诊断。如果是双栈客户端（同时返回了IPv4与IPv6），那么我们会选择首个IPv4与首个IPv6同时进行Ping/TraceRoute以确认不同IP类型的联通情况
+  - CDN质量监控
+  - DNS策略优化
+    - LocalDNS行为
+      - Android平台下LocalDNS的行为逻辑以确认性能较差的原因
+      - DNS的查询逻辑。其中一个重要参数是TTL(Time to Live)，这个参数表明当前查询结果的有效时间
+        - 通常TTL设置为120秒以内，这是因为要考虑到节点故障，能够快速切换。而到端侧查询时，TTL会在0~120之间。低于120是因为我们查询此结果的DNS server自身已经缓存了一定的时间。
+      - 双栈客户端上，同时发起A类（IPv4）、AAAA类（IPv4）查询无论是A类地址先返回，还是AAAA类地址先返回，Android都会将IPv6地址放在前面
+      - DNS数据包错误与重试
+        - 当前Android内有一个同步栅栏，多个线程同时查询一个Host，只会允许一个通过
+        - iOS平台下的DNS异常率远远低于Android，甚至差了一个数量级
+          - 较长的缓存时长。当DNS的TTL较低时（比如3秒），iOS会忽略TTL值，直接缓存1分钟以上。
+          - 积极的重试逻辑。只要1秒内未收到响应立即进行多次重试，其中主DNS 6次，备DNS 8次
+      - 我们看到Android平台下的LocalDNS查询极其不可靠，好在我们并非只能通过LocalDNS来解析IP。任何将域名转换为IP的手段都可以使用，比如通过http获取、磁盘缓存等。
+      - 在LocalDNS的基础上，我们增加了HttpDNS，磁盘缓存来优化DNS问题。其中HttpDNS在第60ms异步启动，磁盘缓存在第6秒钟时异步启动。三种查询方式任意一个返回，则DNS结束
+  - IPv6故障修复 IPv6探测&重排序
+    - 如果IP列表中同时包含IPv6&IPv4，则对第一个IPv6地址同步进行Ping探测。如果250ms内探测成功或曾经探测成功，则认为IPv6正常。
+    - 如果IPv6畅通，则按照IPv6优先进行交叉排序。如果IPv6故障，则按照IPv4优先进行交叉排序
+    - 快乐眼球（HappyEyeball）
+      - 当前DNS返回的IP地址数量超过一个时，每250ms异步启动一个新的TCP建连，任意一个TCP建连成功，则断开其他TCP并开始同步TLS建连。
+      - TLS 建连成功则返回此Connection，流程结束；TLS 建连失败时，如果是可恢复的TLS失败（部分SSLException），则立即重试；如果是不可恢复失败，则再次启动其他TCP的竞速。
+      - 核心修改点是原流程的建连部分。原流程中，在网络线程中同步的、依次进行TCP、TLS建连。新流程中，将TCP与TLS建连分开，竞速建连TCP，TCP建连完成后建连TLS。
+  - CA证书问题
+    - 历史为了优化SSL耗时过长、证书认证安全等问题，接口、图片域名均开启了ocsp的功能，但实际监控发现部分用户存在本地时间不对齐的情况，即超过了CA证书 ocsp校验的有效期
+    - 
 
 
 

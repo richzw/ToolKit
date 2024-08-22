@@ -541,9 +541,6 @@
         - 用更高精度的量化向量进行 refine 得到最终结果。
   - https://github.com/harsha-simhadri/big-ann-benchmarks/pulls?q=Zilliz+Solution+author%3Ahhy3
 - [向量检索大赛](https://mp.weixin.qq.com/s/pngwV1Ibe4rxmtWrcr_D2g)
-- Zilliz
-  - Unstructured Data Meetup
-    - [Feb](https://www.youtube.com/watch?v=42wZa3NasoM)
 - [Vector DB Comparison](https://www.superlinked.com/vector-db-comparison)
   - Pinecone vs Weaviate
     - Pinecone Key Features

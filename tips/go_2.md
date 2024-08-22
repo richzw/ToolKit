@@ -1487,6 +1487,7 @@
   - `GOMEMLIMIT=10737418240 GOGC=off GODEBUG=gctrace=1 ./soft_memory_limit -depth=21`
   - 通过SetMemoryLimit设置一个较大的值，再加上 GOGC=off，可以实现ballast的效果
   - 但是在没有关闭GOGC的情况下，还是有可能会触发很多次的GC,影响性能，这个时候还得GOGC Tuner调优，减少触达MemoryLimit之前的GC次数。
+  - [Go Beyond: Building Performant and Reliable Golang Applications](https://blog.zomato.com/go-beyond-building-performant-and-reliable-golang-applications)
 - [聊聊两个Go即将过时的GC优化策略](https://www.luozhiyun.com/archives/680)
   - GC
     - GC几个阶段
