@@ -559,7 +559,9 @@
     - This makes them highly effective for semantic search, as they return the most similar results based on distance, even without exact keyword matches.
   - Summary
     - dense embeddings are better for encoding the semantics or fuzzy meaning of a piece of text
-    -  sparse embeddings are better for encoding exact or adjacent concepts
+      - dense embedding -> L2 or cosine
+    - sparse embeddings are better for encoding exact or adjacent concepts
+      - sparse embedding -> IP
 - VectorDB challenge
   - 工程
     - 向量索引的 合并、拆分 - small index merge into large index

@@ -1137,8 +1137,18 @@
     - 反向传播的算力需求一般是前向传播的2倍
 - [50行正则就能切分“任何文档”的精妙分词器]
   - https://gist.github.com/hanxiao/3f60354cf6dc5ac698bc9154163b4e6a
-
-
+- [A Theory of Unsupervised Learning](https://mp.weixin.qq.com/s/enZoL8xW-EJLPyCEa4-TUw?poc_token=HMnQxmaj9Y1XKvIlUC4SXp9Q7rw8wLgSyKeZFYbq)
+  - https://www.lesswrong.com/posts/KqgujtM3vSAfZE2dR/on-ilya-sutskever-s-a-theory-of-unsupervised-learning
+  - 机器学习：监督学习与无监督学习
+    - 低训练误差+大训练集，就能确保模型的泛化能力，这就是监督学习背后的理论保证。
+    - 无监督学习的本质是分布匹配，是一种规律性的模式匹配
+  - 分布匹配：无监督学习的新思路
+    - 无监督学习其实就是在寻找最优的数据压缩方法
+    - 给定两个没有直接对齐的数据集X和Y (比如英语和法语的语料)，我们要找到一个函数f，使得f(X)的分布与Y的分布相似。
+    - 在机器翻译、语音识别等转换任务中，如果X和Y的维度足够高，X这个条件能提供很强的约束，几乎可以唯一地决定f(X)
+    - 把无监督学习看作是一个数据压缩问题，可以让我们从数学上理解无监督学习为什么有效，在任务执行上使之与监督学习处于同等地位
+    - 一个数据对象的 K氏复杂度，就是能够完整描述这个对象的最短计算机程序的长度
+    - 条件 K氏复杂度 K(Y|X) 提供了一种理论上最优的无监督学习解决方案。
 
 
 
