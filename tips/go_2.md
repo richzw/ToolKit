@@ -2038,8 +2038,11 @@
   - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.
   - Error wrapping makes using sentinel errors much more expensive, including making errors.Is() more expensive when the error is non-nil.
   - Using sentinel errors is as performant as other techniques on the happy path if you take the above precautions, but unavoidably much more expensive on the error path.
-
-
+- Time
+  - time.Sleep 是用阻塞当前 goroutine 的方式来实现的，它需要调度器先唤醒当前 goroutine，然后才能执行后续代码逻辑。
+  - time.Ticker 创建了一个底层数据结构定时器 runtimeTimer，并且监听 runtimeTimer 计时结束后产生的信号。因为 Go 为其进行了优化，所以它的 CPU 消耗比 time.Sleep 小很多。
+  - time.Timer 底层也是定时器 runtimeTimer，只不过我们可以方便的使用 timer.Reset 重置间隔时间。
+- Go 程序如何实现优雅退出
 
 
 

@@ -448,6 +448,7 @@
 - [容器网络原理](https://mp.weixin.qq.com/s/tjLsr_8eFnwbqy9_G2H7ow)
 - [容器内的 1 号进程](https://mp.weixin.qq.com/s/7RB9d2J1_bGJYaI_T-1h-A)
   - Linux 发行版，无论是 RedHat 系的还是 Debian 系的，都会把 /sbin/init 作为符号链接指向 Systemd。Systemd 是目前最流行的 Linux init 进程
+    - [Systemd Cheat Sheet](https://mp.weixin.qq.com/s/TAoiDH8SFk39TuVcdG5kUg)
   - 在容器中也有 1 号进程的概念，一旦容器建立了自己的 Pid Namespace（进程命名空间)，这个 Namespace 里的进程号也是从 1 开始标记的, 1 号进程是第一个用户态的进程，由它直接或者间接创建了容器中的其他进程
   - Linux 信号
     - 命令 kill ，直接向一个进程发送一个信号，缺省情况下不指定信号的类型，那么这个信号就是 SIGTERM。也可以指定信号类型，比如命令 kill -9，这里的 9，就是编号为 9 的信号，SIGKILL 信号

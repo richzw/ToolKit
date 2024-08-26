@@ -884,6 +884,10 @@
   - LlamaParse
     - with an API call you can store both cleanly parsed text and image chunks
     - the text can be pre-extracted by OCR/multimodal models but you can also dynamically feed the image directly into the model during query-time
+  - Late Chunking
+    - a "Late Chunking" method for preserving contextual information, which leverages the long context embedding model to more effectively embed chunks.
+      - exploring the lost context problem in naive chunking-embedding pipeline of many RAG systems
+    - https://github.com/jina-ai/late-chunking
 - [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
   - Query Transformations - a set of approaches focused on modifying the user input in order to improve retrieval
     - Query expansion - decomposes the input into sub-questions, each of which is a more narrow retrieval challenge
