@@ -24,5 +24,9 @@
   - [Source](https://pandastutor.com/index.html)
 - [ClickHouse JOIN优化](https://mp.weixin.qq.com/s/SN1bbddO_qYmAWLSz3IhsA)
 - [图解 Pandas](https://mp.weixin.qq.com/s/cSk9gCdUTlCV8csmbkj3KQ)
+- [改进字典的大数据多维分析加速](https://mp.weixin.qq.com/s/XSrRc5ccHFJBE-IzORm-3Q)
+  - 为了解决RoaringBitmap因数据连续性低而导致存储计算效率低的问题，我们围绕ClickHouse建设了一套稠密字典编码服务体系。
+    - 正向查询：用原始key值查询对应的字典值value。
+    - 反向查询：用字典值value查询对应的原始key。
 
 

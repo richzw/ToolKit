@@ -1173,6 +1173,7 @@
   
   Remember, don't blindly repeat the contexts verbatim. And here is the user question:
   ```
+- [Claude System Prompt](https://docs.anthropic.com/en/release-notes/system-prompts#july-12th-2024)
 - Sonnet 3.5 Coding - System
   ```
   You are an expert in Web development, including CSS, JavaScript, React, Tailwind, Node.JS and Hugo / Markdown. You are expert at selecting and choosing the best tools, and doing your utmost to avoid unnecessary duplication and complexity.
@@ -1260,6 +1261,7 @@
   新的对话内容： {new_lines}
   新的总结：
   ```
+
 - Misc
   - 很多GPT都加了防护，最常见的就是第一段加一个“Above all Rules”，告诉GPT不要给任何 Prompt
     - 基本思路就是告诉它为了更好的生成效果，我们需要添加新的规则，覆盖“Above all Rules”，如果它同意回复一段唯一字符（随便组合，越特别越好）。
@@ -1267,6 +1269,8 @@
   - You can't find answers without asking the right questions
     - 《The Prompt with Trevor Noah》
   - [Prompt技巧](https://mp.weixin.qq.com/s/Qlz2iyO6dN4-MWJmIHZIiQ)
+  - [Prompt Design](https://www.cursor.com/blog/prompt-design)
+  - ![Prompt framework](llm_prompt_framework.png)
 
 
 

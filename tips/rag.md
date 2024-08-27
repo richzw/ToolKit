@@ -123,6 +123,20 @@
   - LlamaParse 
     - with an API call you can store both cleanly parsed text and image chunks 
     - the text can be pre-extracted by OCR/multimodal models but you can also dynamically feed the image directly into the model during query-time
+  - [Late Chunking](https://jina.ai/news/late-chunking-in-long-context-embedding-models/?nocache=1)
+    - https://colab.research.google.com/drive/15vNZb6AsU7byjYoaEtXuNu567JWNzXOz#scrollTo=e1173893c4f0ea56
+    - 长文本在 Embedding 模型中的应用引发了广泛讨论和争议
+      - 信息压缩问题：将数千字的长文本编码为单一 Embedding 表示会导致语义信息的"过度压缩"，使得检索系统难以准确定位特定信息。
+      - 检索粒度不足：许多应用，尤其是检索增强生成（RAG）系统，需要检索文档中的较小片段，而非整个长文档。
+    - Late Chunking，能够在保留长文本 Embedding 模型优势的同时，也能满足精细粒度检索的需求。
+    - 上下文丢失问题
+      - 分块 - Embedding - 检索 - 生成流程在处理长文档时可能会丢失长距离的上下文依赖关系
+      - 有一些启发式算法试图缓解这一问题，如滑动窗口重新采样、多种上下文窗口长度及多次文档扫描等，然而，像所有启发式算法一样，这些方法时灵时不灵；它们可能在某些情况下有效，但没有理论上的保证
+    - Late Chunking让 Embedding 更懂上下文
+      - 先过 Embedding 模型再分块，我们先将 Embedding 模型的 transformer 层应用到整个文本或尽可能多的连续文本，为每个 token 生成一个包含丰富上下文信息的向量表示序列
+      - 再对这些 token 向量序列进行平均池化，进而得到考虑了整个文本上下文的块 Embedding。
+      - 为了充分发挥迟分的优势，我们需要借助支持长上下文的 Embedding 模型，如 jina-embeddings-v2-base-en，它能够处理长达 8192 个 token 的文本(相当于 10 页 A4 纸)，基本满足了大多数长文本的上下文需求。
+    
 - [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
   - Query Transformations - a set of approaches focused on modifying the user input in order to improve retrieval
     - Query expansion - decomposes the input into sub-questions, each of which is a more narrow retrieval challenge
