@@ -230,7 +230,8 @@
 - [踩内存案例分析](https://mp.weixin.qq.com/s/9OCFb2cH-H5zbaIT5VAS9w)
 - [社群推荐算法](https://mp.weixin.qq.com/s/5NVPoJ16VgFpJOUNQnBfew)
 - [How Google Search ranking works](https://searchengineland.com/how-google-search-ranking-works-445141)
-
+- AI-powered Git Commit Function
+  - https://gist.github.com/karpathy/1dd0294ef9567971c1e4348a90d69285
 
 
 

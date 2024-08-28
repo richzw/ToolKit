@@ -1149,6 +1149,24 @@
     - 把无监督学习看作是一个数据压缩问题，可以让我们从数学上理解无监督学习为什么有效，在任务执行上使之与监督学习处于同等地位
     - 一个数据对象的 K氏复杂度，就是能够完整描述这个对象的最短计算机程序的长度
     - 条件 K氏复杂度 K(Y|X) 提供了一种理论上最优的无监督学习解决方案。
+- [Meta - Methods for adapting large language models](https://ai.meta.com/blog/adapting-large-language-models-llms/)
+  - Full fine-tuning and parameter-efficient fine-tuning (PEFT)
+  - Retrieval-augmented generation (RAG)
+  - In-context learning (ICL)
+    - Input and output text only—that is, few-shot learning
+    - Reasoning traces: adding intermediate reasoning steps; see Chain-of-Thought (CoT) prompting
+    - Planning and reflection traces: adding information that teaches the LLM to plan and reflect on its problem solving strategy; see ReACT
+  - Fine-tuning vs. and RAG
+    - Does your application require external knowledge? Fine-tuning is typically not helpful for injecting new knowledge.
+    - Does your application need custom tone/behavior/vocabulary or style? For these types of requirements, fine-tuning is typically the right approach.
+    - How forgiving is your application to hallucinations? In applications where suppressing falsehoods and imaginative fabrications is vital, RAG systems provide built-in mechanisms to minimize hallucinations.
+    - How much labeled training data is available?
+    - How static/dynamic is the data? If the problem requires access to a dynamic corpus of data, fine-tuning may not be the right approach, as the knowledge of the LLM can soon become stale.
+    - How transparent/interpretable does the LLM application need to be? RAG can inherently provide references, which are useful for interpreting the LLM output.
+    - Cost and complexity: Does the team have expertise building search systems or previous fine-tuning experience?
+    - How diverse are the tasks in your application?
+
+
 
 
 
