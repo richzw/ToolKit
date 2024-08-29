@@ -1271,6 +1271,7 @@
   - [Prompt技巧](https://mp.weixin.qq.com/s/Qlz2iyO6dN4-MWJmIHZIiQ)
   - [Prompt Design](https://www.cursor.com/blog/prompt-design)
   - ![Prompt framework](llm_prompt_framework.png)
+  - [Cursor Prompt](https://cursor.directory/)
 
 
 
