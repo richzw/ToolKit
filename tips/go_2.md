@@ -2043,7 +2043,50 @@
   - time.Ticker 创建了一个底层数据结构定时器 runtimeTimer，并且监听 runtimeTimer 计时结束后产生的信号。因为 Go 为其进行了优化，所以它的 CPU 消耗比 time.Sleep 小很多。
   - time.Timer 底层也是定时器 runtimeTimer，只不过我们可以方便的使用 timer.Reset 重置间隔时间。
 - Go 程序如何实现优雅退出
-
+- channel 锁的竞争加剧, 给出优化的几种方法
+  - 降低 GOMAXPROC 数量(视频里设置了 32，生产环境的 1/4)，这样即使核数增加，但 P 的数量固定，不会发生大量线程抢占同一个 channel 的锁
+  - 发送时设置超时，如果一个消息过了一段时间后还没发送进 channel 里，就将消息丢弃或做再尝试放入 channel 中
+  - 使用多个不同的 channel，类似分片锁，比如每次采用取模的方式选择其中一个 channel
+  - 使用缓冲机制，先把元素存到一个 buffer 里，buffer 满了之后把整个 buffer 塞进 channel 里，减少 channel 中元素的数量
+  ```
+  func BenchmarkChannelPC(b *testing.B) {
+   b.Run("P=1, C=1", func(b *testing.B) {
+    benchmarkChannel_WithPC(b, 1, 1)
+   })
+  
+   b.Run("P=1, C=128", func(b *testing.B) {
+    benchmarkChannel_WithPC(b, 1, 128)
+   })
+  
+   b.Run("P=128, C=4", func(b *testing.B) {
+    benchmarkChannel_WithPC(b, 128, 1)
+   })
+  
+   b.Run("P=128, C=128", func(b *testing.B) {
+    benchmarkChannel_WithPC(b, 128, 128)
+   })
+  }
+  
+  func benchmarkChannel_WithPC(b *testing.B, p, c int) {
+   n := runtime.GOMAXPROCS(p)
+   defer runtime.GOMAXPROCS(n)
+  
+   ch := make(chan int, 1024)
+   var wg sync.WaitGroup
+   wg.Add(c)
+   b.ResetTimer()
+   for i := 0; i < c; i++ {
+    go func() {
+     defer wg.Done()
+     for i := 0; i < b.N; i++ {
+      ch <- 1
+      <-ch
+     }
+    }()
+   }
+   wg.Wait()
+  }
+  ``` 
 
 
 
