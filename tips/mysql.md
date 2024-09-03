@@ -1019,7 +1019,7 @@
   - 在语义相同，无索引的情况下：
     - distinct效率高于group by。原因是distinct 和 group by都会进行分组操作，但group by在Mysql8.0之前会进行隐式排序，导致触发filesort，sql执行效率低下。
     - 但从Mysql8.0开始，Mysql就删除了隐式排序，所以，此时在语义相同，无索引的情况下，group by和distinct的执行效率也是近乎等价的。
-
+-  where condition order by A limit N 这样的语句，由于MYSQL5.7默认是打开 prefer_ordering_index 也就是在操作的时候，由于limit N 的值比较小，导致查询分析器去走ORDER BY 字段上的索引，而放弃更适合的索引。
 
 
 

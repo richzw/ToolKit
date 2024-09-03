@@ -319,6 +319,13 @@
     - Knowhere 属于开源，其部署环境更多样，可在所有主机类型上运行
     - Knowhere 依赖于 OSS 库（如 Faiss、DiskANN 和 hnswlib）
     - milvus的ivfsq8，实际用的就是faiss的IndexIvfScalarQuantizer
+  - [多租户](https://mp.weixin.qq.com/s/3QV7xjJ4G7MUxKOb0T427Q)
+    - to B 大型知识库系统中，我们一般为每个租户提供一到多个 Database，以满足数据规模及知识库构建灵活度的需要
+    -  to C 对话上下文的数据隔离，一般会选择在 Colletion，或 Partition Key 这两层实现。Partition Key 是逻辑上的表内隔离,  Partition Key 理解为一个 Hash 分桶的过程
+      - 一个快速的选型原则是：如果你的用户数量在几千或万这个量级，你可以考虑为每个用户分配一个 Collection；如果你的用户数量在几百万甚至上千万这个量级，你应该考虑为每个用户分配一个 Partition Key。
+      - 采用 partition key 方案进行数据隔离，Milvus 提供了 mmap 机制进行冷热数据向多层存储的映射。
+      - Milvus 还提供了逻辑层的显式数据加载/释放能力。我们可以通过 load/release 这对操作，在业务层控制是否将一个非活跃用户的 collection 在内存上释放，或将一个回归活跃的用户的 collection 从磁盘加载至内存
+      - 在 mmap 机制中，数据从磁盘到内存的移动过程应用侧是不感知的，而 load/release 在应用侧必须感知
   - attu
     -  attu里显示的approx entities number相当于用pymilvus的collection.num_entities获取行数，这个是从etcd中快速统计已落盘的行数。加载在内存里的数量有可能不一样，因为有些数据可能没落盘
   - 编译

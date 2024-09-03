@@ -1272,6 +1272,8 @@
   - [Prompt Design](https://www.cursor.com/blog/prompt-design)
   - ![Prompt framework](llm_prompt_framework.png)
   - [Cursor Prompt](https://cursor.directory/)
+  - [SuperPrompt](https://github.com/NeoVertex1/SuperPrompt)
+    - You will want to use this prompt with Claude (as instructions) but it also work with other llms.
 
 
 
