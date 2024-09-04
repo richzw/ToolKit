@@ -2088,8 +2088,19 @@
    wg.Wait()
   }
   ``` 
-
-
+- [go directive、toolchain directive、go env 中的 GOTOOLCHAIN 以及环境变量中的 GOTOOLCHAIN 都有各自的作用和相互之间的关系](https://mp.weixin.qq.com/s/xBaadsv--4ZrnAjJwzLIqQ)
+  - 优先级（从高到低）
+    - 环境变量中的GOTOOLCHAIN
+    - go env中的GOTOOLCHAIN
+    - go.mod中的toolchain directive
+    - go.mod中的go directive
+  - 相互抑制关系:
+    - 环境变量中的GOTOOLCHAIN会覆盖go env中的GOTOOLCHAIN设置。
+    - go env中的GOTOOLCHAIN会覆盖go.mod中的toolchain directive。
+    - go.mod中的toolchain directive会覆盖go directive关于工具链版本的影响，但不影响语言层面的版本控制。
+  - 选择与使用:
+    - 开发阶段: 可以使用go.mod中的go directive和toolchain directive来确保团队使用一致的 Go 语言版本和工具链版本。
+    - 部署和 CI/CD: 可以使用环境变量中的GOTOOLCHAIN来强制指定工具链版本，确保编译和运行环境的一致性。
 
 
 
