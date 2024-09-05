@@ -233,7 +233,14 @@
 - [How Google Search ranking works](https://searchengineland.com/how-google-search-ranking-works-445141)
 - AI-powered Git Commit Function
   - https://gist.github.com/karpathy/1dd0294ef9567971c1e4348a90d69285
-
+- git
+  ```
+  git remote add fork git@github.com:xxx.git
+  git fetch fork
+  git co -b v2.4 fork/v2.4.x
+  git remote remove fork
+  git push --set-upstream origin v2.4
+  ```
 
 
 

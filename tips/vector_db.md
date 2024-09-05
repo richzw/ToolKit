@@ -186,12 +186,13 @@
     - nlist取2048比较好，nprobe按你之前的比例取10左右。ivfpq，一亿的数据，nlist 可以设置成多少合适，2048吗？
       - 在milvus里，每个分片都是独立的内存，所以nlist的取值是以每个分片所包含的行数来推荐。我们推荐是4*sqrt(每个分片里的行数)。faiss都是把数据整成一份，所以它那个很大
       - nlist的推荐值是4*sqrt(n)，其中n是单个segment中的数据行数，如果milvus.yaml中的segment. maxSize为默认的512MB，则n可以用512MB/(dimension*4Bytes)来计算
-      - nlist是聚类中心的数量，nprobe是搜索时查询的聚类中心的数量。nlist越大，聚类中心越多，搜索时需要查询的聚类中心也就越多，搜索的时间也就越长。nprobe是搜索时查询的聚类中心的数量，nprobe越大，搜索的时间也就越长。nlist和nprobe的取值要根据实际情况来调整，一般来说，nlist和nprobe的取值要根据数据量、数据维度、索引类型、搜索参数等因素来调整。
+      - nlist是聚类中心的数量，nprobe是搜索时查询的聚类中心的数量。nlist越大，聚类中心越多，搜索时需要查询的聚类中心也就越多，搜索的时间也就越长。
+      - nprobe是搜索时查询的聚类中心的数量，nprobe越大，搜索的时间也就越长。nlist和nprobe的取值要根据实际情况来调整，一般来说，nlist和nprobe的取值要根据数据量、数据维度、索引类型、搜索参数等因素来调整。
       - nlist 和 nprobe 都是针对一个segment里的数据来说的，这两个值调控的是一个segment里面参与搜索的数据比例。nlist 是把一个segment里的数据分成多少个堆，nprobe是决定从这nlist个堆里选多少个出来参与搜索计算。
       - nlist和nprobe匹配着用就问题不大。比如nlist=1024 nprobe=128能满足你对于召回率的要求，那么把nlist改成512后重建索引，也相应地把nprobe=64，那么召回率也大概率能满足你召回率的要求。
       - 随着nlist/nprobe的较小，对召回率的影响就开始越来越大，比如16/2和8/1，这两者的召回率可能就差挺大了。反之，随着nlist/nprobe等比放大，两组召回率差别变小，但由于nlist的计算量差别增大，查询速度的差距也变大。所以才有4*sqrt(n)这么一个推荐值
     - 要明白k-means的原理，知道nlist和nprobe的关系。nlist和nprobe固定不变的情况下，被计算的数据比例基本是固定的，所以召回率也是基本不变
-      - 我理解k-means是聚类出nlist中心点，nprobe是检索的时候，查询多少个中心点。随机情况下，每个中心点代表的数据条数是分片里的数据量除以nlist，那我每次搜索nprobe核中心，这比例不就固定的
+      - k-means是聚类出nlist中心点，nprobe是检索的时候，查询多少个中心点。随机情况下，每个中心点代表的数据条数是分片里的数据量除以nlist，那每次搜索nprobe核中心，这比例不就固定的
     - 每次search()返回的list第一个distance都是最大的？
       - 选的metric_type是L2还是IP。
       - 如果是L2的话，distance越接近0就越相似，排第一个的最相似。
@@ -269,6 +270,8 @@
       - 如果打开mmap功能，所有的索引都可以借助磁盘来减少内存占用。
       - 比如IVFFLAT索引原本要占用40GB内存的，如果querynode没有大于40GN内存，load就会失败。但如果打开mmap之后，只需要给querynode配置更少的内存，比如配置20GB，也能加载成功查询成功，只是耗时会久一些。
     -  float16向量在有些索引类型里还是以float32来计算的，比如IVF索引。在HNSW和DISKANN里是真正以float16计算的。相应的以float16计算的索引内存占用减半，速度也快一些。
+    - 使用ivf_flat，频繁插入大量数据会自动重建索引么？
+      - 之前调过创建索引的接口，后面新插入的数据都会自动创建索引。每个ivf_flat索引是用当前segment的数据做训练的，前后数据分布变了不影响。
   - load
     - load是否有并发的设置呢？
       - milvus.yaml里的queryCoord.taskExecutionCap，这个设小点每批送给一个querynode加载的segment的最大数量，每个segment里有多个数据文件，querynode也有自己的并发读取的限制，跟cpu核数相关
@@ -568,8 +571,12 @@
   - Summary
     - dense embeddings are better for encoding the semantics or fuzzy meaning of a piece of text
       - dense embedding -> L2 or cosine
+      - Use L2 distance because it effectively captures the overall similarity in a continuous vector space, 
+      - which aligns with the semantic similarity encoded in dense embeddings.
     - sparse embeddings are better for encoding exact or adjacent concepts
       - sparse embedding -> IP
+      - Use Inner Product because it measures the overlap in non-zero dimensions, 
+      - which is crucial for capturing exact or adjacent concepts in high-dimensional sparse vectors.
 - VectorDB challenge
   - 工程
     - 向量索引的 合并、拆分 - small index merge into large index
