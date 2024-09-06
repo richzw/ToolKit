@@ -705,6 +705,7 @@
     - Two unintuitive things are happening at the same time:
       - 1. The <|begin_of_text|> token (128000) was added to the front of the sequence.
       - 2. The <|end_of_text|> token (128001) was parsed out of our string and the special token was inserted. Our text (which could have come from a user) is now possibly messing with the token protocol and taking the LLM out of distribution with undefined outcomes.
+  - [Chat GPT "DAN" (and other "Jailbreaks")](https://gist.github.com/coolaj86/6f4f7b30129b0251f61fa7baaa881516)
 - [Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models](https://www.edhec.edu/sites/default/files/2023-12/ChatGPT_Paper_Slides%20%281%29%20%281%29%20%281%29.pdf)
 - [Big Prompt Library](https://github.com/0xeb/TheBigPromptLibrary?tab=readme-ov-file#how-to-protect-gpt-instructions)
   - How to get system prompt?

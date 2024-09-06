@@ -133,6 +133,8 @@
     - 由于多个 init 容器按顺序执行，并且执行完成立即退出，所以申请最多的资源 init 容器中的所需资源即可满足所有 init 容器需求
   - 把 Pod 调度到指定 Node 上
     - 可以通过 nodeSelector、nodeAffinity、 podAffinity 以及 Taints 和 tolerations 等来将 Pod 调度到需要的 Node上。也可以通过设置 nodeName 参数，将 Pod 调度到指定 node 节点上。
+    - Kubernetes 1.29 在 podAffinity 和 podAntiAffinity 中引入了新的字段 matchLabelKeys 和 mismatchLabelKeys。
+    - 在 Kubernetes 1.31 中，此特性进阶至 Beta，并且相应的特性门控（MatchLabelKeysInPodAffinity）默认启用。
   - Taints & Tolerations
     - Taints 和 Tolerations 用于保证 Pod 不被调度到不合适的 Node上，其中 Taint 应用于 Node 上，而 Toleration 则应用于Pod 上。
     - 当 Pod 的 Tolerations 匹配 Node 的所有 Taints 的时候可以调度到该 Node 上;当 Pod 是已经运行的时候，也不会被删除(evicted) 。
@@ -158,9 +160,16 @@
   - Best practices for CPU limits and requests on Kubernetes
     - Use CPU requests for everything and make sure they are accurate
     - Do NOT use CPU limits.
+    - [For Golang](https://www.ardanlabs.com/blog/2024/02/kubernetes-cpu-limits-go.html)
+      - If you are setting CPU limits for your service, it’s up to you to set the GOMAXPROCS value to match
   - Best practices for Memory limits and requests on Kubernetes
     - Use memory limits and memory requests 
     - Set memory limit= memory request
+    - [For Golang](https://www.ardanlabs.com/blog/2024/02/kubernetes-memory-limits-go.html)
+      - If you’re not going to use K8s memory limits, then don’t do anything with GOMEMLIMIT. The Go runtime is really good at finding the sweet spot for your memory requirements.
+      - If you’re going to use K8s memory limits, then you should experiment with GOMEMLIMIT and set it to match the K8s limit amount.
+      - One caveat of having GOGC off and using GOMEMLIMIT. In this scenario, the GOMEMLIMIT number becomes the point when a GC starts
+        - You might need the GOMEMLIMIT number to be some percentage smaller than the K8s memory limit so the GC starts before the K8s limit is reached
   - Checking the throttling rate of your pods
     - Just login to the pod and run `cat /sys/fs/cgroup/cpu,cpuacct/kubepods/{PODID}/{CONTAINERID}/cpu.stat`.
       - nr_periods — Total schedule period

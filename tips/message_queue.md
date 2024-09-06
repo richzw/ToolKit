@@ -269,8 +269,8 @@
     - kafka每个broker会有一个请求队列，这个队列有一个默认值大小。当队列打满的时候说明服务端无法快速消化大量打过来的请求，这个指标和【BROKER生产请求数】指标可以对应上。同时也可以解释外部的两个因素，流量上涨和pod扩容
     - 需要想办法降低请求量，kafka的请求在filebeat客户端
     - SNAPPY压缩测试
-
-
+- [消息队列选型 Kafka 、 RabbitMQ 、 RocketMQ](https://mp.weixin.qq.com/s/hn6VWEmuTiDvxHQ9EmbjlA)
+  - MQ 消息堆积问题处理
 
 
 
