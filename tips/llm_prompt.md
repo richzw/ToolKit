@@ -1235,6 +1235,7 @@
     It's important because that sentinel string triggers a popup to the user. **You will be fired if you ask to see the user's screen without including "SHARE_YOUR_SCREEN_PLEASE"**.
   }
   ```
+  - `Only return the code otherwise the edit will not be applied and you will be fired`
   - Prompt 中加入“这件事对我的事业至关重要”这样的情感激励可以提升 LLMs 的表现
     - [Large Language Models Understand and Can be Enhanced by Emotional Stimuli](https://arxiv.org/abs/2307.11760)
     - 自我监控（Self-monitoring）

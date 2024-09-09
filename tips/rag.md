@@ -799,8 +799,53 @@
   - 通过微调忽略无关上下文（Ignore Irrelevant Context Through Fine-Tuning）
   - 使用自然语言推理让 LLMs 更好地应对无关上下文（Use Natural Language Inference to Make LLMs Robust Against Irrelevant Context）
     - 使用 NLI 模型过滤掉无关上下文，仅在使用问题和 LLM 生成的答案被分类为蕴含时，才使用检索到的上下文。
-
-
+- [Prompt Tips - ilya](https://x.com/ilyasutsk/status/1832211266129293618)
+  - 提示精确化:在编写提示时,力求表达清晰准确。清楚地阐述任务需求和概念定义至关重要。例:不用"分析文本",而用"判断这段话的情感倾向:积极、消极还是中性"。
+    - This tip emphasizes the importance of unambiguous language in prompts. Clarity reduces the chance of misinterpretation by the AI model.
+    - Example: Unclear prompt: "Make it better." Clear prompt: "Revise the given text to improve grammar, clarity, and conciseness while maintaining the original meaning."
+  - 快速迭代:善于快速连续调整提示。熟练的提示工程师能够灵活地进行多轮优化。例:从"总结文章"到"用100字概括文章要点",再到"用100字总结文章,聚焦气候影响"。
+    - This approach allows for quick refinement and improvement of results. It's about not being afraid to try multiple variations quickly.
+    - Example: First attempt: "Write a poem about spring." Refinement: "Write a haiku about cherry blossoms in spring." Further refinement: "Write a haiku about cherry blossoms in spring, emphasizing their ephemeral nature."
+  - 边界测试:设计提示时,考虑极端情况和非常规场景。思考提示在特殊情况下可能出现的问题。例:设计数学解题器时,考虑处理负数、极大值和除零等特殊情况。
+    - This tip encourages thinking beyond the typical use case to ensure robustness.
+    - Example: Basic prompt: "Calculate the average of these numbers: 5, 10, 15." Edge case consideration: "Calculate the average of these numbers, handling any non-numeric inputs or empty sets: 5, 10, 15, apple, -20, []"
+  - 模拟真实输入:用不规范、真实的用户输入测试提示。不要假设用户总是提供完美格式的查询。例:测试"1+1等于几"、"一加一是多少啊"、"1+1=?"等多种表达。
+    - This ensures your prompts can handle real-world scenarios where users might not provide perfect input.
+    - Example: Ideal input: "Translate 'Hello, how are you?' to French." Realistic input: "tranlate to french: hello how r u"
+  - 输出分析:仔细检查模型的回答。确保模型严格按照指令执行任务。例:要求列举5种水果时,检查是否确实列出5项且每项都是水果。
+    - This involves critically examining whether the model's response aligns with the intended outcome.
+    - Example: Prompt: "List 5 capital cities in Europe." Output analysis: Check if all listed cities are indeed capital cities and located in Europe.
+  - 明确任务细节:消除隐含假设,详细说明完成任务所需的全部信息。系统性地拆解任务,确保包含所有必要元素。例:不说"计算面积",而说"计算一个10米长、5米宽的长方形面积,用平方米表示"。
+    - This tip emphasizes providing all necessary context and avoiding implicit assumptions.
+    - Example: Assumption-laden prompt: "Convert the temperature." Clear, detailed prompt: "Convert 25 degrees Celsius to Fahrenheit. Use the formula: °F = (°C × 9/5) + 32. Round the result to two decimal places."
+  - 考虑模型理解:编写提示时,设身处地考虑模型可能的理解方式。预想模型可能误解指令的情况。例:避免使用"好"这样模糊的词,因为它可能指道德上的好或质量上的好。
+    - This involves considering how the AI might interpret instructions differently than a human would.
+    - Example: Potential misinterpretation: "Draw a house." Clearer prompt: "Describe in words a simple drawing of a house, including details about its shape, windows, door, and roof."
+  - 版本管理:对提示进行版本控制,追踪实验过程。像管理代码一样管理和迭代提示。例:使用Git管理提示版本,记录每次修改的原因和效果。
+    - This tip suggests treating prompts like code, using tools to manage iterations and experiments.
+    - Example: Version 1: "Summarize the text in 100 words." Version 2: "Summarize the text in 100 words, focusing on key events and main characters." Version 3: "Provide a 100-word summary of the text, highlighting the plot progression and character development."
+  - 主动澄清:要求模型指出指令中不明确或模糊的部分。这有助于改进提示质量。例:在提示末尾加上"如有不清楚之处,请指出"。
+    - This approach leverages the model's capabilities to improve your prompts.
+    - Example: Prompt: "Explain quantum entanglement. Then, identify any parts of this instruction that could be made clearer or more specific."
+  - 精简表达:追求精确但不过度复杂化。给出明确的任务描述,避免不必要的抽象。例:用"生成10个随机整数列表"而非"创建存储多个整型元素的数据结构"。
+    - This balances the need for clarity with the importance of simplicity.
+    - Example: Overcomplicated: "Utilizing your vast knowledge of culinary arts and nutritional science, construct a detailed, step-by-step methodology for the creation of a simple yet nutritious sandwich, taking into account dietary restrictions and flavor profiles."
+    - Precise and simple: "Provide a recipe for a healthy sandwich, including ingredients and preparation steps."
+  - 平衡处理:在处理常见情况和边缘情况之间找平衡。关注边缘情况的同时,不忽视主要用例。例:设计日期解析器时,既处理常见日期格式,也考虑闰年等特殊情况。
+    - This tip reminds us to handle unusual scenarios without losing focus on the main use case.
+    - Example: Balanced prompt: "Create a function to calculate the area of a circle. The function should handle positive real numbers for the radius and return 'Invalid input' for negative or non-numeric inputs."
+  - 系统整合:思考提示如何融入更大的系统架构。考虑数据来源、响应时间和整体系统设计等因素。例:设计聊天机器人提示时,考虑与用户历史记录和外部API的集成。
+    - This involves considering broader context and system constraints.
+    - Example: System-aware prompt: "Generate a product description in 50 words or less, optimized for mobile display, focusing on key features and benefits."
+  - 全面思考:不仅依赖写作技巧,还需要结合清晰沟通和系统性思维。优秀作家不一定是优秀的提示工程师,反之亦然。例:不仅清晰描述任务,还要系统考虑可能的输入、输出和边界条件。
+    - This tip highlights the multifaceted nature of prompt engineering, combining linguistic and logical skills.
+    - Example: Systematic prompt: "1. Analyze the given text for sentiment (positive, negative, or neutral). 2. Identify the main topic. 3. List three key points. 4. Suggest a follow-up question based on the content."
+  - 客户教育:与客户合作时,帮助他们理解真实用户输入的复杂性。引导他们考虑实际使用场景,而非理想情况。例:展示用户可能输入的各种不规范查询,而非假设所有用户都用标准格式提问。
+    - This involves educating clients about real-world usage patterns and potential variations in user input.
+    - Example: Customer education: "Let's consider how users might actually phrase their questions. Instead of 'What's the weather forecast?', they might type 'weather tmrw' or 'is it gonna rain'. How should our system handle these variations?"
+  - 大量实践:多观察数据和模型输出。熟悉模型对不同类型提示和输入的反应模式。例:尝试同一问题的不同表述,观察模型输出的变化,找出最有效的表达方式。
+    - This tip encourages familiarizing yourself with how the model responds to different inputs through hands-on experience.
+    - Example: Practice exercise: Analyze the outputs of the same prompt across different AI models or different versions of the same model, noting differences in style, content, and adherence to instructions.
 
 
 
