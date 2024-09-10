@@ -744,8 +744,10 @@
     - • Kube-controller-manager 的 Deployment Controller 从 Kube-apiserver Watch 到 Deployment 的创建事件，并创建一个 ReplicaSet；
     - • Kube-apiserver 会将 ReplicaSet 的描述信息写入 Etcd 中；
     - • Kube-controller-manager 的 ReplicaSet Controller 从 Kube-apiserver Watch 到 ReplicaSet 的创建事件，并创建一个 Pod；
+      - Controller-manager 监听 Apiserver 的变化，检测到有新的 Pod 对象时，控制器创建 Pod 并将其状态设为 Pending
     - • Kube-apiserver 会将 Pod 的描述信息写入 Etcd 中；
     - • Kube-scheduler 从 Kube-apiserver Watch 到 Pod 的创建事件，并根据调度算法从集群中选择一个最优的节点，并更新 Pod 的 nodeName 字段；
+      - Scheduler 也通过监听 Apiserver 的变化，发现有新的、尚未分配节点的 Pod。根据预选策略和优选策略，选择一个最适合的 Node 来运行新的 Pod。
     - • Kube-apiserver 会将 Pod 的更新信息写入 Etcd 中；
     - • 上述绑定的节点 Kubelet 从 Kube-apiserver Watch 到 Pod 绑定节点是自身，直接调用 CRI 创建容器；
     - • 结果返回，并写入 Etcd。
