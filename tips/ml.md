@@ -1165,7 +1165,21 @@
     - How transparent/interpretable does the LLM application need to be? RAG can inherently provide references, which are useful for interpreting the LLM output.
     - Cost and complexity: Does the team have expertise building search systems or previous fine-tuning experience?
     - How diverse are the tasks in your application?
-
+- 图像与文本并存，多模态检索
+  - Pic2Word
+    - 如果把图片用一个文本token来进行表示，那么图片与文本就可以统一成文本，并很自然地生成CLIP text embedding进行以文搜图查询
+    - 这种token并不是真正的文本token，而是生成的一个伪符（pesudo token）,用来在文本空间中表示图像
+    - 关键就在于训练一个图像embedding到pesudo token embedding的映射网络. CLIP visual embedding
+  - CompoDiff
+    - 利用了扩散模型(diffusion models)的技术来进行组合图像搜索
+    - Compodiff的就是将现有的图像扩散模型技术应用到了embedding生成上，希望将输入的文本，参考图片，掩膜Mask等组合共同生成出一个符合CLIP visual embedding分布的向量，从而可以进行组合图像查询
+    - Embedding模型自然就可以理解成根据文本，将一个高斯噪声embedding一步一步去噪，逐渐增大embedding的信噪比变为符合CLIP embedding分布的visual embedding，并且将文本和图像进行生成过程的控制
+  - CIReVL
+    - 将图像变成文本，再使用prompt工程结合修改文本转为目标文本，最后生成目标文本的embedding，进行查询
+  - MagicLens
+    - 使用编码器（CLIP或CoCa）分别将图像和文本编码为Embedding，再经过多个自注意力层，生成了一个多模态表征向量
+    - 因为检索的图像都没有文本，可以使用空文本“”来替代描述文本，从而生成图像的Embedding
+  - 广泛所使用的用于CIR评测的数据集为FashionIQ， CIRR以及CIRCO
 
 
 

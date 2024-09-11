@@ -137,6 +137,7 @@
       - 再对这些 token 向量序列进行平均池化，进而得到考虑了整个文本上下文的块 Embedding。
       - 为了充分发挥迟分的优势，我们需要借助支持长上下文的 Embedding 模型，如 jina-embeddings-v2-base-en，它能够处理长达 8192 个 token 的文本(相当于 10 页 A4 纸)，基本满足了大多数长文本的上下文需求。
     - [Late Chunking: Balancing Precision and Cost in Long Context Retrieval](https://weaviate.io/blog/late-chunking)
+    - https://arxiv.org/pdf/2409.04701
 - [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
   - Query Transformations - a set of approaches focused on modifying the user input in order to improve retrieval
     - Query expansion - decomposes the input into sub-questions, each of which is a more narrow retrieval challenge

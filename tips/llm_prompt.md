@@ -1276,8 +1276,8 @@
   - [Cursor Prompt](https://cursor.directory/)
   - [SuperPrompt](https://github.com/NeoVertex1/SuperPrompt)
     - You will want to use this prompt with Claude (as instructions) but it also work with other llms.
-
-
+- [Prompt cheat sheet](https://big-picture.com/media/the_prompt_engineering_cheat_sheet.pdf)
+  - https://medium.com/the-generator/the-perfect-prompt-prompt-engineering-cheat-sheet-d0b9c62a2bba
 
 
 
