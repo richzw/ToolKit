@@ -1020,7 +1020,11 @@
     - distinct效率高于group by。原因是distinct 和 group by都会进行分组操作，但group by在Mysql8.0之前会进行隐式排序，导致触发filesort，sql执行效率低下。
     - 但从Mysql8.0开始，Mysql就删除了隐式排序，所以，此时在语义相同，无索引的情况下，group by和distinct的执行效率也是近乎等价的。
 -  where condition order by A limit N 这样的语句，由于MYSQL5.7默认是打开 prefer_ordering_index 也就是在操作的时候，由于limit N 的值比较小，导致查询分析器去走ORDER BY 字段上的索引，而放弃更适合的索引。
-
+- mysql 优化的工具
+  - mysqltuner.pl 是mysql一个常用的数据库性能诊断工具，主要检查参数设置的合理性包括日志文件、存储引擎、安全建议及性能分析
+  - tuning-primer.sh 针于mysql的整体进行一个体检，对潜在的问题，给出优化的建议
+  - pt-variable-advisor 
+  - pt-qurey-digest 主要功能是从日志、进程列表和tcpdump分析MySQL查询
 
 
 

@@ -709,7 +709,8 @@
 - Agentic RAG
   - Routing (Adaptive RAG) - Allows the agent to intelligently route user queries to the most suitable retrieval method based on the question itself. 
   - Fallback (Corrective RAG) - Ensures the agent has a backup plan if its initial retrieval methods fail to provide relevant results. 
-  - Self-correction (Self-RAG) - Enables the agent to identify and fix its own errors or misleading outputs. 
+  - Self-correction (Self-RAG) - Enables the agent to identify and fix its own errors or misleading outputs.
+  - [Building an Advanced Knowledge Assistant](https://www.figma.com/slides/wkRKi1AxgAkIaX8CnR2IbE/LlamaIndex-(AI-Conference%2C-Sep.-10-2024%2C-v1)?node-id=66-320&node-type=slide)
 - ![img.png](rag_ft.png)
 - [Musings on building a Generative AI product](https://www.linkedin.com/blog/engineering/generative-ai/musings-on-building-a-generative-ai-product)
   - the basic framework up and running:
