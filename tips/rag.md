@@ -257,6 +257,55 @@
     - Parent Document Retriever
     - Self-Query Retriever
     - Contextual Compression Retriever (Reranking)
+  - [Advanced RAG techniques](https://www.leewayhertz.com/advanced-rag/#applications-and-use-cases)
+    - Indexing
+      - Optimize text chunking with chunk optimization
+      - Transform texts into vectors with advanced embedding models
+      - Enhance semantic matching with embedding fine-tuning
+      - Improve retrieval efficiency with multi-representation
+      - Organize data with hierarchical indexing
+      - Enhance data retrieval with metadata attachment
+    - Query transformations
+      - Improve query clarity with HyDE (Hypothetical Document Embeddings)
+      -  Simplify complex queries with multi-step query
+      - Enhance context with step-back prompting
+      - Improve retrieval with query rewriting
+    - Query routing
+      - Direct queries with logical routing 
+      -  Guide queries with semantic routing
+    - Pre-retrieval and data-indexing techniques
+      - Increase information density using LLMs
+      - Apply hierarchical index retrieval
+      - Improve retrieval symmetry with a hypothetical question index
+      -  Deduplicate information in your data index using LLMs
+      - Test and optimize your chunking strategy
+      - Use sliding window indexing for context preservation
+      - Enhance data granularity with cleaning
+      - Add metadata for precise filtering
+    - Retrieval Techs
+      - Optimize search queries using LLMs
+      - Fix query-document asymmetry with Hypothetical Document Embeddings (HyDE)
+      - Implement query routing or a RAG decider pattern
+      -  Perform deep data exploration with recursive retriever
+      - Optimize data source selection with router retriever
+      - Automate query generation with auto retriever
+      - Combine results for comprehensive retrieval with fusion retriever
+      - Aggregate data contexts with auto merging retriever
+      -  Fine-tune embedding models for domain specificity
+      - Implement dynamic embedding for contextual understanding
+      - Leverage hybrid search for enhanced retrieval
+    - Post-retrieval techniques
+      - Prioritize search results with reranking
+      - Optimize search results with contextual prompt compression
+      - Score and filter retrieved documents with corrective RAG
+    -  Generation techniques
+      - Tune out noise with Chain-of-Thought prompting
+      - Make your system self-reflective with self-RAG
+      - Ignore irrelevant context through fine-tuning
+      - Use natural language inference to make LLMs robust against irrelevant context
+      -  Control data retrieval with FLARE
+      - Refine responses with ITER-RETGEN
+      - Clarify questions with ToC (Tree of Clarifications)
 - [RAG 问题](https://mp.weixin.qq.com/s/2dwnwQGsqKWZQX8gEUV0Sw)
   - 朴素的RAG通常将文档分成块，嵌入它们，并检索与用户问题具有高语义相似性的块。但是，这会带来一些问题
     - 文档块可能包含降低检索效果的无关内容
@@ -711,6 +760,21 @@
   - Fallback (Corrective RAG) - Ensures the agent has a backup plan if its initial retrieval methods fail to provide relevant results. 
   - Self-correction (Self-RAG) - Enables the agent to identify and fix its own errors or misleading outputs.
   - [Building an Advanced Knowledge Assistant](https://www.figma.com/slides/wkRKi1AxgAkIaX8CnR2IbE/LlamaIndex-(AI-Conference%2C-Sep.-10-2024%2C-v1)?node-id=66-320&node-type=slide)
+    - There’s many questions/tasks that naive RAG can’t give an answer to
+      - Hallucinations
+      -  Limited time savings
+      -  Limited decision-making enhancement
+    - Knowledge Assistant
+      - High-quality data and retrieval - hierarchical indexing and retrieval
+        - generally good pipeline:
+          - Parse documents into elements: text chunks, tables, images, and more.
+          - For each element, extract one or more text representations that can be indexed.
+            - Text Chunks: Extract smaller sentences, summaries
+            - Tables: Extract summaries, table cells
+            - Images: Extract caption
+      - Agentic reasoning over complex inputs
+      - Agentic decision-making and output generation
+      - Towards a scalable, full-stack application
 - ![img.png](rag_ft.png)
 - [Musings on building a Generative AI product](https://www.linkedin.com/blog/engineering/generative-ai/musings-on-building-a-generative-ai-product)
   - the basic framework up and running:

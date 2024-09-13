@@ -673,7 +673,8 @@
     - exec 格式：CMD ["可执行文件", "参数1", "参数2"...]
     - exec 格式这种写法避免了 Docker 自动将 CMD 转换为 sh -c 形式的操作，因为 JSON 数组格式的 CMD 已经明确指定了要执行的命令路径或文件
 - [Get Started with the Latest Updates for Dockerfile Syntax (v1.7.0)](https://www.docker.com/blog/new-dockerfile-capabilities-v1-7-0/)
-
+- nsenter [Linxu 小技巧 - 使用 nsenter 在主机上调试容器]()
+  - nsenter --net=/proc/48683/ns/net ip addr
 
 
 
