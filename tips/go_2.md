@@ -2101,7 +2101,7 @@
   - 选择与使用:
     - 开发阶段: 可以使用go.mod中的go directive和toolchain directive来确保团队使用一致的 Go 语言版本和工具链版本。
     - 部署和 CI/CD: 可以使用环境变量中的GOTOOLCHAIN来强制指定工具链版本，确保编译和运行环境的一致性。
-
+- [Go sync.Cond](https://victoriametrics.com/blog/go-sync-cond/)
 
 
 

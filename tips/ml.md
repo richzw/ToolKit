@@ -780,6 +780,16 @@
       - GPTQ (Gradient-based Post-training Quantization) 使用数据集，如C4，来进行权重的精细调整和量化，这是因为它依赖于数据驱动的方法来确定哪些权重对模型性能最为关键。通过在具体的数据集上进行微调，GPTQ可以更准确地确定哪些权重在量化时需要保持更高的精度。
       - AWQ (Adaptive Weight Quantization) 采用了一种不依赖于特定数据集的方法。它利用模型权重本身的统计信息来指导量化过程，而不是依赖于外部数据。这种方法的优势在于它不需要额外的数据来进行权重的量化，从而简化了量化过程。 AWQ关注权重的分布和重要性，使用这些信息来适应性地量化不同的权重，从而在不牺牲太多模型性能的情况下减少模型大小。
   - [Training and Finetuning Embedding Models with Sentence Transformers v3](https://huggingface.co/blog/train-sentence-transformers)
+  - [原始HTML转换为干净Markdown的小型语言模型](https://mp.weixin.qq.com/s/p2KrZKpcYnkc28geheInVA)
+    - 我们需要的是一个 矮胖 的 SLM。“矮”指的是任务比较简单，所以 Transformer 层数不用太多；“胖”指的是需要足够长的上下文支持，才能在实际应用中派上用场，所以注意力机制得额外照顾一下
+    - https://colab.research.google.com/drive/1wXWyj5hOxEHY6WeHbOwEzYAC0WB1I5uA
+    - 如何训练 Reader-LM
+      - 精挑细选，喂饱模型
+      - 两阶段训练：先易后难，循序渐进
+      - 解决模型犯错：重复和循环
+        - 主要问题是模型生成的 Markdown 会出现退化(Degeneration)，尤其是重复和循环
+        - 我们用了对比搜索(Contrastive Search)作为解码方法，并在训练中加入了对比损失。从实验结果看，这个方法有效减少了重复生成的情况。
+        - 我们在 Transformer 管道里加了一个简单的重复停止标准。当模型开始重复生成 token 的时候，这个标准会自动检测到，并提前停止解码，避免进入无聊的循环。
 - [LLM Tools]
   - [candle](https://github.com/huggingface/candle)
     - Minimalist ML framework for Rust
