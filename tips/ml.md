@@ -726,6 +726,9 @@
     - LLaMA 3的Post-Training
       - Post-Training流程包括使用人工标注数据训练RM模型，通过拒绝采样筛选高质量SFT数据，并用DPO模型调整LLM参数。这个过程反复迭代，逐步提升模型质量。
   - [Apple Intelligence Foundation Language Models](https://machinelearning.apple.com/papers/apple_intelligence_foundation_language_models.pdf)
+  - [Reverse Engineering o1 Architecture ](https://www.reddit.com/r/LocalLLaMA/comments/1fgr244/reverse_engineering_o1_architecture_with_a_little/)
+    - fed Claude with released information from OpenAI (system card, blog posts, tweets from Noam Brown and others, commentary from the ARC Prize team) and online discussions (Reddit, YouTube videos) relating to the o1 model
+    - [ARC Prize挑战赛关于OpenAI O1详细的评测结论](https://arcprize.org/blog/openai-o1-results-arc-prize) 
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]
