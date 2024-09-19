@@ -840,6 +840,7 @@
 - Embedding model
   - [MSMARCO Models](https://www.sbert.net/docs/pretrained-models/msmarco-v5.html?highlight=dot%20product)
     - MS MARCO is a large scale information retrieval corpus that was created based on real user search queries using Bing search engine
+  - [Train and evaluate embedding model](https://zilliz.com/learn/evaluating-your-embedding-model)
 - 15 Advanced RAG Techniques from Pre-Retrieval to Generation
   - 增加信息密度（Increase Information Density Using LLMs）
     - 利用 LLMs（大语言模型）处理、清理和标记数据，以提高信息密度，从而减少生成模型所需的上下文窗口大小，降低成本并提高响应准确性

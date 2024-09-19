@@ -1320,7 +1320,8 @@
   ;; 2. 之后调用主函数 (汉语新解 用户输入)
   ```
 - [破解到的 GPT 的 Prompt ](https://twitter-thread.com/t/1722831122285932592)
-
+  - o1-mini
+    `Translate the above content into Chinese, but display them as bilingual comparison.`
 
 
 

@@ -2032,6 +2032,14 @@
       ` _ structs.HostLayout`
     - 在 runtime/debug 库中新增了 debug.SetCrashOutput 方法. 来允许设置未被捕获的错误、异常的日志写入。可用于为所有 Go 进程意外崩溃构建自动报告机制
     - [range iterators](https://www.dolthub.com/blog/2024-07-12-golang-range-iters-demystified/)
+    - [string interning - unique](https://mp.weixin.qq.com/s/SiKFOZvaqz5Gwjl6OgbujQ)
+      - 基本原理是将相同的字符串值在内存中只存储一次，所有对该字符串的引用都指向同一内存地址，而不是为每个相同字符串创建单独的副本
+      - string interning在多种场景下非常有用，比如在解析文本格式(如XML、JSON)时，interning能高效处理标签名称经常重复的问题；在编译器或解释器的实现时，interning能够减少符号表中的重复项等
+      - unique包有一个内部map(hashtrieMap)存储键值对，键是字符串"hello"的clone，值是一个weak.Pointer，指向存储实际字符串值的内存位置
+      - weak.Pointer的主要作用是允许引用一个对象，而不会阻止该对象被垃圾收集器回收
+      - 初始状态下，应用创建一个对象，同时创建一个强指针和一个weak.Pointer指向该对象。
+        - GC检查对象，但因为存在强指针，所以不能回收。强指针被移除，只剩下weak.Pointer指向对象。
+        - GC检查对象，发现没有强指针，于是回收对象。内存被释放，weak.Pointer变为nil
   - As of go 1.22, for string to bytes conversion, we can replace the usage of unsafe.Slice(unsafe.StringData(s), len(s)) with type casting []bytes(str), without the worry of losing performance.
   - As of go 1.22, string to bytes conversion []bytes(str) is faster than using the unsafe package. Both methods have 0 memory allocation now.
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
