@@ -180,7 +180,7 @@
       - 澄清和询问：主动向用户提问，以获取更多信息
   - [Routing](https://blog.langchain.dev/applying-openai-rag/)
   - Query Construction
-    - Text-to-SQL
+    - Text-to-SQL https://github.com/run-llama/llama_index/blob/main/docs/docs/examples/workflow/advanced_text_to_sql.ipynb
     - Text-to-Cypher
     - Text-to-metadata filters
   - Indexing

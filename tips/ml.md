@@ -792,7 +792,8 @@
       - 解决模型犯错：重复和循环
         - 主要问题是模型生成的 Markdown 会出现退化(Degeneration)，尤其是重复和循环
         - 我们用了对比搜索(Contrastive Search)作为解码方法，并在训练中加入了对比损失。从实验结果看，这个方法有效减少了重复生成的情况。
-        - 我们在 Transformer 管道里加了一个简单的重复停止标准。当模型开始重复生成 token 的时候，这个标准会自动检测到，并提前停止解码，避免进入无聊的循环。
+        - 我们在 Transformer 管道里加了一个简单的重复停止标准。当模型开始重复生成 token 的时候，这个标准会自动检测到，并提前停止解码，避免进入无聊的循环
+  - [Improve LLM reasoning using self-generated data: RL and verifiers](https://drive.google.com/file/d/1komQ7s9kPPvDx_8AxTh9A6tlfJA0j6dR/view)
 - [LLM Tools]
   - [candle](https://github.com/huggingface/candle)
     - Minimalist ML framework for Rust
