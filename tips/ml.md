@@ -353,6 +353,7 @@
       - 训练协议。
       - 内存如何集成到模型中。
 - [Theory](https://mp.weixin.qq.com/s/oUe_Vw0vfMvXJ-w97dkK4w)
+  - [The Little Book of Deep Learning](https://fleuret.org/francois/lbdl.html)
   - [Transformer模型之输入处理](https://mp.weixin.qq.com/s/ryjV4IVLbjUO-QVieOrW3A)
   - [Transformer模型之Encoder-Decoder](https://mp.weixin.qq.com/s/MPFq_-Jqu0DC7QffSK4oNg)
     - https://github.com/heiyeluren/black-transformer

@@ -180,7 +180,24 @@
       - 澄清和询问：主动向用户提问，以获取更多信息
   - [Routing](https://blog.langchain.dev/applying-openai-rag/)
   - Query Construction
-    - Text-to-SQL https://github.com/run-llama/llama_index/blob/main/docs/docs/examples/workflow/advanced_text_to_sql.ipynb
+    - Text-to-SQL 
+      - llamaIndex sample https://github.com/run-llama/llama_index/blob/main/docs/docs/examples/workflow/advanced_text_to_sql.ipynb
+      - [QueryGPT ](https://www.uber.com/en-HK/blog/query-gpt/)
+        - Naive version
+          - To help the LLM understand internal Uber lingo and work with Uber datasets, we also included some custom instructions in the LLM call
+          - ```
+            It's important to consider the data type of columns in a given dataset because certain functions can only be applied to certain data types. 
+            For example, the function AVG() can only be applied to numerical columns. data functions like DATE_TRUNC(), DATE_ADD can only be used with TIMESTAMP columns. 
+            ```
+        - Better RAG
+          - Understanding User’s Intent
+          - Handling Large Schemas
+          - Intent Agent
+          - Table Agent - Allowing users to select the tables used in the query generation came up as feedback from some users
+          - Column Prune Agent - wherein we use an LLM call to prune the irrelevant columns from the schemas we provided to the LLM
+          - Evaluation Procedure 
+            - For each question, we can view the generated SQL, reason for the error, and related performance metrics
+            - We also aggregate accuracy and latency metrics for each evaluation run to track performance over time.
     - Text-to-Cypher
     - Text-to-metadata filters
   - Indexing
@@ -841,6 +858,15 @@
   - [MSMARCO Models](https://www.sbert.net/docs/pretrained-models/msmarco-v5.html?highlight=dot%20product)
     - MS MARCO is a large scale information retrieval corpus that was created based on real user search queries using Bing search engine
   - [Train and evaluate embedding model](https://zilliz.com/learn/evaluating-your-embedding-model)
+  - [Jina Embeddings V3](https://mp.weixin.qq.com/s/n3qH2jCpbCV23A_hg-ce-Q)
+    - 沿用了 XLM-RoBERTa 分词器, 5.7 亿参数的顶级文本向量模型
+    - 内置多种 LoRA 适配器，可以根据你的需求，针对 检索、聚类、分类和匹配 的不同场景进行定制，获得更精准的向量化效果
+    - 相比 baai-bge-m3 使用的固定位置编码技术，和 jina-embeddings-v2 使用的 ALiBi 方法，我们采用的 RoPE 位置编码技术能够更有效地处理长文本序列
+    - jina-embeddings-v3 基于 XLM-RoBERTa 模型架构，我们主要针对多语言长文本的处理，以及多任务场景进行了优化
+    - 多语言支持: 支持 89 种语言，全面超越 multilingual-e5-large-instruct
+    - 长文本处理: 支持 8192 token 的输入长度，在 LongEmbed 基准测试中表现出色
+    - 任务定制更精准: 内置多种 LoRA 适配器，针对检索、聚类、分类和匹配等任务，生成定制化向量，效果更精准。
+    - 输出维度可定制: 默认输出维度为 1024，但你完全可以根据需要把它缩减到 32，性能几乎不受影响，这都归功于俄罗斯套娃表示学习技术的加持
 - 15 Advanced RAG Techniques from Pre-Retrieval to Generation
   - 增加信息密度（Increase Information Density Using LLMs）
     - 利用 LLMs（大语言模型）处理、清理和标记数据，以提高信息密度，从而减少生成模型所需的上下文窗口大小，降低成本并提高响应准确性
@@ -913,7 +939,7 @@
   - 大量实践:多观察数据和模型输出。熟悉模型对不同类型提示和输入的反应模式。例:尝试同一问题的不同表述,观察模型输出的变化,找出最有效的表达方式。
     - This tip encourages familiarizing yourself with how the model responds to different inputs through hands-on experience.
     - Example: Practice exercise: Analyze the outputs of the same prompt across different AI models or different versions of the same model, noting differences in style, content, and adherence to instructions.
-
+- [Modular RAG](https://arxiv.org/pdf/2407.21059)
 
 
 
