@@ -448,6 +448,10 @@
   - [深度强化学习课程](https://mp.weixin.qq.com/s/w99dQXk8dDoXDYLcE2F0ww)
     - https://huggingface.co/learn/deep-rl-course/unit5/how-mlagents-works
   - [利用大语言模型促进综合图学习能力](https://mp.weixin.qq.com/s/5S2D44V-fIe4Te5XtgOqhQ)
+  - [o1模型训练核心秘密： 通过激励模型学习是培养 AGI 系统通用技能的最佳方式](https://docs.google.com/presentation/d/1nnjXIuN2XDJENAOaKXI5srQscO3276svvP6JgivTv6w/edit#slide=id.g2d1161c9c52_0_251)
+    - 为了解决语言模型中的“幻觉问题”（hallucination），可以设计奖励结构，使得模型不仅仅追求回答问题的正确性，还要学会在不确定的情况下说“不知道”。
+    - 弱激励学习（Weak Incentive Learning） 涌现能力（Emergent Abilities）
+    - https://www.youtube.com/watch?v=kYWUEV_e2ss
 - [Prompt](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
   - `Prompt Engineering`, also known as `In-Context Prompting`, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes without updating the model weights.
   - `Instructed LM` (e.g. InstructGPT, natural instruction) finetunes a pretrained model with high-quality tuples of (task instruction, input, ground truth output) to make LM better understand user intention and follow instruction

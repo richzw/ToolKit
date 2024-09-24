@@ -124,4 +124,9 @@
     - 灵活:过滤规则可以动态更新,使包过滤功能更加灵活
   - Classical BPF 通常应用于网络监控、防火墙、流量控制等场景 
   - 它为包过滤提供了一个高效、安全、灵活的解决方案。但功能较为受限,只能过滤包不能修改
-
+- [ebpf 跟踪goroutine状态的变化](https://mp.weixin.qq.com/s/O-zVRmuiOamvhkY3VKY07A)
+  - 如何跟踪用户态程序中的函数调用，寄存器参数的读取
+  - 如何使用 eBPF 的 uprobe 探针
+  - 如何设置 eBPF 程序的常量
+  - 如何使用 ringbuf 接收 eBPF 内核态程序传递的事件
+  - 如何使用 cilium/ebpf 库加载和接收 eBPF 内核态程序传递的事件

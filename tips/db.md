@@ -1604,7 +1604,17 @@
   - Tuple
     - A tuple is very similar to a row, but a tuple is immutable. 
     - The state of a specific row at a specific time is a tuple, but a tuple is a more general term for a collection of data points. When you return data from a query, you can get tuples.
-  
+- [两轮调度ES优化](https://mp.weixin.qq.com/s/kZ9mJ3e5Ynisaxgz20JpqA)
+  - 为什么mapping索引会影响集群cpu水位
+    - 段创建/合并频繁
+    - 不需要检索的字段加了mapping，多了一份索引构建的消耗
+    - 错用的数据类型
+  - 倒排索引
+    - term index：为了解决term dictionary占用太大，不适合放在内存。采用fst（Finite State Transducers）保存term字典的二级索引，用于加速查询，可以在FST上快速定位到term在磁盘上的block位置。
+    - term dictionary：为了解决如何快速的在海量term中查询到对应的term，将term排序，保存了每个term对应的docId的列表
+    - Posting List：采用frame of reference进行压缩和用skipList的结构保存用于快速跳跃，多字段联合检索交/并集的时候会用到。
+  - 正确的mapping类型怎么选择
+    - https://www.elastic.co/guide/en/elasticsearch/reference/7.5/keyword.html
 
 
 

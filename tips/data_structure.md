@@ -323,6 +323,7 @@
   - **Extendible hashing** is designed for databases and file systems and uses a mix of a trie and a chained hash table to dynamically increase bucket sizes as individual buckets get loaded. 
   - **Robin Hood hashing** is a variant of linear probing in which items can be moved after being inserted to reduce the variance in how far from home each element can live.
   - **cuckoo hashing** have two hash tables and two hash functions. Each item can be in exactly one of two places - it's either in the location in the first table given by the first hash function, or it's in the location in the second table given by the second hash function. This means that lookups are worst-case efficient, since you only have to check two spots to see if something is in the table.
+    - https://coolshell.cn/articles/17225.html
 - [lock-free synchronization always superior to synchronization using locks?]
   - lock free
     - Lock-free data structures often perform very well when there is no contention, and will perform correctly even in the presence of contention, but the presence of contention may cause their performance to be severely degraded. 
