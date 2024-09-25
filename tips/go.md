@@ -2150,6 +2150,7 @@
   - unique
     - 字符串驻留（string interning）
     - 主要思想是对于每一个唯一的字符串值，只存储一个副本，这些字符串必须是不可变的
+  - [Iterators and reflect.Value.Seq](https://blog.carlana.net/post/2024/golang-reflect-value-seq/)
 - 在 Go 中结构体可以比较吗? Normal 结构体是可以比较的
   - 那么所有结构体都可以比较吗？显然不是，如果都可以比较，那么 reflect.DeepEqual() 就没有存在的必要了。
   - 结构体包含了 map[string]int 类型字段，不可比较

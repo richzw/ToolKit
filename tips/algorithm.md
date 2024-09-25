@@ -656,7 +656,7 @@
 - [tree-shaking的原理](https://juejin.cn/post/7265125368553685050#heading-0)
   - 核心原理就是AST语法树
 - [网络表征算法](https://mp.weixin.qq.com/s/Zyd_hQEdXSyCJC1manOv0A)
-
+- [包材推荐算法](https://mp.weixin.qq.com/s/AM76NRMFkT4yedHcn4czWA)
 
 
 

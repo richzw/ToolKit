@@ -1615,6 +1615,9 @@
     - Posting List：采用frame of reference进行压缩和用skipList的结构保存用于快速跳跃，多字段联合检索交/并集的时候会用到。
   - 正确的mapping类型怎么选择
     - https://www.elastic.co/guide/en/elasticsearch/reference/7.5/keyword.html
+- [Postgres 17 enhancement to nbtree's ScalaryArrayOp execution](https://www.crunchydata.com/blog/real-world-performance-gains-with-postgres-17-btree-bulk-scans)
+  -  Any particular scan with multiple scalar inputs will consider all those inputs as it's traversing a B-tree, and where multiple values land on the same leaf page, they're retrieved together to avoid repetitive traversals.
+  
 
 
 

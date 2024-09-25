@@ -730,6 +730,13 @@
     - Changing the LLM
   - Chunk size: 512 Chunk overlap: 64  Number of docs retrieved (Retrieval Window): 5
 - Graph RAG
+  - rag 挑战：细粒度检索，全局上下文，语义相似度，分层摘要
+    - 图索引vs知识图谱 
+    - retrieve方法：子图搜索，路径搜索
+    - chain of exploration，对于问题分类 全局问题or局部问题
+    - 高效构建graph？
+      - prompt方式，拆分文档，解析 主谓宾，构建graph
+      - 代码对于graph，进行过滤检查
   - 使用图社区摘要解决总结性查询任务的问题，将知识图谱技术应用到RAG。
   - Graph RAG的核心链路分如下三个阶段：
     - 索引（三元组抽取）：通过LLM服务实现文档的三元组提取，写入图数据库。
@@ -940,7 +947,10 @@
     - This tip encourages familiarizing yourself with how the model responds to different inputs through hands-on experience.
     - Example: Practice exercise: Analyze the outputs of the same prompt across different AI models or different versions of the same model, noting differences in style, content, and adherence to instructions.
 - [Modular RAG](https://arxiv.org/pdf/2407.21059)
-
+- [Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval)
+  - Contextual Embeddings and Contextual BM25
+  - If your knowledge base is smaller than 200,000 tokens (about 500 pages of material), you can just include the entire knowledge base in the prompt that you give the mode
+  - https://github.com/anthropics/anthropic-cookbook/tree/main/skills/contextual-embeddings
 
 
 
