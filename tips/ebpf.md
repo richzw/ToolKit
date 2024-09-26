@@ -130,3 +130,11 @@
   - 如何设置 eBPF 程序的常量
   - 如何使用 ringbuf 接收 eBPF 内核态程序传递的事件
   - 如何使用 cilium/ebpf 库加载和接收 eBPF 内核态程序传递的事件
+- [EBPF MySQL慢查询](https://mp.weixin.qq.com/s/JHrLkBzOkZqXNnqpXapmIg)
+  - dispatch_command就是我们需要关注的函数，它是 Mysql 的命令分发函数，它会根据客户端发送的命令，调用不同的处理函数。我们可以通过 eBPF 来跟踪dispatch_command函数，从而找到慢查询 SQL
+  - 利用uprobe跟踪dispatch_command函数，记录开始时间和 sql 语句，然后在uretprobe中计算时间，打印 sql 语句和时间。通过TID做主键保存信息
+
+
+
+
+

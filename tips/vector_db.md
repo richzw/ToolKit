@@ -579,6 +579,15 @@
       - sparse embedding -> IP
       - Use Inner Product because it measures the overlap in non-zero dimensions, 
       - which is crucial for capturing exact or adjacent concepts in high-dimensional sparse vectors.
+  - [ binary embeddings](https://zilliz.com/learn/what-are-binary-vector-embedding)
+    - Binary embeddings are a type of vector representation in which each dimension is encoded using a single binary digit, typically represented as either 0 or 1.
+    - Binary embeddings offer storage efficiency and computational speed, limited memory resources or large datasets
+    - may not capture all the nuances or complexities in the original data.
+    - How to Generate Binary Embeddings
+      - Hashing-based methods utilize locality-sensitive hashing (LSH) or random projections to directly map high-dimensional input data to binary codes
+      - Deep learning architectures, such as deep belief networks (DBNs) and restricted Boltzmann machines (RBMs), generate binary embeddings as part of their output
+      - Quantization-based techniques convert continuous-valued embeddings into binary representations.
+    
 - VectorDB challenge
   - 工程
     - 向量索引的 合并、拆分 - small index merge into large index

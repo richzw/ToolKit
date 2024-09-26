@@ -656,6 +656,13 @@
     - Go 网络标准库通过在底层封装 epoll 实现了 IO 多路复用，通过网络轮询器加 GMP 调度器避免了传统网络编程中的线程切换和 IO 阻塞
     - ListenTCP 方法内部实现了创建 socket，绑定端口，监听端口三个操作，相对于传统的 C 系列语言编程，将初始化过程简化为一个方法 API, 当方法执行完成后，epoll 也已经完成初始化工作，进入轮询状态等待连接到来以及 IO 事件。
     - netpoll 方法用于检测网络轮询器并返回已经就绪的 goroutine 列表. 然后调用方会将返回的 goroutine 逐个加入处理器的本地队列或者全局队列
+  - [golang netpoll 中的 poll_wait 流程和 epoll_wait 流程](https://mp.weixin.qq.com/s/qhwq772zcKoBly3-GP99-w)
+    - 在 golang 的 poll_wait 流程中，并没有直接调用到 epoll_wait，而是通过 gopark 操作实现将当前 g 只为阻塞态的操作
+    - 而真正调用 epoll_wait 操作是 gmp 轮询调用的 netpoll 流程中，并通常是以非阻塞模式来执行 epoll_wait 指令，在找到就绪的 pollDesc 后，进一步获取其中存储的g 实例，最后通过 goready 操作来唤醒 g.
+    - 为什么 golang 不利用阻塞模式的epoll_wait 指令来直接控制 g 的阻塞与唤醒呢？
+      - 答案就是——epoll_wait 做不到. epoll_wait 的调用单元是 thread，及 gmp 中的 m，而非 g
+      - golang io 模型的设计实现中，需要尽可能避免 thread 级别的阻塞，因此当 g 因 io 未就绪而需要阻塞时，应该通过 gopark 实现用户态下 g 粒度的阻塞，而非简单地基于阻塞模式进行 epoll_wait 指令的调用.
+      - p 本就是基于轮询模型不断寻找合适的 g 进行调度，而 net_poll 恰好是其寻找 g 的诸多方式的其中一种，因此这个轮询机制是与 gmp 天然契合的
 - always discard body e.g. io.Copy(ioutil.Discard, resp.Body) if you don't use it
   - HTTP client's Transport will not reuse connections unless the body is read to completion and closed
    ```go
@@ -1501,7 +1508,8 @@
   - https://mp.weixin.qq.com/s/oGswwbhca6kDXzGnPF_I_Q
 - netcap netcap 可以几乎跟踪整个内核网络协议栈（有skb作为参数的函数）
   - https://github.com/bytedance/netcap
-
+- Wireshark 高级过滤技巧 x == ${x}
+  - 显示过滤器表达式 tcp.stream == ${tcp.stream}
 
 
 
