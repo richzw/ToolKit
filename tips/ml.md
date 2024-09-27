@@ -734,6 +734,12 @@
   - [Reverse Engineering o1 Architecture ](https://www.reddit.com/r/LocalLLaMA/comments/1fgr244/reverse_engineering_o1_architecture_with_a_little/)
     - fed Claude with released information from OpenAI (system card, blog posts, tweets from Noam Brown and others, commentary from the ARC Prize team) and online discussions (Reddit, YouTube videos) relating to the o1 model
     - [ARC Prize挑战赛关于OpenAI O1详细的评测结论](https://arcprize.org/blog/openai-o1-results-arc-prize) 
+  - [OpenAI o1 模型的技术原理 猜测](https://www.bestblogs.dev/en/article/16ba35)
+    - OpenAI o1 通过融合 LLM 和 RL 生成 Hidden COT，显著提升了复杂逻辑推理能力。 -- 通过融合大语言模型和强化学习，o1 能够生成 Hidden COT，从而在复杂逻辑推理任务中表现出色。
+    - o1 具备自我反思与错误修正能力，解决了大模型在长链条思考中的错误累积问题。 -- o1 能够在“思考”过程中意识到并修正之前的错误，有效解决了大模型在长链条思考中的错误累积问题。
+    - o1 引入了新型的 RL Scaling law，通过树搜索结构提升了模型的可扩展性和灵活性。 -- o1 采用了类似 AlphaGo 的 MCTS 树搜索，这种策略提升了模型的可扩展性和灵活性，预示着小模型的发展潜力。
+    - o1 在内容安全方面采用了不同于 GPT 4 的策略，通过增强逻辑推理能力和引入“AI 宪法”模式来提升安全性。 -- o1 在内容安全方面的能力比 GPT 4 强很多，预示着大模型安全范式的巨大变化。
+    - o1 模型的训练数据可能包括人工标注的 COT 思考过程和合成数据。 -- 人工标注的 COT 数据数量有限但质量高，合成数据可以通过 MCTS 树搜索方式扩展，提高模型的训练效果。
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]

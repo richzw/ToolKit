@@ -1355,7 +1355,7 @@
     }
     """
 - [Khanmigo Lite](https://x.com/dotey/status/1838335929246990723)
-
+- [ChatGPT Advanced Voice Mode system prompt](https://github.com/elder-plinius/L1B3RT45/blob/main/SYSTEMPROMPTS.mkd)
 
 
 
