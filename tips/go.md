@@ -2150,6 +2150,8 @@
   - unique
     - 字符串驻留（string interning）
     - 主要思想是对于每一个唯一的字符串值，只存储一个副本，这些字符串必须是不可变的
+    - 在内部，它也有一个全局 Map（一个快速的泛型并发 Map[2]），并在该 Map 中查找值。然而，它与 Intern 有两个重要的区别：首先，它接受任何可比较类型的值；其次，它返回一个包装值 Handle[T]，可以从中检索规范化的值。
+    - https://mp.weixin.qq.com/s/bLBcJ0hnU-ET3jmDHnBPTw
   - [Iterators and reflect.Value.Seq](https://blog.carlana.net/post/2024/golang-reflect-value-seq/)
 - 在 Go 中结构体可以比较吗? Normal 结构体是可以比较的
   - 那么所有结构体都可以比较吗？显然不是，如果都可以比较，那么 reflect.DeepEqual() 就没有存在的必要了。

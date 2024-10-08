@@ -647,6 +647,18 @@
     - 2. Adding RAG + data processing to an agent
     - 3. Adding memory to an agent
     - 4. Equipping with our tools from LlamaHub
+  - [Agent进化的三个等级](https://x.com/yoheinakajima/status/1839398354364838366?s=46)
+    - L1：基于请求
+      - 用户可以要求人工智能生成函数，当他们查询系统时，新函数就会作为一个选项供人工智能使用。
+    - L2：基于需求
+      - 当用户提交查询时，人工智能首先会判断现有函数是否有效，如果无效，则会生成一个新的可重用函数，根据用户的原始输入生成参数，并执行新函数来处理查询。
+    - L3：预见性
+      - 根据对用户的理解生成合成查询的系统，每个查询都会输入系统 2 （基于需求的系统，该系统会根据需要生成所需的功能）。最终形成一个可自主生成功能的系统
+      - 他还给出了L3 Agent原型展示：
+        - 用户描述作为输入
+        - 生成查询
+        - 处理查询
+        - 生成并存储针对该查询的多个可重用函数
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
