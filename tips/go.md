@@ -984,6 +984,7 @@
     - 优先从read map中读取(无锁)，否则再从dirty map中读取(加锁)
     - 动态调整，当misses次数过多时，将dirty map提升为read map
     - 延迟删除，删除只是为value打一个标记，在dirty map提升时才执行真正的删除
+    - [Go sync.Map: The Right Tool for the Right Job](https://victoriametrics.com/blog/go-sync-map/)
 - [Go中使用单调时钟获得准确的时间间隔](https://mp.weixin.qq.com/s?__biz=MzkyMTI5MTgzNg==&mid=2247484818&idx=1&sn=c965af56ed87d17b3b8b19ab503a1186&scene=21#wechat_redirect)
   - 墙上时钟与单调时钟
     - 墙上时钟 - 大多是1970年1月1日（UTC）以来的秒数和毫秒数
@@ -2153,6 +2154,10 @@
     - 在内部，它也有一个全局 Map（一个快速的泛型并发 Map[2]），并在该 Map 中查找值。然而，它与 Intern 有两个重要的区别：首先，它接受任何可比较类型的值；其次，它返回一个包装值 Handle[T]，可以从中检索规范化的值。
     - https://mp.weixin.qq.com/s/bLBcJ0hnU-ET3jmDHnBPTw
   - [Iterators and reflect.Value.Seq](https://blog.carlana.net/post/2024/golang-reflect-value-seq/)
+  - [弱引用](https://mp.weixin.qq.com/s/lwqy3AIIHKbwcUsX2rylGQ)
+    - 缓存机制：当不需要强引用缓存数据时，使用弱引用可确保系统在内存不足时回收这些数据。
+    - 事件处理器和回调：避免由于强引用导致的内存泄漏。
+    - 大型对象图：在复杂的对象引用结构中，通过弱引用防止循环引用问题
 - 在 Go 中结构体可以比较吗? Normal 结构体是可以比较的
   - 那么所有结构体都可以比较吗？显然不是，如果都可以比较，那么 reflect.DeepEqual() 就没有存在的必要了。
   - 结构体包含了 map[string]int 类型字段，不可比较

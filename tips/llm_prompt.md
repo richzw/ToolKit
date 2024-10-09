@@ -1357,6 +1357,7 @@
 - [Khanmigo Lite](https://x.com/dotey/status/1838335929246990723)
 - [ChatGPT Advanced Voice Mode system prompt](https://github.com/elder-plinius/L1B3RT45/blob/main/SYSTEMPROMPTS.mkd)
 - [Full Prompt of ChatGPT 4o with canvas](https://baoyu.io/blog/prompt/full-prompt-chatgpt-4o-with-canvas)
+  - [OpenAI Canvas 如何根据用户操作拼接生成 Prompt](https://baoyu.io/blog/ai/reverse-engineering-openai-canvas-prompt-generation)
 - [提示工程已经死?](https://www.bestblogs.dev/en/article/89f533)
   - 提示工程，有两大核心部分：技巧和指令
     - 技巧就是那些与模型本身密切相关，各种让特定模型表现更好的技巧，比如说：

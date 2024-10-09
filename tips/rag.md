@@ -138,6 +138,12 @@
       - 为了充分发挥迟分的优势，我们需要借助支持长上下文的 Embedding 模型，如 jina-embeddings-v2-base-en，它能够处理长达 8192 个 token 的文本(相当于 10 页 A4 纸)，基本满足了大多数长文本的上下文需求。
     - [Late Chunking: Balancing Precision and Cost in Long Context Retrieval](https://weaviate.io/blog/late-chunking)
     - https://arxiv.org/pdf/2409.04701
+    - Chunking long docs has 2 issues: 
+      - 1. finding breakpoints determining the breakpoints—i.e., how to segment the document.
+      - 2. loss of context within each chunk
+      - Late Chunking & AnthropicAI's Contextual Retrieval both tackle the 2nd, experiments show Late Chunking is resilient to messy boundaries, so no need for perfect semantic breaks.
+    - Late chunking does not require additional training for embedding models and can be applied to any long-context embedding models that use mean pooling
+    - [What Late Chunking Really Is & What It’s Not](https://jina.ai/news/what-late-chunking-really-is-and-what-its-not-part-ii/)
 - [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
   - Query Transformations - a set of approaches focused on modifying the user input in order to improve retrieval
     - Query expansion - decomposes the input into sub-questions, each of which is a more narrow retrieval challenge
@@ -781,6 +787,7 @@
   - [From Knowledge Graphs to GraphRAG: Advanced Intelligent Data Retrieval](https://div.beehiiv.com/p/knowledge-graphs-graphrag-advanced-intelligent-data-retrieval)
   - Sample
     - https://colab.research.google.com/github/tomasonjo/blogs/blob/master/llm/llama_relik.ipynb
+    - https://towardsdatascience.com/graph-rag-into-production-step-by-step-3fe71fb4a98e
     - https://zilliz.com/blog/graphrag-explained-enhance-rag-with-knowledge-graphs
     - https://github.com/run-llama/llama_index/blob/main/docs/docs/examples/cookbooks/GraphRAG_v2.ipynb
 - 提升RAG效果的方法
@@ -878,14 +885,18 @@
     - MS MARCO is a large scale information retrieval corpus that was created based on real user search queries using Bing search engine
   - [Train and evaluate embedding model](https://zilliz.com/learn/evaluating-your-embedding-model)
   - [Jina Embeddings V3](https://mp.weixin.qq.com/s/n3qH2jCpbCV23A_hg-ce-Q)
-    - 沿用了 XLM-RoBERTa 分词器, 5.7 亿参数的顶级文本向量模型
-    - 内置多种 LoRA 适配器，可以根据你的需求，针对 检索、聚类、分类和匹配 的不同场景进行定制，获得更精准的向量化效果
-    - 相比 baai-bge-m3 使用的固定位置编码技术，和 jina-embeddings-v2 使用的 ALiBi 方法，我们采用的 RoPE 位置编码技术能够更有效地处理长文本序列
+    - https://mp.weixin.qq.com/s/EQsgkQX8PtWTN69axJ7uOQ
     - jina-embeddings-v3 基于 XLM-RoBERTa 模型架构，我们主要针对多语言长文本的处理，以及多任务场景进行了优化
+    - 沿用了 XLM-RoBERTa 分词器, 5.7 亿参数的顶级文本向量模型
+      - 使用 RoPE 去做 position embeddings 以保证长文本召回性能，FlashAttention2 去改进注意力机制的训练和推理性能。
+      - 我们采用多阶段训练方式：从头开始对整个模型预训练，二段 pairwise 训练，三段 hard-negative triplet 训练。
+      - 内置多种 LoRA 适配器，可以根据你的需求，针对 检索、聚类、分类和匹配 的不同场景进行定制，获得更精准的向量化效果
+      - LoRA adapter 其实被插入到 24 层 Transformer 的每一层中了。在选择一项任务时，那个任务对应的 LoRA adapter 就会被激活，从而参与到每一层的计算中来
     - 多语言支持: 支持 89 种语言，全面超越 multilingual-e5-large-instruct
     - 长文本处理: 支持 8192 token 的输入长度，在 LongEmbed 基准测试中表现出色
     - 任务定制更精准: 内置多种 LoRA 适配器，针对检索、聚类、分类和匹配等任务，生成定制化向量，效果更精准。
     - 输出维度可定制: 默认输出维度为 1024，但你完全可以根据需要把它缩减到 32，性能几乎不受影响，这都归功于俄罗斯套娃表示学习技术的加持
+    - 针对异构搜索、同构匹配、分类、聚类四类任务做了特别的 Adapter 设计和训练，基本上 Embedding 的使用场景都可以被划分到这四类任务上。
 - 15 Advanced RAG Techniques from Pre-Retrieval to Generation
   - 增加信息密度（Increase Information Density Using LLMs）
     - 利用 LLMs（大语言模型）处理、清理和标记数据，以提高信息密度，从而减少生成模型所需的上下文窗口大小，降低成本并提高响应准确性
