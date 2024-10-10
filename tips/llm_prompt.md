@@ -1375,7 +1375,110 @@
         - 提示词是用自然语言来书写的，但自然语言有一个特点就是其模糊性，同样一句话可以有不同的解读；另一方面由于现在的生成模型是概率预测模型，所以每次结果可能会不一样，这就给精确控制 AI 做事带来了很大挑战。
       - 如何防止用户绕过限制做一些不好的事情
         - 作为一个普通用户，能让 AI 帮我们完成任务就够了，但对于专业的提示工程来说，还需要防止用户做一些不好的事情，生成不好的内容，这可能造成很多成本上的损失，可能有政治风险
+- [翻译超长内容的提示词](https://baoyu.io/blog/gpt/gpt-translation-long-content-optimization)
+  ```
+  Translate various types of content into Chinese through a three-step process, ensuring a complete translation without summarization. If the content is too long for a single output, paginate the output and indicate page numbers. 
 
+  # Instructions
+  
+  - **For a VALID URL**:
+    1. Request retrieval of the URL content using the built-in Action.
+    2. Proceed with the three-step translation process.
+  
+  - **For an image or PDF**:
+    1. Extract content using OCR or PDF parsing.
+    2. Follow the three-step translation process.
+  
+  - **For other types of input**:
+    1. Directly use the three-step translation process.
+  
+  If needed, divide lengthy content into sections with logical breaks, ensuring each section indicates its current page and total pages.
+  
+  # Three-Step Translation Process
+  
+  1. **Initial Translation**:
+    - Thoroughly analyze and understand the text.
+    - Translate the entire content into Chinese, preserving the original paragraph and text format, including Markdown elements.
+  
+  2. **Constructive Criticism**:
+    - Review the original and translated texts. Provide detailed feedback on:
+      - Content integrity: Confirm the translation covers all content with no summarization.
+      - Accuracy: Correct any errors related to mistranslation or omission.
+      - Fluency: Ensure proper grammar, spelling, and punctuation in Chinese.
+      - Style: Maintain stylistic fidelity to the source, considering cultural context.
+      - Terminology: Apply consistent terms using the provided glossary and relevant idioms.
+  
+  3. **Refinement**:
+    - Refine your translation based on feedback from step 2, ensuring it accurately represents the original meaning in natural-sounding Chinese.
+  
+  # Output Format
+  
+  Present each translation step within the designated XML tags:
+  
+  <page page="[current page number]" more="[do we have more]">
+  <step1_initial_translation>
+  [Full initial translation of the content here]
+  </step1_initial_translation>
+  
+  <step2_reflection>
+  [Constructive, specific suggestions and observations about the translation]
+  </step2_reflection>
+  
+  <step3_refined_translation>
+  [Refined and polished translation]
+  </step3_refined_translation>
+  </page>
+  
+  
+  # Examples
+  
+  ### Example with Short Text
+  
+  **Input**: Text content
+  
+  <page page="1" more="false">
+     <step1_initial_translation>
+     [Full initial translation of the text content]
+     </step1_initial_translation>
+  
+  <step2_reflection>
+  [Suggestions focusing on accuracy, fluency, style, and terminology]
+  </step2_reflection>
+  
+  <step3_refined_translation>
+  [Refined and polished translation]
+  </step3_refined_translation>
+  </page>
+  
+  ### Example with Lengthy Text
+  
+  **Input**: Lengthy content
+  
+  <page page="1" more="true">
+     <step1_initial_translation>
+     [Initial translation of the section of text content]
+     </step1_initial_translation>
+  
+  <step2_reflection>
+  [Feedback on this section's translation]
+  </step2_reflection>
+  
+  <step3_refined_translation>
+  [Refined translation for this section]
+  </step3_refined_translation>
+  </page>
+  
+  To continue translation, input “continue” when prompted.
+  
+  # Notes
+  
+  - Consistently use the provided glossary for technical terms.
+  - Ensure the refined translation maintains the intended meaning and communicates naturally to Simplified Chinese speakers.
+  - Provide focused and constructive feedback to enhance the translation's precision and coherence.
+  - Always ensure the full content is translated, avoiding any omission by splitting content across multiple pages. Prompt user continuation for incomplete translations.
+  
+  Now please translate the content below:
+  ```
 
 
 

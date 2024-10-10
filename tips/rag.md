@@ -280,6 +280,11 @@
     - Parent Document Retriever
     - Self-Query Retriever
     - Contextual Compression Retriever (Reranking)
+  - Auto-Document Retrieval
+    - Index chunks with document metadata into a vector DB 
+    - Perform chunk-level retrieval to fetch relevant document metadata 
+    - Use metadata as few-shot examples for an auto-retriever prompt
+    - https://github.com/run-llama/llamacloud-demo/blob/main/examples/advanced_rag/auto_retrieval.ipynb
   - [Advanced RAG techniques](https://www.leewayhertz.com/advanced-rag/#applications-and-use-cases)
     - Indexing
       - Optimize text chunking with chunk optimization
@@ -790,6 +795,13 @@
     - https://towardsdatascience.com/graph-rag-into-production-step-by-step-3fe71fb4a98e
     - https://zilliz.com/blog/graphrag-explained-enhance-rag-with-knowledge-graphs
     - https://github.com/run-llama/llama_index/blob/main/docs/docs/examples/cookbooks/GraphRAG_v2.ipynb
+  - [KG-based RAG](https://mp.weixin.qq.com/s/jaFzZ2WIbgy9mKo1-gKt2Q)
+    - 跳数有限性假设基于两点很重要的观察：1. query 复杂度有限性， 2.“捷径”的局部 dense 结构。
+    - 将 entities, relationships 信息分别进行向量化，并存储在向量存储里，这样存储了一个逻辑上的知识图谱
+    - 当进行 query 查询时，会先把相关的 entities 和 relationships 检索出来。通过这些 entities 和 relationships，我们在图结构上进行有限的拓展
+    - 将这些 relationships 与 query 问题组装进 prompt 内，使用 LLM 的能力对这些 relationships 进行 reranking。
+    - 最后得到 topK 个重要的 relationships，在他们的 metadata 信息内获得与他们相关的 passages，作为最终的 retrieved passages。
+    - https://milvus.io/docs/graph_rag_with_milvus.md
 - 提升RAG效果的方法
   - RAPTOR https://arxiv.org/pdf/2401.18059
     - 通过递归嵌入、聚类和总结文本块，构建一个自底向上的树形结构，在推理时从这棵树中检索信息，从而在不同抽象层次上整合来自长文档的信息。

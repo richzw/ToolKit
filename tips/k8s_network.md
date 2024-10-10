@@ -837,9 +837,13 @@
     - k8s 中的 underlay network
       - 模型下典型的有 flannel 的 host-gw 模式与 calico BGP 模式。
       - flannel host-gw 模式中每个 Node 需要在同一个二层网络中，并将 Node 作为一个路由器，跨节点通讯将通过路由表方式进行，这样方式下将网络模拟成一个underlay network。
-      - Calico 提供了的 BGP 网络解决方案，在网络模型上，Calico 与 Flannel host-gw 是近似的，但在软件架构的实现上，flannel 使用 flanneld 进程来维护路由信息；而 Calico 是包含多个守护进程的，其中 Brid 进程是一个 BGP 客户端与路由反射器(Router Reflector)，BGP 客户端负责从 Felix 中获取路由并分发到其他 BGP Peer，而反射器在 BGP 中起了优化的作用。
+      - Calico 提供了的 BGP 网络解决方案，在网络模型上，Calico 与 Flannel host-gw 是近似的，但在软件架构的实现上，flannel 使用 flanneld 进程来维护路由信息；
+      - 而 Calico 是包含多个守护进程的，其中 Brid 进程是一个 BGP 客户端与路由反射器(Router Reflector)，BGP 客户端负责从 Felix 中获取路由并分发到其他 BGP Peer，而反射器在 BGP 中起了优化的作用。
+      - calico的ipip模式，它是一种overlay的网络方案，容器和宿主机之间通过veth pair进行通信存在性能损耗，虽然calico可以通过BGP，在三层通过路由的方式实现underlay的网络通信
     - IPVLAN & MACVLAN
       - IPVLAN 允许一个物理网卡拥有多个 IP 地址，并且所有的虚拟接口用同一个 MAC 地址；
+        - IPvlan和传统Linux网桥隔离的技术方案有些区别，它直接使用linux以太网的接口或子接口相关联，这样使得整个发送路径变短，并且没有软中断的影响
+        - ipvlan L3模式，宿主机充当路由器的角色，实现容器跨网段的访问
       - MACVLAN 则是相反的，其允许同一个网卡拥有多个 MAC 地址，而虚拟出的网卡可以没有 IP 地址
   - Overlay Network Model
     - Overlay
