@@ -1013,7 +1013,7 @@
   - 在 MySQL 环境 8.x 版本环境中，DELETE 操作引发的死锁情况得到了改进。通过观察加锁日志发现，事务在对于 delete mark 的记录加锁时，如果已经持有了该记录的记录锁，他将获取间隙锁而不是临键锁，这一变化有效避免了死锁的发生。
 - [MySQL 8.0：filesort 性能退化的问题](https://mp.weixin.qq.com/s/qYkyzD79nQuNGe59M2wWgg)
   - 8.0 排序过程中发生了对无关列的数据转换，导致了性能退化。用户的实例中包含了溢出列，由于溢出列的数据转换格外耗时，最终将这个性能退化的问题放大。
-- MySQL 中的 distinct 和 group by 哪个效率更高
+- [MySQL 中的 distinct 和 group by 哪个效率更高](https://mp.weixin.qq.com/s/zDjluBvsSJgp2VyLxqBQLw)
   - 在语义相同，有索引的情况下：
     - group by和distinct都能使用索引，效率相同。因为group by和distinct近乎等价，distinct可以被看做是特殊的group by。
   - 在语义相同，无索引的情况下：
@@ -1027,7 +1027,15 @@
   - pt-qurey-digest 主要功能是从日志、进程列表和tcpdump分析MySQL查询
 - 通过 MySQL 的 SHOW INDEX 命令查看索引的 Cardinality 值，它表示索引的选择性。值越大，索引越有效
   - `SHOW INDEX FROM order_info WHERE Key_name = 'idx_order_status';` 如果 Cardinality 很低，说明创建的普通索引对性能提升不大
-
+- [一条SQL最多能查询出来多少条记录](https://mp.weixin.qq.com/s/X_OVuOi7quR65-JedMYlBw)
+  - MySQL 8  - max_allowed_packet
+    - MySQL 客户端  max_allowed_packet 值的默认大小为 16M（不同的客户端可能有不同的默认值，但最大不能超过 1G）
+    - MySQL 服务端 max_allowed_packet 值的默认大小为 64M
+    - max_allowed_packet 值最大可以设置为 1G（1024 的倍数
+  - 你的单行记录大小不能超过  max_allowed_packet
+  - 一个表最多可以创建 1017 列 （InnoDB）
+  - 建表时定义列的固定长度不能超过 页的一半（8k,16k...）
+  - 建表时定义列的总长度不能超过 65535  个字节
 
 
 
