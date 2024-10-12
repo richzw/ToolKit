@@ -675,7 +675,9 @@
 - [Get Started with the Latest Updates for Dockerfile Syntax (v1.7.0)](https://www.docker.com/blog/new-dockerfile-capabilities-v1-7-0/)
 - nsenter [Linxu 小技巧 - 使用 nsenter 在主机上调试容器]()
   - nsenter --net=/proc/48683/ns/net ip addr
-
+- Docker 利用 OverlayFS（一种联合文件系统）来实现 CoW
+  - OverlayFS 能够将多个目录层叠在一起，形成统一视图，这使得多个容器可以共享同一个基础镜像，只有在需要修改时才在特定容器中创建独立的可写层，优化了存储使用，也是 Docker 容器瞬间启动的原因
+  - 
 
 
 

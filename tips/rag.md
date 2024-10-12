@@ -653,6 +653,10 @@
     - Controllability
     - Observability
   - [RAG agent](https://talks.nerdai.io/vector-ess-oss-06-13-2024)
+  - [What is an agent](https://blog.langchain.dev/what-is-an-agent/)
+    - 是一套系统
+    - 这套系统决策的是应用程序的控制流
+    - 要借助大语言模型来规划决策
   - [Build an agent with llamaindex](https://docs.llamaindex.ai/en/stable/understanding/agent/tools/)
     - 1. Building a basic agent, with and without local models
     - 2. Adding RAG + data processing to an agent
