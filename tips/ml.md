@@ -1205,7 +1205,9 @@
     - 使用编码器（CLIP或CoCa）分别将图像和文本编码为Embedding，再经过多个自注意力层，生成了一个多模态表征向量
     - 因为检索的图像都没有文本，可以使用空文本“”来替代描述文本，从而生成图像的Embedding
   - 广泛所使用的用于CIR评测的数据集为FashionIQ， CIRR以及CIRCO
-
+- AGI
+  - [Machines of Loving Grace](https://darioamodei.com/machines-of-loving-grace) - Dario Amodei (Anthropic)
+    - https://mp.weixin.qq.com/s/StZeb__lyrZl_as_sQ8l6A
 
 
 

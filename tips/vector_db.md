@@ -153,6 +153,14 @@
     - 然后如果你用的是hnsw索引，性能可能会比纯内存慢一到两倍这样。如果用的ivf索引，性能会比纯内存慢一到两个数量级
 - [Milvus]
   - ![img.png](vector_db_milvus_overview.png)
+    - 接入层（Access Layer）：系统的门面，由一组无状态 proxy 组成。对外提供用户连接的 endpoint，负责验证客户端请求并合并返回结果。
+    - 协调服务（Coordinator Service）：系统的大脑，负责分配任务给执行节点。协调服务共有四种角色，分别为 root coord、data coord、query coord 和 index coord。
+    - 执行节点（Worker Node）：系统的四肢，负责完成协调服务下发的指令和 proxy 发起的数据操作语言（DML）命令。执行节点分为三种角色，分别为 data node、query node 和 index node。
+    - 存储服务 （Storage）：系统的骨骼，负责 Milvus 数据的持久化，分为元数据存储（meta store）、消息存储（log broker）和对象存储（object storage）三个部分
+      - 元数据存储：使用 etcd 作为实现，主要负责存储系统运行所必需的元信息，例如集合的 schema 定义、系统节点的状态信息以及消息消费的 checkpoint 状态等
+      - 对象存储：采用 MinIO 作为默认方案，并兼容 AWS S3 和 Azure Blob 等云存储服务，用于存放日志快照、索引文件及查询过程中的临时结果
+      - 消息存储：在分布式环境中采用 Pulsar，在单机版本中使用 RocksDB，作为数据流式处理与持久化的基石。
+    - Milvus 的设计哲学围绕日志即数据的原则，摒弃了传统意义上的物理表结构，转而利用日志的发布订阅机制来解耦数据的读写操作，实现了系统的高度可扩展性和灵活性
   - indexnode，每个querynode，每个datanode都是单独的容器
     - indexnode只负责建索引任务，querynode只负责查询任务，datanode只负责数据的持久化和整理任务。indexnode建索引时总是会尽量用满cpu，以最快速度建好索引
       - querynode负责搜索任务，要把整个表的索引都加载到自己的内存里。
@@ -248,12 +256,20 @@
       - 内存里有小部分量化过的数据，搜索的时候先在内存里做一次快速搜索，然后在localstorage里找到对应的分块文件，读出原始向量做精确检索
   - 索引
     - [index overview](https://www.slideshare.net/slideshow/introduction-to-multilingual-retrieval-augmented-generation-rag/267957576)
-      - L2 (Euclidean) - Spatial distance
+      - L2 (Euclidean) - Spatial distance 主要运用于计算机视觉领域
       - Cosine - Orientation distance
-      - IP (Inner Product) - Both
+      - IP (Inner Product) - Both - 主要运用于自然语言处理（NLP）领域
         - With normalized vectors, IP is equivalent to cosine similarity
       - SQ - Scalar Quantization - Bucketize across one dimension, accracy x memory tradeoff
       - PQ - Product Quantization - bucketize across multiple dimensions, accuracy x memory tradeoff
+    - Index type
+      - FLAT：适用于需要 100% 召回率且数据规模相对较小（百万级）的向量相似性搜索应用。
+      - IVF_FLAT：基于量化的索引，适用于追求查询准确性和查询速度之间理想平衡的场景（高速查询、要求高召回率）。
+      - IVF_SQ8：基于量化的索引，适用于磁盘或内存、显存资源有限的场景（高速查询、磁盘和内存资源有限、接受召回率的小幅妥协）。
+      - IVF_PQ：基于量化的索引，适用于追求高查询速度、低准确性的场景（超高速查询、磁盘和内存资源有限、接受召回率的实质性妥协）。
+      - HNSW：基于图的索引，适用于追求高查询效率的场景（高速查询、要求尽可能高的召回率、内存资源大的情景）。
+      - ANNOY：基于树的索引，适用于追求高召回率的场景（低维向量空间）。
+      - IVF_HNSW：基于量化和图的索引，高速查询、需要尽可能高的召回率、内存资源大的情景
     - milvus里面，每个向量字段最多只能建立一种索引，如果要换，要把旧的删除再建新的。执行search的时候总是会使用那唯一指定的索引。 查询计划无法被外界感知
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap

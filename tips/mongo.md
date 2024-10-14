@@ -101,6 +101,16 @@
     ```
 -  [硬件和操作系统配置](https://mp.weixin.qq.com/s/FKfbg1qw0XAvK_xc_G6u6A)
   - WiredTiger存储引擎的内部缓存大小可以通过storage.wiredTiger.engineConfig.cacheSizeGB进行设置，其大小应足以容纳整个工作集
+  - WiredTiger 会按需将磁盘的数据以 page 为单位加载到内存，同时在内存会构造相应的 B-Tree 来存储这些数据
+  - WiredTiger 相比 MMAPV1 的优势：
+    - 文档空间分配方式：WiredTiger 使用 BTree 存储，MMAPV1 使用线性存储，需要 Padding；
+    - 并发级别：WiredTiger 支持文档级别锁，MMAPV1 引擎使用表级锁；
+    - 数据压缩：WiredTiger 支持snappy (默认) 和 zlib，相比 MMAPV1（无压缩)）空间节省数倍；
+    - 内存使用：WiredTiger 可以指定内存的使用大小，同时 WiredTiger 使用了二阶缓存 WiredTiger Cache，File System Cache 来保证Disk上的数据的最终一致性，而 MMAPv1 只有 journal 日志；
+  - Checkpoint 的目的
+    - 将内存里面发生修改的数据写到数据文件进行持久化保存，确保数据一致性
+    - 实现数据库在某个时刻意外发生故障，再次启动时，缩短数据库的恢复时间。
+  - 本质上来说，Checkpoint 相当于一个日志，记录了上次 Checkpoint 后相关数据文件的变化。
 - Mongo Index
   - MongoDB 底层是如何存储数据的
     - 一个 collection 对应到底层存储引擎就是一个文件，另外每个索引也是单独的文件，每个数据和索引文件的默认结构是 b 树
