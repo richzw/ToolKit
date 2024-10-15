@@ -1049,7 +1049,13 @@
   - What does the len() function return if passed a UTF-8 encoded string? the number of bytes
   - What does a sync.Mutex block while it is locked? any other call to lock that Mutex? any other call to lock that Mutex
   - What is a side effect of using time.After in a select statement?
-
+- Go中间件上踩过的坑
+  - 请求不均匀问题（rand）
+    - 调查发现，业务代码使用了 rand.Seed(time.Now().Unix())，影响了中间件获取随机浮点数的逻辑。
+    - 在某一秒，由于业务反复执行 rand.Seed(秒级时间戳)，导致 go vipserver client中间件中，获取到的随机数就会一样（Go的标签库实现是仿随机数）
+    - 如何解决这个问题呢，新版本使用 golang.org/x/exp/rand 包，创建了一个独立的 globalRand，不再使用全局共用的 rand.Float()
+  -  ticker 的泄露
+    - go 1.23.0 之前的版本，得等时间到了，对应的 ticker 才被释放，在释放前，资源会一直占用着
 
 
 

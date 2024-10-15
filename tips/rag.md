@@ -674,6 +674,7 @@
         - 生成查询
         - 处理查询
         - 生成并存储针对该查询的多个可重用函数
+  - [Orchestrating Agents: Routines and Handoffs](https://github.com/openai/openai-cookbook/blob/main/examples/Orchestrating_agents.ipynb)
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回

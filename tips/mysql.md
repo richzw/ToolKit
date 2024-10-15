@@ -1040,7 +1040,23 @@
   - 表上的并发控制，或者说表锁主要保护的是表结构，在 MySQL 8.0 版本中，表结构的保护都是由 MDL 锁完成；非 InnoDB 表（CSV 表）还会依赖 Server 层的表锁进行并发控制，InnoDB 表不需要 Server 层加表锁；
   - 页上的并发控制，或者说 index 和 page 上的锁主要是为了保护 B+tree 的安全性，乐观写入下，只有叶子节点上需要加 X 锁；悲观写入下（SMO），索引可能修改的节点上都需要加 X 锁。引入 SX 锁增加了读写并发，但是 SMO 操作依然不能并发；
   - 行上的并发控制，或者说行锁主要是为了保护行记录的一致性，其实行上的并发控制还有一个很重要的点是 MVCC
+- 全表 update 
+  - 数据量达到一个量级后，就会出现一些问题，比如主从架构部署的Mysql，主从同步需要需要binlog来完成, 因此如果在亿级数据的表中执行全表update，必然会在主库中产生大量的binlog，接着会在进行主从同步时，从库也需要阻塞执行大量sql，风险极高，因此直接update是不行的
+  - Solution
+    - 写一个这样的脚本，依次分批替换，limit的游标不断增加。
+    - mysql的limit游标进行的范围查找原理，是下沉到B+数的叶子节点进行的向后遍历查找，在limit数据比较小的情况下还好，limit数据量比较大的情况下，效率很低接近于全表扫描，这也就是我们常说的“深度分页问题”。
+  - 全表扫数据如何防止对buffer pool污染到我们业务正常的热点数据
+  - Final Solution
+    ```
+    select /*!40001 SQL_NO_CACHE */ id from tb_user_info FORCE INDEX(`PRIMARY`) where id> "1" ORDER BY id limit 1000,1;
 
+    update tb_user_info set user_img=replace(user_img,'http','https') where id >"{1}" and id <"{2}";
+    ```
+    - 我们在select sql中使用了这个语法/*!40001 SQL_NO_CACHE */，这个语法的意思就是本次查询不使用innodb的buffer pool，也不会将本次查询的数据页放到buffer pool中作为热点数据的缓存。
+    - Q：第一个sql如果不走buffer pool，第二个更新sql也会把数据页载入到buffer pool吧？
+    - A：读缓存和写缓存是不一样的。
+    - Q：只要我知道min_id、max_id，只要序列差不多连续是不是可以直接分片执行，不需要一定要每次1000条执行的吧？
+    - A：min和max这样直接分片的话，除非是自增id，否则是不能保证匀速的，后续多线程执行的任务分配也不能得到保证。
 
 
 
