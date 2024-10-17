@@ -730,6 +730,16 @@
       - 退火（Annealing）：在最后阶段调整学习率和数据混合配比，以增加高质量数据的影响。
     - LLaMA 3的Post-Training
       - Post-Training流程包括使用人工标注数据训练RM模型，通过拒绝采样筛选高质量SFT数据，并用DPO模型调整LLM参数。这个过程反复迭代，逐步提升模型质量。
+    - [llama 3.1技术报告](https://mp.weixin.qq.com/s/fWu6QtABI9OseygXTr1cJw)
+      - 数据很缺。无论是数量上还是质量上。某些细分类特别特别缺。合成数据是大趋势 合成数据进行后训练可以一定程度上替代模型蒸馏。不过这个早就是主流操作了。数学推理/代码数据非常有用
+      - scaling laws应该可以再指导几年。扩大大模型参数量规模理论上可以继续提高效果，并更好的辅助对小模型的蒸馏。卡点在合成数据
+        - 保证每一次训练都能达到当前超参组合下的上限（稳定训练）
+        - 选择能带来最高上限的超参组合（调参）
+      - pre-train+SFT+RLHF，就是结合了语言模型和强化学习的不稳定性
+      - 训练过程 = 预训练pre-train + 后训练post-training + 平均化
+                =（短上下文pre-train + 长上下文pre-train + 退火annealing） +  （(监督微调SFT + 拒绝采样rejection sampling（合成数据用）) + 直接偏好优化DPO）+ 平均化
+      - 监督微调SFT + 拒绝采样rejection sampling 6轮后训练，先SFT再DPO算一轮。
+      - 直接偏好优化DPO
   - [Apple Intelligence Foundation Language Models](https://machinelearning.apple.com/papers/apple_intelligence_foundation_language_models.pdf)
   - [Reverse Engineering o1 Architecture ](https://www.reddit.com/r/LocalLLaMA/comments/1fgr244/reverse_engineering_o1_architecture_with_a_little/)
     - fed Claude with released information from OpenAI (system card, blog posts, tweets from Noam Brown and others, commentary from the ARC Prize team) and online discussions (Reddit, YouTube videos) relating to the o1 model
@@ -740,6 +750,12 @@
     - o1 引入了新型的 RL Scaling law，通过树搜索结构提升了模型的可扩展性和灵活性。 -- o1 采用了类似 AlphaGo 的 MCTS 树搜索，这种策略提升了模型的可扩展性和灵活性，预示着小模型的发展潜力。
     - o1 在内容安全方面采用了不同于 GPT 4 的策略，通过增强逻辑推理能力和引入“AI 宪法”模式来提升安全性。 -- o1 在内容安全方面的能力比 GPT 4 强很多，预示着大模型安全范式的巨大变化。
     - o1 模型的训练数据可能包括人工标注的 COT 思考过程和合成数据。 -- 人工标注的 COT 数据数量有限但质量高，合成数据可以通过 MCTS 树搜索方式扩展，提高模型的训练效果。
+  - [多语言向量模型的语言鸿沟（Language Gap）](https://mp.weixin.qq.com/s/ESlsTPnydjHCeQytgRdpuQ)
+    - 不同语言中表达相同含义的短语，它们的向量却可能相距甚远，无法有效对齐。
+    - 多语言模型的棘手挑战
+      - 掩码语言建模（Masked Language Modeling, MLM）
+      - 对比学习（Contrastive Learning）
+        - 预训练完成后，我们会用一些精心挑选或者半自动构建的数据集，继续训练模型。这里的目标是让语义相似的文本向量靠得更近，同时（可选地）将语义不相似的文本向量推得更远。
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]

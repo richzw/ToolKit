@@ -1,3 +1,5 @@
+- [Introduction to Retrieval Augmented Generation (RAG)](https://weaviate.io/blog/introduction-to-rag)
+  - [Advanced RAG Techniques](https://weaviate.io/blog/advanced-rag)
 - [LLM 回答更加准确的秘密：为检索增强生成（RAG）添加引用源](https://mp.weixin.qq.com/s/I01YcEs_dV8fkSD-HaQQxg)
   - RAG 的出现重点解决了现有大模型的三个挑战：
     - 幻觉问题：生成内容不正确，与事实不符，甚至荒谬
@@ -204,6 +206,7 @@
           - Evaluation Procedure 
             - For each question, we can view the generated SQL, reason for the error, and related performance metrics
             - We also aggregate accuracy and latency metrics for each evaluation run to track performance over time.
+      - [dynamic-few-shot-llamaindex-workflow](https://github.com/rsrohan99/dynamic-few-shot-llamaindex-workflow/tree/master)
     - Text-to-Cypher
     - Text-to-metadata filters
   - Indexing
@@ -675,6 +678,7 @@
         - 处理查询
         - 生成并存储针对该查询的多个可重用函数
   - [Orchestrating Agents: Routines and Handoffs](https://github.com/openai/openai-cookbook/blob/main/examples/Orchestrating_agents.ipynb)
+  - Handoff 模式
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回

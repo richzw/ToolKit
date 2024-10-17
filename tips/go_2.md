@@ -2032,6 +2032,7 @@
       ` _ structs.HostLayout`
     - 在 runtime/debug 库中新增了 debug.SetCrashOutput 方法. 来允许设置未被捕获的错误、异常的日志写入。可用于为所有 Go 进程意外崩溃构建自动报告机制
     - [range iterators](https://www.dolthub.com/blog/2024-07-12-golang-range-iters-demystified/)
+      - [Range Over Function Types](https://go.dev/blog/range-functions)
     - [string interning - unique](https://mp.weixin.qq.com/s/SiKFOZvaqz5Gwjl6OgbujQ)
       - 基本原理是将相同的字符串值在内存中只存储一次，所有对该字符串的引用都指向同一内存地址，而不是为每个相同字符串创建单独的副本
       - string interning在多种场景下非常有用，比如在解析文本格式(如XML、JSON)时，interning能高效处理标签名称经常重复的问题；在编译器或解释器的实现时，interning能够减少符号表中的重复项等
