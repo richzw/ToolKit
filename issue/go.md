@@ -124,7 +124,7 @@
        }()
    }
    ```
-- [defer Close() 的风险](https://mp.weixin.qq.com/s?__biz=MzkyMzIyNjIxMQ==&mid=2247484680&idx=1&sn=5df7d6a7b410fcdec01982470ca2158d&chksm=c1e91c04f69e9512628968de16dd081582fea5aae45b17f0facdc33322c9d447d9c09529f36c&scene=21#wechat_redirect)
+- [defer Close() 的风险](https://www.joeshaw.org/dont-defer-close-on-writable-files/)
   - 问题：
     - `defer x.Close()` 会忽略它的返回值，但在执行 x.Close() 时，我们并不能保证 x 一定能正常关闭，万一它返回错误应该怎么办？这种写法，会让程序有可能出现非常难以排查的错误。
   - Close() 方法会返回什么错误呢
@@ -1077,7 +1077,7 @@
 
 
 
-r
+
 
 
 

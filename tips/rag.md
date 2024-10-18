@@ -679,6 +679,14 @@
         - 生成并存储针对该查询的多个可重用函数
   - [Orchestrating Agents: Routines and Handoffs](https://github.com/openai/openai-cookbook/blob/main/examples/Orchestrating_agents.ipynb)
   - Handoff 模式
+  - [o1正在重塑Agent](https://mp.weixin.qq.com/s/R33WBLPzpkdj_P3UbNG4Dg)
+    - [Using reasoning for routine generation](https://cookbook.openai.com/examples/o1/using_reasoning_for_routine_generation)
+      - Action可以被分为四类：
+        - Function Call（黑色）：生成并调用相关API，例如验证用户或取消订阅；
+        - Knowledge Retriever（深蓝）：调阅相关政策和知识；
+        - 向用户索取信息（黄色）；
+        - 指导如何通知客户（浅蓝）。
+    - 伴随着“慢思考”大模型的演进，One-Shot Agent的特征非常适合于跨平台并协作人类解答流程复杂的决策问题
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
@@ -804,6 +812,7 @@
     - https://towardsdatascience.com/graph-rag-into-production-step-by-step-3fe71fb4a98e
     - https://zilliz.com/blog/graphrag-explained-enhance-rag-with-knowledge-graphs
     - https://github.com/run-llama/llama_index/blob/main/docs/docs/examples/cookbooks/GraphRAG_v2.ipynb
+    - GraphRAG + Milvus https://mp.weixin.qq.com/s/9P0yel8EsEsPNeeCTZ5GTA
   - [KG-based RAG](https://mp.weixin.qq.com/s/jaFzZ2WIbgy9mKo1-gKt2Q)
     - 跳数有限性假设基于两点很重要的观察：1. query 复杂度有限性， 2.“捷径”的局部 dense 结构。
     - 将 entities, relationships 信息分别进行向量化，并存储在向量存储里，这样存储了一个逻辑上的知识图谱
@@ -995,7 +1004,8 @@
   - Contextual Embeddings and Contextual BM25
   - If your knowledge base is smaller than 200,000 tokens (about 500 pages of material), you can just include the entire knowledge base in the prompt that you give the mode
   - https://github.com/anthropics/anthropic-cookbook/tree/main/skills/contextual-embeddings
-
+- [Multimodal RAG with Milvus](https://colab.research.google.com/github/milvus-io/bootcamp/blob/master/bootcamp/tutorials/quickstart/multimodal_rag_with_milvus.ipynb)
+  - [Video](https://www.youtube.com/watch?v=AImwkZYbUvE)
 
 
 
