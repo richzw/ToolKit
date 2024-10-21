@@ -1,5 +1,26 @@
 - [Introduction to Retrieval Augmented Generation (RAG)](https://weaviate.io/blog/introduction-to-rag)
   - [Advanced RAG Techniques](https://weaviate.io/blog/advanced-rag)
+- [RAG速通](https://mp.weixin.qq.com/s/11NcuacIALFWcAtQ9rWaMA)
+  - RAG优化核心策略主要基于Information Retrieval的2-stage经典思路展开：即同时保证高召回率和精度
+    - 第一阶段：最大化召回率(High Recall)，同时接受较低的精度( Low Precision)。此阶段涵盖RAG的Indexing和Retrieval部分
+    - 第二阶段：提升精度（Higher Precision）。此阶段由新增的Reranking部分构成，其目的是在切片文档被获取后进行“Postprocessing”，以提升Top_K的精度，降低送往大模型文档切片的噪声
+  - 依据实际业务需求厘清优化目标，明确要在哪一个或者多个部分实现优化。Recalling、Indexing和Reranking三部分优化目标分别如下：
+    - Recalling的目标是完善Query以取得更高的召回率；
+    - Indexing的优化目标是在提升召回率的同时保证语义完整性；
+    - Reranking的优化目标是保证Top_K的精度。
+      -  bge-reranker
+  - Question Transformation是通过改写、拓展和丰富问题的语义以提升召回率。当前比较流行的方案包括：
+    - Rewrite-Retrieve-Read：使用大模型改写问题；
+    - Step Back prompting：使用大模型产生问题的“Step-back Question”，并将问题和Step-back一同用于召回；
+    - Follow Up Questions：将历史对话记录融入当前问题进行召回；
+    - Multi Query Retrieval：使用大模型基于原始问题，从不同角度产生多个新问题，并使用每一个新问题进行召回；
+    - HyDE：使用大模型产生问题的Hypothetical答案，并将问题和答案一同用于召回。
+  - RAG-Fusion 结合Multi Query Retrieval 和基于Reciprocal Rank Fusion (RRF）算法的Reranker，通过产生多个问题变种、进行多次召回，再用RRF算法进行合并和排序来提升召回率和精度。
+  - Hybrid Search 同时执行Keyword Search和Vector Search，并使用RRF算法合并、并重排两种不同检索的结果
+  - Small-to-Big采用分离索引和内容的方式以提升Vector Search的完整性 通常通过一小段索引（节点）关联到一大块完整的切片，以小切片搜索的精确度驱动大切片内容的完整性。
+    - Sentence-window retrieval：索引句子，关联到句子的上下文；
+    - Auto-merging retrieval：通过子节点递归关联父节点；
+    - Multiple-Vector Retriever：通过切片的Summary，找到存储在Doc Store中的切片原文。
 - [LLM 回答更加准确的秘密：为检索增强生成（RAG）添加引用源](https://mp.weixin.qq.com/s/I01YcEs_dV8fkSD-HaQQxg)
   - RAG 的出现重点解决了现有大模型的三个挑战：
     - 幻觉问题：生成内容不正确，与事实不符，甚至荒谬
@@ -914,6 +935,7 @@
   - [MSMARCO Models](https://www.sbert.net/docs/pretrained-models/msmarco-v5.html?highlight=dot%20product)
     - MS MARCO is a large scale information retrieval corpus that was created based on real user search queries using Bing search engine
   - [Train and evaluate embedding model](https://zilliz.com/learn/evaluating-your-embedding-model)
+  - [https://weaviate.io/blog/how-to-choose-an-embedding-model](https://weaviate.io/blog/how-to-choose-an-embedding-model)
   - [Jina Embeddings V3](https://mp.weixin.qq.com/s/n3qH2jCpbCV23A_hg-ce-Q)
     - https://mp.weixin.qq.com/s/EQsgkQX8PtWTN69axJ7uOQ
     - jina-embeddings-v3 基于 XLM-RoBERTa 模型架构，我们主要针对多语言长文本的处理，以及多任务场景进行了优化

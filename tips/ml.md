@@ -327,6 +327,7 @@
       - 纵向，获取历史同一时刻30个点的观测值，通过3sigma算法来检测异常。
       - 横向，zscore算法进行变点检测，横向获取某个时刻往前历史30个点的观测值。
 - [GPT-4 Architecture, Infrastructure, Training Dataset, Costs, Vision, MoE](https://hub.baai.ac.cn/view/27744)
+- [Uber Optimizes LLM Training](https://www.uber.com/en-HK/blog/open-source-and-in-house-how-uber-optimizes-llm-training/)
 - [What Is ChatGPT Doing … and Why Does It Work](https://writings.stephenwolfram.com/2023/02/what-is-chatgpt-doing-and-why-does-it-work/)
   - 当我们训练一个大型神经网络来准确预测互联网上许多不同文本中的下一个单词时，我们所做的就是学习一个世界模型。
   - 从表面上看，可能只是在学习文本中的统计相关性。

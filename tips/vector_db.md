@@ -254,6 +254,7 @@
       - 那如果加上过滤条件，把一大批数据都排除在计算之外，那么本来要搜索的那小范围里也会有向量被排除在外，就凑不出足够的结果
       -  localstorage对diskann有效，当你调用load的时候就会把diskann索引数据都下载到localstorage里。
       - 内存里有小部分量化过的数据，搜索的时候先在内存里做一次快速搜索，然后在localstorage里找到对应的分块文件，读出原始向量做精确检索
+    - 查询延迟就主要跟querynode有关，有时querynode资源充足而proxy节点不太行的话，proxy也有可能成为瓶颈
   - 索引
     - [index overview](https://www.slideshare.net/slideshow/introduction-to-multilingual-retrieval-augmented-generation-rag/267957576)
       - L2 (Euclidean) - Spatial distance 主要运用于计算机视觉领域
@@ -273,6 +274,7 @@
     - milvus里面，每个向量字段最多只能建立一种索引，如果要换，要把旧的删除再建新的。执行search的时候总是会使用那唯一指定的索引。 查询计划无法被外界感知
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap
+      - mmap是对diskann索引和gpu索引以外的其他索引有效
     - diskann加载到内存里的是类似于一个IVF_PQ索引。搜索时是先在内存里的索引粗略地搜索一下，然后到磁盘里取出部分向量数据做更精确的搜索
     - 集群开了mmap，创建集合索引的时候是默认就开启了，还是需要collection.set_properties({'mmap.enabled': True})参数指定
     - hnsw索引的向量类型只能用floatvector？ float16Vector可以使用和floatVector一样的索引，hnsw ivf都行
@@ -353,7 +355,9 @@
   - 编译
     - 编译可以看看milvus repo下的DEVELOPMENT.md, 可以去github milvus disscusions里搜索compile关键字看别人都踩了哪些坑
     - 要编译和创建milvus镜像，参考这个帖子：https://github.com/milvus-io/milvus/discussions/31043
-    - 编译milvus源码的，在运行start_standalone.sh之前，先做两件事：一是改configs/milvus.yaml里配置项，把所有带有/var/lib路径的替换为一个你机器上合法的路径，比如/tmp/milvus。二是进入development/docker/dev目录运行docker-compose up -d 以启动etcd服务和minio服务
+    - 编译milvus源码的，在运行start_standalone.sh之前，先做两件事：一是改configs/milvus.yaml里配置项，把所有带有/var/lib路径的替换为一个你机器上合法的路径，比如/tmp/milvus。
+      - 二是进入development/docker/dev目录运行docker-compose up -d 以启动etcd服务和minio服务
+    - 为了尽量降低环境因素的影响，可以尝试在docker里去编译：https://github.com/milvus-io/milvus/blob/master/build/README.md
   - [Cardinal 搜索引擎](https://mp.weixin.qq.com/s/4xx2U8Xyr1RetTkMtRrxyw)
     - Cardinal 是用现代 C++ 语言和实用的近似最近邻搜索（ANNS）算法构建的多线程、高效率向量搜索引擎， 将搜索引擎的性能比原来提升了 3 倍，搜索性能（QPS）是 Milvus 的 10 倍
     - 同时能够处理暴搜请求和 ANNS 索引修改请求；处理各种数据格式，包括 FP32、FP16 和 BF16;执行索引 Top-K 和索引范围搜索（Range Search）;使用内存中数据或提供基于内存、磁盘和 MMap 等不同方式的索引
