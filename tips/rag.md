@@ -708,6 +708,16 @@
         - 向用户索取信息（黄色）；
         - 指导如何通知客户（浅蓝）。
     - 伴随着“慢思考”大模型的演进，One-Shot Agent的特征非常适合于跨平台并协作人类解答流程复杂的决策问题
+  - [Memory for agents](https://blog.langchain.dev/memory-for-agents/)
+    - CoALA paper
+    - Procedural Memory
+      - This term refers to long-term memory for how to perform tasks, similar to a brain’s core instruction set. - remembering how to ride a bike.
+    - Semantic Memory
+      - This is someone’s long-term store of knowledge.
+      - Semantic memory in humans: it’s composed of pieces of information such as facts learned in school, what concepts mean and how they are related
+    - Episodic Memory
+      - This refers to recalling specific past events.
+      - Episodic memory in humans: when a person recalls a particular event (or “episode”) experienced in the past.
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回

@@ -864,6 +864,14 @@
     - n-gram 概率生成 “随机词”但问题是：没有足够的英文文本可以推导出这些概率
     - ChatGPT 的核心正是一个所谓的 “大型语言模型”（LLM），它的建立可以很好地估计这些概率。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。
   - [Fixing Hallucinations in LLMs](https://betterprogramming.pub/fixing-hallucinations-in-llms-9ff0fd438e33)
+  - [Evaluate fairness in ChatGPT](https://mp.weixin.qq.com/s/-zAlMyXzmCvN05PTtiY6Qg)
+    - “第一人称公平性”问题
+      - 当用户使用"Emily"这个名字时，ChatGPT 倾向于使用更友好、更个人化的语气；而对于"Muhammad"这个名字，AI 的回应则显得更为正式和疏离
+    - 偏见:
+      - 性别偏见:当扮演女性角色时,ChatGPT 更倾向于讨论情感和关系话题,而扮演男性角色时则更多谈论事业和成就。这反映了 AI 系统可能继承了训练数据中的性别刻板印象。
+      - 种族偏见:系统在扮演不同种族背景的角色时,表现出了明显的差异。例如,扮演非裔美国人时,更容易提到与犯罪或贫困相关的话题,这反映了潜在的种族偏见。
+      - 文化差异:AI 在扮演不同文化背景的角色时,展现出了对特定文化习俗和价值观的理解,但有时也会过度强调某些文化特征,导致刻板印象的产生。
+      - 宗教敏感度:研究发现,AI 在处理宗教相关话题时表现得相对谨慎,但仍然存在对某些宗教群体的潜在偏见。
 - [Why you should work on AI AGENTS](https://www.youtube.com/watch?v=fqVLjtvWgq8)
 - [Sample]
   - [GPT-4 生成 Golang Worker Pool](https://mp.weixin.qq.com/s/2kmNHqZO5EdYGsOcYg4dhw)
@@ -1225,7 +1233,14 @@
 - AGI
   - [Machines of Loving Grace](https://darioamodei.com/machines-of-loving-grace) - Dario Amodei (Anthropic)
     - https://mp.weixin.qq.com/s/StZeb__lyrZl_as_sQ8l6A
-
+- 模型文件格式
+  - [Safetensors](https://mp.weixin.qq.com/s/o-banwxQlk4rBiNOnp6lmA)
+    - 当我们训练模型时，通常会将模型的权重保存到文件中，以便在检查点保存和稍后加载。最流行的格式是 PyTorch 的状态字典，它是一个 Python 字典对象，将每一层映射到其参数 tensor
+    - 使用 pickle 来序列化和反序列化整个状态字典对象，引发了安全性问题。原因在于 pickle 并不安全，可能会加载具有与反序列化程序相同权限的任意代码
+    - 攻击者可以通过模型权重注入任意代码，造成严重的安全问题。一种攻击模型权重的方法是修改其 __reduce__ 方法来执行任意代码。
+    - Safetensors 如何解决问题
+      - Safetensors 不使用 pickle 来序列化和反序列化状态字典对象。相反，它使用自定义的序列化方法来存储模型权重
+      - Hugging Face 的 Safetensors 确保你的模型权重文件只包含参数数据，而不包含其他任何内容。Safetensors 在存储和保存模型权重时仍然保持了快速零拷贝的特性
 
 
 

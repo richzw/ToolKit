@@ -1060,7 +1060,11 @@
   - poolDequeue 是一个 lock-free 的数据结构, 高性能的单生产者多消费者的队列, 它是一个固定尺寸，使用 ringbuffer (环形队列) 方式实现的队列
   - PoolChain 是在 PoolDequeue 的基础上实现的一个动态尺寸的队列，它的实现和 PoolDequeue 类似，只是增加了一个 headTail 的链表，用于存储多个 PoolDequeue
     - sync.Pool中就是使用的PoolChain来实现的，它是一个单生产者多消费者的队列，可以同时有多个消费者消费数据，但是只有一个生产者生产数据
-  
+  - runq 数据结
+    - Go 运行时这么做，主要还是减少 P 之间对获取 goroutine 之间的竞争。本地队列 runq 主要由持有它的 P 进行读写，只有在"被偷"的情况下，才可能有"数据竞争"的问题
+    - runq 是一个无锁循环队列，由数组实现，它的长度是 256，这个长度是固定的，不会动态调整
+    - runqhead 和 runqtail 分别是队列的头和尾，runqhead 指向队列的头部，runqtail 指向队列的尾部。
+    - runq 数组的每个元素是一个 guintptr 类型，它是一个 uintptr 类型的别名，用来存储 g 的指针
 
 
 
