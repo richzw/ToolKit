@@ -80,30 +80,36 @@
   - 本质是内存使用的不合理，当触发GC之后，在负载高的情况下，内存分配的速度超过了GC扫描的速度，从而一直在执行辅助标记，大大减慢了程序运行的速度。这会导致调度延迟等各方面情况发生恶化。通过优化代码逻辑和复用内存分配，消除瓶颈，节约线上千台容器。
 - [gops](https://github.com/google/gops)
   - gops is a command to list and diagnose Go processes currently running on your system.
-- [应用内存占用太多](https://eddycjy.com/posts/go/talk/2019-09-24-why-vsz-large/)
-  - 某同学就说 VSZ 那么高，而某云上的容器内存指标居然恰好和 VSZ 的值相接近，因此某同学就怀疑是不是 VSZ 所导致的，觉得存在一定的关联关系
-  - 什么是 VSZ
-    - VSZ 是该进程所能使用的虚拟内存总大小，它包括进程可以访问的所有内存，其中包括了被换出的内存（Swap）、已分配但未使用的内存以及来自共享库的内存
-    - 而虚拟内存，又分为内核虚拟内存和进程虚拟内存，每一个进程的虚拟内存都是独立的
-  - 排查问题
-    - 一个测试程序, `ps aux ` VSZ 为 4297048K，也就是 4G 左右
-    - 首先看下 runtime.MemStats 和 pprof
-    - 查看内存映射
-      - 利用 macOS 的 vmmap 命令去查看内存映射情况, 这些关联共享库占用的空间并不大，导致 VSZ 过高的根本原因不在共享库和二进制文件上，但是并没有发现大量保留内存空间的行为，这是一个问题点。
-      - 若是 Linux 系统，可使用 cat /proc/PID/maps 或 cat /proc/PID/smaps 查看。
-    - 查看系统调用
-      - 通过 macOS 的 dtruss 命令监听并查看了运行这个程序所进行的所有系统调用，发现了与内存管理有一定关系的方法如下：
-        - mmap：创建一个新的虚拟内存区域，但这里需要注意，就是当系统调用 mmap 时，它只是从虚拟内存中申请了一段空间出来，并不会去分配和映射真实的物理内存，而当你访问这段空间的时候，才会在当前时间真正的去分配物理内存。那么对应到我们实际应用的进程中，那就是 VSZ 的增长后，而该内存空间又未正式使用的话，物理内存是不会有增长的。
-        - madvise：提供有关使用内存的建议，例如：MADV_NORMAL、MADV_RANDOM、MADV_SEQUENTIAL、MADV_WILLNEED、MADV_DONTNEED 等等。
-        - mprotect：设置内存区域的保护情况，例如：PROT_NONE、PROT_READ、PROT_WRITE、PROT_EXEC、PROT_SEM、PROT_SAO、PROT_GROWSUP、PROT_GROWSDOWN 等等。
-        - sysctl：在内核运行时动态地修改内核的运行参数
-      - 若是 Linux 系统，可使用 strace 命令
-    - 查看 Go Runtime
-      - 在 Go 程序启动的时候 VSZ 就已经不低了，并且确定不是共享库等的原因，且程序在启动时系统调用确实存在 mmap 等方法的调用
-      - runtime 里的 schedinit 方法. 实际上在调用 mheap_.arenaHintAlloc.alloc() 时，调用的是 mheap 下的 sysAlloc 方法，而 sysAlloc 又会与 mmap 方法产生调用关系，并且这个方法与常规的 sysAlloc 还不大一样
-      - mheap.sysAlloc 里其实有调用 sysReserve 方法，而 sysReserve 方法又正正是从 OS 系统中保留内存的地址空间的特定方法
-  - 小结
-    - VSZ（进程虚拟内存大小）与共享库等没有太大的关系，主要与 Go Runtime 存在直接关联，也就是在前图中表示的运行时堆（malloc）。转换到 Go Runtime 里，就是在 mallocinit 这个内存分配器的初始化阶段里进行了一定量的虚拟空间的保留
+  - [应用内存占用太多](https://eddycjy.com/posts/go/talk/2019-09-24-why-vsz-large/)
+    - 某同学就说 VSZ 那么高，而某云上的容器内存指标居然恰好和 VSZ 的值相接近，因此某同学就怀疑是不是 VSZ 所导致的，觉得存在一定的关联关系
+    - 什么是 VSZ
+      - VSZ 是该进程所能使用的虚拟内存总大小，它包括进程可以访问的所有内存，其中包括了被换出的内存（Swap）、已分配但未使用的内存以及来自共享库的内存
+      - 而虚拟内存，又分为内核虚拟内存和进程虚拟内存，每一个进程的虚拟内存都是独立的
+    - 排查问题
+      - 一个测试程序, `ps aux ` VSZ 为 4297048K，也就是 4G 左右
+      - 首先看下 runtime.MemStats 和 pprof
+      - 查看内存映射
+        - 利用 macOS 的 vmmap 命令去查看内存映射情况, 这些关联共享库占用的空间并不大，导致 VSZ 过高的根本原因不在共享库和二进制文件上，但是并没有发现大量保留内存空间的行为，这是一个问题点。
+        - 若是 Linux 系统，可使用 cat /proc/PID/maps 或 cat /proc/PID/smaps 查看。
+      - 查看系统调用
+        - 通过 macOS 的 dtruss 命令监听并查看了运行这个程序所进行的所有系统调用，发现了与内存管理有一定关系的方法如下：
+          - mmap：创建一个新的虚拟内存区域，但这里需要注意，就是当系统调用 mmap 时，它只是从虚拟内存中申请了一段空间出来，并不会去分配和映射真实的物理内存，而当你访问这段空间的时候，才会在当前时间真正的去分配物理内存。那么对应到我们实际应用的进程中，那就是 VSZ 的增长后，而该内存空间又未正式使用的话，物理内存是不会有增长的。
+          - madvise：提供有关使用内存的建议，例如：MADV_NORMAL、MADV_RANDOM、MADV_SEQUENTIAL、MADV_WILLNEED、MADV_DONTNEED 等等。
+          - mprotect：设置内存区域的保护情况，例如：PROT_NONE、PROT_READ、PROT_WRITE、PROT_EXEC、PROT_SEM、PROT_SAO、PROT_GROWSUP、PROT_GROWSDOWN 等等。
+          - sysctl：在内核运行时动态地修改内核的运行参数
+        - 若是 Linux 系统，可使用 strace 命令
+          - Debug
+          ```
+          //-r 打印相对时间
+          //-s 256 表示--string-limit，设置 limit 为 256，可以显示 sendto(下图黄底) 系统调用完整的 DNS 查询字符串(下图绿线)
+          strace -r -s 256 tcpdump -i eth0 icmp
+          ```
+      - 查看 Go Runtime
+        - 在 Go 程序启动的时候 VSZ 就已经不低了，并且确定不是共享库等的原因，且程序在启动时系统调用确实存在 mmap 等方法的调用
+        - runtime 里的 schedinit 方法. 实际上在调用 mheap_.arenaHintAlloc.alloc() 时，调用的是 mheap 下的 sysAlloc 方法，而 sysAlloc 又会与 mmap 方法产生调用关系，并且这个方法与常规的 sysAlloc 还不大一样
+        - mheap.sysAlloc 里其实有调用 sysReserve 方法，而 sysReserve 方法又正正是从 OS 系统中保留内存的地址空间的特定方法
+    - 小结
+      - VSZ（进程虚拟内存大小）与共享库等没有太大的关系，主要与 Go Runtime 存在直接关联，也就是在前图中表示的运行时堆（malloc）。转换到 Go Runtime 里，就是在 mallocinit 这个内存分配器的初始化阶段里进行了一定量的虚拟空间的保留
 - [When Bloom filters don't bloom](https://blog.cloudflare.com/when-bloom-filters-dont-bloom/)
   - profiler
     - strace: `strace -cf PROGRAM`

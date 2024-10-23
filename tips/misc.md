@@ -249,7 +249,11 @@
     - 事件中断：前一次事件因为某些原因中断了，永远的停留在了某个节点
 - [Cursor 的进阶用法](https://x.com/xiaokedada/status/1833132309496885434?s=46)
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
-
+- systemd-resolved:
+  - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。
+  - 它作为一个本地 DNS 解析器和缓存，可以提高 DNS 查询的效率。
+  - systemd-resolved 支持多种 DNS 协议，如 DNSSEC、DNS over TLS 等。
+  - 它可以管理多个网络接口的 DNS 设置，适合复杂的网络环境。
 
 
 

@@ -30,6 +30,7 @@
     - 微调的成本更高，需要使用的数据也更多，并且每一次 fine-tune 的时间比较久，企业无法经常去做这个事情，因为它的 cost 非常高. 因此主要适用于风格迁移（style transfer）的场景
     - RAG 方法使用例如 Milvus 之类的向量数据库，从而将知识和数据注入到应用中，更适用于通用场景
     - RAG 方法就意味着使用向量数据库存储真理数据，这样可以确保应用返回正确的信息和知识，而不是在缺乏数据时产生幻觉，捏造回答
+    - [Fine-Tuning vs. Retrieval-Augmented Generation](https://neo4j.com/developer-blog/fine-tuning-vs-rag/)
   - 在LLM开发领域，有RAG，MRKL，Re-Act，Plan-Execute等模式
   - 大模型的内在基因
     - 在机器学习中，我们根据解决问题方法不同将模型分为两类，生成式和判别式
@@ -959,6 +960,7 @@
     - 任务定制更精准: 内置多种 LoRA 适配器，针对检索、聚类、分类和匹配等任务，生成定制化向量，效果更精准。
     - 输出维度可定制: 默认输出维度为 1024，但你完全可以根据需要把它缩减到 32，性能几乎不受影响，这都归功于俄罗斯套娃表示学习技术的加持
     - 针对异构搜索、同构匹配、分类、聚类四类任务做了特别的 Adapter 设计和训练，基本上 Embedding 的使用场景都可以被划分到这四类任务上。
+    - [v2 到 v3 的迁移](https://mp.weixin.qq.com/s/wdoWD_i8G095-GdU5ZSn5Q)
 - 15 Advanced RAG Techniques from Pre-Retrieval to Generation
   - 增加信息密度（Increase Information Density Using LLMs）
     - 利用 LLMs（大语言模型）处理、清理和标记数据，以提高信息密度，从而减少生成模型所需的上下文窗口大小，降低成本并提高响应准确性
