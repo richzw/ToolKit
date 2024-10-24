@@ -2139,25 +2139,6 @@
   - ![img.png](go_read_million.png)
   - https://benhoyt.com/writings/go-1brc/
   - https://r2p.dev/b/2024-03-18-1brc-go/
-- [Go 1.23 iter](https://mp.weixin.qq.com/s/qLab_fjDvVWXdXJIMvt0Fg)
-- Go 1.23 
-  - Time
-    - 如果程序中不再引用某个 Timer 或 Ticker，则这些定时器或计时器会立即成为垃圾回收的候选对象，即使它们的 Stop 方法尚未被调用,也会被垃圾回收掉
-    - 与 Timer 或 Ticker 关联的定时器通道现在变为无缓冲的，容量为 0
-      - Go 现在保证对于任何调用Reset 或 Stop 方法的操作，在该调用之前准备的任何过时值都不会在调用后被发送或接收
-      - 这可能会影响那些通过轮询长度来决定定时器通道上的接收操作是否会成功的程序。此类代码应该改用非阻塞接收。
-    - 这些新行为仅在主 Go 程序位于使用 Go 1.23.0 或更高版本的 go.mod 文件的模块中时才会启用。当 Go 1.23 构建旧程序时，旧行为仍然有效
-    - 新的 GODEBUG 设置 asynctimerchan=1 可以在即使程序在其 go.mod 文件中指定了 Go 1.23.0 或更高版本时，也恢复到异步通道行为。
-  - unique
-    - 字符串驻留（string interning）
-    - 主要思想是对于每一个唯一的字符串值，只存储一个副本，这些字符串必须是不可变的
-    - 在内部，它也有一个全局 Map（一个快速的泛型并发 Map[2]），并在该 Map 中查找值。然而，它与 Intern 有两个重要的区别：首先，它接受任何可比较类型的值；其次，它返回一个包装值 Handle[T]，可以从中检索规范化的值。
-    - https://mp.weixin.qq.com/s/bLBcJ0hnU-ET3jmDHnBPTw
-  - [Iterators and reflect.Value.Seq](https://blog.carlana.net/post/2024/golang-reflect-value-seq/)
-  - [弱引用](https://mp.weixin.qq.com/s/lwqy3AIIHKbwcUsX2rylGQ)
-    - 缓存机制：当不需要强引用缓存数据时，使用弱引用可确保系统在内存不足时回收这些数据。
-    - 事件处理器和回调：避免由于强引用导致的内存泄漏。
-    - 大型对象图：在复杂的对象引用结构中，通过弱引用防止循环引用问题
 - 在 Go 中结构体可以比较吗? Normal 结构体是可以比较的
   - 那么所有结构体都可以比较吗？显然不是，如果都可以比较，那么 reflect.DeepEqual() 就没有存在的必要了。
   - 结构体包含了 map[string]int 类型字段，不可比较
@@ -2178,7 +2159,7 @@
   - 如何通过 hack 的方式访问外部结构体的私有字段
   - 如何通过 hack 的方式设置外部结构体的私有字段
   - 如何通过 hack 的方式设置 unaddressable 的值
-
+- [io.MultiWriter](https://iximiuz.com/en/posts/go-io-tee-reader-and-multi-writer/)
 
 
 

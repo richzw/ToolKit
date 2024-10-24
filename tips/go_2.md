@@ -2041,6 +2041,28 @@
       - 初始状态下，应用创建一个对象，同时创建一个强指针和一个weak.Pointer指向该对象。
         - GC检查对象，但因为存在强指针，所以不能回收。强指针被移除，只剩下weak.Pointer指向对象。
         - GC检查对象，发现没有强指针，于是回收对象。内存被释放，weak.Pointer变为nil
+    - [Go 1.23 iter](https://mp.weixin.qq.com/s/qLab_fjDvVWXdXJIMvt0Fg)
+    - Time https://go.dev/wiki/Go123Timer https://mp.weixin.qq.com/s/5UdKbSoxueQR6dHwY35y6A
+      - 如果程序中不再引用某个 Timer 或 Ticker，则这些定时器或计时器会立即成为垃圾回收的候选对象，即使它们的 Stop 方法尚未被调用,也会被垃圾回收掉
+      - 与 Timer 或 Ticker 关联的定时器通道现在变为无缓冲的，容量为 0
+        - Go 现在保证对于任何调用Reset 或 Stop 方法的操作，在该调用之前准备的任何过时值都不会在调用后被发送或接收
+        - 这可能会影响那些通过轮询长度来决定定时器通道上的接收操作是否会成功的程序。此类代码应该改用非阻塞接收。
+        - 在 Go 1.23 之前，定时器通道的 cap 为 1，其 len 值表示是否有值在等待接收（有则为 1，无则为 0）。Go 1.23 实现中创建的定时器通道的 cap 和 len 始终为 0。
+      - 这些新行为仅在主 Go 程序位于使用 Go 1.23.0 或更高版本的 go.mod 文件的模块中时才会启用。当 Go 1.23 构建旧程序时，旧行为仍然有效
+      - 新的 GODEBUG 设置 asynctimerchan=1 可以在即使程序在其 go.mod 文件中指定了 Go 1.23.0 或更高版本时，也恢复到异步通道行为。
+      - 新实现带来了两项重要改变：
+        - 未停止但不再被引用的定时器和周期计时器现在可以被垃圾回收。在 Go 1.23 之前，未停止的定时器在触发之前无法被垃圾回收，而未停止的周期计时器则永远无法被垃圾回收。Go 1.23 的实现避免了那些没有使用 t.Stop 的程序中的资源泄漏。
+        - 定时器通道现在是同步的（无缓冲），这为 t.Reset 和 t.Stop 方法提供了更强的保证：在这些方法返回后，定时器通道的接收操作不会观察到与旧定时器配置相对应的过期时间值。在 Go 1.23 之前，使用 t.Reset 时无法避免过期值，而使用 t.Stop 避免过期值则需要谨慎处理其返回值。Go 1.23 的实现完全消除了这个问题。
+    - unique
+      - 字符串驻留（string interning）
+      - 主要思想是对于每一个唯一的字符串值，只存储一个副本，这些字符串必须是不可变的
+      - 在内部，它也有一个全局 Map（一个快速的泛型并发 Map），并在该 Map 中查找值。然而，它与 Intern 有两个重要的区别：首先，它接受任何可比较类型的值；其次，它返回一个包装值 Handle[T]，可以从中检索规范化的值。
+      - https://mp.weixin.qq.com/s/bLBcJ0hnU-ET3jmDHnBPTw
+    - [Iterators and reflect.Value.Seq](https://blog.carlana.net/post/2024/golang-reflect-value-seq/)
+    - [弱引用](https://mp.weixin.qq.com/s/lwqy3AIIHKbwcUsX2rylGQ)
+      - 缓存机制：当不需要强引用缓存数据时，使用弱引用可确保系统在内存不足时回收这些数据。
+      - 事件处理器和回调：避免由于强引用导致的内存泄漏。
+      - 大型对象图：在复杂的对象引用结构中，通过弱引用防止循环引用问题
   - As of go 1.22, for string to bytes conversion, we can replace the usage of unsafe.Slice(unsafe.StringData(s), len(s)) with type casting []bytes(str), without the worry of losing performance.
   - As of go 1.22, string to bytes conversion []bytes(str) is faster than using the unsafe package. Both methods have 0 memory allocation now.
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)

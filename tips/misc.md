@@ -61,6 +61,7 @@
   - 实验系统中三个最关键的环节是：干预、测量和分析
   - [未来AB测试系统](https://mp.weixin.qq.com/s/Z54PYpN2NTeKGwjKW16jSg)
   - [A/B测试12问](https://mp.weixin.qq.com/s/o0Chnfs4Rsu93ZQqDGvcNw)
+- [实验平台的边界拓展](https://mp.weixin.qq.com/s/aacaDdQgO2riN7-7SreTLg)
 - [AB测试中的流量互斥与流量正交]()
   - [Overlapping Experiment Infrastructure: More, Better, Faster Experimentation](https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/36500.pdf)
   - [AB实验的异质性分析](https://mp.weixin.qq.com/s/FjifDJTSnOYXBymJ0hI5Dw)
@@ -254,8 +255,7 @@
   - 它作为一个本地 DNS 解析器和缓存，可以提高 DNS 查询的效率。
   - systemd-resolved 支持多种 DNS 协议，如 DNSSEC、DNS over TLS 等。
   - 它可以管理多个网络接口的 DNS 设置，适合复杂的网络环境。
-
-
+- [ELF 101](https://github.com/ForceInjection/linux-from-beginner-to-master/blob/main/elf_101.md)
 
 
 

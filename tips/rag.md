@@ -719,6 +719,10 @@
     - Episodic Memory
       - This refers to recalling specific past events.
       - Episodic memory in humans: when a person recalls a particular event (or “episode”) experienced in the past.
+  - 快思考与慢思考 Agent 的结合
+    - 在这个双系统架构中，Agent被分为两个角色：快速直观的对话代理和较慢深思熟虑的推理代理。
+    - 系统1能够快速做出判断和反应，比如感知速度较快的汽车或识别同事的情绪。而系统2则处理复杂问题，如规划假期和进行复杂计算
+    - 系统1持续为系统2提供直觉和建议，后者可以选择采纳这些建议。
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
