@@ -1057,7 +1057,7 @@
     - A：读缓存和写缓存是不一样的。
     - Q：只要我知道min_id、max_id，只要序列差不多连续是不是可以直接分片执行，不需要一定要每次1000条执行的吧？
     - A：min和max这样直接分片的话，除非是自增id，否则是不能保证匀速的，后续多线程执行的任务分配也不能得到保证。
-
+- [The-Art-of-Problem-Solving-in-Software-Engineering_How-to-Make-MySQL-Better](https://advancedmysql.github.io/The-Art-of-Problem-Solving-in-Software-Engineering_How-to-Make-MySQL-Better/)
 
 
 

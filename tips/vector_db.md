@@ -628,7 +628,7 @@
       - 数据剪枝，主要是根据实际情况对物理上的键排列分区，包括对主键和辅助索引的分区，以此来加速查询。
     - 存储层过滤
       - 在存储层面进行优化，将过滤条件下推到存储中，尽量减少 IO 操作。对类似OLAP和OLTP的数据库而言，查询动作的底层会有很高的计算开销
-
+- [Vector Database vs Graph Database](https://zilliz.com/learn/vector-database-vs-graph-database)
 
 
 
