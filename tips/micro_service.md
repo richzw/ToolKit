@@ -1351,7 +1351,11 @@
     - 用于查询数据（读取）的数据结构与用于更新数据（写入）的结构是分开的。这种分离允许对每种操作进行独立优化，从而提高性能、可扩展性和安全性
   - Event Sourcing
     - 事件源是一种将应用程序状态的变化存储为一系列事件的模式。事件源不存储域中数据的当前状态，而是存储随着时间推移发生的所有变化（事件）的日志
-
+- [Eventual Consistency](https://newsletter.systemdesigncodex.com/p/eventual-consistency-is-tricky?utm_source=multiple-personal-recommendations-email&utm_medium=email&triedRedirect=true)
+  - Event-Based: Good for building loosely coupled systems that prioritize scalability and flexibility, but consistency takes time due to asynchronous updates. This is more of a foundational pattern.
+  - Background Sync: Best for systems where data doesn’t need to be immediately consistent and can be synchronized periodically, leading to slower updates.
+  - Saga-Based: Great for managing complex, long-lived transactions with multiple services, ensuring consistency via compensating transactions.
+  - CQRS-Based: Allows optimization for both read and write operations, but consistency between the two models is achieved asynchronously.
 
 
 

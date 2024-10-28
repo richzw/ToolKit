@@ -1058,7 +1058,19 @@
     - Q：只要我知道min_id、max_id，只要序列差不多连续是不是可以直接分片执行，不需要一定要每次1000条执行的吧？
     - A：min和max这样直接分片的话，除非是自增id，否则是不能保证匀速的，后续多线程执行的任务分配也不能得到保证。
 - [The-Art-of-Problem-Solving-in-Software-Engineering_How-to-Make-MySQL-Better](https://advancedmysql.github.io/The-Art-of-Problem-Solving-in-Software-Engineering_How-to-Make-MySQL-Better/)
-
+- [MySQL 批量操作，一次插入多少行数据效率最高](https://mp.weixin.qq.com/s/IZT1IaOCXjEe28CXrfMcgA)
+  - 适当增大 max_allowed_packet 参数可以使client端到server端传递大数据时，系统能够分配更多的扩展内存来处理。不能超过32M
+  - 首先是插入的时候，要注意缓冲区的大小使用情况
+    - 如果buffer pool余量不足25%，插入失败，返回DB_LOCK_TABLE_FULL。
+    - 插入并不能仅仅只考虑max_allowed_packet的问题，也要考虑到缓冲区的大小。
+  - 插入缓存
+    - 对于innodb引擎来说，因为存在插入缓存（Insert Buffer）这个概念，所以在插入的时候也是要耗费一定的缓冲池内存的 innodb_buffer_pool_size
+    - 写密集的情况下，插入缓冲会占用过多的缓冲池内存，默认最大可以占用到1/2的缓冲池内存，当插入缓冲占用太多缓冲池内存的情况下，会影响到其他的操作。
+  - 使用事务提升效率
+    - 使用事务可以提高数据的插入效率，这是因为进行一个INSERT操作时，MySQL内部会建立一个事务，在事务内才进行真正插入处理操作。通过使用事务可以减少创建事务的消耗，所有插入都在执行后才进行提交操作
+    - MySQL有innodb_log_buffer_size配置项，超过这个值会把innodb的数据刷到磁盘中  64M
+  - 索引影响插入性能
+  - 最终是选用的一次批量插入数据量为max_allowed_packet大小的一半
 
 
 

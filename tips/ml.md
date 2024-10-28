@@ -1241,7 +1241,7 @@
     - Safetensors 如何解决问题
       - Safetensors 不使用 pickle 来序列化和反序列化状态字典对象。相反，它使用自定义的序列化方法来存储模型权重
       - Hugging Face 的 Safetensors 确保你的模型权重文件只包含参数数据，而不包含其他任何内容。Safetensors 在存储和保存模型权重时仍然保持了快速零拷贝的特性
-
+- [Claude Artifacts](https://simonwillison.net/2024/Oct/21/claude-artifacts/)
 
 
 
