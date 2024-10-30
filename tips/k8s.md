@@ -606,6 +606,18 @@
           - 维护有序性：Balanced Binary Search Tree
           - 维护资源前缀和：将【前缀和问题】抽象为【区间和问题】，进而将【线性的区间和】转化为【结构化的子树求和】
           - 借助 Splay-Tree，能够在维护有序性的同时维护子树性质（资源维度求和），并通过 Splay 伸展操作动态调整树结构、通过子树和来得到所需前缀和
+- [负载感知调度实践（koordinator & crane）](https://mp.weixin.qq.com/s/fz8vvOUZ5ko1oNeMgEH6HA)
+  - koordinator 和 crane 都是基于Scheduler Framework 进行实现的 负载感知插件
+  - 原生 Kubernetes 调度器仅基于资源的 Request 进行调度，在生产环境资源的真实使用率和申请率往往相差巨大，造成资源浪费的同时也会造成节点的负载不均衡
+  - 
+    | Feature              | crane-scheduler                                                                         | koord-scheduler                                                                     |
+    |----------------------|-----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+    | 指标收集周期            | 依赖于外置 Prometheus 的收集周期，默认为 30s（颗粒度较粗，不容易收集到突刺）                   | ds 方式的 koordlet 插件收集，相当于每个 Node 节点都有一个 Prometheus，收集周期默认为 1s |
+    | 数值类型              | avg、max                                                                               | avg、p50、p90、p95、p99                                                             |
+    | 在线离线混部          | 不支持                                                                                  | 支持在线 Pod(LSE/LSR/LS) 和离线 Pod (BE)                                            |
+    | hotValue 资源预估     | 支持                                                                                     | 支持                                                                                |
+    | 使用率 分母           | 宿主机 Total 资源（不合理）                                                              | Node allocatable（合理）                                                             |
+- 
 - [K8s 一条默认参数引起的性能问题](https://mp.weixin.qq.com/s/w6ufHeQqf4I2IygJ_yg9zg)
   - 问题
     - 接口响应超时 接口偶发性超时

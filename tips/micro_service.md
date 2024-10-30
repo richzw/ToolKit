@@ -1,14 +1,4 @@
-
-- 服务发现
-    - 服务注册是针对服务端的，服务启动后需要注册，分为几个部分：
-        - 启动注册
-        - 定时续期
-        - 退出撤销
-    - 服务发现是针对调用端的，一般分为两类问题：
-        - 存量获取
-        - 增量侦听
-        - 还有一个常见的工程问题是： 应对服务发现故障
-
+- [You Want Modules, Not Microservices](https://blogs.newardassociates.com/blog/2023/you-want-modules-not-microservices.html)
 - [Fail at Scale, Reliability in the face of rapid change](https://mp.weixin.qq.com/s/BNOr5e92atc2RZstv_afwQ) 
   - 如果大规模请求都慢了，会引起 Go GC 压力增加，最终导致服务不可用。Facebook 采了两种方法解决
     - Controlled Delay: 算法根据不同负载处理排队的请求，解决入队速率与处理请求速率不匹配问题

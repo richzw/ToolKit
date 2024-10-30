@@ -1056,7 +1056,7 @@
     - 如何解决这个问题呢，新版本使用 golang.org/x/exp/rand 包，创建了一个独立的 globalRand，不再使用全局共用的 rand.Float()
   -  ticker 的泄露
     - go 1.23.0 之前的版本，得等时间到了，对应的 ticker 才被释放，在释放前，资源会一直占用着
-- Internal Data structure
+- Go Internal Data structure
   - poolDequeue 是一个 lock-free 的数据结构, 高性能的单生产者多消费者的队列, 它是一个固定尺寸，使用 ringbuffer (环形队列) 方式实现的队列
   - PoolChain 是在 PoolDequeue 的基础上实现的一个动态尺寸的队列，它的实现和 PoolDequeue 类似，只是增加了一个 headTail 的链表，用于存储多个 PoolDequeue
     - sync.Pool中就是使用的PoolChain来实现的，它是一个单生产者多消费者的队列，可以同时有多个消费者消费数据，但是只有一个生产者生产数据
@@ -1065,7 +1065,11 @@
     - runq 是一个无锁循环队列，由数组实现，它的长度是 256，这个长度是固定的，不会动态调整
     - runqhead 和 runqtail 分别是队列的头和尾，runqhead 指向队列的头部，runqtail 指向队列的尾部。
     - runq 数组的每个元素是一个 guintptr 类型，它是一个 uintptr 类型的别名，用来存储 g 的指针
-
+  - Treap：平衡树不一定就用红黑树
+    - treap 是一棵二叉树，它同时维护二叉搜索树 （BST） 和堆的属性, 所以由此得名 (tree + heap ⇒ treap)
+    - treap 的特点是实现简单，且能基本实现随机平衡的结构。属于弱平衡树。
+    - treap 是一种在二叉树中存储键值对 (X,Y) 的数据结构，其特点是：按 X 值满足二叉搜索树的性质，同时按 Y 值满足二叉堆的性质
+    - Go 运行时 sema.go#semaRoot中，定义了一个数据结构 semaRoot Go 语言互斥锁(Mutex)底层实现中的关键数据结构，用于管理等待获取互斥锁的 goroutine 队列
 
 
 

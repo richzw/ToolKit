@@ -431,6 +431,7 @@
   - [VBASE: Unifying Online Vector Similarity Search and Relational Queries via Relaxed Monotonicity](https://www.usenix.org/conference/osdi23/presentation/zhang-qianxi)
   - [卷积神经网络（CNN）](https://mp.weixin.qq.com/s/ywQkV4VCh_30gCcdvfl1qw)
     - [Convolutional Neural Network Explainer](https://poloclub.github.io/cnn-explainer/)
+    - [playground](https://machinelearning.tobiashill.se/2019/01/28/extra-2-a-mnist-playground/)
   - [Large Language Models (in 2023)](https://mp.weixin.qq.com/s/Kwkn7H82QV7KaFma0r7SlQ)
   - [OpenAI spinning up](https://spinningup.openai.com/en/latest/index.html)
   - [DALL・E 3 ](https://cdn.openai.com/papers/dall-e-3.pdf)
@@ -453,6 +454,7 @@
     - 为了解决语言模型中的“幻觉问题”（hallucination），可以设计奖励结构，使得模型不仅仅追求回答问题的正确性，还要学会在不确定的情况下说“不知道”。
     - 弱激励学习（Weak Incentive Learning） 涌现能力（Emergent Abilities）
     - https://www.youtube.com/watch?v=kYWUEV_e2ss
+  - [How could Machine reach Human-level Intelligence](https://mp.weixin.qq.com/s/mE7vZaGKTT-i8gUFCORWIg)
 - [Prompt](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
   - `Prompt Engineering`, also known as `In-Context Prompting`, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes without updating the model weights.
   - `Instructed LM` (e.g. InstructGPT, natural instruction) finetunes a pretrained model with high-quality tuples of (task instruction, input, ground truth output) to make LM better understand user intention and follow instruction
