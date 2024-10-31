@@ -35,6 +35,9 @@
     - Holt Winter’s Exponential Smoothing (HWES)
   - 由于我们的数据中存在季节性，因此选择HWES，因为它适用于具有趋势和/或季节成分的时间序列数据。
   - 这种方法使用指数平滑来编码大量的过去的值，并使用它们来预测现在和未来的“典型”值。指数平滑指的是使用指数加权移动平均(EWMA)“平滑”一个时间序列。使用均方根误差(RMSE)作为评估模型误差的度量的实现。
+- [Time Series Embedding for Forecasting](https://zilliz.com/learn/time-series-embedding-data-analysis)
+  - how do we convert our time series data into a matrix form that is expected by our machine learning model? 
+  - There are several methods we can use, such as using lag features, window features, or adding exogenous features
 - Base model
   - LSTM擅长捕捉序列数据中的长期依赖关系，而CNN则擅长提取图像数据的局部特征。
   - 通过结合两者的优势，我们可以让模型同时考虑到数据的时序信息和空间信息，减少参数降低过拟合风险，从而提供更精确的预测、更出色的性能以及更高的训练效率。
@@ -753,6 +756,13 @@
     - o1 引入了新型的 RL Scaling law，通过树搜索结构提升了模型的可扩展性和灵活性。 -- o1 采用了类似 AlphaGo 的 MCTS 树搜索，这种策略提升了模型的可扩展性和灵活性，预示着小模型的发展潜力。
     - o1 在内容安全方面采用了不同于 GPT 4 的策略，通过增强逻辑推理能力和引入“AI 宪法”模式来提升安全性。 -- o1 在内容安全方面的能力比 GPT 4 强很多，预示着大模型安全范式的巨大变化。
     - o1 模型的训练数据可能包括人工标注的 COT 思考过程和合成数据。 -- 人工标注的 COT 数据数量有限但质量高，合成数据可以通过 MCTS 树搜索方式扩展，提高模型的训练效果。
+  - [o1背后的秘密：6种推理模式]
+    - 系统分析（SA）。从问题的整体结构开始，o1首先分析输入和输出以及约束条件，然后决定算法的选择和数据结构的使用。
+    - 方法重用（MR）。对于一些可以转化为经典问题的问题（例如最短路径或背包问题），o1可以快速重用现有方法来解决它们。
+    - 分而治之（DC）。它将复杂问题分解为子问题，并通过解决子问题来构建整体解决方案。
+    - 自我完善（SR）。o1在推理过程中评估其推理过程，以确定是否存在任何问题并纠正任何错误。
+    - 上下文识别（CI）。对于一些需要额外信息输入的数据集（例如HotpotQA），o1首先总结与查询相关的上下文的不同方面，然后给出相应查询的响应。
+    - 强调约束（EC）。对于一些对生成文本有约束的数据集（例如Collie），o1通常在推理过程中强调相应的约束。
   - [多语言向量模型的语言鸿沟（Language Gap）](https://mp.weixin.qq.com/s/ESlsTPnydjHCeQytgRdpuQ)
     - 不同语言中表达相同含义的短语，它们的向量却可能相距甚远，无法有效对齐。
     - 多语言模型的棘手挑战
@@ -1244,7 +1254,11 @@
       - Safetensors 不使用 pickle 来序列化和反序列化状态字典对象。相反，它使用自定义的序列化方法来存储模型权重
       - Hugging Face 的 Safetensors 确保你的模型权重文件只包含参数数据，而不包含其他任何内容。Safetensors 在存储和保存模型权重时仍然保持了快速零拷贝的特性
 - [Claude Artifacts](https://simonwillison.net/2024/Oct/21/claude-artifacts/)
-
+- [Github Spark](https://github.blog/news-insights/product-news/bringing-developer-choice-to-copilot/)
+  - Github Spark 和 Copilot 都将支持三种超强的代码模型：
+    - Claude 3.5，擅长整个软件开发生命周期的编码任务——从初始设计到错误修复、维护到优化。
+    - OpenAI o1 和 o1 mini，该模型的推理功能可以更深入地理解代码约束和边缘情况，从而产生高效且高质量的结果。
+    - Gemini 1.5 Pro，具有 200 万个令牌的上下文窗口，并且本身是多模式的，能够同时处理代码、图像、音频、视频和文本
 
 
 
