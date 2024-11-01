@@ -1042,6 +1042,25 @@
   - Contextual Embeddings and Contextual BM25
   - If your knowledge base is smaller than 200,000 tokens (about 500 pages of material), you can just include the entire knowledge base in the prompt that you give the mode
   - https://github.com/anthropics/anthropic-cookbook/tree/main/skills/contextual-embeddings
+    ```
+    <document> 
+    {{WHOLE_DOCUMENT}}
+    </document>
+    Here is the chunk we want to situate within the whole document
+    <chunk>
+    {{CHUNK_CONTENT}}
+    </chunk>
+    Please give a short succinct context to situate this chunk within the overall document for the purposes of improving search retrieval of the chunk. Answer only with the succinct context and nothing else.
+    ```
+  - Contextual RAG 的工作流程如下：
+    - 上下文增强：对于文档中的每个 chunk，系统会在其前面添加一段解释性的上下文片段，帮助 chunk 更好地融入整个文档的语境。这一步骤使用一个小型、高效的 LLM 来完成。
+    - 混合搜索：系统会同时使用稀疏（关键词）和密集（语义）两种方式对 chunk 进行嵌入。这就像是让 AI 同时具备了字面理解和深层含义理解的能力。
+    - 排名融合：使用递归排名融合（Reciprocal Rank Fusion，RRF）算法来合并搜索结果。这个过程就像是在多个专家意见中寻找最佳答案。
+    - 重排序：系统会检索前 150 个chunks，然后通过一个专门的重排序模型筛选出 top 20 。这一步确保了最相关的信息被推到最前面。
+  - Open Contextual RAG
+    - Contextual RAG 是一种先进的 chunk 增强技术，它巧妙地利用LLM，比如claude，为每个文档片段赋予更丰富的上下文
+    - 如果我们的大脑在回忆某件事时，不仅能想起事件本身，还能自动联想到相关的前因后果
+    - https://github.com/togethercomputer/together-cookbook/blob/main/Open_Contextual_RAG.ipynb
 - [Multimodal RAG with Milvus](https://colab.research.google.com/github/milvus-io/bootcamp/blob/master/bootcamp/tutorials/quickstart/multimodal_rag_with_milvus.ipynb)
   - [Video](https://www.youtube.com/watch?v=AImwkZYbUvE)
 

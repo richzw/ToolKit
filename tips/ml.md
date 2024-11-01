@@ -228,6 +228,7 @@
        )
        without (offset)
     ```
+    ![img.png](img.png)
 - [如何用 PPO 算法让 AI 学会玩 FlappyBird](https://mp.weixin.qq.com/s/5DYBCCU3xsmTHtN5Ciz0WA)
 - [Ray: 大模型时代的AI计算基础设施](https://mp.weixin.qq.com/s/nIi9M9aokPQ3sTIbJNGPgg)
 - [Ray 的大规模离线推理](https://mp.weixin.qq.com/s/2-jWtYcO0CVnttRrJOYcnA)
@@ -884,6 +885,9 @@
       - 种族偏见:系统在扮演不同种族背景的角色时,表现出了明显的差异。例如,扮演非裔美国人时,更容易提到与犯罪或贫困相关的话题,这反映了潜在的种族偏见。
       - 文化差异:AI 在扮演不同文化背景的角色时,展现出了对特定文化习俗和价值观的理解,但有时也会过度强调某些文化特征,导致刻板印象的产生。
       - 宗教敏感度:研究发现,AI 在处理宗教相关话题时表现得相对谨慎,但仍然存在对某些宗教群体的潜在偏见。
+  - [SimpleQA](https://openai.com/index/introducing-simpleqa/)
+    - https://github.com/openai/simple-evals/
+    - SimpleQA that measures the ability for language models to answer short, fact-seeking questions.
 - [Why you should work on AI AGENTS](https://www.youtube.com/watch?v=fqVLjtvWgq8)
 - [Sample]
   - [GPT-4 生成 Golang Worker Pool](https://mp.weixin.qq.com/s/2kmNHqZO5EdYGsOcYg4dhw)
@@ -1259,6 +1263,11 @@
     - Claude 3.5，擅长整个软件开发生命周期的编码任务——从初始设计到错误修复、维护到优化。
     - OpenAI o1 和 o1 mini，该模型的推理功能可以更深入地理解代码约束和边缘情况，从而产生高效且高质量的结果。
     - Gemini 1.5 Pro，具有 200 万个令牌的上下文窗口，并且本身是多模式的，能够同时处理代码、图像、音频、视频和文本
+- [LLM推理全阶段的JSON格式输出](https://mp.weixin.qq.com/s/MNj_EQ62UZC9SlOTtfYy4g)
+  - https://openai.com/index/introducing-structured-outputs-in-the-api/
+  - 推理“前”：Prompt Engineering
+  - 推理“中”：基于动态限制解码实现100%输出JSON
+  - 推理“后”：JSON数据后处理 JSON Repair库; 随机种子控制：可改变LLM推理的seed, 在不同的seed下输出以减少出错概率。
 
 
 
