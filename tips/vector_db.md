@@ -530,6 +530,11 @@
       - 这里面确实是有bug，不过不好复现。上次另一个用户说设置topk大于某一个值时就不报错了，他设置的topk是五百多
     - milvus单机版迁移到集群的方案（含数据迁移）
       - milvus-backup项目是做milvus数据的备份恢复的，用这个工具把单机的数据备份出来，然后把备份目录上传到集群所使用的s3 bucket里，最后再用milvus-backup工具恢复数据到该集群。
+    - [milvus-backup 工具](https://mp.weixin.qq.com/s/BWbwgBlhNajFOi2df0UaKg)
+      - 在同一个 Milvus 实例内进行备份和恢复：在同一 Milvus 实例内将 Collection 复制为一个新的 Collection。
+      - 在共用同一个 S3 Bucket 的两个 Milvus 实例之间进行备份和恢复：在使用不同根路径但使用相同 S3 Bucket 的 Milvus 实例之间迁移 Collection。
+      - 在同一个 S3 服务不同 Bucket 的两个 Milvus 实例之间进行备份和恢复：在同一 S3 服务内的不同 S3 Bucket 之间迁移 Collection。
+      - 在不同 S3 服务的两个 Milvus 实例之间进行备份和恢复：在使用不同 S3 服务的 Milvus 实例之间复制 Collection。
     - datanode写minio的速度跟不上从pulsar读取数据的速度，导致datanode的内存不断升高直到oom，怎么能控制datanode读取pulsar的速度呢
       - 一般可以通过quota反压 或者datanode加资源解决
     - 需要一个clip模型帮你做embedding，milvus只是做向量搜索。milvus是否支持通过大模型输文字到milvus里面搜索对应的图片的功能？

@@ -1,5 +1,6 @@
 - [Introduction to Retrieval Augmented Generation (RAG)](https://weaviate.io/blog/introduction-to-rag)
   - [Advanced RAG Techniques](https://weaviate.io/blog/advanced-rag)
+  - [The Ultimate Guide to RAGs — Each Component Dissected](https://towardsdatascience.com/the-ultimate-guide-to-rags-each-component-dissected-3cd51c4c0212)
 - [RAG速通](https://mp.weixin.qq.com/s/11NcuacIALFWcAtQ9rWaMA)
   - RAG优化核心策略主要基于Information Retrieval的2-stage经典思路展开：即同时保证高召回率和精度
     - 第一阶段：最大化召回率(High Recall)，同时接受较低的精度( Low Precision)。此阶段涵盖RAG的Indexing和Retrieval部分

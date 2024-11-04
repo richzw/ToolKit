@@ -964,6 +964,7 @@
       - LLM Model Serving 
       - 常规的LLM推理过程通常分为两个阶段：prefill和decode。通常会使用KV cache技术加速推理。
       - [vLLM核心技术PagedAttention原理](https://mp.weixin.qq.com/s?__biz=Mzg2NjcwNjcxNQ==&mid=2247485614&idx=1&sn=5600ea665d942b7ff290caded1e2252f&chksm=ce47fcdaf93075cc4582bfb15eb822840c332d56122df5b59bd8722426d07ac5b097cf032ba4&scene=21#wechat_redirect)
+    - [vLLM eBay推理平台的工程实践](https://mp.weixin.qq.com/s/y7OkAy-_H0J12ngexVRkvg)
     - [模型部署与推理](https://mp.weixin.qq.com/s/glPPSqHjsnDjC0DZSuuPzA)
       - 模型压缩
         - 模型压缩的方向大致分为剪枝（Pruning），知识蒸馏（Knowledge Distillation，KD），量化（Quantization），低秩分解（Low-Rank Factorization），权重共享（Weight sharing），神经网络架构搜索（NAS
