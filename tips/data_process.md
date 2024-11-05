@@ -28,5 +28,5 @@
   - 为了解决RoaringBitmap因数据连续性低而导致存储计算效率低的问题，我们围绕ClickHouse建设了一套稠密字典编码服务体系。
     - 正向查询：用原始key值查询对应的字典值value。
     - 反向查询：用字典值value查询对应的原始key。
-
+- [ClickHouse高并发写入优化](https://mp.weixin.qq.com/s/3Q-Gu_CnU3ynL7hjujkCow)
 

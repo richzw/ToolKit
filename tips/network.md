@@ -1462,6 +1462,8 @@
     - TCP Keep-Alive
       - 当 TCP 数据段大小为 0 或 1 时设置，当前序列号比预期的下一个序列号小 1 字节，并且没有设置 SYN、FIN 或 RST
     - TCP Keep-Alive 数据包 TCP Len 为 0 的场景相对来说更容易碰到。如下 TCP 流在经过 45 秒间隔
+  - Simultaneous Close
+    - TCP 四个数据包，双方向各两个数据包，FIN + ACK，而状态变化都是由 ESTABLISHED -> FIN_WAIT_1 -> CLOSING -> TIME_WAIT -> CLOSED
 - [Wireshark手册](https://www.ilikejobs.com/posts/wireshark/)
   - [Wireshark != 和 !==](https://mp.weixin.qq.com/s/yXbnCjelmdBOG1BgUFAexA)
     - 显示过滤表达式 ip.addr != 192.168.0.1 的结果显示为空，意味着没有源和目的 IP 值都不是 192.168.0.1 的数据包，也就是 all ；
@@ -1506,13 +1508,13 @@
   - 同方向之前下一个期望的 Seq Num 大于当前数据包的 Seq Num
 - netdev Linux网络开发者会议 
   - https://mp.weixin.qq.com/s/oGswwbhca6kDXzGnPF_I_Q
-- netcap netcap 可以几乎跟踪整个内核网络协议栈（有skb作为参数的函数）
+- netcap 可以几乎跟踪整个内核网络协议栈（有skb作为参数的函数）
   - https://github.com/bytedance/netcap
 - Wireshark 高级过滤技巧 x == ${x}
   - 显示过滤器表达式 tcp.stream == ${tcp.stream}
 - Wireshark 过滤只有请求没有响应的数据包
   - http.request && !http.response_in
-
+- [Linux 网络报文收发路径](https://github.com/ForceInjection/linux-from-beginner-to-master/tree/main/net)
 
 
 

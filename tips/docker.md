@@ -589,7 +589,7 @@
         && echo "Asia/Shanghai" > /etc/timezone
     - 将时区文件挂载到 Pod 中
     - 通过环境变量定义时区 TZ 环境变量用于设置时区
-- Docker镜像体积减小
+- [Docker镜像体积减小](https://mp.weixin.qq.com/s/k7B0YK905T-zYKLqVtKTFg)
   - 多层镜像构建是指在一个Dockerfile中使用多个RUN指令来构建镜像。每个RUN指令会产生一个新的镜像层，而每个镜像层都会占用额外的存储空间
     - 为了优化多层镜像构建，可以使用&&操作符将多个命令合并成一个RUN指令，避免产生额外的镜像层。同时，在一个RUN指令中执行多个命令可以减少Docker镜像的大小。
   - 有效使用缓存
@@ -611,7 +611,10 @@
       ```
     - 首次构建镜像时，Docker 会运行 npm install 安装依赖，并创建一个缓存层。
     - 在后续构建过程中，如果只有 app.js 文件发生了改变，而 package.json 文件没有变化，Docker 将会重用之前的缓存层，直接复制 app.js 到镜像中，而无需重新安装依赖，从而加快构建速度
-  - 使用多阶段构建
+  - [使用多阶段构建](https://x.com/iximiuz/status/1852436697943851322?s=46)
+    - Modern Dockerfiles can have multiple FROM instructions.
+    - Every FROM instruction starts not an image but a "stage".
+    - You can COPY files --from one stage to another.
     - ```
       # 构建阶段1
       FROM golang:1.17 AS builder
@@ -632,6 +635,7 @@
       # 容器启动时运行的命令
       CMD ["myapp"]
       ```
+    - ![img.png](docker_multistage_builds.png)
 - 容器干扰检测与治理
   - CPI
     - CPI 即 Cycle Per Instruction 的缩写，它的含义就是每指令周期数。此外，在一些场合，也可以经常看到 IPC，即 Instruction Per Cycle，含义为每周期指令数
