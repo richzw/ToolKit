@@ -530,6 +530,7 @@
       - 这里面确实是有bug，不过不好复现。上次另一个用户说设置topk大于某一个值时就不报错了，他设置的topk是五百多
     - milvus单机版迁移到集群的方案（含数据迁移）
       - milvus-backup项目是做milvus数据的备份恢复的，用这个工具把单机的数据备份出来，然后把备份目录上传到集群所使用的s3 bucket里，最后再用milvus-backup工具恢复数据到该集群。
+      - milvus-backup check命令检查下配置
     - [milvus-backup 工具](https://mp.weixin.qq.com/s/BWbwgBlhNajFOi2df0UaKg)
       - 在同一个 Milvus 实例内进行备份和恢复：在同一 Milvus 实例内将 Collection 复制为一个新的 Collection。
       - 在共用同一个 S3 Bucket 的两个 Milvus 实例之间进行备份和恢复：在使用不同根路径但使用相同 S3 Bucket 的 Milvus 实例之间迁移 Collection。

@@ -169,6 +169,12 @@
       - Late Chunking & AnthropicAI's Contextual Retrieval both tackle the 2nd, experiments show Late Chunking is resilient to messy boundaries, so no need for perfect semantic breaks.
     - Late chunking does not require additional training for embedding models and can be applied to any long-context embedding models that use mean pooling
     - [What Late Chunking Really Is & What It’s Not](https://jina.ai/news/what-late-chunking-really-is-and-what-its-not-part-ii/)
+    - [使用小型语言模型在长文档中寻找最优分隔点](https://jina.ai/news/finding-optimal-breakpoints-in-long-documents-using-small-language-models)
+      - 传统的那些分块方法，像固定 token 长度、固定句子数量，或者高级点的用正则表达式，都忽略了语义边界。结果就是，碰上主题模糊的内容，分出来的块就支离破碎，即使后来用迟分生成带上下文的向量也救不回来。
+      - 既然用了迟分，就不用太担心语义或上下文丢失的问题。边界好坏，迟分都能处理，因此文本块的可读性就成了关键
+      - simple-qwen-0.5，根据文档的结构元素进行切分，简单直接。https://huggingface.co/jinaai/text-seg-lm-qwen2-0.5b
+      - topic-qwen-0.5：灵感来自思维链 (Chain-of-Thought) 推理，它会先识别文本中的主题，再根据主题进行切分。初步测试显示，它的切分结果非常符合人类的直觉。https://huggingface.co/jinaai/text-seg-lm-qwen2-0.5b-cot-topic-chunking
+      - summary-qwen-0.5：不仅能切分文档，还能生成每个分块的摘要，在 RAG 应用中非常有用。https://huggingface.co/jinaai/text-seg-lm-qwen2-0.5b-summary-chunking
 - [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
   - Query Transformations - a set of approaches focused on modifying the user input in order to improve retrieval
     - Query expansion - decomposes the input into sub-questions, each of which is a more narrow retrieval challenge

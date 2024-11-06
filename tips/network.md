@@ -1515,8 +1515,15 @@
 - Wireshark 过滤只有请求没有响应的数据包
   - http.request && !http.response_in
 - [Linux 网络报文收发路径](https://github.com/ForceInjection/linux-from-beginner-to-master/tree/main/net)
-
-
+- [TCP半连接全连接](https://xiaodongq.github.io/2024/05/18/tcp_connect/)
+  - https://xiaodongq.github.io/images/tcp-connect-close.png
+  - ss 命令
+    -  对于 LISTEN 状态的 socket：
+      - Recv-Q：当前全连接队列的大小，即已完成三次握手等待应用程序 accept() 的 TCP 链接；
+      - Send-Q：全连接队列的最大长度，即全连接队列的大小。
+    - 对于非 LISTEN 状态的 socket：
+      - Recv-Q：已收到但未被应用程序读取的字节数；
+      - Send-Q：已发送但未收到确认的字节数。
 
 
 

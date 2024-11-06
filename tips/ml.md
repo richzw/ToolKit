@@ -1155,6 +1155,8 @@
       - 1. 使用小模型自回归的生成N个token 2. 使用大模型并行验证N个token出现的概率，接受一部分或者全部token。
       - 由于小模型推理时间远小于大模型，因此投机采样在理想的情况下能够实现数倍的推理速度提升
       - 同时，投机采样使用了特殊的采样方法，来保证投机采样获得的token分布符合原模型的分布，即使用投机采样对效果是无损的。
+  - [Latency optimization](https://platform.openai.com/docs/guides/latency-optimization?lang=python)
+    - Use Predicted Outputs
 - [Open-Source AI Cookbook](https://huggingface.co/learn/cookbook/index) 
 - AI 搜索如何提升准确度
   - 意图识别 Intent Detection - 意图识别的目的是对用户的搜索意图进行分类，路由到合适的信息源，召回更精准的参考信息。

@@ -1,4 +1,33 @@
-
+- [Go程序性能优化](https://mp.weixin.qq.com/s/wLPfiJ0wKH3DrBJS4yxeHw)
+  - pprof
+    -  CPU 分析
+      - svg 矢量图 / top / source / peek (对函数调用上下游进行分析)
+      - 在用户指定的采样周期内，profile 的会按照一定的频率进行采样，随机得到一个协程的调用栈信息；采样频率固定为100，采样间隔为1s/100=10ms
+      - 在分析时，按采样数据的调用栈进行聚合（调用栈计算 hash，hash 值相等就是相同的调用栈），某个调用栈的汇总 CPU 时间就等于该调用栈的采样次数*采样间隔
+    - allocs/heap 分析内存
+      - allocs 统计的是从程序开始以来所有内存分配的情况（即 alloc_space），而heap统计的是当前存活的对象的内存分配情况（即 inuse_space），但是实测获取的数据都是 inuse_space
+  - trace
+    - 如存在严重阻塞或者存在网络 IO 瓶颈的场景，这种因为等待而导致的性能不达标，CPU 占用和内存消耗可能都很小，pprof 分析无能为力，这时候就是 trace 工具大显身手的时候了。
+    - trace 工具可以记录 Go 程序运行时的所有事件，例如协程的创建、结束、阻塞、解除阻塞，系统调用的进入和退出，GC 开始、结束和 stopTheWorld 等等
+    - trace 会记录每个事件的纳秒级时间戳和调用栈信息
+    - View trace。
+      - 整个视图主要分为三部分，STAT 统计区域、PROCS 视图区域、选中项详情区域
+      - STATS 区域展示数据统计信息，从上到下依次是：
+        - 协程统计，统计不同状态的协程数量（蓝色为 Runnable 数量，绿色为 Running 数量）。
+        - 内存统计，统计当前分配内存大小（绿色为 NextGC 大小，红色为 Allocated 大小）。
+        - 线程统计，统计不同状态的线程数量（绿色为 InSyscall 数量，紫红色为 Running 数量）
+      - PROCS 展示了采样周期内所有处理器上的所有事件
+        - 按 s 键缩小视图可以对 GC 情况大致进行分析
+        - 按 w 键放大视图，可以对协程调度和阻塞情况进行分析
+    - Profiles。
+      - profiles 包含了四种数据类型
+      - network blocking：网络 IO 阻塞，协程阻塞在网络 IO 上的时间分析。
+      - Synchronization blocking：同步阻塞分析，协程阻塞在 waiting 状态的时间分析。
+      - Syscall blocking：系统调用阻塞，协程阻塞在系统调用上的时间分析。
+      - Scheduler latency：调度器延迟分析，协程从 runnable 状态到 running 状态花费的时间的分析。
+    - Goroutine analysis。
+      - 左侧调用栈可以查看每一个的协程及其统计数据，包括协程汇总的执行时间、网络等待时间、同步阻塞时间、调度等待时间、GC 清扫时间和 GC 总时间
+    - Minimum mutator utilization。评价 GC 的重要指标
 - [PProf 工具](https://mp.weixin.qq.com/s?__biz=MzUxMDI4MDc1NA==&mid=2247488702&idx=1&sn=b941ddb5473e8f6b85cd970e81225347&chksm=f90401e3ce7388f50f390eb4dfd887481a7866cb50011802d1916ec644c3ba5485ea0e423036&scene=178&cur_album_id=1628210764123521025#rd)
   - PProf 是用于可视化和分析性能分析数据的工具，PProf 以 profile.proto 读取分析样本的集合，并生成报告以可视化并帮助分析数据
   - 哪几种采样方式
