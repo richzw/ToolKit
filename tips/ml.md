@@ -934,6 +934,9 @@
   - [Evaluate LLMs in real time with Street Fighter](https://github.com/OpenGenerativeAI/llm-colosseum)
   - [SynthID](https://www.deepmind.com/synthid) a tool for watermarking and identifying AI-generated images
     - [人工智能水印](https://mp.weixin.qq.com/s/a7loCRioleww_X9nWeGisA)
+    - [AI 生成文本中应用不可见水印](https://mp.weixin.qq.com/s/zj5xmTB_lz7rlaNZ9IlItw)
+      - 通过使用logits 处理器为生成任务添加水印，并利用分类器检测这些水印。
+      - 使用一个伪随机函数 (g 函数) 增强任何 LLM 的生成过程。这个水印对人类来说不可见，但能被训练好的模型检测。
   - [inference]
     - Xinference（https://github.com/xorbitsai/inference） 使得本地模型部署变得非常简单。用户可以轻松地一键下载和部署内置的各种前沿开源模型
     - [LLM 推理新优化策略：使用连续批处理](https://mp.weixin.qq.com/s/iTT5jJc3tiJ_YzyPf1tFWg)

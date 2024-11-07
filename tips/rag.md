@@ -716,6 +716,10 @@
         - 向用户索取信息（黄色）；
         - 指导如何通知客户（浅蓝）。
     - 伴随着“慢思考”大模型的演进，One-Shot Agent的特征非常适合于跨平台并协作人类解答流程复杂的决策问题
+    - 当前表现最好的模型（gpt-4o）One-Shot的准确率有七成，如果我们利用Verifier将One-Shot架构转化为ReAct，凭借提示词Routine Gen的准确率有望达到90%+；
+    - 准确率超过60%的模型对知识图谱有较好的理解，而如果该指标低于50%，则不建议使用此类模型进行Routine Gen；
+    - 国产主力模型能力距gpt-4o不远（例如 glm-4-plus的准确率为～65%），市场上有望出现能够PK微软和Salesforce的纯国产的"编排型"Agent；
+    - 各个模型所犯错误较为近似，有进一步通过优化提示词工程提升准确率的空间
   - [Memory for agents](https://blog.langchain.dev/memory-for-agents/)
     - CoALA paper
     - Procedural Memory
