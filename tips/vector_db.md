@@ -635,6 +635,14 @@
     - 存储层过滤
       - 在存储层面进行优化，将过滤条件下推到存储中，尽量减少 IO 操作。对类似OLAP和OLTP的数据库而言，查询动作的底层会有很高的计算开销
 - [Vector Database vs Graph Database](https://zilliz.com/learn/vector-database-vs-graph-database)
+- [Weaviate]
+  - ACORN (ANN Constraint-Optimized Retrieval Network)  filter search
+    - improves speed and accuracy when using rule-based filtered with vector-based search by employing predicate subgraph traversal
+    - benefit those of you with very large datasets
+    - improve performance challenges with negatively correlated filtered HNSW searches
+    - Filtered search has two main drawbacks:
+      - The filter can start at the “wrong” end of the vector space, making it slow.
+      - The filter can also filter out the most relevant items to the search query. This is called negatively correlated filtered search.
 
 
 

@@ -976,6 +976,13 @@
     - 输出维度可定制: 默认输出维度为 1024，但你完全可以根据需要把它缩减到 32，性能几乎不受影响，这都归功于俄罗斯套娃表示学习技术的加持
     - 针对异构搜索、同构匹配、分类、聚类四类任务做了特别的 Adapter 设计和训练，基本上 Embedding 的使用场景都可以被划分到这四类任务上。
     - [v2 到 v3 的迁移](https://mp.weixin.qq.com/s/wdoWD_i8G095-GdU5ZSn5Q)
+  - [Matryoshka Embeddings](https://milvus.io/blog/matryoshka-embeddings-detail-at-multiple-scales)
+    - Matryoshka embeddings learn this multi-scale structure during the initial training process.
+    - The result is remarkable: not only does the full embedding capture input semantics, but each nested subset prefix (first half, first quarter, etc.) provides a coherent, if less detailed, representation.
+    - Need a quick approximate search? Use the smallest “doll.” Need maximum accuracy? Use the full embedding.
+    - funnel search approach
+      - First, we perform an initial similarity search using only the first 1/32 of the embedding dimensions, generating a broad pool of candidate items
+      - We then rerank these candidates based on their similarity to the query using the first 1/16 of the dimensions, pruning a portion of the list.
 - 15 Advanced RAG Techniques from Pre-Retrieval to Generation
   - 增加信息密度（Increase Information Density Using LLMs）
     - 利用 LLMs（大语言模型）处理、清理和标记数据，以提高信息密度，从而减少生成模型所需的上下文窗口大小，降低成本并提高响应准确性

@@ -1617,7 +1617,12 @@
     - https://www.elastic.co/guide/en/elasticsearch/reference/7.5/keyword.html
 - [Postgres 17 enhancement to nbtree's ScalaryArrayOp execution](https://www.crunchydata.com/blog/real-world-performance-gains-with-postgres-17-btree-bulk-scans)
   -  Any particular scan with multiple scalar inputs will consider all those inputs as it's traversing a B-tree, and where multiple values land on the same leaf page, they're retrieved together to avoid repetitive traversals.
-  
+- 分库分表的问题
+  - 分库分表难以解决分布式事务问题
+  - 分库分表难以实现非分片属性的索引查询能力
+  - 分库分表导致的全局主键问题 
+  - 分库分表难以建立全局唯一键约束
+  - 大量分库分表导致运维成本激增
 
 
 
