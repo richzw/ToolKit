@@ -1043,6 +1043,28 @@
   - passive rst
     - 如果从抓包上来看表现就是（如下图）rst的报文中无ack标识，而且RST的seq等于它否定的报文的ack号
     - RST的Ack号为1
+- [TCP 收发包需要注意的内核参数]
+  - 收包是指数据到达网卡并被应用程序开始处理的过程；发包则是应用程序调用发包函数到数据包从网卡发出的过程。
+    - 网卡中断过多，占用大量 CPU，影响业务性能；
+    - 应用程序调用 write() 或 send() 发送数据包却未成功；
+    - 数据包已被网卡接收但应用程序未收到； 调整缓冲区大小无效； 内核缓冲区可能已满导致丢包
+  - 数据包的发送
+    - net.ipv4.tcp_wmem
+    - sysctl net.core.wmem_max
+    - 有时应用程序会明确指定发送数据大小，可通过 setsockopt(2) 的 SO_SNDBUF 设置固定的缓冲区大小，此时 tcp_wmem 失效，缓冲区大小不再动态调整。SO_SNDBUF 的值也不能超过 net.core.wmem_max。
+    - 系统中可能有大量 TCP 连接，总内存使用受 net.ipv4.tcp_mem 控制
+    - 在 IP 层，net.ipv4.ip_local_port_range 控制本地端口范围
+    - qdisc 是 Linux 内核的流控实现，txqueuelen 是 qdisc 队列长度。队列太小可能导致丢包，可使用以下命令检查 ip -s -s link ls dev eno1
+      - 若 dropped 项不为 0，可能需增大 txqueuelen ifconfig eth0 txqueuelen 2000
+      - 默认的 qdisc 为 pfifo_fast，通常无需调整；若使用 TCP BBR 拥塞控制，需将其设置为 fq sysctl net.core.default_qdisc=fq
+  - 数据包的接收
+    -  数据包到达网卡后会触发中断（IRQ）通知 CPU 读取数据包。高性能网络场景中数据包量大，频繁中断影响性能，NAPI 机制通过轮询（poll）批量处理数据包。轮询数量受 net.core.netdev_budget 控制
+    - TCP 接收缓冲区大小由 net.ipv4.tcp_rmem 控制
+    - 默认情况下，接收缓冲区大小动态调节。tcp_moderate_rcvbuf 控制动态调节开关，通常保持打开（值为 1）
+    - 应用程序也可通过 SO_RCVBUF 设置固定的接收缓冲区大小。类似发送缓冲区，SO_RCVBUF 的值不能超过 net.core.rmem_max
+    - 只有在 tcp_moderate_rcvbuf 为 1，并且应用程序没有通过 SO_RCVBUF 来配置缓冲区大小的情况下，TCP 接收缓冲区才会动态调节
+  - Tool ``ss -tiepm4 | head``
+
 
 
 

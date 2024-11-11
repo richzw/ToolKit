@@ -83,6 +83,9 @@
         - 近邻图方法，如 [Hierarchical Navigable Small World (HNSW)](https://towardsdatascience.com/similarity-search-part-4-hierarchical-navigable-small-world-hnsw-2aad4fe87d37)
           - HNSW利用图结构，其中每个节点都是数据中的一个向量，通过一系列层次来确保快速访问。每一层都是原始数据的一个子集，上层的数据点数量比下层少。
           - HNSW 提供了查询速度和精确度之间的良好平衡，适用于大型和高维数据集。但它需要更多的内存，构建索引的过程可能较慢。
+          - M: The number of edges per element during the graph creation in each layer. A higher M value generally results in better search accuracy, but it comes at the cost of slower index-building time.
+          - efConstruction: The number of neighbors considered to find the nearest neighbor at each layer during graph creation. The more neighbors considered, the better the index quality, but the slower the index building time will be.
+          - efSearch: The number of nearest neighbors to consider during the vector search process. The higher the efSearch, the higher the recall, but the searching process will be slower.
     - 近似最近邻 (ANN)算法
   - [Comprehensive Guide To Approximate Nearest Neighbors Algorithms](https://towardsdatascience.com/comprehensive-guide-to-approximate-nearest-neighbors-algorithms-8b94f057d6b6)
     - 「LSH」（Locality-Sensitive Hashing）」它引入了一种哈希函数，使得相似的输入能以更高的概率映射到相同的桶中，其中桶的数量远小于输入的数量。

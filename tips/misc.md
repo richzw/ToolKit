@@ -249,6 +249,7 @@
     - 多线程并发：并行启动了多次同一个事件，且他们的完成时间也不固定，如同时上传了多张大小不一的封面。
     - 事件中断：前一次事件因为某些原因中断了，永远的停留在了某个节点
 - [Cursor 的进阶用法](https://x.com/xiaokedada/status/1833132309496885434?s=46)
+  - https://cursor101.com/zh
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。
