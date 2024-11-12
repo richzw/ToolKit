@@ -257,7 +257,9 @@
   - systemd-resolved 支持多种 DNS 协议，如 DNSSEC、DNS over TLS 等。
   - 它可以管理多个网络接口的 DNS 设置，适合复杂的网络环境。
 - [ELF 101](https://github.com/ForceInjection/linux-from-beginner-to-master/blob/main/elf_101.md)
-
-
+- [Cache Miss Attack]()
+  - 缓存空键
+    - 为空键设置较短的 TTL（生存时间）。通过缓存不存在或“虚拟”的键，系统可以减少攻击者检测缓存未命中所依赖的时间差异。
+  - 使用 Bloom 过滤器
 
 

@@ -1524,8 +1524,17 @@
     - 对于非 LISTEN 状态的 socket：
       - Recv-Q：已收到但未被应用程序读取的字节数；
       - Send-Q：已发送但未收到确认的字节数。
-
-
+- [跟踪内核态包接收到用户态的数据读取完整流程](https://mp.weixin.qq.com/s/ouF_C_e8g5MUri3FpWIEoQ)
+  - Go 语言网络对 raw socket 设置 cBPF 过滤器的功能
+  - Raw socket 有两种：IP 层的 raw socket 和链路层(Ethernet)的 raw socket
+    - [IP 层的 raw socket 称之为 Raw-Socket, 链路层 (Ethernet) 的 raw socket 叫做 Packet-Socket](https://0xbharath.github.io/art-of-packet-crafting-with-scapy/networking/socket_interface/index.html)
+    - Raw-Socket 能接收到 IP 层的数据，也意味着 IP Header 数据你都可以读取，发送的时候也需要手动设置 IP header
+      - Go 语言的net.ListenPacket函数可以创建一个 IP 层的 RAW-socket，然后使用WriteTo函数发送数据包
+      - Go 标准库对于 RAW-socket 这种类型的数据做了特殊的处理，你WriteTo发送的数据(上面例子中的data)不包含 IP 头部，Go 会自动帮你添加 IP 头部，所以你只需要构造 UDP 数据包即可
+      - Go 语言的扩展包golang.org/x/net/ipv4，它提供了一些接口可以让我们设置 IP 头部数据
+    - Packet-Socket 可以访问到链路层的数据，包括源目的 Mac 地址。同时也意味着发送数据的时候你也需要填空这些信息
+      - 使用 syscall 包来创建 Packet-Socket，然后使用 gopacket 库来构建数据包，最后使用 syscall 包发送数据包
+  
 
 
 
