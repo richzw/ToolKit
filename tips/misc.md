@@ -261,5 +261,8 @@
   - 缓存空键
     - 为空键设置较短的 TTL（生存时间）。通过缓存不存在或“虚拟”的键，系统可以减少攻击者检测缓存未命中所依赖的时间差异。
   - 使用 Bloom 过滤器
-
+- 用 Google 高级搜索，配合这些关键词组合
+  - site:http://reddit.com "[你的领域]" + "looking for"
+  - site:http://reddit.com "[你的领域]" + "need recommendation"
+  - 如 site:http://reddit.com "video editing" "need software"
 

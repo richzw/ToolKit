@@ -1073,6 +1073,13 @@
   - BitVec：位向量125MB存储10亿个数据
     - 位图在处理海量数据、状态标记、数据压缩、快速统计等场景中表现出色
     - cmd/compile/internal/bitvec
+  - cacheline 缓存行
+    - x86 架构中常见的 cacheline 大小是 64 字节，而 Apple M 系列等一些 ARM 架构处理器上可能达到 128 字节
+    - 伪共享 是指多个线程访问同一个 cache line 中的不同变量时，导致频繁的缓存失效（cache invalidation）
+    - 如何避免伪共享
+      - 变量对齐（Padding）：将每个变量扩展至一个完整的 cacheline，以防止多个线程访问同一个 cacheline。
+      - 运行时中的 CacheLinePad
+      - Go 的扩展库golang.org/x/sys/cpu中提供了CacheLinePad的定义，我们可以直接使用。
 
 
 

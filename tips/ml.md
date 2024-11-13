@@ -446,6 +446,9 @@
       - 他们使用了 GPT-4 来完善用户写出的简短提示；
       - 他们训练了一个 U-net 解码器，并将其蒸馏成 2 个去噪步骤；
       - 文本渲染仍然不可靠，他们认为该模型很难将单词 token 映射为图像中的字母
+    - [使用 DALL-E 给 PPT 画风格稳定的配图](https://baoyu.io/blog/dall-e-ppt-image-style-guide)
+      - 使用 DALL-E 的 GPT 而不是 GPT-4o 画图
+      - 基于同一会话保持风格一致
   - Weak-To-Strong Generalization: Eltciting Strong Capabilities With Weak Supervision
   - [负样本对大模型蒸馏的价值](https://mp.weixin.qq.com/s/KUa3Yn3DTkXaFQ2JKHvlZw)
     - 1）思维链蒸馏（Chain-of-Thought Distillation），使用 LLMs 生成的推理链训练小模型。

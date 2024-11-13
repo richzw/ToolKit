@@ -527,7 +527,14 @@
   - Overview
     - Redis主线程模型，处理请求的速度过慢（大KEY），出现了间歇性阻塞，无法及时处理正常发送的请求，导致客户端发送的请求在输入缓冲区越积越多。
     - 输入缓冲区内存随即激增。最终，redis内存被缓冲区内存（输入、输出）完全侵占
-
+- Redis的“谣言”
+  - 删除大key直接卡死Redis
+    - Redis 4.0提供了异步删除命令unlink、并针对过期、逐出、slave flush提供了异步配置
+    - Redis 6.0，支持del命令直接转unlink  lazyfree-lazy-user-del yes
+  - Redis持久化（RDB）使用fork实现，会直接卡死Redis
+    - fork确实会卡主Redis主线程 8G 90ms
+  - Redis单个key能力确实有限：有时候能到几十万，有时候就几百.
+    - redis读写分离
 
 
 
