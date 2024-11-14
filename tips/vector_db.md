@@ -376,6 +376,7 @@
     - 估算容量
       - 5百万128维，原始数据量大约是2.5g，工具估算时会乘以一个安全系数，这个系数一般是2到3之间，所以你看到的Loading Memory是5G多点
       - 工具是按cluster估的，每个节点都给了推荐，如果不算etcd/minio/plasar这些的话，milvus的节点的推荐内存配置大约总共27. 5g  etcd推荐3*4g，minio推荐2*8g，pulsar的比较多，因为它本身也是个分布式系统 所以如果500万128维的向量其实必要用cluster，一个standalone就好了
+    - https://github.com/zilliztech/vts 迁移用这个工具
   - [优化](https://zilliz.com.cn/blog/milvus-%20community-keyword)
     - 降低内存
       - 牺牲性能 - Mmap, DiskANN
