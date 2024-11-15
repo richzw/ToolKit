@@ -1080,7 +1080,8 @@
       - 变量对齐（Padding）：将每个变量扩展至一个完整的 cacheline，以防止多个线程访问同一个 cacheline。
       - 运行时中的 CacheLinePad
       - Go 的扩展库golang.org/x/sys/cpu中提供了CacheLinePad的定义，我们可以直接使用。
-
+  - HeapMap
+    - HeapMap (也叫做 PriorityMap) 是一种结合了堆和哈希映射的数据结构，常用于需要按键排序并进行高效查找的场景。
 
 
 

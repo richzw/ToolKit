@@ -1511,7 +1511,7 @@
       - 分配角色的时候其实是一个且的关系。你注入了一个信息量进去，信息熵变低了，就是他除了知道他要做什么事情以外，这时候你额外指定了一个哲学家
     - 给出示例（few-shots）
     - 思维链（Chain-of-Thought）- 让我们一步步思考（“Let’s think step by step.”）就是相当于是快思考和慢思考的那个感觉
-
+- [Think Claud](https://github.com/richards199999/Thinking-Claude/blob/main/model_instructions.md)
 
 
 

@@ -366,6 +366,15 @@
       -  Control data retrieval with FLARE
       - Refine responses with ITER-RETGEN
       - Clarify questions with ToC (Tree of Clarifications)
+  - [动态章节 RAG 系统](https://github.com/run-llama/llama_parse/blob/main/examples/advanced_rag/dynamic_section_retrieval.ipynb)
+    - 一种基于文档结构的智能检索方法，通过动态识别和提取完整章节内容，解决了传统文档分块检索造成的上下文割裂问题，实现了语义完整的知识增强生成
+    - 问题背景:
+      - 传统 RAG 系统在处理长文档时会将文档分割成小块进行检索
+      - 这种方式可能会导致检索到的内容缺乏完整上下文，因为一个完整的章节可能被分散在多个块中
+    - 解决方案:
+      - 先提取文档的章节结构(TOC)
+      - 为每个文档块标注其所属的章节信息
+      - 检索时不仅返回相关块，而是返回相关块所属的完整章节
 - [RAG 问题](https://mp.weixin.qq.com/s/2dwnwQGsqKWZQX8gEUV0Sw)
   - 朴素的RAG通常将文档分成块，嵌入它们，并检索与用户问题具有高语义相似性的块。但是，这会带来一些问题
     - 文档块可能包含降低检索效果的无关内容
