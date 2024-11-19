@@ -1092,8 +1092,17 @@
     - https://github.com/togethercomputer/together-cookbook/blob/main/Open_Contextual_RAG.ipynb
 - [Multimodal RAG with Milvus](https://colab.research.google.com/github/milvus-io/bootcamp/blob/master/bootcamp/tutorials/quickstart/multimodal_rag_with_milvus.ipynb)
   - [Video](https://www.youtube.com/watch?v=AImwkZYbUvE)
-
-
+- [RAG 存在哪些需要解决的难题](https://mp.weixin.qq.com/s/Za26pIabmREPn6u2bEkBUw)
+  -  知识分块矛盾
+    - 要想检索器检索的精准，需要小分块；
+    - 要想大模型生成时候参考得多，需要大分块；
+    - 同时，即使有overlap，但文档语义很可能恰恰在分块处隔断
+  - 知识本身缺失
+    - 答案可能存在在文档中，但不存在确切的某一分块中。从query到document本身的语义鸿沟来说，用户的问题可大可小，和沉淀的文档的语义维度不可能始终一致
+    - 一些先验的领域型知识并不在确切的分块里，但大模型没有该类领域性常识时在回答具体问题时较为困难
+  - 知识相互冲突
+    - 假设知识全都call出来，但call出来的知识本身不清晰或者是不同的文档中对相似问题的诠释不同，模棱两可的知识容易让大模型想不通以至于幻觉
+  
 
 
 

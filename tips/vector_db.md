@@ -16,6 +16,10 @@
                 - DiskANN
                     - DiskANN 依赖高性能的磁盘索引，借助 NVMe 磁盘缓存全量数据，在内存中只存储了量化后的数据。
                     - DiskANN 适用于对于查询 Recall 要求较高，QPS 不高的场景。
+                    - Vamana the algorithm behind the DiskANN
+                      - Build a random graph.
+                      - Optimize the graph, so it only connects vectors close to each other.
+                      - Modify the graph by removing some short connections and adding some long-range edges to speed up the traversal of the graph.
         - 构建索引和内存资源是否充足
             - 性能优先，选择 HNSW 索引
 - [Milvus 2.0 数据插入与持久化](https://mp.weixin.qq.com/s/D0xdD9mqDgxFvNY19hvDgQ)
