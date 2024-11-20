@@ -937,6 +937,11 @@
   - cgroups v2 added that reliable mechanism, but we didn’t default to killing every process when we switched to v2 recently as the default
 - [Node.js OOM under K8s that cgroup v2](https://github.com/nodejs/node/issues/47259)
 - [Building kubectl CLIs Like a Pro](https://iximiuz.com/en/posts/kubernetes-api-go-cli/)
+- 基于 OpenKrusieGame（OKG）在 Kubernetes 上开发和部署游戏服务器
+  - 需要根据业务状态来扩缩容——不止是副本数，也包括结束特定的 Pod。比如房间没有玩家时自动 Kill Pod；
+  - 连接是有状态的，需要始终和一开始建立连接的 Pod 通信；
+  - 平滑更新，已在服务器的玩家不受影响，下一轮匹配开始才是新版的服务器。
+  - 基于  OpenKrusie 提供的支持原地升级（InPlace Update）的增强的 Workload，提供了 GameServerSet 和 GameServer 两个 CRD， 方便游戏行业的开发者更容易在 K8s 上部署管理游戏服务器
 
 
 
