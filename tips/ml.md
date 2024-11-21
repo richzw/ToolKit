@@ -994,6 +994,16 @@
     - 三个较为流行的Inference Server -Triton Server RayLLM OpenLLM 
   - [大模型需要怎样的硬件算力](https://mp.weixin.qq.com/s/NoREsyLXNVk1aABtSkhBDA)
   - [Needle In A Haystack](https://github.com/gkamradt/LLMTest_NeedleInAHaystack)
+  - [A statistical approach to model evaluations](https://www.anthropic.com/research/statistical-approach-to-model-evals)
+    - Use the Central Limit Theorem
+      - the real object of interest should not be the observed average, but rather the theoretical average across all possible questions.
+    - Cluster standard errors
+      - clustering standard errors on the unit of randomization (for example, passage of text)
+    - Reduce variance within questions
+      -  Reducing the variance in the random component of question scores leads to a smaller standard error and increased statistical precision. Two strategies are recommended:
+        - For models using chain-of-thought reasoning, resample answers multiple times and use the question-level averages.
+        - For models with non-deterministic answers, generate and grade multiple answers per question or use next-token probabilities for multiple-choice questions.
+    - Analyze Paired Differences: Comparing eval scores of different models using paired-differences tests eliminates variance in question difficulty and focuses on response variance.
 - LLM Limitations
   - Lacking domain-specific information
     - LLMs are trained solely on data that is publicly available. Thus, they may lack knowledge of domain-specific, proprietary, or private information that is not accessible to the public.

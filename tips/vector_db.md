@@ -646,15 +646,21 @@
       - 在存储层面进行优化，将过滤条件下推到存储中，尽量减少 IO 操作。对类似OLAP和OLTP的数据库而言，查询动作的底层会有很高的计算开销
 - [Vector Database vs Graph Database](https://zilliz.com/learn/vector-database-vs-graph-database)
 - [Weaviate]
-  - ACORN (ANN Constraint-Optimized Retrieval Network)  filter search
+  - [ACORN (ANN Constraint-Optimized Retrieval Network)  filter search](https://weaviate.io/blog/speed-up-filtered-vector-search)
     - improves speed and accuracy when using rule-based filtered with vector-based search by employing predicate subgraph traversal
     - benefit those of you with very large datasets
     - improve performance challenges with negatively correlated filtered HNSW searches
     - Filtered search has two main drawbacks:
       - The filter can start at the “wrong” end of the vector space, making it slow.
       - The filter can also filter out the most relevant items to the search query. This is called negatively correlated filtered search.
-
-
+    - pre-filter or post-filter?
+      - pre-filtering determine which objects match the filter, skip the HNSW graph index, and just brute force these filtered objects
+      - post-filtering we first search for the closest vectors to our query using the HNSW graph index, and then we apply the filter.
+      - use the flatSearchCutOff param to trigger switching between the two solutions. The post-filtering solution, however, is enhanced by filtering the result set inline while searching.
+    - The Weaviate implementation of ACORN differs from that of the paper in a few ways
+      - The first important change is during building the graph. While it is true that a different pruning logic helps keep the graph connected, we decided not to modify the indexing from “vanilla” HNSW.
+      - The second important difference is how we explore the graph while querying. Weaviate's ACORN implementation conditionally evaluates whether to use the two-hop expansion.
+      - The third difference is how we seed additional entry points at layer zero of the graph to better deal with the problem of queries having low correlation to the filter.
 
 
 
