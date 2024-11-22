@@ -377,15 +377,56 @@
     - lsof +L1  
   - 磁盘空间莫名被吃？
     - tune2fs 修改预留空间的比例  tune2fs -m 1 /dev/vda1
-
-
-
-
-
-
-
-
-
+- 诊断一个耗资源的神秘进程
+  - 查看系统总体状态
+    - top 或 htop：实时查看 CPU、内存使用情况。
+    - iotop：查看 IO 使用情况（需要 root 权限）。
+    - vmstat：检查 CPU、内存、磁盘 IO 等性能指标。
+  - 找出占用资源的主要进程
+    - 使用 ps 查找占用最多资源的进程：
+      - ps aux --sort=-%cpu | head -n 10   # 按 CPU 使用排序
+      - ps aux --sort=-%mem | head -n 10   # 按内存使用排序
+    - 使用 pidstat 查看进程的 CPU、内存和 IO 使用： pidstat -p ALL 1
+    - 使用 lsof 查看特定进程打开的文件描述符 lsof -p <PID>
+  - 检查进程是否存在高 CPU 占用
+    - 使用 perf top 或 perf record（Linux）分析 CPU 热点。
+    - 使用 strace 查看进程的系统调用： strace -cp <PID>
+    - 检查是否存在线程死循环： top -H -p <PID>
+    - 查看堆栈信息： gstack <PID>  # Linux
+  - 检查内存泄漏或异常
+    - 使用 pmap 查看进程内存分布： pmap -x <PID>
+    - 使用 smem 分析进程的内存使用： smem -P <ProcessName>
+    - 检查内存增长趋势： watch -n 1 cat /proc/<PID>/status
+  - 分析 IO 使用
+    - 使用 iotop 或 iostat 查看磁盘 IO：
+      - iotop -o  # 查看 IO 活跃的进程
+      - iostat -x 1  # 查看详细的磁盘 IO 性能
+    - 使用 strace 查看进程是否频繁调用 IO 系统调用：
+      - strace -p <PID> -e trace=open,read,write,fsync
+- CPU 上下文切换之问题排查
+  - 如何统计系统范围一段时间内，上下文切换比较高的进程？ pidstat -w 1 3 通过观察 cswch/s 和 nvcswch/s 值，我们可以确定上下文切换较高的进程。
+  - 如何找出一个进程的 context switch 比较高的原因？
+    - 找出一个进程上下文切换（context switch）较高的原因需要结合上下文切换的类型、进程的行为、系统资源状况等多个方面进行分析。以下是具体的排查方法和常见原因：
+    - 判断上下文切换类型
+      - grep 'voluntary_ctxt_switches' /proc/<pid>/status  grep 'nonvoluntary_ctxt_switches' /proc/<pid>/status
+      - 分析自愿上下文切换（Voluntary Context Switch）
+        - 常见原因
+          • 频繁等待 I/O：进程正在等待磁盘或网络 I/O 完成，主动让出 CPU。
+          • 锁竞争：多线程程序中，线程因获取锁失败而主动阻塞。
+          • 资源不可用：进程等待资源（如信号、管道数据、文件描述符）可用。
+        - 排查方法
+          • 使用 strace 分析系统调用  strace c -p <pid>
+          - 使用 iotop 检查 I/O 活动： iotop -o -p <pid>
+          - 使用 perf 检查锁竞争：
+      - 分析非自愿上下文切换（Non-Voluntary Context Switch）
+        - 常见原因
+          • CPU 时间片用尽：进程运行时占用 CPU 时间片，被系统调度器强制切换。
+          • 高优先级进程抢占：系统中其他高优先级进程抢占了 CPU 资源。
+          • 核争用：在多核环境下，进程频繁被调度到不同的 CPU 核上运行。
+        - 排查方法
+          • 检查进程的 CPU 使用情况：pidstat -u 1 -p <pid>
+          - 观察系统负载： 使用 htop 或 uptime 查看是否有高负载进程导致频繁抢占
+          - 使用 perf sched 分析调度器行为：
 
 
 

@@ -1938,6 +1938,8 @@
     - Sorted Static Arrays
     - Reducing the Amount of Code With embed
       - `go:embed` 指令可以将文件嵌入到 Go 二进制文件中，这样就可以在运行时访问这些文件了 https://mp.weixin.qq.com/s/ATaMRBl44KClGK2QWqm2IQ
+      - The go:embed directive tells the Go compiler to include files and folders into the compiled binary at build time. This means your application can access these resources directly from memory without needing to read from the disk at runtime
+      - https://www.bytesizego.com/blog/go-embed 
       - Using this, it's easy to move the large static arrays out of the Go code itself and into an external file. When doing this, you will need to account for the serialization of the data itself into the external files
     - Lazy Loading Maps
       - The simplest way to accomplish this is to move the access of the map behind a function call, and to populate the map contents using a sync.Once invocation within that function

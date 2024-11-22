@@ -878,6 +878,11 @@
     - 将这些 relationships 与 query 问题组装进 prompt 内，使用 LLM 的能力对这些 relationships 进行 reranking。
     - 最后得到 topK 个重要的 relationships，在他们的 metadata 信息内获得与他们相关的 passages，作为最终的 retrieved passages。
     - https://milvus.io/docs/graph_rag_with_milvus.md
+  - [GraphRAG Agent](https://zilliz.com/blog/build-graphrag-agent-with-neo4j-and-milvus)
+    - agent follows three key concepts: routing, fallback mechanisms, and self-correction
+      - Routing – A dedicated routing mechanism decides whether to use the vector database, the knowledge graph, or a combination of both based on the query.
+      - Fallback – In situations where the initial retrieval is insufficient, the agent falls back to a web search using Tavily.
+      - Self-correction – The agent evaluates its own answers and attempts to correct hallucinations or inaccuracies.
 - 提升RAG效果的方法
   - RAPTOR https://arxiv.org/pdf/2401.18059
     - 通过递归嵌入、聚类和总结文本块，构建一个自底向上的树形结构，在推理时从这棵树中检索信息，从而在不同抽象层次上整合来自长文档的信息。
@@ -906,6 +911,11 @@
       - Agentic reasoning over complex inputs
       - Agentic decision-making and output generation
       - Towards a scalable, full-stack application
+  - [Agents](https://weaviate.io/blog/what-is-agentic-rag#what-are-agents-in-ai-systems)
+    - LLM (with a role and a task)
+    - Memory (short-term and long-term)
+    - Planning (e.g., reflection, self-critics, query routing, etc.)
+    - Tools (e.g., calculator, web search, etc.)
 - ![img.png](rag_ft.png)
 - [Musings on building a Generative AI product](https://www.linkedin.com/blog/engineering/generative-ai/musings-on-building-a-generative-ai-product)
   - the basic framework up and running:
