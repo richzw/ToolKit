@@ -1,4 +1,4 @@
-- 
+- [Graph Theory and Additive Combinatorics](https://yufeizhao.com/gtacbook/) 
 - [优化 Milvus 性能](https://mp.weixin.qq.com/s/4gDsAF4QnmXWzomrSFRLLg)
     - Milvus 是读写分离且无状态的向量数据库，状态信息储存在 etcd 中，coordinator 节点去 etcd 请求状态并修改状态
         - 当用户需要查看状态信息、清理状态信息场景时，etcd 调试工具必不可少。
@@ -80,6 +80,11 @@
             - 缺点是构建过程可能相对较慢，需要更多的内存
           - Annoy（Approximate Nearest Neighbors Oh Yeah）：Annoy是一种为大型数据集创建持久性、静态、可查询的近似最近邻索引的方法
             - 它通过构建多棵随机投影树实现。Annoy 提供了查询速度和精确度之间的良好平衡，适用于大型数据集 然而它是一个近似方法，可能不保证总是返回真正的最近邻。
+            - Annoy is a tree-based indexing algorithm that uses random projections to iteratively split the hyperspace of vectors, with the final split resulting in a binary tree
+            - Annoy uses two tricks to improve accuracy/recall 
+              - 1) traversing down both halves of a split if the query point lies close to the dividing hyperplane, and 
+              - 2) creating a forest of binary trees.
+            - Annoy is still an in-memory index
         - 哈希方法，如 Local Sensitive Hashing (LSH)
         - 矢量量化方法，如 Product Quantization (PQ)
           - PQ将大向量空间分解为更小的子空间，并为这些子空间的每一个独立地学习一组有限的“代码簿”。向量被编码为这些子空间中最近的代码簿条目的索引
@@ -143,7 +148,15 @@
     - Tree-based，是把向量根据相似度去构造成一个树的结构
     - Cluster-based，也称为 IVF（Inverted File），把向量先进行聚类处理，检索时首先计算出最近的 k 个聚类中心，再在这些聚类中心中计算出最近的 k 个向量
     - Graph-based， 把向量按照相似度构建成一个图结构，检索变成一个图遍历的过程。常用算法是HNSW
-  - ByteHouse
+  - [Vector Search Explained](https://weaviate.io/blog/vector-search-explained)
+    - Vector search is a technique for finding and retrieving similar items in large datasets by comparing their vector representations, which are numerical encodings of their features
+    - distance metrics, like cosine similarity and Euclidean distance (L2 distance).
+    - Approximate nearest neighbors (ANN)
+      - trees – e.g. ANNOY (Figure 3),
+      - proximity graphs - e.g. HNSW (Figure 4),
+      - clustering - e.g. FAISS,
+      - hashing - e.g. LSH
+    - Vector indexing libraries such as FAISS, Annoy, and ScaNN
 - [向量数据库](https://mp.weixin.qq.com/s/UCgJi7MfAnn8tAPvL3sldQ)
   - 向量检索算法
     - 基于树的方法，例如KDTree和Annoy
@@ -438,6 +451,12 @@
             - 为了规避多次随机读写磁盘数据，DiskANN 算法结合两类算法：聚类压缩算法和图结构算法
               - 一是通过压缩原始数据，仅将压缩后的码表信息和中心点映射信息放到内存中，而原始数据和构建好的图结构数据存放到磁盘中，只需在查询匹配到特定节点时到磁盘中读取
               - 二是修改向量数据和图结构的排列方式，将数据点与其邻居节点并排存放，这种方式使得一次磁盘操作即可完成节点的向量数据、邻接节点等信息的读取
+            -  Vamana, the core data structure behind DiskANN
+              - Vamana's key concept is the relative neighborhood graph (RNG)
+              - the key concept is that RNGs are constructed so that only a subset of the most relevant nearest edges are added for any single point in the graph
+              - There are two main problems with RNGs that make them still too inefficient for vector search. 
+                - The first is that constructing an RNG is prohibitively expensive  n^2
+                - The second is that setting the diameter of an RNG is difficult
           - IVF_PQ
             - 对于精确度要求不高的场景或者性能要求极高的场景。
             - IVF 参数

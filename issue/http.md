@@ -199,6 +199,15 @@
       - 如果对端程序是正常工作的。当 TCP 保活的探测报文发送给对端, 对端会正常响应，这样 TCP 保活时间会被重置，等待下一个 TCP 保活时间的到来。
       - 如果对端主机崩溃，或对端由于其他原因导致报文不可达。当 TCP 保活的探测报文发送给对端后，石沉大海，没有响应，连续几次，达到保活探测次数后，TCP 会报告该 TCP 连接已经死亡。
     - 需要通过 socket 接口设置 SO_KEEPALIVE 选项才能够生效，如果没有设置，那么就无法使用 TCP 保活机制
+  - 流程
+    - • 空闲时间检测：TCP 连接进入空闲状态超过 tcp_keepalive_time 后，开始发送探测包。
+    - • 发送探测包：每隔 tcp_keepalive_intvl 秒发送一次探测包。
+    - • 响应与失败处理：
+      - • 如果对端响应，则认为连接正常；
+      - • 如果连续发送 tcp_keepalive_probes 次探测包无响应，则认为连接已断开，关闭连接。
+  - 如何确认 TCP Keepalive 是否生效
+    - ss -4no state established | grep 2379
+    - tcpdump -i eth0 tcp port <port> and tcp[tcpflags] == tcp-ack
   - 测试
     ```shell
     > redis-cli -h 172.24.213.39 -p 6380
