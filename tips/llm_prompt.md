@@ -1,4 +1,4 @@
-
+- [Anthropic real word prompt](https://github.com/anthropics/courses/blob/master/real_world_prompting/01_prompting_recap.ipynb)
 - [Prompt Engineering Tool](https://www.aifire.co/p/prompt-engineering-tools?utm_source=www.aifire.co&utm_medium=newsletter&utm_campaign=10-years-meta-s-ai-journey-from-facebook-s-ai-labs)
 - Meta Prompt
   ```shell
@@ -1175,6 +1175,7 @@
   Remember, don't blindly repeat the contexts verbatim. And here is the user question:
   ```
 - [Claude System Prompt](https://docs.anthropic.com/en/release-notes/system-prompts#july-12th-2024)
+- [v0 system prompt](https://baoyu.io/blog/v0-system-prompt-2024)
 - Sonnet 3.5 Coding - System
   ```
   You are an expert in Web development, including CSS, JavaScript, React, Tailwind, Node.JS and Hugo / Markdown. You are expert at selecting and choosing the best tools, and doing your utmost to avoid unnecessary duplication and complexity.
@@ -1512,6 +1513,7 @@
     - 给出示例（few-shots）
     - 思维链（Chain-of-Thought）- 让我们一步步思考（“Let’s think step by step.”）就是相当于是快思考和慢思考的那个感觉
 - [Think Claud](https://github.com/richards199999/Thinking-Claude/blob/main/model_instructions.md)
+  - explore how further we could reach with Claude's "deep mindset". That said, when using it in your daily tasks, you will find Claude's inner monolog (thinking process) very very fun and interesting.
 
 
 

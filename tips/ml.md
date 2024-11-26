@@ -971,6 +971,12 @@
     - [vLLM 原理](https://mp.weixin.qq.com/s/JqubXK1VbMaShrJY20aKMg)
       - LLM Model Serving 
       - 常规的LLM推理过程通常分为两个阶段：prefill和decode。通常会使用KV cache技术加速推理。
+      - The core idea of vLLM (Virtual Large Language Model) is to optimize the serving and execution of LLMs by utilizing efficient memory management techniques.
+        - Optimized Memory Management: vLLM implements advanced memory allocation and management techniques to fully leverage available hardware resources
+        - Dynamic Batching: vLLM adapts batch sizes and sequences based on the memory and compute capabilities of the underlying hardware.
+        - Modular Design: The architecture of vLLM is modular, facilitating straightforward integration with various hardware accelerators
+        - Efficient Resource Utilization: vLLM optimizes the use of critical resources such as CPUs, GPUs, and memory
+        - Seamless Integration: Designed to integrate smoothly with existing machine learning frameworks and libraries, vLLM provides a user-friendly interface.
       - [vLLM核心技术PagedAttention原理](https://mp.weixin.qq.com/s?__biz=Mzg2NjcwNjcxNQ==&mid=2247485614&idx=1&sn=5600ea665d942b7ff290caded1e2252f&chksm=ce47fcdaf93075cc4582bfb15eb822840c332d56122df5b59bd8722426d07ac5b097cf032ba4&scene=21#wechat_redirect)
     - [vLLM eBay推理平台的工程实践](https://mp.weixin.qq.com/s/y7OkAy-_H0J12ngexVRkvg)
     - [模型部署与推理](https://mp.weixin.qq.com/s/glPPSqHjsnDjC0DZSuuPzA)

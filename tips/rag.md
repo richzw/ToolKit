@@ -694,6 +694,7 @@
     - Controllability
     - Observability
   - [RAG agent](https://talks.nerdai.io/vector-ess-oss-06-13-2024)
+    - https://github.com/milvus-io/bootcamp/blob/master/bootcamp/RAG/advanced_rag/langgraph-rag-agent-local.ipynb
   - [What is an agent](https://blog.langchain.dev/what-is-an-agent/)
     - 是一套系统
     - 这套系统决策的是应用程序的控制流
@@ -1102,6 +1103,7 @@
     - https://github.com/togethercomputer/together-cookbook/blob/main/Open_Contextual_RAG.ipynb
 - [Multimodal RAG with Milvus](https://colab.research.google.com/github/milvus-io/bootcamp/blob/master/bootcamp/tutorials/quickstart/multimodal_rag_with_milvus.ipynb)
   - [Video](https://www.youtube.com/watch?v=AImwkZYbUvE)
+  - https://zilliz.com/blog/deploy-multimodal-rag-using-vllm-and-milvus
 - [RAG 存在哪些需要解决的难题](https://mp.weixin.qq.com/s/Za26pIabmREPn6u2bEkBUw)
   - 知识分块矛盾
     - 问题Overview：

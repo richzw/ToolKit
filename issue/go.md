@@ -1082,6 +1082,12 @@
       - Go 的扩展库golang.org/x/sys/cpu中提供了CacheLinePad的定义，我们可以直接使用。
   - HeapMap
     - HeapMap (也叫做 PriorityMap) 是一种结合了堆和哈希映射的数据结构，常用于需要按键排序并进行高效查找的场景。
+  - maphash
+    - 具体都在src/runtime/asm_xxx.s文件中，比如src/runtime/asm_amd64.s文件中有memhash的实现
+    - 如果 CPU 支持 Aes 指令，它会使用 Aes 指令来实现 hash 算法，否则会使用runtime·memhashFallback纯内存算法的函数实现
+    - AES 指令集（AES-NI，Advanced Encryption Standard New Instructions）是由英特尔和 AMD 引入的一组指令，用于硬件加速 AES 加密和解密操作。AES 是对称加密标准，广泛应用于数据保护领域，如 HTTPS、VPN、磁盘加密等。
+    - 可以通过cat /proc/cpuinfo | grep -m 1 -i aes查看你的 CPU 是否支持 aes 指令
+    - 苹果电脑中可以使用sysctl -a | grep aes查看 CPU 是否支持 AES:
 
 
 
