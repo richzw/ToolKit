@@ -469,6 +469,24 @@
     - 首先Redis底层数据结构里，根据Value的不同，会进行数据结构的重新选择；
     - 可以扩展新的数据结构，进行序列化构建，然后通过 restore 一次性写入；
     - 将大 key 分拆为多个 key，设置较长的过期时间
+- [热key统计](https://mp.weixin.qq.com/s/RWQzLZq6X7B5ThaKX6U4SQ)
+  -  HotKey
+    - 访问热key的命令是时间复杂度较高的命令，会使得CPU消耗变得更加严重；或者，如果访问的热key同时也是一个大key，也可能使得访问流量达到节点所在机器带宽上限。
+  - 常见探测方法
+    - Redis-cli的hotkeys参数
+      - 通过向Redis-server节点发送scan + object freq命令以遍历的方式分析Redis实例中所有key，然后返回实例中热key信息
+      - 前提条件是需要将Redis-server的淘汰策略maxmemory-policy参数设置为LFU（volatile-lfu或allkeys-lfu）
+      - 实时性差 信息不够丰富
+    -  monitor命令统计
+      - 该命令在高并发的条件下，有内存增暴增的隐患，还会降低Redis的性能，只能紧急情况下短暂使用，不能长时间使用
+      - 对于过去已经发生的访问热key无法获取，无法应对一些瞬时的突发热key等情况。
+    - Redis节点抓包分析
+    - Client/Proxy端收集
+  - 基于Redis内核的热key统计
+    - 在Redis-server端实现，包含热key统计模块和热key通知模块两部分，另外提供热key日志记录查询与重置命令。
+    - 热key统计模块基于LRU队列实现统计key每秒内访问次数，当访问次数达到设置的热key阈值时，被判定为热key，热key加入热key队列用于提供实时查询
+    - 热key统计默认以每秒一个周期，统计每个key在每秒时间内的访问次数，当每秒访问次数达到一定的阈值（阈值大小可配置）时，认定为是热key
+    - 
 - [高性能Redis集群](https://mp.weixin.qq.com/s/5BwWCekb_wIu6LrCdmoGCQ)
   - 数据怕丢失 -> 持久化（RDB/AOF）
   - 恢复时间久 -> 主从副本（副本随时可切）
