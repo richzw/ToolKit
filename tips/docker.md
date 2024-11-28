@@ -688,7 +688,8 @@
   - 3.使用轻量的基础镜像：选择一个轻量的基础镜像作为你的镜像的基础，这样可以减少镜像的大小。
   - 4.合并镜像层：在Dockerfile中，你可以使用多个命令来合并多个操作，这样可以减少镜像的层数和大小。
   - 5.我们应该把变化最少的部分放在 Dockerfile 的前面，将经常变化的内容放在最后面，这样可以充分利用镜像缓存。
-
+- [dive](https://github.com/wagoodman/dive)
+  - A tool for exploring a docker image, layer contents, and discovering ways to shrink the size of your Docker/OCI image.
 
 
 

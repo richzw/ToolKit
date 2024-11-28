@@ -271,7 +271,7 @@
     - SNAPPY压缩测试
 - [消息队列选型 Kafka 、 RabbitMQ 、 RocketMQ](https://mp.weixin.qq.com/s/hn6VWEmuTiDvxHQ9EmbjlA)
   - MQ 消息堆积问题处理
-
+- 反压机制主要用于解决生产者速度远大于消费者速度的问题，防止内存水位迅速上升导致系统崩溃。
 
 
 

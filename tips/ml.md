@@ -1295,7 +1295,9 @@
   - 推理“前”：Prompt Engineering
   - 推理“中”：基于动态限制解码实现100%输出JSON
   - 推理“后”：JSON数据后处理 JSON Repair库; 随机种子控制：可改变LLM推理的seed, 在不同的seed下输出以减少出错概率。
-
+- [Model Context Protocol MCP](https://mp.weixin.qq.com/s/ASmcjW53HKokdYt1m-xyXA)
+  - 为数据源与 AI 系统之间的连接提供了统一标准，替代复杂的多源整合方式 https://github.com/modelcontextprotocol
+  - 
 
 
 

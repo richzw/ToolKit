@@ -29,4 +29,11 @@
     - 正向查询：用原始key值查询对应的字典值value。
     - 反向查询：用字典值value查询对应的原始key。
 - [ClickHouse高并发写入优化](https://mp.weixin.qq.com/s/3Q-Gu_CnU3ynL7hjujkCow)
-
+- [StarRocks存算分离](https://mp.weixin.qq.com/s/9fvVtInwiR93GGVR8yarLA)
+  - Clickhouse在大数据量下的困境
+    - 物化视图缺乏透明改写能力
+    - 缺乏离线导入功能
+    - 扩容困难
+  - 基于StarRocks降本增效
+    - 存算分离带来成本下降
+    - 在复杂SQL join能力上大幅领先Clickhouse
