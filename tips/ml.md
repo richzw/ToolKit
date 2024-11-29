@@ -1297,8 +1297,15 @@
   - 推理“后”：JSON数据后处理 JSON Repair库; 随机种子控制：可改变LLM推理的seed, 在不同的seed下输出以减少出错概率。
 - [Model Context Protocol MCP](https://mp.weixin.qq.com/s/ASmcjW53HKokdYt1m-xyXA)
   - 为数据源与 AI 系统之间的连接提供了统一标准，替代复杂的多源整合方式 https://github.com/modelcontextprotocol
-  - 
-
+  - Samples  https://github.com/modelcontextprotocol/servers  
+- [文本水印](https://mp.weixin.qq.com/s/xH4ySZsr0A6I2H6yzdm9TQ)
+  - https://colab.research.google.com/drive/1sbIdU2tr-18sAtLvVVyhYtrIw2Cgjp8F
+  - 利用了 Jina Embeddings v3 模型的独特优势 —— 长文本处理和跨语言对齐 既能给文本加上水印，又能检测出文本水印
+  - 文本水印是在 语义空间(Semantic Space)  里进行操作，对内容进行细微修改。所以，有效的文本水印必须要满足以下几个关键要求：
+    - 保持原义：带水印的文本必须与原文意思一致，且可读性不能打折扣，就像图像水印不能遮挡图像的关键元素。
+    - 难以察觉：水印对普通读者应该是不可见的，以防止在文本转写(比如修改或翻译)过程中被故意保留或移除。
+    - 机器可读：水印对机器来说必须得清晰可见，所以它需要创建清晰可测量的模式，让算法能够可靠地识别。
+    - 稳定可靠：水印必须足够稳定，能够抵御各种文本修改，例如改写、翻译，无论修改者是否知道水印的存在。当文本被改得面目全非，原来的意思和结构都完全变了，水印才可能失效。
 
 
 
