@@ -690,7 +690,9 @@
   - 5.我们应该把变化最少的部分放在 Dockerfile 的前面，将经常变化的内容放在最后面，这样可以充分利用镜像缓存。
 - [dive](https://github.com/wagoodman/dive)
   - A tool for exploring a docker image, layer contents, and discovering ways to shrink the size of your Docker/OCI image.
-
+- Can you send a signal to a pod that has *no shell* and *no permissions* to spin up privileged ephemeral containers
+  - https://labs.iximiuz.com/challenges/kubernetes-signal-non-root-container
+  - kubectl exec my-app-pod -c [container-name] --signal=SIGTERM --
 
 
 

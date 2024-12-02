@@ -364,6 +364,9 @@
     - Knowhere 属于开源，其部署环境更多样，可在所有主机类型上运行
     - Knowhere 依赖于 OSS 库（如 Faiss、DiskANN 和 hnswlib）
     - milvus的ivfsq8，实际用的就是faiss的IndexIvfScalarQuantizer
+    - [HNSWlib](https://zilliz.com/learn/learn-hnswlib-graph-based-library-for-fast-anns)
+      - HNSWlib is a library for vector search. It implements the HNSW algorithm, which creates a hierarchical graph structure for efficient similarity search in high-dimensional spaces.
+      - 
   - [多租户](https://mp.weixin.qq.com/s/3QV7xjJ4G7MUxKOb0T427Q)
     - to B 大型知识库系统中，我们一般为每个租户提供一到多个 Database，以满足数据规模及知识库构建灵活度的需要
     -  to C 对话上下文的数据隔离，一般会选择在 Colletion，或 Partition Key 这两层实现。Partition Key 是逻辑上的表内隔离,  Partition Key 理解为一个 Hash 分桶的过程
