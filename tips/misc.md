@@ -135,6 +135,7 @@
   - 比较合理的 QPS 范围
     - 带了数据库的服务一般写性能在 5k 以下，读性能一般在 10k 以下，能到 10k 以上的话，那很可能是在数据库前面加了层缓存
 - [C++常见避坑指南](https://mp.weixin.qq.com/s/ivmOl-qGALnHEVbwKANiug)
+  - [C++11 21-统一的内存模型 Unified memory model](https://mp.weixin.qq.com/s/2SxzphrNLPp6wc1AqpML2A)
 - [Clickhouse 构建新一代日志存储系统](https://mp.weixin.qq.com/s/7zUYmQ2jjPNTjTKqnPcRcg)
   - 大数据量：CK 的分布式架构支持动态扩缩容，可支撑海量数据存储。
   - 写入性能：CK 的 MergeTree 表的写入速度在200MB/s，具有很高吞吐，写入基本没有瓶颈。

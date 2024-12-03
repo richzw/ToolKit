@@ -1321,6 +1321,7 @@
   - https://mp.weixin.qq.com/s/DKaoP6Vrhhm243-jOeyiyg
 - [RDMA](http://reports.ias.ac.in/report/12829/understanding-the-concepts-and-mechanisms-of-rdma)
   - RDMA（ Remote Direct Memory Access ）意为远程直接地址访问，通过RDMA，本端节点可以“直接”访问远端节点的内存 [1](https://mp.weixin.qq.com/s/u6O7BgzDlO9_FihRgXr8EA)
+  - [常见术语](https://mp.weixin.qq.com/s/rsujnVsbVFWOiauLCpnSyA?poc_token=HNlqTGejvjhFmhrV0wgU1TENTJe_ENIFXIxGed5k)
   - RDMA 直接将服务器应用数据从内存传输到智能网卡 (INIC)（通过稳固的 RDMA 协议），再由 INIC 硬件完成 RDMA 传输报文的封装工作，从而解放了操作系统和 CPU
   - 把本端内存中的一段数据，复制到对端内存中，在使用了RDMA技术时，两端的CPU几乎不用参与数据传输过程（只参与控制面），数据传输的过程完全由RDMA适配器完成
   - RDMA的优势
@@ -1346,6 +1347,12 @@
     - 传输层采用 iWARP 协议。
     - iWARP 是在以太网 TCP/IP 协议栈的 TCP 层上实现的，支持在第二层和第三层网络中传输。然而，由于在大规模网络上建立和维护 TCP 连接会消耗大量的 CPU 资源，这在一定程度上限制了 iWARP 的应用范围。
     - iWARP 仅需网络适配器支持 RDMA，无需专用的交换机和路由器，其建设成本介于 InfiniBand 和 RoCE 之间。
+  - [交换参数](https://mp.weixin.qq.com/s/l7i3YJn-_Un0s5hiU-E2jA)
+    - 在使用 RDMA（Remote Direct Memory Access）进行通信时，交换参数是建立高效通信的关键步骤。这些参数包括队列对（QP，Queue Pair）的标识符、内存密钥、网络地址等。
+    -  静态配置（Static Configuration）
+    - 通过 TCP/IP 进行参数交换
+    - 通过分布式服务（如 etcd 或 Consul）进行参数存储与共享
+    - 使用 IPoIB（IP over InfiniBand）作为辅助通道
 - [TCP 协议]()
   - 计算机网络是不可靠的，存在 丢包、乱序、延时 。
   - 可靠传输的基础机制

@@ -664,6 +664,8 @@
     - Prompt Tuning是通过设计合适的Prompt来对模型进行微调，以使其更好地适应特定的任务或应用场景。提示是一些关键词或短语，可以帮助模型理解任务的要求和期望输出的格式。
   - Low-Rank Adaptation（LoRA）
     - LoRA是通过将预训练模型分解成低秩矩阵来进行微调，以提高模型的效率和泛化能力。该技术可以减少预训练模型的参数数量，同时保留模型的表示能力，从而提高模型的适应性和泛化能力。
+    - LoRA Explained: Low-Rank Adaptation for Fine-Tuning LLMs
+      - https://zilliz.com/learn/lora-explained-low-rank-adaptation-for-fine-tuning-llms
 - LLM Apps
   - ![img.png](ml_embedding_search.png)
   - [Generative Agents: Interactive Simulacra of Human Behavior](https://github.com/joonspk-research/generative_agents)
