@@ -1088,8 +1088,9 @@
     - AES 指令集（AES-NI，Advanced Encryption Standard New Instructions）是由英特尔和 AMD 引入的一组指令，用于硬件加速 AES 加密和解密操作。AES 是对称加密标准，广泛应用于数据保护领域，如 HTTPS、VPN、磁盘加密等。
     - 可以通过cat /proc/cpuinfo | grep -m 1 -i aes查看你的 CPU 是否支持 aes 指令
     - 苹果电脑中可以使用sysctl -a | grep aes查看 CPU 是否支持 AES:
-
-
+- [S3 log](https://avi.im/blag/2024/s3-log/)
+  - https://github.com/avinassh/s3-log
+- [Go在十亿次循环和百万任务中表现不如Java](https://mp.weixin.qq.com/s/hTQiEmf3ztRS-77fBET91A)
 
 
 

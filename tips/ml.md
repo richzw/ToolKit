@@ -463,6 +463,7 @@
     - 弱激励学习（Weak Incentive Learning） 涌现能力（Emergent Abilities）
     - https://www.youtube.com/watch?v=kYWUEV_e2ss
   - [How could Machine reach Human-level Intelligence](https://mp.weixin.qq.com/s/mE7vZaGKTT-i8gUFCORWIg)
+  - [Reward Hacking in Reinforcement Learning](https://lilianweng.github.io/posts/2024-11-28-reward-hacking/)
 - [Prompt](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
   - `Prompt Engineering`, also known as `In-Context Prompting`, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes without updating the model weights.
   - `Instructed LM` (e.g. InstructGPT, natural instruction) finetunes a pretrained model with high-quality tuples of (task instruction, input, ground truth output) to make LM better understand user intention and follow instruction

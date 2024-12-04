@@ -103,6 +103,7 @@
       - HNSW构建这些小世界图的层次结构，其中底层结构包含实际数据。中间的层创建快捷方式以加快搜索速度。执行搜索时，HNSW从顶层的随机节点开始，导航至目标。当它无法靠近时，它会向下移动到下一层，直到到达最底层。上层中的每个移动都可能覆盖数据空间中的很长一段距离，而下层中的每个移动都可以细化搜索质量。
     - 「FAISS（facebook AI Similarity Search）」它运行的假设是：高维空间中节点之间的距离服从高斯分布，因此这些数据点之间存在着聚类点。faiss通过将向量空间划分为簇，然后在簇内使用用向量量化。faiss首先使用粗粒度量化方法来查找候选簇，然后进一步使用更精细的量化方法来查找每个簇。
       - [上手Faiss](https://mp.weixin.qq.com/s/GxxPqa1pjDvt9PvAMuebkA)
+      - [Faiss: The Missing Manual](https://www.pinecone.io/learn/series/faiss/)
     - 「ScaNN（Scalable Nearest Neighbors）」的主要创新在于各向异性向量量化。它将数据点量化为一个向量，使得它们的内积与原始距离尽可能相似，而不是选择最接近的量化质心点。
       - [blog](https://blog.research.google/2020/07/announcing-scann-efficient-vector.html) [Vector Search ANN 服务](https://cloud.google.com/vertex-ai/docs/matching-engine/ann-service-overview?hl=zh-cn)
       - ScaNN 算法的核心思想是使用一种称为 Product Quantization（PQ）的技术将高维向量压缩成多个低维向量，并使用这些低维向量进行相似性搜索。PQ 技术可以将高维向量划分成多个子向量，并对每个子向量进行量化，从而将高维向量压缩成多个低维向量。这样可以大大降低相似性搜索的计算复杂度，提高搜索效率。
@@ -572,6 +573,8 @@
     - datanode写minio的速度跟不上从pulsar读取数据的速度，导致datanode的内存不断升高直到oom，怎么能控制datanode读取pulsar的速度呢
       - 一般可以通过quota反压 或者datanode加资源解决
     - 需要一个clip模型帮你做embedding，milvus只是做向量搜索。milvus是否支持通过大模型输文字到milvus里面搜索对应的图片的功能？
+    - milvus有没有关于向量数据的插入性能测试，先创建索引在插入？
+      - 插入的负载主要会在proxy，datanode和MQ，如果是先建索引和load再做插入的话，indexnode建索引的快慢也会影响growing segment的数量，进而影响datanode的负载然后影响插入的性能；我们测试过插入吞吐200+MB/s的场景，理论上还可以更高
     - 搜索结果不全，有可能是以下两种情况：
       - 一种是刚insert的数据不一定能搜出来，把search的consistency_level参数设为Strong，能保证该时间点之前的数据都能搜出来，但latency会增加几百毫秒。
       - 另一种是带索引加过滤条件，因为索引只搜一小块数据，加了过滤之后，那一小块里面有可能被过滤掉很多，导致结果不足。你把索引换成FLAT，也就是暴搜，就可以搜到。
