@@ -579,6 +579,19 @@
       - 一种是刚insert的数据不一定能搜出来，把search的consistency_level参数设为Strong，能保证该时间点之前的数据都能搜出来，但latency会增加几百毫秒。
       - 另一种是带索引加过滤条件，因为索引只搜一小块数据，加了过滤之后，那一小块里面有可能被过滤掉很多，导致结果不足。你把索引换成FLAT，也就是暴搜，就可以搜到。
     - [Milvus源码开发](https://mp.weixin.qq.com/s/kKmcVciEf_WcuiGwYzYMxg)
+    - [How does Milvus GPU work](https://github.com/milvus-io/milvus/discussions/36328)
+      - milvus loads GPU index into GPU RAM. If the GPU RAM is insufficient, you will get an error about load failure.
+      - When you call search(), the request's vector is copied into GPU RAM to compute, then result is copied from GPU RAM to CPU RAM, and returned to the client. So, there is an extra cost for copying data between GPU RAM and CPU RAM.
+      - GPU is faster than CPU for large number of parallel tasks. So, GPU index is suitable for large NQ search, NQ is the number of vectors you input to search().
+    - [the difference between SPARSE_INVERTED_INDEX and SPARSE_WAND](https://github.com/milvus-io/milvus/discussions/34806)
+      - SPARSE_INVERTED_INDEX is the plain old inverted index: for each dimension, maintain a list of doc ids that is not zero in this dimension; at search time, only compute scores of docs in merged lists of the query's non zero dimensions.
+      - SPARSE_WAND is similar to SPARSE_INVERTED_INDEX in that they both have the same inverted index, but SPARSE_WAND maintains more metadata in the index to allow the utilization of the WAND algorithm to greatly reduce the number of docs that needs to be evaluated. 
+      - The choice between SPARSE_WAND and SPARSE_INVERTED_INDEX mostly depends on the density(average number of non zeros / total number of possible dimensions) of the dataset and the queries. 
+        - In most cases SPARSE_WAND should be much faster than SPARSE_INVERTED_INDEX, especially for doc embeddings with higher density and datasets with tons of docs. 
+        - But SPARSE_WAND's performance downgrades fast as the dimensions of the query increases: every time when we see slower WAND, we see long queries with small drop_ratio_search.
+      - The default value for drop_ratio_build/search is 0. With this setting both indexes yield 100% recall rate. And the same drop_ratio_build/search yields the same recall rate on SPARSE_WAND/SPARSE_INVERTED_INDEX.
+      - suggest to start from drop_ratio_build=0.3 and drop_ratio_search=0.6 and see if that meets your recall requirement, and adjust as needed. 
+      - Also I suggest to adjust drop_ratio_search more aggressively if it's ok to sacrifice recall a little for a huge performance improvement
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。

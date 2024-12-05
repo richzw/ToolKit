@@ -1301,6 +1301,7 @@
 - [Model Context Protocol MCP](https://mp.weixin.qq.com/s/ASmcjW53HKokdYt1m-xyXA)
   - 为数据源与 AI 系统之间的连接提供了统一标准，替代复杂的多源整合方式 https://github.com/modelcontextprotocol
   - Samples  https://github.com/modelcontextprotocol/servers  
+  - [summarize your chat messages](https://github.com/mcpservers/mcp-server-chatsum)
 - [文本水印](https://mp.weixin.qq.com/s/xH4ySZsr0A6I2H6yzdm9TQ)
   - https://colab.research.google.com/drive/1sbIdU2tr-18sAtLvVVyhYtrIw2Cgjp8F
   - 利用了 Jina Embeddings v3 模型的独特优势 —— 长文本处理和跨语言对齐 既能给文本加上水印，又能检测出文本水印

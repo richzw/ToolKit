@@ -1091,7 +1091,13 @@
 - [S3 log](https://avi.im/blag/2024/s3-log/)
   - https://github.com/avinassh/s3-log
 - [Go在十亿次循环和百万任务中表现不如Java](https://mp.weixin.qq.com/s/hTQiEmf3ztRS-77fBET91A)
-
+  - 10 亿迭代测试编程语言的性能中，Go 代码不公平，修改和 C、Rust、Zig 性能相差无几
+  - 百万并发测试编程语言的内存占用中, goroutine 确实内存占用较大，针对这个场景不是太好解。
+  - DIff
+    - C 语言的数组元素类int32_t, 每个元素四个字节
+    - Rust 语言的数组元素类型也是u32类型，每个元素四个字节
+    - Go 语言的数组元素类型是int, 在 64 位操作系统下是int64, 8 个字节
+    - 假定你的 cacheline 的大小是 64 字节， C 语言和 Rust 语言一次可以加载 16 个元素，而 Go 语言一次加载 8 个元素
 
 
 
