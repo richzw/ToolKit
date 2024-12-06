@@ -14,6 +14,7 @@
   - [Tools](https://www.thinkwithgoogle.com/tools/)
     - Find my audience
 - [Node.js Addon](https://mp.weixin.qq.com/s/6Qm5DpNWEyCBkI9Fh_Z0CA)
+- [P 和 NP](http://www.matrix67.com/blog/archives/7084#more-7084)
 - [搜索引擎]
   - 多模态语义理解技术在用户意图分析、向量召回、倒排召回以及相关性排序四个方面的业务实践。
   - 短文本理解是用户意图分析的主要手段
@@ -275,3 +276,5 @@
   - site:http://reddit.com "[你的领域]" + "need recommendation"
   - 如 site:http://reddit.com "video editing" "need software"
 - [https://whoismaking.money/]
+- Telegram 的密聊（Secret Chat）使用端到端加密 (E2EE) 来保护消息的隐私
+  - 这种加密确保消息内容只能由参与密聊的两方解密，即使是 Telegram 服务器也无法读取内容

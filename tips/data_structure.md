@@ -73,6 +73,7 @@
   - [Serialized Roaring Bitmaps](https://github.com/dgraph-io/sroar)
     - Sroar operates on 64-bit integers and uses a single byte slice to store all the keys and containers. This byte slice can then be stored on disk, operated on directly in memory, or transmitted over the wire. There’s no encoding/decoding step required. For all practical purposes, sroar can be treated just like a byte slice.
 - [When Bloom filters don't bloom](https://blog.cloudflare.com/when-bloom-filters-dont-bloom/)
+- [The Beautiful Math of Bloom Filters](https://nyadgar.com/posts/the-beautiful-math-of-bloom-filters/)
 - [布谷鸟过滤器](https://juejin.cn/post/6844903861749055502)
   - 布隆过滤器有以下不足：查询性能弱(布隆过滤器存储空间和插入/查询时间都是O(k))、空间利用效率低、不支持反向操作（删除）以及不支持计数
     - 查询性能弱是因为布隆过滤器需要使用多个 hash 函数探测位图中多个不同的位点，这些位点在内存上跨度很大，会导致 CPU 缓存行命中率低。

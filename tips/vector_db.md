@@ -411,6 +411,7 @@
     - 这个设置成主键之后，为什么还可以继续重复插入相同的值？
       - Milvus 用 insert 接口做数据插入时，不会做主键去重，如果希望主键去重，可以使用 upsert 接口
       - 但是，由于 upsert 内部多做了一次 query 操作，插入性能会比 insert 更差
+    - Support partial upsert feature https://github.com/milvus-io/milvus/issues/29735
     - 半数使用问题是配置问题
       - 怎么调？ https://mp.weixin.qq.com/s?__biz=MzUzMDI5OTA5NQ==&mid=2247496778&idx=1&sn=018256ae415356e3ed357ee473dc1627&chksm=fa5155f2cd26dce4095b57fa4eb5c7e67e9eb49ed2762ce618e1134bb33022049e75c25e49ab&scene=21#wechat_redirect
       - Milvus 从 2.3.0 版本开始，就开始支持动态调整参数，具体操作方法参考：https://milvus.io/docs/dynamic_config.md
@@ -663,7 +664,7 @@
       - Hashing-based methods utilize locality-sensitive hashing (LSH) or random projections to directly map high-dimensional input data to binary codes
       - Deep learning architectures, such as deep belief networks (DBNs) and restricted Boltzmann machines (RBMs), generate binary embeddings as part of their output
       - Quantization-based techniques convert continuous-valued embeddings into binary representations.
-    
+  - [Vector Visualization](https://milvus.io/docs/vector_visualization.md)
 - VectorDB challenge
   - 工程
     - 向量索引的 合并、拆分 - small index merge into large index

@@ -116,6 +116,9 @@
         - Multiple Reactors 模式通常也可以等同于 Master-Workers 模式，比如 Nginx 和 Memcached 等就是采用这种多线程模型，虽然不同的项目实现细节略有区别，但总体来说模式是一致的。
       - ![img.png](redis_io_multiple_thread_model.png)
       - 这里大部分逻辑和之前的单线程模型是一致的，变动的地方仅仅是把读取客户端请求命令和回写响应数据的逻辑异步化了，交给 I/O 线程去完成，这里需要特别注意的一点是：I/O 线程仅仅是读取和解析客户端命令而不会真正去执行命令，客户端命令的执行最终还是要回到主线程上完成。
+      - 使用 I/O 线程实现网络 I/O 多线程化，I/O 线程只负责网络 I/O 和命令解析，不执行客户端命令。
+      - 利用原子操作+交错访问实现无锁的多线程模型。
+      - 通过设置 CPU 亲和性，隔离主进程和其他子进程，让多线程网络模型能发挥最大的性能。
 - [Redis 的大 Key 对持久化有什么影响](https://mp.weixin.qq.com/s/_vIYdzh3dA1kjw4IgMsnPA)
   - 大 Key 对 AOF 日志的影响
     - Redis 提供了 3 种 AOF 日志写回硬盘的策略: Always/EverySec/NO - 这三种策略只是在控制 fsync() 函数的调用时机

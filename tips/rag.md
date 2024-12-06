@@ -829,8 +829,24 @@
     - Changing the LLM
   - Chunk size: 512 Chunk overlap: 64  Number of docs retrieved (Retrieval Window): 5
 - Graph RAG
-  - rag 挑战：细粒度检索，全局上下文，语义相似度，分层摘要
-    - 图索引vs知识图谱 
+  - [Overview](https://mp.weixin.qq.com/s/GWRMF7gR9O9zp57_u1ooMQ)
+    - RAG 
+      - 索引层面的技术包括 Chunk and Embedding / BM25、生成 QA 对、分层块摘要等，
+      - 查询层面的技术包括 Vector / Hybrid Search、Rewrite Query、递归搜索 / 复合搜索、Agentic、重排等。
+    - RAG 面对如下一些挑战
+      - 细粒度检索：碎片化知识的召回
+        - 大海捞针（Needle in Haystack）：
+          - 分割内容可能会使检索细粒度、分散的知识变得具有挑战
+          - 分区可能会在多个片段中稀释关键信息，使其更难捕获完整的上下文。
+      - 全局上下文：丢失链接
+        - 穿针引线（Connecting the Dots），这个挑战的关键点在于：
+          - 线性分割大块知识可能会导致丢失全局上下文 / 连接； 面向连接的检索在上下文分散在多来源（不具有局部性）时可能有挑战。
+      - 语义相似度：相关性错配
+        - 基础模型通常依赖于常识或字面意义，导致相关性（相关性幻觉）的错误正例；
+        - 高相似度（例如，95%）并不保证相关性；上下文无关的片段可能看起来非常相似（例如，虚构的食谱或不存在的情节）
+      - 分层摘要：宏观问题挑战
+        - 难以从多个来源的分散信息中回答广泛、全局的问题；
+        - 需要从整个数据集中总体获得洞察，而不是某几个孤立的片段
     - retrieve方法：子图搜索，路径搜索
     - chain of exploration，对于问题分类 全局问题or局部问题
     - 高效构建graph？
