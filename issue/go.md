@@ -1098,7 +1098,11 @@
     - Rust 语言的数组元素类型也是u32类型，每个元素四个字节
     - Go 语言的数组元素类型是int, 在 64 位操作系统下是int64, 8 个字节
     - 假定你的 cacheline 的大小是 64 字节， C 语言和 Rust 语言一次可以加载 16 个元素，而 Go 语言一次加载 8 个元素
-
+- [在 Go 中如果获取 goroutine 的 id](https://mp.weixin.qq.com/s/b_SB1-GbUf-4bL9vZcPgtg)
+  - 获取当前进程的 id 
+    - 启动 Go 程序还是会有一个进程存在的，Go 标准库提供了 os.Getpid 函数，可以方便的获取当前进程的 id
+  - 使用 runtime 包获取 goroutine id
+    - 虽然不能直接获取每个 goroutine 的 id，但我们可以变相的通过 runtime.Stack 函数来获取。
 
 
 

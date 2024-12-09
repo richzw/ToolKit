@@ -175,6 +175,33 @@
       - simple-qwen-0.5，根据文档的结构元素进行切分，简单直接。https://huggingface.co/jinaai/text-seg-lm-qwen2-0.5b
       - topic-qwen-0.5：灵感来自思维链 (Chain-of-Thought) 推理，它会先识别文本中的主题，再根据主题进行切分。初步测试显示，它的切分结果非常符合人类的直觉。https://huggingface.co/jinaai/text-seg-lm-qwen2-0.5b-cot-topic-chunking
       - summary-qwen-0.5：不仅能切分文档，还能生成每个分块的摘要，在 RAG 应用中非常有用。https://huggingface.co/jinaai/text-seg-lm-qwen2-0.5b-summary-chunking
+    - [长文本模型已全能，我们还需要分块处理吗？](https://jina.ai/news/still-need-chunking-when-long-context-models-can-do-it-all/)
+      - 长文本 Embeddings 的问题
+        - 表示稀释：虽然文本中的所有主题可能相关，但用户的搜索查询可能只与其中一个相关。然而，单个 embedding（在这种情况下是整篇博文的 embedding）仅是向量空间中的一个点。随着更多文本输入到模型中，embedding 会转向捕捉文章的整体主题，在表示特定段落内容时效果下降。
+        - 有限容量：Embedding 模型生成固定大小的向量，与输入长度无关。随着输入内容的增加，模型越来越难以在向量中表示所有这些信息。
+        - 信息丢失：在某些情况下，即使是长文本 embedding 模型也会达到其限制；许多模型支持最多 8,192 个 token 的文本编码。更长的文档在 embedding 之前需要被截断，导致信息丢失
+      - 文本分段以提升检索性能
+        - • 分段：在输入文本中检测边界标记，例如句子或固定数量的 token。
+        - • 朴素分块：在编码之前，根据分段标记将文本分成块。
+          - 虽然朴素分块解决了长上下文 embedding 模型的一些限制，但它也有其缺点：
+            - 丢失全局视角：在文档检索中，多个小块的 embedding 可能无法捕捉文档的整体主题。这就像只见树木不见森林。
+            - 缺失上下文问题：由于缺少上下文信息，无法准确理解块的内容。
+            - 效率：更多的块需要更多存储空间并增加检索时间。
+        - • 后期分块：先编码文档，然后再进行分段（保留块之间的上下文）。
+          - 后期分块解决了上下文问题
+            - 后期分块分两个主要步骤工作：
+              - 首先，利用模型的长上下文能力将整个文档编码为 token embedding。这保留了文档的完整上下文。
+              - 然后，通过对特定 token embedding 序列进行平均池化来创建块 embedding，这些序列对应于分割过程中识别的边界标记。
+      - 朴素分块：将文档分割成小块，然后分别对每个块进行编码。
+      - 后期分块：一次性对整个文档进行编码以创建 token embedding，然后基于段落边界对 token embedding 进行池化以创建块 embedding。
+      - 长文本后期分块：将大型文档分割成适合模型上下文窗口的重叠宏块，对这些块进行编码获取 token embedding，然后正常应用后期分块。
+      - 何时应该使用长上下文嵌入？
+        - 一般来说，在嵌入模型的输入中包含尽可能多的文档文本不会损害检索准确性。然而，长上下文嵌入模型往往关注文档开头，因为它们包含标题和介绍等对判断相关性更重要的内容，但模型可能会忽略文档中间的内容。
+      - 何时应该使用简单分块？
+        - 当文档涵盖多个方面，或用户查询针对文档中的特定信息时，分块通常可以提高检索性能。
+        - 最终，分段决策取决于各种因素，比如是否需要向用户显示部分文本（例如 Google 在搜索结果预览中展示相关段落），这使得分段成为必需，或者计算和内存的限制，由于增加了检索开销和资源使用，分段可能较不利。
+      - 何时应该使用后分块？
+        - 通过在创建分块之前编码完整文档，后分块解决了由于缺少上下文导致文本段落失去意义的问题。这在连贯的文档中特别有效，因为每个部分都与整体相关。
 - [Deconstructing RAG](https://blog.langchain.dev/deconstructing-rag/)
   - Query Transformations - a set of approaches focused on modifying the user input in order to improve retrieval
     - Query expansion - decomposes the input into sub-questions, each of which is a more narrow retrieval challenge
