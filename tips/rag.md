@@ -927,6 +927,7 @@
       - Routing – A dedicated routing mechanism decides whether to use the vector database, the knowledge graph, or a combination of both based on the query.
       - Fallback – In situations where the initial retrieval is insufficient, the agent falls back to a web search using Tavily.
       - Self-correction – The agent evaluates its own answers and attempts to correct hallucinations or inaccuracies.
+    - https://neo4j.com/developer-blog/graphrag-agent-neo4j-milvus/
 - 提升RAG效果的方法
   - RAPTOR https://arxiv.org/pdf/2401.18059
     - 通过递归嵌入、聚类和总结文本块，构建一个自底向上的树形结构，在推理时从这棵树中检索信息，从而在不同抽象层次上整合来自长文档的信息。
@@ -960,6 +961,7 @@
     - Memory (short-term and long-term)
     - Planning (e.g., reflection, self-critics, query routing, etc.)
     - Tools (e.g., calculator, web search, etc.)
+  - [Build agentic RAG on Google Cloud databases with LlamaIndex](https://cloud.google.com/blog/products/databases/llamaindex-integrates-with-alloydb-and-cloud-sql-for-postgresql?e=48754805)
 - ![img.png](rag_ft.png)
 - [Musings on building a Generative AI product](https://www.linkedin.com/blog/engineering/generative-ai/musings-on-building-a-generative-ai-product)
   - the basic framework up and running:
