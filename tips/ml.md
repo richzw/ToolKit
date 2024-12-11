@@ -777,6 +777,7 @@
       - 掩码语言建模（Masked Language Modeling, MLM）
       - 对比学习（Contrastive Learning）
         - 预训练完成后，我们会用一些精心挑选或者半自动构建的数据集，继续训练模型。这里的目标是让语义相似的文本向量靠得更近，同时（可选地）将语义不相似的文本向量推得更远。
+  - [Diffusion Transformer (DiT)](https://x.com/ProfTomYeh/status/1866278836234784813)
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]
