@@ -359,15 +359,34 @@
 - [io_ring解析]()
   - [io_ring worker pool](https://blog.cloudflare.com/missing-manuals-io_uring-worker-pool/)
 - [RSS, RPS and RFS](https://stackoverflow.com/questions/44958511/what-is-the-main-difference-between-rss-rps-and-rfs)
+  - 当网卡启用多队列功能后，接收到的数据包会均衡分配到不同的队列，由多个 CPU 核心并行处理。然而，如果单个 CPU 核心同时负责中断处理和数据包处理，可能会导致该核心负载过高
+    - 在系统拥有较多 CPU 核心的情况下，可以通过分离网络中断处理和数据包处理，将它们分配给不同的 CPU 核心。为实现这一目标，可以引入 RPS（Receive Packet Steering） 和 RFS（Receive Flow Steering） 技术，分别用于负载均衡和流感知优化
   - RSS: Receive Side Scaling 
-    - it is hardware implemented and hashes some bytes of packets ("hash function over the network and/or transport layer headers-- for example, a 4-tuple hash over IP addresses and TCP ports of a packet"). Implementations are different, some may not filter most useful bytes or may be limited in other ways. This filtering and queue distribution is fast (only several additional cycles are needed in hw to classify packet), but not portable between some network cards or can't be used with tunneled packets or some rare protocols. And sometimes your hardware have no support of number of queues enough to get one queue per logical CPU core.
+    - it is hardware implemented and hashes some bytes of packets ("hash function over the network and/or transport layer headers-- for example, a 4-tuple hash over IP addresses and TCP ports of a packet"). 
+    - Implementations are different, some may not filter most useful bytes or may be limited in other ways. 
+    - This filtering and queue distribution is fast (only several additional cycles are needed in hw to classify packet), but not portable between some network cards or can't be used with tunneled packets or some rare protocols. 
+    - And sometimes your hardware have no support of number of queues enough to get one queue per logical CPU core.
     - RSS should be enabled when latency is a concern or whenever receive interrupt processing forms a bottleneck. Spreading load between CPUs decreases queue length.
   - Receive Packet Steering (RPS) 
-    - it is logically a software implementation of RSS. Being in software, it is necessarily called later in the datapath. So, this is software alternative to hardware RSS (still parses some bytes to hash them into queue id), when you use hardware without RSS or want to classify based on more complex rule than hw can or have protocol which can't be parsed in HW RSS classifier. But with RPS more CPU resources are used and there is additional inter-CPU traffic.
-    - RPS has some advantages over RSS: 1) it can be used with any NIC, 2) software filters can easily be added to hash over new protocols, 3) it does not increase hardware device interrupt rate (although it does introduce inter-processor interrupts (IPIs)).
+    - it is logically a software implementation of RSS. Being in software, it is necessarily called later in the datapath. 
+    - So, this is software alternative to hardware RSS (still parses some bytes to hash them into queue id), when you use hardware without RSS or want to classify based on more complex rule than hw can or have protocol which can't be parsed in HW RSS classifier.
+    - But with RPS more CPU resources are used and there is additional inter-CPU traffic.
+    - RPS has some advantages over RSS: 
+       - 1) it can be used with any NIC, 
+       - 2) software filters can easily be added to hash over new protocols,
+        - 3) it does not increase hardware device interrupt rate (although it does introduce inter-processor interrupts (IPIs)).
+    - RPS将接收到的网络数据包分配给特定的CPU核心处理，以实现更好的多核负载均衡
+      - 1. 数据包到达网卡后进入接收队列（RX队列）。
+      - 2. 根据RPS配置，Linux内核会将这些数据包重新分配给指定的CPU核心进行处理，而不是默认地由处理网卡中断的CPU处理。
+    - RPS：实现多核负载均衡，适合高并发场景。
   - RFS: Receive Flow Steering 
     - it is like RSS (software mechanism with more CPU overhead), but it not just hashing into pseudo-random queue id, but takes "into account application locality." (so, packet processing will probably be faster due to good locality). Queues are tracked to be more local to the thread which will process received data, and packets are delivered to correct CPU core.
     - The goal of RFS is to increase datacache hitrate by steering kernel processing of packets to the CPU where the application thread consuming the packet is running. RFS relies on the same RPS mechanisms to enqueue packets onto the backlog of another CPU and to wake up that CPU. ... In RFS, packets are not forwarded directly by the value of their hash, but the hash is used as index into a flow lookup table. This table maps flows to the CPUs where those flows are being processed.
+    - RFS 在 RPS 的基础上增加了流感知能力，优先将网络流（flow）的数据包分配给当前正在处理该流的CPU，以提升缓存命中率。
+      - 1. 追踪每个网络流的CPU绑定关系。
+      - 2. 当新的数据包到达时，内核会查询流表（flow table）。
+      - 3. 如果发现某流已由特定CPU处理过，则将新的数据包分配给同一个CPU，以利用缓存中的上下文。
+    - RFS：进一步优化缓存命中率，适合长时间处理的网络流。
   - Accelerated RFS
     - RFS with hw support. (Check your network driver for ndo_rx_flow_steer) "Accelerated RFS is to RFS what RSS is to RPS: a hardware-accelerated load balancing mechanism that uses soft state to steer flows based on where the application thread consuming the packets of each flow is running.".
   - Note: it would be smart to use RSS and RPS together in order to avoid CPU utilization bottlenecks on the receiving side

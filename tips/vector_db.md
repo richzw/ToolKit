@@ -95,6 +95,9 @@
           - M: The number of edges per element during the graph creation in each layer. A higher M value generally results in better search accuracy, but it comes at the cost of slower index-building time.
           - efConstruction: The number of neighbors considered to find the nearest neighbor at each layer during graph creation. The more neighbors considered, the better the index quality, but the slower the index building time will be.
           - efSearch: The number of nearest neighbors to consider during the vector search process. The higher the efSearch, the higher the recall, but the searching process will be slower.
+          - M：NSW图中每个元素的边数。较高的M值通常会对应更好的搜索精度，但代价是更慢的索引构建时间。
+          - efConstruction：构建索引时的动态候选列表大小。一般来说，候选队列越长，索引质量越好，索引构建时间也就会越长。
+          - efSearch：搜索阶段的动态候选列表的大小。一般来说，efSearch越高，召回率越高，但是搜索过程会比较慢。
     - 近似最近邻 (ANN)算法
   - [Comprehensive Guide To Approximate Nearest Neighbors Algorithms](https://towardsdatascience.com/comprehensive-guide-to-approximate-nearest-neighbors-algorithms-8b94f057d6b6)
     - 「LSH」（Locality-Sensitive Hashing）」它引入了一种哈希函数，使得相似的输入能以更高的概率映射到相同的桶中，其中桶的数量远小于输入的数量。
