@@ -1350,7 +1350,17 @@
   - Background Sync: Best for systems where data doesn’t need to be immediately consistent and can be synchronized periodically, leading to slower updates.
   - Saga-Based: Great for managing complex, long-lived transactions with multiple services, ensuring consistency via compensating transactions.
   - CQRS-Based: Allows optimization for both read and write operations, but consistency between the two models is achieved asynchronously.
-
+- [云原生数据库的一致性]
+  - 为什么 Consensus-based replication 会如此流行
+    - 是相比于传统主从复制，尽管 Consensus-based replication 在 CAP 理论中更偏重 “CP”，且其依然提供了不错的 Availability，通常情况下进程崩溃，服务器重启都可以在秒级恢复
+    -  Raft 的提出极大的简化了 Consensus 算法的实现复杂度，越来越多的数据库选择了自己写 Raft 算法，或者改造现有的 Raft 实现
+  - Consensus-based replication 有什么问题
+    - 对比弱一致性系统，以及基于 Quorum 实现的分布式系统，Paxos/Raft 在进行优化之后往往对主副本有较强的依赖，导致其对抗 Grey Failure 的能力较弱
+    - 复杂度
+    - 性能成本
+  - 云原生时代，究竟应该采用什么样的日志复制策略
+    - Aurora 的强大之处在于使用 6 副本的 NWR 协议保证了写入的高可用性。相比于 DynamoDB 的 NWR，Aurora 由于只存在 single writer，可以产生递增的 log sequence numer，解决了传统 NWR 系统中最难规避的冲突仲裁问题
+    - 
 
 
 

@@ -430,6 +430,7 @@
         - 本质是通过 LLM 对用户问题生成假设性文档，这些文档基于 LLM 本身的知识生成，可能存在错误或者不准确，但是跟 RAG 中知识库的文档相关联，然后通过假设性文档去检索向量相近的真实文档，通过这种方式来提高检索的准确性
         - from llama_index.core.indices.query.query_transform import HyDEQueryTransform
         -  HyDE 可能会误导查询和引起偏见，所以在实际应用中需要谨慎使用。
+        - [Improving Information Retrieval and RAG with Hypothetical Document Embeddings (HyDE)](https://zilliz.com/learn/improve-rag-and-information-retrieval-with-hyde-hypothetical-document-embeddings)
     - [Step back prompting](https://medium.com/international-school-of-ai-data-science/enhancing-llms-reasoning-with-step-back-prompting-47fad1cf5968)
       - Step-Back Prompting是一种用于增强语言模型，特别是大型语言模型（LLMs）的推理和解决问题能力的技术。它涉及鼓励LLM从给定的问题或问题中后退一步，并提出一个更抽象、更高层次的问题，这个问题包含了原始询问的本质
       - 使用LLM生成一个“退后一步”的问题。这可以与或不使用检索一起使用。使用检索时，将使用“退后一步”问题和原始问题进行检索，然后使用两个结果来确定语言模型的响应

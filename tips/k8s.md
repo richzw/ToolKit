@@ -942,7 +942,9 @@
   - 连接是有状态的，需要始终和一开始建立连接的 Pod 通信；
   - 平滑更新，已在服务器的玩家不受影响，下一轮匹配开始才是新版的服务器。
   - 基于  OpenKrusie 提供的支持原地升级（InPlace Update）的增强的 Workload，提供了 GameServerSet 和 GameServer 两个 CRD， 方便游戏行业的开发者更容易在 K8s 上部署管理游戏服务器
-
+- K8s 控制面过载了，但是 coredns 依赖了控制面，所以最后导致数据平面也出问题了 (core dns ttl default 300seconds)
+  - TTL 过期前：如果某条 DNS 记录已经被缓存（TTL 未过期），CoreDNS 可以继续返回这条缓存记录，即使 API Server 宕机也不会有问题。
+  - TTL 过期后：如果 API Server 宕机且 CoreDNS 的缓存过期，CoreDNS 将无法从 API Server 获取新数据，最终会返回查询失败。
 
 
 

@@ -323,13 +323,22 @@
       - 步骤 3 的指数移动平均 MACD 信号曲线减去 MACD 曲线，我们会得到 MACD 直方图。这个直方图有助于我们检测时间序列数据中的渐变变化。
   - Outlier Identify
     - https://archive.siam.org/meetings/sdm10/tutorial3.pdf
-    - IQR
-      - Q3+1.5（Q3-Q1） Q1-1.5（Q3-Q1）
-    - 3sigma算法
-      - 3σ原则是指在正态分布的情况下，距离均值μ±3σ之内的数据占比约为99.73%，即在一组数据中，距离均值μ±3σ之内的数据占比约为99.73%。
-    - 观测指标的检测分为两步：
-      - 纵向，获取历史同一时刻30个点的观测值，通过3sigma算法来检测异常。
-      - 横向，zscore算法进行变点检测，横向获取某个时刻往前历史30个点的观测值。
+    - Approach I: Graphical Methods
+      - Scatter Plot: Look for points far from the main cluster.
+      - Box Plot: Outliers appear as points outside the whiskers.
+    - Approach II: Statistical Methods
+      - IQR
+        - Q3+1.5（Q3-Q1） Q1-1.5（Q3-Q1）
+      - 3sigma算法 Z-score
+        - 3σ原则是指在正态分布的情况下，距离均值μ±3σ之内的数据占比约为99.73%，即在一组数据中，距离均值μ±3σ之内的数据占比约为99.73%。
+      - 观测指标的检测分为两步：
+        - 纵向，获取历史同一时刻30个点的观测值，通过3sigma算法来检测异常。
+        - 横向，zscore算法进行变点检测，横向获取某个时刻往前历史30个点的观测值。
+    - Approach III: Machine Learning Methods
+      - Isolation Forest: Isolates anomalies based on how easily a data point can be separated.
+      - Elliptic Envelope: Fits a multivariate Gaussian distribution to identify outliers.
+      - LOF (Local Outlier Factor): Detects density-based anomalies.
+      - SVM (Support Vector Machine): Learns a boundary to separate normal and outlier data.
 - [GPT-4 Architecture, Infrastructure, Training Dataset, Costs, Vision, MoE](https://hub.baai.ac.cn/view/27744)
 - [Uber Optimizes LLM Training](https://www.uber.com/en-HK/blog/open-source-and-in-house-how-uber-optimizes-llm-training/)
 - [What Is ChatGPT Doing … and Why Does It Work](https://writings.stephenwolfram.com/2023/02/what-is-chatgpt-doing-and-why-does-it-work/)
