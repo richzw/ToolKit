@@ -942,10 +942,20 @@
   - 连接是有状态的，需要始终和一开始建立连接的 Pod 通信；
   - 平滑更新，已在服务器的玩家不受影响，下一轮匹配开始才是新版的服务器。
   - 基于  OpenKrusie 提供的支持原地升级（InPlace Update）的增强的 Workload，提供了 GameServerSet 和 GameServer 两个 CRD， 方便游戏行业的开发者更容易在 K8s 上部署管理游戏服务器
-- K8s 控制面过载了，但是 coredns 依赖了控制面，所以最后导致数据平面也出问题了 (core dns ttl default 300seconds)
-  - TTL 过期前：如果某条 DNS 记录已经被缓存（TTL 未过期），CoreDNS 可以继续返回这条缓存记录，即使 API Server 宕机也不会有问题。
-  - TTL 过期后：如果 API Server 宕机且 CoreDNS 的缓存过期，CoreDNS 将无法从 API Server 获取新数据，最终会返回查询失败。
-
+- 大量 Kubernetes API 的请求负载，压垮了 OpenAI 的 Kubernetes 控制平面，并导致基于 DNS 的服务发现机制出现问题
+  - K8s 控制面过载了，但是 coredns 依赖了控制面，所以最后导致数据平面也出问题了 (core dns ttl default 300seconds)
+    - TTL 过期前：如果某条 DNS 记录已经被缓存（TTL 未过期），CoreDNS 可以继续返回这条缓存记录，即使 API Server 宕机也不会有问题。
+    - TTL 过期后：如果 API Server 宕机且 CoreDNS 的缓存过期，CoreDNS 将无法从 API Server 获取新数据，最终会返回查询失败。
+  - 在正常情况下，DNS 缓存可以有效缓解此类故障，甚至完全避免影响。DNS 通常将 Kubernetes 服务解析为 Cluster IP
+    - 缓存的 Cluster IP 在 Pod 更新的过程中通常是稳定的，仅在 Service 创建或删除时需要更新缓存。
+    - 而 Headless Service 的域名解析 则直接解析到 Pod IP，在 Pod 创建或删除时因为Pod IP变化，缓存需要频繁更新
+  - 大规模的大模型部署通常需要多个 Pod 协同工作（比如 LWS），这相当于一个 Super Pod，组内通信依赖 DNS 进行互相的服务发现
+    - 因为NodeLocalDNS 和 CoreDNS 的缓存均可能失效，而当 CoreDNS 缓存的 TTL 过期后，当API Server负载过高无响应，CoreDNS则无法从 API Server 获取更新数据，则可能导致服务解析失败
+  - 在生产环境，还有哪些措施可以有效缓解 API Server 压力呢？
+    - 限流策略：对于类似 OpenAI 事故中的 Telemetry 组件对于 Kubernetes API 的频繁调用，用户应该配置 Kube API Server 的全局或者局部的 API Priority and Fairness
+    - 读缓存：在频繁的对于 Kubernetes 资源的【读】操作上，我们还可以借助 Clusterpedia 等工具，减轻对 API Server 以及 ETCD 的直接压力
+    - 隔离方法：如果遥测服务对 API Server 压力非常大且是必须的，也可以考虑单独部署一个API Server来提供服务，这样也是有效减少爆炸半径的方案
+    - 常见的性能瓶颈在 ETCD，API Server 可以通过 --etcd-servers-overrides 支持对 ETCD 进行切分。通常来说 /events （事件） ， /leases（节点心跳等） 都是比较适合放在单独的 ETCD 里面，减小其他资源访问的 ETCD 压力。
 
 
 

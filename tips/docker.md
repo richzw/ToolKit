@@ -694,6 +694,16 @@
 - Can you send a signal to a pod that has *no shell* and *no permissions* to spin up privileged ephemeral containers
   - https://labs.iximiuz.com/challenges/kubernetes-signal-non-root-container
   - kubectl exec my-app-pod -c [container-name] --signal=SIGTERM --
+- 在配置文件~/.docker/daemon.json加，重启docker
+  ```
+  {
+   "registry-mirrors": [
+   "https://dockerproxy.com",
+   "https://docker.mirrors.ustc.edu.cn",
+   "https://docker.nju.edu.cn"
+    ]
+  }
+  ```
 
 
 
