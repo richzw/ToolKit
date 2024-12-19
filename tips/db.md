@@ -1623,7 +1623,14 @@
   - 分库分表导致的全局主键问题 
   - 分库分表难以建立全局唯一键约束
   - 大量分库分表导致运维成本激增
-
+- 列式存储 vs 行式存储
+  - Column-Stores vs. Row-Stores: How Different Are They Really? http://www.cs.umd.edu/~abadi/papers/abadi-sigmod08.pdf
+  - 在 OLAP 下为什么列式存储Column-Store优于行式存储Row-Store。
+  - 面向列的系统中优化主要有：
+    - 延迟物化Late Materialization
+    - 块遍历Block Iteration
+    - 压缩Compression
+    - 隐式连接
 
 
 

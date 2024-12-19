@@ -1541,7 +1541,7 @@
       - Go 语言的扩展包golang.org/x/net/ipv4，它提供了一些接口可以让我们设置 IP 头部数据
     - Packet-Socket 可以访问到链路层的数据，包括源目的 Mac 地址。同时也意味着发送数据的时候你也需要填空这些信息
       - 使用 syscall 包来创建 Packet-Socket，然后使用 gopacket 库来构建数据包，最后使用 syscall 包发送数据包
-  
+- [超时重传、窗口管理 以及 拥塞控制](https://mp.weixin.qq.com/s/6MlebbExo3GVhj554J7Vnw)
 
 
 

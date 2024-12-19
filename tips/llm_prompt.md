@@ -1517,7 +1517,7 @@
   - explore how further we could reach with Claude's "deep mindset". That said, when using it in your daily tasks, you will find Claude's inner monolog (thinking process) very very fun and interesting.
 - 在使用大模型处理这类内容的时候，不妨反过来：不是让大模型帮你总结摘要，而是帮你去掉无关内容。
   - 以下是一场投资相关演讲的速记稿， 其中有一些内容和主题无关。请对这份速记稿进行精简：尽可能保留和投资、政经相关的内容，去掉无关内容。
-
+- [写作助手提示词模板](https://mp.weixin.qq.com/s/VjNaeXNyI1_mMAt6lnp_lA?token=1320388846&lang=zh_CN&scene=21#wechat_redirect)
 
 
 

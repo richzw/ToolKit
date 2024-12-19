@@ -1321,8 +1321,12 @@
     - 机器可读：水印对机器来说必须得清晰可见，所以它需要创建清晰可测量的模式，让算法能够可靠地识别。
     - 稳定可靠：水印必须足够稳定，能够抵御各种文本修改，例如改写、翻译，无论修改者是否知道水印的存在。当文本被改得面目全非，原来的意思和结构都完全变了，水印才可能失效。
 - ["强化微调"(Reinforcement Fine-Tuning)功能](https://openai.com/form/rft-research-program/)
-- 
-
+- [Scaling Test-Time Compute 扩展推理时计算](https://mp.weixin.qq.com/s/qlepyeHgkwFTa2IxDKDLeQ)
+  - 与其让模型死记硬背，不如让它多思考. Scaling 指的是在推理过程中增加计算资源（例如算力或时间）
+  - 把“思维链”的概念也应用到 Embedding 模型上?
+    - 扩展推理时计算（Scaling Test-Time Compute）应用到jina-clip，以对 棘手的领域外（Out Of Domain, OOD）图像 进行分类
+    - 完整的思维链（CoT）由两部分组成：classification_groups 和 pokemon_rules，前者定义了提问框架：每个属性（例如颜色、形态）对应一个问题模板和一系列可能的答案选项。后者则记录了每只宝可梦应该匹配哪些选项
+    - 
 
 
 
