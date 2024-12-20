@@ -520,6 +520,11 @@
       - you can match strings using prefix, infix, postfix, or even character wildcard searches.
       - all the variations are possible as well as using array values, either by exact matches or by checking if any elements in the array match (contains_any())
       - https://github.com/milvus-io/bootcamp/blob/master/bootcamp/Retrieval/imdb_metadata_filtering.ipynb
+  - Milvus 2.5
+    - Sparse BM25
+      - 向量里的值，都是根据文档长度 |D|， TF(q) : 单词 q 在文档中的词频 来生成的，这些都是局部信息
+      - avgdl : 平均文档长度， N : 文档总数，这些全局信息都是存在meta里的，不是在具体的向量值里，也不是在每个segment里。
+      - 做向量查询的时候，计算分数需要计算完整的BM25公式，同时查询过来的时候也需要多花一点时间做计算（包括从 meta 取 avgdl 等全局信息的时间）。
   - Error Check list
     - "deny to write: memory limit exceeded" 意思是某个querynode或者datanode的内存快用光了
     - "unrecognized dtype for key: labels"  这是因为langchain.MilvusVectorStore没法根据你在Document的metadata中的"labels"这个key所对应的vlaue推断出这是个什么类型的字段

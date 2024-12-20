@@ -360,6 +360,16 @@
   - ![img.png](http_cert_x509.png)
   - [关于证书（certificate）和公钥基础设施（PKI）](https://arthurchiao.art/blog/everything-about-pki-zh/)
   - [Deep Dive into SSL certificates](https://hackernoon.com/deep-dive-into-ssl-certificates)
+  - [HTTPS 常见部署问题及解决方案](https://imququ.com/post/troubleshooting-https.html)
+    - 浏览器提示证书有错误
+      - 检查证书链是否完整
+      - 检查浏览器是否支持 SNI
+      - 检查系统时间
+    - 启用 HTTP/2 后网站无法访问，提示 ERR_SPDY_INADEQUATE_TRANSPORT_SECURITY
+      - 这个问题一般是由于 CipherSuite 配置有误造成的。建议对照「Mozilla 的推荐配置、CloudFlare 使用的配置」等权威配置修改 Nginx 的 ssl_ciphers 配置项
+    - 网站无法访问，提示 ERR_SSL_VERSION_OR_CIPHER_MISMATCH
+      - 出现这种错误，通常都是配置了不安全的 SSL 版本或者 CipherSuite —— 例如服务器只支持 SSLv3，或者 CipherSuite 只配置了 RC4 系列，使用 Chrome 访问就会得到这个提示
+    - 
 - [TLS 单向和双向认证](https://mp.weixin.qq.com/s/JOpega3ud9P7NDNsGAwCCg)
   - SSL 证书 （也称为 TLS 或 SSL /TLS 证书）是将网站的身份绑定到由公共密钥和私有密钥组成的加密密钥对的数字文档。 证书中包含的公钥允许 Web 浏览器执行以下操作： 通过 TLS 和 HTTPS 协议。 私钥在服务器上保持安全，并用于对网页和其他文档（例如图像和 JavaScript 文件）进行数字签名。
   - 双向 TLS（mTLS)
