@@ -2065,8 +2065,16 @@
       - 缓存机制：当不需要强引用缓存数据时，使用弱引用可确保系统在内存不足时回收这些数据。
       - 事件处理器和回调：避免由于强引用导致的内存泄漏。
       - 大型对象图：在复杂的对象引用结构中，通过弱引用防止循环引用问题
+    
   - As of go 1.22, for string to bytes conversion, we can replace the usage of unsafe.Slice(unsafe.StringData(s), len(s)) with type casting []bytes(str), without the worry of losing performance.
   - As of go 1.22, string to bytes conversion []bytes(str) is faster than using the unsafe package. Both methods have 0 memory allocation now.
+  - Go 1.24
+    - 带有类型参数的type alias `type MySlice[T any] = []T`
+    - 运行时性能优化
+      - 基于Swiss Tables的原生map实现
+      - 针对当前runtime.lock2实现的问题进行优化
+    - cgo改进：新增了#cgo noescape和#cgo nocallback注解，优化C代码调用的效率。
+    - 编译器限制：禁止在C类型别名上声明方法，以提高类型安全性
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
   - errors.Is() is expensive. If you use it, check the error is non-nil first to avoid a pretty big performance penalty on the happy path.
   - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.

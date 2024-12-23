@@ -676,6 +676,9 @@
     - LoRA是通过将预训练模型分解成低秩矩阵来进行微调，以提高模型的效率和泛化能力。该技术可以减少预训练模型的参数数量，同时保留模型的表示能力，从而提高模型的适应性和泛化能力。
     - LoRA Explained: Low-Rank Adaptation for Fine-Tuning LLMs
       - https://zilliz.com/learn/lora-explained-low-rank-adaptation-for-fine-tuning-llms
+  - [Alignment Faking in Large Language Models](https://mp.weixin.qq.com/s/UpTjO8ATcYC6-PSnJkZMMg)
+    - Claude 在训练过程中经常假装有不同的观点，而实际上却保持了其原始偏好。
+    - 模型的偏好可能看起来已经被训练所改变，但实际上可能一直在伪对齐。
 - LLM Apps
   - ![img.png](ml_embedding_search.png)
   - [Generative Agents: Interactive Simulacra of Human Behavior](https://github.com/joonspk-research/generative_agents)

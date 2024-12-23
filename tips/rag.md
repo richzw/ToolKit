@@ -780,6 +780,10 @@
     - 系统1持续为系统2提供直觉和建议，后者可以选择采纳这些建议。
   - [RAG Context Refinement Agent](https://www.llamaindex.ai/blog/rag-context-refinement-agent)
     - the agent to revisit the source documentation itself, to refine the context portion of the LLM prompt until it contains sufficient information to answer the user's question
+  - [Building effective agents](https://www.anthropic.com/research/building-effective-agents)
+    - Building block: The augmented LLM
+    - Workflow: Prompt chaining / Routine / Parallelization /  Orchestrator-workers / Evaluator-optimizer / Agent
+    - https://github.com/anthropics/anthropic-cookbook/tree/main/patterns/agents
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
