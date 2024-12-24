@@ -2075,6 +2075,8 @@
       - 针对当前runtime.lock2实现的问题进行优化
     - cgo改进：新增了#cgo noescape和#cgo nocallback注解，优化C代码调用的效率。
     - 编译器限制：禁止在C类型别名上声明方法，以提高类型安全性
+    - new omitzero struct tag in encoding/json that lets you automatically skip fields with zero values
+      - you can define your own IsZero() method for it.
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
   - errors.Is() is expensive. If you use it, check the error is non-nil first to avoid a pretty big performance penalty on the happy path.
   - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.

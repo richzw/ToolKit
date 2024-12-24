@@ -1753,7 +1753,9 @@
     - ISO 映像挂载：Loop 设备还常用于挂载 ISO 文件，无需刻录到物理介质上，使其内容可直接访问。
     - 加密磁盘：loop 设备还能和一些加密技术（如dm-crypt）结合，因为 loop 设备可以绑定几乎任意类型的文件，这就给了人们无限的想象空间。我们可以创建一个加密的磁盘镜像，增强数据安全。
 - [Linux系统中的动态链接库机制](https://mp.weixin.qq.com/s/0OgcjDlT9hQBkd_W0eJfnw)
-
+- Cache prefetching can be accomplished either by hardware or by software.
+  - Hardware based prefetching is typically accomplished by having a dedicated hardware mechanism in the processor that watches the stream of instructions or data being requested by the executing program, recognizes the next few elements that the program might need based on this stream and prefetches into the processor's cache.
+  - Software based prefetching is typically accomplished by having the compiler analyze the code and insert additional "prefetch" instructions in the program during compilation itself.
 
 
 

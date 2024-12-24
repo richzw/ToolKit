@@ -1055,6 +1055,9 @@
     - 针对异构搜索、同构匹配、分类、聚类四类任务做了特别的 Adapter 设计和训练，基本上 Embedding 的使用场景都可以被划分到这四类任务上。
     - [v2 到 v3 的迁移](https://mp.weixin.qq.com/s/wdoWD_i8G095-GdU5ZSn5Q)
   - [Matryoshka Embeddings](https://milvus.io/blog/matryoshka-embeddings-detail-at-multiple-scales)
+    - Matryoshka Representation Learning is a technique used in training embedding models. It allows you to trade off a small amount of accuracy in exchange for much smaller embedding sizes
+      - Thus, you can store more information at a lower cost and search for it faster.
+      - https://weaviate.io/blog/openais-matryoshka-embeddings-in-weaviate
     - Matryoshka embeddings learn this multi-scale structure during the initial training process.
     - The result is remarkable: not only does the full embedding capture input semantics, but each nested subset prefix (first half, first quarter, etc.) provides a coherent, if less detailed, representation.
     - Need a quick approximate search? Use the smallest “doll.” Need maximum accuracy? Use the full embedding.

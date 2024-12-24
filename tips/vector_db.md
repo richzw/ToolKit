@@ -672,6 +672,7 @@
       - Hashing-based methods utilize locality-sensitive hashing (LSH) or random projections to directly map high-dimensional input data to binary codes
       - Deep learning architectures, such as deep belief networks (DBNs) and restricted Boltzmann machines (RBMs), generate binary embeddings as part of their output
       - Quantization-based techniques convert continuous-valued embeddings into binary representations.
+    - https://weaviate.io/blog/binary-quantization
   - [Vector Visualization](https://milvus.io/docs/vector_visualization.md)
 - VectorDB challenge
   - 工程
