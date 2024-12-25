@@ -525,6 +525,11 @@
       - 向量里的值，都是根据文档长度 |D|， TF(q) : 单词 q 在文档中的词频 来生成的，这些都是局部信息
       - avgdl : 平均文档长度， N : 文档总数，这些全局信息都是存在meta里的，不是在具体的向量值里，也不是在每个segment里。
       - 做向量查询的时候，计算分数需要计算完整的BM25公式，同时查询过来的时候也需要多花一点时间做计算（包括从 meta 取 avgdl 等全局信息的时间）。
+      - [具体功能：](https://mp.weixin.qq.com/s/ikOFS19LT7DZrctDwBUOkg)
+        - 分词和数据预处理：基于开源搜索库 Tantivy 实现，包括词干提取、词形还原和停用词过滤等功能。
+        - 分布式词表和词频统计：高效支持大规模语料的词频管理与计算。
+        - 稀疏向量生成与相似度计算：通过语料库的词频(Corpus TF)构建稀疏向量，并基于查询词频(Query TF)和全局逆文档频率 (IDF) 构建查询稀疏向量，再通过特定的 BM25 距离函数进行相似度计算。
+        - 倒排索引支持：实现基于 WAND 算法的倒排索引，同时 Block-Max WAND 算法和图索引的支持也在开发中。
   - Error Check list
     - "deny to write: memory limit exceeded" 意思是某个querynode或者datanode的内存快用光了
     - "unrecognized dtype for key: labels"  这是因为langchain.MilvusVectorStore没法根据你在Document的metadata中的"labels"这个key所对应的vlaue推断出这是个什么类型的字段
