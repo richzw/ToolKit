@@ -1631,7 +1631,7 @@
     - 块遍历Block Iteration
     - 压缩Compression
     - 隐式连接
-
+- [PostgreSQL 内参：深入解析运行原理](https://postgres-internals.cn/)
 
 
 

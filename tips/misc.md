@@ -278,3 +278,9 @@
 - [https://whoismaking.money/]
 - Telegram 的密聊（Secret Chat）使用端到端加密 (E2EE) 来保护消息的隐私
   - 这种加密确保消息内容只能由参与密聊的两方解密，即使是 Telegram 服务器也无法读取内容
+- [Cognitive load is what matters](https://minds.md/zakirullin/cognitive)
+  - Minimize Unnecessary Complexity: Always question whether a code structure or architecture adds real value or just additional mental overhead.
+  - Prioritize Clarity: Write code with the reader in mind, aiming for simplicity and ease of understanding.
+  - Balance Principles with Pragmatism: Apply best practices thoughtfully, without becoming rigid or dogmatic, to avoid introducing more complexity than they eliminate.
+  - Facilitate Easy Onboarding: Strive for a codebase that new team members can quickly grasp without having to load excessive context into their working memory.
+  - Continuous Improvement: Regularly assess and refactor code to eliminate unnecessary cognitive load, keeping the codebase lean and manageable.
