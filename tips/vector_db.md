@@ -210,6 +210,8 @@
     - TTL
       - ttl feature is more like a async cleanup. if you want to trigger cleanup you will need to run manualy compaction
       - flush operate is needed to ManualCompaction success
+    - PV卷（查询节点和索引节点所在容器中的/var/lib/milvus/data使用的PV卷）挂载到NVMe SSD 上就可以。values.yaml中的queryNode.disk.enabled和indexNode.disk.enabled跟queryNode.enableDisk是一样的作用，
+      - 相当于是在values.yaml中加了设置磁盘索引的快捷入口，你用了values.yaml里的这个配置，就不用milvus.yaml里的配置了
   - [查询](https://milvus.io/blog/deep-dive-5-real-time-query.md)
     - milvus的调用顺序可以是：建表，insert，建索引，load，search
       - 也可以是：建表，建索引，insert，load，search

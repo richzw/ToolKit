@@ -284,3 +284,8 @@
   - Balance Principles with Pragmatism: Apply best practices thoughtfully, without becoming rigid or dogmatic, to avoid introducing more complexity than they eliminate.
   - Facilitate Easy Onboarding: Strive for a codebase that new team members can quickly grasp without having to load excessive context into their working memory.
   - Continuous Improvement: Regularly assess and refactor code to eliminate unnecessary cognitive load, keeping the codebase lean and manageable.
+- IP Check
+  -  用 http://scamalytics.com 全面检测 IP 质量
+  -  通过 http://ipqualityscore.com 评估 IP 可信度
+  -  使用 http://ipinfo.io 查看个人 IP 属性
+  -  http://whoer.net 检测 IP 伪装程度 http://ipcheck.ing 提供中文界面检测服务

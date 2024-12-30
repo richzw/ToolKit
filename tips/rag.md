@@ -145,6 +145,11 @@
       - 按相似性分块策略（仅支持API调用）：当文档结构无法提供明确的主题边界时，可以使用 "通过相似性 "策略。该策略使用 "sentence-transformers/multi-qa-mpnet-base-dot-v1 "嵌入模型来识别在主题上相似的顺序元素，并将它们组合成块。
   - [测试 LangChain 分块](https://mp.weixin.qq.com/s/-ZgM3wItZUtY6nU_9FmJnw)
     - 我添加了五个实验，这个教程测试的分块长度从 32 到 64、128、256、512 不等，分块 overlap 从 4 到 8、16、32、64 不等的分块策略
+    - Markdown的分页 https://python.langchain.com/docs/how_to/#text-splitters
+      - 1. 先按照Headers分，或者说按照文章的“章”来分
+      - 2. 合并相邻较小的
+      - 3. 参考上面的策略，对于大的“章”，按照“节”继续拆分
+      - 4. 对于大的“节”，依次按照“段”、“句”、“词”继续拆分，直到满足长度要求
   - LlamaParse 
     - with an API call you can store both cleanly parsed text and image chunks 
     - the text can be pre-extracted by OCR/multimodal models but you can also dynamically feed the image directly into the model during query-time
