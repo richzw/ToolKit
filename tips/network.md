@@ -1,3 +1,5 @@
+- [数据包收发内核路径图](https://raw.githubusercontent.com/mYu4N/mytracer/refs/heads/main/Linux%20%E6%95%B0%E6%8D%AE%E5%8C%85%E6%94%B6%E5%8F%91%E5%86%85%E6%A0%B8%E8%B7%AF%E5%BE%84%E5%9B%BE--0919.png)
+  - ![img.png](network_package_kernel.png)
 - [Networking Challenges](https://labs.iximiuz.com/challenges?category=networking)
 - [在 FIN_WAIT_2 状态下，是如何处理收到的乱序到 FIN 报文，然后 TCP 连接又是什么时候才进入到 TIME_WAIT 状态?](https://mp.weixin.qq.com/s/6euF1TQMP36AEurS44Casg)
   - 在 FIN_WAIT_2 状态时，如果收到乱序的 FIN 报文，那么就被会加入到「乱序队列」，并不会进入到 TIME_WAIT 状态。
@@ -1480,6 +1482,15 @@
     - TCP Keep-Alive 数据包 TCP Len 为 0 的场景相对来说更容易碰到。如下 TCP 流在经过 45 秒间隔
   - Simultaneous Close
     - TCP 四个数据包，双方向各两个数据包，FIN + ACK，而状态变化都是由 ESTABLISHED -> FIN_WAIT_1 -> CLOSING -> TIME_WAIT -> CLOSED
+  - TCP Time-Wait 状态下收到 SYN 的处理
+    - 在 TW 状态下收到不带时间戳的 SYN 数据包，处理如下：
+      - 新 SYN 的序列号比服务器端期望的下一个收到的序列号要大，则服务器端接收 SYN 请求，进而正常建立连接。
+      - 新 SYN 的序列号比服务器端期望的下一个收到的序列号要小，则服务器端不接收 SYN 请求，并响应一个 ACK 数据包。
+    - 在 TW 状态下收到带时间戳的 SYN 数据包，处理如下：
+      - 新 SYN 的序列号比服务器端期望的下一个收到的序列号要大，并且新 SYN 的时间戳比服务器端最后收到的数据包的时间戳要大，则服务器端接收 SYN 请求，进而正常建立连接；
+      - 新 SYN 的序列号比服务器端期望的下一个收到的序列号要大，并且新 SYN 的时间戳比服务器端最后收到的数据包的时间戳要小，则服务器端不接收 SYN 请求，重新刷新 TW 状态计时，并响应一个 ACK 数据包；
+      - 新 SYN 的序列号比服务器端期望的下一个收到的序列号要小，并且新 SYN 的时间戳比服务器端最后收到的数据包的时间戳要大，则服务器端接收 SYN 请求，进而正常建立连接；
+      - 新 SYN 的序列号比服务器端期望的下一个收到的序列号要小，并且新 SYN 的时间戳比服务器端最后收到的数据包的时间戳要小，则服务器端不接收 SYN 请求，重新刷新 TW 状态计时，并响应一个 ACK 数据包。
 - [Wireshark手册](https://www.ilikejobs.com/posts/wireshark/)
   - [Wireshark != 和 !==](https://mp.weixin.qq.com/s/yXbnCjelmdBOG1BgUFAexA)
     - 显示过滤表达式 ip.addr != 192.168.0.1 的结果显示为空，意味着没有源和目的 IP 值都不是 192.168.0.1 的数据包，也就是 all ；

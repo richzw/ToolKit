@@ -473,6 +473,11 @@
     - https://www.youtube.com/watch?v=kYWUEV_e2ss
   - [How could Machine reach Human-level Intelligence](https://mp.weixin.qq.com/s/mE7vZaGKTT-i8gUFCORWIg)
   - [Reward Hacking in Reinforcement Learning](https://lilianweng.github.io/posts/2024-11-28-reward-hacking/)
+  - [向量模型的词序感知缺陷与优化策略](https://mp.weixin.qq.com/s/zXNrLHtf2ruO_3mHhqt05w)
+    - 文本向量模型似乎存在一个问题：即使句子词序被打乱，模型输出的向量与原句仍然高度相似
+    - 向量的平均余弦相似度呈现出明显的线性关系：文本越长，原始句子和打乱后句子的平均余弦相似度就越低
+    - 在长文本里，一个词可能被挪到离它原始上下文很远的地方，这就会显著改变它的 Token 向量。所以说，打乱长文本中的词，会产生比短文本更远的向量距离
+    - 更大的模型确实对词序变化更敏感一些，但效果提升非常有限
 - [Prompt](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
   - `Prompt Engineering`, also known as `In-Context Prompting`, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes without updating the model weights.
   - `Instructed LM` (e.g. InstructGPT, natural instruction) finetunes a pretrained model with high-quality tuples of (task instruction, input, ground truth output) to make LM better understand user intention and follow instruction
