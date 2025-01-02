@@ -284,6 +284,7 @@
       -  localstorage对diskann有效，当你调用load的时候就会把diskann索引数据都下载到localstorage里。
       - 内存里有小部分量化过的数据，搜索的时候先在内存里做一次快速搜索，然后在localstorage里找到对应的分块文件，读出原始向量做精确检索
     - 查询延迟就主要跟querynode有关，有时querynode资源充足而proxy节点不太行的话，proxy也有可能成为瓶颈
+    - milvus目前的querynode做负载均衡的时候是根据行数来估算的，如果某一个entity的text列特别大，有的特别小，balance是个挑战
   - 索引
     - [index overview](https://www.slideshare.net/slideshow/introduction-to-multilingual-retrieval-augmented-generation-rag/267957576)
       - L2 (Euclidean) - Spatial distance 主要运用于计算机视觉领域
@@ -305,8 +306,13 @@
     - seal compact index这几个事情有点复杂。seal之后会建一次索引，但seal的分片可能会被合并成大的分片，大的分片又要建一次索引
     - 除了DISKANN之外，所有的索引都是纯内存的。若打开了mmap，这样querynode会把数据文件下载到本地，然后通过mmap读取。内存不足的话可以考虑ivf_sq8  ivf_pw  diskindex这些索引，或者开mmap
       - mmap是对diskann索引和gpu索引以外的其他索引有效
+    - 长文本一般不过滤的 mmap最合适了，标量文本后期你如果不需要使用（过滤/outputfield输出），那么可以使用partial load，不加载这个字段。如果需要使用，可以给这个字段使用mmap
     - diskann加载到内存里的是类似于一个IVF_PQ索引。搜索时是先在内存里的索引粗略地搜索一下，然后到磁盘里取出部分向量数据做更精确的搜索
     - 集群开了mmap，创建集合索引的时候是默认就开启了，还是需要collection.set_properties({'mmap.enabled': True})参数指定
+      - If mmap is enabled, when you call collection.load(), the query node will download the index files to local. The default local path is configured by the localStorage.path + "/mmap" in the milvus.yaml
+      - Query node maps the file between RAM and disk by mmap().
+      - Query node calls unlink() to drop the index file. But the mmap file still occupies disk space.
+      - When search, query node actually read data from disk, acts like read from RAM.
     - hnsw索引的向量类型只能用floatvector？ float16Vector可以使用和floatVector一样的索引，hnsw ivf都行
     - ivf_flat建索引的时间跟nlist的大小相关，设小点就快，大点就慢，1G的耗时1分钟也是有可能的
       - 推荐值是4*sqrt(n)，n是单个segment里的行数。4096 dim，默认单个segment 512MB，那每个segment里大约有15000条数据，那么nlist大约为4*sqrt(15000)=480，最好是转成2的比方数，那就选512。
