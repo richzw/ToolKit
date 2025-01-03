@@ -791,6 +791,7 @@
     - https://github.com/anthropics/anthropic-cookbook/tree/main/patterns/agents
   - [Full RAG](https://zilliz.com/blog/full-rag-modern-architecture-for-hyperpersonalization)
     -  Batch + Streaming data + Real-time Context
+  - [談 LLM-based AI Agents](https://ihower.tw/presentation/ihower-agents-202412.pdf)
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
@@ -1214,8 +1215,14 @@
     - 假设知识全都call出来，但call出来的知识本身不清晰或者是不同的文档中对相似问题的诠释不同，模棱两可的知识容易让大模型想不通以至于幻觉
     - 从知识标签到文档优先级
       - 文档优先级运用思路 结合CoT的Ref Selection
-
-
+- [RAG summary](https://mp.weixin.qq.com/s/Ps4nZShTuuGFQo6TH_5LZQ)
+  - RAG 面临的问题，主要就三类：
+    - 针对非结构化多模态文档无法提供有效问答。
+      - 基于 VLM 和延迟交互模型实现多模态 RAG
+    - 采用纯向量数据库带来的低召回和命中率，从而无法针对实际场景提供有效问答，这主要是因为向量表征不仅缺乏对精确信息的表达，对语义召回也有损耗
+      - BM25 和混合搜索的崛起
+    - RAG 的本质是搜索，它能工作的前提在于根据用户的提问，可以“搜”到答案所在。但是在很多情况下，这个前提不存在，例如一些意图不明的笼统提问，以及一些需要在多个子问题基础之上综合才能得到答案的所谓“多跳”问答，
+      - GraphRAG RAG 的一些核心问题——这就是语义鸿沟
 
 
 

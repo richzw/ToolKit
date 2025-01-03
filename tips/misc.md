@@ -217,7 +217,14 @@
   - `sytstemctl status foobar.service`
 - [闰秒](https://mp.weixin.qq.com/s/LsHoTiwuQpxYoN5kKmTWug)
 - [Parquet格式]
-  - Parquet作为一种列式存储的开源文件格式
+  - 优势
+    - Parquet作为一种列式存储的开源文件格式
+    - Parquet 支持多种压缩算法（如 Snappy、GZIP 等），并通过字典编码和运行长度编码（RLE）等技术进一步减少数据体积。
+    - Parquet 不仅支持基本的数据类型（如整数、字符串等），还支持嵌套数据结构（如数组、映射等）。这使得 Parquet 非常适合存储半结构化数据（如 JSON、XML）
+  - 高级特性
+    - 对于重复值较多的列（如“城市”），Parquet 会使用字典编码来压缩数据。例如，将“北京”、“上海”、“广州”映射为整数索引，从而减少存储空间。
+    - 对于连续重复的值（如“年龄”），Parquet 会使用 RLE 来进一步压缩数据。例如，如果某列的值为 [25, 25, 25, 30, 30]，RLE 会将其编码为 (25, 3), (30, 2)。
+    - Parquet 文件的元数据记录了每个行组的最小值和最大值，查询引擎可以根据这些信息跳过不相关的行组
 - Bypassing Rate Limit Protection
   - IP Rotator 
     - If developer implemented rate limit in such a way that the application blocks the IP address of attacker after few requests, 
