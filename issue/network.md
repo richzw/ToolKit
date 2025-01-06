@@ -970,7 +970,12 @@
   - 网络收包处理，在由网卡中断触发，Kernel 的中断处理分两部分：上半部分处理 hardirq，做的事情很少，只是处理中断信号然后 schedule softirq，即下半部分。softirq 会真正做协议栈的处理。
   - 用 trace-irqoff 这个工具来跟踪中断处理的延迟
   - 我们没有使用 IPVS 提供的这些统计信息，所以这个函数可以关闭。目前已经可以通过 sysctl 参数关闭了5，不需要打 patch：sysctl -w net.ipv4.vs.run_estimation=0。
-
+- ping
+  - -i 控制 ping 包的间隔；
+  - -c ping 包的数量；
+  - -I 指定网卡
+  - -s 指定 ping 包大小，用来测试 MTU
+  - -f flood ping 测试性能常用，大规模 ping 来判断个别丢包
 
 
 

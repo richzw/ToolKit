@@ -28,7 +28,19 @@
         - 当你又调用insert增加一条数据时，这条新数据实际上是放入一个新的segment中，这条新数据也会占用额外内存空间。因此，随着你继续删除+insert，你会看到内存用量增加，新的这个segment执行的是暴搜，cpu用量会增加。
         - 随着新的segment中的数据达到一定量可以建索引了，indexnode就开始给这个新segment建索引，建索引就会消耗cpu。只有当某个segment中被删的数据达到20%以上，datanode开始对这个segment进行compact，
         - 把deleted的数据去除掉，剩下的数据存为一个新的segmemt。在compact之后有可能会发生小segment合并成大segment。总之，删除和更新数据会产生很多额外的工作，消耗内存消耗cpu，设计上就如此
-    - 如果用num_enrtities观察行数的话，是看不出变化的，因为num_entities不统计被删除的行数。如果你是删除之后再用query去查询主键，还能查到的话，那八成是因为你是删完就立即query，而consistency_level没有设为Strong
+      - How to fully delete data  https://github.com/milvus-io/milvus/discussions/24875
+        - small segments are compacted to a large segment, and the small segments are marked as "soft-delete", they will be deleted by garbage collection.
+        - compaction do these work: 1. merge small segments into large segment, 2. remove deleted entities from segments
+        - garbage collection only does one thing: permanently delete the data files of the soft-delete segments
+        - once max size of segment is defined, max rows of segment also defined, a segment with max size 512MB, if vector dimension is 128, each segment will contains no more than 1 million entities.
+        - How the compaction handles a segment that contains deleted entities:
+          - Let's say there is a segment that has 1000 rows and contains 10 deleted entities. 
+          - Compactions firstly read the segment into memory, then pick non-deleted items to construct a new segment with 990 rows.
+          - The original segment is marked as soft-delete and wait gc to clean. And index node will build a new index for the new segment.
+      - Configs
+        - GlobalCompactionInterval means the internal machinery triggers a compaction operation every minute "dataCoord.compaction.global.interval"
+        - the SingleCompactionRatioThreshold is for this purpose. You can change this threshold to 10%, but don't set it to 0.
+      - 如果用num_enrtities观察行数的话，是看不出变化的，因为num_entities不统计被删除的行数。如果你是删除之后再用query去查询主键，还能查到的话，那八成是因为你是删完就立即query，而consistency_level没有设为Strong
 - [动态 Schema](https://mp.weixin.qq.com/s/jhyePhxjUbWBicEvqxIKGQ)
   - Milvus 如何实现动态 Schema 功能
     - Milvus 通过用隐藏的元数据列的方式，来支持用户为每行数据添加不同名称和数据类型的动态字段的功能。
@@ -565,7 +577,7 @@
     - 如何查看日志？
       -  https://github.com/milvus-io/milvus/tree/master/deployments/export-log 这里有脚本可以看日志 
     - 日志里面待构建索引行数和已构建索引行数之和大于数据总行数是什么原因呢？而且这个pendingIndexRows的数量还会增加是怎么回事呢？ 索引的已构建行数最大是等于表的总行数
-      - pendingrow增加是因为里面有compaction，有些segment已经建好了索引，但它要和其他segment合并成更大的srgment，合并完之后又会再次建索引
+      - pendingrow增加是因为里面有compaction，有些segment已经建好了索引，但它要和其他segment合并成更大的segment，合并完之后又会再次建索引
     - 按照标量查询数据，同样的表达式，为什么一个有结果一个没结果？
       - 表达式过滤搜索时，如果带有索引比如ivf_flat索引，查出的结果可能有时有有时没有，因为内部是先过滤再做ann search。你换成FLAT就有稳定结果。
     - milvus如果做成一项公共向量服务，每个系统都是按需load/release索引的话，在数据量几百万/几千万这个级别的时候，搬运一次其实挺慢的，要好几秒的时间，那milvus的查询不就变得很慢了么，有没有什么好的建议?

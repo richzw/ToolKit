@@ -1756,7 +1756,9 @@
 - Cache prefetching can be accomplished either by hardware or by software.
   - Hardware based prefetching is typically accomplished by having a dedicated hardware mechanism in the processor that watches the stream of instructions or data being requested by the executing program, recognizes the next few elements that the program might need based on this stream and prefetches into the processor's cache.
   - Software based prefetching is typically accomplished by having the compiler analyze the code and insert additional "prefetch" instructions in the program during compilation itself.
-
+- [Xarry](https://mp.weixin.qq.com/s/pOkczZy4z0k88i9NwgfJKA) 
+  - Linux 内核的 Page Cache 是由 Radix Tree 管理的，Radix Tree 在内核中通过 Xarray 机制进行了很好的包装，
+  - Xarray 提供了简单易用的仿数组 API，让大部分内核组件可以像使用数组一样使用 Radix Tree。
 
 
 
