@@ -1,6 +1,7 @@
 - [Introduction to Retrieval Augmented Generation (RAG)](https://weaviate.io/blog/introduction-to-rag)
   - [Advanced RAG Techniques](https://weaviate.io/blog/advanced-rag)
   - [The Ultimate Guide to RAGs — Each Component Dissected](https://towardsdatascience.com/the-ultimate-guide-to-rags-each-component-dissected-3cd51c4c0212)
+- [RAG 2024 年度清单](https://mp.weixin.qq.com/s/0YxHilReHG5jtzhHl7zw8A)
 - [RAG速通](https://mp.weixin.qq.com/s/11NcuacIALFWcAtQ9rWaMA)
   - RAG优化核心策略主要基于Information Retrieval的2-stage经典思路展开：即同时保证高召回率和精度
     - 第一阶段：最大化召回率(High Recall)，同时接受较低的精度( Low Precision)。此阶段涵盖RAG的Indexing和Retrieval部分
@@ -500,6 +501,7 @@
     - 多条件约束失效: Q 昨天《独家新闻》统计的化学制品行业的关注度排名第几
     - 全文/多文类意图失效
     - 复杂逻辑推理: Q 近期碳酸锂和硫酸镍同时下跌的时候，哪个在上涨？
+  - [RAG Evaluation](https://weaviate.io/blog/rag-evaluation)
 - [How To Observe Your RAG Post-Deployment](https://www.rungalileo.io/blog/mastering-rag-how-to-observe-your-rag-post-deployment)
 - [Seven Failure Points When Engineering a Retrieval Augmented Generation System](https://mp.weixin.qq.com/s/iMTgxYELvESUnCFOglhcYg)
   - ![img.png](ml_rag_failure_points.png)
@@ -792,6 +794,7 @@
   - [Full RAG](https://zilliz.com/blog/full-rag-modern-architecture-for-hyperpersonalization)
     -  Batch + Streaming data + Real-time Context
   - [談 LLM-based AI Agents](https://ihower.tw/presentation/ihower-agents-202412.pdf)
+  - [Agent white paper](https://www.kaggle.com/whitepaper-agents)
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回

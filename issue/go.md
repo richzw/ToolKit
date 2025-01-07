@@ -399,7 +399,9 @@
                   return
               }
       ```
-
+    - 禁止RLock的递归调用，换句话说是在同一协程下，读锁未UnLock的情况下，禁止重复调用RLock(当然也不能调用Lock)，否则可能导致死锁
+    - golang标准库里读写锁的实现(RWMutex)，采用了writer-preferring的策略，使用Mutex实现写-写互斥，通过信号量等待和唤醒实现读-写互斥
+    - https://mp.weixin.qq.com/s/m6JPAkwUdNivsOGft-lR8w
 - [Go 程序自己监控自己](https://mp.weixin.qq.com/s?__biz=MzUzNTY5MzU2MA==&mid=2247490745&idx=1&sn=6a04327f98a734fd50e509362fc04d48&scene=21#wechat_redirect)
   - 怎么用Go获取进程的各项指标
     - 获取Go进程的资源使用情况使用[gopstuil库](github.com/shirou/gopsutil)
