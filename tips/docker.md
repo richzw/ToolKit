@@ -637,6 +637,7 @@
       CMD ["myapp"]
       ```
     - ![img.png](docker_multistage_builds.png)
+    - [Docker 多阶段构建](https://mp.weixin.qq.com/s/vYzo5bPF48NnTBmvGAb7kQ)
 - 容器干扰检测与治理
   - CPI
     - CPI 即 Cycle Per Instruction 的缩写，它的含义就是每指令周期数。此外，在一些场合，也可以经常看到 IPC，即 Instruction Per Cycle，含义为每周期指令数

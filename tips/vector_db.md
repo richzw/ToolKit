@@ -352,6 +352,9 @@
       - 如果用的是 python 的 Milvus Client，create_collection 如果没输入 index param 是不会 load 到内存里的.
       - 如果没有设置这个参数，你可以单独调用create_index()和load_collection()接口
     - 把文件上传到S3上，然后把路径传给milvus让它去读取并解析。传路径的接口在pymilvus里叫utility.do_bulk_insert()
+    - Query node加载数据原理 https://github.com/milvus-io/milvus/discussions/32698
+      - 每个collection有一根数据管道，其中有一个querynode负责管理这根管道，我们称之为shard-leader，它从管道中接收来自pulsar的数据，数据积累在内存里，称为growing segment，
+      - 当数据达到一定量，比如一百兆，就把这块数据落盘变成sealed segment，其他的querynode等加载sealed segment。
   - insert
     - 客户端发送一个insert请求
       - 客户端发送一个insert请求，milvus server的proxy接到请求，proxy把数据转发给pulsar/kafka，转发完之后就立刻返回，告诉客户端说insert完成
