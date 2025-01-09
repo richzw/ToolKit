@@ -956,10 +956,23 @@
     - 读缓存：在频繁的对于 Kubernetes 资源的【读】操作上，我们还可以借助 Clusterpedia 等工具，减轻对 API Server 以及 ETCD 的直接压力
     - 隔离方法：如果遥测服务对 API Server 压力非常大且是必须的，也可以考虑单独部署一个API Server来提供服务，这样也是有效减少爆炸半径的方案
     - 常见的性能瓶颈在 ETCD，API Server 可以通过 --etcd-servers-overrides 支持对 ETCD 进行切分。通常来说 /events （事件） ， /leases（节点心跳等） 都是比较适合放在单独的 ETCD 里面，减小其他资源访问的 ETCD 压力。
-
-
-
-
+- K8s 1.32
+  -  [QueueingHint 的调度上下文元素](https://mp.weixin.qq.com/s/41XdPwW8wqh0MDs901eGpw)
+    - QueueingHint 改进 Pod 调度重试
+- 开发K8s组件的最佳实践
+  - 规范组件 LIST 请求
+    - 必须使用全量 LIST 时添加 resourceVersion=0，从 APIServer cache 读取数据，避免一次请求访问全量击穿到 etcd；
+    - 从 etcd 读取大量数据，需要基于 limit 使用分页访问。加快访问速度，降低对控制面压力。
+  - 序列化编码方式统一
+    - 对非 CRD 资源的 API 序列化协议不使用 JSON，统一使用 Protobuf，相比于 JSON 更节省传输流量。
+  - 优选使用 Informer 机制
+    - 大规模场景下，频繁 LIST 大量资源会对管控面 APIServer 和 etcd 产生显著压力。频繁 LIST 的组件需要切换使用 Informer 机制。
+    - 基于 Informer 的 LIST+WATCH 机制优雅的访问控制面，提升访问速度，降低对控制面压力。
+  - 户端访问资源频度
+    - 客户端控制访问大规模全量资源的频度，降低对管控的资源和带宽压力。
+  - 对 APIServer 访问的中继方案
+    - 大规模场景下，对于 Daemonset、ECI pod 等对 APIServer 进行访问的场景，可以设计可横向扩容的中继组件，由中继组件统一访问 APIServer，其他组件从中继组件获取数据
+    - 例如 ACK 的系统组件 poseidon 在 ECI 场景下作为 networkpolicy 中继使用。降低管控的资源和带宽压力，提升稳定性。
 
 
 
