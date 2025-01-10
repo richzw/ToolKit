@@ -973,11 +973,22 @@
   - 对 APIServer 访问的中继方案
     - 大规模场景下，对于 Daemonset、ECI pod 等对 APIServer 进行访问的场景，可以设计可横向扩容的中继组件，由中继组件统一访问 APIServer，其他组件从中继组件获取数据
     - 例如 ACK 的系统组件 poseidon 在 ECI 场景下作为 networkpolicy 中继使用。降低管控的资源和带宽压力，提升稳定性。
-
-
-
-
-
+-  Pod 出现 UnexpectedAdmissionError
+  - 表示在 Pod 的准入控制阶段（Admission Control）发生了意外错误，导致 Pod 无法正常启动。这种错误通常与资源分配、调度器配置或设备管理相关
+  - 常见原因
+    - 资源不足或分配失败
+      • GPU 资源不足：当 Pod 请求 GPU 资源（如 nvidia.com/gpu）时，如果节点上的可用 GPU 数量不足，会导致 UnexpectedAdmissionError。例如，请求 1 个 GPU，但节点上可用 GPU 为 0。
+      • CPU 或内存资源不足：在某些情况下，CPU 管理器（CPU Manager）或内存管理器无法为 Pod 分配足够的资源，也会触发此错误
+    - 调度器配置问题
+      • 多调度器竞争：如果集群中同时存在多个调度器（如默认调度器和自定义调度器），可能会导致资源分配冲突。例如，两个调度器同时尝试分配同一资源，导致资源不足。
+      • 调度器未启用 Leader 选举：如果多个调度器实例未启用 Leader 选举（--leader-elect=false），可能会导致重复调度 Pod，进而引发资源分配失败。
+    - 设备插件问题
+      • GPU 设备插件未正确注册：如果 GPU 设备插件未正确部署或注册到 Kubelet，Kubernetes 无法识别 GPU 资源，导致 Pod 无法启动。
+      • 设备健康状态异常：如果设备插件报告的设备状态为不健康（如 no healthy devices present），Kubelet 会拒绝分配资源，导致 UnexpectedAdmissionError。
+    - 磁盘空间不足
+      • Kubelet 检查点文件写入失败：如果节点的磁盘空间不足，Kubelet 无法写入设备分配检查点文件如 kubelet_internal_checkpoint），会导致资源分配失败。
+    - 节点状态异常
+      • 节点重启或资源耗尽：如果节点重启或资源（如 CPU、内存、磁盘）耗尽，Kubelet 可能无法正确处理 Pod 的资源请求，导致 UnexpectedAdmissionError。
 
 
 

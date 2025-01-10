@@ -556,6 +556,9 @@
         - 分布式词表和词频统计：高效支持大规模语料的词频管理与计算。
         - 稀疏向量生成与相似度计算：通过语料库的词频(Corpus TF)构建稀疏向量，并基于查询词频(Query TF)和全局逆文档频率 (IDF) 构建查询稀疏向量，再通过特定的 BM25 距离函数进行相似度计算。
         - 倒排索引支持：实现基于 WAND 算法的倒排索引，同时 Block-Max WAND 算法和图索引的支持也在开发中。
+  - Milvus 3.0
+    - [Support Streaming Service in Milvus](https://github.com/milvus-io/milvus/issues/33285)
+      - 零磁盘架构（Zero-Disk Architecture） https://zhuanlan.zhihu.com/p/15809814733
   - Error Check list
     - "deny to write: memory limit exceeded" 意思是某个querynode或者datanode的内存快用光了
     - "unrecognized dtype for key: labels"  这是因为langchain.MilvusVectorStore没法根据你在Document的metadata中的"labels"这个key所对应的vlaue推断出这是个什么类型的字段
