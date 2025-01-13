@@ -37,3 +37,10 @@
   - 基于StarRocks降本增效
     - 存算分离带来成本下降
     - 在复杂SQL join能力上大幅领先Clickhouse
+- Iceberg 的真正优势
+  - 提供了多个变革性的能力，如模式演进（Schema evolution）、时间旅行（Time travel）、以及使用各种工具进行数据分析（兼容多种引擎）
+  - Iceberg 可以将 S3 buckets 转变为结构化、可查询的数据集，加上适当的访问控制，兼容任何现代查询引擎
+  - Iceberg 广泛的兼容性则可以摆脱厂商锁定。
+  - Iceberg 支持多引擎，用户可以根据任务类型选择最合适的工具。
+    - 例如，将 Iceberg 与 Snowflake 配对以处理复杂的分析查询（OLAP），与 DuckDB 配对进行轻量级分析。这类组合既节省成本，又不影响灵活性。
+  

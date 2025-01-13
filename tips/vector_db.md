@@ -23,24 +23,35 @@
         - 构建索引和内存资源是否充足
             - 性能优先，选择 HNSW 索引
 - [Milvus 2.0 数据插入与持久化](https://mp.weixin.qq.com/s/D0xdD9mqDgxFvNY19hvDgQ)
-    - 删数据逻辑
-        - 调用delete删除一条已存在的数据时，它只是在某个segment里把某条数据标记为deleted，但是这个segment的数据此时仍然是一个整体，那条被删的数在内存里仍然占着空间。
-        - 当你又调用insert增加一条数据时，这条新数据实际上是放入一个新的segment中，这条新数据也会占用额外内存空间。因此，随着你继续删除+insert，你会看到内存用量增加，新的这个segment执行的是暴搜，cpu用量会增加。
-        - 随着新的segment中的数据达到一定量可以建索引了，indexnode就开始给这个新segment建索引，建索引就会消耗cpu。只有当某个segment中被删的数据达到20%以上，datanode开始对这个segment进行compact，
-        - 把deleted的数据去除掉，剩下的数据存为一个新的segmemt。在compact之后有可能会发生小segment合并成大segment。总之，删除和更新数据会产生很多额外的工作，消耗内存消耗cpu，设计上就如此
-      - How to fully delete data  https://github.com/milvus-io/milvus/discussions/24875
-        - small segments are compacted to a large segment, and the small segments are marked as "soft-delete", they will be deleted by garbage collection.
-        - compaction do these work: 1. merge small segments into large segment, 2. remove deleted entities from segments
-        - garbage collection only does one thing: permanently delete the data files of the soft-delete segments
-        - once max size of segment is defined, max rows of segment also defined, a segment with max size 512MB, if vector dimension is 128, each segment will contains no more than 1 million entities.
-        - How the compaction handles a segment that contains deleted entities:
-          - Let's say there is a segment that has 1000 rows and contains 10 deleted entities. 
-          - Compactions firstly read the segment into memory, then pick non-deleted items to construct a new segment with 990 rows.
-          - The original segment is marked as soft-delete and wait gc to clean. And index node will build a new index for the new segment.
-      - Configs
-        - GlobalCompactionInterval means the internal machinery triggers a compaction operation every minute "dataCoord.compaction.global.interval"
-        - the SingleCompactionRatioThreshold is for this purpose. You can change this threshold to 10%, but don't set it to 0.
-      - 如果用num_enrtities观察行数的话，是看不出变化的，因为num_entities不统计被删除的行数。如果你是删除之后再用query去查询主键，还能查到的话，那八成是因为你是删完就立即query，而consistency_level没有设为Strong
+  - 删数据逻辑
+    - 调用delete删除一条已存在的数据时，它只是在某个segment里把某条数据标记为deleted，但是这个segment的数据此时仍然是一个整体，那条被删的数在内存里仍然占着空间。
+    - 当你又调用insert增加一条数据时，这条新数据实际上是放入一个新的segment中，这条新数据也会占用额外内存空间。因此，随着你继续删除+insert，你会看到内存用量增加，新的这个segment执行的是暴搜，cpu用量会增加。
+    - 随着新的segment中的数据达到一定量可以建索引了，indexnode就开始给这个新segment建索引，建索引就会消耗cpu。只有当某个segment中被删的数据达到20%以上，datanode开始对这个segment进行compact，
+    - 把deleted的数据去除掉，剩下的数据存为一个新的segmemt。在compact之后有可能会发生小segment合并成大segment。总之，删除和更新数据会产生很多额外的工作，消耗内存消耗cpu，设计上就如此
+  - How to fully delete data  https://github.com/milvus-io/milvus/discussions/24875
+    - small segments are compacted to a large segment, and the small segments are marked as "soft-delete", they will be deleted by garbage collection.
+    - compaction do these work: 1. merge small segments into large segment, 2. remove deleted entities from segments
+    - garbage collection only does one thing: permanently delete the data files of the soft-delete segments
+    - once max size of segment is defined, max rows of segment also defined, a segment with max size 512MB, if vector dimension is 128, each segment will contains no more than 1 million entities.
+    - How the compaction handles a segment that contains deleted entities:
+      - Let's say there is a segment that has 1000 rows and contains 10 deleted entities. 
+      - Compactions firstly read the segment into memory, then pick non-deleted items to construct a new segment with 990 rows.
+      - The original segment is marked as soft-delete and wait gc to clean. And index node will build a new index for the new segment.
+  - Configs
+    - GlobalCompactionInterval means the internal machinery triggers a compaction operation every minute "dataCoord.compaction.global.interval"
+    - the SingleCompactionRatioThreshold is for this purpose. You can change this threshold to 10%, but don't set it to 0.
+  - 如果用num_enrtities观察行数的话，是看不出变化的，因为num_entities不统计被删除的行数。如果你是删除之后再用query去查询主键，还能查到的话，那八成是因为你是删完就立即query，而consistency_level没有设为Strong
+  - Compaction https://github.com/milvus-io/milvus/discussions/28565  https://milvus.io/blog/2022-2-21-compact.md
+    - When you continually insert data into milvus, the data is not persisted into storage instantly. Querynode accumulates the data in memory to perform brute-force search on it.
+    -  Datanode accumulates the data in a buffer until the buffer size exceeds a threshold. The threshold is dataCoord.segment.maxSize * dataCoord.segment.sealProportion, after the datanode flushes the buffer into storage, the data becomes a "sealed segment".
+    - The value dataCoord.segment.sealProportion is 0.23, this value should not be too large or too small, the reason is:
+      - only "sealed segment" can be indexed, before the "growing segment" is sealed, it always performs brute-force search and slows down the search performance. If this value is large, a large "growing segment" will lead to poor search performance.
+      - If the value is small, there will be lots of small sealed segments generated, large number of small segments also slows down search performance, and brings heavy workload to datanode to compact them.
+    - The major purposes of compaction:
+      - merge small segments into large segments because large amount of small segments slows down search performance. Ideally, the size of each segment is near to dataCoord.segment.maxSize=512MB.
+      - in milvus, delete action is "soft-delete". When you call delete(), an entity is marked as "soft-deleted" in a segment, it is invisible/ignored to search/query, but still occupies memory and storage space.
+    - Milvus builds an independent index for each segment. So, if segments are compacted to a new segment, the old segments are marked as "deleted" and waiting for GC
+      - and indexnode will build index for the new segment. Set indexBasedCompaction to true can avoid unnecessary index work.
 - [动态 Schema](https://mp.weixin.qq.com/s/jhyePhxjUbWBicEvqxIKGQ)
   - Milvus 如何实现动态 Schema 功能
     - Milvus 通过用隐藏的元数据列的方式，来支持用户为每行数据添加不同名称和数据类型的动态字段的功能。
