@@ -1492,8 +1492,22 @@
       - 新 SYN 的序列号比服务器端期望的下一个收到的序列号要小，并且新 SYN 的时间戳比服务器端最后收到的数据包的时间戳要大，则服务器端接收 SYN 请求，进而正常建立连接；
       - 新 SYN 的序列号比服务器端期望的下一个收到的序列号要小，并且新 SYN 的时间戳比服务器端最后收到的数据包的时间戳要小，则服务器端不接收 SYN 请求，重新刷新 TW 状态计时，并响应一个 ACK 数据包。
   - TCP Time-Wait 状态下收到 RST 数据包会发生什么现象
-    - 无时间戳的场景，新 SYN 的序列号比服务器端期望的下一个收到的序列号要小，服务器会响应一个 ACK（与之前连接第四次挥手 ACK 一样），之后客户端收到后发现并不是自己期望的 ACK num，就会回 RST 报文给服务器端
-    - 有时间戳的场景，新 SYN 的时间戳比服务器端最后收到的数据包的时间戳要小，服务器会响应一个 ACK（与之前连接第四次挥手 ACK 一样），之后客户端收到后发现并不是自己期望的 ACK num，就会回 RST 报文给服务器端
+    - 无时间戳的场景
+      - net.ipv4.tcp_rfc1337 为 0，则收到了 RST 后会提前结束 TIME_WAIT 状态，释放连接；
+        - The net.ipv4.tcp_rfc1337 parameter in Linux is a sysctl setting that controls how the TCP stack handles connections in the TIME_WAIT state
+        - TIME_WAIT Assassination
+          - Session Hijacking Risks: Improper handling of incoming RST or SYN packets can allow malicious actors to disrupt existing sessions or hijack connections.
+          - Connection Confusion: New connections could be confused with old ones if the ports are reused too quickly, leading to data corruption or loss.
+          - Resource Exhaustion: Servers can run out of available ports for new connections if TIME_WAIT states are not managed properly
+        - RFC 1337, titled "TIME-WAIT Assassination Hazards in TCP", 
+          - outlines the hazards associated with improper handling of the TIME_WAIT state and provides recommendations to mitigate these issues
+          - it advises that TCP implementations should ignore RST segments for connections in TIME_WAIT and handle incoming SYN segments carefully to prevent premature termination.
+      - net.ipv4.tcp_rfc1337 为 1，则直接丢弃 RST 数据包。
+    - 有时间戳的场景
+      - 时间戳比服务器端最后收到的数据包的时间戳要小，直接丢弃 RST 数据包。
+      - 时间戳比服务器端最后收到的数据包的时间戳要大。
+        - net.ipv4.tcp_rfc1337 为 0，则收到了 RST 后会提前结束 TIME_WAIT 状态，释放连接；
+        - net.ipv4.tcp_rfc1337 为 1，则直接丢弃 RST 数据包
 - [Wireshark手册](https://www.ilikejobs.com/posts/wireshark/)
   - [Wireshark != 和 !==](https://mp.weixin.qq.com/s/yXbnCjelmdBOG1BgUFAexA)
     - 显示过滤表达式 ip.addr != 192.168.0.1 的结果显示为空，意味着没有源和目的 IP 值都不是 192.168.0.1 的数据包，也就是 all ；
