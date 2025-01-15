@@ -308,6 +308,11 @@
       - 内存里有小部分量化过的数据，搜索的时候先在内存里做一次快速搜索，然后在localstorage里找到对应的分块文件，读出原始向量做精确检索
     - 查询延迟就主要跟querynode有关，有时querynode资源充足而proxy节点不太行的话，proxy也有可能成为瓶颈
     - milvus目前的querynode做负载均衡的时候是根据行数来估算的，如果某一个entity的text列特别大，有的特别小，balance是个挑战
+    - query node cpu https://github.com/milvus-io/milvus/discussions/25571
+      - a search request CPU usage is estimated by cpuRatio * nq * segment_count
+      - Assume a query node has 16 cores, we say the CPU ability is 1600. The collection has 5 segments. Now you send 100 search requests at the same time with nq=8. cpuRatio=10.
+        - The search engine estimates usage of each request to be 8510=400. Then it allows 1600/400=4 requests to be executed at the same time
+      - maxNQ is for search requests combination. The search engine can combine similar search requests into a big request to execute.
   - 索引
     - [index overview](https://www.slideshare.net/slideshow/introduction-to-multilingual-retrieval-augmented-generation-rag/267957576)
       - L2 (Euclidean) - Spatial distance 主要运用于计算机视觉领域

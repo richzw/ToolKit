@@ -931,6 +931,7 @@
     - Advanced RAG 系统设计了预检索、检索和后检索策略来弥补朴素 RAG 的不足，而模块化 RAG 系统则采用迭代和动态循环检索生成模式。
     - Graph RAG 结合了多个系统的概念，如社区概要作为自我记忆用于增强检索，以及社区答案的并行生成类似于迭代或联邦检索-生成策略。其他系统也集成了这些概念进行多文档摘要和多跳问答
   - [From Knowledge Graphs to GraphRAG: Advanced Intelligent Data Retrieval](https://div.beehiiv.com/p/knowledge-graphs-graphrag-advanced-intelligent-data-retrieval)
+  - [Graph Data Models for RAG Applications](https://neo4j.com/developer-blog/graph-data-models-rag-applications/?utm_campaign=DeveloperBlog&utm_content=&utm_medium=&utm_source=LinkedIn&utm_justglobal=NA)
   - Sample
     - https://colab.research.google.com/github/tomasonjo/blogs/blob/master/llm/llama_relik.ipynb
     - https://towardsdatascience.com/graph-rag-into-production-step-by-step-3fe71fb4a98e
