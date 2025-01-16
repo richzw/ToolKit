@@ -1106,8 +1106,14 @@
   - 使用 runtime 包获取 goroutine id
     - 虽然不能直接获取每个 goroutine 的 id，但我们可以变相的通过 runtime.Stack 函数来获取。
 - [Go网络编程](https://mp.weixin.qq.com/s/ns7PSoRqoZGQ2JrvDHj7tg)
-
-
+- [Go编译时插桩工具导致go build -race竞态检测产生崩溃](https://mp.weixin.qq.com/s/0NOn7R86-9DyMkNr9tP20A)
+  - 使用otel go build -race替代正常的go build -race命令后，编译生成的程序会导致崩溃。
+  - 程序崩溃的原因如下：
+    - newproc1 中插入的 contextPropagate 调用TakeSnapshot，而TakeSnapshot被 go build -race 强行在函数开始插入了 racefuncenter() 函数调用，该函数将使用 racectx。
+    - newproc1 是在 g0 协程执行下运行，该协程的 racectx 字段是 0，最终导致崩溃。
+  - 一个解决办法是给TakeSnapshot加上 Go编译器的特殊指令 //go:norace，该指令需紧跟在函数声明后面，用于指定该函数的内存访问将被竞态检测器忽略，Go编译器将不会强行插入racefuncenter()调用。
+  - TakeSnapShot 中有 map 初始化和 map 循环操作，这些操作会被编译器展开成 mapinititer() 等函数调用。这些函数直接手动启用了竞态检测器，而且无法加上 //go:norace
+  - 对此问题的解决办法是在newproc1注入的代码里面，避免使用map数据结构
 
 
 

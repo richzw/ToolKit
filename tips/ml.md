@@ -788,6 +788,24 @@
     - 自我完善（SR）。o1在推理过程中评估其推理过程，以确定是否存在任何问题并纠正任何错误。
     - 上下文识别（CI）。对于一些需要额外信息输入的数据集（例如HotpotQA），o1首先总结与查询相关的上下文的不同方面，然后给出相应查询的响应。
     - 强调约束（EC）。对于一些对生成文本有约束的数据集（例如Collie），o1通常在推理过程中强调相应的约束。
+  - [o1 isn’t a chat model](https://www.latent.space/p/o1-skill-issue)
+    - 不要只是写提示，而要写完整的“简报” (Brief) 要提供大量上下文。
+    - 专注于目标：明确告诉它“想要什么”，而非“怎么做”
+      - focus on explaining what you want the output to be.
+    - o1 擅长的：
+      - 完美地一次生成整个文件或多份文件
+      - 更少的“胡编乱造”（Hallucination）
+      - 医学诊断
+      - 解释概念
+      - Evals（评估）
+    - o1 不擅长的（目前）：
+      - 以特定风格或语气来写作
+      - 从零构建完整应用
+    - 参考的 o1 提示词结构：
+      - 目标（Goal）
+      - 返回格式（Return Format）
+      - 警示（Warnings）
+      - 上下文（Context Dump）
   - [多语言向量模型的语言鸿沟（Language Gap）](https://mp.weixin.qq.com/s/ESlsTPnydjHCeQytgRdpuQ)
     - 不同语言中表达相同含义的短语，它们的向量却可能相距甚远，无法有效对齐。
     - 多语言模型的棘手挑战
