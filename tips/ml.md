@@ -813,6 +813,10 @@
       - 对比学习（Contrastive Learning）
         - 预训练完成后，我们会用一些精心挑选或者半自动构建的数据集，继续训练模型。这里的目标是让语义相似的文本向量靠得更近，同时（可选地）将语义不相似的文本向量推得更远。
   - [Diffusion Transformer (DiT)](https://x.com/ProfTomYeh/status/1866278836234784813)
+  - [ReaderLM v2](https://jina.ai/news/readerlm-v2-frontier-small-language-model-for-html-to-markdown-and-json/)
+    - 用于 HTML 转 Markdown 和 JSON 的前沿小型语言模型
+    - 𝗰𝘂𝗿𝗹 𝗵𝘁𝘁𝗽𝘀://𝗿.𝗷𝗶𝗻𝗮.𝗮𝗶/𝗵𝘁𝘁𝗽𝘀://𝗻𝗲𝘄𝘀.𝘆𝗰𝗼𝗺𝗯𝗶𝗻𝗮𝘁𝗼𝗿.𝗰𝗼𝗺/ -𝗛 '𝘅-𝗲𝗻𝗴𝗶𝗻𝗲: 𝗿𝗲𝗮𝗱𝗲𝗿𝗹𝗺-𝘃𝟮' -𝗛 '𝗔𝗰𝗰𝗲𝗽𝘁: 𝘁𝗲𝘅𝘁/𝗲𝘃𝗲𝗻𝘁-𝘀𝘁𝗿𝗲𝗮𝗺'
+    - https://colab.research.google.com/drive/1FfPjZwkMSocOLsEYH45B3B4NxDryKLGI?usp=sharing
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]
@@ -1017,6 +1021,7 @@
         - Efficient Resource Utilization: vLLM optimizes the use of critical resources such as CPUs, GPUs, and memory
         - Seamless Integration: Designed to integrate smoothly with existing machine learning frameworks and libraries, vLLM provides a user-friendly interface.
       - [vLLM核心技术PagedAttention原理](https://mp.weixin.qq.com/s?__biz=Mzg2NjcwNjcxNQ==&mid=2247485614&idx=1&sn=5600ea665d942b7ff290caded1e2252f&chksm=ce47fcdaf93075cc4582bfb15eb822840c332d56122df5b59bd8722426d07ac5b097cf032ba4&scene=21#wechat_redirect)
+      - [Structured Decoding in vLLM: A Gentle Introduction](https://www.bentoml.com/blog/structured-decoding-in-vllm-a-gentle-introduction)
     - [vLLM eBay推理平台的工程实践](https://mp.weixin.qq.com/s/y7OkAy-_H0J12ngexVRkvg)
     - [模型部署与推理](https://mp.weixin.qq.com/s/glPPSqHjsnDjC0DZSuuPzA)
       - 模型压缩

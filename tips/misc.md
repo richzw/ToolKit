@@ -296,3 +296,4 @@
   -  通过 http://ipqualityscore.com 评估 IP 可信度
   -  使用 http://ipinfo.io 查看个人 IP 属性
   -  http://whoer.net 检测 IP 伪装程度 http://ipcheck.ing 提供中文界面检测服务
+- [Learning CUDA by optimizing softmax](https://maharshi.bearblog.dev/optimizing-softmax-cuda/)
