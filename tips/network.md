@@ -1555,8 +1555,9 @@
   - https://mp.weixin.qq.com/s/oGswwbhca6kDXzGnPF_I_Q
 - netcap 可以几乎跟踪整个内核网络协议栈（有skb作为参数的函数）
   - https://github.com/bytedance/netcap
-- Wireshark 高级过滤技巧 x == ${x}
+- Wireshark 高级过滤技巧 x == ${x} 其中 x 代表字段名
   - 显示过滤器表达式 tcp.stream == ${tcp.stream}
+  - 显示过滤器 tcp.stream = 1
 - Wireshark 过滤只有请求没有响应的数据包
   - http.request && !http.response_in
 - [Linux 网络报文收发路径](https://github.com/ForceInjection/linux-from-beginner-to-master/tree/main/net)

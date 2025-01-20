@@ -675,7 +675,11 @@
     - MAC地址欺骗 (MAC Address Spoofing)：攻击者更改其设备的MAC地址以模仿另一设备，可能导致对网络访问控制的绕过。
     -  ARP欺骗 (ARP Spoofing)：通过发送伪造的ARP消息，攻击者可以将自己的MAC地址与另一IP地址关联起来，从而劫持流量或进行中间人攻击。
     -  交换机泛洪 (Switch Flooding)：通过向交换机发送大量的以太网帧，每个帧都有不同的源MAC地址，导致交换机的地址表溢出，使其退化为一个集线器，广播所有流量。
-
+- HTTP -> HTTPS
+  - If you've got an internal HTTPS service, but your load balancer, ingress gateway, or the like only allows HTTP destinations, you can work it around with a simple socat command.
+    ```bash
+    socat TCP-LISTEN:80,fork,reuseaddr TCP:localhost:443, verify=0
+    ```
 
 
 
