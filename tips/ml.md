@@ -1,6 +1,8 @@
 - [AIGC知识库](https://longalong.feishu.cn/wiki/Jm3EwrFcIiNZW7k1wFDcGpkGnfg?table=tblMuhjq52WBho11&view=vewj3UlzIX)
   - [Top AI cheatsheet](https://www.aifire.co/p/top-ai-cheatsheets)
   - [Understanding Deep Learning](https://udlbook.github.io/udlbook/)
+  - [LLM Course](https://github.com/mlabonne/llm-course)
+    - https://mlabonne.github.io/blog/
 - [基于趋势和季节性的时间序列预测](https://mp.weixin.qq.com/s/Ln4E9iZd3b3EZqeEjNNsag)
   - 时间序列模式
     - 时间序列预测模型使用数学方程(s)在一系列历史数据中找到模式。然后使用这些方程将数据[中的历史时间模式投射到未来。

@@ -1434,6 +1434,8 @@
     - GPU的定位非常简单，就是纯计算，GPU绝不是用来取代CPU的，CPU只是把一些GPU非常擅长的事情交给它，GPU仅仅是用来分担CPU工作的配角。
     - ![img.png](os_cpu_gpu_cuda.png)
     - GPU的计算场景是这样的：1)计算简单；2）重复计算。
+  - [CPU和GPU介绍](https://mp.weixin.qq.com/s/YoJHG8j9N_xDV3JT7fqFYQ)
+    - 
 - [计算机系统中的异常 & 中断](https://mp.weixin.qq.com/s/8Plas3j-e5bavs8xvb_tmQ)
   - 中断和异常可以归结为一种事件处理机制，通过中断或异常发出一个信号，然后操作系统会打断当前的操作，然后根据信号找到对应的处理程序处理这个中断或异常，处理完毕之后再根据处理结果是否要返回到原程序接着往下执行。
   - An interrupt is an asynchronous event that is typically triggered by an I/O device.

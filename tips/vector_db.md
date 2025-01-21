@@ -107,7 +107,11 @@
             - Annoy uses two tricks to improve accuracy/recall 
               - 1) traversing down both halves of a split if the query point lies close to the dividing hyperplane, and 
               - 2) creating a forest of binary trees.
-            - Annoy is still an in-memory index
+            - Annoy is still an in-memory index, the number of trees (n_trees) and the number of nodes explored (search_k), allow users to balance accuracy and speed
+              - Number of Trees (n_trees): Increasing the number of trees improves search accuracy but requires more storage and computation during queries.
+              - Search Effort (search_k): This parameter determines how many candidate points the system evaluates during a query. Higher values lead to better accuracy at the cost of increased query time.
+            - Annoy traverses several trees in parallel to narrow down the search space when performing a query. 
+              - The results from all trees are combined to approximate the nearest neighbors to the query vector.
         - 哈希方法，如 Local Sensitive Hashing (LSH)
         - 矢量量化方法，如 Product Quantization (PQ)
           - PQ将大向量空间分解为更小的子空间，并为这些子空间的每一个独立地学习一组有限的“代码簿”。向量被编码为这些子空间中最近的代码簿条目的索引

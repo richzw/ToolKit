@@ -297,3 +297,42 @@
   -  使用 http://ipinfo.io 查看个人 IP 属性
   -  http://whoer.net 检测 IP 伪装程度 http://ipcheck.ing 提供中文界面检测服务
 - [Learning CUDA by optimizing softmax](https://maharshi.bearblog.dev/optimizing-softmax-cuda/)
+- [NeighborHash]
+  - 场景
+    - 只有导入没有commit，过程中没有一致性要求，只需要最终一致性，也就是一个在线分析处理 (OLAP) 系统。我们应用场景的特点是批量点查、无范围查询需求且查询命中率高
+    - 相比于Skip-list 、 B+ Tree等KV数据结构，hash-map是最快的
+  - 传统哈希表中，通常使用Separate Chaining 和 Open Addressing来解决哈系统冲突 
+    - Separate Chaining
+      - 优势：pointer stability，比较次数可控，冲突容忍高
+      - 劣势：high cache miss，查询性能比较差，内存利用率低
+    - Open Addressing
+      - 优势：cache命中率好，查询性能高（low load-factor）
+      - 劣势：pointer instability，high load-factor性能变差，内存利用率低
+  - https://github.com/slow-steppers/NeighborHash/commits/main/
+  - Linear probing在低负载下可以保持很好的cache locality和查询性能，但是高负载下会急速退化，而Separate chaining虽然有确定性的跳转，但是cache locality差
+  - NeighborHash在设计上除了尝试结合前述两种方案的优势，还借鉴了Swiss-Table 在 SIMD（单指令多数据）上的使用，来加速比较过程
+  - 与CoalescedHash类似，NeighborHash在一个Flat Array中建立seperated chaining，但是不同于CoalescedHash通过Cellar Region处理冲突
+  - NeighborHash采用了Lodger Relocation的方式来处理冲突，并采用Bidirectional Cacheline-aware的方法来进行probing
+  - 为了进一步优化内存访问，采用inline-chaining来表示冲突链表
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
