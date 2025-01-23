@@ -126,6 +126,20 @@
           - efConstruction：构建索引时的动态候选列表大小。一般来说，候选队列越长，索引质量越好，索引构建时间也就会越长。
           - efSearch：搜索阶段的动态候选列表的大小。一般来说，efSearch越高，召回率越高，但是搜索过程会比较慢。
     - 近似最近邻 (ANN)算法
+      - Voyager vs. Annoy  https://zilliz.com/learn/what-is-voyager
+        - Annoy was one of the earliest libraries Spotify used for ANN search. It relies on tree-based indexing, which is effective for static datasets but requires full index rebuilds for updates.
+        - Voyager addresses this limitation with dynamic indexing, making it better suited for real-time and dynamic applications
+        - Voyager outperforms Annoy in terms of speed and accuracy, especially as datasets grow larger.
+      - Voyager vs. hnswlib
+        - Hnswlib is a well-known implementation of the HNSW algorithm. While it offers excellent performance and accuracy, 
+          - it lacks production-grade features like multi-language support and fault tolerance.
+        - Voyager builds on hnswlib by adding these enhancements, making it a more robust and versatile tool for real-world deployments.
+      - Voyager vs. ScaNN
+        - ScaNN, short for Scalable Nearest Neighbors, excels in inner-product search but does not support dynamic datasets. This limitation makes it less suitable for real-time systems that require frequent updates.
+        - Voyager’s flexibility and support for evolving data make it a better choice for dynamic environments
+      - Voyager vs. Faiss
+        - Faiss is optimized for GPU-accelerated batch processing, making it ideal for offline tasks like training or preprocessing large datasets.
+        -  Voyager is designed for real-time applications, with CPU-based operations that allow for dynamic indexing and low-latency responses.
   - [Comprehensive Guide To Approximate Nearest Neighbors Algorithms](https://towardsdatascience.com/comprehensive-guide-to-approximate-nearest-neighbors-algorithms-8b94f057d6b6)
     - 「LSH」（Locality-Sensitive Hashing）」它引入了一种哈希函数，使得相似的输入能以更高的概率映射到相同的桶中，其中桶的数量远小于输入的数量。
     - 「ANNOY（Approximate Nearest Neighbors）」它的核心数据结构是随机投影树，实际是一组二叉树，其中每个非叶子节点表示一个将输入空间分成两半的超平面，每个叶子节点存储一个数据。二叉树是独立且随机构建的，因此在某种程度上，它模仿了哈希函数。ANNOY会在所有树中迭代地搜索最接近查询的那一半，然后不断聚合结果。这个想法与 KD 树非常相关，但更具可扩展性。
@@ -239,6 +253,21 @@
       - flush operate is needed to ManualCompaction success
     - PV卷（查询节点和索引节点所在容器中的/var/lib/milvus/data使用的PV卷）挂载到NVMe SSD 上就可以。values.yaml中的queryNode.disk.enabled和indexNode.disk.enabled跟queryNode.enableDisk是一样的作用，
       - 相当于是在values.yaml中加了设置磁盘索引的快捷入口，你用了values.yaml里的这个配置，就不用milvus.yaml里的配置了
+    - [Milvus Kafka Topic 命名规则](https://xie.infoq.cn/article/44c20de81d705ec44c857e094)
+      - 配置文件中的 chanNamePrefix
+      - Milvus 会创建三种类型的 Topic：
+        - Datacoord-timetick-channel——chanNamePrefix.cluster-chanNamePrefix.dataCoordTimeTick
+        - Dml channel--chanNamePrefix.cluster-chanNamePrefix.rootCoordDml
+        - Delta channel--chanNamePrefix.cluster-chanNamePrefix.rootCoordDelta
+      - Milvus utilizes two types of channels, PChannel and VChannel. https://github.com/milvus-io/milvus/discussions/36095
+        - Each PChannel corresponds to a topic for log storage --- physical channel
+        - Each VChannel corresponds to a shard in a collection ----- virtual channel
+        - Multiple vchannels can share one pchannel.
+          - A P-channel does not always serve one collection. V-channel is assigned to a P-channel by a runtime balancer.
+          - A collection with multiple vchannels, the multiple vchannels could be assigned to multiple pchannels, or assigned to a single P-channel, depending on the runtime balancer.
+      - Each kafka topic is a "physical channel". The number of physical channels is defined in the milvus.yaml `rootCorrd.dmlChannelNum`
+      - By default, milvus creates 16 physical channels during startup
+      - 
   - [查询](https://milvus.io/blog/deep-dive-5-real-time-query.md)
     - milvus的调用顺序可以是：建表，insert，建索引，load，search
       - 也可以是：建表，建索引，insert，load，search

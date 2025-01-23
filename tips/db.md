@@ -1632,7 +1632,10 @@
     - 压缩Compression
     - 隐式连接
 - [PostgreSQL 内参：深入解析运行原理](https://postgres-internals.cn/)
-
+- PostgreSQL and MySQL’s binary search for MVCC visibility isn’t scalable, causing issues in NUMA with high concurrency in read-committed isolation. 
+  - In NUMA setups, binary search struggles with large datasets under high concurrency
+  - A single CPU timeslice might not finish the task and could jump to another NUMA node. 
+  - Data migration between nodes consumes valuable cross-node memory bandwidth, leading to a throughput collapse.
 
 
 
