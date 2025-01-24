@@ -708,6 +708,9 @@
       - 大规模数据集构建，采用自指导风格，使用UltraChat数据集，随后进行蒸馏式监督微调（dSFT）。
       - 通过一系列聊天模型完成和随后的GPT-4（UltraFeedback）评分来收集人工智能反馈（AIF），然后将其转化为偏好数据。
       - 将蒸馏直接偏好优化（dDPO）应用于使用收集的反馈数据的dSFT模型
+  - [ModernBERT](https://jina.ai/news/what-should-we-learn-from-modernbert/)
+    - 词汇表大小很重要 - 词汇权重不参与注意力机制 - 它们只是查找表
+    - 通过"权重平铺"进行模型扩展
   - BGE-M3, Splade 模型, BM25
     - BGE-M3 和 Splade 均基于 BERT 架构发展
     - BGE-M3
