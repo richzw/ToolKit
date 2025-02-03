@@ -625,6 +625,7 @@
       - 前一种情况可以通过手动调用compact就能重建bloomfilter。后一种情况相当于数据丢了回不来了，只能用birdwatcher的segment drop命令把被误删的segment信息从etcd里清除。
     - request limit exceeded[limit=1024] - 调整proxy.maxTaskNum这个参数
   - QA
+    - [De duplication of the same vector](https://github.com/milvus-io/milvus/issues/5607)
     - 为何不用float64来保证小数点后十几位？
       - 一来因为float32计算起来比float64快得多，也省内存。
       - 二来向量搜索简称ANNS，本身就是近似搜索，小数点后十几位的值没有意义，就好比我们比较两个人是否长得相似不会去一根根计算他们的头发数量是否相等。

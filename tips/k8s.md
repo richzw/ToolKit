@@ -989,7 +989,9 @@
       • Kubelet 检查点文件写入失败：如果节点的磁盘空间不足，Kubelet 无法写入设备分配检查点文件如 kubelet_internal_checkpoint），会导致资源分配失败。
     - 节点状态异常
       • 节点重启或资源耗尽：如果节点重启或资源（如 CPU、内存、磁盘）耗尽，Kubelet 可能无法正确处理 Pod 的资源请求，导致 UnexpectedAdmissionError。
-
+- Deep Dive into Kubernetes CronJobs
+  - https://mp.weixin.qq.com/s/bHeJRsF-8EmiUi-w4KQBrQ
+  - https://scaibu.medium.com/technical-deep-dive-into-kubernetes-cronjobs-automation-at-scale-c258864a3bf0
 
 
 

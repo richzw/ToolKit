@@ -1345,6 +1345,7 @@
     - Creating prompts and schemas from scratch can be time-consuming, so generating them can help you get started quickly. The Generate button uses two main approaches:
       - Prompts: We use meta-prompts that incorporate best practices to generate or improve prompts.
       - Schemas: We use meta-schemas that produce valid JSON and function syntax.
+  - OpenAI Operator 系统提示词 https://baoyu.io/blog/openai-operator-system-prompts-cn
 - [o1 prompt advice](https://platform.openai.com/docs/guides/reasoning/advice-on-prompting)
   - Keep prompts simple and direct: The models excel at understanding and responding to brief, clear instructions without the need for extensive guidance.
   - Avoid chain-of-thought prompts: Since these models perform reasoning internally, prompting them to "think step by step" or "explain your reasoning" is unnecessary.
