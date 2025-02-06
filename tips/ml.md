@@ -420,6 +420,7 @@
     - 图解
       - ![img.png](ml_transformer_encoder1.png)
   - [从神经网络原理、Transformer模型演进](https://mp.weixin.qq.com/s/OWTcGPHb4xGThaYsNcTn7w)
+  - [Transformer模型：分步骤数学实例解析](https://mp.weixin.qq.com/s/DOQfm8tHoXKKSEvz9c8Nvg)
   - [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html)
     - Harvard NLP 的 The Annotated Transformer 是一个非常好的学习 Transformer 的资源
   - [Infini-attention transformer](https://arxiv.org/abs/2404.07143)

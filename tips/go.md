@@ -2112,6 +2112,8 @@
     - SIMD 代表“单指令多数据”(Single Instruction Multiple Data)
     - 它允许你用一条指令在一堆数据上运行一个操作。举个例子，要对两个int32向量逐元素相加，我们可以用ADD指令一个一个地加起来，或者我们可以用VPADDD指令一次加上 64 对，延迟相同
   - [Binary Search Tree with SIMD](https://clement-jean.github.io/simd_binary_search_tree/)
+  - 单指令多数据流（SIMD，Single Instruction Multiple Data）是一种并行计算技术，允许一条指令同时处理多个数据点。通常用于向量化计算。现代 CPU（如 Intel 的SSE/AVX、ARM 的NEON）都提供了 SIMD 指令集
+  - https://mp.weixin.qq.com/s/aYpVONfKLzfyTg9JUp8sow
 - [10亿行的挑战](https://github.com/gunnarmorling/1brc)
   - https://mp.weixin.qq.com/s/_z801oBwANP27C-BXbHNZA
 - [ I/O聚合]

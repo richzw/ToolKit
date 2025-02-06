@@ -353,7 +353,15 @@
       - IP (Inner Product) - Both - 主要运用于自然语言处理（NLP）领域
         - With normalized vectors, IP is equivalent to cosine similarity
       - SQ - Scalar Quantization - Bucketize across one dimension, accracy x memory tradeoff
+        - The dimensions in a vector embedding are usually represented as 32 bit floats. SQ transforms the float representation to an 8 bit integer. This is a 4x reduction in size.
+        - like BQ, is a lossy compression technique. However, SQ has a much greater range.
+        - SQ compressed vectors are more accurate than BQ compressed vectors
       - PQ - Product Quantization - bucketize across multiple dimensions, accuracy x memory tradeoff
+        - First, it reduces the number of vector dimensions to a smaller number of "segments",
+        - then each segment is quantized to a smaller number of bits from the original number of bits (typically a 32-bit float).
+        - PQ makes tradeoffs between recall, performance, and memory usage. This means a PQ configuration that reduces memory may also reduce recall.
+      - BQ - Binary quantization - a quantization technique that converts each vector embedding to a binary representation
+        - The tradeoff is that BQ is lossy. The binary representation by nature omits a significant amount of information, and as a result the distance calculation is not as accurate as the original vector embedding.
     - Index type
       - FLAT：适用于需要 100% 召回率且数据规模相对较小（百万级）的向量相似性搜索应用。
       - IVF_FLAT：基于量化的索引，适用于追求查询准确性和查询速度之间理想平衡的场景（高速查询、要求高召回率）。

@@ -591,6 +591,7 @@
       - RESET by Firewalls in transit：在防火墙维护session状态的场景（NAT网关），防火墙Session TTL过期。(中间数据-> FW reset)
       - Time-Wait Assassination：Client Time-Wait 期间，收到 Server 端迟到的数据包，回送Ack给Server，导致Server发送Rst包。(Server 迟到数据 -> Client Ack-> Server Reset)
       - Aborting Connection：客户端Abort，内核发送reset给服务端。(Client Reset)
+      - 当 TCP 某一端的接收缓存中还有数据没有被应用层读取，但是此时应用层直接关闭 TCP 连接，就会产生 Reset。
 - [Graceful shutdown of a TCP server in Go](https://eli.thegreenplace.net/2020/graceful-shutdown-of-a-tcp-server-in-go/)
   - 1: waiting for client connections to shut down
   - 2: actively closing open client connections
