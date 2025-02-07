@@ -267,7 +267,10 @@
           - A collection with multiple vchannels, the multiple vchannels could be assigned to multiple pchannels, or assigned to a single P-channel, depending on the runtime balancer.
       - Each kafka topic is a "physical channel". The number of physical channels is defined in the milvus.yaml `rootCorrd.dmlChannelNum`
       - By default, milvus creates 16 physical channels during startup
-      - 
+      - 修改配置
+        - 如果是Docker Compose部署，可以修改配置文件 milvus.yaml，
+        - 若是heml部署，可以helm upgrade my-release milvus/milvus --set queryNode.enableDisk
+        - 若是 operator部署 https://github.com/zilliztech/milvus-operator/blob/main/docs/administration/configure-milvus.md
   - [查询](https://milvus.io/blog/deep-dive-5-real-time-query.md)
     - milvus的调用顺序可以是：建表，insert，建索引，load，search
       - 也可以是：建表，建索引，insert，load，search
@@ -693,6 +696,9 @@
       - The default value for drop_ratio_build/search is 0. With this setting both indexes yield 100% recall rate. And the same drop_ratio_build/search yields the same recall rate on SPARSE_WAND/SPARSE_INVERTED_INDEX.
       - suggest to start from drop_ratio_build=0.3 and drop_ratio_search=0.6 and see if that meets your recall requirement, and adjust as needed. 
       - Also I suggest to adjust drop_ratio_search more aggressively if it's ok to sacrifice recall a little for a huge performance improvement
+    - 在milvus中一个collection 刚插入数据的时候，这个数据可以检索到，但是过几分钟就查不出来了，我查询条件是从1000万数据里面取top200
+      - 在 Milvus 中插入新数据后，立即进行搜索，可以检索到新插入的数据。这是因为新数据尚未被纳入索引，搜索过程对新数据采用的是精确的暴力搜索（Brute-Force Search）
+      - 经过一段时间，Milvus 后台会自动触发索引构建或合并过程，新数据被纳入向量索引中。此时，搜索过程主要依赖于索引结构进行近似搜索，可能导致无法检索到先前插入的数据。
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。

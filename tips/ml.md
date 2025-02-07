@@ -931,6 +931,7 @@
     - n-gram 概率生成 “随机词”但问题是：没有足够的英文文本可以推导出这些概率
     - ChatGPT 的核心正是一个所谓的 “大型语言模型”（LLM），它的建立可以很好地估计这些概率。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。
   - [Fixing Hallucinations in LLMs](https://betterprogramming.pub/fixing-hallucinations-in-llms-9ff0fd438e33)
+  - [Enhancing AI Reliability Through Fine-Grained Hallucination Detection and Correction with FAVA](https://zilliz.com/blog/enhancing-ai-reliability-through-fine-grained-hallucination-detection-and-correction-with-fava#Understanding-the-Categories-of-Hallucinations)
   - [Evaluate fairness in ChatGPT](https://mp.weixin.qq.com/s/-zAlMyXzmCvN05PTtiY6Qg)
     - “第一人称公平性”问题
       - 当用户使用"Emily"这个名字时，ChatGPT 倾向于使用更友好、更个人化的语气；而对于"Muhammad"这个名字，AI 的回应则显得更为正式和疏离
