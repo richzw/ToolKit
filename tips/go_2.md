@@ -2079,6 +2079,16 @@
       - you can define your own IsZero() method for it.
     - weak 包
       - https://victoriametrics.com/blog/go-weak-pointer/
+    - 添加一个包级变量 slog.DiscardHandler（类型为 slog.Handler），用于丢弃所有日志输出。
+    - 垃圾回收时的注册函数机制、
+      - 改进的终结器（finalizer） 本次新版本增加的 runtime.AddCleanup 函数是一个比原有 runtime.SetFinalizer 更灵活、更高效且更不易出错的终结机制。
+    - 新增的迭代器方法、
+      - strings.Lines Lines 返回字符串 s 中换行结束行 \n 的迭代器
+      - strings.SplitSeq 返回用 sep 分隔的 s 的所有子串的迭代器
+      - strings.SplitAfterSeq 返回在每个 sep 实例之后分割的 s 子串的迭代器
+      - 根据 unicode.IsSpace 的定义，FieldsSeq 返回围绕空白字符串分割的 s 子串的迭代器
+      - strings.FieldsFuncSeq 返回围绕满足 f(c) 的 Unicode 代码点运行分割的 s 子串的迭代器
+    - JSON 零值的优化。json.Marshal 支持省略零值 omitzero 标签
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
   - errors.Is() is expensive. If you use it, check the error is non-nil first to avoid a pretty big performance penalty on the happy path.
   - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.

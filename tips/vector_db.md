@@ -226,6 +226,50 @@
       - 对象存储：采用 MinIO 作为默认方案，并兼容 AWS S3 和 Azure Blob 等云存储服务，用于存放日志快照、索引文件及查询过程中的临时结果
       - 消息存储：在分布式环境中采用 Pulsar，在单机版本中使用 RocksDB，作为数据流式处理与持久化的基石。
     - Milvus 的设计哲学围绕日志即数据的原则，摒弃了传统意义上的物理表结构，转而利用日志的发布订阅机制来解耦数据的读写操作，实现了系统的高度可扩展性和灵活性
+    - [Segment](https://mp.weixin.qq.com/s/6TPJwoSbLio3Dai7YizGpg)
+      - Think of segments as being in the intersection of shards and partitions. By design, segments cannot cross shard or partition boundaries
+      - Segments are the smallest unit in Milvus for load balancing. Indexes built on separate data segments don’t depend on each other
+      - Indexes are typically built only on sealed segments, posing challenges when dealing with rapidly changing data like user clicks on a shopping site
+      - 数据写入：Insert 请求如何拆解为 Segment
+        - proxy 会按照 shards_num 对数据进行分片，并将其发送到消息管道 ，然后data node从消息管道中异步接收数据
+        - 在 data node 端，每个partition中的每个 shard 都会对应一个 growing segment。data node 为每个 growing segment 维护一个缓存，用于存放尚未落盘的数据
+      - Growing Segment 如何持久化
+        - 各个 shard 的数据会被累积在对应 growing segment 的缓存里。该缓存的最大容量由 milvus.yaml 中 dataNode.segment.insertBufSize 控制，默认值为 16MB
+        - 一旦缓存中数据超过此阈值，data node 就会将这部分数据写入 S3/MinIO，形成一个 Chunk, Chunk 指的是 segment 中的一小段数据，并且每个字段的数据也会被分别写入独立的文件。因此，每个 Chunk 通常包含多个文件
+        - dataNode.segment.syncPeriod（默认 600 秒）定义了数据在缓存中允许停留的最长时间。如果在 10 分钟内缓存数据尚未达到 insertBufSize 的上限，data node 同样会将缓存写入 S3/MinIO。
+        - 当某个 growing segment 累计写入量达到一定阈值后，data node 会将其转换为 sealed segment，并新建一个新的 growing segment 来继续接收 shard 数据。
+          - 这个阈值由 dataCoord.segment.maxSize（默认 1024MB）和 dataCoord.segment.sealProportion（默认 0.12）共同决定
+        - 如果用户通过 Milvus SDK 调用 flush 接口，则会强制将指定 Collection 的所有 growing segment 缓存落盘并转为 sealed segment
+        - 频繁调用 flush() 容易产生大量体量较小的 sealed segment，进而影响查询性能。
+      - Segment 合并优化：Compaction 的三种场景
+        - data node 会通过 compaction 将若干较小的 sealed segment 合并成更大的 sealed segment。合并后形成的 segment 大小会尽量接近 dataCoord.segment.maxSize（默认 1GB）
+        - 小文件合并（系统自动 存在多个体积较小的 sealed segment，其总大小接近 1GB
+        - 删除数据清理（系统自动） segment 中的被删除数据占比 ≥ dataCoord.compaction.single.ratio.threshold（默认 20%）
+        - 按聚类键（Clustering Key）重组（手动触发） SDK 调用 compact()，并按照指定的 Clustering Key 对 Segment 进行重组。
+      - 临时索引 vs 持久化索引
+        - 对于每个 growing segment，query node 会在内存中为其建立临时索引; 当 query node 加载未建立索引的 sealed segment 时，也会创建临时索引
+        - 当 data coordinator 监测到新的 sealed segment 生成后，会指示 index node 为其构建并持久化索引
+          - 如果该 sealed segment 的数据量小于 indexCoord.segment.minSegmentNumRowsToEnableIndex（默认 1024 行），index node 将不会为其创建索引。
+      - Segment 加载：Query Node 如何管理数据？
+        - 当用户调用 load_collection 时：
+          - (1)Query node 会从 S3/MinIO 加载该 Collection 的所有 sealed segment，并订阅相应的 shard 流数据。
+          - (2)系统力求将多个 shard 分配给不同的 query node 以实现负载均衡；如果只有一个 query node，则该节点订阅全部 shard。
+          - 对于每个 shard，query node 会同样在内存中维护一个对应的 growing segment，保证与 data node 上的数据保持一致。
+          - 对于已构建好持久化索引的 sealed segment，query node 会从 S3/MinIO 中加载其索引文件。
+      - Sharding - for distributed data writing https://zilliz.com/blog/sharding-partitioning-segments-get-most-from-your-database
+        - 百万行级别数据量建议设置 shards_num=1，千万行级别数据量建议设置 shards_num=2，亿级别以上数据量建议设置 shards_num=4 或 8
+        - In distributed data writes, a shard refers to a horizontal data partition in a database. 
+        - Think of it like dividing a book into chapters, where each chapter resides on a separate server, and each chapter can be written concurrently.
+        -  For faster writes:
+          - Increase the number of shards, but not too much
+          - Increase the number of data nodes if flush takes too long.
+          - Add proxy servers if the network is the bottleneck
+      - Partitioning - for targeted data reading
+        - Imagine a book with chapters and a reader interested in a specific subject. They will read through the book based on specific criteria, akin to using a database key.
+        - For targeted reading:
+          - Automatic Partitioning with metadata filters if desired
+          - Multi-tenancy manual use case: `tenant_id` as the partition key
+            - this is just logical isolation, not real RBAC, which is defined at the collection level
   - indexnode，每个querynode，每个datanode都是单独的容器
     - indexnode只负责建索引任务，querynode只负责查询任务，datanode只负责数据的持久化和整理任务。indexnode建索引时总是会尽量用满cpu，以最快速度建好索引
       - querynode负责搜索任务，要把整个表的索引都加载到自己的内存里。
