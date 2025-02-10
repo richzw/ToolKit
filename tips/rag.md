@@ -254,6 +254,11 @@
         - 训练Bert模型或使用现有模型，如 KeyBERT：直接提取关键词，形成最终的关键词列表
         - 使用 LLM 提取关键词
       - 澄清和询问：主动向用户提问，以获取更多信息
+    - [意图识别工程化](https://mp.weixin.qq.com/s/nu-2ji9NOszcZ_6SWd469A)
+      - 基模 + Prompt : CoT 思维链, Few-Shot 少样本学习
+      - 基模 + Prompt + RAG : 
+      - 使用小尺寸模型进行SFT 
+      - 自动质检和自动微调工程
   - [Routing](https://blog.langchain.dev/applying-openai-rag/)
   - Query Construction
     - Text-to-SQL 

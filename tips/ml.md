@@ -889,6 +889,7 @@
         - 我们在 Transformer 管道里加了一个简单的重复停止标准。当模型开始重复生成 token 的时候，这个标准会自动检测到，并提前停止解码，避免进入无聊的循环
   - [Improve LLM reasoning using self-generated data: RL and verifiers](https://drive.google.com/file/d/1komQ7s9kPPvDx_8AxTh9A6tlfJA0j6dR/view)
   - [Ultimate Guide to Fine-Tuning LLMs](https://arxiv.org/pdf/2408.13296v1)
+  - [Understanding Reasoning LLMs](https://magazine.sebastianraschka.com/p/understanding-reasoning-llms?continueFlag=c88ae10074507aefcbc4375ccc10431e)
 - [LLM Tools]
   - [candle](https://github.com/huggingface/candle)
     - Minimalist ML framework for Rust
@@ -1248,6 +1249,7 @@
   - 构建上下文内容池 Context Pool
 - [The LLM Triangle Principles to Architect Reliable AI Apps](https://towardsdatascience.com/the-llm-triangle-principles-to-architect-reliable-ai-apps-d3753dd8542e)
   - ![img.png](ml_app_sample.png)
+  - [How real-world businesses are transforming with AI – with 50 new stories](https://blogs.microsoft.com/blog/2025/02/05/https-blogs-microsoft-com-blog-2024-11-12-how-real-world-businesses-are-transforming-with-ai/)
 - [大模型分不清 9.9 与 9.11 ](https://mp.weixin.qq.com/s/wIm3loi5KcznFYTpgIl-Dg)
   - https://colab.research.google.com/drive/11kUxYhHMLqYhw5HVKEYdHv0EfdZIyBBy?ref=jina-ai-gmbh.ghost.io#scrollTo=G7Cy9zSb2Ukg
 - [预训练一个72b模型需要多久](https://mp.weixin.qq.com/s/E0OIgufVW8dm-fRhlRoA6A)
