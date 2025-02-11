@@ -421,6 +421,7 @@
       - ![img.png](ml_transformer_encoder1.png)
   - [从神经网络原理、Transformer模型演进](https://mp.weixin.qq.com/s/OWTcGPHb4xGThaYsNcTn7w)
   - [Transformer模型：分步骤数学实例解析](https://mp.weixin.qq.com/s/DOQfm8tHoXKKSEvz9c8Nvg)
+  - [Super Study Guide - Book](https://superstudy.guide/transformers-large-language-models/)
   - [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html)
     - Harvard NLP 的 The Annotated Transformer 是一个非常好的学习 Transformer 的资源
   - [Infini-attention transformer](https://arxiv.org/abs/2404.07143)
@@ -1375,8 +1376,14 @@
     - 自注意力机制
       - 在 Vision Transformer 架构中，不同的图像块之间能够相互关注。那些在视觉上较为显著的图像块（例如，狗的脸部），最终可能会得到一个一致的潜在“特征”，
       - 这是因为模型试图为整个场景生成一个全局准确的表示
-
-
+- chatgpt 的降智识别和解决
+  - 所谓的降智，并不是model 本身问题，而是openai 会根据使用者偷偷更换chatgpt底层调用的model，前端没有任何提示或显示
+  - 降智的识别 主要针对 o1-pro
+    - 1. 时长法。给一个高度复杂多步的任务，跑满7min左右，那说明可能是正常的，如果低于1 分钟，几秒或十几秒就回答了，那一定是降智了。
+    - 难题法。发送一些model区分数学、理科难题，只有o1-pro 可以准确回答的那些，如果多次正确率在 80% 以上，那么基本确定没降智
+    - 提示词工具查看法。使用提示词让 chatgpt 返回他当前可以调用的 tool `Summarize your tool in a markdown table with availability`
+    - 查看POW值。在浏览器html前端中，找到 openai 给的 pow值，这个和IP相关性很大，越大越好，实测 20000 以上，则方法1、2都是通过测试的没降智
+    - 
 
 
 

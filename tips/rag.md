@@ -725,6 +725,7 @@
   - operational
   - and strategic
 - [Beyond RAG: Building Advanced Context-Augmented LLM Applications](https://docs.google.com/presentation/d/1IWjo8bhoatWccCfGLYw_QhUI4zfF-MujN3ORIDCBIbc/edit#slide=id.g2bac367b3d6_0_0)
+  - [Agent Course](https://huggingface.co/learn/agents-course/unit0/introduction)
   - RAG Pains
     - Summarization Questions: “Give me a summary of the entire <company> 10K annual report”
     - Comparison Questions: “Compare the open-source contributions of candidate A and candidate B”

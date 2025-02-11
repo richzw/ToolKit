@@ -1761,7 +1761,8 @@
 - [Xarry](https://mp.weixin.qq.com/s/pOkczZy4z0k88i9NwgfJKA) 
   - Linux 内核的 Page Cache 是由 Radix Tree 管理的，Radix Tree 在内核中通过 Xarray 机制进行了很好的包装，
   - Xarray 提供了简单易用的仿数组 API，让大部分内核组件可以像使用数组一样使用 Radix Tree。
-
+- [High-Performance GPU Memory Transfer on AWS Sagemaker Hyperpod](https://www.perplexity.ai/hub/blog/high-performance-gpu-memory-transfer-on-aws)
+  - Using a custom RDMA-based networking library, we've been able to achieve 3200 Gbps GPU memory transfers, bypassing NCCL limits for 97.1% theoretical bandwidth efficiency.
 
 
 

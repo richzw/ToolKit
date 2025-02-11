@@ -199,6 +199,10 @@
     - Approximate nearest neighbors (ANN)
       - trees – e.g. ANNOY (Figure 3),
       - proximity graphs - e.g. HNSW (Figure 4),
+      - HNSW 三剑客：
+        - m：每本书的“直接好友”数量（影响精度 & 目录大小）。
+        - ef_construct：建目录时考虑多少“邻居”（影响目录质量 & 构建速度）。
+        - ef：找书时看多少“邻居”（影响搜索精度 & 速度）。
       - clustering - e.g. FAISS,
       - hashing - e.g. LSH
     - Vector indexing libraries such as FAISS, Annoy, and ScaNN
