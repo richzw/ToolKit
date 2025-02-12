@@ -206,6 +206,17 @@
       - clustering - e.g. FAISS,
       - hashing - e.g. LSH
     - Vector indexing libraries such as FAISS, Annoy, and ScaNN
+  - [Vector Search Resource Optimization Guide](https://qdrant.tech/articles/vector-search-resource-optimization/#)
+    -  Overview
+      - High Search Precision + Low Memory Expenditure :	On-Disk Indexing
+      - Low Memory Expenditure + Fast Search Speed :	Quantization
+      - High Search Precision + Fast Search Speed :	RAM Storage + Quantization
+      - Balance Latency vs Throughput : 	Segment Configuration
+    - Scalar Quantization
+      - Qdrant compresses 32-bit floating-point values (float32) into 8-bit unsigned integers (uint8), slashing memory usage by an impressive 75%
+    - Binary Quantization
+      - Binary quantization takes scalar quantization to the next level by compressing each vector component into just a single bit.
+      - 
 - [向量数据库](https://mp.weixin.qq.com/s/UCgJi7MfAnn8tAPvL3sldQ)
   - 向量检索算法
     - 基于树的方法，例如KDTree和Annoy

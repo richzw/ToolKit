@@ -350,7 +350,10 @@
     - 测试程序在调用栈中的某些路径上表现异常。
     - 多线程或并行执行中，因运行时调度导致的问题
   - Hash-Based Bisect的核心在于利用哈希值为程序的变化点（如函数、代码行、调用栈等）分配唯一标识，并通过二分搜索算法，逐步缩小问题范围。它通过动态启用或禁用这些变化点，结合测试结果判断问题是否被触发，从而定位导致问题的最小变化集
-  
+- [Funnel hashing](https://www.youtube.com/watch?v=ArQNyOU1hyE)
+  - https://www.quantamagazine.org/undergraduate-upends-a-40-year-old-data-science-conjecture-20250210/
+  - 新型哈希表在几近满载时，寻找元素或空位的耗时仅仅和(log𝑥)²成正比，而非 x 
+  - 
 
 
 
