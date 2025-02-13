@@ -1560,6 +1560,14 @@
   - 显示过滤器 tcp.stream = 1
 - Wireshark 过滤只有请求没有响应的数据包
   - http.request && !http.response_in
+- Wireshark 组播数据包过滤
+  - ip.dst == 224.0.0.0/4
+    - 最普通的一种过滤方式，当然 ip.dst >= 224.0.0.0 and ip.dst <= 239.255.255.255 也可以。
+  - eth.dst[0:3] == 01:00:5e
+    - 也是常见的一种过滤方式，有时候一些简单的场景直接用 eth.dst[0] == 1 也行，但不一定都是组播。
+  - eth.dst.ig == 1
+    - 利用 IG 位，唯一不好的是组播和广播都会过滤出来，当然也可以排除掉广播，eth.dst.ig == 1 and eth.dst != ff:ff:ff:ff:ff:ff
+  - ip_multicast(ip.dst)
 - [Linux 网络报文收发路径](https://github.com/ForceInjection/linux-from-beginner-to-master/tree/main/net)
 - [TCP半连接全连接](https://xiaodongq.github.io/2024/05/18/tcp_connect/)
   - https://xiaodongq.github.io/images/tcp-connect-close.png

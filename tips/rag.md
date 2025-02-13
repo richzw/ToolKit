@@ -1234,7 +1234,7 @@
     - RAG 的本质是搜索，它能工作的前提在于根据用户的提问，可以“搜”到答案所在。但是在很多情况下，这个前提不存在，例如一些意图不明的笼统提问，以及一些需要在多个子问题基础之上综合才能得到答案的所谓“多跳”问答，
       - GraphRAG RAG 的一些核心问题——这就是语义鸿沟
 - [How to use the Usage API and Cost API to monitor your OpenAI usage](https://cookbook.openai.com/examples/completions_usage_api) 
-
+- [QUERYING DATABASES WITH FUNCTION CALLING](https://arxiv.org/pdf/2502.00032)
 
 
 
