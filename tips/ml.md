@@ -891,6 +891,13 @@
   - [Improve LLM reasoning using self-generated data: RL and verifiers](https://drive.google.com/file/d/1komQ7s9kPPvDx_8AxTh9A6tlfJA0j6dR/view)
   - [Ultimate Guide to Fine-Tuning LLMs](https://arxiv.org/pdf/2408.13296v1)
   - [Understanding Reasoning LLMs](https://magazine.sebastianraschka.com/p/understanding-reasoning-llms?continueFlag=c88ae10074507aefcbc4375ccc10431e)
+    - DeepSeek R1 的三个变体分别采用了纯 RL、SFT+RL 和蒸馏等不同的训练方法。 
+      - R1-Zero 采用纯 RL，R1 采用 SFT+RL，R1-Distill 采用蒸馏，不同的训练方法影响了模型的性能和特点，满足不同应用场景的需求
+      - Inference-time scaling (推理时scaling)： 在推理阶段增加计算资源（如 CoT 提示、投票、搜索策略）来提升输出质量。
+      - 纯强化学习 (RL)： 不经过监督微调 (SFT)，直接使用强化学习训练模型。
+      - 监督微调 + 强化学习 (SFT + RL)： 先用 SFT 进行指令微调，再用 RL 进一步优化，这是目前更主流且效果更好的方法。
+      - 纯监督微调 (SFT) + 蒸馏： 利用大型 LLMs 生成的 SFT 数据，对较小的 LLMs 进行指令微调。
+    -  对于简单任务并非必需，成本较高，回复更冗长，有时会因“过度思考”而出错。不适用于简单任务，如文本摘要、机器翻译、基于知识的问答等。
 - [LLM Tools]
   - [candle](https://github.com/huggingface/candle)
     - Minimalist ML framework for Rust
