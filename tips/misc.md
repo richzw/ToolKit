@@ -34,6 +34,22 @@
       - 连续预训练阶段在预训练模型基础上使用搜索日志进行监督训练；
       - 微调阶段在连续训练模型基础上使用人工标注语料进行监督训练。
 - [Protobuf编码](https://mp.weixin.qq.com/s/hAfrPlPD2KBCWxpIuGkQTQ)
+  - 编码
+    - tag + value
+    - tag 里面会包含两部分信息：字段序号，字段类型
+    - value 里面会包含两部分信息：字段长度，字段值
+    - Varints 编码
+      - 对于 protobuf 来说对数字类型做了压缩的，普通情况下一个 int32 类型需要 4 byte，而 protobuf 表示127以内的数字只需要 2 byte
+    - ZigZag 编码
+      - 用于对有符号整数进行编码，将有符号整数转换为无符号整数，然后再使用 Varints 编码
+      - sint32 这种类型，采用 zigzag 编码。将所有整数映射成无符号整数，然后再采用 varint 编码方式编码
+  - 最佳实践
+    - 字段编号
+      - 需要注意的是范围 1 到 15 中的字段编号需要一个字节进行编码，包括字段编号和字段类型；范围 16 至 2047 中的字段编号需要两个字节。所以你应该保留数字 1 到 15 作为非常频繁出现的消息元素。
+    - 保留字段
+      - 可以使用 reserved 来标记被删除的字段
+    - 不要修改字段 tag 编号以及字段类型
+      - protobuf 序列化是不带字段名的，所以如果客户端的 proto 文件只修改了字段名，请求服务端是安全的，服务端继续用根据序列编号还是解出来原来的字段，但是需要注意的是不要修改字段类型，以及序列编号，修改了之后就可能按照编号找错类型。
   - 基本类型
     - int32、int64、uint32、uint64会直接使用varint编码，
     - bool类型会直接使用一个字节存储，
@@ -46,6 +62,8 @@
     - 结构体类型 typeid、length、data三部分长度会根据实际情况发生改变
   - protobuf既然有了int32 为什么还要用sint32 和 fixed32 ？
     - int32使用varint编码，对于小正数有较好的压缩效果，对于大整数和负数会导致额外的字节开销。因此引入fixed32，该类型不会对数值进行任何编码，对大于2^28-1的整数比int32占用更少的字节。而对于负数使用zigzag编码，这样绝对值较小的负数都能被有效压缩。
+  - https://victoriametrics.com/blog/go-protobuf/
+  - 
 - [Protobuf 动态反射 - Dynamicgo](https://mp.weixin.qq.com/s/OeQwlgZJtYOGTHnN50IdOA)
 - [优秀程序员的共性特征](https://mp.weixin.qq.com/s/FKRedldguFVPred7johg8A)
   - 偏执 - 当所有人都真的在给你找麻烦的时候，偏执就是一个好主意
