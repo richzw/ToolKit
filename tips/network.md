@@ -1568,6 +1568,14 @@
   - eth.dst.ig == 1
     - 利用 IG 位，唯一不好的是组播和广播都会过滤出来，当然也可以排除掉广播，eth.dst.ig == 1 and eth.dst != ff:ff:ff:ff:ff:ff
   - ip_multicast(ip.dst)
+- [一个接收窗口满的特殊案例，现象是接收端在接收窗口为 0 的情况下，依然正常接收了数据](https://mp.weixin.qq.com/s/5ee0c4j0mZCdoEeIwGwL6w)
+  - 接收窗口管理：
+    - 当服务器的接收窗口为2920字节时，客户端发送第一个1460字节的数据包后，服务器会发送一个ACK，并将接收窗口更新为1460字节。
+    - 客户端随后发送两个1460字节的数据包。理论上，由于接收窗口已满（1460字节），服务器应该只接受第二个数据包，丢弃第三个数据包。
+    - 实际观察到，服务器ACK的确认号（ACK Num）表明它已确认接收了第二个和第三个数据包，且通过read()可以读取到4380字节的数据。
+  - 快速路径处理：
+    - Linux内核中的TCP“快速路径”优化旨在提高数据包处理的效率，减少上下文切换和锁的竞争。
+    - 在快速路径下，某些检查（如接收窗口大小）可能被简化或延迟，以提升性能。这可能导致接收端暂时接受超出当前接收窗口的数据，后续通过窗口更新或其他机制进行调整
 - [Linux 网络报文收发路径](https://github.com/ForceInjection/linux-from-beginner-to-master/tree/main/net)
 - [TCP半连接全连接](https://xiaodongq.github.io/2024/05/18/tcp_connect/)
   - https://xiaodongq.github.io/images/tcp-connect-close.png

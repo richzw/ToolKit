@@ -1235,7 +1235,10 @@
       - GraphRAG RAG 的一些核心问题——这就是语义鸿沟
 - [How to use the Usage API and Cost API to monitor your OpenAI usage](https://cookbook.openai.com/examples/completions_usage_api) 
 - [QUERYING DATABASES WITH FUNCTION CALLING](https://arxiv.org/pdf/2502.00032)
-
+- [Dify]
+  - workflow
+    - 构建 AI 驱动的多轮评审润色流程
+    - https://www.ginonotes.com/dify/wenrun.yml
 
 
 
