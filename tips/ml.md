@@ -824,6 +824,42 @@
     - 用于 HTML 转 Markdown 和 JSON 的前沿小型语言模型
     - 𝗰𝘂𝗿𝗹 𝗵𝘁𝘁𝗽𝘀://𝗿.𝗷𝗶𝗻𝗮.𝗮𝗶/𝗵𝘁𝘁𝗽𝘀://𝗻𝗲𝘄𝘀.𝘆𝗰𝗼𝗺𝗯𝗶𝗻𝗮𝘁𝗼𝗿.𝗰𝗼𝗺/ -𝗛 '𝘅-𝗲𝗻𝗴𝗶𝗻𝗲: 𝗿𝗲𝗮𝗱𝗲𝗿𝗹𝗺-𝘃𝟮' -𝗛 '𝗔𝗰𝗰𝗲𝗽𝘁: 𝘁𝗲𝘅𝘁/𝗲𝘃𝗲𝗻𝘁-𝘀𝘁𝗿𝗲𝗮𝗺'
     - https://colab.research.google.com/drive/1FfPjZwkMSocOLsEYH45B3B4NxDryKLGI?usp=sharing
+  - COT模型的演进：探索Latent Space推理
+    - 大模型的推理过程完全可以在潜在空间（latent space） 中进行，即通过向量表示进行信息传递。这种方法可以解决以下关键问题：
+      - 1.减少文字生成的计算开销 —— 传统 CoT 需要生成可读文本，导致额外的算力消耗，而潜在空间推理可直接在隐藏状态中完成计算；
+      - 2.自适应计算资源分配 —— 传统 CoT 所有 token 被分配相同算力，未能区分语义重要性，而潜在空间推理可动态调整计算资源，关注关键部分；
+      - 3.并行推理与剪枝 —— CoT 采用线性推理路径，一旦出错难以纠正，而潜在空间推理可以并行探索多个可能路径，并逐步剪枝错误选项，提高推理的鲁棒性。
+  - Test-Time 记忆范式与外部知识增强
+    - 引入遗忘与压缩机制，降低长上下文注意力计算成本
+    - 增强外部知识检索，提高推理效率和定制化能力
+  - 推理模型和基础模型的融合
+    - 如何让语言模型在基础文本生成与高阶推理能力之间实现动态切换。这一融合的主要挑战是算力和推理质量之间的可控权衡
+  - [deepseek核心技术](https://mp.weixin.qq.com/s/0VgtLaHq04pk6r-O0HvovQ)
+    - 反事实推理  Counterfactual Reasoning，它是一种通过构建与事实相反的假设性情景，探索因果关系和潜在结果的逻辑推理方法。
+      - 能突破数据量上限。
+        - 传统的大模型，比拼的都是数据量与参数量，需要大量的互联网数据。但互联网数据毕竟是有限的，最多把全网的数据都拿来训练，
+        - 有没有办法突破全网数据量上限呢？ 有的，虚构数据，反事实推理模拟各种场景，来增强训练样本
+      - 助力因果发现，加强结果的解释性，关联性，因果性。
+        - 虚构训练数据，那回复的置信度会打折扣吧？
+        - 与之相反，反事实推理有着严密的数学模型，因果推断三层次模型，它由美国计算机科学家Pearl提出，是因果推理理论的核心框架。
+        - 因果推断有哪三层次？
+          - 第一层：关联，Association。这一层关注条件概率P(Y|X)，是传统统计学和机器学习的主要关注点。
+          - 第二层：干预，Intervention。这一层关注P(Y|do(X))，即主动干预某一变量，观察对结果的影响。
+          - 反事实，Counterfactuals。这一层研究假设性问题，关注xxoo（公式不会输入）
+      - 避免单一输出，加强分析维度
+    - MoE 架构
+      - DeepSeek-V3 针对 MoE 中常见的负载不均衡问题，提出了一种新的负载均衡策略。在用于选择专家的 Gate 模块中引入了一个可学习的偏置项
+      - 动态调整路由倾向: 通过学习偏置项，模型可以动态地调整对不同路由专家的偏好
+      - 无额外损耗: 该偏置项是直接通过模型的训练目标进行优化的，而不是通过一个独立的负载均衡损失函数
+    - 群体相对策略优化（Group Relative Policy Optimization，GRPO）
+      - RLHF 算法有 PPO（Proximal Policy Optimization）、DPO（Direct Preference Optimization）以及GRPO
+      - DPO依赖于理论上的偏好模型，如Bradley-Terry模型，来测量奖励函数与经验偏好数据的对齐程度。它直接根据策略定义偏好损失，无需在训练过程中明确学习 Reward 模型。
+      - PPO算法采用Actor-Critic架构，需要 Policy 模型、Value 模型、 Reward 模型、 Reference 模型。 使用 Value 模型评估模型的预期总收益（模型回复的好坏）
+      - GRPO可以算作是PPO的计算效率优化版本，在保持效果的同时，降低计算资源消耗
+      - GRPO算法采用Actor-Critic架构，需要 Reward 模型、Reference 模型，但是删掉了 Value 模型。 不使用 Value 模型，而是使用一组 LLM 生成的针对同一上文输入的多次采样结果来做预期总收益的估计。
+    - 多令牌预测（Multi-Token Prediction，MTP）
+      - MTP 的核心思想是让模型一次性预测多个 token，以提升了模型的训练效率、生成质量和推理速度
+      - 
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]
@@ -1375,7 +1411,6 @@
   - 把“思维链”的概念也应用到 Embedding 模型上?
     - 扩展推理时计算（Scaling Test-Time Compute）应用到jina-clip，以对 棘手的领域外（Out Of Domain, OOD）图像 进行分类
     - 完整的思维链（CoT）由两部分组成：classification_groups 和 pokemon_rules，前者定义了提问框架：每个属性（例如颜色、形态）对应一个问题模板和一系列可能的答案选项。后者则记录了每只宝可梦应该匹配哪些选项
-    - 
 - [文本-图像全局对比对齐与 Token-Patch 级别的局部对齐](https://mp.weixin.qq.com/s/8RKIT5OzXPjRUj0LtHk6iQ)
   - 为什么我们有时会观察到词语与图像块之间存在局部对齐的现象呢？
     - 共现模式
@@ -1429,6 +1464,7 @@
   - [Deep Research and Knowledge Value](https://stratechery.com/2025/deep-research-and-knowledge-value/)
     - 它也很依赖于公开的信息，而且热门话题往往噪音多、信噪比差；
     - 小众/专业话题数据更集中且高质，价值更明显。但对于小众信息来说，如果真正关键或独家数据并未对外公开，那么再强大的 AI 也无法查询到，最终会导致报告中出现“严重缺失”，反而并给人造成“似乎已经知道一切”的假象。
+
 
 
 

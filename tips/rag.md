@@ -1239,7 +1239,10 @@
   - workflow
     - 构建 AI 驱动的多轮评审润色流程
     - https://www.ginonotes.com/dify/wenrun.yml
-
+- LLM Consortium
+  - The idea is to have a bunch of LLMs (the Consortium members) answering the same question, collect their responses and ask an arbiter to synthesize them into a final result
+  - If the arbiter is not happy with the responses, it can iterate and ask the Consortium to try again
+  - https://colab.research.google.com/drive/1OnIipRwuHOZbKHN0haHGD0OnckBGfzqx
 
 
 
