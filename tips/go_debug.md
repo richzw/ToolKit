@@ -506,8 +506,9 @@
     - 采样原理：在 Go 语言中，runtime/pprof 包提供了一种采样的方式，即在一段时间内，每隔一段时间就会中断程序，记录当前程序的堆栈信息。这样就可以得到程序在这段时间内的堆栈信息，从而可以分析程序的性能瓶颈。
     - 采样频率：runtime/pprof 包提供了 SetCPUProfileRate 函数，可以设置采样的频率。默认情况下，采样频率是 100 Hz，即每隔 10ms 就会中断程序，记录当前程序的堆栈信息。
     - 采样时机：runtime/pprof 包会在程序启动时，调用 runtime.SetCPUProfileRate 函数设置采样频率，然后启动一个 goroutine，每隔一段时间就会中断程序，记录当前程序的堆栈信息。这样就可以得到程序在这段时间内的堆栈信息，从而可以分析程序的性能瓶颈。
-    
- 
+- Self-aware Golang profile dumper https://github.com/mosn/holmes
+  - Dump goroutine when goroutine number spikes
+  - Dump cpu profile when cpu load spikes
 
 
 

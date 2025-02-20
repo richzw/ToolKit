@@ -340,6 +340,9 @@
   -  使用 http://ipinfo.io 查看个人 IP 属性
   -  http://whoer.net 检测 IP 伪装程度 http://ipcheck.ing 提供中文界面检测服务
 - [Learning CUDA by optimizing softmax](https://maharshi.bearblog.dev/optimizing-softmax-cuda/)
+  - GPU资源使用涉及两个方面：cuda driver和cuda toolkit（runtime和libraries） https://mp.weixin.qq.com/s/6VRhouwEEa672gne6Ofjrg
+    - 程序调用GPU资源其实是调用cuda toolkit，具体底层GPU资源的利用其实是由cuda driver去驱动
+    - 比喻：可以把cuda driver当作contained，toolkit是kubelet。pod创建其实是发信号给kubelet，具体pod如何创建出来是由containered去实现的
 - [NeighborHash]
   - 场景
     - 只有导入没有commit，过程中没有一致性要求，只需要最终一致性，也就是一个在线分析处理 (OLAP) 系统。我们应用场景的特点是批量点查、无范围查询需求且查询命中率高
@@ -357,6 +360,7 @@
   - 与CoalescedHash类似，NeighborHash在一个Flat Array中建立seperated chaining，但是不同于CoalescedHash通过Cellar Region处理冲突
   - NeighborHash采用了Lodger Relocation的方式来处理冲突，并采用Bidirectional Cacheline-aware的方法来进行probing
   - 为了进一步优化内存访问，采用inline-chaining来表示冲突链表
+- [What every SRE should know](https://biriukov.dev/)
 
 
 

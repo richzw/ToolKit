@@ -1568,6 +1568,9 @@
   - eth.dst.ig == 1
     - 利用 IG 位，唯一不好的是组播和广播都会过滤出来，当然也可以排除掉广播，eth.dst.ig == 1 and eth.dst != ff:ff:ff:ff:ff:ff
   - ip_multicast(ip.dst)
+- 客户端 TCP 三次握手的问题，仅有的三个数据包分别是 SYN、SYN/ACK 和 RST
+  - 一个可能的原因是 TCP TSOPT，模拟客户端发出 SYN ，然后直接修改了返回的 SYN/ACK 中的 TSecr 选项值，最终造成客户端发出 RST
+  - 如果 ACK Num 存在异常，在 snd_una 之前或者在 snd_nxt 之后，都会直接 RST
 - [一个接收窗口满的特殊案例，现象是接收端在接收窗口为 0 的情况下，依然正常接收了数据](https://mp.weixin.qq.com/s/5ee0c4j0mZCdoEeIwGwL6w)
   - 接收窗口管理：
     - 当服务器的接收窗口为2920字节时，客户端发送第一个1460字节的数据包后，服务器会发送一个ACK，并将接收窗口更新为1460字节。

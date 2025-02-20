@@ -992,9 +992,18 @@
 - Deep Dive into Kubernetes CronJobs
   - https://mp.weixin.qq.com/s/bHeJRsF-8EmiUi-w4KQBrQ
   - https://scaibu.medium.com/technical-deep-dive-into-kubernetes-cronjobs-automation-at-scale-c258864a3bf0
-
-
-
+- [K8s 集群中出现的OOM（Out of Memory）和Pod驱逐问题](https://mp.weixin.qq.com/s/B9g4yC7Y1dDwiPF1uLe6Xw)
+  - 现象
+    - 既有podOOM又有节点内存不足的驱逐 "reason":"Evicted","message":"The node was low on resource: memory
+    - 调小kubelet保留内存（调整前可用26G，调整后29G），依然约26G触发OOM
+  - cgroup设置的总得limit在这个文件中设置，它是kubelet初始化的时候设置的
+  - 为了验证kubelet设置的值是否正确，重启下kubelet试试，重启kubelet后memory.limit_in_bytes被设置为了正确值
+  - 集群默认使用的cgroup驱动是systemd，会不会是systemd在搞鬼 `systemctl show kubepods.slice`
+  - 重启kubelet后会覆盖成新值，但是触发daemon-reload的话会再次覆盖回去
+    - systemd覆盖了cgroup的limit值，而systemd记录的memory.limit是kubelet第一次计算的值，不是重新加载客户自定义配置的值，因此当daemon-reload时会导致覆盖。
+    - https://github.com/kubernetes/kubernetes/issues/104289
+  - https://github.com/kubernetes/kubernetes/issues/88197 kubelet计算自定义的预留值后，没有update systemd的配置文件导致。
+  - 根本解法：1.20的集群升级到1.22及以上版本的集群，修复了覆盖systemd的问题。
 
 
 

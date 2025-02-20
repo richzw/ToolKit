@@ -1464,7 +1464,9 @@
   - [Deep Research and Knowledge Value](https://stratechery.com/2025/deep-research-and-knowledge-value/)
     - 它也很依赖于公开的信息，而且热门话题往往噪音多、信噪比差；
     - 小众/专业话题数据更集中且高质，价值更明显。但对于小众信息来说，如果真正关键或独家数据并未对外公开，那么再强大的 AI 也无法查询到，最终会导致报告中出现“严重缺失”，反而并给人造成“似乎已经知道一切”的假象。
-
+  - Jina  AI
+    - https://search.jina.ai/
+    - https://github.com/jina-ai/deepsearch-ui
 
 
 
