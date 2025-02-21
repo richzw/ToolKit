@@ -1467,6 +1467,34 @@
   - Jina  AI
     - https://search.jina.ai/
     - https://github.com/jina-ai/deepsearch-ui
+  - [查询扩展](https://jina.ai/news/query-expansion-with-llms-searching-better-by-saying-more/)
+    - 查询扩展最初是为那些通过匹配查询词与文档内容来判断相关性的搜索系统开发的，比如 tf-idf 或其他"稀疏向量"方案
+    - ```
+      Please provide additional search keywords and phrases for 
+      each of the key aspects of the following queries that make
+      it easier to find the relevant documents (about {size} words
+      per query):
+      {query}
+      
+      Please respond in the following JSON schema:
+      Expansion = {"qid": str, "additional_info": str}
+      Return: list [Expansion]
+      ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

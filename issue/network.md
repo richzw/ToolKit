@@ -976,7 +976,33 @@
   - -I 指定网卡
   - -s 指定 ping 包大小，用来测试 MTU
   - -f flood ping 测试性能常用，大规模 ping 来判断个别丢包
-
+- Logical Analysis of the Issue Where the Test Server Fails to Receive Data
+  - Before proceeding with the diagnostics, ensure the network path is accessible:
+    - Use telnet on the online server to connect to the test server’s port.
+  - During a tcpcopy test, if the application on the test server does not receive any requests, determine if the initial handshake packet (SYN packet) reaches the test server
+    - If the SYN Packet Reaches the Test Server
+      - 1.1 Only SYN Packets Captured
+        - Use tcpdump on the test server to check for replicated SYN packets.
+        - If only SYN packets are seen, it suggests packets were dropped at the IP layer.
+        - Check iptables settings; if configured improperly, remove or adjust rules to resolve conflicts.
+      - 1.2 SYN Followed by RST Packet
+        - If a SYN packet is immediately followed by a reset (RST) packet (with less than 1-second delay), it indicates a routing issue or conflict.
+        - The response packet might be sent directly back to the real client.
+      - 1.3 Test Server Responds with the Second Handshake Packet
+        - Capture packets on the assistant server to check if the second handshake packet reaches it.
+        - If the packet doesn’t reach, it suggests ineffective routing, preventing intercept from capturing the packet.
+    - If the SYN Packet Does Not Reach the Test Server
+      - 2.1 tcpcopy Packets Captured on the Online Server
+        - Use tcpdump to capture tcpcopy’s forwarded packets on the online server.
+        - If packets don’t reach the test server, they were dropped along the way.
+        - Check the -c parameter in tcpcopy to ensure it matches the IP address used.
+        - If intercept is running on the test server, ensure the -c parameter is set to the IP address used by tcpcopy to connect to intercept.
+      - 2.2 tcpcopy Packets Not Captured on the Online Server
+        - If no all clt:xx information is found in tcpcopy’s log, it indicates tcpcopy cannot capture packets at the IP layer.
+        - Use the --pcap-capture option to capture packets at the data link layer.
+        - Set the -f parameter (e.g., TCP and destination port 80, destination host 10.10.0.12) and the -i parameter (network interface) to bypass IP layer capturing.
+        - If all clt:xx (where xx > 0) is seen in the log, it means tcpcopy captured the packet, but it was filtered out by the IP layer on the online server.
+        - Check iptables restrictions on the output chain; if iptables cannot be modified, use the --pcap-send option to send packets from the data link layer.
 
 
 
