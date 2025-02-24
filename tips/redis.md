@@ -594,7 +594,9 @@
       - 为实现 IO 线程与主线程之间的高效通信，我们设计了一个基于事件通知的客户端队列（event-notified client queue）
       - 每个 IO 线程和主线程各自拥有两个这样的队列，用于存储待处理的客户端列表，这些队列的事件通知器可与 epoll 集成，以实现事件驱动的处理方式
       - 使用 pthread_mutex 来确保队列操作的安全性、数据的可见性和顺序性
-
+- redis 7 ERR user_script:1 Attempt to modify a readonly table script
+  - https://github.com/redis/redis/pull/10651
+  - lua function改为local
 
 
 
