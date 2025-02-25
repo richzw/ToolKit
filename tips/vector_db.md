@@ -694,6 +694,8 @@
       - no suck key一般是在2.3早期的版本偶现。原因是某些bug导致gc把东西误删，导致load失败。主要有两种情况，一种是segment的bloomfilter被误删，另一种是segment的数据文件被误删。
       - 前一种情况可以通过手动调用compact就能重建bloomfilter。后一种情况相当于数据丢了回不来了，只能用birdwatcher的segment drop命令把被误删的segment信息从etcd里清除。
     - request limit exceeded[limit=1024] - 调整proxy.maxTaskNum这个参数
+    -  some node(s) haven't received input
+      - 这种报错有可能是collection或者partition的数量太多了，datanode在处理timetick消息的过程中超时。要么减少表和分区的数量，要么把milvus.yaml里的watchTimeoutInterval改高点。
   - QA
     - [De duplication of the same vector](https://github.com/milvus-io/milvus/issues/5607)
     - 为何不用float64来保证小数点后十几位？
@@ -758,6 +760,11 @@
     - 在milvus中一个collection 刚插入数据的时候，这个数据可以检索到，但是过几分钟就查不出来了，我查询条件是从1000万数据里面取top200
       - 在 Milvus 中插入新数据后，立即进行搜索，可以检索到新插入的数据。这是因为新数据尚未被纳入索引，搜索过程对新数据采用的是精确的暴力搜索（Brute-Force Search）
       - 经过一段时间，Milvus 后台会自动触发索引构建或合并过程，新数据被纳入向量索引中。此时，搜索过程主要依赖于索引结构进行近似搜索，可能导致无法检索到先前插入的数据。
+    - 数据分布不均匀
+      - 先部署个监控和webui 看看有几个segment 是不是在三台机器上均匀 数据太小了三台用不起来 需要开三replica.Milvus是分segment的 
+      - 一百万数据可能就一两个segment 加再多机器也只有一两个有数据 replica可以解决这个问题
+      - 1024维，150万数据是6GB，大约会有七八个segment。如果有集群里有3个querynode，并且每个querynode的cpu资源跟你的standalone的cpu资源相等，那么150万数据的这个集群查询性能会比50万数据的这个单机稍慢一些，
+        - 因为集群内部几个节点间有通信，3个querynode的结果集还要做合并。
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。

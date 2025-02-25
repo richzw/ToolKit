@@ -1509,6 +1509,10 @@
       - 时间戳比服务器端最后收到的数据包的时间戳要大。
         - net.ipv4.tcp_rfc1337 为 0，则收到了 RST 后会提前结束 TIME_WAIT 状态，释放连接；
         - net.ipv4.tcp_rfc1337 为 1，则直接丢弃 RST 数据包
+  - BDP、tcp buffer、RT 三者之间的关系
+    - BDP是衡量网络管道容量的指标，由带宽和RTT决定。
+    - TCP buffer需要与BDP匹配，以确保高效传输。
+    - RTT作为时延因素，直接影响BDP和传输性能，是TCP优化的关键变量。
 - [Wireshark手册](https://www.ilikejobs.com/posts/wireshark/)
   - [Wireshark != 和 !==](https://mp.weixin.qq.com/s/yXbnCjelmdBOG1BgUFAexA)
     - 显示过滤表达式 ip.addr != 192.168.0.1 的结果显示为空，意味着没有源和目的 IP 值都不是 192.168.0.1 的数据包，也就是 all ；
