@@ -1480,6 +1480,7 @@
       Expansion = {"qid": str, "additional_info": str}
       Return: list [Expansion]
       ```
+  - [Deep Research System Card](https://cdn.openai.com/deep-research-system-card.pdf)
 - 企业落地 AI 最佳实践以及常见错误 
   - Anthropic 通过和企业客户的协作过程中，发现主要的问题集中在这几个方面：
     - • 问题一：从何入手？ 你知道 AI 很强大，但具体到你的业务场景，应该从哪里开始？是做一个聊天机器人，还是做数据分析工具？抑或是更高级的 AI Agent？

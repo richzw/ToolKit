@@ -268,6 +268,16 @@
     - 对于重复值较多的列（如“城市”），Parquet 会使用字典编码来压缩数据。例如，将“北京”、“上海”、“广州”映射为整数索引，从而减少存储空间。
     - 对于连续重复的值（如“年龄”），Parquet 会使用 RLE 来进一步压缩数据。例如，如果某列的值为 [25, 25, 25, 30, 30]，RLE 会将其编码为 (25, 3), (30, 2)。
     - Parquet 文件的元数据记录了每个行组的最小值和最大值，查询引擎可以根据这些信息跳过不相关的行组
+  - 列式存储的 Repetition Level 与 Definition Level
+    - Parquet 的 Repetition Level（重复层级和 Definition Level（定义层级） 是处理嵌套数据结构的关键机制，尤其在列式存储中高效编码和重建复杂数据。
+    - Repetition Level（重复层级）
+      • 作用：标记当前值在嵌套结构的哪个层级开始重复。
+      • 通俗理解：当遇到一个数组或列表时，它告诉我们“当前值属于哪个层级的重复结构”。例如，一个用户有多个联系人，每个联系人有多个电话，Repetition Level 会标记电话属于哪个联系人
+    - Definition Level（定义层级）
+      • 作用：标记当前值在嵌套结构中的存在深度。
+      • 通俗理解：如果某个字段是可选的（比如 null），Definition Level 会告诉我们“这个字段的父级路径存在到哪里”。例如，如果字段 a.b.c 存在，而路径 a.b 是必需的，但 c 是可选的，Definition Level 会表示 c 是否存在。
+    -  Repetition Level：回答“当前值从哪个层级开始重复”，用于重建数组的嵌套结构。
+    - Definition Level：回答“当前值的父级路径存在到哪里”，用于处理可选字段（如 null）
 - Bypassing Rate Limit Protection
   - IP Rotator 
     - If developer implemented rate limit in such a way that the application blocks the IP address of attacker after few requests, 
