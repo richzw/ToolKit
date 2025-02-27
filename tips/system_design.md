@@ -798,6 +798,7 @@
       - 虽然 Redis 可以方便的实现高性能的关注 Timeline 系统，但是内存空间总是十分珍贵的，我们常常没有足够的内存为活跃用户缓存关注 Timeline。
       - 只要是支持有序结构的 NewSQL 数据库比如 Cassandra、HBase 都可以胜任 Redis 的二级缓存：
   - [Feed 流系统的架构设计](https://mp.weixin.qq.com/s/CyXO13C3zQLoa-p7N2qPMg)
+  - [腾讯频道Feed流系统架构设计](https://mp.weixin.qq.com/s/XVgdfRz3fkuEM0wFCvljqA)
 - [Pull vs Push]
   - pull 模式的优点：
     - pull 模式很容易判断监控对象的存活性，push 模式很难
