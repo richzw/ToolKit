@@ -3,6 +3,7 @@
   - [Understanding Deep Learning](https://udlbook.github.io/udlbook/)
   - [LLM Course](https://github.com/mlabonne/llm-course)
     - https://mlabonne.github.io/blog/
+- [LLM (ML) Job Interviews ](https://mimansajaiswal.github.io/posts/llm-ml-job-interviews-fall-2024-process/)
 - [基于趋势和季节性的时间序列预测](https://mp.weixin.qq.com/s/Ln4E9iZd3b3EZqeEjNNsag)
   - 时间序列模式
     - 时间序列预测模型使用数学方程(s)在一系列历史数据中找到模式。然后使用这些方程将数据[中的历史时间模式投射到未来。
@@ -859,7 +860,7 @@
       - GRPO算法采用Actor-Critic架构，需要 Reward 模型、Reference 模型，但是删掉了 Value 模型。 不使用 Value 模型，而是使用一组 LLM 生成的针对同一上文输入的多次采样结果来做预期总收益的估计。
     - 多令牌预测（Multi-Token Prediction，MTP）
       - MTP 的核心思想是让模型一次性预测多个 token，以提升了模型的训练效率、生成质量和推理速度
-      - 
+    - https://mp.weixin.qq.com/s/23h_Lz2kTmt5NNvLZ4B2SA
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]

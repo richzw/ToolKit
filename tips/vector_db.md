@@ -484,6 +484,9 @@
     - insert_log
       - insert_log里的东西就是每个表的原始数据，包括向量数据，各个字段的数据。分片合并时，旧的分片数据不会立刻删除，要等待GC机制大约2—3小时后删除。
       - 如果停止了数据输入，等那些旧的分片都被GC清理之后，insert_log的大小就是真实的原始数据大小
+      - 单个segment存放在minio里是切分成很多个小文件的，insert_log目录下依次按collection/partition/segment/field 层级，你会看到每个field目录下面有若干个小文件，那些就是binlog文件
+      -  delta log是delete操作产生的文件，记录的主要是那些要被删除数据的id。delta log跟insert log无所谓什么先后，一个是delete/upsert操作产生，另一个是insert产生
+      - stats log主要包含bloom flter的数据和一些统计信息，不是由外部操作产生，而是内部生成
     - milvus跟客户端之间的rpc请求，默认单次传输的数据上限是64MB.
       - 假设每行只有一条向量加一个id，向量维度是512，那么每条向量是2048字节，加上id是2056字节。64MB除以2056就是大约的行数
     - Proxy也可以做多副本的。
