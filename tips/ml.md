@@ -861,6 +861,7 @@
     - 多令牌预测（Multi-Token Prediction，MTP）
       - MTP 的核心思想是让模型一次性预测多个 token，以提升了模型的训练效率、生成质量和推理速度
     - https://mp.weixin.qq.com/s/23h_Lz2kTmt5NNvLZ4B2SA
+    - [DeepSeek-V3/R1 Inference System Overview](https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md)
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]
@@ -935,6 +936,8 @@
       - 监督微调 + 强化学习 (SFT + RL)： 先用 SFT 进行指令微调，再用 RL 进一步优化，这是目前更主流且效果更好的方法。
       - 纯监督微调 (SFT) + 蒸馏： 利用大型 LLMs 生成的 SFT 数据，对较小的 LLMs 进行指令微调。
     -  对于简单任务并非必需，成本较高，回复更冗长，有时会因“过度思考”而出错。不适用于简单任务，如文本摘要、机器翻译、基于知识的问答等。
+  - [3FS（ Fire-Flyer File System）设计](https://mp.weixin.qq.com/s/B_5xdV2gl9APcJyBuBuUgQ)
+    - 3FS系统有四个组件：集群管理器（cluster manager）、元数据服务（metadata service）、存储服务（storage service）和客户端（client）。 所有组件都连接在一个RDMA网络中（InfiniBand或RoCE）。
 - [LLM Tools]
   - [candle](https://github.com/huggingface/candle)
     - Minimalist ML framework for Rust
@@ -1502,6 +1505,11 @@
           - 递归方法很难应用预算限制，因为没有明确的经验法则来决定应该为子问题分配多少 token 预算（因为它们可能会产生新的子问题）
       - 查询重写
         - 不仅仅是将自然语言转换为类似 BM25 的关键词；它还会扩展查询以覆盖跨不同语言、语气和内容格式的更多潜在答案
+  - [LLM-as-SERP](https://jina.ai/news/llm-as-serp-search-engine-result-pages-from-large-language-models/)
+    - https://github.com/jina-ai/node-serp
+  - [DeepSearcher](https://milvus.io/blog/introduce-deepsearcher-a-local-open-source-deep-research.md)
+    - https://github.com/zilliztech/deep-searcher
+    - steps: define/refine the question, research, analyze, synthesize
 - 企业落地 AI 最佳实践以及常见错误 
   - Anthropic 通过和企业客户的协作过程中，发现主要的问题集中在这几个方面：
     - • 问题一：从何入手？ 你知道 AI 很强大，但具体到你的业务场景，应该从哪里开始？是做一个聊天机器人，还是做数据分析工具？抑或是更高级的 AI Agent？
@@ -1513,7 +1521,9 @@
     - 明确核心指标。 根据业务需求，确定哪个维度是最关键的。
     - 设计评估标准。 针对核心指标，设定明确的评估标准。
     - 灵活调整。 在开发过程中，根据评估结果，灵活调整技术方案，找到最优平衡
-
+- PDF parse
+  - PDF解析库 https://olmocr.allenai.org/  github地址：https://github.com/allenai/olmocr
+  - gptpdf（https://github.com/CosmosShadow/gptpdf
 
 
 

@@ -438,7 +438,8 @@
           • 检查进程的 CPU 使用情况：pidstat -u 1 -p <pid>
           - 观察系统负载： 使用 htop 或 uptime 查看是否有高负载进程导致频繁抢占
           - 使用 perf sched 分析调度器行为：
-
+- [btop](https://mp.weixin.qq.com/s/zyIn_YB6Rqj4Cb86_L151g)
+  - https://github.com/aristocratos/btop
 
 
 

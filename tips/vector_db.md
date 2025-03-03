@@ -760,6 +760,7 @@
       - The default value for drop_ratio_build/search is 0. With this setting both indexes yield 100% recall rate. And the same drop_ratio_build/search yields the same recall rate on SPARSE_WAND/SPARSE_INVERTED_INDEX.
       - suggest to start from drop_ratio_build=0.3 and drop_ratio_search=0.6 and see if that meets your recall requirement, and adjust as needed. 
       - Also I suggest to adjust drop_ratio_search more aggressively if it's ok to sacrifice recall a little for a huge performance improvement
+      - https://weaviate.io/blog/blockmax-wand
     - 在milvus中一个collection 刚插入数据的时候，这个数据可以检索到，但是过几分钟就查不出来了，我查询条件是从1000万数据里面取top200
       - 在 Milvus 中插入新数据后，立即进行搜索，可以检索到新插入的数据。这是因为新数据尚未被纳入索引，搜索过程对新数据采用的是精确的暴力搜索（Brute-Force Search）
       - 经过一段时间，Milvus 后台会自动触发索引构建或合并过程，新数据被纳入向量索引中。此时，搜索过程主要依赖于索引结构进行近似搜索，可能导致无法检索到先前插入的数据。

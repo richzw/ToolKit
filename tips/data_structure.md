@@ -321,6 +321,19 @@
       - 对 CPU 的 cache 更友好，更重要的是，可以通过 SSE 指令并行比较 16 个短哈希。
       - 在 key 的数量比较少时,swiss 并不能发挥它的 SSE 指令的优势，但是在 key 值非常多的情况下， swiss 优势明显
       - swiss 库采用了Daniel Lemire提出的一个快速求余(更准确的说，是 modulo reduction)的算法，这个想法看似简单，但实际上非常巧妙 (x * N) / 232
+      - https://mp.weixin.qq.com/s/BrR8VEiNYUQE9atwHm5I2g
+        - 桶数： 2的幂次方，便于模运算
+        - 分组宽度（WIDTH）：16字节（SSE2），或usize（软件回退），与SIMD寄存器对齐
+        - 控制字节状态 ： EMPTY（0xFF）、DELETED（0x80）、FULL（0x0x，含哈希片段）
+        - 哈希值分割 ： H1（57位，索引），H2（7位，控制字节比较）
+        - 探测策略： 三角探测（1, 2, 3,...组），SIMD并行搜索
+        - 内存分配： 单次分配，包含控制字节和键值对数组
+        - 空表优化 ：静态分配[EMPTY; WIDTH]，首次插入触发resize
+      - 针对传统哈希表存在的几个问题进行了优化：
+        - 缓存效率：传统哈希表（如链式哈希）可能因指针跳跃导致缓存未命中，瑞士表的连续内存布局显著提升缓存命中率。
+        - 高负载因子性能：标准哈希表在负载因子超过70%时性能下降，瑞士表支持高达87.5%的负载因子，通过高效探测和SIMD保持性能。
+        - 内存效率：通过紧凑的控制字节和无指针设计，减少内存开销，适合内存敏感场景。
+        - 快速操作：利用SIMD并行处理和三角探测，确保查找和插入操作在大型数据集中的高效性。
   - **Extendible hashing** is designed for databases and file systems and uses a mix of a trie and a chained hash table to dynamically increase bucket sizes as individual buckets get loaded. 
   - **Robin Hood hashing** is a variant of linear probing in which items can be moved after being inserted to reduce the variance in how far from home each element can live.
   - **cuckoo hashing** have two hash tables and two hash functions. Each item can be in exactly one of two places - it's either in the location in the first table given by the first hash function, or it's in the location in the second table given by the second hash function. This means that lookups are worst-case efficient, since you only have to check two spots to see if something is in the table.
