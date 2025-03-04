@@ -773,6 +773,12 @@
     - Nagle's algorithm
       - Nagle's algorithm is for reducing more number of small network packets in wire. 
       - The algorithm is: if data is smaller than a limit (usually MSS), wait until receiving ACK for previously sent packets and in the mean time accumulate data from user. Then send the accumulated data.
+      - 测试
+        - 如果包长度达到 MSS ，则允许发送。 在使用 nagle 算法的情况下，尝试连续写入 1 个 100 字节和 1 个 MSS 大小也就是 1000 字节的数据包
+        - 如果包含有 FIN ，则允许发送。 在使用 nagle 算法的情况下，尝试连续写入 1 个 100 字节和 1 个包含 FIN 的数据包
+        - 如果 TCP_CORK 选项没有设置，设置了 TCP_NODELAY 选项，则允许发送
+        - 如果 TCP_CORK 选项没有设置，如果所有已发送的小数据包（包长度小于 MSS）均被确认，则允许发送。
+        - 
     - However, waiting for the ACK may increase latency when sending streaming data. Additionally, if the receiver implements the 'delayed ACK policy', it will cause a temporary deadlock situation. In such cases, disabling Nagle's algorithm is a better option.
   - TCP_CORK
     - If set, don't send out partial frames. All queued partial frames are sent when the option is cleared again. This is useful for prepending headers before calling sendfile(2), or for throughput optimization.
