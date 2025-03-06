@@ -706,8 +706,8 @@
   }
   ```
 - `docker system prune -a --volumes`
-
-
+- docker run command 
+  - ![img.png](docker_run_cmd.png)
 
 
 

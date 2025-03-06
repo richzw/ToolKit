@@ -67,7 +67,7 @@
   - 实时数仓：文件格式为 Parquet，表格格式为 Iceberg，流程为 Kafka → Flink 实时处理 → 写入 Iceberg（Parquet 文件）→ Trino 查询。
   - 频繁更新的用户数据：文件格式为 Parquet，表格格式为 Delta Lake，流程为 Spark 读取用户表 → Merge 操作更新 → 写入 Delta Lake
   - 日志分析：文件格式为 JSON（初始导入）→ 转换为 ORC/Parquet，表格格式为 Hive 表，流程为日志文件（JSON）→ Hive 表分区存储（列式格式）→ Hive SQL 分析。
-
+- [ETL Tools for Unstructured Data](https://zilliz.com/blog/selecting-the-right-etl-tools-for-unstructured-data-to-prepare-for-ai)
 
 
 
