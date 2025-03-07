@@ -938,6 +938,7 @@
     -  对于简单任务并非必需，成本较高，回复更冗长，有时会因“过度思考”而出错。不适用于简单任务，如文本摘要、机器翻译、基于知识的问答等。
   - [3FS（ Fire-Flyer File System）设计](https://mp.weixin.qq.com/s/B_5xdV2gl9APcJyBuBuUgQ)
     - 3FS系统有四个组件：集群管理器（cluster manager）、元数据服务（metadata service）、存储服务（storage service）和客户端（client）。 所有组件都连接在一个RDMA网络中（InfiniBand或RoCE）。
+  - [Finetuning Embedding Models](https://www.databricks.com/blog/improving-retrieval-and-rag-embedding-model-finetuning)
 - [LLM Tools]
   - [candle](https://github.com/huggingface/candle)
     - Minimalist ML framework for Rust

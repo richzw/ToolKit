@@ -1114,7 +1114,17 @@
   - 一个解决办法是给TakeSnapshot加上 Go编译器的特殊指令 //go:norace，该指令需紧跟在函数声明后面，用于指定该函数的内存访问将被竞态检测器忽略，Go编译器将不会强行插入racefuncenter()调用。
   - TakeSnapShot 中有 map 初始化和 map 循环操作，这些操作会被编译器展开成 mapinititer() 等函数调用。这些函数直接手动启用了竞态检测器，而且无法加上 //go:norace
   - 对此问题的解决办法是在newproc1注入的代码里面，避免使用map数据结构
-
+- Go Mistakes
+  - The bigger the interface, the weaker the abstraction
+  - Don’t design with interfaces, discover them. 意思就是只有在实现过程中发现需要 interface 时才需要定义。是自下而上的过程，而非相反
+  - 包名要反映这个包能提供什么能力，而不是它包含了哪些内容
+  - nil slice
+    - 对于一个函数的返回值而言，返回 nil slice 比 emtpy slice 要更好
+    - 在 marshal 时，nil slice 是 null，而 empty slice 是 []
+  - 不要边遍历 map 边写入 key
+  - rune 代表一个“字”，等于 Unicode 中的 code point
+  - 发生 false sharing 的原因是，cache line 而非某个变量是 CPU 更新的粒度
+  - 
 
 
 

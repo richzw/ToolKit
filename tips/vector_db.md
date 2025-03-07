@@ -842,6 +842,7 @@
       - Quantization-based techniques convert continuous-valued embeddings into binary representations.
     - https://weaviate.io/blog/binary-quantization
   - [Vector Visualization](https://milvus.io/docs/vector_visualization.md)
+  - [Embedding Models for Audio Data](https://zilliz.com/learn/top-10-most-used-embedding-models-for-audio-data)
 - VectorDB challenge
   - 工程
     - 向量索引的 合并、拆分 - small index merge into large index

@@ -657,7 +657,11 @@
   - 核心原理就是AST语法树
 - [网络表征算法](https://mp.weixin.qq.com/s/Zyd_hQEdXSyCJC1manOv0A)
 - [包材推荐算法](https://mp.weixin.qq.com/s/AM76NRMFkT4yedHcn4czWA)
-
+- [NP vs P vs NPC](http://www.matrix67.com/blog/archives/105)
+  - 时间复杂度并不是表示一个程序解决问题需要花多少时间，而是当问题规模扩大后，程序需要的时间长度增长得有多快。
+  - P类问题的概念：如果一个问题可以找到一个能在多项式的时间里解决它的算法，那么这个问题就属于P问题。
+  - NP问题是指可以在多项式的时间里验证一个解的问题。NP问题的另一个定义是，可以在多项式的时间里猜出一个解的问题。
+  - 
 
 
 

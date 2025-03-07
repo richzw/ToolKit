@@ -930,8 +930,21 @@
 - [Iptables Command](https://wiki.dd-wrt.com/wiki/index.php/Iptables)
 - [Bridge container network](https://labs.iximiuz.com/skill-paths/master-container-networking)
   - ![img.png](k8s_network_bridge_container.png)
-
-
+- [kube-proxy 的 nftables 模式](https://mp.weixin.qq.com/s/3T3mlTJKZNue3E2zkTwB4Q)
+  - 为什么选择 nftables？第一部分：数据平面延迟
+  - 为什么选择 nftables？第二部分：控制平面延迟
+- [Hot LB流量平衡](https://mp.weixin.qq.com/s/qTi3hhVg-V3yVMKf5NvXwA)
+  - hot LB的解决方法，是把一部分VIP从hot LB迁移到别的LB，实现多个LB之间的负载的平衡分布。这样的迁移操作，又称为rebalancing。
+  - hot LB rebalancing项目，之前没能做成全自动化，最关键的几个挑战是：
+    - 如何自动完成流量迁移中的健康检查：这里的困难依然是对工程师经验的依赖，没有自动化的健康检查系统，我们只好人工做健康检查。 
+      - 流量特征 = 请求的字节数 / 响应的字节数
+      - 同个应用在多个VIP间的流量分布：主要是确保新老VIP上的实际流量，符合配置值
+      - HTTP返回码：由于大部分流量协议都是HTTP类型的，所以我们可以根据HTTP返回码进行聚合统计，比较新老VIP之间的差别
+    - 如何自动选择合适的做迁移的VIP：这里的困难是没有一个数学模型能够反映流量跟LB CPU的对应关系，我们只好凭借工程师的个人经验做选择。
+      - LB这种网络类系统来说，带宽(bandwidth)和CPU是两大类资源开销
+      - 首先是样本数据的采集。我们在测试LB上配置了一些有代表性的VIP，然后对这些VIP发起压测。当CPU运行到一定值的时候，我们记下当时的CPU使用率、VIP的rps、IN bps、OUT bps这几种数值。
+      - 然后是数据建模。利用python的numpy库，对前面的样本数据进行函数拟合，得到相应的函数曲线。
+    - 如何自动选择合适的destination LB：这里的困难是没有统一的rebalancing统筹机制，多个任务经常会选中同一个LB，致使其也变hot。
 
 
 
