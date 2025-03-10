@@ -284,7 +284,13 @@
   - 无栈协程
     - 任务没有自己的栈。在 Rust 中，Future 基本上是简单的结构体，实现了 Future 特征，每个.await链都被编译成巨大的状态机
     - async/await的巨大代价：函数着色问题[1]，即同步函数无法调用异步函数，反之亦然。
-
+- [高性能网关 ROFF](https://mp.weixin.qq.com/s/wnkYr4qKIFmh9E9H_XcwTA)
+  - 选择了主从多线程的架构方案，启动一个 Master 进程负责监听程序的关闭、重启、配置更新等信号，启动一个 Worker 进程，其中 Worker 进程将运行多个 worker 线程以接收和处理请求。
+    - Master 进程采用 fork-then-exec 模型孵化 Worker 进程，其自身仅专注于 Worker 进程的管理和替换，不会对 Master进程产生影响，可以有效监听旧进程的状态。
+    - 工作进程中引入 main 线程与 worker 线程的概念。main 线程负责配置解析、动态变配、健康检查等多个工作，并在需要时将变更的配置信息同步到其他 worker 线程，worker 线程则仅仅专注于请求的处理。
+  - 热重载/热升级
+    - 引入 Unix Domain Sockets (UDS) 方案进行文件描述符 File Descriptor (FD) 转移，以增加系统的安全性和灵活性。
+    - 
 
 
 

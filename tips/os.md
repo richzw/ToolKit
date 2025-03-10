@@ -1763,7 +1763,9 @@
   - Xarray 提供了简单易用的仿数组 API，让大部分内核组件可以像使用数组一样使用 Radix Tree。
 - [High-Performance GPU Memory Transfer on AWS Sagemaker Hyperpod](https://www.perplexity.ai/hub/blog/high-performance-gpu-memory-transfer-on-aws)
   - Using a custom RDMA-based networking library, we've been able to achieve 3200 Gbps GPU memory transfers, bypassing NCCL limits for 97.1% theoretical bandwidth efficiency.
-
+- [strace](https://mp.weixin.qq.com/s/mepQvBEPf1KsSdKTjU1Reg)
+  - Strace 是理解 Linux 程序行为的绝佳工具。通过观察系统调用，你可以深入了解程序如何与操作系统交互，这对调试问题和学习系统编程都非常有价值
+  - ltrace: 类似 strace，但跟踪库调用而非系统调用
 
 
 
