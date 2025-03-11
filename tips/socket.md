@@ -778,7 +778,9 @@
         - 如果包含有 FIN ，则允许发送。 在使用 nagle 算法的情况下，尝试连续写入 1 个 100 字节和 1 个包含 FIN 的数据包
         - 如果 TCP_CORK 选项没有设置，设置了 TCP_NODELAY 选项，则允许发送
         - 如果 TCP_CORK 选项没有设置，如果所有已发送的小数据包（包长度小于 MSS）均被确认，则允许发送。
-        - 
+        - Nagle ，在任意时刻，最多只能有一个未被 ACK 确认的小包，这是对于发送端的规则，而 Delayed ACK，这是对于接收端的规则。
+          - 如果发送端 Nagle 碰上了接收端 Delayed ACK 的场景，就会有一定问题，发送端受 Nagle 限制，延缓了数据发送，而接收端又受 Delayed ACK 限制，延缓了数据确认
+        - TLP Loss Probe 探测包并不受到 Nagle 的约束
     - However, waiting for the ACK may increase latency when sending streaming data. Additionally, if the receiver implements the 'delayed ACK policy', it will cause a temporary deadlock situation. In such cases, disabling Nagle's algorithm is a better option.
   - TCP_CORK
     - If set, don't send out partial frames. All queued partial frames are sent when the option is cleared again. This is useful for prepending headers before calling sendfile(2), or for throughput optimization.

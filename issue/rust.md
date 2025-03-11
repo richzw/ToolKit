@@ -290,7 +290,12 @@
     - 工作进程中引入 main 线程与 worker 线程的概念。main 线程负责配置解析、动态变配、健康检查等多个工作，并在需要时将变更的配置信息同步到其他 worker 线程，worker 线程则仅仅专注于请求的处理。
   - 热重载/热升级
     - 引入 Unix Domain Sockets (UDS) 方案进行文件描述符 File Descriptor (FD) 转移，以增加系统的安全性和灵活性。
-    - 
+  - HTTP 请求处理
+    - Rust 的 trait 特性，将四层和七层处理分别抽象为了 InboundHandler 和 OutboundHandler 方法
+    - ROFF 本身的过滤器机制继承自 Pingora，而后使用过程宏为每个过滤器生成新的函数签名，添加 Next 函数参数，以此提供更加丰富的过滤器流程控制能力
+    - 长尾延迟（ long-tail latency ）是指重计算的情况下核心任务不均匀导致部分请求积压，请求延迟上涨。
+      - 采用 tokio 的 multiple worker 运行时，一些共享变量需要额外的 Sync 约束，进而引入过多互斥锁开销。
+    
 
 
 
