@@ -936,6 +936,7 @@
       - 监督微调 + 强化学习 (SFT + RL)： 先用 SFT 进行指令微调，再用 RL 进一步优化，这是目前更主流且效果更好的方法。
       - 纯监督微调 (SFT) + 蒸馏： 利用大型 LLMs 生成的 SFT 数据，对较小的 LLMs 进行指令微调。
     -  对于简单任务并非必需，成本较高，回复更冗长，有时会因“过度思考”而出错。不适用于简单任务，如文本摘要、机器翻译、基于知识的问答等。
+  - [Detecting misbehavior in frontier reasoning models](https://openai.com/index/chain-of-thought-monitoring/)
   - [3FS（ Fire-Flyer File System）设计](https://mp.weixin.qq.com/s/B_5xdV2gl9APcJyBuBuUgQ)
     - 3FS系统有四个组件：集群管理器（cluster manager）、元数据服务（metadata service）、存储服务（storage service）和客户端（client）。 所有组件都连接在一个RDMA网络中（InfiniBand或RoCE）。
   - [Finetuning Embedding Models](https://www.databricks.com/blog/improving-retrieval-and-rag-embedding-model-finetuning)
@@ -1112,6 +1113,13 @@
         - For models using chain-of-thought reasoning, resample answers multiple times and use the question-level averages.
         - For models with non-deterministic answers, generate and grade multiple answers per question or use next-token probabilities for multiple-choice questions.
     - Analyze Paired Differences: Comparing eval scores of different models using paired-differences tests eliminates variance in question difficulty and focuses on response variance.
+  - [NoLiMA]( https://mp.weixin.qq.com/s/2shfTDjtAP4eF2ehibhT-w)
+    - 一种大语言模型（LLM）长文本理解能力评估方法 通过精心设计问题和关键信息，迫使模型进行深层语义理解和推理，才能从长文本中找到答案。
+    - 对于向量模型，上下文长度是影响检索性能的关键因素，文本越长，模型就越难找到正确答案。就算问题和答案里的关键词一模一样，模型也不一定能找对。
+      - 性能随长度锐减：jina-embeddings-v3 在短文本（128 词元）下表现出色，但在长文本下性能迅速下降。归一化相似度得分从 128 词元时的 0.37 降至 8K 词时的 0.10。更重要的是，模型区分相关信息和无关信息的能力（我们称之为“分离度”）几乎完全消失了。
+      - “单跳推理”很困难：即使在短文本下，如果问题和答案之间没有直接的字面重叠，模型的表现也会明显变差。这说明，向量模型在进行“单跳推理”（例如，从“住在森珀歌剧院旁边”推断出“去过德累斯顿”）时存在困难。
+      - 查询扩展有帮助，但不是万能的：查询扩展可以在一定程度上提高检索性能，特别是在长文本下，使模型表现优于随机猜测。但是，它并不能完全解决长文本带来的问题，性能还是会随着文本变长而下降。而且，加词也得小心，不相关的词反而会引入语义噪声，降低性能。
+      - 字面匹配不是关键：就算问题和答案里有一样的关键词，只要文本一长，模型还是找不到。这说明，比起答案怎么说，文本有多长，答案在文本里的位置，对模型能不能找到答案的影响更大
 - LLM Limitations
   - Lacking domain-specific information
     - LLMs are trained solely on data that is publicly available. Thus, they may lack knowledge of domain-specific, proprietary, or private information that is not accessible to the public.
@@ -1402,6 +1410,13 @@
   - 为数据源与 AI 系统之间的连接提供了统一标准，替代复杂的多源整合方式 https://github.com/modelcontextprotocol
   - Samples  https://github.com/modelcontextprotocol/servers  
   - [summarize your chat messages](https://github.com/mcpservers/mcp-server-chatsum)
+  - [MCP祛魅](https://mp.weixin.qq.com/s/qtsxTC8_LioHUuZHQo5CoA)
+    - MCP处理的一个用户的需求（query或request）是这样的：
+      - MCP Client从MCP Server得到所有工具（tools或function calls）的列表和描述，包括参数描述。
+      - MCP Client将用户的需求和工具加描述列表送给大模型（LLM）。
+      - 大模型确定应该使用哪个工具。
+      - MCP Client通过调用MCP Server来执行大模型选择的工具，从而得到工具执行后的结果。
+      - MCP Client讲结果送给大模型来提供自然语言的描述，然后呈现给用户
 - [文本水印](https://mp.weixin.qq.com/s/xH4ySZsr0A6I2H6yzdm9TQ)
   - https://colab.research.google.com/drive/1sbIdU2tr-18sAtLvVVyhYtrIw2Cgjp8F
   - 利用了 Jina Embeddings v3 模型的独特优势 —— 长文本处理和跨语言对齐 既能给文本加上水印，又能检测出文本水印
@@ -1511,6 +1526,7 @@
   - [DeepSearcher](https://milvus.io/blog/introduce-deepsearcher-a-local-open-source-deep-research.md)
     - https://github.com/zilliztech/deep-searcher
     - steps: define/refine the question, research, analyze, synthesize
+  - https://github.com/swirl-ai/ai-angineers-handbook/tree/main/building_agents_from_scratch
 - 企业落地 AI 最佳实践以及常见错误 
   - Anthropic 通过和企业客户的协作过程中，发现主要的问题集中在这几个方面：
     - • 问题一：从何入手？ 你知道 AI 很强大，但具体到你的业务场景，应该从哪里开始？是做一个聊天机器人，还是做数据分析工具？抑或是更高级的 AI Agent？
