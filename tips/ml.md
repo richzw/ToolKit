@@ -295,6 +295,8 @@
     - Language Agent Tree Search  ：是 Tree search + ReAct+Plan&solve 的融合体
     - Self-Discover 让大模型在更小粒度上 task 本身进行反思，比如前文中的 Plan&Slove 是反思 task 是不是需要补充，而 Self-discover 是对 task 本身进行反思
   - [LLM_Agent_Memory_Survey](https://github.com/nuster1128/LLM_Agent_Memory_Survey)
+  - [AI智能体](https://vintagedata.org/blog/posts/designing-llm-agents)
+    - 真正的LLM智能体，根本不需要「提示」 LLM智能体动态地决定自己的流程和工具用法，完全自主
 - 时间序列异常值检测
   - 正确体现各种指标多样的变化趋势和行为特性
     - 为消除每个分组中的趋势和季节性影响因素，我们利用了 statsmodels 库中强大的 seasonal_decompose（季节性分解函数）
@@ -1527,6 +1529,29 @@
     - https://github.com/zilliztech/deep-searcher
     - steps: define/refine the question, research, analyze, synthesize
   - https://github.com/swirl-ai/ai-angineers-handbook/tree/main/building_agents_from_scratch
+  - [DeepSearch/DeepResearch 实现的两个关键优化点](https://jina.ai/news/snippet-selection-and-url-ranking-in-deepsearch-deepresearch/)
+    - 从长网页中选择最佳片段
+      - 问题：当从网页获取内容后，需要选择哪些部分最相关，而不是将整个内容都放入LLM上下文（这样会浪费token并降低生成速度）。
+      - 解决方案：使用late-chunking和嵌入模型来选择最相关片段：
+        - 1. 将长文档分成固定长度的块
+        - 2. 使用jina-embeddings-v3模型为每个块生成嵌入向量，启用晚期分块选项
+        - 3. 计算每个块与查询的相似度
+        - 4. 使用滑动窗口找出平均相似度最高的区域
+        - 5. 选取这些连续文本块作为知识片段
+      - 这种方法的优势是：
+        - 保持了上下文信息
+        - 不受边界影响
+        - 支持多语言检索
+        - 只需处理几百个向量，可在内存中完成而不需要向量数据库
+    - 对待爬取的URL进行排名
+      - 问题：DeepSearch会收集大量URL，但直接将所有URL放入LLM上下文会浪费空间，且LLM往往随机选择URL。
+      - 解决方案：在访问URL前，根据多种因素为它们建立排名系统：
+      - 1. 频率信号：在不同来源多次出现的URL和常见域名获得更高权重
+      - 2. 路径结构：分析URL路径识别内容集群，共同路径层级获得更高分数
+      - 3. 语义相关性：使用jina-reranker-v2-base-multilingual评估问题与URL文本信息的相关性
+      - 4. 最后更新时间：优先考虑新鲜内容
+      - 5. 访问限制筛选：降低有访问限制内容的排名
+      - 6. 域名多样性：实施探索-利用策略，从每个主机名选择排名靠前的URL
 - 企业落地 AI 最佳实践以及常见错误 
   - Anthropic 通过和企业客户的协作过程中，发现主要的问题集中在这几个方面：
     - • 问题一：从何入手？ 你知道 AI 很强大，但具体到你的业务场景，应该从哪里开始？是做一个聊天机器人，还是做数据分析工具？抑或是更高级的 AI Agent？
