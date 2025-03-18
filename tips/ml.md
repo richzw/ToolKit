@@ -941,6 +941,15 @@
   - [Detecting misbehavior in frontier reasoning models](https://openai.com/index/chain-of-thought-monitoring/)
   - [3FS（ Fire-Flyer File System）设计](https://mp.weixin.qq.com/s/B_5xdV2gl9APcJyBuBuUgQ)
     - 3FS系统有四个组件：集群管理器（cluster manager）、元数据服务（metadata service）、存储服务（storage service）和客户端（client）。 所有组件都连接在一个RDMA网络中（InfiniBand或RoCE）。
+    - C++写的高性能分布式文件系统
+    - 传统的分布式文件系统设计之初基本，大部分基本基于HDD与NFS TCP/IP； 而AI训练与推理大范围使用SSD与RDMA
+    - AI训练与推理的业务需求传统分布式文件系统已经难以满足。
+      - 海量数据顺序读（语料输入）；
+      - 检查点（分步骤重算）；
+      - 顺序写（模型参数保存）；
+      - 随机读（特征查询）；
+    - Linux提供了FUSE机制，允许用户在不修改内核代码的情况下，在用户空间实现自己的文件系统。
+    - 
   - [Finetuning Embedding Models](https://www.databricks.com/blog/improving-retrieval-and-rag-embedding-model-finetuning)
 - [LLM Tools]
   - [candle](https://github.com/huggingface/candle)

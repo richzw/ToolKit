@@ -1776,9 +1776,24 @@
     -  fsync 函数只对由文件描述符 filedes 指定的单一文件起作用，并且等待写磁盘操作结束，然后返回。
     -  fdatasync函数相似于fsync，但它只影响文件的数据部分。而除数据外，fsync还会同步更新文件的属性。
   - ![img.png](os-system-buffer.png)
-
-
-
+- [iodump](https://github.com/os-health/iodump)
+  - 利用内核tracepoint静态探针点技术实现的一个io问题排查工具。通过iops dump工具，我们可以获取每一个IOPS（w/s和r/s）的详细信息
+  - 常见的工具或者方法有iotop、blktrace、ftrace和block_dump等。实际使用中，它们都有各种不足：
+    - iotop工具，可以细化到进程带宽信息，但缺乏进程级的IOPS信息，也没有对应的磁盘分区信息。
+    - blktrace工具，功能强大，但使用较复杂。获取sector信息后，进一步通过debugfs等其他方式解析文件路径也比较低效。
+    - ftrace工具，当跟踪块设备层静态探针点时，功能和blktrace工具类似，也需要通过debugfs等工具进一步解析文件路径。当跟踪文件系统层探针点函数时，无法精确对应IOPS数量。
+    - block_dump工具，也同样存在以上ftrace工具的2个不足
+  - iodump有如下几个特色优势 ：
+    - 支持自定义选择blk层探针点函数。
+    - 支持自定义输出字段信息，包括时间、进程名、进程ID、IO大小、扇区地址、磁盘分区、读写类型、扩展IO类型、IO来源、Inode号，文件全路径。
+    - 当采集进程异常退出后，支持内核态自动关闭探针。
+    - 支持从2.6.32以上的各内核版本。
+    - 当IOPS高时，支持抽样输出。
+- [进程绑定到某个 CPU 上运行](https://mp.weixin.qq.com/s/_6neC_aw_IPOcI02CGH9XA)
+  - 在多核 CPU 结构中，每个核心有各自的L1、L2缓存，而L3缓存是共用的。如果一个进程在核心间来回切换，各个核心的缓存命中率就会受到影响
+  - 将进程与 CPU 进行绑定可以提高 CPU 缓存的命中率，从而提高性能。而进程与 CPU 绑定被称为：CPU 亲和
+  - Linux 系统提供了一个名为 sched_setaffinity 的系统调用，此系统调用可以设置进程的 CPU 亲和性
+  - 
 
 
 

@@ -699,6 +699,8 @@
     - request limit exceeded[limit=1024] - 调整proxy.maxTaskNum这个参数
     -  some node(s) haven't received input
       - 这种报错有可能是collection或者partition的数量太多了，datanode在处理timetick消息的过程中超时。要么减少表和分区的数量，要么把milvus.yaml里的watchTimeoutInterval改高点。
+    - failed to search: out of range in json: ef(56) should be larger than k(200)
+      - 这个报错意思是你给search设置的topk值是200，hnsw的ef参数要大于topk，但你给ef设值是56。ef的值要大于topk的值，设计上如此
   - QA
     - [De duplication of the same vector](https://github.com/milvus-io/milvus/issues/5607)
     - 为何不用float64来保证小数点后十几位？
