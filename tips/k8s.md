@@ -1005,7 +1005,7 @@
     - https://github.com/kubernetes/kubernetes/issues/104289
   - https://github.com/kubernetes/kubernetes/issues/88197 kubelet计算自定义的预留值后，没有update systemd的配置文件导致。
   - 根本解法：1.20的集群升级到1.22及以上版本的集群，修复了覆盖systemd的问题。
-
+- ![img.png](k8s_control_group.png)
 
 
 
