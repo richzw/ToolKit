@@ -372,7 +372,7 @@
   - 为了进一步优化内存访问，采用inline-chaining来表示冲突链表
 - [What every SRE should know](https://biriukov.dev/)
 - [Deep dive aws S3](https://www.youtube.com/watch?v=NXehLy7IiPM)
-
+- [Digital hygiene](https://karpathy.bearblog.dev/digital-hygiene/)
 
 
 

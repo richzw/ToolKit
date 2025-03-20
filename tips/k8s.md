@@ -1006,8 +1006,16 @@
   - https://github.com/kubernetes/kubernetes/issues/88197 kubelet计算自定义的预留值后，没有update systemd的配置文件导致。
   - 根本解法：1.20的集群升级到1.22及以上版本的集群，修复了覆盖systemd的问题。
 - ![img.png](k8s_control_group.png)
-
-
+- [隐式内存占用](https://mp.weixin.qq.com/s/WjsuxbxL4b2DiC9FcBSlxQ)
+  - 隐式内存占用是指在业务运行过程中引起的系统内存消耗，这些消耗未直接统计或反馈到业务进程中
+    - 文件缓存(filecache)高
+      - filecache 用来提升文件访问性能，并且理论上可以在内存不足时被回收，但高 filecache 在生产环境中也引发了诸多问题：
+      - filecache 回收时，直接影响业务响应时间（RT）
+      - 在 Kubernetes（k8s）环境中，workingset 包含活跃的文件缓存，如果这些活跃缓存过高，会直接影响k8s的调度决策，导致容器无法被高效调度到合适的节
+    - SReclaimable 高
+      - SReclaimable 内存是操作系统为了实现自身功能而缓存的内核对象，虽然不计入应用内存，但应用的行为却影响 SReclaimable 的高低
+    - memory group 残留
+      - cgroup 和 namespace 是支撑容器技术的关键组件。业务频繁的容器创建和销毁经常会引起 cgroup 残留，容易造成统计不准确和系统抖动。
 
 
 

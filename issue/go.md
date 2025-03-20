@@ -1124,8 +1124,26 @@
   - 不要边遍历 map 边写入 key
   - rune 代表一个“字”，等于 Unicode 中的 code point
   - 发生 false sharing 的原因是，cache line 而非某个变量是 CPU 更新的粒度
-  - 
-
+- [generic protobuf reader](https://konradreiche.com/blog/a-generic-protobuf-reader-with-go-type-parameters/)
+  - Writing a generic protobuf writer in Go is straightforward. - proto.Marshal
+  - ```
+    type Proto[T any] interface {
+       prto.Message
+       *T
+    }
+    
+    func Read[T any, P Proto[T]](b []byte) (P, error) {
+       var msg P = new(T)
+       if err := proto.Unmarshal(b, msg); err != nil {
+          return nil, err
+       }
+       return msg, nil
+    }
+    ```
+    - T is your concrete Protobuf type (e.g., pb.Post).
+    - P is constrained to be a pointer to T (*pb.Post) and a proto.Message.
+    - new(T) creates a non-nil pointer to a zero-initialized T, avoiding the nil panic.
+    - Declaring var msg P ensures the compiler treats msg as type P (not just *T).
 
 
 

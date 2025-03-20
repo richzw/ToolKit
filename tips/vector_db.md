@@ -475,6 +475,14 @@
       - 每个collection有一根数据管道，其中有一个querynode负责管理这根管道，我们称之为shard-leader，它从管道中接收来自pulsar的数据，数据积累在内存里，称为growing segment，
       - 当数据达到一定量，比如一百兆，就把这块数据落盘变成sealed segment，其他的querynode等加载sealed segment。
   - insert
+    - [数据插入流程](https://milvus.io/blog/a-day-in-the-life-of-milvus-datum.md)
+      - Proxy Nodes and the Message Queue
+        - send an _insert()_ request to a proxy node. Proxy nodes are the gateway between the user and the database system,
+        - A hash function is applied to the item’s primary key to determine which channel to send it to. Channels, implemented with either Pulsar or Kafka topics
+      - Data Nodes, Segments, and Chunks
+        - insert_log
+          - collection ID -> partition ID -> Segment ID -> Field ID -> Chunk ID
+      - Sealing, Merging, and Compacting Segments
     - 客户端发送一个insert请求
       - 客户端发送一个insert请求，milvus server的proxy接到请求，proxy把数据转发给pulsar/kafka，转发完之后就立刻返回，告诉客户端说insert完成
       - 数据还在kafka里，然后querynode/datanode都要向kafka订阅数据，这里就是异步的。kafka就好比milvus的WAL组件，保证插入的数据不丢
