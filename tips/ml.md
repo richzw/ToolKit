@@ -1429,6 +1429,12 @@
       - MCP Client通过调用MCP Server来执行大模型选择的工具，从而得到工具执行后的结果。
       - MCP Client讲结果送给大模型来提供自然语言的描述，然后呈现给用户
   - [MCP](https://www.newsletter.swirlai.com/p/everything-you-need-to-know-about)
+  - [What is Model Context Protocol (MCP)](https://norahsakal.com/blog/mcp-vs-api-model-context-protocol-explained/)
+    - MCP Hosts: These are applications (like Claude Desktop or AI-driven IDEs) needing access to external data or tools
+    - MCP Clients: They maintain dedicated, one-to-one connections with MCP servers
+    - MCP Servers: Lightweight servers exposing specific functionalities via MCP, connecting to local or remote data sources
+    - Local Data Sources: Files, databases, or services securely accessed by MCP servers
+    - Remote Services: External internet-based APIs or services accessed by MCP servers
 - [文本水印](https://mp.weixin.qq.com/s/xH4ySZsr0A6I2H6yzdm9TQ)
   - https://colab.research.google.com/drive/1sbIdU2tr-18sAtLvVVyhYtrIw2Cgjp8F
   - 利用了 Jina Embeddings v3 模型的独特优势 —— 长文本处理和跨语言对齐 既能给文本加上水印，又能检测出文本水印

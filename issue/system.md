@@ -440,7 +440,20 @@
           - 使用 perf sched 分析调度器行为：
 - [btop](https://mp.weixin.qq.com/s/zyIn_YB6Rqj4Cb86_L151g)
   - https://github.com/aristocratos/btop
-
+- [分布式系统领域事件变更引发下游故障的案例研究](https://mp.weixin.qq.com/s/nub1iKRD-jchRANUEcrjRA)
+  - 分布式系统中领域事件的管理需秉承“前移防御，后备补救”的原则。
+  - 在开发阶段就尽量通过模式约束和契约测试防止不兼容变更引入，在运行阶段通过架构隔离和监控及时止损，将问题遏制在局部，并准备好降级和补偿方案处理不可预见的错误事件
+  - 严格的模式演进控制：在事件消息中使用强模式（模式化）的序列化格式（如Avro或Protocol Buffers）定义事件结构，并借助模式注册表（Schema Registry）强制管控演进兼容性
+  - 演进策略与版本管理：采用扩展而非修改的策略演进事件格式。新增字段应设置为可选并提供默认值，尽量避免删除或重命名现有字段
+  - 消费者容错与降级：下游消费者在实现上应做到健壮性防御。例如，使用宽松的反序列化策略：
+    - 忽略未知字段、不依赖字段顺序，并对缺失字段设置默认处理，以防止小变更就引发运行时错误。
+    - 对于无法解析的消息，可捕获异常后将消息发送到DLQ或记录错误而不中断整个消费循环。
+  - 分层隔离架构：借鉴Netflix的做法，通过架构上的隔离来减少单点变更的影响范围。例如采用前置队列 + 下游队列的双层消息集群，前置层仅负责缓存转发，上游服务只与前置层交互。
+  - 监控和数据质量保障：建立事件流的监控告警和数据质量检测机制 数据平台团队可以对关键业务指标设置异常检测（anomaly detection）
+  - 故障转移和补偿机制：针对无法完全避免的错误，引入Dead Letter Queue和补偿处理机制作为最后一道防线
+    - 运维人员应制定DLQ消息的处理流程，包括定期扫描分析DLQ原因、针对可重试的消息执行补处理或重新投递，对确属BUG导致的则在修复后回放。
+- [ Dynamic Tracing](https://blog.openresty.com/en/dynamic-tracing-part-1/)
+  - random bugs that might only occur once every few months, the best approach could be Dynamic Tracing
 
 
 

@@ -507,6 +507,7 @@
     - 全文/多文类意图失效
     - 复杂逻辑推理: Q 近期碳酸锂和硫酸镍同时下跌的时候，哪个在上涨？
   - [RAG Evaluation](https://weaviate.io/blog/rag-evaluation)
+  - [Calculate the Total Cost of Your RAG-Based Solutions](https://zilliz.com/blog/how-to-calculate-the-total-cost-of-your-rag-based-solutions)
 - [How To Observe Your RAG Post-Deployment](https://www.rungalileo.io/blog/mastering-rag-how-to-observe-your-rag-post-deployment)
 - [Seven Failure Points When Engineering a Retrieval Augmented Generation System](https://mp.weixin.qq.com/s/iMTgxYELvESUnCFOglhcYg)
   - ![img.png](ml_rag_failure_points.png)
