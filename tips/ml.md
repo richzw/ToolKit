@@ -1614,7 +1614,11 @@
   - 法律判决
     - 关注指标：特异度（减少误判无罪为有罪）
     - 示例：在法律判决中，特异度更为重要，因为误判无罪为有罪可能导致冤假错案。
-
+- [The "think" tool: Enabling Claude to stop and think in complex tool use situations](https://www.anthropic.com/engineering/claude-think-tool)
+  - "think"工具是Anthropic为Claude开发的一种简单而强大的功能，让AI可以在复杂任务解决过程中拥有专门的思考空间。这与Claude的"extended thinking"功能有所不同：
+    - Extended thinking：Claude在开始生成回应前的深度思考过程
+    - "think"工具：Claude在生成回应过程中的额外步骤，用于停下来思考是否已获取足够信息继续前进
+  - "think"工具特别适用于Claude需要处理外部信息（如工具调用结果）的场景，更聚焦于模型在发现新信息后的思考过程
 
 
 

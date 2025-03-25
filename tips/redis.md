@@ -597,7 +597,16 @@
 - redis 7 ERR user_script:1 Attempt to modify a readonly table script
   - https://github.com/redis/redis/pull/10651
   - lua function改为local
-
+- 优化 Redis 在线特征存储中的延迟
+  - 处理批量查询访问模式
+  - 最初，我们的方法将每个特征存储为 Redis 哈希映射，并使用管道同时获取多行
+  - 不再使用 Redis 管道，而是改用 MGET 一次获取多行
+  - MGET 单个 Redis 分片造成的。为了解决这个问题，我们引入了虚拟分区，将 800 行分成 10 个分区，每个分区 80 行，并向 MGET 多个 Redis 分片发出并发命令。
+  - 为了找出根本原因，我们将延迟分为两个指标：
+    - Lettuce 第一个字节延迟：从 Redis 接收第一个字节的时间。
+    - Lettuce 完成延迟：完成整个请求的时间。
+  - 这个反序列化过程是顺序的而不是并行的。我们怀疑这种顺序反序列化是导致延迟增加的原因，尤其是在扇出因子增加的情况下。
+  - 并行化反序列化
 
 
 

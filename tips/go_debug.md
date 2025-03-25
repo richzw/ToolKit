@@ -509,7 +509,11 @@
 - Self-aware Golang profile dumper https://github.com/mosn/holmes
   - Dump goroutine when goroutine number spikes
   - Dump cpu profile when cpu load spikes
-
+- [debug hanging Go program](https://michael.stapelberg.ch/posts/2025-02-27-debug-hanging-go-programs/)
+  - Press Ctrl+\ (SIGQUIT) to print a stack trace
+  - Attach the delve debugger to the process
+  - Save a core dump for later - GOTRACEBACK=crash
+  - 
 
 
 
