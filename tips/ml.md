@@ -1397,7 +1397,7 @@
 - AGI
   - [Machines of Loving Grace](https://darioamodei.com/machines-of-loving-grace) - Dario Amodei (Anthropic)
     - https://mp.weixin.qq.com/s/StZeb__lyrZl_as_sQ8l6A
-- 模型文件格式
+- [模型文件格式](https://mp.weixin.qq.com/s/HXMLPM2KNkO6Mah-4btaEQ)
   - [Safetensors](https://mp.weixin.qq.com/s/o-banwxQlk4rBiNOnp6lmA)
     - 当我们训练模型时，通常会将模型的权重保存到文件中，以便在检查点保存和稍后加载。最流行的格式是 PyTorch 的状态字典，它是一个 Python 字典对象，将每一层映射到其参数 tensor
     - 使用 pickle 来序列化和反序列化整个状态字典对象，引发了安全性问题。原因在于 pickle 并不安全，可能会加载具有与反序列化程序相同权限的任意代码
@@ -1405,6 +1405,23 @@
     - Safetensors 如何解决问题
       - Safetensors 不使用 pickle 来序列化和反序列化状态字典对象。相反，它使用自定义的序列化方法来存储模型权重
       - Hugging Face 的 Safetensors 确保你的模型权重文件只包含参数数据，而不包含其他任何内容。Safetensors 在存储和保存模型权重时仍然保持了快速零拷贝的特性
+  - GGUF
+    - GGUF 是一种二进制格式，旨在实现快速的模型加载和保存，并易于阅读。模型通常使用 PyTorch 或其他框架开发，然后转换为 GGUF 格式以与 GGML 一起使用。
+    - GGUF 格式和 GGML 库还提供了灵活的 量化方案，能够在保持良好精度的同时实现高效的模型存储
+  - PyTorch
+    - .pt/.pth 扩展名代表 PyTorch 的默认序列化格式，存储包含学习参数 (权重、偏置) 、优化器状态和训练元数据的模型状态字典
+    - PyTorch 格式基于 Python 的pickle模块，该模块用于序列化 Python 对象
+  - Safetensors
+    -  Hugging Face 开发的safetensors解决了传统 Python 序列化方法 (如 PyTorch 使用的 pickle) 中存在的安全性和效率问题
+    - 以 JSON 格式保存的元数据部分。该部分包含模型中所有张量的信息，例如它们的形状、数据类型和名称。它还可以选择性地包含自定义元数据。
+    - 缺点:
+      - 量化方案不如 GGUF 灵活。这主要是由于 PyTorch 提供的量化支持有限。
+      - 需要 JSON 解析器来读取元数据部分。这在处理像 C++ 这样的低级语言时可能会出现问题，因为这些语言没有内置的 JSON 支持。
+  - ONNX
+    - ONNX 模型以 .onnx 扩展名的单个文件保存。与 GGUF 或 Safetensors 不同，ONNX 不仅包含模型的张量和元数据，还包含模型的 计算图
+    - 缺点:
+      - 对量化张量的支持有限。ONNX 本身不支持量化张量，而是将它们分解为整数张量和比例因子张量。这可能导致在处理量化模型时质量下降。
+      - 复杂架构可能需要为不支持的层使用操作符回退或自定义实现。这可能会在将模型转换为 ONNX 格式时导致性能损失。
 - [Claude Artifacts](https://simonwillison.net/2024/Oct/21/claude-artifacts/)
 - [Github Spark](https://github.blog/news-insights/product-news/bringing-developer-choice-to-copilot/)
   - Github Spark 和 Copilot 都将支持三种超强的代码模型：
