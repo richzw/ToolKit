@@ -1435,6 +1435,8 @@
   - 推理“后”：JSON数据后处理 JSON Repair库; 随机种子控制：可改变LLM推理的seed, 在不同的seed下输出以减少出错概率。
   - [Structured Outputs Sample Apps](https://github.com/openai/openai-structured-outputs-samples/tree/main)
 - [Model Context Protocol MCP](https://mp.weixin.qq.com/s/ASmcjW53HKokdYt1m-xyXA)
+  - [specification](https://github.com/modelcontextprotocol/specification/tree/main)
+    - https://openai.github.io/openai-agents-python/mcp/
   - 为数据源与 AI 系统之间的连接提供了统一标准，替代复杂的多源整合方式 https://github.com/modelcontextprotocol
   - Samples  https://github.com/modelcontextprotocol/servers  
   - [summarize your chat messages](https://github.com/mcpservers/mcp-server-chatsum)
@@ -1636,7 +1638,7 @@
     - Extended thinking：Claude在开始生成回应前的深度思考过程
     - "think"工具：Claude在生成回应过程中的额外步骤，用于停下来思考是否已获取足够信息继续前进
   - "think"工具特别适用于Claude需要处理外部信息（如工具调用结果）的场景，更聚焦于模型在发现新信息后的思考过程
-
+- [Tracing the thoughts of a large language model](https://www.anthropic.com/research/tracing-thoughts-language-model)
 
 
 

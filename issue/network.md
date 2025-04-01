@@ -166,6 +166,11 @@
     - 如果你通过抓包去看一下 MSS 是否是有效的，里面每一个包的大小是否最大是 1500 bytes
       - TSO，TCP Segment Offload 网卡 Driver 告诉 Kernel，这个工作可以交给我 于是，Kernel 就发大包到网卡，网卡完成大包拆小包
       - 关闭 TSO 功能: ethtool -K eth0 tx off
+      - TSO
+        - TSO (TCP Segmentation Offload) 是一种利用网卡分割大数据包，减小 CPU 负荷的一种技术，也被叫做 LSO (Large segment offload)
+        - TSO 是使得网络协议栈能够将大块数据推送至网卡，然后网卡执行分片工作，这样减轻了 CPU 的负荷，但 TSO 需要硬件来实现分片功能
+        - 考虑将 TSO 技术一般化，因为其本质实际是延缓分片，这种技术，在 Linux 中被叫做 GSO(Generic Segmentation Offload)，它比 TSO 更通用，原因在于它不需要硬件的支持分片就可使用
+      - 对于 TSO/GSO 开启的情况下，最直观的就是发送端通过 tcpdump 所捕获的数据包是可以看到大分段的，因为分片是在网卡执行，而 tcpdump 抓包是发生在网卡执行之前
   - [IPv4 分段、MTU、MSS 和 PMTUD](https://www.cisco.com/c/zh_cn/support/docs/ip/generic-routing-encapsulation-gre/25885-pmtud-ipfrag.html)
   - 为什么会出现粘包
     - TCP，Transmission Control Protocol。传输控制协议，是一种面向连接的、可靠的、**基于字节流**的传输层通信协议。
