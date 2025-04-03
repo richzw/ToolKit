@@ -1092,7 +1092,12 @@
     - 应用程序也可通过 SO_RCVBUF 设置固定的接收缓冲区大小。类似发送缓冲区，SO_RCVBUF 的值不能超过 net.core.rmem_max
     - 只有在 tcp_moderate_rcvbuf 为 1，并且应用程序没有通过 SO_RCVBUF 来配置缓冲区大小的情况下，TCP 接收缓冲区才会动态调节
   - Tool ``ss -tiepm4 | head``
-
-
+- TCP
+  - Q：Linux中究竟有多少个端口是可以被有效使用的？
+    - A：Linux一共有65535个端口可用，其中 ip_local_port_range 范围内的可以被系统随机分配，其他需要指定绑定使用，同一个端口只要TCP连接四元组不完全相同可以无限复用。
+  - Q：什么在 tcp_tw_reuse=1 情况下，端口依然不够用？
+    - A：connect() 系统调用和 bind(0) 系统调用在随机绑定端口的时候选择限制不同，bind(0) 会忽略存在 time_wait 连接的端口。
+  - Q：当全连接队列满时，connect() 和 accept() 侧是什么表现行为?
+    - A：Linux 3.10内核和新版本内核行为不一致，如果在Linux 3.10内核，会出现客户端假连接成功的问题，Linux 4.9内核就不会出现问题。
 
 

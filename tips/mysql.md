@@ -1097,6 +1097,6 @@
   - MySQL提供了相应的函数来把字符串格式的IP转换成整数INET_ATON，以及把整数格式的IP转换成字符串的INET_NTOA
 - [MySQL一次批量插入多少条数据性能最佳？](https://mp.weixin.qq.com/s/VcSo-lKs3mL_NWSFwwmGSw)
 - [The Art of Problem-Solving in Software Engineering:How to Make MySQL Better](https://github.com/enhancedformysql/The-Art-of-Problem-Solving-in-Software-Engineering_How-to-Make-MySQL-Better)
-
+- [MySQL 虚拟索引 VIDEX](https://mp.weixin.qq.com/s/MhWFjbqEb0E4duEbaavnUg)
 
 

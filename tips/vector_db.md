@@ -560,6 +560,22 @@
     - https://github.com/zilliztech/vts 迁移用这个工具
     - milvus的检索策略这里的短词和长句的权重适配策略是怎么做
       - 简单的方法就是根据用户 query 来的问题分词的长度来计算，比如长度小于3，BM25 这一路的分数给 0.7，dense 给 0.3；如果问题长度长，分数就倾向于 dense；最后根据业务召回准确率来调整这里的参数定义
+    - [Milvus SDK v2 ](https://mp.weixin.qq.com/s/VXupxtWpiC1XIgbswdt3Og)
+    - Milvus如何实现无感扩容自动分片
+      - Milvus 利用 Kubernetes 和存算分离架构来支持无缝扩展与动态资源分配
+      - 其一，基于Segment的架构：在核心上，Milvus 将数据组织成“Segment”——数据管理的最小单位：
+        - Growing Segment位于StreamNodes上，优化实时查询的数据新鲜度
+        - Sealed Segment 由QueryNodes管理，利用强大的索引加速搜索
+        - 这些Segment在节点之间均匀分布，以优化并行处理
+      - 其二，双层路由：与传统数据库中每个分片位于单个机器上不同，Milvus 将一个Shard中的数据动态分布在多个节点上：
+        - 每个Shard可以存储超过 10 亿个数据点
+        - 每个Shard中的Segment可以跨机器自动平衡
+        - 扩展集合就像扩展Shard数量一样简单
+        - 即将推出的 Milvus 3.0 将引入动态Shard拆分，甚至将这一最小的手动步骤也取消
+      - 而应对大规模查询时，Milvus 整体遵循以下的过程：
+        - Proxy识别请求collection的相关Shard
+        - Proxy从StreamNodes和QueryNodes收集数据
+        - StreamNodes 处理实时数据，而QueryNodes 同时处理历史数据。 结果被聚合并返回给用户
   - [优化](https://zilliz.com.cn/blog/milvus-%20community-keyword)
     - 降低内存
       - 牺牲性能 - Mmap, DiskANN
