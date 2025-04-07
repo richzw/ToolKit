@@ -1038,7 +1038,11 @@
       - SReclaimable 内存是操作系统为了实现自身功能而缓存的内核对象，虽然不计入应用内存，但应用的行为却影响 SReclaimable 的高低
     - memory group 残留
       - cgroup 和 namespace 是支撑容器技术的关键组件。业务频繁的容器创建和销毁经常会引起 cgroup 残留，容易造成统计不准确和系统抖动。
-
+- [KAI-Scheduler vs HAMi：GPU 共享](https://mp.weixin.qq.com/s/a-SkSq03vyM9BnjNyglEdg)
+  - KAI-Scheduler 提出了一种非常巧妙的解决方案：Reservation Pod
+    - 当一个 Pod 请求分数 GPU 时，KAI-Scheduler 不会直接尝试告诉 K8s "这个 Pod 要 0.x 个 GPU"。
+    - 相反，它会创建一个特殊的、低资源消耗的 Reservation Pod。这个 Pod 会正儿八经地向 Kubernetes 申请 整个 GPU (nvidia.com/gpu: "1")！
+    - 这样一来，Kubernetes 就认为这个 GPU 已经被完全分配掉了，kube-scheduler 自然不会再把其他 Pod 调度到这个 GPU 上。
 
 
 

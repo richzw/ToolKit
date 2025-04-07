@@ -181,8 +181,12 @@
     - 响应时间：服务时间和排队时间之和。服务时间是指数据库处理这个查询真正花了多长时间 - 可能是等I/O操作完成，也可能是等待行锁。
     - 扫描的行数：一条查询，如果性能很差，最常见的原因是访问的数据太多。大部分性能低下的查询都可以通过减少访问的数据量的方式进行优化
     - 返回的行数：会给服务器带来额外的I/O、内存和CPU的消耗（使用limit限制返回行数）
-  - 
-
+- [Multi-Version Concurrency Control (MVCC) in PostgreSQL](https://www.red-gate.com/simple-talk/databases/postgresql/multi-version-concurrency-control-mvcc-in-postgresql-learning-postgresql-with-grant/)
+  - The PostgreSQL database management system has three ways, isolation levels, for dealing with concurrency:
+    - Read Committed
+    - Repeatable Read
+    - Serializable
+  
 
 
 
