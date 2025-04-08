@@ -1440,6 +1440,16 @@
     - Local Data Sources: Files, databases, or services securely accessed by MCP servers
     - Remote Services: External internet-based APIs or services accessed by MCP servers
   - [Go开发MCP Server](https://mp.weixin.qq.com/s/UgdXztu3SKYMs56DqiX3Sg)
+  - MCP、Function Calling 有什么区别
+    - Function Calling、MCP 以及 AI Agent, 这三者类比为“调用指令 → 调度系统 → 自主执行者”
+    - Function Calling —— 让模型“能调用工具”
+      - 让大模型能正确生成调用外部函数的指令。开发者只需定义好函数接口，模型通过提示词知道有哪些函数可调用，并在推理中选择合适的函数与参数。
+      - 工具数量一多（例如几十上百个），模型就难以在一长串函数列表中准确选择，提示词复杂、上下文迅速膨胀，效果大打折扣。
+    - MCP（Multi-tool Calling Protocol）—— 高效接入大量工具
+      - Function Calling 明显力不从心。这时就需要引入 MCP，也就是多工具调用协议。MCP 提供一种统一标准的工具接入机制，就像一个 AI 插座，让所有工具都能以标准化协议连接进来。
+    - AI Agent —— 自主完成复杂任务
+      -  AI Agent，它不只是“调用工具”，而是具备一定的自主性，能进行规划、决策、执行的闭环操作。
+  - [github mcp server](https://github.com/github/github-mcp-server)
 - [文本水印](https://mp.weixin.qq.com/s/xH4ySZsr0A6I2H6yzdm9TQ)
   - https://colab.research.google.com/drive/1sbIdU2tr-18sAtLvVVyhYtrIw2Cgjp8F
   - 利用了 Jina Embeddings v3 模型的独特优势 —— 长文本处理和跨语言对齐 既能给文本加上水印，又能检测出文本水印
@@ -1573,6 +1583,9 @@
       - 4. 最后更新时间：优先考虑新鲜内容
       - 5. 访问限制筛选：降低有访问限制内容的排名
       - 6. 域名多样性：实施探索-利用策略，从每个主机名选择排名靠前的URL
+  - [DeepSearch 本质上就是一个大的 while 循环, 不断地重复“搜索”、“阅读”、“思考”这几个动作，直到找到它认为最好的答案为止](https://mp.weixin.qq.com/s/5WpbKxfMroeOMSAsUgA-1w)
+    - 把原来用 gemini-2.0-flash 来做决策的地方，换成 DeepSeek R1 671B 这个专攻推理的 LLM。
+    - https://colab.research.google.com/drive/18sqU8_eWqFleKqpd-SnGDNmZ_P1KLfXw?usp=sharing#scrollTo=2jFWdbnp_6ws
 - 企业落地 AI 最佳实践以及常见错误 
   - Anthropic 通过和企业客户的协作过程中，发现主要的问题集中在这几个方面：
     - • 问题一：从何入手？ 你知道 AI 很强大，但具体到你的业务场景，应该从哪里开始？是做一个聊天机器人，还是做数据分析工具？抑或是更高级的 AI Agent？
@@ -1629,7 +1642,7 @@
 
 
 
-d
+
 
 
 
