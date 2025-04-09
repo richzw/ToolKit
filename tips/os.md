@@ -1435,7 +1435,9 @@
     - ![img.png](os_cpu_gpu_cuda.png)
     - GPU的计算场景是这样的：1)计算简单；2）重复计算。
   - [CPU和GPU介绍](https://mp.weixin.qq.com/s/YoJHG8j9N_xDV3JT7fqFYQ)
-    - 
+- [GPU 利用率(Utilization) 是一个误导性指标](https://mp.weixin.qq.com/s/dUhxU3QBnZ4kUMBzxrmC_w)
+  - 除 GPU 利用率外还应关注流多处理器效率（SM Efficiency）。该指标能更真实反映 GPU 的性能压榨程度，而 GPU 利用率仅能体现设备是否处于空闲状态。
+  - 通过结合 MFU 和 SM Efficiency，可以更全面地评估 GPU 的计算效率，而不仅仅是依赖 GPU Utilization 这一粗略指标
 - [计算机系统中的异常 & 中断](https://mp.weixin.qq.com/s/8Plas3j-e5bavs8xvb_tmQ)
   - 中断和异常可以归结为一种事件处理机制，通过中断或异常发出一个信号，然后操作系统会打断当前的操作，然后根据信号找到对应的处理程序处理这个中断或异常，处理完毕之后再根据处理结果是否要返回到原程序接着往下执行。
   - An interrupt is an asynchronous event that is typically triggered by an I/O device.

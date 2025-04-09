@@ -418,7 +418,9 @@
         - The dimensions in a vector embedding are usually represented as 32 bit floats. SQ transforms the float representation to an 8 bit integer. This is a 4x reduction in size.
         - like BQ, is a lossy compression technique. However, SQ has a much greater range.
         - SQ compressed vectors are more accurate than BQ compressed vectors
+        - 把一个高精度的浮点向量，主动丢失部分精度，变为一个低精度向量，减少计算和存储开销。例如把向量中的元素 0.1192 和 0.1365 统一用 0.1 来替换
       - PQ - Product Quantization - bucketize across multiple dimensions, accuracy x memory tradeoff
+        - 把高维向量空间降维。因为低维向量的存储和计算开销都远远低于高维
         - First, it reduces the number of vector dimensions to a smaller number of "segments",
         - then each segment is quantized to a smaller number of bits from the original number of bits (typically a 32-bit float).
         - PQ makes tradeoffs between recall, performance, and memory usage. This means a PQ configuration that reduces memory may also reduce recall.
@@ -526,7 +528,6 @@
     - milvus的ivfsq8，实际用的就是faiss的IndexIvfScalarQuantizer
     - [HNSWlib](https://zilliz.com/learn/learn-hnswlib-graph-based-library-for-fast-anns)
       - HNSWlib is a library for vector search. It implements the HNSW algorithm, which creates a hierarchical graph structure for efficient similarity search in high-dimensional spaces.
-      - 
   - [多租户](https://mp.weixin.qq.com/s/3QV7xjJ4G7MUxKOb0T427Q)
     - to B 大型知识库系统中，我们一般为每个租户提供一到多个 Database，以满足数据规模及知识库构建灵活度的需要
     -  to C 对话上下文的数据隔离，一般会选择在 Colletion，或 Partition Key 这两层实现。Partition Key 是逻辑上的表内隔离,  Partition Key 理解为一个 Hash 分桶的过程
@@ -668,6 +669,14 @@
         - Segment 大小：Segment 大小越大，查询性能越好，构建索引越慢，负载越不容易均衡。Milvus 默认选择 512M Segment 大小主要是考虑到了内存比较少的机型。对于内存在 8G-16G 的用户，建议 Segment 大小调整到 1024M，16G 以上的机型可以调整到 2G。
         - Segment seal portion: 当 Growing Segment 达到 Segment 大小 * seal portion 后，流式数据就会被转换为批数据。通常情况下建议 Growing segment 的大小控制在 100-200M 左右，调小这个值有助于降低流式写入场景下的查询延迟。
         - DataNode Segment SyncPeriod: Milvus 会定时将数据 Sync 到对象存储，Sync 越频繁故障恢复速度越快，但过于频繁的 sync 会导致 Milvus 生产大量小文件，给对象存储造成较大压力。
+    - [如何找到精度与性能的黄金点](https://mp.weixin.qq.com/s/qUxqfr0KA9lwhwtNCZ9maw)
+      - Zilliz Cloud 发布最新功能：level 参数调节搜索精度和 enable_recall_calculation 返回精度预估
+      - Recall 和 Latency/QPS 的需求大不同
+        - 推荐系统：召回精度要求低，高 QPS 低延迟
+        - 人脸识别：召回精度要求高，低 QPS 延迟宽松
+      - Level 参数调节召回精度
+        - 较低的 level 参数 (level=1)：适用于一般场景（召回率通常在 90% 以上），此时查询性能优异，资源消耗较低，非常适合需要快速响应的业务需求。
+        - 较高的 level 参数 (level=10)：针对对召回率要求极高的场景，提升搜索精度，但会消耗更多的计算资源和时间，适用于对精准度要求严苛的任务。
   - Milvus 2.3
     - Cosine 相似度类型： 无需向量归一化，简化数据搜索流程。
     - Upsert 数据：提升更新和删除数据的管理流程效率，适用于频繁更新数据且追求数据一致性和原子性的场景。
