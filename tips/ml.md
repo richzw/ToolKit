@@ -849,6 +849,16 @@
       - MTP 的核心思想是让模型一次性预测多个 token，以提升了模型的训练效率、生成质量和推理速度
     - https://mp.weixin.qq.com/s/23h_Lz2kTmt5NNvLZ4B2SA
     - [DeepSeek-V3/R1 Inference System Overview](https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md)
+  - [jina-reranker-m0 全新多模态多语言重排器](https://mp.weixin.qq.com/s/8o0flybYLQVHLctvbPJY8w)
+    - 当用户输入一个查询（query）以及一堆包含文本、图表、表格、信息图或复杂布局的文档时，模型会根据文档与查询的相关性，输出一个排序好的文档列表
+    - 基于 Qwen2-VL-2B 构建的，总参数量达到 24 亿。该模型采用成对比较（pairwise comparison）机制，能够同时评估输入文档里的视觉和文本元素与查询的相关性，进而实现高效的文档排序。
+    - 跟 jina-reranker-v2-base-multilingual 不一样，jina-reranker-m0 不再使用经典的交叉编码器（cross-encoder）架构，而是转向了仅解码器（decoder-only）的视觉语言模型
+    - 用 LoRA 对其中的大语言模型（LLM）部分进行了微调，并且在之后额外训练了一个多层感知机（MLP），专门用于生成表征查询-文档相关性的排序分数（ranking logits）。通过这种设计，我们构建了一个专门针对排序任务优化的判别式模型（discriminative model）。
+    - 架构还有效地缓解了模态鸿沟（modality gap）问题
+    - 采用 decoder-only 架构的意义远不止是优化传统指标，而是在于解锁了 encoder-only 架构无法支持的新功能：
+      - 统一的混合模态重排：能够直接处理查询与包含不同模态（文本、图像）文档集的复杂排序场景。
+      - 实现列表式重排（Listwise reranking）和文档去重：decoder 模型更自然地支持将整个候选文档列表作为上下文进行联合评估，从而实现更优的全局排序效果和内置去重逻辑。
+      - 基于注意力机制的可解释性：decoder 架构固有的注意力机制为理解模型的排序决策过程、分析特征重要性提供了基础，提升了模型的可解释性潜力。
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]

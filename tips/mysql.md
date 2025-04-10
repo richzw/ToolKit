@@ -1098,5 +1098,5 @@
 - [MySQL一次批量插入多少条数据性能最佳？](https://mp.weixin.qq.com/s/VcSo-lKs3mL_NWSFwwmGSw)
 - [The Art of Problem-Solving in Software Engineering:How to Make MySQL Better](https://github.com/enhancedformysql/The-Art-of-Problem-Solving-in-Software-Engineering_How-to-Make-MySQL-Better)
 - [MySQL 虚拟索引 VIDEX](https://mp.weixin.qq.com/s/MhWFjbqEb0E4duEbaavnUg)
-
+- [YouTube 使用 MySQL 和 Vitess 支撑其海量用户](https://blog.bytebytego.com/p/how-youtube-supports-billions-of)
 
