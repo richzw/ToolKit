@@ -375,7 +375,7 @@
 - [What every SRE should know](https://biriukov.dev/)
 - [Deep dive aws S3](https://www.youtube.com/watch?v=NXehLy7IiPM)
 - [Digital hygiene](https://karpathy.bearblog.dev/digital-hygiene/)
-
+- [The Best Programmers I Know](https://endler.dev/2025/best-programmers/)
 
 
 
