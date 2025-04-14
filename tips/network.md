@@ -1586,6 +1586,8 @@
   - eth.dst.ig == 1
     - 利用 IG 位，唯一不好的是组播和广播都会过滤出来，当然也可以排除掉广播，eth.dst.ig == 1 and eth.dst != ff:ff:ff:ff:ff:ff
   - ip_multicast(ip.dst)
+- 用 Wireshark 来看下是哪些源发了这么多的 ARP 广播包
+  - $ tshark -r arp.pcap -2R "arp" -T fields -e arp.src.proto_ipv4
 - 客户端 TCP 三次握手的问题，仅有的三个数据包分别是 SYN、SYN/ACK 和 RST
   - 一个可能的原因是 TCP TSOPT，模拟客户端发出 SYN ，然后直接修改了返回的 SYN/ACK 中的 TSecr 选项值，最终造成客户端发出 RST
   - 如果 ACK Num 存在异常，在 snd_una 之前或者在 snd_nxt 之后，都会直接 RST

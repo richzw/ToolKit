@@ -186,7 +186,10 @@
     - Read Committed
     - Repeatable Read
     - Serializable
-  
+- [数据库迁移全流程](https://mp.weixin.qq.com/s/xKr9k7uSILk4q64zIzJ3dA)
+  - 三板斧(灰度/监控/回滚)
+    - 可监控(数据对比读逻辑) 可监控(对比读逻辑) 可灰度(灰度切量读) 可回滚(灰度切量写)
+    - 
 
 
 

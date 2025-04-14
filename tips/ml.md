@@ -1432,6 +1432,7 @@
 - [Model Context Protocol MCP](https://mp.weixin.qq.com/s/ASmcjW53HKokdYt1m-xyXA)
   - [specification](https://github.com/modelcontextprotocol/specification/tree/main)
     - https://openai.github.io/openai-agents-python/mcp/
+  - ![img.png](ml_mcp.png)
   - 为数据源与 AI 系统之间的连接提供了统一标准，替代复杂的多源整合方式 https://github.com/modelcontextprotocol
   - Samples  https://github.com/modelcontextprotocol/servers  
   - [summarize your chat messages](https://github.com/mcpservers/mcp-server-chatsum)
@@ -1460,6 +1461,15 @@
     - AI Agent —— 自主完成复杂任务
       -  AI Agent，它不只是“调用工具”，而是具备一定的自主性，能进行规划、决策、执行的闭环操作。
   - [github mcp server](https://github.com/github/github-mcp-server)
+  - [Agent MCP](https://github.com/anthropics/anthropic-quickstarts/tree/main/agents)
+- [Agent2Agent](https://mp.weixin.qq.com/s/8nh4Cg-TH0eF2gWYUiwh3A)
+  - https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability
+  - 在 A2A 的工作模型中，主要存在“客户端代理（client agent）”和“远程代理（remote agent）”两种角色：
+    - 客户端代理：负责接收用户请求、制定具体任务，并向远程代理提出需求。
+    - 远程代理：根据接收到的任务，执行相应操作或产出结果（“artifact”）
+  - 二者的交互方式包括能力发现（capability discovery）、任务管理（task management）、协作（Collaboration）和用户体验协商（User experience negotiation）
+  - MCP（Model Context Protocol，模型上下文协议）—— 适用于工具和资源 利用结构化的输入和输出，将代理连接至工具、API 和其它资源。
+  - A2A（Agent2Agent Protocol，代理对代理协议）—— 用于代理之间协作 不同代理之间无需共享内存、资源和工具，即可实现动态、多模态的通信。
 - [文本水印](https://mp.weixin.qq.com/s/xH4ySZsr0A6I2H6yzdm9TQ)
   - https://colab.research.google.com/drive/1sbIdU2tr-18sAtLvVVyhYtrIw2Cgjp8F
   - 利用了 Jina Embeddings v3 模型的独特优势 —— 长文本处理和跨语言对齐 既能给文本加上水印，又能检测出文本水印
