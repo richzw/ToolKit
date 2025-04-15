@@ -84,6 +84,7 @@
 - [AB测试中的流量互斥与流量正交]()
   - [Overlapping Experiment Infrastructure: More, Better, Faster Experimentation](https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/36500.pdf)
   - [AB实验的异质性分析](https://mp.weixin.qq.com/s/FjifDJTSnOYXBymJ0hI5Dw)
+  - [随机实验AA问题](https://mp.weixin.qq.com/s/no4nQI31Y3YPnVvIxH4tew)
 - [推荐场景下的 A/B 实验](https://mp.weixin.qq.com/s/7wQsdMzuM8H8osoKPfJCig)
   - 推荐场景A/B测试具有复杂性
     - 推荐场景存在多边影响 - 它所影响的角色众多，并且这些角色往往同时受到影响。平台上有3类典型角色：消费者、创作者以及平台方

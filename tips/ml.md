@@ -463,6 +463,7 @@
     - 向量的平均余弦相似度呈现出明显的线性关系：文本越长，原始句子和打乱后句子的平均余弦相似度就越低
     - 在长文本里，一个词可能被挪到离它原始上下文很远的地方，这就会显著改变它的 Token 向量。所以说，打乱长文本中的词，会产生比短文本更远的向量距离
     - 更大的模型确实对词序变化更敏感一些，但效果提升非常有限
+  - [大语言模型的训练后量化算法](https://mp.weixin.qq.com/s/IIpMWgmjmfSJsO33ojGaYQ)
 - [Prompt](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
   - `Prompt Engineering`, also known as `In-Context Prompting`, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes without updating the model weights.
   - `Instructed LM` (e.g. InstructGPT, natural instruction) finetunes a pretrained model with high-quality tuples of (task instruction, input, ground truth output) to make LM better understand user intention and follow instruction
@@ -1462,14 +1463,30 @@
       -  AI Agent，它不只是“调用工具”，而是具备一定的自主性，能进行规划、决策、执行的闭环操作。
   - [github mcp server](https://github.com/github/github-mcp-server)
   - [Agent MCP](https://github.com/anthropics/anthropic-quickstarts/tree/main/agents)
+  - [MCP 传输机制（Transport）](https://mp.weixin.qq.com/s/7fO2C3bJ51o9dTi5UAhcxw)
+    - MCP 协议使用 JSON-RPC 来编码消息。JSON-RPC 消息必须使用 UTF-8 编码。
+    - stdio：通过标准输入和标准输出进行通信
+    - SSE：通过 HTTP 进行通信，支持流式传输。（协议版本 2024-11-05 开始支持，即将废弃）
+    - Streamble HTTP：通过 HTTP 进行通信，支持流式传输。（协议版本 2025-03-26 开始支持，用于替代 SSE）
 - [Agent2Agent](https://mp.weixin.qq.com/s/8nh4Cg-TH0eF2gWYUiwh3A)
   - https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability
+  - A2A（Agent2Agent）协议 是由 Google Cloud 推出的一个开放协议，旨在促进不同 AI 代理之间的互操作性
+    - 目标是允许这些代理在动态的、多代理的生态系统中进行有效的通信和协作，无论它们是由不同的供应商构建的还是使用不同的技术框架
   - 在 A2A 的工作模型中，主要存在“客户端代理（client agent）”和“远程代理（remote agent）”两种角色：
     - 客户端代理：负责接收用户请求、制定具体任务，并向远程代理提出需求。
     - 远程代理：根据接收到的任务，执行相应操作或产出结果（“artifact”）
   - 二者的交互方式包括能力发现（capability discovery）、任务管理（task management）、协作（Collaboration）和用户体验协商（User experience negotiation）
   - MCP（Model Context Protocol，模型上下文协议）—— 适用于工具和资源 利用结构化的输入和输出，将代理连接至工具、API 和其它资源。
   - A2A（Agent2Agent Protocol，代理对代理协议）—— 用于代理之间协作 不同代理之间无需共享内存、资源和工具，即可实现动态、多模态的通信。
+  - A2A 核心概念
+    - AgentCard 是一个 JSON 文件，描述了 Agent 提供了什么样的功能，官方建议托管在https:// base url /.well-known/agent.json
+    - 任务是一个有状态的实体，允许客户端与远程代理协作以达成特定的结果并生成相应的输出。在任务内，客户端与远程代理之间会交换消息，远程代理则生成工件作为结果（代理即是 Agent）。
+    - Artifact(工件) 是代理作为任务最终结果生成的输出。工件具有不可变性，可以被命名，并且可以包含多个部分。通过流式响应，可以将新部分附加到现有的工件中
+      - 一个任务可以生成多个工件
+    - Message(消息)
+      - 消息是包含任何非工件内容的实体。这些内容可以包括代理的思考、用户的上下文、指令、错误信息、状态更新或元数据。
+    - Part是客户端与远程代理之间作为消息或工件一部分交换的完整内容。每个Part都有其独特的内容类型和元数据。
+  - [MCP vs. A2A](https://www.newsletter.swirlai.com/p/mcp-vs-a2a-friends-or-foes)
 - [文本水印](https://mp.weixin.qq.com/s/xH4ySZsr0A6I2H6yzdm9TQ)
   - https://colab.research.google.com/drive/1sbIdU2tr-18sAtLvVVyhYtrIw2Cgjp8F
   - 利用了 Jina Embeddings v3 模型的独特优势 —— 长文本处理和跨语言对齐 既能给文本加上水印，又能检测出文本水印
