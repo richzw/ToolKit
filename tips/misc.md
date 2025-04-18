@@ -34,15 +34,20 @@
       - 连续预训练阶段在预训练模型基础上使用搜索日志进行监督训练；
       - 微调阶段在连续训练模型基础上使用人工标注语料进行监督训练。
 - [Protobuf编码](https://mp.weixin.qq.com/s/hAfrPlPD2KBCWxpIuGkQTQ)
-  - 编码
+  - [编码](https://mp.weixin.qq.com/s/RsfHGTcsrfY2WSIQ1rfIWQ)
     - tag + value
     - tag 里面会包含两部分信息：字段序号，字段类型
     - value 里面会包含两部分信息：字段长度，字段值
     - Varints 编码
       - 对于 protobuf 来说对数字类型做了压缩的，普通情况下一个 int32 类型需要 4 byte，而 protobuf 表示127以内的数字只需要 2 byte
+      - 变长编码，对于小正整数有较好的压缩效果，对于大整数或负数编码后字节流长度会变大。
     - ZigZag 编码
       - 用于对有符号整数进行编码，将有符号整数转换为无符号整数，然后再使用 Varints 编码
       - sint32 这种类型，采用 zigzag 编码。将所有整数映射成无符号整数，然后再采用 varint 编码方式编码
+      - 定长编码，将小正整数和小负整数转换到小正整数，结合varint编码，可以实现对绝对值较小的整数有良好的压缩效果。
+    - protobuf既然有了int32 为什么还要用sint32 和 fixed32 ？
+      - int32使用varint编码，对于小正数有较好的压缩效果，对于大整数和负数会导致额外的字节开销。
+      - 因此引入fixed32，该类型不会对数值进行任何编码，对大于228-1的整数比int32占用更少的字节。而对于负数使用zigzag编码，这样绝对值较小的负数都能被有效压缩。
   - 最佳实践
     - 字段编号
       - 需要注意的是范围 1 到 15 中的字段编号需要一个字节进行编码，包括字段编号和字段类型；范围 16 至 2047 中的字段编号需要两个字节。所以你应该保留数字 1 到 15 作为非常频繁出现的消息元素。
@@ -377,7 +382,7 @@
 - [Deep dive aws S3](https://www.youtube.com/watch?v=NXehLy7IiPM)
 - [Digital hygiene](https://karpathy.bearblog.dev/digital-hygiene/)
 - [The Best Programmers I Know](https://endler.dev/2025/best-programmers/)
-
+- [WebRTC](https://webrtcforthecurious.com/zh/docs/01-what-why-and-how/)
 
 
 
