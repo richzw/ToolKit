@@ -798,10 +798,12 @@
     - Building block: The augmented LLM
     - Workflow: Prompt chaining / Routine / Parallelization /  Orchestrator-workers / Evaluator-optimizer / Agent
     - https://github.com/anthropics/anthropic-cookbook/tree/main/patterns/agents
+    - https://www.youtube.com/watch?v=D7_ipDqhtwk
   - [Full RAG](https://zilliz.com/blog/full-rag-modern-architecture-for-hyperpersonalization)
     -  Batch + Streaming data + Real-time Context
   - [談 LLM-based AI Agents](https://ihower.tw/presentation/ihower-agents-202412.pdf)
   - [Agent white paper](https://www.kaggle.com/whitepaper-agents)
+  - https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回

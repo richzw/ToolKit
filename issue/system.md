@@ -412,6 +412,7 @@
     - 使用 iotop 或 iostat 查看磁盘 IO：
       - iotop -o  # 查看 IO 活跃的进程
       - iostat -x 1  # 查看详细的磁盘 IO 性能
+      - [使用 iostat 监控磁盘性能](https://github.com/ForceInjection/linux-from-beginner-to-master/blob/main/disk/iostat_intro.md)
     - 使用 strace 查看进程是否频繁调用 IO 系统调用：
       - strace -p <PID> -e trace=open,read,write,fsync
 - CPU 上下文切换之问题排查

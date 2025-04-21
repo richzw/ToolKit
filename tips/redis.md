@@ -607,9 +607,13 @@
     - Lettuce 完成延迟：完成整个请求的时间。
   - 这个反序列化过程是顺序的而不是并行的。我们怀疑这种顺序反序列化是导致延迟增加的原因，尤其是在扇出因子增加的情况下。
   - 并行化反序列化
-
-
-
+- [Redis大Key分析利器]
+  - Redis 大 key 分析工具主要分为两类
+    - 离线分析 基于 RDB 文件进行解析，常用工具是 redis-rdb-tools（https://github.com/sripathikrishnan/redis-rdb-tools）。
+    - 在线分析
+      - --bigkeys：Redis 3.0.0 引入，统计的是 key 中元素的数量。
+      - --memkeys：Redis 6.0.0 引入，通过MEMORY USAGE命令统计 key 的内存占用。
+  - https://github.com/slowtech/redis-find-big-key
 
 
 
