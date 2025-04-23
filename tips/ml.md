@@ -1696,7 +1696,7 @@
     - "think"工具：Claude在生成回应过程中的额外步骤，用于停下来思考是否已获取足够信息继续前进
   - "think"工具特别适用于Claude需要处理外部信息（如工具调用结果）的场景，更聚焦于模型在发现新信息后的思考过程
 - [Tracing the thoughts of a large language model](https://www.anthropic.com/research/tracing-thoughts-language-model)
-
+- [Turns Codebase into Easy Tutorial](https://the-pocket.github.io/Tutorial-Codebase-Knowledge/)
 
 
 

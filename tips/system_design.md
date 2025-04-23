@@ -1047,7 +1047,9 @@
     - 另外，因为 RC 还支持"半一致读"，可以大大的减少了更新语句时行锁的冲突；对于不满足更新条件的记录，可以提前释放锁，提升并发度。
   - RC 之后，就需要自己解决幻读的问题
     - 通过“RC+显示锁”强制避免幻读
-
+- [DCDN](https://mp.weixin.qq.com/s/w7TVzNm4r_Ll0RLcokm1BA)
+  - DCDN加速过程中DNS解析扮演着最重要的角色之一，DNS一般默认使用运营商的 LocalDNS，然而LDNS有着容易被劫持、DNS调度不准确等问题。
+    - 业界成熟的方案是使用 HTTPDNS，与传统的DNS解析方式不同，集成 HTTPDNS 的客户端可以绕过 LocalDNS，直接向 HTTPDNS 服务发送DNS查询请求
 
 
 

@@ -994,6 +994,14 @@
     - Planning (e.g., reflection, self-critics, query routing, etc.)
     - Tools (e.g., calculator, web search, etc.)
   - [Build agentic RAG on Google Cloud databases with LlamaIndex](https://cloud.google.com/blog/products/databases/llamaindex-integrates-with-alloydb-and-cloud-sql-for-postgresql?e=48754805)
+  - [How to think about agent frameworks](https://blog.langchain.dev/how-to-think-about-agent-frameworks/)
+    - TL; DR; 
+      - The hard part of building reliable agentic systems is making sure the LLM has the appropriate context at each step. This includes both controlling the exact content that goes into the LLM, as well as running the appropriate steps to generate relevant content.
+      - Agentic systems consist of both workflows and agents (and everything in between).
+      - Most agentic frameworks are neither declarative or imperative orchestration frameworks, but rather just a set of agent abstractions.
+      - Agent abstractions can make it easy to get started, but they can often obfuscate and make it hard to make sure the LLM has the appropriate context at each step.
+      - Agentic systems of all shapes and sizes (agents or workflows) all benefit from the same set of helpful features, which can be provided by a framework, or built from scratch.
+    - agentic systems” we see in production are a combination of “workflows” and “agents
 - ![img.png](rag_ft.png)
 - [Musings on building a Generative AI product](https://www.linkedin.com/blog/engineering/generative-ai/musings-on-building-a-generative-ai-product)
   - the basic framework up and running:

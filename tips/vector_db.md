@@ -805,6 +805,9 @@
       - 一百万数据可能就一两个segment 加再多机器也只有一两个有数据 replica可以解决这个问题
       - 1024维，150万数据是6GB，大约会有七八个segment。如果有集群里有3个querynode，并且每个querynode的cpu资源跟你的standalone的cpu资源相等，那么150万数据的这个集群查询性能会比50万数据的这个单机稍慢一些，
         - 因为集群内部几个节点间有通信，3个querynode的结果集还要做合并。
+    - [使用外部pulsar](https://github.com/milvus-io/milvus/discussions/40914)
+      - 除了milvus.yaml中的mq.type设置成pulsar之外，还要milvus.yaml中的pulsar.address/port这些设置正确
+      - 这个pulsar最好能允许milvus创建topic，如果不能创建，那就得设置milvus.yaml中的common.preCreatedTopic指定你预先设置的topic
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。
