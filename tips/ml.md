@@ -1121,13 +1121,29 @@
         - For models using chain-of-thought reasoning, resample answers multiple times and use the question-level averages.
         - For models with non-deterministic answers, generate and grade multiple answers per question or use next-token probabilities for multiple-choice questions.
     - Analyze Paired Differences: Comparing eval scores of different models using paired-differences tests eliminates variance in question difficulty and focuses on response variance.
-  - [NoLiMA]( https://mp.weixin.qq.com/s/2shfTDjtAP4eF2ehibhT-w)
+  - [NoLiMA](https://mp.weixin.qq.com/s/2shfTDjtAP4eF2ehibhT-w)
     - 一种大语言模型（LLM）长文本理解能力评估方法 通过精心设计问题和关键信息，迫使模型进行深层语义理解和推理，才能从长文本中找到答案。
     - 对于向量模型，上下文长度是影响检索性能的关键因素，文本越长，模型就越难找到正确答案。就算问题和答案里的关键词一模一样，模型也不一定能找对。
       - 性能随长度锐减：jina-embeddings-v3 在短文本（128 词元）下表现出色，但在长文本下性能迅速下降。归一化相似度得分从 128 词元时的 0.37 降至 8K 词时的 0.10。更重要的是，模型区分相关信息和无关信息的能力（我们称之为“分离度”）几乎完全消失了。
       - “单跳推理”很困难：即使在短文本下，如果问题和答案之间没有直接的字面重叠，模型的表现也会明显变差。这说明，向量模型在进行“单跳推理”（例如，从“住在森珀歌剧院旁边”推断出“去过德累斯顿”）时存在困难。
       - 查询扩展有帮助，但不是万能的：查询扩展可以在一定程度上提高检索性能，特别是在长文本下，使模型表现优于随机猜测。但是，它并不能完全解决长文本带来的问题，性能还是会随着文本变长而下降。而且，加词也得小心，不相关的词反而会引入语义噪声，降低性能。
       - 字面匹配不是关键：就算问题和答案里有一样的关键词，只要文本一长，模型还是找不到。这说明，比起答案怎么说，文本有多长，答案在文本里的位置，对模型能不能找到答案的影响更大
+  - [嵌入向量长度偏差及其对搜索的影响](https://jina.ai/news/on-the-size-bias-of-text-embeddings-and-its-impact-in-search/)
+    - 当与其他文本嵌入进行比较时，较长文本的嵌入通常会显示更高的相似度分数，这与实际内容的相似程度无关。虽然真正相似的文本仍然会有较高的相似度分数，但较长的文本会引入偏差——仅仅因为其长度就使其嵌入在平均上看起来更相似
+    - 由于长度偏差，你无法使用相似度分数来判断最佳匹配或任何次优匹配是否真正相关
+      - 任何余弦相似度高于 0.75 的匹配都是相关的，因为可能会有一个长文档在完全不相关的情况下也能达到这个水平
+      - 比较嵌入向量只能告诉你相对相似度，而不能判断相关性。
+    - 是什么导致了大小偏差
+      - 较长的文本，至少是人们通常创建的那种，自然会产生在语义空间中更"分散"的 embedding。如果一个文本说了更多的东西，它的 embedding 与其他向量的平均角度会更小，这与文本的主题无关
+    - 测量相关性
+      - 不能仅仅用语义向量之间的余弦值来判断某个东西是否是好的匹配，只能判断它是否是可用选项中最好的匹配
+      - 可以尝试归一化。如果你能够经验性地测量大小偏差，可能可以抵消它。然而，这种方法可能不太稳健。适用于一个数据集的方法可能不适用于另一个数据集
+      - jina-embeddings-v3 提供的非对称查询-文档编码减少了 embedding 模型中的大小偏差，但并没有消除它。非对称编码的目的是将文档编码得不那么"分散"，而将查询编码得更分散
+      - 重排序器方法，例如 jina-reranker-v2-base-multilingual 和 jina-reranker-m0，是对查询-文档匹配进行评分的另一种方式，我们已经知道它提高了查询精度。重排序器分数没有归一化，所以它们也不能作为客观的相似度度量
+    - 让模型做它擅长的事
+      - embedding 模型的一个基本限制：它们擅长比较事物，但在测量绝对相关性方面不可靠
+      - 首先，对余弦阈值持怀疑态度。它们就是不起作用。余弦相似度度量产生看起来很客观的浮点数。但仅仅因为某个东西输出数字并不意味着它在客观地测量某些东西。
+      - 考虑混合解决方案。embedding 可以有效地将大量项目缩小到有希望的候选项，之后你可以应用更复杂（和计算密集）的技术，如重排序器或 LLM，甚至人工评估员来确定实际相关性
 - LLM Limitations
   - Lacking domain-specific information
     - LLMs are trained solely on data that is publicly available. Thus, they may lack knowledge of domain-specific, proprietary, or private information that is not accessible to the public.
@@ -1697,8 +1713,8 @@
   - "think"工具特别适用于Claude需要处理外部信息（如工具调用结果）的场景，更聚焦于模型在发现新信息后的思考过程
 - [Tracing the thoughts of a large language model](https://www.anthropic.com/research/tracing-thoughts-language-model)
 - [Turns Codebase into Easy Tutorial](https://the-pocket.github.io/Tutorial-Codebase-Knowledge/)
-
-
+- [Claude Code: Best practices for agentic coding](https://www.anthropic.com/engineering/claude-code-best-practices)
+  - [AI 写代码的深度体验](https://mp.weixin.qq.com/s/6dLnTlb0RfnLjrExa7j_zQ)
 
 
 

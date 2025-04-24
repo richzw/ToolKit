@@ -330,6 +330,8 @@
         - 如果是Docker Compose部署，可以修改配置文件 milvus.yaml，
         - 若是heml部署，可以helm upgrade my-release milvus/milvus --set queryNode.enableDisk
         - 若是 operator部署 https://github.com/zilliztech/milvus-operator/blob/main/docs/administration/configure-milvus.md
+      - milVus单机默认16个channel(p/v总和)。
+        - 一个collection会默认有两个channel处理TT等消息，channel的值是2*collection数量。 collection过多，会导致并发争16个channel，CPU会飙起来
   - [查询](https://milvus.io/blog/deep-dive-5-real-time-query.md)
     - milvus的调用顺序可以是：建表，insert，建索引，load，search
       - 也可以是：建表，建索引，insert，load，search

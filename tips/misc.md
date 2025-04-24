@@ -328,6 +328,18 @@
     - 事件中断：前一次事件因为某些原因中断了，永远的停留在了某个节点
 - [Cursor 的进阶用法](https://x.com/xiaokedada/status/1833132309496885434?s=46)
   - https://cursor101.com/zh
+  - 1. Set 5-10 clear project rules upfront so Cursor knows your structure and constraints. Try /generate rules for existing codebases.
+  - 2. Be specific in prompts. Spell out tech stack, behavior, and constraints like a mini spec.
+  - 3. Work file by file; generate, test, and review in small, focused chunks.
+  - 4. Write tests first, lock them, and generate code until all tests pass.
+  - 5. Always review AI output and hard‑fix anything that breaks, then tell Cursor to use them as examples.
+  - 6. Use @ file, @ folders, @ git to scope Cursor’s attention to the right parts of your codebase.
+  - 7. Keep design docs and checklists in .cursor/ so the agent has full context on what to do next.
+  - 8. If code is wrong, just write it yourself. Cursor learns faster from edits than explanations.
+  - 9. Use chat history to iterate on old prompts without starting over.
+  - 10. Choose models intentionally. Gemini for precision, Claude for breadth.
+  - 11. In new or unfamiliar stacks, paste in link to documentation. Make Cursor explain all errors and fixes line by line.
+  - 12.Let big projects index overnight and limit context scope to keep performance snappy.
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。
@@ -383,7 +395,8 @@
 - [Digital hygiene](https://karpathy.bearblog.dev/digital-hygiene/)
 - [The Best Programmers I Know](https://endler.dev/2025/best-programmers/)
 - [WebRTC](https://webrtcforthecurious.com/zh/docs/01-what-why-and-how/)
-
+- [the evolution of Google Search from 1999 to 2009](https://static.googleusercontent.com/media/research.google.com/en//people/jeff/WSDM09-keynote.pdf)
+  - https://videolectures.net/videos/wsdm09_dean_cblirs
 
 
 
