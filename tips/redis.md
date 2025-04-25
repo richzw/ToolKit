@@ -614,8 +614,27 @@
       - --bigkeys：Redis 3.0.0 引入，统计的是 key 中元素的数量。
       - --memkeys：Redis 6.0.0 引入，通过MEMORY USAGE命令统计 key 的内存占用。
   - https://github.com/slowtech/redis-find-big-key
-
-
+- [Redis 内存突增时，如何定量分析其内存](https://mp.weixin.qq.com/s/lkbk0T_tDlEgOCZi5HHOdQ)
+  - 一个 Redis 实例的内存突增，used_memory最大时达到了 78.9G，而该实例的maxmemory配置却只有 16G，最终导致实例中的数据被大量驱逐
+  - INFO 中的used_memory是怎么来的？
+    - used_memory 的值来自 zmalloc_used，而 zmalloc_used 又是通过zmalloc_used_memory()函数获取的
+  - 什么是used_memory？
+    - 在通过内存分配器（常用的内存分配器有 glibc's malloc、jemalloc、tcmalloc，Redis 中一般使用 jemalloc）中的函数分配或释放内存时，会同步调用update_zmalloc_stat_alloc或update_zmalloc_stat_free来更新 used_memory 的值
+    - 数据本身：对应 INFO 中的used_memory_dataset。
+    - 内部管理和维护数据结构的开销：对应 INFO 中的used_memory_overhead。
+  - used_memory内存通常会被用于哪些场景？
+    - mem_clients_slaves，mem_clients_normal 和mem_aof_buffer。
+    - mem_aof_buffer：重点关注 AOF 重写期间缓冲区的大小。
+    - mem_clients_slaves 和 mem_clients_normal：都是客户端，内存分配方式相同。客户端的内存开销主要包括以下三部分：
+      - 输入缓冲区：用于暂存客户端命令，大小由 client-query-buffer-limit 限制。
+      - 输出缓冲区：用于缓存发送给客户端的数据，大小受 client-output-buffer-limit 控制。如果数据超过软硬限制并持续一段时间，客户端会被关闭。
+      - 客户端对象本身占用的内存。
+  - Redis 7 在内存统计方面的变化。
+  - 数据驱逐的触发条件——当used_memory 超过maxmemory后，是否一定会触发驱逐？
+    - 数据被驱逐需满足以下条件：
+      - maxmemory 必须大于 0。
+      - maxmemory-policy 不能是 noeviction。
+      - 内存使用需满足一定的条件。不是 used_memory 大于 maxmemory，而是 used_memory 减去 mem_not_counted_for_evict 后的值大于 maxmemory
 
 
 

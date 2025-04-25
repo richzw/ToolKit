@@ -984,6 +984,18 @@
 - K8s 1.32
   -  [QueueingHint 的调度上下文元素](https://mp.weixin.qq.com/s/41XdPwW8wqh0MDs901eGpw)
     - QueueingHint 改进 Pod 调度重试
+  - [1.33](https://mp.weixin.qq.com/s/a7ZLS59ibSbr-7m1TJpehw)
+    - https://mp.weixin.qq.com/s/UO1Nnz1Hi2qxhQWl9tLTdA
+    - 原生支持 Sidecar 容器
+      - 为 init 容器引入了 restartPolicy 字段，并使用这个字段来指示 init 容器是 Sidecar 容器。 确保 Sidecar 在应用程序容器之前启动，在 Pod 的整个生命周期中保持运行，并在主容器退出后自动终止。
+      - kubelet 将按照 restartPolicy=Always 的顺序与其他 init 容器一起启动 init 容器，但它不会等待其完成，而是等待容器启动完成
+      - 字段 restartPolicy 仅在 init 容器上被接受。现在唯一支持的值是 “Always”。不会定义其他值.Sidecar 容器不会阻止 Pod 完成 - 如果所有常规容器都已完成，Sidecar 容器将被终止
+    - 始终遵循 PersistentVolume 回收策略
+    - Kube-proxy 基于 nftables 的实现
+    - 使用 matchLabelKeys 和 mismatchLabelKeys 定义 Pod 亲和性或反亲和性
+    - 在计算 Pod 拓扑分布倾斜时考虑污点和容忍度 PodTopologySpread：nodeAffinityPolicy 和 nodeTaintsPolicy
+    - Beta 版: Pod 垂直扩缩的 In-place 资源调整 - 在不重新启动现有 Pod 的情况下动态更新 Pod 的资源配置
+    - Alpha 版: kubectl 的新配置选项，使用 .kuberc 实现用户首选项
 - 开发K8s组件的最佳实践
   - 规范组件 LIST 请求
     - 必须使用全量 LIST 时添加 resourceVersion=0，从 APIServer cache 读取数据，避免一次请求访问全量击穿到 etcd；

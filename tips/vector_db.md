@@ -297,6 +297,7 @@
     - cluster是用pulsar或者kafka来做为message queue。而cdc是通过操作kafka/pulsar来同步数据的，所以standalone不能用
     - deployment推荐的resources.limits,indexnode，datanode的内存限制，refer https://milvus.io/tools/sizing/
   - Config参考 https://github.com/zilliztech/milvus-helm/blob/master/charts/milvus/values.yaml#L731C7-L731C45
+    - [Milvus核心参数](https://mp.weixin.qq.com/s/FoyiQCchwY9AkOmi6ElmKA)
     - milvus rpc的传输限制，这个可以在milvus.yaml的proxy. grpc. serverMaxRecvSize/clientMaxSendSize
     - autoindex是定义在milvus.yaml里的，默认好像是hnsw索引，数据有100gb的话，索引就要100gb+的内存
     - indexbasedCompaction设为true，compaction的时候就只针对建好索引的分片，没建好索引的分片没资格参与compaction
@@ -324,6 +325,10 @@
         - Multiple vchannels can share one pchannel.
           - A P-channel does not always serve one collection. V-channel is assigned to a P-channel by a runtime balancer.
           - A collection with multiple vchannels, the multiple vchannels could be assigned to multiple pchannels, or assigned to a single P-channel, depending on the runtime balancer.
+        - 创建collection时会指定分片(shard)数量，每个分片对应一个虚拟通道(vchannel)
+        - Milvus会为log broker中的每个vchannel分配一个物理通道(pchannel)
+        - 不同的collection可以共享相同的pchannel,这样可以通过log broker的高并发提高吞吐量
+        - 当collection创建时,不仅指定了分片数量,同时也确定了vchannel和pchannel在log broker中的映射关系
       - Each kafka topic is a "physical channel". The number of physical channels is defined in the milvus.yaml `rootCorrd.dmlChannelNum`
       - By default, milvus creates 16 physical channels during startup
       - 修改配置
