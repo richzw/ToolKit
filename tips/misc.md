@@ -397,7 +397,9 @@
 - [WebRTC](https://webrtcforthecurious.com/zh/docs/01-what-why-and-how/)
 - [the evolution of Google Search from 1999 to 2009](https://static.googleusercontent.com/media/research.google.com/en//people/jeff/WSDM09-keynote.pdf)
   - https://videolectures.net/videos/wsdm09_dean_cblirs
-
+- [Reduce container startup time on Amazon EKS with Bottlerocket data volume](https://aws.amazon.com/blogs/containers/reduce-container-startup-time-on-amazon-eks-with-bottlerocket-data-volume/)
+  - 这个方案的扩展版本，把某些巨无霸image和文件烧到数据卷里做成snapshot。
+  - worker 启动时候，直接从snapshot 创建数据卷。 然后pod的启动时间从5分钟（下载太慢了，还费流量费用），缩短到20s。
 
 
 

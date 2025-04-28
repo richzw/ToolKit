@@ -1099,4 +1099,40 @@
 - [The Art of Problem-Solving in Software Engineering:How to Make MySQL Better](https://github.com/enhancedformysql/The-Art-of-Problem-Solving-in-Software-Engineering_How-to-Make-MySQL-Better)
 - [MySQL 虚拟索引 VIDEX](https://mp.weixin.qq.com/s/MhWFjbqEb0E4duEbaavnUg)
 - [YouTube 使用 MySQL 和 Vitess 支撑其海量用户](https://blog.bytebytego.com/p/how-youtube-supports-billions-of)
+- 一个表拥有千万级别数据量，给status字段加索引，是否有效？
+  - 加了索引的简单执行流程
+  - 极端场景,走索引or全表扫描
+  - status区分度与选择行
+  - 查询的数据量的影响
+  - 结合不同场景的其他字段
+  - 分区表
+  - EXPLAIN 查询计划
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
