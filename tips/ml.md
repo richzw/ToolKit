@@ -742,6 +742,7 @@
             - 指数移动平均 (EMA)：在强化学习 (RL) 微调过程中应用。
             - 球形线性插值 (SLERP)：在多个策略的 RL 微调后应用。
             - 向初始化线性插值 (LITI)：在 SLERP 阶段之后应用
+  - [Gemini Flash Pretraining](https://vladfeinberg.com/2025/04/24/gemini-flash-pretraining.html)
   - [Llama3](https://m.weibo.cn/detail/5059754760081007)
     - LLaMA 3模型结构
       - LLaMA 3采用了标准的Dense LLM模型结构，类似于大多数LLM模型。尽管有些模型采用MOE结构，但其基本结构仍然是Transformer的变体。LLaMA 3的结构趋于行业标准，主要原因是Transformer结构的稳定性和现有生态系统的兼容性。
