@@ -1454,6 +1454,7 @@
   - ![img.png](ml_mcp.png)
   - 为数据源与 AI 系统之间的连接提供了统一标准，替代复杂的多源整合方式 https://github.com/modelcontextprotocol
   - Samples  https://github.com/modelcontextprotocol/servers  
+    - docker mcp list https://hub.docker.com/catalogs/mcp
   - [summarize your chat messages](https://github.com/mcpservers/mcp-server-chatsum)
   - [MCP祛魅](https://mp.weixin.qq.com/s/qtsxTC8_LioHUuZHQo5CoA)
     - MCP处理的一个用户的需求（query或request）是这样的：

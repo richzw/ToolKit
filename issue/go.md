@@ -1144,6 +1144,70 @@
     - P is constrained to be a pointer to T (*pb.Post) and a proto.Message.
     - new(T) creates a non-nil pointer to a zero-initialized T, avoiding the nil panic.
     - Declaring var msg P ensures the compiler treats msg as type P (not just *T).
+- [runtime: make GOMAXPROCS cfs-aware on GOOS=linux](https://github.com/golang/go/issues/33803)
+  - 可能存在与容器 CPU 配额（例如通过 Docker CFS 带宽控制实现的配额）存在严重数值偏差的情况。
+    - 这种情况可能导致程序出现显著的延迟异常，特别是在以下两类场景：
+      - 峰值负载期间
+      - 后台 GC 阶段占满所有处理器时
+  - GOMAXPROCS=max(1,floor(cpu_quota))，永远不要超过你的 CPU 配额。
+  - [Container CPU Requests & Limits Explained with GOMAXPROCS Tuning](https://victoriametrics.com/blog/kubernetes-cpu-go-gomaxprocs/index.html)
+    - cgroup
+      - QOS
+        - A Guaranteed pod has CPU and memory requests that are exactly the same as their limits. These get the best performance and priority.
+        - A Burstable pod has a lower request than limit—so it’s guaranteed a baseline, but it can use more if there’s room.
+        - A Best-Effort pod doesn’t define any requests or limits. It uses whatever’s left and is the first to get throttled or evicted when things get tight.
+      - during memory pressure, Best-Effort pods are the first to go, then Burstable, and Guaranteed pods are kept around the longest.
+      - The lower the OOM score, the less likely the process will be killed:
+        - Guaranteed containers usually have an OOM score of -997. That’s a very low score, so they’re less likely to be killed.
+        - Burstable containers get scores between 2 and 1000. The more you request, the lower your score.
+        - Best-Effort containers end up with the highest score—1000—and are at the top of the list to get killed.
+    - CPU requests are translated into cpu.shares (for cgroup v1) or cpu.weight (for cgroup v2)
+    - CPU limits become cpu.cfs_quota_us with cpu.cfs_period_us (for v1) or just cpu.max (for v2)
+    - CPU Manager in Kubernetes, and it supports two policies: none and static. For now, we’ll stick with none, since that’s the default.
+      - With static, Kubernetes can give certain containers exclusive access to CPU cores. But it only kicks in if the container:
+        - Is in the Guaranteed QoS class
+        - Asks for a full number of CPUs (like 1 or 2, not 0.5)
+    - Stop Using CPU Limits on Kubernetes. The main idea is that when there’s CPU contention, Kubernetes will still guarantee the amount you requested, or the fair share. But if you set a limit, you’re stopping the pod from using any spare CPU—even when it’s available.
+    - How CPU Weight Is Calculated
+      - for v1
+      ```
+      cgroup_v1.shares = (milliCPU * 1024) / 1000
+      cgroup_v1.shares = clamp(cgroup_v1.shares, 2, 262144)
+      ```
+      - for v2
+      ````
+      cgroup_v2.weight = (((cgroup_v1.shares - 2) * 9999) / 262142) + 1
+      cgroup_v2.weight = clamp(cgroup_v2.weight, 1, 10000)
+      ````
+      - weight only comes into play when there’s competition for CPU.
+    - go.uber.org/automaxprocs
+      - If you’ve already set GOMAXPROCS manually, it leaves it alone and uses that.
+      - On Linux, it checks the CPU limits using cgroup values. It supports both cgroup v1 and v2:
+        - For cgroup v1, it reads from cpu.cfs_quota_us and cpu.cfs_period_us
+        - For cgroup v2, it reads from cpu.max
+      - It divides quota by period (quota / period) to figure out how many logical CPUs are available. We already went through the equation earlier.
+      - It rounds down to the nearest whole number, with a floor of 1. So a quota of 2.7 CPUs becomes GOMAXPROCS=2.
+      - Finally, it sets GOMAXPROCS to the calculated number
+- [SIGHUP Signal for Configuration Reloads](https://blog.devtrovert.com/p/sighup-signal-for-configuration-reloads)
+  - SIGHUP is a signal caught between two worlds. It was born from the physical "hang up" of terminal lines, and its original meaning—the loss of a controlling terminal—still applies.
+- [Go值接收者的隐藏成本与优化](https://mp.weixin.qq.com/s/jeIPGn8VC7YowUlXMx9VZA)
+  - runtime.newobject是Go用于在堆上分配内存的内建函数。这意味着，新的实现引入了额外的堆内存分配
+  - 将 ReadBytes 方法的接收者从值类型 nodeStore 改为指针类型 *nodeStore，就挽回了那丢失的 30% 性能。
+  - 当使用值接收者时，方法内部操作的是接收者值的一个副本（Copy）运行时会创建一个 nodeStore 结构体的副本，并将这个副本传递给 ReadBytes 方法内部的vs变量。
+  - 本该廉价的栈上复制，变成了昂贵的堆上分配
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
