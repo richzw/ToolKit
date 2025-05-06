@@ -685,8 +685,12 @@
     - HTTP + SSE 存在的问题
       - 服务器必须维护长连接，在高并发情况下会导致显著的资源消耗。
       - 服务器消息只能通过 SSE 传递，造成了不必要的复杂性和开销
+      - 基础架构兼容性，许多现有的网络基础架构可能无法正确处理长期的 SSE 连接。企业防火墙可能会强制终止超时连接，导致服务不可靠
   - Streamable HTTP：统一使用单一HTTP端点处理请求和响应，服务器可根据需要选择返回标准HTTP响应或启用SSE流式传输。
     - Streamable HTTP 协议则可以直接返回响应，多个请求可以复用同一个 TCP 连接，TCP连接数最高只到几十条，并且整体执行时间也只有SSE Server 的四分之一。
+      - 统一端点：移除了专门建立连接的 /sse 端点，将所有通信整合到统一的端点。
+      - 按需流式传输：服务器可以灵活选择返回标准 HTTP 响应或通过 SSE 流式返回。
+      - 状态管理：引入 session 机制以支持状态管理和恢复。
     - 服务器必须提供一个单一的 HTTP 端点（例如 https://example.com/mcp），支持 POST 和 GET 方法 (Model Context Protocol Specification - Transports)。
     - 客户端通过 HTTP POST 请求发送 JSON-RPC 消息到该端点，消息体可以是单一 JSON-RPC 消息或批处理请求/通知/响应。
     - 客户端必须在请求头中包含 Accept 头，支持 application/json 和 text/event-stream

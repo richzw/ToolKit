@@ -635,9 +635,15 @@
       - maxmemory 必须大于 0。
       - maxmemory-policy 不能是 noeviction。
       - 内存使用需满足一定的条件。不是 used_memory 大于 maxmemory，而是 used_memory 减去 mem_not_counted_for_evict 后的值大于 maxmemory
-
-
-
+- Redis 8 —— One Redis
+  - 核心功能大整合 (One Redis)： 这是 Redis 8 最重要的变化之一。
+    - 原先作为 Redis Stack 模块提供的核心功能，如 JSON、Time Series、Bloom filter、Cuckoo filter、Count-min sketch、Top-k、t-digest 等概率数据结构，以及 Redis Query Engine（支持二级索引和搜索）
+  - Vector Set (Beta)： 在 AI 和向量数据库竞争白热化的当下，Redis 8 迈出了关键一步
+  - 性能“核爆级”提升
+    - 命令延迟显著降低： 多达 90 个命令的 P50 延迟降低了 5.4% 至 **87.4%**！
+    - 多线程吞吐量翻倍： 改进的 I/O 线程模型，在多核 CPU 上设置 io-threads=8 时，吞吐量最高可提升 **112%**。
+    - 复制效率提升： 新的复制机制使主节点在复制期间写入性能提升 7.5%，复制时间缩短 18%，峰值复制缓冲区大小降低 **35%**。
+    - 查询引擎扩展性： 支持集群模式下的查询，并通过垂直扩展将查询吞吐量提升高达 16 倍
 
 
 
