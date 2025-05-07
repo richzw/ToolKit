@@ -1,7 +1,9 @@
 - [Introduction to Retrieval Augmented Generation (RAG)](https://weaviate.io/blog/introduction-to-rag)
   - [Advanced RAG Techniques](https://weaviate.io/blog/advanced-rag)
   - [The Ultimate Guide to RAGs — Each Component Dissected](https://towardsdatascience.com/the-ultimate-guide-to-rags-each-component-dissected-3cd51c4c0212)
-- [RAG 2024 年度清单](https://mp.weixin.qq.com/s/0YxHilReHG5jtzhHl7zw8A)
+  - [RAG 2.0]()
+    - 基础检索生成（Naive RAG）→ 检索全流程优化（Advanced RAG）→ 具备反思能力的模块化系统（Modular RAG）
+    - 全文搜索 with BM25 + 稠密向量（语义匹配） + 稀疏向量（关键词增强）
 - [RAG速通](https://mp.weixin.qq.com/s/11NcuacIALFWcAtQ9rWaMA)
   - RAG优化核心策略主要基于Information Retrieval的2-stage经典思路展开：即同时保证高召回率和精度
     - 第一阶段：最大化召回率(High Recall)，同时接受较低的精度( Low Precision)。此阶段涵盖RAG的Indexing和Retrieval部分
@@ -1259,8 +1261,7 @@
 - [10 Lessons on RAG Agents in Production](https://www.youtube.com/watch?v=kPL-6-9MVyA)
   - Better Systems > Better Models
   - Expertise is your fuel
-  - 
-
+- [AI Agent 框架调研](https://4c0rz0rc1r.app.yourware.so/)
 
 
 

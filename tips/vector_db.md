@@ -448,9 +448,9 @@
       - mmap是对diskann索引和gpu索引以外的其他索引有效
     - 长文本一般不过滤的 mmap最合适了，标量文本后期你如果不需要使用（过滤/outputfield输出），那么可以使用partial load，不加载这个字段。如果需要使用，可以给这个字段使用mmap
     - diskann加载到内存里的是类似于一个IVF_PQ索引。搜索时是先在内存里的索引粗略地搜索一下，然后到磁盘里取出部分向量数据做更精确的搜索
-    - 集群开了mmap，创建集合索引的时候是默认就开启了，还是需要collection.set_properties({'mmap.enabled': True})参数指定
+    - [集群开了mmap，创建集合索引的时候是默认就开启了，还是需要collection.set_properties({'mmap.enabled': True})参数指定](https://github.com/milvus-io/milvus/discussions/33621)
       - If mmap is enabled, when you call collection.load(), the query node will download the index files to local. The default local path is configured by the localStorage.path + "/mmap" in the milvus.yaml
-      - Query node maps the file between RAM and disk by mmap().
+      - Query node maps the file between RAM and disk by mmap(). And maps the index files into memory, but the files are not immediately read from disk to physical RAM, so the memory usage is very low.
       - Query node calls unlink() to drop the index file. But the mmap file still occupies disk space.
       - When search, query node actually read data from disk, acts like read from RAM.
     - hnsw索引的向量类型只能用floatvector？ float16Vector可以使用和floatVector一样的索引，hnsw ivf都行

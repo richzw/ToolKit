@@ -1685,6 +1685,8 @@
     - 密切关注在 arenas 上创建的对象的生命周期。确保不要将它们泄漏到程序的其他组件，其中对象可能超出 arenas 的生命周期
     - 使用`defer a.Free()`确保不会忘记释放内存
     - 使用`arena.Clone()`将对象克隆回堆上，如果您在 arenas 被释放后想要使用它们
+  - 这个官方的 Arena 提案最终被无限期搁置了。原因在于，Arena 这种手动内存管理机制与 Go 语言现有的大部分特性和标准库组合得很差 (compose poorly)。
+  - [Cheating the Reaper in Go](https://mcyoung.xyz/2025/04/21/go-arenas/)
 - [WaitGroup解读](https://mp.weixin.qq.com/s/PykMWANuSkDWavW5c6L2gg)
 - [Generics can make your Go code slower](https://planetscale.com/blog/generics-can-make-your-go-code-slower)
   - 创建一个多态函数(polymorphic function), 广义来讲，有两种方法

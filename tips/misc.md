@@ -340,6 +340,13 @@
   - 10. Choose models intentionally. Gemini for precision, Claude for breadth.
   - 11. In new or unfamiliar stacks, paste in link to documentation. Make Cursor explain all errors and fixes line by line.
   - 12.Let big projects index overnight and limit context scope to keep performance snappy.
+  - 指令Prompt
+    ```
+    你是一个优秀的技术架构师和优秀的程序员，在进行架构分析、功能模块分析，以及进行编码的时候，请遵循如下规则：
+    1. 分析问题和技术架构、代码模块组合等的时候请遵循“第一性原理”
+    2. 在编码的时候，请遵循 “DRY原则”、“KISS原则”、“SOLID原则”、“YAGNI原则”
+    3. 如果单独的类、函数或代码文件超过500行，请进行识别分解和分离，在识别、分解、分离的过程中请遵循以上原则
+    ```
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。

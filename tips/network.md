@@ -1527,6 +1527,12 @@
     - BDP是衡量网络管道容量的指标，由带宽和RTT决定。
     - TCP buffer需要与BDP匹配，以确保高效传输。
     - RTT作为时延因素，直接影响BDP和传输性能，是TCP优化的关键变量。
+  - TCP Dup ACK
+    - 指 TCP 发送了相同 ACK 序号的 ACK 数据包，即重复 ACK，触发的原因可能是丢包或者乱序。
+      - TCP 段大小为 0；
+      - 窗口大小非零且没有改变，或者有有效的 SACK 数据；
+      - 下一个期望的 Seq Num 和 LastACK Num 是非 0 的（即连接已经建立）；
+      - 没有设置 SYN、FIN、RST。
 - [Wireshark手册](https://www.ilikejobs.com/posts/wireshark/)
   - [Wireshark != 和 !==](https://mp.weixin.qq.com/s/yXbnCjelmdBOG1BgUFAexA)
     - 显示过滤表达式 ip.addr != 192.168.0.1 的结果显示为空，意味着没有源和目的 IP 值都不是 192.168.0.1 的数据包，也就是 all ；
