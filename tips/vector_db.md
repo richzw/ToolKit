@@ -542,6 +542,7 @@
       - 采用 partition key 方案进行数据隔离，Milvus 提供了 mmap 机制进行冷热数据向多层存储的映射。
       - Milvus 还提供了逻辑层的显式数据加载/释放能力。我们可以通过 load/release 这对操作，在业务层控制是否将一个非活跃用户的 collection 在内存上释放，或将一个回归活跃的用户的 collection 从磁盘加载至内存
       - 在 mmap 机制中，数据从磁盘到内存的移动过程应用侧是不感知的，而 load/release 在应用侧必须感知
+    - [多租户实践](https://mp.weixin.qq.com/s/YpQ1TkJx9H6tawzvqstHCw)
   - attu
     -  attu里显示的approx entities number相当于用pymilvus的collection.num_entities获取行数，这个是从etcd中快速统计已落盘的行数。加载在内存里的数量有可能不一样，因为有些数据可能没落盘
   - 编译
@@ -598,6 +599,11 @@
     - 这个设置成主键之后，为什么还可以继续重复插入相同的值？
       - Milvus 用 insert 接口做数据插入时，不会做主键去重，如果希望主键去重，可以使用 upsert 接口
       - 但是，由于 upsert 内部多做了一次 query 操作，插入性能会比 insert 更差
+      - 将 Upsert 替代 Insert 使用，这类操作往往会导致系统收到大量不存在主键的 Delete 请求。
+      - 在 Milvus 中，处理 Delete 操作时通常会先借助 BloomFilter 判断主键是否存在，从而避免浪费资源在为不存在的数据进行 Delete 操作
+      - 在百万级 segment 场景下，BloomFilter 带来的内存消耗是巨大的
+      -  Milvus 2.5.8 中我们做出调整：DataNode 不再将 BloomFilter 加载至内存，所有 Delete 记录直接持久化到底层对象存储。
+      - 即便 Delete 的主键在当前数据中不存在，也不再进行过滤，而是交由后续阶段统一处理 最终一致性由 Compaction 机制保证
     - Support partial upsert feature https://github.com/milvus-io/milvus/issues/29735
     - 半数使用问题是配置问题
       - 怎么调？ https://mp.weixin.qq.com/s?__biz=MzUzMDI5OTA5NQ==&mid=2247496778&idx=1&sn=018256ae415356e3ed357ee473dc1627&chksm=fa5155f2cd26dce4095b57fa4eb5c7e67e9eb49ed2762ce618e1134bb33022049e75c25e49ab&scene=21#wechat_redirect

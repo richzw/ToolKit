@@ -971,6 +971,14 @@
 - [Safeguarding Your RAG Pipelines](https://towardsdatascience.com/safeguarding-your-rag-pipelines-a-step-by-step-guide-to-implementing-llama-guard-with-llamaindex-6f80a2e07756)
 - [RAG for a Codebase with 10k Repos](https://www.codium.ai/blog/rag-for-large-scale-code-repos/)
 - Agentic RAG
+  - 3 core components
+    - 𝗠𝗲𝗺𝗼𝗿𝘆: This allows agents to learn from past experiences and improve over time. It's what makes your agent smarter with each interaction rather than starting from scratch every time.
+    - 𝗧𝗼𝗼𝗹𝘀: These are the hands of your agent - external resources that help it complete tasks beyond just generating text. In RAG, these might include search tools, data processors, or API connectors.
+    - 𝗥𝗲𝗮𝘀𝗼𝗻𝗶𝗻𝗴: LLMs serve as the brain, enabling the agent to plan, make decisions, and break complex tasks into manageable sub-tasks. The agent follows a ReAct framework (Reason + Act) where it:
+      • Thinks about what action to take
+      • Executes that action
+      • Observes the results
+      • Repeats until completion
   - Routing (Adaptive RAG) - Allows the agent to intelligently route user queries to the most suitable retrieval method based on the question itself. 
   - Fallback (Corrective RAG) - Ensures the agent has a backup plan if its initial retrieval methods fail to provide relevant results. 
   - Self-correction (Self-RAG) - Enables the agent to identify and fix its own errors or misleading outputs.

@@ -996,6 +996,11 @@
     - 在计算 Pod 拓扑分布倾斜时考虑污点和容忍度 PodTopologySpread：nodeAffinityPolicy 和 nodeTaintsPolicy
     - Beta 版: Pod 垂直扩缩的 In-place 资源调整 - 在不重新启动现有 Pod 的情况下动态更新 Pod 的资源配置
     - Alpha 版: kubectl 的新配置选项，使用 .kuberc 实现用户首选项
+    - HorizontalPodAutoscaler 可配置容差
+      - 为了避免在指标发生小波动时创建或删除副本， Kubernetes 应用了一种迟滞形式：仅当当前和期望的指标值差异超过 10% 时， 才改变副本数量
+      - Kubernetes v1.33 集群中启用 HPAConfigurableTolerance特性门控后， 你可以为你的 HorizontalPodAutoscaler 对象添加期望的容差
+      - 容差出现在 spec.behavior.scaleDown 和 spec.behavior.scaleUp字段下，因此对于扩容和缩容可以有不同的设置。
+      - 典型的用法是在扩容时指定一个小的容差（以快速响应峰值）， 而在缩容时指定较大的容差（以避免因小的指标波动而过快地添加或移除副本）。
 - 开发K8s组件的最佳实践
   - 规范组件 LIST 请求
     - 必须使用全量 LIST 时添加 resourceVersion=0，从 APIServer cache 读取数据，避免一次请求访问全量击穿到 etcd；

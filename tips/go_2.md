@@ -2072,6 +2072,8 @@
     - 带有类型参数的type alias `type MySlice[T any] = []T`
     - 运行时性能优化
       - 基于Swiss Tables的原生map实现
+      - 在 Go1.24 所引入的 swissmaps 中，map[int64]struct{} 的每个槽（slot）需要 16 字节空间，而不是预期的 8 字节
+        - https://github.com/golang/go/issues/70835
       - 针对当前runtime.lock2实现的问题进行优化
     - cgo改进：新增了#cgo noescape和#cgo nocallback注解，优化C代码调用的效率。
     - 编译器限制：禁止在C类型别名上声明方法，以提高类型安全性
@@ -2164,8 +2166,13 @@
     - 开发阶段: 可以使用go.mod中的go directive和toolchain directive来确保团队使用一致的 Go 语言版本和工具链版本。
     - 部署和 CI/CD: 可以使用环境变量中的GOTOOLCHAIN来强制指定工具链版本，确保编译和运行环境的一致性。
 - [Go sync.Cond](https://victoriametrics.com/blog/go-sync-cond/)
-
-
+- [Differential Coverage for Debugging](https://research.swtch.com/diffcover)
+  ```
+  $ go test -coverprofile=c1.prof -skip='TestAddSub$'
+  $ go test -coverprofile=c2.prof -run='TestAddSub$'
+  $ (head -1 c1.prof; diff c[12].prof | sed -n 's/^> //p') >c3.prof
+  $ go tool cover -html=c3.prof
+  ```
 
 
 
