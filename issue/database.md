@@ -190,7 +190,9 @@
   - 三板斧(灰度/监控/回滚)
     - 可监控(数据对比读逻辑) 可监控(对比读逻辑) 可灰度(灰度切量读) 可回滚(灰度切量写)
     - 
-
+- [Postgresql 18 async io](https://pganalyze.com/blog/postgres-18-async-io)
+  - Asynchronous I/O support in Postgres 18 introduces worker (as the default) and io_uring options under the new io_method setting
+  - Observability practices need to evolve: EXPLAIN ANALYZE may underreport I/O effort, and new views like pg_aios will help provide insights
 
 
 

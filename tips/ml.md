@@ -465,6 +465,9 @@
     - 更大的模型确实对词序变化更敏感一些，但效果提升非常有限
   - [大语言模型的训练后量化算法](https://mp.weixin.qq.com/s/IIpMWgmjmfSJsO33ojGaYQ)
   - [预训练到微调的技术原理](https://mp.weixin.qq.com/s/-VLtTcvmD2p1s1ePy7Hhhw)
+  - [Model Soup](https://jina.ai/news/model-soups-recipe-for-embeddings/)
+    - “模型汤”涉及使用不同的超参数和训练数据选择来训练多个模型——与您通常的做法相同——然后将它们组合起来。结果是比单个最佳模型性能更高、更稳健的模型
+    - 模型汤方法已被证明对文本-图像多模态嵌入模型(Wortsman et al. 2022)和生成式大型语言模型非常有用
 - [Prompt](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
   - `Prompt Engineering`, also known as `In-Context Prompting`, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes without updating the model weights.
   - `Instructed LM` (e.g. InstructGPT, natural instruction) finetunes a pretrained model with high-quality tuples of (task instruction, input, ground truth output) to make LM better understand user intention and follow instruction

@@ -1079,6 +1079,10 @@
         - In addition, as its name suggests it does error propagation and cancels the context in order to terminate the other go-routines in case of an error.
     - How to propagate the termination signal to multiple go routines
       - channel failed to do that, whereas context could done. Refer to snippet
+- [Graceful Shutdown in Go: Practical Patterns](https://victoriametrics.com/blog/go-graceful-shutdown/)
+  - Catching the Signal
+    - When your Go application starts, even before your main function runs, the Go runtime automatically registers signal handlers for many signals (SIGTERM, SIGQUIT, SIGILL, SIGTRAP, and others)
+
 - [基于channel实现的并发安全的字节池](https://mp.weixin.qq.com/s/91_FxpV5qbR-XNqh0Dh8EA)
   - MinIO
     ```go
@@ -2098,6 +2102,8 @@
           - SplitSeq 和 SplitAfterSeq 会保留空字符串(在连续分隔符之间)
           - FieldsSeq 会忽略连续的空白字符，不会产生空字符串
     - JSON 零值的优化。json.Marshal 支持省略零值 omitzero 标签
+  - Go 1.25
+    - [DWARF 5调试信息格式](https://mp.weixin.qq.com/s/38n83jpD0bgfs0Bi14Ac7g)
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
   - errors.Is() is expensive. If you use it, check the error is non-nil first to avoid a pretty big performance penalty on the happy path.
   - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.
