@@ -1172,8 +1172,10 @@
     - Cache 不友好：而且 STL 的普通内存分配器分散了对象的内存地址，降低了数据的缓存命中率。
     - 并发差：STL 的默认内存分配器可能使用全局锁，相当于给加了一把大锁，在多线程环境下性能表现很差。
   - 使用无锁数据结构
-
-
+- [Optimizing Heap Allocations in Go](https://www.dolthub.com/blog/2025-04-18-optimizing-heap-allocations/)
+   - Understanding why compilers make decisions with regard to memory allocation is important for writing performant code. Tools like -gcflags "-m" that provide insight into compiler decisions are incredibly useful for understanding and optimizing performance.
+   - Storing a value on the heap is always safe in a garbage-collected language, but comes at a performance cost: both during the initial allocation and again during garbage collection. Since it's always safe, Golang can always choose to allocate a value on the heap, and will unless it can prove that a stack allocation is also safe.
+   - Prefer pointer receivers in order to avoid unnecessary copies, because those copies can easily result in extra heap allocations.
 
 
 

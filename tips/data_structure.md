@@ -368,7 +368,7 @@
   - 新型哈希表在几近满载时，寻找元素或空位的耗时仅仅和(log𝑥)²成正比，而非 x 
 - [Ds In database]
   - ![img_1.png](datastructure_db.png)
-
+- ![img.png](datastructure_design.png)
 
 
 

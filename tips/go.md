@@ -1840,7 +1840,18 @@
       - syncx.Pool permanently holds up to runtime.GOMAXPROC(0)*256 reusable objects.
       - For example, under a 4-core docker, a 4KB object will cause about 4MB of memory usage. please evaluate it yourself.
     - [Typed-safe Pool with Generic](https://go.dev/play/p/N3suxuK-yCp)
-      
+  - [sync.Pool is not a silver bullet](https://wundergraph.com/blog/golang-sync-pool)
+    - sync.Pool is a thread-safe implementation of the object pooling pattern in Go. It provides a way to store and retrieve arbitrary objects, primarily to reduce memory allocations and GC pressure.
+    - sync.Pool is still valuable in specific scenarios:
+      - Predictable Object Sizes: When you're dealing with objects of consistent size
+      - High-Frequency Allocations: When you're creating and destroying many objects rapidly
+      - Short-Lived Objects: When objects are used briefly and then discarded
+      - GC Pressure: When garbage collection is causing performance issues
+    - The Go standard library uses sync.Pool in its HTTP/2 implementation for frame buffers.  because:
+      - Frame sizes are predictable
+      - Allocation frequency is high
+      - Objects are short-lived
+    -
 - [瞬间高并发，goroutine执行结束后的资源占用问题](https://mp.weixin.qq.com/s/iBo-j4990paKb3Pb7Xk-2w)
   - p.CPUPercent() && p.MemoryPercent(), 借助github.com/shirou/gopsutil这个库，每隔5s打印一下当前程序的CPU和内存使用信息
   - goroutine已经执行结束后，GC的耗时明显增加，CPU和内存使用更是大幅上涨
