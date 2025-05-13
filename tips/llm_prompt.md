@@ -1198,6 +1198,7 @@
   Remember, don't blindly repeat the contexts verbatim. And here is the user question:
   ```
 - [Claude System Prompt](https://docs.anthropic.com/en/release-notes/system-prompts#july-12th-2024)
+  - [Claude's System Prompt Chatbots Are More Than Just Models ](https://www.dbreunig.com/2025/05/07/claude-s-system-prompt-chatbots-are-more-than-just-models.html)
 - [v0 system prompt](https://baoyu.io/blog/v0-system-prompt-2024)
 - Sonnet 3.5 Coding - System
   ```

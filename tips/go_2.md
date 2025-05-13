@@ -1082,7 +1082,15 @@
 - [Graceful Shutdown in Go: Practical Patterns](https://victoriametrics.com/blog/go-graceful-shutdown/)
   - Catching the Signal
     - When your Go application starts, even before your main function runs, the Go runtime automatically registers signal handlers for many signals (SIGTERM, SIGQUIT, SIGILL, SIGTRAP, and others)
-
+      - SIGTERM (Termination): A standard and polite way to ask a process to terminate. It does not force the process to stop. Kubernetes sends this signal when it wants your application to exit before it forcibly kills it.
+      - SIGINT (Interrupt): Sent when the user wants to stop a process from the terminal, usually by pressing Ctrl+C.
+      - SIGHUP (Hang up): Originally used when a terminal disconnected. Now, it is often repurposed to signal an application to reload its configuration.
+  - Stop Accepting New Requests
+    - When using net/http, you can handle graceful shutdown by calling the http.Server.Shutdown method
+    - This method stops the server from accepting new connections and waits for all active requests to complete before shutting down idle connections.
+  - Handle Pending Requests
+    - a. Use context middleware to inject cancellation logic
+    - b. Use BaseContext to provide a global context to all connections
 - [基于channel实现的并发安全的字节池](https://mp.weixin.qq.com/s/91_FxpV5qbR-XNqh0Dh8EA)
   - MinIO
     ```go
