@@ -67,6 +67,8 @@
         - 这是第一类错误：实际没有区别，但实验结果表示有区别，我们得到显著结果因此否定原假设，认为实验组更优，发生的概率用 𝛂 表示。
         - 这是第二类错误：实际有区别，但是实际结果表示没有区别，我们得到不显著的结果因此无法拒绝原假设，认为实验组和对照组没有区别，发生的概率用 𝜷 表示。
   - ![img.png](ml_abtest.png)
+  - [Beyond A/B Testing: Part 2 – When A/B Tests Struggle with Ranking & Recommendations](https://bananimohapatra.substack.com/p/beyond-ab-testing-part-2-when-ab)
+  
 - [特征重要性分析的常用方法](https://mp.weixin.qq.com/s/GQIjypyqw4LaSrkDivi23g)
   - 特征重要性分析可以识别并关注最具信息量的特征，从而带来以下几个优势：
     - 改进的模型性能

@@ -708,7 +708,9 @@
 - `docker system prune -a --volumes`
 - docker run command 
   - ![img.png](docker_run_cmd.png)
-
+- Why ["npm", "start"] is a poor choice for a Dockerfile CMD instruction
+  - ["npm", "start"] in CMD leads to an unwanted shell in the container process tree, which in particular can cause signal propagation issues (hence, break graceful termination of your containerized application).
+  - ![img.png](docker_npm_cmd.png)
 
 
 

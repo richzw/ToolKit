@@ -1266,6 +1266,7 @@
   - https://colab.research.google.com/drive/1OnIipRwuHOZbKHN0haHGD0OnckBGfzqx
 - [RAG on PDFs using File Search in the Responses API](https://cookbook.openai.com/examples/file_search_responses)
 - [mineru.net](https://mineru.net/) 一个开源的pdf转md文件
+  - [How to Parse a PDF](https://unstructured.io/blog/how-to-parse-a-pdf-part-1)
 - [10 Lessons on RAG Agents in Production](https://www.youtube.com/watch?v=kPL-6-9MVyA)
   - Better Systems > Better Models
   - Expertise is your fuel

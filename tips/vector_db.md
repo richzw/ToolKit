@@ -694,6 +694,19 @@
       - Level 参数调节召回精度
         - 较低的 level 参数 (level=1)：适用于一般场景（召回率通常在 90% 以上），此时查询性能优异，资源消耗较低，非常适合需要快速响应的业务需求。
         - 较高的 level 参数 (level=10)：针对对召回率要求极高的场景，提升搜索精度，但会消耗更多的计算资源和时间，适用于对精准度要求严苛的任务。
+    - [How to Filter Efficiently Without Killing Recall](https://milvus.io/blog/how-to-filter-efficiently-without-killing-recall.md)
+      - Graph Index Optimization: 
+        - Preserves paths between similar items even when filters remove connecting nodes, preventing the “islands” problem that reduces result quality.
+        - We implemented the Alpha strategy alongside other optimization techniques. 
+          - implementing a dynamic combination of “include-all” and “exclude-all” traversal methods that intelligently adapts based on data statistics to optimize query performance
+        - strike a balance between recall and performance
+      - Metadata-Aware Indexing: 
+        - Creates specialized paths for common filter conditions, making filtered searches significantly faster without sacrificing accuracy.
+        - the main graph index is called the base graph, while the specialized graphs built for specific metadata fields are called column graphs.
+      - Iterative Filtering: 
+        - Processes results in batches, applying complex filters only to the most promising candidates instead of the entire dataset.
+      - AutoIndex: 
+        - Uses machine learning to automatically tune search parameters based on your data and queries, balancing speed and accuracy without manual configuration.
   - Milvus 2.3
     - Cosine 相似度类型： 无需向量归一化，简化数据搜索流程。
     - Upsert 数据：提升更新和删除数据的管理流程效率，适用于频繁更新数据且追求数据一致性和原子性的场景。
