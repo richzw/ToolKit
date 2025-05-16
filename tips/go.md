@@ -1725,6 +1725,18 @@
   - Json Parse is inefficient
     - Parsing goes in two phases - first it parses the string into raw interface{}s using the Go encoding/json package, then it transforms that into a JSON
   - [Building a high performance JSON parser](https://dave.cheney.net/high-performance-json.html)
+  - GOEXPERIMENT=jsonv2：Go下一代JSON库
+    - encoding/json (v1) 长期以来积累的一些核心痛点
+      - 大小写不敏感的字段名匹配： v1 在反序列化时，JSON 对象中的字段名与 Go 结构体字段的 JSON Tag 或字段名进行匹配时，采用的是大小写不敏感的策略。这虽然在某些情况下提供了便利，但并不符合 JSON 规范的最新趋势（RFC 8259 强调对象名是大小写敏感的），也可能导致非预期的匹配。
+      - 重复键处理不明确： 当输入的 JSON 对象包含重复的键名时，v1 的行为是不确定的（通常是后者覆盖前者），并且不会报错。这违反了 RFC 8259 中关于名称唯一性的建议，可能导致数据丢失或解析混乱。
+      - 无效 UTF-8 的静默替换： v1 在遇到无效的 UTF-8 字节序列时，会将其静默地替换为 Unicode 替换字符 (U+FFFD)，而不是报错。v2 则默认要求严格的 UTF-8。
+      - 反序列化 null 到非空 Go 值的行为不一致： v1 在此场景下行为不统一，有时清零有时保留原值。v2 则统一为清零。
+      - 合并 (Merge) 语义不一致： v1 在反序列化到已有的非零 Go 值时，其合并行为在不同类型（如 struct 字段 vs map 值）之间存在差异。v2 对合并语义进行了重新设计
+      - 缺乏灵活的时间格式化支持： v1 强制要求时间字符串符合 RFC 3339 格式，无法方便地处理其他常见的时间格式。
+      - 对 omitempty 的定义局限： v1 的 omitempty 基于 Go 类型的零值判断，对于某些场景（如希望指针为 nil 时才省略，而不是其指向的值为空时省略）不够灵活。v2 重新定义了 omitempty 并引入了 omitzero。注：v1版本也已经加入对omitzero支持的补丁。
+      - 处理未知字段不便： v1 默认会丢弃 JSON 对象中未在 Go 结构体中定义的字段，缺乏一种内建的、优雅的方式来捕获这些未知字段。
+      - nil Slice/Map 的序列化行为： v1 将 nil slice 和 nil map 序列化为 JSON null，而许多用户期望它们被序列化为空数组 [] 和空对象 {}。
+    
 - full slice expression
   - `a = a[0:len(a):len(a)]`
   - the slice a is restricted to itself, the elements past the end of the slice cannot be accessed or modified, even if you accidentally re-slice or append to it.
@@ -1943,6 +1955,22 @@
       字符集过小，可以直接使用其他简单的数据结构
       动态数据集，也就是数据集需要频繁地进行插入和删除操作，由于 Radix Tree 的节点需要合并和路径重组，动态修改树结构可能引起较大的开销，在这种情况下，这时平衡二叉搜索树结构（AVL 树、红黑树）更适合
       节点之间的父子节点使用指针连接，对 CPU 和自带 GC 语言不太友好 (这个问题在 Trie Tree 中同样存在)
+  - [Which Go router should I use](https://www.alexedwards.net/blog/which-go-router-should-i-use)
+    - Use the standard library if you can, Go 1.22 及更高版本中，http.ServeMux 的能力得到了显著提升
+    - http.ServeMux（即使是增强后）与某些第三方库相比仍存在的差距，这些差距往往就是我们选择拓展的理由：
+      - 更复杂的路径参数与匹配规则：
+        - **子段通配符 (Subsegment wildcards)**：如 chi 支持的 /articles/{month}-{year}-{day}/{id}。标准库的 {NAME...} 是捕获剩余所有路径段，而非段内复杂模式。
+        - 正则表达式通配符：如 gorilla/mux, chi, flow 支持的 /movies/{[a-z-]+}。标准库的通配符不直接支持正则表达式。
+      - 高级中间件管理：
+        - **路由组 (Middleware groups)**：如 chi 和 flow 提供的，可以为一组路由批量应用中间件，这对于组织大型应用非常有用。虽然 http.ServeMux 也可以通过封装实现类似效果（Alex 也写过相关文章[2]），但第三方库通常提供了更便捷的内建支持。
+      - 更细致的 HTTP 行为控制：
+        - 自定义 404/405 响应：虽然 http.ServeMux 可以通过“捕获所有”路由实现自定义 404，但这可能会影响自动的 405 响应。httprouter, chi, gorilla/mux, flow 等库对此有更好的处理，并能正确设置 Allow 头部。
+        - 自动处理 OPTIONS 请求：httprouter 和 flow 可以自动为 OPTIONS 请求发送正确的响应。
+      - 特定匹配需求：
+        - 基于请求头 (Header matching) 或 **自定义匹配规则 (Custom matching rules)**：gorilla/mux 在这方面表现突出，允许根据请求头（如 Authorization, Content-Type）或 IP 地址等进行路由。
+      - 其他便利功能：
+        - **路由反转 (Route reversing)**：gorilla/mux 支持类似 Django, Rails 中的路由命名和反向生成 URL。
+        - **子路由 (Subrouters)**：chi 和 gorilla/mux 允许创建子路由，更好地组织复杂应用的路由结构。
 - [Why does `IsSorted` in the standard library iterate over the slice in reverse]
   - because more efficient code can be generated from a downward loop, specifically for the condition part.
   - `go tool compile -S play.go > play.s`

@@ -741,6 +741,20 @@
         - 分布式词表和词频统计：高效支持大规模语料的词频管理与计算。
         - 稀疏向量生成与相似度计算：通过语料库的词频(Corpus TF)构建稀疏向量，并基于查询词频(Query TF)和全局逆文档频率 (IDF) 构建查询稀疏向量，再通过特定的 BM25 距离函数进行相似度计算。
         - 倒排索引支持：实现基于 WAND 算法的倒排索引，同时 Block-Max WAND 算法和图索引的支持也在开发中。
+  - Milvus 2.6
+    - [IVF_RABITQ 索引](https://mp.weixin.qq.com/s/jx2Isz0zfcERri3EdXc6jg)
+      - 融合了 RaBitQ、IVF 倒排索引、随机旋转变换（Random Rotation）以及后处理优化机制（refinement），在高效压缩和高精度检索之间取得更优平衡。
+      - 关于 IVF、RaBitQ 以及精调过程（refinement）过程的一些底层配置参数说明：
+        - nlist 和 nprobe 是所有基于 IVF 方法的标准参数：
+          - nlist：一个非负整数，表示整个数据集被划分成的 IVF 分桶（bucket）数量。
+          - nprobe：一个非负整数，表示在搜索过程中为每个查询向量访问的 IVF 分桶数量。 属于与搜索相关的参数。
+        - rbq_bits_query 指定查询向量的量化级别：
+          - 可选值为 1 到 8，对应 SQ1 到 SQ8 的量化等级。
+          - 设置为 0 时表示不对查询向量进行量化。 属于搜索相关参数。
+        - refine、refine_type 和 refine_k 是用于精排过程的标准参数：
+          - refine：布尔值，表示是否启用精排策略。
+          - refine_k：一个非负浮点数，表示精排时所选候选池的放大倍数。系统将从一个大小为 refine_k 倍的候选集合中，使用更高精度的量化方式选出最终的近邻结果。属于搜索相关参数。
+          - refine_type：字符串，指定用于精排阶段的量化类型。可选值包括 SQ6、SQ8、FP16、BF16 和 FP32 / FLAT（无压缩的原始精度）。
   - Milvus 3.0
     - [Support Streaming Service in Milvus](https://github.com/milvus-io/milvus/issues/33285)
       - 零磁盘架构（Zero-Disk Architecture） https://zhuanlan.zhihu.com/p/15809814733
