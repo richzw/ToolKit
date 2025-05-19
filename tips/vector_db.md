@@ -755,6 +755,48 @@
           - refine：布尔值，表示是否启用精排策略。
           - refine_k：一个非负浮点数，表示精排时所选候选池的放大倍数。系统将从一个大小为 refine_k 倍的候选集合中，使用更高精度的量化方式选出最终的近邻结果。属于搜索相关参数。
           - refine_type：字符串，指定用于精排阶段的量化类型。可选值包括 SQ6、SQ8、FP16、BF16 和 FP32 / FLAT（无压缩的原始精度）。
+    - [重写 Milvus 的流处理架构 woodpecker](https://mp.weixin.qq.com/s/3a1TbQSSOxAsuJyjYmaSSw)
+      - WoodPecker 面向对象存储优化的 WAL 引擎
+      - 采用 “ZeroDisk” 架构，所有日志数据存储于云对象存储（如 Amazon S3、GCS、阿里 OSS），元数据则由 etcd 等分布式 KV 系统管理。
+      - 架构
+        - Client：用于提交读写请求的接口层
+        - LogStore：处理写缓冲、异步写入与日志压缩
+        - Storage Backend：后端存储（支持 S3、GCS、EFS 等）
+        - ETCD：管理元数据并协同分布式节点
+      - 两种部署模式：
+        - MemoryBuffer 模式（轻量且免维护）
+        - QuorumBuffer 模式（低延迟 & 高容错）
+    - 除了 Woodpecker，Milvus 2.6 还引入了 Streaming Service —— 一个专用于日志接入、增量写入与实时订阅的核心组件。
+      - 它取代了 Kafka/Pulsar 在数据链路中的角色，成为真正意义上的实时数据流通引擎。
+    - Woodpecker is the storage layer that handles the actual persistence of write-ahead logs, providing durability and reliability
+    - StreamingService is the service layer that manages log operations and provides real-time data streaming capabilities
+    - [2.6功能预览](https://mp.weixin.qq.com/s/UnvVbKSjTsyz8HzRTbs2gw)
+      - 降本提速：
+        - 引入RabitQ量化兼顾内存和召回率；
+        - Sparse-BM25性能提升，QPS最高提7倍；
+          - 设计了灵活的近似检索策略（如 drop_ratio_search 与 dim_max_score_ratio），让用户在精度与速度之间灵活调控
+          - 在工程实现中引入了 SIMD 加速、数据预取机制等，引入并优化了 Block-Max WAND 与 Block-Max MaxScore 等高性能剪枝算法
+        - JSON Path Index加速动态字段过滤，含Json field的过滤搜索延迟大幅下降。
+          - 用于加速对动态字段内部特定路径下数据的过滤操作
+      - 搜索与功能增强：
+        - 增强Analyzer/Tokenizer功能，支持多语言；
+          - 新增 Run Analyzer 语法支持，提供分词配置的可观测性
+          - 新增 Lindera 分词器，支持日语、韩语等亚洲语种
+          - 新增 ICU 分词器，适合多语言场景
+        - 引入Phrase Match功能精准匹配短语词序；支持基于短语结构和词序的精确匹配。
+          - 由于不同 tokenizer 对 position 的定义方式不同，相同短语在不同分词器中可能产生不同的 slop 值。建议在使用 Phrase Match 前，通过 run_analyzer 先行验证分词效果。
+        - Decay Function实现时间衰减重排序；支持第三方模型集成，简化工作流。
+          - 许多信息检索和推荐场景中，内容的时效性是一个至关重要的因素。用户往往更关注最新的资讯、最近发生的事件或近期活跃的项目。
+          - 传统的相似性搜索可能仅仅依据内容本身的匹配度进行排序，而忽略了时间维度对信息价值的影响。
+          - Decay Function 允许用户在获取初步的搜索候选集之后，根据每个条目的时间戳信息，对其原始相关性得分进行调整。
+      - 架构优化：
+        -  引入Tiered Storage数据冷热分层，平衡性能与成本；
+           - 对于长时间未访问的冷数据，系统可基于 LRU 算法主动卸载，以腾出内存资源。
+           - 主要特性包括延迟加载（Lazy Load）、部分加载（Partial Load）和基于 LRU 的缓存逐出（LRU-based Cache Eviction），实现“先元后数、按需拉取、自动回收”的高效流程。
+        - Streaming Service增强实时向量处理能力；
+        - 支持100k Collection；
+        - 采用Woodpecker云原生日志系统；
+        - 优化File format v2和Coord Merge 。
   - Milvus 3.0
     - [Support Streaming Service in Milvus](https://github.com/milvus-io/milvus/issues/33285)
       - 零磁盘架构（Zero-Disk Architecture） https://zhuanlan.zhihu.com/p/15809814733

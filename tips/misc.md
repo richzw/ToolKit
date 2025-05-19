@@ -408,7 +408,10 @@
 - [Reduce container startup time on Amazon EKS with Bottlerocket data volume](https://aws.amazon.com/blogs/containers/reduce-container-startup-time-on-amazon-eks-with-bottlerocket-data-volume/)
   - 这个方案的扩展版本，把某些巨无霸image和文件烧到数据卷里做成snapshot。
   - worker 启动时候，直接从snapshot 创建数据卷。 然后pod的启动时间从5分钟（下载太慢了，还费流量费用），缩短到20s。
-
+- jsdiff 是一个功能强大的 JavaScript 库，用于实现文本内容差异的比较。https://github.com/kpdecker/jsdiff
+  - 它基于著名的 "An O(ND) Difference Algorithm and its Variations" (Myers, 1986) 算法 
+  - 这个算法通常用于 比较两个序列（如两个文本文件或字符串） 找出它们的最小编辑距离（即最少修改几步能把一个变成另一个）
+  - 利用动态规划+对角线追踪大大加速
 
 
 
