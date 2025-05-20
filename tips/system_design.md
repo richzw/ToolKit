@@ -1050,9 +1050,26 @@
 - [DCDN](https://mp.weixin.qq.com/s/w7TVzNm4r_Ll0RLcokm1BA)
   - DCDN加速过程中DNS解析扮演着最重要的角色之一，DNS一般默认使用运营商的 LocalDNS，然而LDNS有着容易被劫持、DNS调度不准确等问题。
     - 业界成熟的方案是使用 HTTPDNS，与传统的DNS解析方式不同，集成 HTTPDNS 的客户端可以绕过 LocalDNS，直接向 HTTPDNS 服务发送DNS查询请求
-
-
-
+- Scaling Memcache at Facebook
+  - 缓存一致性的问题，更新缓存的策略其实可以演变出4种策略： 更新数据库后更新缓存、更新数据库前更新缓存、更新数据库后删除缓存、更新数据库前删除缓存。
+    - 大体上，采取先更新数据库再删除缓存的策略是没有问题的
+  - 如何降低延迟
+    - web服务器通常需要与多台 memcache 服务器通信才能完成用户请求，这种 all-to-all 的请求方式会造成两个问题：
+      - Incast Congestion：当许多 Web 服务器（发送方）同时向 同一个 memcache 服务器（接收方）发送请求时，会瞬间产生大量的网络流量涌向该 memcache 服务器或其连接的网络交换机端口。
+      - Single Server Bottleneck：某个 memcache 服务器因为持有特别热门的数据（"hot spot"），或者自身处理能力稍弱，或者暂时出现性能波动，那么它也可能成为瓶颈
+    - 解决之道主要有两个：
+      - Parallel requests and batching（并行请求和批量处理）：这主要是优化 RTT 次数，将可以一起取的数据通过一次 RTT 一并取出，减少时延；
+      - Client-server communication（客户端-服务器通信）：这个优化主要将控制逻辑集中到 memcache client。memcache client 分成两部分：sdk 与 proxy，proxy 也叫做 mcrouter，它用来桥接 web server 与 memcached server。
+    - Client 的请求还进一步优化，将查询请求优化为 UDP 请求，写请求为 TCP 请求
+    - 为了解决Incast Congestion问题，FB 在 client 中使用了滑动窗口机制来做流量限制，滑动窗口的大小和 TCP 的拥塞机制做的有点类似，滑动窗口的大小会在请求成功的时候缓慢增大窗口，在请求没有回应的时候缩小窗口。
+  - 降低负载
+    - FB 使用 Leases 主要为了解决两个问题：
+      - 陈旧写入（Stale Set）
+      - 惊群效应（Thundering Herd）惊群效应（Thundering Herd）特指当某个热点缓存项失效时，大量并发请求同时穿透缓存层，直接冲击后端数据库的现象
+    - 通过 令牌仲裁 与 速率限制 同时解决上述两大问题
+  - 池化技术的合理利用：
+    - 系统分为默认通配符池、小池（频繁但缓存未命中成本低）和大池（不频繁但未命中成本高），使用缓存池来剥离不同的业务场景；
+    - 并对于频繁访问的数据，复制到多个服务器，减少单服务器负载，优化资源使用；
 
 
 

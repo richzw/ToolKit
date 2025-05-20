@@ -1533,6 +1533,11 @@
       - 窗口大小非零且没有改变，或者有有效的 SACK 数据；
       - 下一个期望的 Seq Num 和 LastACK Num 是非 0 的（即连接已经建立）；
       - 没有设置 SYN、FIN、RST。
+  - Dup ACK Threshold
+    - 通过 1 个 Dup ACK 并不能可靠的确认是发生了丢包还是发生了乱序，因此会存在一个门限，也就是 Dup ACK threshold（或者叫做 dupthresh)，
+      - 当 TCP 收到的 Dup ACK 数量超过这个门限值的时候，就会认为发生了丢包，进而触发出一个基础的快速重传。
+    - 在 Linux 中可以通过 /proc/sys/net/ipv4/tcp_reordering 来设置 dupthresh 值，默认为 3 ，
+    - 另外也可能会根据乱序测量的结果来更新 dupthresh 值。dupthresh 的范围在 /proc/sys/net/ipv4/tcp_reordering 和 /proc/sys/net/ipv4/tcp_max_reordering 之间，默认值分别为 3 和 300。
 - [Wireshark手册](https://www.ilikejobs.com/posts/wireshark/)
   - [Wireshark != 和 !==](https://mp.weixin.qq.com/s/yXbnCjelmdBOG1BgUFAexA)
     - 显示过滤表达式 ip.addr != 192.168.0.1 的结果显示为空，意味着没有源和目的 IP 值都不是 192.168.0.1 的数据包，也就是 all ；

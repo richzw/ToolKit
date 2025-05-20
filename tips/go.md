@@ -2186,8 +2186,15 @@
   - 如何通过 hack 的方式设置外部结构体的私有字段
   - 如何通过 hack 的方式设置 unaddressable 的值
 - [io.MultiWriter](https://iximiuz.com/en/posts/go-io-tee-reader-and-multi-writer/)
-
-
+- 原子操作的瓶颈与Go的多核扩展性
+  - 即使是看似轻量级的原子操作，在多核“混战”中也可能成为性能的阿喀琉斯之踵。
+  - 在高并发场景下，如果多个核心频繁地对同一个缓存行中的原子变量进行写操作，就会导致：
+    - 缓存行在不同核心的 L1/L2 缓存之间频繁失效和同步，这个过程被称为“缓存行乒乓 (Cache Line Ping-Ponging)”。
+    - 产生大量的总线流量和内存访问延迟。
+  - 这就是所谓的真共享 (True Sharing) 争用。即使原子操作本身在单个核心上执行得非常快，这种跨核心的缓存同步开销也会让其整体性能急剧下降
+  - jonhoo/drwmutex 的分片读写锁
+    - 为每个 CPU 核心提供其自己的 RWMutex 实例。读者只需要获取其核心本地的读锁，而写者则必须按顺序获取所有核心上的锁
+- [150-Line Go Script Is Actually a Full-On Load Balancer](https://hackernoon.com/this-150-line-go-script-is-actually-a-full-on-load-balancer)
 
 
 

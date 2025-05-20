@@ -861,12 +861,18 @@
     - 当用户输入一个查询（query）以及一堆包含文本、图表、表格、信息图或复杂布局的文档时，模型会根据文档与查询的相关性，输出一个排序好的文档列表
     - 基于 Qwen2-VL-2B 构建的，总参数量达到 24 亿。该模型采用成对比较（pairwise comparison）机制，能够同时评估输入文档里的视觉和文本元素与查询的相关性，进而实现高效的文档排序。
     - 跟 jina-reranker-v2-base-multilingual 不一样，jina-reranker-m0 不再使用经典的交叉编码器（cross-encoder）架构，而是转向了仅解码器（decoder-only）的视觉语言模型
-    - 用 LoRA 对其中的大语言模型（LLM）部分进行了微调，并且在之后额外训练了一个多层感知机（MLP），专门用于生成表征查询-文档相关性的排序分数（ranking logits）。通过这种设计，我们构建了一个专门针对排序任务优化的判别式模型（discriminative model）。
+    - 用 LoRA 对其中的大语言模型（LLM）部分进行了微调，并且在之后额外训练了一个多层感知机（MLP），专门用于生成表征查询-文档相关性的排序分数（ranking logits）。
+      - 通过这种设计，我们构建了一个专门针对排序任务优化的判别式模型（discriminative model）。
     - 架构还有效地缓解了模态鸿沟（modality gap）问题
     - 采用 decoder-only 架构的意义远不止是优化传统指标，而是在于解锁了 encoder-only 架构无法支持的新功能：
       - 统一的混合模态重排：能够直接处理查询与包含不同模态（文本、图像）文档集的复杂排序场景。
       - 实现列表式重排（Listwise reranking）和文档去重：decoder 模型更自然地支持将整个候选文档列表作为上下文进行联合评估，从而实现更优的全局排序效果和内置去重逻辑。
       - 基于注意力机制的可解释性：decoder 架构固有的注意力机制为理解模型的排序决策过程、分析特征重要性提供了基础，提升了模型的可解释性潜力。
+  - 判别器与生成器差距（Discriminator-generator gap）
+    - 通俗地讲，这个概念是指：
+      - 生成器（Generator） 会不断提出新的想法或解决方案；
+      - 判别器（Discriminator） 则负责衡量这些想法的好坏，并决定它们是否有效。
+    - 当生成器越来越善于创造，而判别器的标准越来越高、判断越来越准确时，这两者之间的差距（gap）会推动AI持续地优化和创新。这就像一位学生（生成器）在不断地尝试新方案，而导师（判别器）则不停地告诉他“好不好”，引导他不断进步。
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]

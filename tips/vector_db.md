@@ -770,6 +770,9 @@
       - 它取代了 Kafka/Pulsar 在数据链路中的角色，成为真正意义上的实时数据流通引擎。
     - Woodpecker is the storage layer that handles the actual persistence of write-ahead logs, providing durability and reliability
     - StreamingService is the service layer that manages log operations and provides real-time data streaming capabilities
+    - [MinHash LSH ，低成本去重百亿文档](https://mp.weixin.qq.com/s/LKa5eznjqlUDzCwp4GnGqg)
+      - MinHash + LSH（局部敏感哈希） 提供了一种兼顾效率与效果的近似去重策略，适用于百亿级语料下的预处理优化；
+      - MinHash 通过将文档压缩为签名，LSH 高效缩小搜索空间，可以快速定位潜在重复对
     - [2.6功能预览](https://mp.weixin.qq.com/s/UnvVbKSjTsyz8HzRTbs2gw)
       - 降本提速：
         - 引入RabitQ量化兼顾内存和召回率；

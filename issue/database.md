@@ -189,11 +189,25 @@
 - [数据库迁移全流程](https://mp.weixin.qq.com/s/xKr9k7uSILk4q64zIzJ3dA)
   - 三板斧(灰度/监控/回滚)
     - 可监控(数据对比读逻辑) 可监控(对比读逻辑) 可灰度(灰度切量读) 可回滚(灰度切量写)
-    - 
 - [Postgresql 18 async io](https://pganalyze.com/blog/postgres-18-async-io)
   - Asynchronous I/O support in Postgres 18 introduces worker (as the default) and io_uring options under the new io_method setting
   - Observability practices need to evolve: EXPLAIN ANALYZE may underreport I/O effort, and new views like pg_aios will help provide insights
-
+- [使用一写多读的未分片架构，证明了 PostgreSQL 在海量读负载下也可以伸缩自如](https://mp.weixin.qq.com/s/ykrasJ2UeKZAMtHCmtG93Q)
+  - OpenAI 使用 Azure 上的托管数据库，没有使用分片与Sharding，而是一个主库 + 四十多个从库的经典 PostgreSQL 主从复制架构
+  - PostgreSQL 的 MVCC 设计存在一些已知的问题，
+    - 例如表膨胀与索引膨胀，自动垃圾回收调优较为复杂，每次写入都会产生一个完整新版本，索引访问也可能需要额外的回表可见性检查。
+    - 这些设计会带来一些 “扩容读副本” 的挑战：更多 WAL 通常会导致复制延迟变大，而且当从库数量疯狂增长时，网络带宽可能成为新的瓶颈。
+  - 优化
+    - 抹平主库上的写尖峰，尽可能的减少主库上的负载： 使用惰性写入来尽可能抹平写入毛刺
+    - 查询层面进行优化： 长事务会阻止垃圾回收并消耗资源，因此他们使用 timeout 配置来避免 Idle in Transaction 长事务；使用 ORM 容易导致低效的查询，应当慎用。
+    - 治理单点问题： 有许多只读从库，一个挂了应用还可以读其他的。实际上许多关键请求是只读的，所以即使主库挂了，它们也可以继续从主库上读取。
+      - 低优先级请求与高优先级请求也进行了区分，对于那些高优先级的请求，OpenAI 分配了专用的只读从库，避免它们被低优先级的请求影响
+    - 只允许在此集群上进行轻量的模式变更
+  - PostgreSQL 开发者社区提出了一些问题与特性需求
+    - 禁用索引问题的，不用的索引会导致写放大与额外的维护开销，他们希望移除没用的索引，然而为了最小化风险
+      - PostgreSQL 其实是有禁用索引的功能的，只需要更新 pg_index 系统表中的 indisvalid 字段为 False，这个索引就不会被 Planner 使用，但仍然会在 DML 中被继续维护
+    - 关于可观测性的，目前的 pg_stat_statement 只提供每类查询的平均响应时间，而没法直接获得 （p95, p99）延迟指标。他们希望拥有更多类似 histogram 与 percentile 延迟的指标。
+    - PostgreSQL 默认参数的优化建议，PostgreSQL 默认参数值过于保守了
 
 
 
