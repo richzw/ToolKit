@@ -1271,7 +1271,15 @@
   - Better Systems > Better Models
   - Expertise is your fuel
 - [AI Agent 框架调研](https://4c0rz0rc1r.app.yourware.so/)
-
+- [QA]
+  - - chunk 是怎么切的？固定？语义？还是自适应？
+  - embedding 模型选型和维度怎么来的？
+  - rerank 用没用？怎么融合 BM25 和 dense 检索？
+  - prompt 是你写的吗？有没有评估 hit rate、hallucination？
+  - RAG 的前半段几乎就是推荐系统那套召回 + 排序 + 精排的逻辑：
+    - embedding = 向量化特征建模
+    - 检索 = 多路召回
+    - rerank = 打分排序
 
 
 

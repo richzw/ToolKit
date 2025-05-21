@@ -2110,6 +2110,18 @@
           - SplitSeq 和 SplitAfterSeq 会保留空字符串(在连续分隔符之间)
           - FieldsSeq 会忽略连续的空白字符，不会产生空字符串
     - JSON 零值的优化。json.Marshal 支持省略零值 omitzero 标签
+    - crypto/mlkem 包正式加入标准库  后量子密码学 (Post-Quantum Cryptography, 以下简称PQC) http://mp.weixin.qq.com/s/bK_MbyOhVNu2HxR6M5eS3A
+      - RSA 加密了公司的核心商业机密，或者用 ECDSA 签名了重要的合同。这些操作的安全性，都依赖于经典计算机难以在有效时间内解决某些数学难题（如大数分解、离散对数）。
+      - 在密钥封装/交换机制（KEM - Key Encapsulation Mechanism)方面，基于格密码学（Lattice-based cryptography）的ML-KEM被选为主要的KEM标准（FIPS 203）
+      - 在数字签名方面，ML-DSA基于Dilithium算法，同样属于格密码学的范畴。该算法被选为主要的数字签名标准
+      - PQC 算法带来了量子抵抗性，但也普遍面临一个挑战：密钥和签名的尺寸通常比经典算法大得多。 这可能会对网络带宽、存储空间（尤其是 X.509 证书）以及资源受限设备带来一定压力。
+      - crypto/mlkem 包实现了 FIPS 203 标准中定义的 ML-KEM 算法，目前支持以下两个参数集：
+        - ML-KEM-768: 这是在大多数场景中推荐使用的参数集，提供了足够的后量子安全性。
+        - ML-KEM-1024: 主要用于满足 CNSA 2.0 等特定规范的要求。
+    - crypto/tls 包现在默认支持并启用了新的后量子混合密钥交换机制 X25519MLKEM768。
+      - Go 1.24+ 应用程序使用 crypto/tls（例如，作为 HTTPS 服务器或客户端），并且 tls.Config 中的 CurvePreferences 字段未被显式设置（保持为 nil）时，TLS 握手将自动尝试使用 X25519MLKEM768 进行密钥交换
+      - X25519MLKEM768 是一种混合 (hybrid) 密钥交换方案。它巧妙地将经过广泛验证的经典椭圆曲线算法 X25519 与后量子安全的 ML-KEM-768 结合起来
+      - 
   - Go 1.25
     - [DWARF 5调试信息格式](https://mp.weixin.qq.com/s/38n83jpD0bgfs0Bi14Ac7g)
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
