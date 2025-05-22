@@ -1062,8 +1062,22 @@
     - 当一个 Pod 请求分数 GPU 时，KAI-Scheduler 不会直接尝试告诉 K8s "这个 Pod 要 0.x 个 GPU"。
     - 相反，它会创建一个特殊的、低资源消耗的 Reservation Pod。这个 Pod 会正儿八经地向 Kubernetes 申请 整个 GPU (nvidia.com/gpu: "1")！
     - 这样一来，Kubernetes 就认为这个 GPU 已经被完全分配掉了，kube-scheduler 自然不会再把其他 Pod 调度到这个 GPU 上。
-
-
+- [pod丢包]
+  - 实时观察，丢包频率
+    ```
+    watch -n 1 cat /sys/class/net/eth0/statistics/rx_dropped
+    # 相同的观察丢包的命令
+    ifconfig eth0 | grep drop
+    cat /proc/net/dev
+    netstat -i
+    ```
+  -  找到 Pod eth0 对应宿主机上的 veth pair
+    ```
+    # pod 内执行，查询 eth0 的对端 index
+    cat /sys/class/net/eth0/iflink
+    # 宿主机执行，根据 index 号查询 veth pair
+    ip a | grep ${index}
+    ```
 
 
 
