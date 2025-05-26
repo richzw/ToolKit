@@ -1103,6 +1103,16 @@
     - funnel search approach
       - First, we perform an initial similarity search using only the first 1/32 of the embedding dimensions, generating a broad pool of candidate items
       - We then rerank these candidates based on their similarity to the query using the first 1/16 of the dimensions, pruning a portion of the list.
+  - 𝐦𝐮𝐥𝐭𝐢-𝐯𝐞𝐜𝐭𝐨𝐫 𝐦𝐨𝐝𝐞𝐥𝐬
+    - 𝐬𝐢𝐧𝐠𝐥𝐞 𝐯𝐞𝐜𝐭𝐨𝐫 (dense) embeddings compress entire documents into one representation
+    - 𝐦𝐮𝐥𝐭𝐢-𝐯𝐞𝐜𝐭𝐨𝐫 𝐦𝐨𝐝𝐞𝐥𝐬 models with late interaction are revolutionizing information retrieval by maintaining token-level semantics.
+    - Why multi-vector models outperform traditional approaches:
+      -  They preserve granular meaning rather than averaging it
+      - Enable precise token-to-token matching between queries and documents
+      - Perfect balance between speed and accuracy
+    - 𝐂𝐨𝐥𝐁𝐄𝐑𝐓: Text-specialized, ideal for high-precision RAG
+    -  𝐂𝐨𝐥𝐏𝐚𝐥𝐢: Multimodal processing with PaliGemma Vision LLM
+    - 𝐂𝐨𝐥𝐐𝐰𝐞𝐧: Apache 2.0 licensed alternative using Qwen2
 - 15 Advanced RAG Techniques from Pre-Retrieval to Generation
   - 增加信息密度（Increase Information Density Using LLMs）
     - 利用 LLMs（大语言模型）处理、清理和标记数据，以提高信息密度，从而减少生成模型所需的上下文窗口大小，降低成本并提高响应准确性

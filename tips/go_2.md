@@ -2077,7 +2077,8 @@
       - 缓存机制：当不需要强引用缓存数据时，使用弱引用可确保系统在内存不足时回收这些数据。
       - 事件处理器和回调：避免由于强引用导致的内存泄漏。
       - 大型对象图：在复杂的对象引用结构中，通过弱引用防止循环引用问题
-    
+    - synctest 是 Go 1.23 引入的一个测试包，用于对并发代码进行确定性测试。它通过创建一个隔离的、可控的并发环境来解决并发测试中的不确定性问题。
+      - https://victoriametrics.com/blog/go-synctest/
   - As of go 1.22, for string to bytes conversion, we can replace the usage of unsafe.Slice(unsafe.StringData(s), len(s)) with type casting []bytes(str), without the worry of losing performance.
   - As of go 1.22, string to bytes conversion []bytes(str) is faster than using the unsafe package. Both methods have 0 memory allocation now.
   - Go 1.24
@@ -2199,7 +2200,7 @@
   $ (head -1 c1.prof; diff c[12].prof | sed -n 's/^> //p') >c3.prof
   $ go tool cover -html=c3.prof
   ```
-
+- [MCP SDK 过程中的取舍与思考](https://mp.weixin.qq.com/s/mrphW4tymbv1cVbFjpnl2w)
 
 
 

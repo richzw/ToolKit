@@ -199,6 +199,8 @@ record: "container_cpu_usage_against_request:pod:rate1m"
   - UTF-8 支持 Prometheus 现在允许默认使用所有有效的 UTF-8 字符作为指标和标签名称，以及标签值，和 2.x 版本一致。
   - OTLP 支持 Prometheus 可以配置为 OTLP 指标协议的原生接收器，在 /api/v1/otlp/v1/metrics 端点接收 OTLP 指标
 - [Prometheus Monitoring: Functions, Subqueries, Operators, and Modifiers](https://victoriametrics.com/blog/prometheus-monitoring-function-operator-modifier/)
+  - [Prometheus Metrics Explained: Counters, Gauges, Histograms & Summaries](https://victoriametrics.com/blog/prometheus-monitoring-metrics-counters-gauges-histogram-summaries/)
+  - [Prometheus alert](https://victoriametrics.com/blog/alerting-recording-rules-alertmanager/)
 - [关于 Distributed Tracing 的调研](https://jiekun.dev/posts/dev-node-distributed-tracing-with-victorialogs/)
 
 
