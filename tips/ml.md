@@ -874,6 +874,10 @@
       - 统一的混合模态重排：能够直接处理查询与包含不同模态（文本、图像）文档集的复杂排序场景。
       - 实现列表式重排（Listwise reranking）和文档去重：decoder 模型更自然地支持将整个候选文档列表作为上下文进行联合评估，从而实现更优的全局排序效果和内置去重逻辑。
       - 基于注意力机制的可解释性：decoder 架构固有的注意力机制为理解模型的排序决策过程、分析特征重要性提供了基础，提升了模型的可解释性潜力。
+  - [使用 jina-reranker-m0 对多模态文档进行公平评分](https://jina.ai/news/fair-scoring-for-multimodal-documents-with-jina-reranker-m0/)
+    - 文本相似度：0.7。图像相似度：0.5。哪个文档更相关？你根本无法判断——而这正是打破多模态搜索的核心问题。我们用统一重排 (unified reranking) 解决它
+    - 模态差异 (modality gap) 文本分数聚集在 0.2-0.8 附近，而图像分数聚集在 0.4-0.6 附近。
+    - 通过 query-to-text 检索 16 个文档，通过 query-to-image 检索 16 个文档。基于每个文档的平均 query-to-text 和 query-to-image 得分进行重排，给出最终得分（query-to-text + query-to-image）/2。
   - 判别器与生成器差距（Discriminator-generator gap）
     - 通俗地讲，这个概念是指：
       - 生成器（Generator） 会不断提出新的想法或解决方案；

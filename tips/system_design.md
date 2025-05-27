@@ -957,6 +957,7 @@
         - Leaf-snowflake
         - UidGenerator
     - workerId（机器id）的分配和回收，原生算法中，该workerId的分配并没有特殊的处理，更多是人工添加处理；
+  - 但是唯一的问题就是生成的64位 ID 太长了。账号ID希望能控制的尽量短
 - [JWT 在 API 网关](https://mp.weixin.qq.com/s/2bpHcdk_8OFUQeOKYQXH3Q)
   - 保障 S2S 通信的两种常见方式
     - 1. 使用传输层安全性（TLS）和客户端证书（双向 TLS 或 mTLS）。

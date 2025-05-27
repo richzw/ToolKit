@@ -1,4 +1,7 @@
-
+- [Reinvent the Wheel](https://endler.dev/2025/reinvent-the-wheel/)
+  - Inventing Wheels Is Learning
+  - “重新发明轮子”是深度学习和理解的绝佳途径。引用物理学家费曼的话：“我无法创造的，我就不理解”，强调只有亲手尝试构建，哪怕只是一个简化版，才能真正从根本上理解事物
+  - 为了洞察而重新发明，为了影响力而重用（Reinvent for insight. Reuse for impact.）
 - [手机居然可以这么偷听你的秘密](https://mp.weixin.qq.com/s/U8fZbVgEHmKSZmt62XFEkw)
   - https://www.ndss-symposium.org/wp-content/uploads/2020/02/24076-paper.pdf
   - 可以采集内置加速传感器的信号，然后通过深度学习算法来解析出语音文字
