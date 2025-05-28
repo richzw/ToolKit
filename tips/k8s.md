@@ -994,8 +994,19 @@
     - Kube-proxy 基于 nftables 的实现
     - 使用 matchLabelKeys 和 mismatchLabelKeys 定义 Pod 亲和性或反亲和性
     - 在计算 Pod 拓扑分布倾斜时考虑污点和容忍度 PodTopologySpread：nodeAffinityPolicy 和 nodeTaintsPolicy
-    - Beta 版: Pod 垂直扩缩的 In-place 资源调整 - 在不重新启动现有 Pod 的情况下动态更新 Pod 的资源配置
-    - Alpha 版: kubectl 的新配置选项，使用 .kuberc 实现用户首选项
+    - Beta 版自动伸缩（VPA）: Pod 垂直扩缩的 In-place 资源调整 - 在不重新启动现有 Pod 的情况下动态更新 Pod 的资源配置
+      - [Resizing Pods Without the Drama](https://itnext.io/kubernetes-1-33-resizing-pods-without-the-drama-finally-88e4791be8d1)
+      - 可变资源字段已支持动态更新- 得益于这个 issue（链接见下方），Pod 规范中的resources.requests和resources.limits字段现在支持动态修改，无需再为 Spec 是否不可变而争论了
+      - Kubelet 的评估机制 - 当你提交 patch 时，kubelet 会评估：(节点可用资源总量) - (当前所有容器资源分配总和) ≥ (新请求资源)？ 满足条件就允许变更，否则返回PodResizePending
+      - CRI 协议握手 - kubelet 会通过容器运行时接口 (CRI) 与 containerd 或 CRI-O 通信：“给这个容器加点资源”。运行时随后会调整对应的 cgroup，无需重启，轻松搞定
+      - 状态更新提示 - 在执行 kubectl describe pod 时，你会看到两个新状态：
+        - PodResizePending —— “节点当前资源不足，稍后再试。”
+        - PodResizeInProgress —— “正在处理，资源调整中。”
+      - 资源调整的限制 - 目前仅支持 CPU 和内存的 requests 和 limits 调整，其他资源（如 GPU）仍需重启 Pod
+        - QoS 类别不可更改： Pod 的原始服务质量等级（Guaranteed/Burstable/BestEffort）保持不变。无法通过调整将 BestEffort 升级为 Guaranteed。
+        - Swap 使用限制： 如果 Pod 开启了 Swap 功能，那你就无法动态调整内存，除非将内存的 resizePolicy 设置为 RestartContainer。
+        - 一旦设置了资源 request 或 limit，就不能通过原地调整将其删除，只能修改数值
+- Alpha 版: kubectl 的新配置选项，使用 .kuberc 实现用户首选项
     - HorizontalPodAutoscaler 可配置容差
       - 为了避免在指标发生小波动时创建或删除副本， Kubernetes 应用了一种迟滞形式：仅当当前和期望的指标值差异超过 10% 时， 才改变副本数量
       - Kubernetes v1.33 集群中启用 HPAConfigurableTolerance特性门控后， 你可以为你的 HorizontalPodAutoscaler 对象添加期望的容差

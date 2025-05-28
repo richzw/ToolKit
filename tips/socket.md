@@ -133,6 +133,13 @@
       - 当连接数少并且连接都十分活跃的情况下，select和poll的性能可能比epoll好；
       - epoll_ctrl每次只能够修改一个fd（kevent可以一次改多个，每次修改，epoll需要一个系统调用，不能 batch 操作，可能会影响性能）。
       - 可能会在定时到期之前返回，导致还需要下一个epoll_wait调用。
+  - https://strikefreedom.top/archives/linux-epoll-with-level-triggering-and-edge-triggering
+    -  epoll 的本质是事件驱动+事件轮询，前者主要依靠内核的 callback + wakeup 机制来实现，也就是回调+唤醒的机制；后者则比较简单，轮询，也即是反复查询，这里的轮询主要针对的是 ready list
+    - Epoll 的坑
+      - 幽灵事件: 如果对应的 file description 上发生了就绪事件，epoll 依然会将事件通知给用户程序 (我称之为"幽灵事件"，ghost events)
+      - 饥饿问题: 使用 epoll 的 ET 模式时，收到就绪事件之后需要一直进行 I/O 操作直到系统返回 EAGAIN 错误
+        - ET 模式下每次都要尽量处理完所有数据再进行下一轮事件循环，否则可能会导致永远没有机会再处理。这种处理模式可以保证程序不会出错，但是可能会引发"饥饿问题"，
+      - 事件聚合: epoll 会将那些在一个很小的时间窗口内触发的事件聚合在一起 (LT 和 ET 模式皆是如此)，最后只向 ready list 中插入一个(组合)事件
 - [异步I/O框架 io_uring](https://mp.weixin.qq.com/s?__biz=MzkyMTIzMTkzNA==&mid=2247562787&idx=1&sn=471a0956249ca789afad774978522717&chksm=c1850172f6f28864474f9832bfc61f723b5f54e174417d570a6b1e3f9f04bda7b539662c0bed&scene=21#wechat_redirect)
   - Source [1](How io_uring and eBPF Will Revolutionize Programming in Linux), [2](An Introduction to the io_uring Asynchronous I/O Framework)
   - 概述

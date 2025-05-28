@@ -202,8 +202,20 @@ record: "container_cpu_usage_against_request:pod:rate1m"
   - [Prometheus Metrics Explained: Counters, Gauges, Histograms & Summaries](https://victoriametrics.com/blog/prometheus-monitoring-metrics-counters-gauges-histogram-summaries/)
   - [Prometheus alert](https://victoriametrics.com/blog/alerting-recording-rules-alertmanager/)
 - [关于 Distributed Tracing 的调研](https://jiekun.dev/posts/dev-node-distributed-tracing-with-victorialogs/)
-
-
+- [RED三板斧搞定服务监控]()
+  - 由三个核心指标的首字母组成：
+    - R - Rate (请求速率) 指服务在单位时间内（通常是每秒）处理的请求数量，我们常说的QPS (Queries Per Second) 或RPS (Requests Per Second) 就是它
+      - sum(rate(http_requests_total{service_name="<your_service>"}[5m])) by (service_name, path, method)
+    - E - Errors (错误率) 指服务在处理请求时，发生错误的请求所占的百分比，或者单位时间内的错误请求总数。
+      - (sum(rate(http_requests_total{service_name="<your_service>", status_code=~"5.."}[5m])) by (service_name, path, method)) 
+      - / (sum(rate(http_requests_total{service_name="<your_service>"}[5m])) by (service_name, path, method))
+    - D - Duration (响应时长) P99  P95 P50
+      - histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service_name="<your_service>"}[5m])) by (le, service_name, path, method))
+  - RED方法 vs. 其他监控方法论
+    - USE方法 (Utilization, Saturation, Errors) 比如CPU使用率、内存饱和度、磁盘错误等。它是RED方法的重要补充，当RED指标显示服务异常时，USE指标能帮助我们判断是不是资源瓶颈导致的。
+    - 四个黄金信号 (Latency, Traffic, Errors, Saturation): Google SRE实践的精华 RED中的Rate对应Traffic，Duration对应Latency，Errors对应Errors。
+  
+  
 
 
 
