@@ -645,7 +645,7 @@
     - 多线程吞吐量翻倍： 改进的 I/O 线程模型，在多核 CPU 上设置 io-threads=8 时，吞吐量最高可提升 **112%**。
     - 复制效率提升： 新的复制机制使主节点在复制期间写入性能提升 7.5%，复制时间缩短 18%，峰值复制缓冲区大小降低 **35%**。
     - 查询引擎扩展性： 支持集群模式下的查询，并通过垂直扩展将查询吞吐量提升高达 16 倍
-
+- [Redis 8.0 vs. Valkey ](https://www.dragonflydb.io/blog/redis-8-0-vs-valkey-8-1-a-technical-comparison)
 
 
 

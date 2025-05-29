@@ -672,8 +672,10 @@
   - 为了解决这个问题，引入了动态分配槽的算法，目标是重新分配 1024 个槽（slot）给节点 A、B、C，使得每个节点上分配到的槽所对应的总请求数尽可能接近所有节点上的平均请求数。
   - 具体来说，就是要找到两个分割点 M 和 N，将槽段 0-(M-1) 分配给 A，M-(N-1) 分配给 B，N-1023 分配给 C，使得以下公式的值最小 `|R_A - Avg| + |R_B - Avg| + |R_C - Avg|`
   - 使用前缀和优化计算 
-
-
+- [How Uber Eats Handles Billions of Daily Search Queries](https://blog.bytebytego.com/p/how-uber-eats-handles-billions-of)
+  - Uber Eats 工程团队如何重建其搜索平台，以适应餐厅、杂货和零售等各个垂直领域中商家和商品的巨大增长
+  - 关键策略包括实施不同的批量和流式导入方式，利用 Uber 的 H3 地理空间索引实现位置感知搜索和分片，优化纬度和六边形等分片技术，以及专门为餐饮外卖和杂货等不同垂直领域需求优化索引布局
+  - Lucene 索引：Uber Eats 使用 Lucene 构建高性能倒排索引，支持全文检索，包括批量和流式数据的索引
 
 
 

@@ -1440,9 +1440,13 @@
     - Safetensors 如何解决问题
       - Safetensors 不使用 pickle 来序列化和反序列化状态字典对象。相反，它使用自定义的序列化方法来存储模型权重
       - Hugging Face 的 Safetensors 确保你的模型权重文件只包含参数数据，而不包含其他任何内容。Safetensors 在存储和保存模型权重时仍然保持了快速零拷贝的特性
-  - GGUF
+  - GGUF CPU 优化：.gguf（GPT-Generated Unified Format）
     - GGUF 是一种二进制格式，旨在实现快速的模型加载和保存，并易于阅读。模型通常使用 PyTorch 或其他框架开发，然后转换为 GGUF 格式以与 GGML 一起使用。
     - GGUF 格式和 GGML 库还提供了灵活的 量化方案，能够在保持良好精度的同时实现高效的模型存储
+  - [GPU 加速：.trt / .engine（TensorRT 格式）](https://mp.weixin.qq.com/s/D3eBqBLjyV4A6Wg5zOiO9Q)
+  - 移动端部署格式
+    - .tflite（TensorFlow Lite）
+    - .mlmodel / .mlpackage（Apple Core ML）
   - PyTorch
     - .pt/.pth 扩展名代表 PyTorch 的默认序列化格式，存储包含学习参数 (权重、偏置) 、优化器状态和训练元数据的模型状态字典
     - PyTorch 格式基于 Python 的pickle模块，该模块用于序列化 Python 对象
