@@ -741,6 +741,7 @@
         - 分布式词表和词频统计：高效支持大规模语料的词频管理与计算。
         - 稀疏向量生成与相似度计算：通过语料库的词频(Corpus TF)构建稀疏向量，并基于查询词频(Query TF)和全局逆文档频率 (IDF) 构建查询稀疏向量，再通过特定的 BM25 距离函数进行相似度计算。
         - 倒排索引支持：实现基于 WAND 算法的倒排索引，同时 Block-Max WAND 算法和图索引的支持也在开发中。
+          - WAND的核心思想是利用打分上界（Upper Bound Score）来提前跳过不会进入Top-K的文档，做到高效剪枝
   - Milvus 2.6
     - [IVF_RABITQ 索引](https://mp.weixin.qq.com/s/jx2Isz0zfcERri3EdXc6jg)
       - 融合了 RaBitQ、IVF 倒排索引、随机旋转变换（Random Rotation）以及后处理优化机制（refinement），在高效压缩和高精度检索之间取得更优平衡。

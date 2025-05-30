@@ -646,7 +646,12 @@
     - 复制效率提升： 新的复制机制使主节点在复制期间写入性能提升 7.5%，复制时间缩短 18%，峰值复制缓冲区大小降低 **35%**。
     - 查询引擎扩展性： 支持集群模式下的查询，并通过垂直扩展将查询吞吐量提升高达 16 倍
 - [Redis 8.0 vs. Valkey ](https://www.dragonflydb.io/blog/redis-8-0-vs-valkey-8-1-a-technical-comparison)
-
+- [Human coders are still better than LLMs](https://www.antirez.com/news/153)
+  - HNSW向量搜索算法的图结构序列化
+    - 1. 从`/dev/urandom`生成随机种子`S`，与链接信息一起构造为`S:A:B:X`。
+    - 2. 使用快速而可靠的哈希函数（如`murmur-128`）对`S:A:B:X`哈希。
+    - 3. 将哈希的128位结果异或到累加器中。
+    - 4. 最后检查累加器是否为零，若为零则说明所有链接都是双向正确的。
 
 
 

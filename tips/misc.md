@@ -425,8 +425,12 @@
     - AB 测试依赖两个关键的统计学原理 ： 大数定律  中心极限定理
   - 1. 正交：不同实验层之间像平行宇宙，互不干扰。当一个用户穿越每层实验时，都会重新随机分配，就像每进入一个新游戏都重新掷骰子决定角色，之前的结果不会影响新的分配。
   - 2. 互斥：同一层内的实验像争夺同一块领地的军队，不共享地盘。一个用户在同一层只能参与一个实验，就像你不能同时穿两条裤子。
-
-
+- Hypothesis飞轮（Hypothesis-Driven Flywheel）
+  - 预判（Initial Hypothesis）。顾问利用先验知识（公开资料、行业经验、对Tesla业务的的理解等），带着对问题根因的预判启动项目
+  - 演进（Evolving）。顾问将Hypothesis拆解为指标，并从指标分析中提取洞察以验证Hypothesis，验证包括正反两个结果
+  - “Aha！Moment”。当顾问发现了清晰、由数据支撑的问题根因，即可依据飞轮迭代过程中所产生的细节产生最终建议
+- Anthropic在其论文《On the Biology of a Large Language Model》中阐述：
+  - 面对Hypothesis式的验证，如果大模型在CoT过程中遇到障碍（例如，没有合适的计算工具），其会“以终为始”编造推理（Unfaithful Motivated Reasoning）以迎合Hypothesis
 
 
 
