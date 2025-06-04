@@ -1006,6 +1006,8 @@
         - QoS 类别不可更改： Pod 的原始服务质量等级（Guaranteed/Burstable/BestEffort）保持不变。无法通过调整将 BestEffort 升级为 Guaranteed。
         - Swap 使用限制： 如果 Pod 开启了 Swap 功能，那你就无法动态调整内存，除非将内存的 resizePolicy 设置为 RestartContainer。
         - 一旦设置了资源 request 或 limit，就不能通过原地调整将其删除，只能修改数值
+    - [容器生命周期更新](https://mp.weixin.qq.com/s/XZx24EUy7YzrGlB1Enj5nw)
+      - ContainerStopSignals 特性门控是 Kubernetes v1.33 新增的， 它将停止信号添加到了 Kubernetes API。这允许用户在容器规格中指定自定义的停止信号
 - Alpha 版: kubectl 的新配置选项，使用 .kuberc 实现用户首选项
     - HorizontalPodAutoscaler 可配置容差
       - 为了避免在指标发生小波动时创建或删除副本， Kubernetes 应用了一种迟滞形式：仅当当前和期望的指标值差异超过 10% 时， 才改变副本数量

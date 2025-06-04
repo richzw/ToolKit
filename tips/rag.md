@@ -1301,8 +1301,15 @@
     - 模型可选性至关重要：智能体并非单一模型的产物。面对功能、成本、速度各异的众多模型，开发者亟需灵活选择。
     - 上下文工程决定可靠性：传递给LLM的提示（上下文）的质量和结构，直接决定了智能体的行为和输出的可靠性。
     - AI可观测性：超越传统，专为智能体而生
-
-
+- AI Agent versus MCP
+  - Key characteristics of AI agents are as follows:
+    - An agent can perform autonomous actions without constant human intervention. Also, they can have a human in the loop to maintain control.
+    - Agents have a memory to store individual preferences and allow for personalization. It can also store knowledge. An LLM can undertake information processing and decision-making functions.
+    - Agents must be able to perceive and process the information available from their environment.
+  - MCP follows a client-server model with 3 key components:
+    - Host: AI applications like Claude
+    - MCP Client: Component inside an AI model (like Claude) that allows it to communicate with MCP servers
+    - MCP Server: Middleman that connects an AI model to an external system
 
 
 

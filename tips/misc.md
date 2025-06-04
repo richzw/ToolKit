@@ -351,6 +351,15 @@
     2. 在编码的时候，请遵循 “DRY原则”、“KISS原则”、“SOLID原则”、“YAGNI原则”
     3. 如果单独的类、函数或代码文件超过500行，请进行识别分解和分离，在识别、分解、分离的过程中请遵循以上原则
     ```
+  - [Cursor AI编程神器：14个实用技巧](https://mp.weixin.qq.com/s/fGHyMzF9M5unuH7YNL1ADg)
+    - 通过MCP获取最新知识: Context7 - 提供丰富的上下文信息 ; DeepWiki - 深度维基知识库
+    - 善用.cursor/rules: 级联Cursor规则是一个强大的新功能，你可以组合多个规则文件
+    - 灵活使用忽略文件: .cursorignore - 完全不索引的文件; .cursorindexignore - 不索引但可以在聊天中用@引用的文件
+    - 掌握@符号的强大功能: @Files & Folders - 缩小上下文范围，帮助AI专注于相关文件 ; @git - 查看特定Git提交中发生的变化; @terminal - 访问日志和错误信息
+    - 在.cursor/mcp.json中配置你的MCP服务器
+    - 内联编辑功能
+    - Settings > General > Privacy Mode
+    - Homebrew安装最新版本的Cursor `brew install --cask --force cursor`
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。

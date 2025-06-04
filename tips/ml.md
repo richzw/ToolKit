@@ -1264,6 +1264,14 @@
   - [Transformer释义](https://mp.weixin.qq.com/s/LL56WxCGnDaJ4Jp-4y9QDA)
   - ![img.png](ml_transformer_explain.png)
   - ![img.png](ml_encoder_explain.png)
+  - 梯度下降算法就是利用梯度信息来指导参数向损失函数更小值移动的过程
+  - 在机器学习中，我们要最小化的"山谷"是损失函数（Loss Function，也称成本函数）https://mp.weixin.qq.com/s/pAoPoCMYTxaUAPByC8DRlw
+    - 损失函数越小，模型的性能越好
+    - 均方误差（MSE）：适用于回归问题
+    - 交叉熵损失：适用于分类问题
+      - 二元交叉熵：二分类
+      - 分类交叉熵：多分类
+    - 对数损失：概率预测问题
 - GPTs List
   - https://supertools.therundown.ai/gpts
   - Tips to create GPTs
