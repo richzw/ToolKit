@@ -360,6 +360,8 @@
     - 内联编辑功能
     - Settings > General > Privacy Mode
     - Homebrew安装最新版本的Cursor `brew install --cask --force cursor`
+  - [Vibe Coding 有“最后一公里”知识幻觉](https://mp.weixin.qq.com/s/loRz_3N_N_fz58yFt_BanQ)
+    - Milvus Code Helper MCP 服务外，开发者还可以选择如 Context7、DeepWiki 等新兴工具来解决这类问题
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。
@@ -440,7 +442,7 @@
   - “Aha！Moment”。当顾问发现了清晰、由数据支撑的问题根因，即可依据飞轮迭代过程中所产生的细节产生最终建议
 - Anthropic在其论文《On the Biology of a Large Language Model》中阐述：
   - 面对Hypothesis式的验证，如果大模型在CoT过程中遇到障碍（例如，没有合适的计算工具），其会“以终为始”编造推理（Unfaithful Motivated Reasoning）以迎合Hypothesis
-
+- [GeoPort](https://github.com/davesc63/GeoPort): Your Location, Anywhere! The iOS location simulator
 
 
 

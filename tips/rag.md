@@ -1310,8 +1310,9 @@
     - Host: AI applications like Claude
     - MCP Client: Component inside an AI model (like Claude) that allows it to communicate with MCP servers
     - MCP Server: Middleman that connects an AI model to an external system
-
-
+- [Selecting a Model Based on Stripe Conversion](https://cookbook.openai.com/examples/stripe_model_eval/selecting_a_model_based_on_stripe_conversion)
+  - A/B 测试模型对付费转化的实际影响
+  - 使用付费转化（以 Stripe 订阅/支付为例）作为核心标准，选择最适合自身业务的 AI 大模型（LLM）的方法
 
 
 

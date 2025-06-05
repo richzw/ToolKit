@@ -214,7 +214,7 @@ record: "container_cpu_usage_against_request:pod:rate1m"
   - RED方法 vs. 其他监控方法论
     - USE方法 (Utilization, Saturation, Errors) 比如CPU使用率、内存饱和度、磁盘错误等。它是RED方法的重要补充，当RED指标显示服务异常时，USE指标能帮助我们判断是不是资源瓶颈导致的。
     - 四个黄金信号 (Latency, Traffic, Errors, Saturation): Google SRE实践的精华 RED中的Rate对应Traffic，Duration对应Latency，Errors对应Errors。
-  
+- [关于 Distributed Tracing 的调研](https://mp.weixin.qq.com/s/Ru9Tl4zWSCBsGO4Pe57vEA)
   
 
 

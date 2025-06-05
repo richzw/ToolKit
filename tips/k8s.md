@@ -143,6 +143,7 @@
   - 计算密集型Pod如何锁死 CPU
     - cpuset，将 Pod 和某个 CPU 核进行绑定，kubelet 支持 static cpu config
     - 将 pod 的 request 和 limits 配置为一样的，该 pod 在 k8s 中的 Qos 等级就是 BestEffort，对应该等级的 Pod，如果 kubelet 配置了 static cpu config，就会自动绑定
+  - [kube-scheduler 整体架构代码](https://mp.weixin.qq.com/s/xM4lPjSCXAIwS2NdNnpDoQ)
 - [KubeGateway](https://mp.weixin.qq.com/s/FEvZwAXj9giSgHhvKPz1EA)
   - https://github.com/kubewharf/kubegateway
   - Why
