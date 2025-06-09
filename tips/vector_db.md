@@ -642,7 +642,7 @@
         - 是否需要精确结果
           - 只有 Faiss 的 Flat 索引支持精确结果, 查询性能通常比其他 Milvus 支持的索引类型低两个数量级以上，因此只适合千万级数据量的小查询
         - 数据量是否能加载进内存？
-          - DiskANN
+          - [DiskANN](https://milvus.io/blog/diskann-explained.md)
             - DiskANN 依赖高性能的磁盘索引，借助 NVMe 磁盘缓存全量数据，在内存中只存储了量化后的数据。
             - DiskANN 适用于对于查询 Recall 要求较高，QPS 不高的场景。
             - 关键参数 search_list: search_list 越大，recall 越高而性能越差

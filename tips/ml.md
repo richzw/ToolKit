@@ -1526,7 +1526,7 @@
     - MCP还缺乏大规模在线服务应用的验证
     - MCP实际上只解决了AI Agent的一部分问题。比如，MCP协议给Tools的使用提供了标准和稳定的解决方案，一定程度上优化了Action的实践路径
       - Planing层面，可能的解决方案是Dify这样的AI工作流编排
-      - 
+  - [OpenAI MCP servers](https://platform.openai.com/docs/mcp)
 - [Agent2Agent](https://mp.weixin.qq.com/s/8nh4Cg-TH0eF2gWYUiwh3A)
   - https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability
   - A2A（Agent2Agent）协议 是由 Google Cloud 推出的一个开放协议，旨在促进不同 AI 代理之间的互操作性

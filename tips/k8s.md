@@ -954,6 +954,18 @@
       - Restarted upon termination.
       - Support startup, readiness, and liveness probes!
       - Terminate after all regular containers are done.
+  - 边车容器可以使用 spec.initContainers 字段在 Pod 清单中定义。 所指定容器之所以变成了边车容器
+    - 在以下情况部署边车：
+      - 你需要扩展应用功能，而无需修改原始代码
+      - 实现日志记录、监控或安全等跨领域关注点
+      - 处理需要现代网络功能的遗留应用
+      - 设计需要独立扩展和更新的微服务
+  - 四个基本的多容器模式
+    - Init 容器模式用于在主应用容器启动之前执行（通常是关键的）设置任务。 与常规容器不同，Init 容器会运行至完成然后终止，确保满足主应用的前提条件。
+      - 适合于： 准备配置 ，加载密钥 ，验证依赖项的可用性 ，运行数据库迁移
+    - Ambassador）容器提供了 Pod 本地的辅助服务，这些服务暴露了一种访问网络服务的简单方式。 通常，Ambassador 容器代表应用容器发送网络请求，并处理诸如服务发现、对等身份验证或传输中加密等挑战。
+      - 适合于： 卸载客户端连接问题, 实现语言无关的网络功能, 添加如 TLS 的安全层, 创建强大的断路器和重试机制
+    - 一个适配器（adapter）（有时也称为切面（façade））容器使主应用容器与外部服务之间能够互操作。 它通过转换数据格式、协议或 API 来实现这一点。
 - K8s design principle
   - https://github.com/kubernetes/design-proposals-archive/blob/main/architecture/principles.md
   - 控制器逻辑

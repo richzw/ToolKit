@@ -1,5 +1,6 @@
 - [Anthropic real word prompt](https://github.com/anthropics/courses/blob/master/real_world_prompting/01_prompting_recap.ipynb)
   - [Anthropic's Prompt Engineering Interactive Tutorial](https://github.com/anthropics/prompt-eng-interactive-tutorial)
+  - [ Prompt Engineering Interactive Tutorial](https://docs.google.com/spreadsheets/d/1jIxjzUWG-6xBVIa2ay6yDpLyeuOh_hR_ZB75a47KX_E/edit?gid=869808629#gid=869808629)
 - [Prompt Engineering Tool](https://www.aifire.co/p/prompt-engineering-tools?utm_source=www.aifire.co&utm_medium=newsletter&utm_campaign=10-years-meta-s-ai-journey-from-facebook-s-ai-labs)
 - Meta Prompt
   ```shell
