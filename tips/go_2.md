@@ -2125,6 +2125,11 @@
       - 
   - Go 1.25
     - [DWARF 5调试信息格式](https://mp.weixin.qq.com/s/38n83jpD0bgfs0Bi14Ac7g)
+    - 解决Git仓库子目录作为模块根路径
+      - 将 Go 模块置于仓库根目录虽然直接，但有时会导致根目录文件列表臃肿，影响项目整体的清爽度。而将 Go 模块移至子目录，则面临着导入路径、版本标签以及 Go 工具链支持等一系列挑战。
+      - 扩展 go-import meta 标签，并明确了版本标签的约定：
+        - 在现有的 go-import meta 标签的三个字段（import-prefix vcs vcs-url）基础上，增加第四个可选字段，用于指定模块在仓库中的实际子目录。
+        - 对于位于子目录中的模块，其版本标签必须包含该子目录作为前缀
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
   - errors.Is() is expensive. If you use it, check the error is non-nil first to avoid a pretty big performance penalty on the happy path.
   - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.

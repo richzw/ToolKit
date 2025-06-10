@@ -443,7 +443,7 @@
 - Anthropic在其论文《On the Biology of a Large Language Model》中阐述：
   - 面对Hypothesis式的验证，如果大模型在CoT过程中遇到障碍（例如，没有合适的计算工具），其会“以终为始”编造推理（Unfaithful Motivated Reasoning）以迎合Hypothesis
 - [GeoPort](https://github.com/davesc63/GeoPort): Your Location, Anywhere! The iOS location simulator
-
+- [电梯的交互和调度](https://blog.codingnow.com/2025/06/elevator.html)
 
 
 

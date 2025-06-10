@@ -272,9 +272,22 @@
 - [消息队列选型 Kafka 、 RabbitMQ 、 RocketMQ](https://mp.weixin.qq.com/s/hn6VWEmuTiDvxHQ9EmbjlA)
   - MQ 消息堆积问题处理
 - 反压机制主要用于解决生产者速度远大于消费者速度的问题，防止内存水位迅速上升导致系统崩溃。
-
-
-
+- [Kafka 构建在 S3 上的技术挑战与最佳实践](https://mp.weixin.qq.com/s/a61AfMzwYreTPkclQiC9iw)
+  - AutoMQ 是一个 100% 兼容 Kafka 的替代方案。它通过复用 Kafka 的协议栈代码，并重写存储层，利用 Write Ahead Log（预写日志） 技术，实现了在云环境中高效运行 Kafka，并将数据高效卸载到 Object storage(对象存储) 中
+  - 对 Object storage（对象存储）发起 GetObject 请求时，中位延迟大约为 20 毫秒，P90 延迟约为 60 毫秒；而 NVMe SSD 的延迟在 20–100 微秒之间
+  - AutoMQ 则通过 WAL+S3 的架构实现低延迟。为了保持写入延迟 P99 小于 10 毫秒，AutoMQ 的 Broker 首先将数据写入 WAL（预写日志）。WAL 本质上是一个磁盘设备，比如 AWS EBS。
+    - 在写入 S3 之前，Broker 必须确保消息已经持久化到 WAL 中；只有当消息成功写入 WAL 后，Broker 才会向 Producer 返回 “我已经收到消息” 的响应。而将数据写入对象存储的过程则是异步进行的
+  - 与延迟相关的另一个问题是写入 Object storage（对象存储）的频率
+    - 如果 Broker 在接收到 Producer 的消息后立刻将其写入 Object storage，那么 PUT 请求的数量将是极其庞大的。
+    -  Brokers 可以将来自不同 Topic 或 Partition 的数据进行批处理，以降低单个 Partition 写入带来的成本；通过 Compaction 异步合并小对象优化读取性能
+  - 提高 Object storage 读取性能最简单的方式，就是减少对对象存储的 GET 请求次数。
+    - 数据缓存可以有效帮助实现这一目标，带来两个好处：提升读取性能，减少对对象存储的访问频率。但这也引出了一个新的问题：如何高效地管理缓存以提高命中率
+    - AutoMQ 的缓存管理机制可以设计为：Broker 缓存其所管理的 Partition 的数据
+  - Shared Nothing 与 Shared Disk 的融合
+    - Shared Nothing 和 Shared Disk 各有优劣。前者可以更高效地执行写入操作并缓存数据；后者的存储方式则具备在不同节点间共享数据的效率优势。
+  - 缓存管理
+    - 充分利用缓存降低 S3 读开销。AutoMQ 双层缓存体系（Log Cache 用于热数据，Block Cache 处理冷数据）
+  - AutoMQ 设计多层级速率限流机制（令牌桶+优先级队列），保障关键流量优先，防止带宽争用
 
 
 
