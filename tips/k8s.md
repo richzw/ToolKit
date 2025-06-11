@@ -294,6 +294,7 @@
     - CPU 类型的镜像，用于启动 Ray Cluster 的 Head 节点
     - GPU 类型的镜像，用于启动 Ray Cluster 的 Worker 节点
 - [Ray Flow Insight](https://mp.weixin.qq.com/s/KehYVdkdEC-9H7jaDMIlow)
+- [Ray Data分布式数据处理原理](https://mp.weixin.qq.com/s/FVAFt3SS52leW9ie5njfAQ)
 - [Uber’s Journey to Ray on Kubernetes: Ray Setup](https://www.uber.com/en-HK/blog/ubers-journey-to-ray-on-kubernetes-ray-setup/?uclick_id=1285ecf2-fbc7-4421-a3e7-f3a120dea10a)
   - [Resource Management](https://www.uber.com/en-HK/blog/ubers-journey-to-ray-on-kubernetes-resource-management/)
 - [K8sGPT](https://github.com/k8sgpt-ai/k8sgpt)

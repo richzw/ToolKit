@@ -300,7 +300,7 @@
   - Advanced RAG
     - ![img.png](ml_advance_rag.png)
     - Chunking & vectorisation
-      -  Search index
+      - Search index
       - Vector store index
       - Hierarchical indices
     - Context enrichment
@@ -1313,7 +1313,24 @@
 - [Selecting a Model Based on Stripe Conversion](https://cookbook.openai.com/examples/stripe_model_eval/selecting_a_model_based_on_stripe_conversion)
   - A/B 测试模型对付费转化的实际影响
   - 使用付费转化（以 Stripe 订阅/支付为例）作为核心标准，选择最适合自身业务的 AI 大模型（LLM）的方法
-
+- RAG, Self-RAG, Agentic RAG, Corrective RAG, Adaptive RAG
+  - Standard RAG
+    - The foundation - retrieves documents based on similarity and generates responses. Simple, fast, but limited feedback loop.
+  - Self-RAG
+    - Adds self-reflection capabilities. The model evaluates its own outputs and decides whether to retrieve additional information or regenerate responses.
+  - Agentic RAG
+    - Goes full autonomous - breaks complex queries into sub-tasks, plans retrieval strategies, and executes multi-step reasoning workflows.
+  - Corrective RAG (CRAG)
+    - Focuses on accuracy through iterative correction. Continuously fact-checks and refines responses against retrieved knowledge.
+  - Adaptive RAG
+    - The smart switcher - dynamically chooses the best retrieval strategy based on query complexity, domain, and confidence levels.
+  - When should you use each?
+    🎯 Starting out or need speed → Standard RAG
+    🎯 Quality and grounding matter → Self-RAG
+    🎯 Complex reasoning required → Agentic RAG
+    🎯 Mission-critical accuracy → CRAG
+    🎯 Diverse query types → Adaptive RAG
+  - Our recommendation: Start with Standard RAG, add Self-RAG for quality, then evolve based on your specific needs.
 
 
 
