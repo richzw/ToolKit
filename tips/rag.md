@@ -1331,7 +1331,8 @@
     🎯 Mission-critical accuracy → CRAG
     🎯 Diverse query types → Adaptive RAG
   - Our recommendation: Start with Standard RAG, add Self-RAG for quality, then evolve based on your specific needs.
-
+- [RAG Cost Calculator](https://zilliz.com/rag-cost-calculator/)
+  - This calculator quickly estimates the cost of building a RAG pipeline, including chunking, embedding, vector storage/search, and LLM generation.
 
 
 

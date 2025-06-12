@@ -2122,7 +2122,17 @@
     - crypto/tls 包现在默认支持并启用了新的后量子混合密钥交换机制 X25519MLKEM768。
       - Go 1.24+ 应用程序使用 crypto/tls（例如，作为 HTTPS 服务器或客户端），并且 tls.Config 中的 CurvePreferences 字段未被显式设置（保持为 nil）时，TLS 握手将自动尝试使用 X25519MLKEM768 进行密钥交换
       - X25519MLKEM768 是一种混合 (hybrid) 密钥交换方案。它巧妙地将经过广泛验证的经典椭圆曲线算法 X25519 与后量子安全的 ML-KEM-768 结合起来
-      - 
+    - [Go synctest: Solving Flaky Tests](https://victoriametrics.com/blog/go-synctest/)
+      - synctest 解决的问题，我们首先必须认识核心问题：并发测试中的非确定性。它通过在受控的隔离环境中运行 goroutine，实现了并发代码的确定性测试。
+        - time.Sleep 的准确性和调度器的行为可能存在很大差异。操作系统差异和系统负载等因素都会影响时序。这使得任何仅基于休眠的同步策略都不可靠。
+      - synctest 还提供了一个强大的同步原语：synctest.Wait 函数
+        - 调用 synctest.Wait() 时，它会阻塞直到所有其他 goroutine（在同一 synctest 组中）要么完成，要么持久阻塞。
+        - Wait() 最常见的用法是启动后台 goroutine，然后暂停直到它们达到稳定点，再进行断言
+      - synctest 如何工作
+        - synctest 通过创建称为"气泡"的隔离环境来工作。气泡是一组在受控和独立环境中运行的 goroutine，与程序的正常执行分离
+        - 合成时间 - 每个气泡都有自己的合成时钟。这个合成时间从 2000 年 1 月 1 日 UTC 午夜开始（纪元 946684800000000000）
+        - Goroutine 协调 - 当调用 synctest.Run(f) 时，当前 goroutine 成为气泡的根。这个根 goroutine 管理合成时间并协调气泡内所有其他 goroutine 的执行。
+          - 被阻塞的 goroutine 有两类：外部阻塞和持久阻塞
   - Go 1.25
     - [DWARF 5调试信息格式](https://mp.weixin.qq.com/s/38n83jpD0bgfs0Bi14Ac7g)
     - 解决Git仓库子目录作为模块根路径

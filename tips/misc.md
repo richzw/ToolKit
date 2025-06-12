@@ -362,6 +362,11 @@
     - Homebrew安装最新版本的Cursor `brew install --cask --force cursor`
   - [Vibe Coding 有“最后一公里”知识幻觉](https://mp.weixin.qq.com/s/loRz_3N_N_fz58yFt_BanQ)
     - Milvus Code Helper MCP 服务外，开发者还可以选择如 Context7、DeepWiki 等新兴工具来解决这类问题
+  - [Claude Code 如何做任务进度跟进](https://gist.github.com/richzw/ebeb0f8b39af64f2dd3a765aa4662150)
+    - 每一个新需求，让Claude Code帮你自动生成一个对应md文件， 该文件包含plan和progress
+    - Claude Code自带一个"内存版的todo list"，就是在面临新需求的时候， 它会自动拆解， 但是这个仅仅是用于更好的让用户查看当前进度，以及LLM自己保持前后一致性， 缺点是， 当前任务结束后用户并不好review。
+    - 如何review呢？ 就是让Claude Code建一个plan and progress的同步版本 md文件。
+      - 每次都要提醒一次吗？ 不用， 将prompt写入CLAUDE[.]md文件即可。 我一般都是放在 `docs/plan` 文件夹
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。
