@@ -367,6 +367,11 @@
     - Claude Code自带一个"内存版的todo list"，就是在面临新需求的时候， 它会自动拆解， 但是这个仅仅是用于更好的让用户查看当前进度，以及LLM自己保持前后一致性， 缺点是， 当前任务结束后用户并不好review。
     - 如何review呢？ 就是让Claude Code建一个plan and progress的同步版本 md文件。
       - 每次都要提醒一次吗？ 不用， 将prompt写入CLAUDE[.]md文件即可。 我一般都是放在 `docs/plan` 文件夹
+  - [Claude Code: Best practices for agentic coding](https://www.anthropic.com/engineering/claude-code-best-practices)
+  - [AI 写代码的深度体验](https://mp.weixin.qq.com/s/6dLnTlb0RfnLjrExa7j_zQ)
+  - [How Anthropic teams use Claude Code](https://www-cdn.anthropic.com/58284b19e702b49db9302d5b6f135ad8871e7658.pdf)
+  - [Claude Code Manual](https://docs.anthropic.com/zh-CN/docs/claude-code/overview)
+  - [A curated list of awesome commands, files, and workflows for Claude Code](https://github.com/hesreallyhim/awesome-claude-code)
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。
@@ -449,7 +454,18 @@
   - 面对Hypothesis式的验证，如果大模型在CoT过程中遇到障碍（例如，没有合适的计算工具），其会“以终为始”编造推理（Unfaithful Motivated Reasoning）以迎合Hypothesis
 - [GeoPort](https://github.com/davesc63/GeoPort): Your Location, Anywhere! The iOS location simulator
 - [电梯的交互和调度](https://blog.codingnow.com/2025/06/elevator.html)
-
+- [𝐆𝐨𝐨𝐠𝐥𝐞 𝐂𝐥𝐨𝐮𝐝’𝐬 𝐨𝐮𝐭𝐚𝐠𝐞]
+  - Here are 5 ways to build a more resilient vector stack:
+    - 𝟏. 𝐔𝐬𝐞 𝐦𝐮𝐥𝐭𝐢-𝐳𝐨𝐧𝐞 𝐝𝐞𝐩𝐥𝐨𝐲𝐦𝐞𝐧𝐭𝐬
+      - Don’t put all of your eggs in the same busket. Distribute replicas across zones so a failed availability zone doesn’t take your app offline.
+    - 𝟐. 𝐂𝐚𝐭𝐜𝐡 𝐭𝐡𝐢𝐧𝐠𝐬 𝐛𝐞𝐟𝐨𝐫𝐞 𝐭𝐡𝐞𝐲 𝐠𝐨 𝐰𝐫𝐨𝐧𝐠
+      - Monitor latency, errors, and throughput. Set alerts for abnormal patterns to catch minor issues before cascading failures.
+    - 𝟑. 𝐒𝐞𝐭 𝐥𝐢𝐦𝐢𝐭𝐬
+      - Throttle ingestion throughput, or better, use bulk import for large scale data ingestion. Don't let the operational workload hurt your serving latency.
+    - 𝟒. 𝐁𝐚𝐜𝐤 𝐮𝐩 𝐲𝐨𝐮𝐫 𝐝𝐚𝐭𝐚
+      - Turn-on automatic backup to always keep a fresh snopshot at hand. You will thank yourself for doing that in the event of data integrity issue.
+    - 𝟓. 𝐑𝐮𝐧 𝐝𝐫𝐢𝐥𝐥𝐬
+      - Test disaster recovery. Simulate degraded performance. Know what your system does when something breaks — before your users find out for you.
 
 
 

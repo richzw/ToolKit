@@ -397,6 +397,18 @@
           - 这是深度神经网络中常见的问题。有两种常见的技术可以缓解这个问题: 残差连接和层归一化
           - 残差连接: 残差连接就是将层的输入与其输出相加。例如，我们将初始嵌入添加到注意力的输出中。残差连接可以缓解梯度消失问题
           - 层归一化 (Layer normalization): 层归一化是一种对层输入进行归一化的技术。它在文本嵌入维度上进行归一化
+        - 残差（Residual）
+          • 定义：指“观测值”与“模型预测值”之间的差距。
+          • 说明：模型预测值是基于我们已知的数据、所选模型以及模型参数得到的，因此残差是我们在具体建模场景下，可以“实际计算得到”的差距。
+          • 特点：
+          - 残差是对模型拟合效果的度量。残差越小，说明模型对该条观测的拟合越好。
+          - 残差有助于分析模型是否存在系统性偏差、是否存在异方差等，从而进行模型诊断及改进。
+        - 误差（Error）
+          • 定义：指“观测值”与“真实值”之间的差距。
+          • 说明：真实值往往是客观存在但未知的，或在理论上可以界定，却在实际中往往无法直接获取。
+          • 特点：
+          - 误差是客观存在，但大多情况下我们只能估计或假设它。
+          - 误差的大小体现了“测量方法、仪器精度”或“系统本身随机性”等因素对观测结果的影响。
     - 解码器
       - 解码器是自回归的，这意味着解码器将使用先前生成的 token 再次生成第二个 token
     - https://osanseviero.github.io/hackerllama/blog/posts/random_transformer/
@@ -1749,8 +1761,6 @@
   - "think"工具特别适用于Claude需要处理外部信息（如工具调用结果）的场景，更聚焦于模型在发现新信息后的思考过程
 - [Tracing the thoughts of a large language model](https://www.anthropic.com/research/tracing-thoughts-language-model)
 - [Turns Codebase into Easy Tutorial](https://the-pocket.github.io/Tutorial-Codebase-Knowledge/)
-- [Claude Code: Best practices for agentic coding](https://www.anthropic.com/engineering/claude-code-best-practices)
-  - [AI 写代码的深度体验](https://mp.weixin.qq.com/s/6dLnTlb0RfnLjrExa7j_zQ)
 
 
 

@@ -2140,6 +2140,16 @@
       - 扩展 go-import meta 标签，并明确了版本标签的约定：
         - 在现有的 go-import meta 标签的三个字段（import-prefix vcs vcs-url）基础上，增加第四个可选字段，用于指定模块在仓库中的实际子目录。
         - 对于位于子目录中的模块，其版本标签必须包含该子目录作为前缀
+    - [Go 1.25 新功能](https://mp.weixin.qq.com/s/OJ0UIo7top-8QApnw25IYA)
+      - go build -asan 内存泄漏检测
+      - go.mod ignore 指令： 新增的 go.mod ignore 指令允许指定 go 命令在匹配 all 或 ./... 等包模式时忽略的目录
+      - 实验性垃圾回收器 (greenteagc) 标记和扫描小对象性能提升，预计减少 0-40% GC 开销
+      - go vet 新增 waitgroup 和 hostport 分析器
+      - testing/synctest 提供测试并发代码的支持，包括伪造时钟和 goroutine 等待机制
+      - 容器感知 GOMAXPROCS 在 Linux 上自动根据 cgroup CPU 限制调整 GOMAXPROCS，并动态更新
+      - TLS SHA-1 禁用
+      - DWARF v5 调试信息 编译器和链接器生成 DWARF v5 调试信息
+      - Go.25 要求 macOS2 Monterey 或更高版本
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
   - errors.Is() is expensive. If you use it, check the error is non-nil first to avoid a pretty big performance penalty on the happy path.
   - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.

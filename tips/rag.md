@@ -807,6 +807,9 @@
   - [談 LLM-based AI Agents](https://ihower.tw/presentation/ihower-agents-202412.pdf)
   - [Agent white paper](https://www.kaggle.com/whitepaper-agents)
   - https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf
+  - [Don’t Build Multi-Agents](https://cognition.ai/blog/dont-build-multi-agents#principles-of-context-engineering)
+    - 多代理架构在LLM代理中可能不稳定，建议使用单线程线性代理
+    - Context 上下文工程被认为是构建可靠长期代理的关键。
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
@@ -1333,8 +1336,17 @@
   - Our recommendation: Start with Standard RAG, add Self-RAG for quality, then evolve based on your specific needs.
 - [RAG Cost Calculator](https://zilliz.com/rag-cost-calculator/)
   - This calculator quickly estimates the cost of building a RAG pipeline, including chunking, embedding, vector storage/search, and LLM generation.
-
-
+- [How we built our multi-agent research system](https://www.anthropic.com/engineering/built-multi-agent-research-system)
+  - 通过让多个子代理（子模型）并行工作，可以同时探索不同方向、在超出单一上下文窗口限制的大规模数据中进行搜索与提炼
+  - 多代理系统的总体架构
+    • Anthropic 采用“主代理（LeadResearcher）+ 子代理（Subagents）”的模式：
+    – 主代理分析用户查询，制定研究策略并分解为子任务；
+    – 子代理各自使用搜索、集成等工具对子任务进行并行探索，然后将结果报告给主代理；
+    – 主代理继续综合、判断是否需要更多研究，或者进入结果整理阶段。
+  - 多代理系统的评估面临更高难度，因其不一定会按照预设路径行动。Anthropic 建议：
+    – 先用小规模测试集进行快速迭代；
+    – 使用 LLM 作为评审来打分或检查输出，从准确性、引用等多角度评估；
+    – 人工评估则能发现自动打分遗漏的各种细节问题（如来源质量不佳）并帮助修正代理行为。
 
 
 

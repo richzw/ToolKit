@@ -1094,8 +1094,11 @@
           - 系统中假设有 N 个进程。每个进程 Pᵢ 维护一个大小为 N 的向量 Vᵢ，其中 Vᵢ[j] 表示进程 Pᵢ 所知道的进程 Pⱼ 已经发生的事件数量。
     - 全局快照的同步时钟 TrueTime
       - TrueTime API明确报告本地时钟的置信区间(所谓的时钟置信区间, 我们可以理解为它是一个日时钟的时间段而不是一个时间点,即[最早时间,最晚时间]),
-
-
+- [多 CDN 策略](https://mp.weixin.qq.com/s/fTkVuQCwPjvCRSuSunhsow)
+  - 请求处理基于主源与备用源机制进行分发：
+    - 主源（Primary Origin）：CloudFront 或 Akamai 会将请求路由至我们的 Nginx 反向代理，再转发至 Kubernetes 中运行的 WebOTT 代理 Pod。在大多数平台中，主源是禁用的，因此 CDN 会直接将请求路由至备用源。
+    - 备用源（Secondary/Failover Origin）：如果主源被禁用，或 CDN 无法从主源获得有效响应，请求将被转发至托管在 AWS S3 上的静态资源作为回退内容。 
+    
 
 
 
