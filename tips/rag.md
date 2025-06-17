@@ -810,6 +810,33 @@
   - [Don’t Build Multi-Agents](https://cognition.ai/blog/dont-build-multi-agents#principles-of-context-engineering)
     - 多代理架构在LLM代理中可能不稳定，建议使用单线程线性代理
     - Context 上下文工程被认为是构建可靠长期代理的关键。
+    - 多智能体架构的“脆弱性”与“可靠性”问题
+      - 关键的失败点在于子智能体可能误解任务并产生不一致的结果，导致最终的智能体难以整合这些误解
+      - 智能体需要长期运行并保持连贯对话时，可靠性至关重要，而上下文工程是核心。多智能体系统会导致“决策过于分散，上下文无法充分共享”，从而产生“脆弱的系统”
+    - 子智能体即使共享原始任务上下文，也可能因为无法看到其他子智能体正在做什么而导致工作不一致，因为它们的行动基于相互冲突的未预设假设。
+      - 原则1是“共享完整上下文和完整的智能体追踪，而不仅仅是单独的消息”，
+      - 原则2是“行动带有隐含决策，冲突的决策会导致糟糕的结果”。
+  - [How we built our multi-agent research system](https://www.anthropic.com/engineering/built-multi-agent-research-system)
+    - 有些领域需要所有智能体共享相同上下文，或者涉及智能体之间许多依赖关系，目前不适合多智能体系统
+      - 如何克服这些限制的：
+        - 协调模式: Anthropic的系统采用“协调者-工作者”模式，由一个主智能体协调整个过程，并委派任务给并行的专业子智能体。
+          - 主智能体分析查询，制定策略，并生成子智能体同时探索不同的方面。子智能体将结果返回给主智能体进行综合。
+        - 明确委托: 他们强调“教导协调者如何委托”，即主智能体需要为子智能体提供详细的任务描述，包括目标、输出格式、使用的工具和来源指南，以及明确的任务边界，以避免工作重复、遗漏或任务误解。
+          - 例如，如果没有详细描述，子智能体可能会重复执行相同的搜索，或者对任务进行不同的解释。
+        - 上下文管理: 对于长期运行的任务和上下文窗口溢出问题，
+          - Anthropic的解决方案是主智能体将计划保存到“内存”中，以持久化上下文，防止上下文窗口过大时被截断。
+          - 他们还实现了智能体在完成工作阶段后总结关键信息并存储到外部记忆中，并在上下文接近限制时生成新的子智能体，通过仔细交接保持连续性。
+       - 最小化“电话游戏”: 他们通过让子智能体将输出直接保存到文件系统来“最小化‘电话游戏’（game of telephone）”，
+         - 而不是所有信息都通过主协调器传递。这有助于提高保真度和性能，并减少通过对话历史复制大量输出所需的token开销，从而避免信息丢失。
+    - 通过让多个子代理（子模型）并行工作，可以同时探索不同方向、在超出单一上下文窗口限制的大规模数据中进行搜索与提炼
+    - 多代理系统的总体架构 - Anthropic 采用“主代理（LeadResearcher）+ 子代理（Subagents）”的模式：
+      - 主代理分析用户查询，制定研究策略并分解为子任务；
+      - 子代理各自使用搜索、集成等工具对子任务进行并行探索，然后将结果报告给主代理；
+      - 主代理继续综合、判断是否需要更多研究，或者进入结果整理阶段。
+    - 多代理系统的评估面临更高难度，因其不一定会按照预设路径行动。Anthropic 建议：
+      - 先用小规模测试集进行快速迭代；
+      - 使用 LLM 作为评审来打分或检查输出，从准确性、引用等多角度评估；
+      - 人工评估则能发现自动打分遗漏的各种细节问题（如来源质量不佳）并帮助修正代理行为。
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
@@ -1336,18 +1363,6 @@
   - Our recommendation: Start with Standard RAG, add Self-RAG for quality, then evolve based on your specific needs.
 - [RAG Cost Calculator](https://zilliz.com/rag-cost-calculator/)
   - This calculator quickly estimates the cost of building a RAG pipeline, including chunking, embedding, vector storage/search, and LLM generation.
-- [How we built our multi-agent research system](https://www.anthropic.com/engineering/built-multi-agent-research-system)
-  - 通过让多个子代理（子模型）并行工作，可以同时探索不同方向、在超出单一上下文窗口限制的大规模数据中进行搜索与提炼
-  - 多代理系统的总体架构
-    • Anthropic 采用“主代理（LeadResearcher）+ 子代理（Subagents）”的模式：
-    – 主代理分析用户查询，制定研究策略并分解为子任务；
-    – 子代理各自使用搜索、集成等工具对子任务进行并行探索，然后将结果报告给主代理；
-    – 主代理继续综合、判断是否需要更多研究，或者进入结果整理阶段。
-  - 多代理系统的评估面临更高难度，因其不一定会按照预设路径行动。Anthropic 建议：
-    – 先用小规模测试集进行快速迭代；
-    – 使用 LLM 作为评审来打分或检查输出，从准确性、引用等多角度评估；
-    – 人工评估则能发现自动打分遗漏的各种细节问题（如来源质量不佳）并帮助修正代理行为。
-
 
 
 

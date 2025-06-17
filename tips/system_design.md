@@ -1098,9 +1098,21 @@
   - 请求处理基于主源与备用源机制进行分发：
     - 主源（Primary Origin）：CloudFront 或 Akamai 会将请求路由至我们的 Nginx 反向代理，再转发至 Kubernetes 中运行的 WebOTT 代理 Pod。在大多数平台中，主源是禁用的，因此 CDN 会直接将请求路由至备用源。
     - 备用源（Secondary/Failover Origin）：如果主源被禁用，或 CDN 无法从主源获得有效响应，请求将被转发至托管在 AWS S3 上的静态资源作为回退内容。 
-    
-
-
+  - 为了更高效地在多个 CDN 之间分发流量，并在需要时实现快速故障切换，我们按如下方式配置了 DNS
+    - 使用低 TTL 的加权记录集
+      - 我们使用 AWS Route 53 的加权记录集（weighted record），并将 TTL 设置为较低值，以便动态调整 CloudFront 与 Akamai 之间的流量分配
+    - AWS 应用恢复控制器（ARC）实现故障切换
+      - 我们集成了 AWS Application Recovery Controller（ARC），作为一个高可用的故障切换开关（kill switch）。当某个 CDN 出现重大故障时，ARC 可以快速将所有流量切换到另一个 CDN，从而将停机时间降至最小。
+  - 每个 CDN 都具备专门的机制，用于支持故障切换与请求重写
+    - Lambda@Edge：用于在主源已启用但不可用时处理请求重写与路由逻辑。
+    - CloudFront Functions：用于将请求头转换为查询参数，使原生应用（例如 AndroidTV）在故障切换模式下可以通过 query 参数传递 header 信息
+    - Akamai EdgeWorkers：用于在主源不可用时处理请求重写与路由逻辑。
+  - Header-to-Query 参数转换
+    - 在故障切换过程中，原生应用所使用的请求头无法直接传递给静态资源。为了解决这个问题：
+      - CloudFront Functions 会提取请求头，并将其转换为查询参数。
+      - 对应的静态资源 URL 会被修改以包含这些参数。
+      - 客户端随后会读取这些查询参数，以重建所需的上下文信息。
+  - https://code.tubitv.com/scaling-tubi-for-the-super-bowl-implementing-a-multi-cdn-strategy-for-web-and-tv-apps-1dc0ed267cdf
 
 
 

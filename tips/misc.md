@@ -372,6 +372,8 @@
   - [How Anthropic teams use Claude Code](https://www-cdn.anthropic.com/58284b19e702b49db9302d5b6f135ad8871e7658.pdf)
   - [Claude Code Manual](https://docs.anthropic.com/zh-CN/docs/claude-code/overview)
   - [A curated list of awesome commands, files, and workflows for Claude Code](https://github.com/hesreallyhim/awesome-claude-code)
+  - [claude-code-costs](https://github.com/philipp-spiess/claude-code-costs)
+    - 如果你使用 Claude Code 并且是 Claude Pro/Max 订阅想要知道如果是 API 得花了多少钱，订阅费花的值不值，可以试试这个命令：$ npx claude-code-costs
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。

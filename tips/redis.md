@@ -658,5 +658,16 @@
     - 当主库收到从库的同步请求时，如果从库的复制历史与主库不一致，或者未能在复制积压区中找到从库请求的同步点时，则会与从库进行全量同步
     - 主库 fork 一个子进程生成 RDB 快照并发送给从库，同时将此期间的写命令缓存在 client output buffer 中，待 RDB 传输完成后再发送给从库。
   - 核心思路是：在全量同步时，从库会与主库再建立一条新的连接，主库会在两条连接上并行发送 RDB 快照和命令流，从库则会将命令流缓存在本地内存，等加载完 RDB 后再回放命令流。
-
+- [Optimizing Latency in Redis Online](https://code.tubitv.com/optimizing-latency-in-redis-online-feature-store-a-case-study-1fd6a611bafa)
+  - 批量查询常常带来“fan-out”效应，例如需要一次性取回大量行，导致系统负载剧增
+  - 初始方案与痛点：
+    - 最初使用 Redis pipeline 与 HGETALL 查询，P99 延迟在 20–30ms 左右。
+    - 后来改用 Redis 单纯 key-value 存储，并用 MGET 一次性获取多行，进一步将延迟降至 3–4ms。
+    - 随着新特征家族的查询量急剧扩张，特别是批量查询中 fan-out 增长极快，P99 延迟升至 15ms，超过目标。
+  - 逐步优化过程：
+    - 尝试虚拟分片（将大批量查询分成若干较小批量，并分发到不同 Redis 分片）但收效有限。
+    - 通过度量拆解发现，Redis 响应的首字节返回很快，瓶颈在客户端的完整反序列化过程。
+      - Lettuce First Byte Latency: The time to receive the first byte from Redis.
+      - Lettuce Completion Latency: The time to complete the entire request.
+    • 最终通过在客户端对反序列化进行并行化，将 P99 延迟从 15ms 降至约 10ms，达到预期 SLA。
 
