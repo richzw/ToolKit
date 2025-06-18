@@ -817,6 +817,24 @@
       - 原则1是“共享完整上下文和完整的智能体追踪，而不仅仅是单独的消息”，
       - 原则2是“行动带有隐含决策，冲突的决策会导致糟糕的结果”。
   - [How we built our multi-agent research system](https://www.anthropic.com/engineering/built-multi-agent-research-system)
+    - Claude 提升复杂研究任务能力，底层其实是三个关键词：带宽、结构、机制。
+      - 从 token 到带宽：扩容问题其实是系统问题
+        - 单个 agent 很快就会遇到 token 限制，这不是模型能力不行，而是容量不够。
+        - 我们自己调长链条、多跳调用的时候也很明显。Anthropic 选择的解法不是扩模型，而是拆任务、开并发、分 agent，每个 agent 自带上下文窗口，从系统结构层面扩容。
+      - 提示词是系统指令，很重要、很重要、很重要！
+        - 主 agent 的提示词，是负责分配任务、指明目标、交代格式、选工具的。
+        - 提示词不只是沟通语言，更是调度逻辑、任务协议、格式规范的集中承载体。
+        - 多个 agent 并行运行时，如果没有一个清晰、格式化、结构稳固的 prompt 模板，每个子 agent 拉回来的信息会特别散、错漏率高、很难合并。这时候，主 agent 的提示词就等于一个调度中枢的“编程语言”
+        - 主 agent 的提示词策略应该和流程图一样严谨：每一步要预设结果、预设失败、预设上下游
+      - 系统级机制，决定了能不能撑进生产环境
+        - checkpoint、异步重试机制、全链路 tracing、彩虹部署。
+        - agent 系统本质上要往服务化方向走，就必须预设失败是常态，重试是能力。
+      - 评估机制是不可缺的闭环，不然做不出反馈导向的系统进化
+        - 让另一个 LLM 去评审 agent 的结果，从准确性、引用合理性、覆盖度等多个维度打分. 在系统里内嵌了 QA 流程，而且不是事后人评，而是可以插入调试链路的 LLM 评测器
+      - 并发是工具，不是策略，适用场景边界要想清楚
+        - 这套系统最适合的场景是：问题复杂度高、信息广度要求强、非实时产出型任务。例如政策研判、产品调研、文献综述、竞品分析这些，在私域服务里也可以类比成“多维标签用户意图研判”这种复杂工作
+        - 但如果放在需要紧密配合、频繁迭代、低延迟要求的任务上，例如代码生成、对话任务、实时接口构建，多 agent 的协调成本反而可能放大系统复杂度。
+        - 构建 agent 系统，不能只是对话式的 prompt 编排，而要像搭服务一样，从任务定义到评估反馈，从并发机制到异常兜底，形成一整套可以持续运行的系统逻辑。
     - 有些领域需要所有智能体共享相同上下文，或者涉及智能体之间许多依赖关系，目前不适合多智能体系统
       - 如何克服这些限制的：
         - 协调模式: Anthropic的系统采用“协调者-工作者”模式，由一个主智能体协调整个过程，并委派任务给并行的专业子智能体。
@@ -833,10 +851,20 @@
       - 主代理分析用户查询，制定研究策略并分解为子任务；
       - 子代理各自使用搜索、集成等工具对子任务进行并行探索，然后将结果报告给主代理；
       - 主代理继续综合、判断是否需要更多研究，或者进入结果整理阶段。
+      - Prompt: https://github.com/anthropics/anthropic-cookbook/tree/main/patterns/agents/prompts
+        - citations_agent.md：规则写得足够具体，从引用位置、格式密度，到去冗余策略都一目了然；
+          - 还明确了技术验证逻辑，模型只要动了原文就直接不收，这种刚性约束非常适合放到最终出报告的链路里。
+        - research_lead_agent.md：具备完整的四层 Research Process 拆解流程，还能判断查询类型（depth-first / breadth-first / straightforward），对应不同任务自动设计结构化分工；
+          - 并发 agent 的使用也有上限指引，能有效防止“乱拆 agent”带来的资源浪费。
+        - research_subagent.md：流程上引入 OODA（Observe–Orient–Decide–Act）循环，还配有 Tool budget 约束，子 agent 不仅能跑、还能限流；
+          - 加上明确的 source quality checklist，显著提升信息质量，避免拉到一堆营销稿或无效链接。
     - 多代理系统的评估面临更高难度，因其不一定会按照预设路径行动。Anthropic 建议：
       - 先用小规模测试集进行快速迭代；
       - 使用 LLM 作为评审来打分或检查输出，从准确性、引用等多角度评估；
       - 人工评估则能发现自动打分遗漏的各种细节问题（如来源质量不佳）并帮助修正代理行为。
+  - [How and when to build multi-agent systems](https://blog.langchain.dev/how-and-when-to-build-multi-agent-systems/)
+    - Context engineering is crucial
+    - Multi-agent systems that primarily “read” are easier than those that “write”
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回

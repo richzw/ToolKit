@@ -35,6 +35,22 @@
 
     The default timeout for the AWS Application Load Balancer is 60 seconds, so we changed the service timeouts to 65 seconds. Barring two hiccoughs shortly after deploying, this has totally fixed it.
     
+  - 使用 AWS Load Balancer Controller 的应用在滚动更新期间出现 502 Bad Gateway 或 504 Gateway Timeout 错误。这一现象在使用 target-type: ip 模式（ALB 直接路由到 Pod IP）时尤为明显。
+    - 问题分析
+      - 这些 5xx 错误本质上是由 AWS ALB 控制面与数据面之间的异步更新机制，以及 Kubernetes Pod 终止过程的时序不匹配导致的。具体流程如下：
+        - 滚动更新开始，Kubernetes 向旧 Pod 发送 SIGTERM 信号，启动终止序列
+        - AWS Load Balancer Controller 检测到 Pod 终止事件，向 ALB 控制面发送目标注销请求
+        - ALB 控制面将目标标记为 “draining” 状态，但这一状态变更需要时间传播到所有 ALB 数据面节点
+        - 在这个传播窗口期（通常为几秒到几十秒），ALB 数据面节点仍可能将新请求路由到正在终止的 Pod
+        - 此时 Pod 可能已关闭其监听端口或终止应用进程，导致请求失败并触发 ALB 返回 502/504 错误
+    - 可以采取以下措施来缓解这个问题。
+      - 给容器添加 preStop 钩子延迟，这会在 Pod 终止前增加一个延迟，给负载均衡器足够的时间将目标标记为排空状态并停止发送新请求。
+        ` lifecycle: preStop: exec: command: [ "sh", "-c", "sleep 30" ] `
+      - 设置 terminationGracePeriodSeconds。这为 Pod 提供了更长的”优雅退出”时间，确保有足够的时间处理现有请求并完成清理工作。
+      - 减少 ALB 的注销延迟。加快目标从 ALB 目标组中移除的速度。
+        `annotations: alb.ingress.kubernetes.io/target-group-attributes: deregistration_delay.timeout_seconds=30`
+      - 启用 Pod Readiness Gates。确保 Pod 只有在成功注册到 ALB 目标组后才被标记为就绪，同样，只有在成功从 ALB 目标组中注销后才会被终止。
+      - kubectl label namespace <your_namespace> elbv2.k8s.aws/pod-readiness-gate-inject=enabled
 --------
 - Case 3 [HOL Blocking](https://mp.weixin.qq.com/s?__biz=Mzg5MTYyNzM3OQ==&mid=2247483985&idx=1&sn=9546ced2f5b9df02537769ff167c9db9&chksm=cfcb304df8bcb95b0527e4ca94ecd66325d8db0b8c7a5eecb92bdd9ed573ce750c1e751809e2&cur_album_id=1899309536088293384&scene=190#rd)
 
