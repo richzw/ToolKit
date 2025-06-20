@@ -433,6 +433,7 @@
         - PQ makes tradeoffs between recall, performance, and memory usage. This means a PQ configuration that reduces memory may also reduce recall.
       - BQ - Binary quantization - a quantization technique that converts each vector embedding to a binary representation
         - The tradeoff is that BQ is lossy. The binary representation by nature omits a significant amount of information, and as a result the distance calculation is not as accurate as the original vector embedding.
+    - [向量索引选型](https://mp.weixin.qq.com/s/yJIHKfUOAtz4iWVHURri9g)
     - Index type
       - FLAT：适用于需要 100% 召回率且数据规模相对较小（百万级）的向量相似性搜索应用。
       - IVF_FLAT：基于量化的索引，适用于追求查询准确性和查询速度之间理想平衡的场景（高速查询、要求高召回率）。
