@@ -16,6 +16,7 @@
                 - DiskANN
                     - DiskANN 依赖高性能的磁盘索引，借助 NVMe 磁盘缓存全量数据，在内存中只存储了量化后的数据。
                     - DiskANN 适用于对于查询 Recall 要求较高，QPS 不高的场景。
+                    - DISKANN需要nvme ssd
                     - Vamana the algorithm behind the DiskANN
                       - Build a random graph.
                       - Optimize the graph, so it only connects vectors close to each other.
@@ -590,6 +591,32 @@
         - Proxy识别请求collection的相关Shard
         - Proxy从StreamNodes和QueryNodes收集数据
         - StreamNodes 处理实时数据，而QueryNodes 同时处理历史数据。 结果被聚合并返回给用户
+    - [Zilliz Cloud 建表功能升级](https://mp.weixin.qq.com/s/FuVzdn1cQCIsuML41lop0A)
+      - 全面支持全文检索与文本匹配
+        • 在界面中可直接启用全文检索（Term Search）和文本匹配（Term Match），无需手动组合字段与函数。
+        • 用户只需选定 VARCHAR 列并配置解析器（Standard 或 Custom），便能享受自动生成稀疏向量的全文检索能力。
+        • 提供可视化示例代码，便于快速上手并平滑切换到 SDK 方式。
+      - Partition 与 Partition Key 概念澄清
+        - • Partition 为同一 Collection 的物理子集，Partition Key 则在超多租户场景下通过标量列进行数据隔离。
+        - • 全新独立分区管理页面，可创建和预览所有分区，并支持将数据直接导入指定分区。
+        - • 当启用 Partition Key 时，系统会自动管理分区，避免重复或错误操作。
+      - Mmap 精细化配置，释放内存潜力
+        - • 允许在集合级和列级分别针对原始数据和索引数据手动开启/关闭 Mmap。
+        - • 提供实时预览功能，修改只需在页面中进行 Release Collection 后即可生效。
+        - • 明确了字段、集合、集群级别的 Mmap 优先级，减少配置混淆带来的性能影响。
+      - 支持 Nullable 和 Default Value，界面更简洁
+        - • 默认隐藏不常用的 Nullable 与 Default Value 设置，仅在需要时展开，避免干扰高频操作。
+        - • 提升写入数据的容错能力，简化对不完整或动态数据的处理。
+      - 完整索引管理生命周期，新增标量索引
+        - • 新版建表流程支持向量索引和标量索引统一管理，并设置专门的索引管理页面。
+        - • 可根据需要新建、删除、预览任意索引，支持 JSON Path 索引以加速 JSON 与动态字段查询。
+      - Shard 与 Consistency Level 配置可视化
+        - • Shard 池可水平拆分 Collection 以提升写入吞吐量。
+        - • Consistency Level 控制跨副本最新数据的可见性，界面提供默认配置解释与修改入口。
+        - • 让用户在建表时便可根据业务需求进行调优，减少后期改动成本。
+      - Dynamic Field 展示优化
+        • 对动态字段与向量/标量列进行并列展示，说明它是“特殊列”并介绍适用场景。
+        • 适用于数据结构不固定且需要频繁新增列的场景，可随时插入新字段而无需改变 Schema。
   - [优化](https://zilliz.com.cn/blog/milvus-%20community-keyword)
     - 降低内存
       - 牺牲性能 - Mmap, DiskANN
