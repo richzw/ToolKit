@@ -803,13 +803,21 @@
       - MinHash + LSH（局部敏感哈希） 提供了一种兼顾效率与效果的近似去重策略，适用于百亿级语料下的预处理优化；
       - MinHash 通过将文档压缩为签名，LSH 高效缩小搜索空间，可以快速定位潜在重复对
     - [2.6功能预览](https://mp.weixin.qq.com/s/UnvVbKSjTsyz8HzRTbs2gw)
+      - https://www.youtube.com/watch?v=Wb3jPzfx97Y&list=PLPg7_faNDlT4UvZtZ5GIZb8YGG_1tfKp-
       - 降本提速：
-        - 引入RabitQ量化兼顾内存和召回率；
+        - 引入RabitQ量化兼顾内存和召回率；一个二进制量化方法
+          - 一种新的量化算法，用于向量压缩，提供高搜索精度（比传统乘积量化高 3-4% 的召回率，比标量量化高 10%）
+          - 针对硬件进行了优化（SIMD 指令），在相似召回率下，QPS（每秒查询数）比原始 IVF 索引翻倍，并节省内存.
         - Sparse-BM25性能提升，QPS最高提7倍；
           - 设计了灵活的近似检索策略（如 drop_ratio_search 与 dim_max_score_ratio），让用户在精度与速度之间灵活调控
           - 在工程实现中引入了 SIMD 加速、数据预取机制等，引入并优化了 Block-Max WAND 与 Block-Max MaxScore 等高性能剪枝算法
         - JSON Path Index加速动态字段过滤，含Json field的过滤搜索延迟大幅下降。
           - 用于加速对动态字段内部特定路径下数据的过滤操作
+        - Milvus Storage V2 (存储 V2)：重新设计的存储层，充分利用 Parquet 和 Arrow 格式，使其与现有数据栈兼容
+          - 它通过将大字段和小字段拆分到不同的行组/文件，引入了对更多数据类型（如长文本和 Blob 存储，例如图像、音频）的支持
+          - 向量存储在 Parquet 之外，以避免昂贵的序列化; 这使得点查询的性能提高了 50 倍
+      - 结构体列表/嵌入列表数据模型 (Struct List / Embedding List Data Model)：
+        - 一种新的数据模型，其中主键可以代表文档 ID，每行可以包含嵌入列表（例如，文档的多个块）或结构化列表（例如，嵌套元数据）
       - 搜索与功能增强：
         - 增强Analyzer/Tokenizer功能，支持多语言；
           - 新增 Run Analyzer 语法支持，提供分词配置的可观测性
@@ -821,14 +829,19 @@
           - 许多信息检索和推荐场景中，内容的时效性是一个至关重要的因素。用户往往更关注最新的资讯、最近发生的事件或近期活跃的项目。
           - 传统的相似性搜索可能仅仅依据内容本身的匹配度进行排序，而忽略了时间维度对信息价值的影响。
           - Decay Function 允许用户在获取初步的搜索候选集之后，根据每个条目的时间戳信息，对其原始相关性得分进行调整。
+        - 查询抽样 (Query Sampling)：允许从集合中抽取数据以评估搜索召回率和准确性，无需预先存在的基础事实数据集
       - 架构优化：
         -  引入Tiered Storage数据冷热分层，平衡性能与成本；
+           - 这是一项标志性功能，允许您将热数据和冷数据分离，并在对象存储之上提供一个缓存层
            - 对于长时间未访问的冷数据，系统可基于 LRU 算法主动卸载，以腾出内存资源。
+           - 同时保持热数据性能与 HNSW 或 DISKANN 类si
            - 主要特性包括延迟加载（Lazy Load）、部分加载（Partial Load）和基于 LRU 的缓存逐出（LRU-based Cache Eviction），实现“先元后数、按需拉取、自动回收”的高效流程。
         - Streaming Service增强实时向量处理能力；
         - 支持100k Collection；
         - 采用Woodpecker云原生日志系统；
         - 优化File format v2和Coord Merge 。
+        - N-gram 索引 (N-gram Index)：通过将数据拆分为更小的 token（例如 2-gram、3-gram）并对其构建索引来加速文本匹配和正则表达式
+        - Minhash：一种局部敏感哈希索引，专门用于大规模数据去重（例如 100 亿个向量），实现相似性去重而非精确哈希比较。这有助于识别和删除近似重复的内容
   - Milvus 3.0
     - [Support Streaming Service in Milvus](https://github.com/milvus-io/milvus/issues/33285)
       - 零磁盘架构（Zero-Disk Architecture） https://zhuanlan.zhihu.com/p/15809814733

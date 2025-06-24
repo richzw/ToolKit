@@ -1219,8 +1219,35 @@
       - 记录使 Span 入队的那个对象作为“代表 (representative)”。
       - 增加一个“命中 (hit)”标志，表示 Span 在队列中时是否有其他对象被标记。
       - 如果出队时“命中”标志未设置，则直接扫描“代表”对象，避免处理整个 Span 的开销。
-
-
+- [Unexpected security footguns in Go's parsers](https://blog.trailofbits.com/2025/06/17/unexpected-security-footguns-in-gos-parsers/)
+  - Go 解析器的“温柔一刀”：那些被忽视的默认行为
+    - 场景一：非预期的序列化/反序列化
+      - 无标签字段的“默认暴露”
+        - Go 结构体中，如果一个字段没有 json 标签，encoding/json 在反序列化时会尝试使用该字段的导出名（首字母大写）作为 JSON 键进行匹配（大小写不敏感）
+      - 误用 json:"-,omitempty"
+        - json:"-" 标签的正确含义是“在序列化和反序列化时完全忽略此字段”。
+        - 但如果错误地与 omitempty 组合成 json:"-,omitempty"，Go 解析器会将其解释为：
+        - 此字段在 JSON 中的名称是 "-" (一个短横线字符串)，并且当其为空值时在序列化时省略。
+      - 误用 json:"omitempty" 作为字段名
+        - 这是一个更直接的错误：开发者本意是想为字段添加 omitempty 选项，却错误地将其写成了 JSON 键名。
+    - 场景二：解析器差异性攻击
+      - 重复字段：Go 的 encoding/json 默认取最后一个同名键的值
+      - 大小写不敏感的键名匹配：这是 encoding/json (v1) 一个广受诟病的特性
+    - 场景三：数据格式混淆攻击
+      - 未知键 (Unknown keys) 的潜在风险
+        - encoding/json (v1) 默认会静默地忽略输入 JSON 中，Go 目标结构体未定义的字段。
+        - 虽然在简单场景下这只是数据被丢弃，但如果应用在后续流程中使用了更通用的方式（如 map[string]interface{}）来处理或透传原始 JSON 数据
+        - ，这些被“忽略”的未知键就可能“复活”并造成危害。
+      - 头部/尾部垃圾数据 (Leading/Trailing garbage data)
+        - encoding/json (v1) 对输入数据的“纯净度”要求并非总是那么严格。
+        - json.Unmarshal通常期望输入是一个单一、完整的 JSON 值。如果JSON值后面跟着非空白的垃圾数据，它通常会报错。
+        - json.Decoder 在处理流式数据时，如果使用其 Decode() 方法，它可能在成功解析流中的第一个有效 JSON 对象后，并不会因为流中后续存在“垃圾数据”而立即报错，而是成功返回。
+  - GOEXPERIMENT=jsonv2 存在于 Go 1.25的encoding/json/v2
+    - 默认禁止重复名称： v2 在遇到 JSON 对象中存在重复名称时，会直接报错，而不是像 v1 那样默默接受最后一个。
+    - 默认大小写敏感匹配： v2 的字段匹配将采用精确的、大小写敏感的方式。虽然也提供了 MatchCaseInsensitiveNames 选项和 nocase 标签来兼容特定场景，但“默认安全”的原则得到了贯彻。
+    - 更强的未知键控制： v2 提供了 RejectUnknownMembers 选项（虽然非默认启用，但行为等同于 v1 的 DisallowUnknownFields），并引入了 unknown 标签，允许开发者将未知字段捕获到指定的 map 或 jsontext.Value 类型的字段中，而不是简单忽略。
+    - UnmarshalRead 校验 EOF： v2 的 UnmarshalRead 函数（用于处理 io.Reader）会校验整个输入流直到 EOF，从而有效阻止尾部垃圾数据的问题。
+    - 更严格的 UTF-8 处理： v2 默认要求严格的 UTF-8 编码，对无效 UTF-8 会报错
 
 
 
