@@ -1,4 +1,17 @@
-
+- [docker-fundamentals](https://github.com/stacksimplify/docker-fundamentals/tree/master)
+  - Union FS
+    -  引言与概述
+       • 联合文件系统（Union File System，简称 UnionFS）可将多个不同文件系统或目录“联合”成一个统一的视图。其最大特点是采用分层（Layer）与写时复制（Copy-on-Write）机制来实现文件系统的高效共享和快速部署。
+       • 发展历程中，AUFS、OverlayFS、Device Mapper、Btrfs、ZFS 等多种实现各有特色，现今容器领域广泛使用 OverlayFS 作为主流驱动。
+    - 核心原理
+      • 分层存储：镜像或文件系统被拆分为只读层与独立的读写层，多个层合并为用户透明的统一视图。
+      • 写时复制 (Copy-on-Write)：只有当文件需要修改时，才会将其从只读层复制到读写层，实现增量更新与节省空间。
+      • Whiteout 文件：用以标记对下层文件的“删除”操作，而无需改动只读层本身。
+    - 主流实现技术
+      • OverlayFS：内核原生支持，性能高、资源占用低；在现代 Docker 默认使用。
+      • AUFS：Docker 早期默认使用，功能丰富，但非内核原生支持，维护复杂。
+      • Device Mapper：基于块设备快照的方式管理存储，在 Red Hat 系列系统曾被广泛使用。
+      • Btrfs、ZFS：属于现代化文件系统，具有原生快照、子卷、压缩、去重等高级特性。
 - [K8s Network Namespace](https://mp.weixin.qq.com/s/Vf_Pj5ofj0am6SRPtMn6GA)
   - 包含网卡（Network Interface），回环设备（Lookback Device），路由表（Routing Table）和iptables规则
     - Veth Pair：Veth设备对的引入是为了实现在不同网络命名空间的通信，总是以两张虚拟网卡（veth peer）的形式成对出现的。并且，从其中一端发出的数据，总是能在另外一端收到

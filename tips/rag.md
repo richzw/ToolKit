@@ -865,6 +865,13 @@
   - [How and when to build multi-agent systems](https://blog.langchain.dev/how-and-when-to-build-multi-agent-systems/)
     - Context engineering is crucial
     - Multi-agent systems that primarily “read” are easier than those that “write”
+  - [航空公司智能客服系统](https://github.com/openai/openai-cs-agents-demo)
+    - 有如下 Agent 组成，实现完善的航空客服系统：
+       - 智能分流 Agent，自动识别并路由不同类型客户请求
+       - 专业座位预订 Agent，处理座位更改和互动座位图
+       - 航班状态 Agent，提供实时航班信息查询
+       - FAQ Agent，回答常见问题和机型信息
+       - 取消服务 Agent，处理退票和改签业务
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
@@ -1391,9 +1398,31 @@
   - Our recommendation: Start with Standard RAG, add Self-RAG for quality, then evolve based on your specific needs.
 - [RAG Cost Calculator](https://zilliz.com/rag-cost-calculator/)
   - This calculator quickly estimates the cost of building a RAG pipeline, including chunking, embedding, vector storage/search, and LLM generation.
-
-
-
+- [Context Engineering for Agents](https://rlancemartin.github.io/2025/06/23/context_engineering/)
+  - 上下文内容可能随代理的多轮交互而不断膨胀，既会增加代价（token数量和时间），也可能导致模型的“Context Degradation Syndrome”——上下文越长，模型对关键信息的把握能力可能下降
+  - 主要策略：Curate, Persist, Isolate
+    - Curate（精简/管控上下文）
+      - 在每次对话或工具调用后进行摘要，以便减少不必要的token占用。
+      - 常见做法包括对全局对话或特定工具调用进行总结，必要时可分层次或“递归”地总结。
+    - Persist（持久化上下文）
+      - 将信息存储于文件、向量数据库或图数据库中，便于用户/系统后续检索。
+      - 可在适当时机（例如用户把关或对话结束）将重要信息写入记忆库，以实现动态更新。
+      - 检索机制则决定了如何挑选相关记忆放回上下文。
+    - Isolate（隔离上下文）
+      - 通过在程序内部定义结构化“状态架构”(schema)，精确控制哪些内容需要在下一“回合”传给LLM，避免无关或大段信息一股脑挤进上下文。
+      - 多代理（Multi-agent）方法是一种更激进的隔离策略：将任务拆分给不同子代理，各自维护独立上下文；但需要注意并行与协调成本。
+  - 实践经验与建议：
+     - • 优先对代理的行为进行监控和数据统计，及时发现token用量异常或上下文膨胀问题。
+     - • 在设计代理时，花时间清晰地定义“代理状态”——哪些信息需要随时给模型，哪些可持久化以备后用。
+     - • 工具调用边界处往往是最佳“精简上下文”的时机，可将冗长结果先行汇总后再注入主上下文。
+     - • “记忆”可以在一定程度上个性化代理，但处理不当易引发检索不准或上下文冲突，建议从施行简单的文件方式开始，循序渐进。
+     - • 多代理适合可并行化、且对最终结果连贯性要求不高的任务；若对单一文档的写作和整体协调度要求较高，需谨慎考虑拆分策略。
+  - On top of context engineering itself, an LLM app has to:
+    - break up problems just right into control flows
+    - pack the context windows just right
+    - dispatch calls to LLMs of the right kind and capability
+    - handle generation-verification UIUX flows
+    - a lot more - guardrails, security, evals, parallelism, prefetching, ...
 
 
 
