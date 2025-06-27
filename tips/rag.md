@@ -1423,6 +1423,15 @@
     - dispatch calls to LLMs of the right kind and capability
     - handle generation-verification UIUX flows
     - a lot more - guardrails, security, evals, parallelism, prefetching, ...
+- [Redefining Document Retrieval with Vision-Language Models](https://zilliz.com/blog/colpali-milvus-redefine-document-retrieval-with-vision-language-models?utm_source=x)
+  - 传统检索流程痛点：
+    • 需要进行 OCR、布局检测、段落/表格识别、文本切分与嵌入等诸多步骤，极其复杂且易出错。
+    • 表格、图表等视觉信息往往丢失，导致检索效果不理想。
+  - ColPali 的创新做法：
+    • 通过将 PDF 等文档页面直接视为图像输入，借助 vision-language 模型（PaliGemma）同时获取视觉与文本语义。
+    • 结合多向量表示与 ColBERT 的“晚期交互（late interaction）”策略，针对查询中的每个 token 都能找到文档中最相似的图文片段并累加，提升匹配精度。
+    • 无需繁琐的 OCR 或额外的布局分析，显著简化处理管线。
+
 
 
 
