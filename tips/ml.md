@@ -4,6 +4,7 @@
   - [Understanding Deep Learning](https://udlbook.github.io/udlbook/)
   - [LLM Course](https://github.com/mlabonne/llm-course)
     - https://mlabonne.github.io/blog/
+  - [AI trends 2025](https://www.bondcap.com/report/tai/#view/0)  Marry Meeker
 - [LLM (ML) Job Interviews ](https://mimansajaiswal.github.io/posts/llm-ml-job-interviews-fall-2024-process/)
 - [基于趋势和季节性的时间序列预测](https://mp.weixin.qq.com/s/Ln4E9iZd3b3EZqeEjNNsag)
   - 时间序列模式
@@ -1203,6 +1204,7 @@
       - embedding 模型的一个基本限制：它们擅长比较事物，但在测量绝对相关性方面不可靠
       - 首先，对余弦阈值持怀疑态度。它们就是不起作用。余弦相似度度量产生看起来很客观的浮点数。但仅仅因为某个东西输出数字并不意味着它在客观地测量某些东西。
       - 考虑混合解决方案。embedding 可以有效地将大量项目缩小到有希望的候选项，之后你可以应用更复杂（和计算密集）的技术，如重排序器或 LLM，甚至人工评估员来确定实际相关性
+  - [不同GPU集群规模的推理技术选型策略](https://mp.weixin.qq.com/s/Ecki52j-uBciwxT9qa7eBQ)
 - LLM Limitations
   - Lacking domain-specific information
     - LLMs are trained solely on data that is publicly available. Thus, they may lack knowledge of domain-specific, proprietary, or private information that is not accessible to the public.

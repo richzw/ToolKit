@@ -1015,6 +1015,17 @@
     - 针对计算机视觉、图像指纹以及推荐系统等场景设计，适用于数据以二进制特征表示的情况
     - 在需要精确匹配的场景（如图像去重、数字水印和版权检测）中，经过优化的二值索引能提供精准的相似性检测
     - 而在对速度要求高于完美召回的场景中（如高吞吐量的推荐系统和大规模特征匹配），二值索引也能展现出优异的性能。
+  - • 𝗦𝗽𝗮𝗿𝘀𝗲 𝗘𝗺𝗯𝗲𝗱𝗱𝗶𝗻𝗴𝘀: https://weaviate.io/learn/knowledgecards/sparse-embeddings?utm_source=channels&utm_medium=w_social&utm_campaign=dev_education&utm_content=knowledge_cards_680689769
+  - • 𝗗𝗲𝗻𝘀𝗲 𝗘𝗺𝗯𝗲𝗱𝗱𝗶𝗻𝗴𝘀: https://weaviate.io/learn/knowledgecards/dense-embeddings?utm_source=channels&utm_medium=w_social&utm_campaign=dev_education&utm_content=knowledge_cards_680996000
+  - • 𝗕𝗶𝗻𝗮𝗿𝘆 𝗘𝗺𝗯𝗲𝗱𝗱𝗶𝗻𝗴𝘀: https://weaviate.io/learn/knowledgecards/binary-embeddings?utm_source=channels&utm_medium=w_social&utm_campaign=dev_education&utm_content=knowledge_cards_680640507
+  - • 𝗤𝘂𝗮𝗻𝘁𝗶𝘇𝗲𝗱 𝗘𝗺𝗯𝗲𝗱𝗱𝗶𝗻𝗴𝘀: https://weaviate.io/learn/knowledgecards/quantized-embeddings?utm_source=channels&utm_medium=w_social&utm_campaign=dev_education&utm_content=knowledge_cards_680040494
+  - • 𝗩𝗮𝗿𝗶𝗮𝗯𝗹𝗲 𝗗𝗶𝗺𝗲𝗻𝘀𝗶𝗼𝗻 𝗘𝗺𝗯𝗲𝗱𝗱𝗶𝗻𝗴𝘀: https://weaviate.io/learn/knowledgecards/variable-dimensions?utm_source=channels&utm_medium=w_social&utm_campaign=dev_education&utm_content=knowledge_cards_680791951
+  - • 𝗠𝘂𝗹𝘁𝗶-𝗩𝗲𝗰𝘁𝗼𝗿 𝗘𝗺𝗯𝗲𝗱𝗱𝗶𝗻𝗴𝘀: https://weaviate.io/learn/knowledgecards/multivector-embeddings?utm_source=channels&utm_medium=w_social&utm_campaign=dev_education&utm_content=knowledge_cards_680980442
+  - 𝗪𝗵𝗶𝗰𝗵 𝘁𝘆𝗽𝗲 𝘀𝗵𝗼𝘂𝗹𝗱 𝘆𝗼𝘂 𝘂𝘀𝗲? It depends on your use case:
+    - • Need semantic matching? → Dense embeddings
+    - • Storage-constrained? → Binary or quantized
+    - • Complex documents? → Multi-vector
+    - • Keyword search? → Sparse vectors
   - [Vector Visualization](https://milvus.io/docs/vector_visualization.md)
   - [Embedding Models for Audio Data](https://zilliz.com/learn/top-10-most-used-embedding-models-for-audio-data)
 - VectorDB challenge
