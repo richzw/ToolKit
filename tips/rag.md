@@ -136,6 +136,18 @@
       - Starting with larger chunks and progressively breaking them down into smaller ones. Search using small, but retrieve using Big.
     - Semantic Text Splitting 
       - Dividing text based on meaning so that each chunk represents a complete idea or topic, ensuring that the context is preserved.
+    - 𝗣𝗼𝗽𝘂𝗹𝗮𝗿 𝗰𝗵𝘂𝗻𝗸𝗶𝗻𝗴 𝘁𝗲𝗰𝗵𝗻𝗶𝗾𝘂𝗲𝘀:
+      - → 𝗙𝗶𝘅𝗲𝗱-𝘀𝗶𝘇𝗲 𝗰𝗵𝘂𝗻𝗸𝗶𝗻𝗴: https://weaviate.io/learn/knowledgecards/fixed-size-chunking?utm_source=channels&utm_medium=w_social&utm_campaign=rag&utm_content=knowledge_cards_680482650
+      - → 𝗥𝗲𝗰𝘂𝗿𝘀𝗶𝘃𝗲 𝗰𝗵𝘂𝗻𝗸𝗶𝗻𝗴: https://weaviate.io/learn/knowledgecards/recursive-chunking?utm_source=channels&utm_medium=w_social&utm_campaign=rag&utm_content=knowledge_cards_680986116
+      - → 𝗗𝗼𝗰𝘂𝗺𝗲𝗻𝘁-𝗯𝗮𝘀𝗲𝗱 𝗰𝗵𝘂𝗻𝗸𝗶𝗻𝗴: https://weaviate.io/learn/knowledgecards/documentbased-chunking?utm_source=channels&utm_medium=w_social&utm_campaign=rag&utm_content=knowledge_cards_680195274
+      - → 𝗦𝗲𝗺𝗮𝗻𝘁𝗶𝗰 𝗰𝗵𝘂𝗻𝗸𝗶𝗻𝗴: https://weaviate.io/learn/knowledgecards/semantic-chunking?utm_source=channels&utm_medium=w_social&utm_campaign=rag&utm_content=knowledge_cards_680092902
+      - → 𝗟𝗟𝗠-𝗯𝗮𝘀𝗲𝗱 𝗰𝗵𝘂𝗻𝗸𝗶𝗻𝗴: https://weaviate.io/learn/knowledgecards/llmbased-chunking?utm_source=channels&utm_medium=w_social&utm_campaign=rag&utm_content=knowledge_cards_680018669
+      - → 𝗟𝗮𝘁𝗲 𝗰𝗵𝘂𝗻𝗸𝗶𝗻𝗴: https://weaviate.io/blog/late-chunking?utm_source=channels&utm_medium=w_social&utm_campaign=rag&utm_content=knowledge_cards
+      - There's no one-size-fits-all chunking strategy. Your choice depends on:
+        - • Document structure
+        - • Query patterns
+        - • Context window limits
+        - • Performance requirements
   - 策略选择
     - 预处理数据，在确定应用程序的最佳块大小之前，您需要先预处理数据以确保质量
     - 选择一定范围的块大小，数据预处理完成后，下一步就是选择一定范围的潜在块大小进行测试
@@ -1159,6 +1171,31 @@
     - 输出维度可定制: 默认输出维度为 1024，但你完全可以根据需要把它缩减到 32，性能几乎不受影响，这都归功于俄罗斯套娃表示学习技术的加持
     - 针对异构搜索、同构匹配、分类、聚类四类任务做了特别的 Adapter 设计和训练，基本上 Embedding 的使用场景都可以被划分到这四类任务上。
     - [v2 到 v3 的迁移](https://mp.weixin.qq.com/s/wdoWD_i8G095-GdU5ZSn5Q)
+  - [jina embeddings v4](https://jina.ai/news/quantization-aware-training-of-jina-embeddings-v4/)
+    - 量化感知训练
+      - 量化是解决人工智能扩展问题的一种广泛使用的方法。 这个名字听起来很复杂，但它只是对数字进行四舍五入，以减少它们占用的空间。 
+      - 这意味着更小的 向量模型 (Embeddings)，占用更少的内存和存储空间，并且由于比较向量所需的时间更少，因此信息检索速度更快
+    - 模型量化通常意味着以下四件事之一：
+      - 训练后量化（PTQ）
+        - 接受经过训练的 向量模型 (Embeddings) 模型，并且不以任何方式修改它。 这只是丢弃模型产生的浮点值的最低有效数字的问题。 我们只是对数字进行四舍五入，有时还会将它们缩放到一个范围。
+      - 量化 向量模型 (Embeddings) 输出训练（Output QAT）
+        - 微调 向量模型 (Embeddings) 模型以产生最佳的降低精度向量。 这意味着修改模型，但它不会改变模型权重的精度，因此不会减小其大小。 只是输出向量的大小减小了
+      - 完全量化模型训练（Full QAT）
+        - 从一个完全训练好的、全精度的模型开始，降低模型权重的精度，然后微调这个修改后的模型的性能。
+      - 从现有非量化模型中提炼出一个新的量化模型
+        - Distillation 是训练一个新模型以匹配现有模型性能的过程。 这意味着创建一个从头开始设计为量化的新模型，然后使用现有模型生成所需的尽可能多的训练数据来训练它，直到它的性能尽可能接近现有模型
+    - 实验
+      - 基线模型是带有检索适配器的 jina-embeddings-v4，它产生 2048 维的 32 位精度浮点 (FP32) 向量。 因此，每个 向量模型 (Embedding) 的大小为 8196 字节，即 8kB。
+      - PTQ——我们量化了输出向量为二进制向量，而没有更改模型。
+      - Output QAT——我们量化了输出向量，并对检索适配器进行了微调，以提高其在量化条件下的性能。
+      - 试验了四个不同的量化级别。
+        - 8 位整数——FP32 值被缩减为 -128 到 127 范围内的整数，从而将 向量模型 (Embeddings) 缩小 4 倍至 2048 字节。
+        - 4 位整数——与 4 位整数相同，但我们映射到 -8 到 7 的范围，将向量大小缩小 8 倍，至 1024 字节。
+        - 三元量化——所有值都映射到三个值之一：-1、0、1。以最佳方式存储时，这会将每个维度减少到 1.6 位，从而将 向量模型 (Embedding) 的大小大致减少 40 倍至大约 230 字节。
+        - 二进制量化——我们使用 torch.sign 数据类型将 FP32 标量值转换为一位，该数据类型仅提供两个值，占用一位来存储。 这会将 2048 维 向量模型 (Embedding) 从 8192 字节减少到 128 字节，减少了 64 倍。
+      - 测试表明，滚动平均缩放方法优于简单的 min/max 方法
+      - 虽然简单的训练后量化 (PTQ) 在内存和存储方面提供了立竿见影的好处，但我们的实验表明，量化感知训练 (QAT) 显着减轻了不可避免的精度损失。 微调始终产生更好的分数
+      - 
   - [Matryoshka Embeddings](https://milvus.io/blog/matryoshka-embeddings-detail-at-multiple-scales)
     - Matryoshka Representation Learning is a technique used in training embedding models. It allows you to trade off a small amount of accuracy in exchange for much smaller embedding sizes
       - Thus, you can store more information at a lower cost and search for it faster.

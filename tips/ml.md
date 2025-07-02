@@ -1521,6 +1521,7 @@
   - 推理“后”：JSON数据后处理 JSON Repair库; 随机种子控制：可改变LLM推理的seed, 在不同的seed下输出以减少出错概率。
   - [Structured Outputs Sample Apps](https://github.com/openai/openai-structured-outputs-samples/tree/main)
 - [Model Context Protocol MCP](https://mp.weixin.qq.com/s/ASmcjW53HKokdYt1m-xyXA)
+  - [MCP overview](https://drive.google.com/file/d/1a0OMR6NKTY-R2ZeLJVnDimkmTauarXPB/view)
   - [specification](https://github.com/modelcontextprotocol/specification/tree/main)
     - https://openai.github.io/openai-agents-python/mcp/
   - ![img.png](ml_mcp.png)
