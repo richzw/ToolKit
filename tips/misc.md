@@ -400,6 +400,9 @@
   - [A curated list of awesome commands, files, and workflows for Claude Code](https://github.com/hesreallyhim/awesome-claude-code)
   - [claude-code-costs](https://github.com/philipp-spiess/claude-code-costs)
     - 如果你使用 Claude Code 并且是 Claude Pro/Max 订阅想要知道如果是 API 得花了多少钱，订阅费花的值不值，可以试试这个命令：$ npx claude-code-costs
+  - [Claude Code 的自定义指令](https://docs.anthropic.com/en/docs/claude-code/slash-commands)
+    - Claude Code 现在可以添加自定义指令，也就是你输入 “/” 可以出来命令提示，这个 ultrathink-task 可以调用架构智能体
+    - https://www.reddit.com/r/ClaudeAI/comments/1lpvj7z/ultrathink_task_command/
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。
@@ -494,8 +497,12 @@
       - Turn-on automatic backup to always keep a fresh snopshot at hand. You will thank yourself for doing that in the event of data integrity issue.
     - 𝟓. 𝐑𝐮𝐧 𝐝𝐫𝐢𝐥𝐥𝐬
       - Test disaster recovery. Simulate degraded performance. Know what your system does when something breaks — before your users find out for you.
-
-
+- [Google账号换国家或换区域大法](https://869hr.uk/2025/tutorial/google-change-country-area/)
+  - 确认账号当前的国家或地区
+    - 访问以下网址 https://policies.google.com/terms ，登录自己的账号即可查看账号当前的国家或地区版本。
+  - 修改账号当前的国家或地区
+    - 访问以下网址 https://policies.google.com/country-association-form ，登录自己的账号即可申请修改账号当前的国家或地区版本。
+  - 以上选择请选择最后一个“以上都不是”，参考申请如下：I need to use Claude for work, please help me change to the United States.
 
 
 

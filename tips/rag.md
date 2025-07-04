@@ -1460,6 +1460,34 @@
     - dispatch calls to LLMs of the right kind and capability
     - handle generation-verification UIUX flows
     - a lot more - guardrails, security, evals, parallelism, prefetching, ...
+  - What is the Context
+    - Instructions / System Prompt: An initial set of instructions that define the behavior of the model during a conversation, can/should include examples, rules ….
+    - User Prompt: Immediate task or question from the user.
+    - State / History (short-term Memory): The current conversation, including user and model responses that have led to this moment.
+    - Long-Term Memory: Persistent knowledge base, gathered across many prior conversations, containing learned user preferences, summaries of past projects, or facts it has been told to remember for future use.
+    - Retrieved Information (RAG): External, up-to-date knowledge, relevant information from documents, databases, or APIs to answer specific questions.
+    - Available Tools: Definitions of all the functions or built-in tools it can call (e.g., check_inventory, send_email).
+    - Structured Output: Definitions on the format of the model's response, e.g. a JSON object.
+  - [Context Engineering](https://blog.langchain.com/context-engineering-for-agents/)
+    - Writing context means saving it outside the context window to help an agent perform a task.
+    - Selecting context means pulling it into the context window to help an agent perform a task.
+    - Compressing context involves retaining only the tokens required to perform a task.
+    - Isolating context involves splitting it up to help an agent perform a task.
+  - [How to Fix Your Context](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html)
+    - 长上下文（long context）可能导致的常见问题，并提出了六大策略来避免或减轻这些问题。核心思想是：上下文并非越长越好，因其信息会直接影响模型的输出质量。
+    - 常见问题
+      - Context Poisoning：上下文里混入了错误或幻觉信息，模型反复引用这些错误内容。
+      - Context Distraction：上下文太长时，模型过度依赖上下文信息，忽略了原先的训练知识。
+      - Context Confusion：上下文中含有过多无关信息，导致回复质量下降。
+      - Context Clash：上下文里新增的信息与已有内容冲突，引发矛盾答案。
+    - 解决策略
+      - RAG（Retrieval-Augmented Generation）：只根据需求检索并添加与当前任务相关的文档，从而避免把所有内容一股脑加入上下文导致混乱。
+      - Tool Loadout：在上下文里只选用当前所需的工具或函数定义，避免工具定义过多相互干扰。引用的研究发现，超过一定数量的工具描述后，模型准确率显著下降。
+      - Context Quarantine：用多代理、多线程的方式，将不同上下文分割在独立的任务或线程里，各自独立处理，减少上下文过载。Anthropic 的多代理研究系统就是典型案例。
+      - Context Pruning：定期或在合适的时机对已有的上下文进行“修剪”，删除不再需要或不相关的信息。可以用专门的工具（如 Provence）自动筛除与问题无关的文本。
+      - Context Summarization：将上下文提炼成简短摘要，以防上下文过长造成干扰。尤其在上下文超过一定大小后，模型可能倾向重复昔日答案而非产生新的见解。
+      - Context Offloading：不把所有过程或信息都放在主上下文里，而是将其移到外部存储或工具（如“scratchpad”）里，只有需要时再引用，能显著提升效率和准确度。
+
 - [Redefining Document Retrieval with Vision-Language Models](https://zilliz.com/blog/colpali-milvus-redefine-document-retrieval-with-vision-language-models?utm_source=x)
   - 传统检索流程痛点：
     • 需要进行 OCR、布局检测、段落/表格识别、文本切分与嵌入等诸多步骤，极其复杂且易出错。
