@@ -1496,7 +1496,14 @@
     • 通过将 PDF 等文档页面直接视为图像输入，借助 vision-language 模型（PaliGemma）同时获取视觉与文本语义。
     • 结合多向量表示与 ColBERT 的“晚期交互（late interaction）”策略，针对查询中的每个 token 都能找到文档中最相似的图文片段并累加，提升匹配精度。
     • 无需繁琐的 OCR 或额外的布局分析，显著简化处理管线。
-
+- 𝗔𝗴𝗲𝗻𝘁𝗶𝗰 𝗥𝗲𝘁𝗿𝗶𝗲𝘃𝗮𝗹
+  - By integrating an agent into your retrieval process, you can move from static pipelines to dynamic, adaptive reasoning.
+  - •  The Smart Router: You can point the agent to multiple data collections (e.g., 'Products', 'UserReviews', 'SupportDocs').
+     - When a query like "Recommend vintage clothes and nice shoes below $60” comes in, the query agent automatically understands it needs to query *multiple* collections.
+  - •  More than Just Retrieval: The query agent doesn't just do one thing. It analyzes the query and decides the best strategy.
+    -  It sees "vintage clothes" and initiates a semantic search for similar concepts.
+    -  It sees "below $60" and knows to apply a filtered aggregation or a metadata filter, a task that basic vector search alone cannot handle.
+  - •  The Final Synthesizer: It takes the results from its multi-step, multi-collection search, synthesizes them into a single, coherent context, and then generates a precise natural language answer using a generative model.
 
 
 
