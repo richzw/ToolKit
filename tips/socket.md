@@ -1106,6 +1106,16 @@
     - A：connect() 系统调用和 bind(0) 系统调用在随机绑定端口的时候选择限制不同，bind(0) 会忽略存在 time_wait 连接的端口。
   - Q：当全连接队列满时，connect() 和 accept() 侧是什么表现行为?
     - A：Linux 3.10内核和新版本内核行为不一致，如果在Linux 3.10内核，会出现客户端假连接成功的问题，Linux 4.9内核就不会出现问题。
-- 数据小于等于或者大于 MSS 只是判断的条件之一，小于 MSS 时不一定就会延迟 ACK，同样大于 MSS 时也不一定就会快速 ACK
+- quick ACK 与 delayed ACK
+  - quick ACK 与 delayed ACK
+    - • 在 TCP 连接建立初期，Linux 会进入 quick ACK 模式，以便更快地确认初始数据段。
+    - • quick ACK 模式通常会被限制在最大计数（TCP_MAX_QUICKACKS，通常为 16）以内，当超过该计数后，TCP 会转为 delayed ACK 模式。
+  - quick ACK 计数器的计算
+    - quickacks = (接收窗口大小 / (2 × rcv_mss))，然后再与 TCP_MAX_QUICKACKS 进行比较，取较小值。
+    - 这意味着实际可用的 quick ACK 数目既受接收窗口大小（rcv_wnd）影响，也会根据 rcv_mss 动态调整。
+    - 一旦超过 quickack 计数，TCP 会开始使用 delayed ACK 机制，再收到数据段时可能会稍作延迟（如几十毫秒）后再发送 ACK。
+  - 数据小于等于或者大于 MSS 只是判断的条件之一，小于 MSS 时不一定就会延迟 ACK，同样大于 MSS 时也不一定就会快速 ACK
+  - • quick ACK 模式下，系统会对前若干个数据段快速回复 ACK；当超过 quickacks 计数后，TCP 则转入 delayed ACK 模式，出现一定时延后再发送 ACK。
+  - • quick ACK 计数与接收窗口大小、rcv_mss 以及系统默认的最大 quick ACK 节点值密切相关。通过调整 SO_RCVBUF、MSS 等参数，可以影响 quick ACK 被触发的次数
 
 

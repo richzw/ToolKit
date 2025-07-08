@@ -1753,6 +1753,32 @@
       - 考虑混合解决方案。Embeddings 技术进行高效的初步筛选，快速从大量候选项中找出“可能相关”的条目。然后再结合更精细（通常计算成本也更高）的方法，比如使用重排器 (Reranker)、大型语言模型 (LLM) 进行评估
       - 设计系统时，重心应该放在最终要解决的任务上，而不是过度关注模型本身的技术指标
       - 认识到模型的局限性，是一种务实的态度，这对于构建可靠、高效的系统至关重要。了解你所使用的工具的强项和弱项，才能更好地扬长避短
+  - [DeepResearch 中用于生成多样化查询的次模优化](https://jina.ai/news/submodular-optimization-for-diverse-query-generation-in-deepresearch/)
+    - 在实施 DeepResearch 时，至少有两个地方需要生成多样化的查询。
+      - 首先，你必须根据用户输入生成网络搜索查询（直接将用户输入扔进搜索引擎并不是一个好主意）。
+      - 其次，许多 DeepResearch 系统包含一个 “研究计划器”，将原始问题分解为子问题，并发调用代理独立解决这些子问题，然后合并它们的结果
+    - 使用句子 向量模型 和次模优化来解决最佳查询生成问题
+      - 次模优化是一种数学方法，旨在从一组候选项中选择一个子集，使得所选子集的总价值最大化，同时确保多样性
+      ```
+      You are an expert research strategist. Generate an optimal set of diverse search queries that maximizes information coverage while minimizing redundancy.
+
+      Task: Create exactly {num_queries} search queries from any given input that satisfy:
+      - Relevance: Each query must be semantically related to the original input
+      - Diversity: Each query should explore a unique facet with minimal overlap
+      - Coverage: Together, the queries should comprehensively address the topic
+      
+      Process:
+      1. Decomposition: Break down the input into core concepts and dimensions
+      2. Perspective Mapping: Identify distinct angles (theoretical, practical, historical, comparative, etc.)
+      3. Query Formulation: Craft specific, searchable queries for each perspective
+      4. Diversity Check: Ensure minimal semantic overlap between queries
+      ```
+      - 可以看出简单和结构化的提示词都表现出余弦相似度得分的较大方差，许多达到 0.7-0.8 的相似度，表明某些生成的查询几乎相同。此外，随着生成更多查询，两种方法都难以保持多样性
+      - 一种解释是 Wang 等人 (2025) 发现 大模型 经常不成比例地反映主要群体的观点，即使使用提示词引导，也表明存在对常见视角的偏见。这是因为 大模型 的训练数据可能过度代表某些观点，导致模型生成与这些普遍观点一致的变体。
+      - 基于 大模型 的查询扩展倾向于流行的解释，而忽略了其他解释。
+      - 既然生成大量查询很便宜，最终会产生一些好的查询，为什么我们不将其视为子集选择问题呢？
+      - 子模公式将临时的“选择多样化查询”启发式转换为具有可证明的保证、高效的算法和可衡量的目标的严格优化问题。
+      - https://github.com/jina-ai/submodular-optimization
 - 企业落地 AI 最佳实践以及常见错误 
   - Anthropic 通过和企业客户的协作过程中，发现主要的问题集中在这几个方面：
     - • 问题一：从何入手？ 你知道 AI 很强大，但具体到你的业务场景，应该从哪里开始？是做一个聊天机器人，还是做数据分析工具？抑或是更高级的 AI Agent？

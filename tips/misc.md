@@ -503,7 +503,10 @@
   - 修改账号当前的国家或地区
     - 访问以下网址 https://policies.google.com/country-association-form ，登录自己的账号即可申请修改账号当前的国家或地区版本。
   - 以上选择请选择最后一个“以上都不是”，参考申请如下：I need to use Claude for work, please help me change to the United States.
-
+- 如何成为任何领域的专家
+  - 1 迭代式项目驱动：追求深度而非广度，“按需”学习（不是先学后做学完再做，而是做中学，根据项目需要边做边学）
+  - 2 费曼一切所学所做：用自己的话说出来/总结
+  - 3 永远不要（和他人）横向比较，只（和过去的自己）纵向比较
 
 
 
