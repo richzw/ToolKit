@@ -436,6 +436,11 @@
   - GPU资源使用涉及两个方面：cuda driver和cuda toolkit（runtime和libraries） https://mp.weixin.qq.com/s/6VRhouwEEa672gne6Ofjrg
     - 程序调用GPU资源其实是调用cuda toolkit，具体底层GPU资源的利用其实是由cuda driver去驱动
     - 比喻：可以把cuda driver当作contained，toolkit是kubelet。pod创建其实是发信号给kubelet，具体pod如何创建出来是由containered去实现的
+  - [GPU工作原理：从硬件到架构](https://mp.weixin.qq.com/s/BH6c3hatP0gW9T3NBRrN4w)
+    - GPU 在 AI 及大规模并行计算中发挥着核心价值，CPU 负责调度、分配任务，GPU 以海量核心加速计算
+    - • 以 Grid、Block、Thread 的层次结构管理并行，Warp（32 线程）是实际的硬件调度单位。
+    - • SIMT（单指令多线程）模型在硬件底层以 SIMD 执行，每个 Warp 中的线程共享指令但拥有各自的索引和活动掩码。
+    - • Warp Divergence（分支分化）可能导致并行效率下降，通过提高占用率、优化访存方式等可隐藏部分延迟。
 - [NeighborHash]
   - 场景
     - 只有导入没有commit，过程中没有一致性要求，只需要最终一致性，也就是一个在线分析处理 (OLAP) 系统。我们应用场景的特点是批量点查、无范围查询需求且查询命中率高

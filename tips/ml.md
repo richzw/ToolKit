@@ -5,6 +5,15 @@
   - [LLM Course](https://github.com/mlabonne/llm-course)
     - https://mlabonne.github.io/blog/
   - [AI trends 2025](https://www.bondcap.com/report/tai/#view/0)  Marry Meeker
+  - [AI 时代的独立思考指南](https://www.bestblogs.dev/en/article/ad7794)
+    - 文章基于《主见》一书的核心思想，系统性地提出了重建独立思考的五大关键：
+      - 有效管理注意力、以终极目标为导向进行决策、主动过滤信息噪声、综合多重视角寻求解决方案，以及在借鉴专家意见的同时保持自主决策。
+    - 1. 信息过载与选择泛滥导致思考退位，使人丧失对生活的解释权。 
+      - 在信息爆炸时代，过多选择引发认知耗竭和错失恐惧，认知偏见被利用，导致人们放弃独立思考，被动接受“最优解”，成为大数据精准投喂下的 NPC。
+    - 2. 盲目迷信专家与工具，将削弱人类直觉和情境感知能力。 
+      - 过度依赖权威和技术工具，可能导致思维局限、系统僵化，甚至忽视实际情况，从而丧失对“沉默变量”的敏锐洞察，陷入“过度自信陷阱”。
+    - 3. 构建个人认知坐标系需掌握五大关键，以重塑独立思考能力。
+      - 包括主动管理注意力、以终极目标为导向、过滤信息噪声、综合多重视角寻求解决方案，以及在专家意见前保持自主决策，做意见的指挥官
 - [LLM (ML) Job Interviews ](https://mimansajaiswal.github.io/posts/llm-ml-job-interviews-fall-2024-process/)
 - [基于趋势和季节性的时间序列预测](https://mp.weixin.qq.com/s/Ln4E9iZd3b3EZqeEjNNsag)
   - 时间序列模式
