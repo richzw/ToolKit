@@ -1788,6 +1788,11 @@
       - 既然生成大量查询很便宜，最终会产生一些好的查询，为什么我们不将其视为子集选择问题呢？
       - 子模公式将临时的“选择多样化查询”启发式转换为具有可证明的保证、高效的算法和可衡量的目标的严格优化问题。
       - https://github.com/jina-ai/submodular-optimization
+  - 在处理长文本时，如何在压缩 Token 的同时高效提取核心信息？
+    - 首先，我们借助 jina-embeddings-v4 的多向量（multi-vector）特性，将长文本映射为细粒度的语义向量。
+    - 接着，应用子模优化（Submodular Optimization）算法，从全局角度筛选出最具代表性的词句，确保以最少的 Tokens 覆盖尽可能多的原文信息。
+    - 最后，借助 Tokenizer 将这些选定的 Tokens 还原至原文对应位置，实现高效压缩。你可以调整 top-k 控制压缩率，兼顾信息保留和处理效率。
+    - https://colab.research.google.com/drive/1J4kLSGTkcR59jM5Xc2EbIkJtoQ0CdbPE#scrollTo=FFVXfk624mL-
 - 企业落地 AI 最佳实践以及常见错误 
   - Anthropic 通过和企业客户的协作过程中，发现主要的问题集中在这几个方面：
     - • 问题一：从何入手？ 你知道 AI 很强大，但具体到你的业务场景，应该从哪里开始？是做一个聊天机器人，还是做数据分析工具？抑或是更高级的 AI Agent？

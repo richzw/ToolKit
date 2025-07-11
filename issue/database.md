@@ -208,7 +208,11 @@
       - PostgreSQL 其实是有禁用索引的功能的，只需要更新 pg_index 系统表中的 indisvalid 字段为 False，这个索引就不会被 Planner 使用，但仍然会在 DML 中被继续维护
     - 关于可观测性的，目前的 pg_stat_statement 只提供每类查询的平均响应时间，而没法直接获得 （p95, p99）延迟指标。他们希望拥有更多类似 histogram 与 percentile 延迟的指标。
     - PostgreSQL 默认参数的优化建议，PostgreSQL 默认参数值过于保守了
-
+- WALs aren't just a recovery mechanism; they're a design principle
+  - WAL logs every change before applying it, which ensures durability and crash safety
+  - Writes are acknowledged only after the log hits persistent storage
+  - WAL is used for crash recovery, replication, and backup
+  - PostgreSQL, MongoDB, Kafka, and many other systems rely on WAL-like designs
 
 
 
