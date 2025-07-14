@@ -1594,6 +1594,19 @@
       - Planing层面，可能的解决方案是Dify这样的AI工作流编排
   - [OpenAI MCP servers](https://platform.openai.com/docs/mcp)
   - [MCP Evaluation](https://cookbook.openai.com/examples/evaluation/use-cases/mcp_eval_notebook)
+  - [Supabase MCP can leak your entire SQL database](https://www.generalanalysis.com/blog/supabase-mcp-blog)
+    - 攻击原理：
+      - 在文中示例中，攻击者通过“提交工单”功能提交一条带有伪装指令的支持消息（即将指令嵌入到看似普通的用户消息中）。
+      - 当开发者在 Cursor 环境中使用 MCP 访问工单信息时，LLM 助手读取到这条嵌入的伪装指令，并在高权限的 service_role 下执行包含敏感数据查询与写入的 SQL 语句。
+      - 最终导致敏感表（如 integration_tokens）中的内容被读取并插入到用户可见的 support_messages 表，从而被攻击者获取。
+    - 漏洞根源：
+      - service_role 拥有对所有数据表的完全访问权限，绕过了 RLS（Row-Level Security）。
+      - LLM 助手会将用户输入（包括用户可提交的恶意指令）视为可执行的命令，缺乏隔离与过滤。
+    - 可能的防护措施：
+      - (1) 仅使用只读模式（Read-Only Mode）：
+        - • Supabase MCP 提供只读模式选项，能有效避免在自动化操作中执行 INSERT、UPDATE 等危险操作。
+      - (2) 对用户输入进行 Prompt Injection 过滤：
+        - • 在让 LLM 助手读取数据前，先对用户内容进行检查，过滤掉看上去包含 SQL 或可疑指令的文本，降低指令注入风险。
 - [Agent2Agent](https://mp.weixin.qq.com/s/8nh4Cg-TH0eF2gWYUiwh3A)
   - https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability
   - A2A（Agent2Agent）协议 是由 Google Cloud 推出的一个开放协议，旨在促进不同 AI 代理之间的互操作性

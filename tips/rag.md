@@ -1505,7 +1505,29 @@
     -  It sees "vintage clothes" and initiates a semantic search for similar concepts.
     -  It sees "below $60" and knows to apply a filtered aggregation or a metadata filter, a task that basic vector search alone cannot handle.
   - •  The Final Synthesizer: It takes the results from its multi-step, multi-collection search, synthesizes them into a single, coherent context, and then generates a precise natural language answer using a generative model.
-
+- 10 Principles of Building AI Agents:
+  - 1. Don’t Use Agents Just to Say You Did
+    - Nobody cares if it's an AI agent or a simple script, as long as it works. If a good old if/else is faster, cheaper, and more reliable, use that. Save the agents for when you really need them.
+  - 2. Small, Specialized, and Decoupled
+    - Think "team of specialists," not "one agent to rule them all." A planner plans. A summarizer summarizes. A verifier checks. Decoupled agents are cheaper to run, easier to fix, and way more predictable.
+  - 3. Enforce Structured Output
+    - Freeform text is a mess to deal with. JSON gives you sanity. It’s easier to debug, cheaper to parse, and acts like a contract between agents. Bonus: you can validate it automatically and stop weird errors before they spread.
+  - 4. Explain the Why, Not Just the What
+    - When you give a task to an agent, don’t just say “do this.” Tell it why it matters and the context in which you need it. I've found that this helps agents make better decisions.
+  - 5. Orchestration > Autonomy
+    - Autonomy sounds great until an agent goes rogue in production. Move all business logic (if/then, loops, retries, error handling) out of agent prompts into the orchestration layer.
+  - 6. Prompt Engineering > Fine Tuning
+    - Before you jump to fine-tuning (and burn cash), pause. Ask: Why is the model failing?
+    - If it’s missing facts → try RAG.
+    - If it’s formatting wrong or off-brand → maybe fine-tune. But 80% of the time, it’s just a prompt problem.
+  - 7. Double Down on Tool Descriptions
+    - Treat tool description as a micro-prompt that guides the agent's reasoning. Tell the agent when and why to use it, what to avoid, and include examples. Bonus: Descriptions provided by MCP servers are often insufficient. Also, consider explaining how to use multiple tools together.
+  - 8. Cache Like You Mean It
+    - If an agent runs the same task on the same data over and over… stop paying for it each time. Cache responses (e.g., hash of agent ID + input) to reduce latency and API costs.
+  - 9. Use Shared Artefacts
+    - Agents shouldn’t act like email users in the ‘90s passing around files. Empower your agents to collaborate by co-editing shared docs, plans, or code.
+  - 10. Log Everything (Seriously)
+    - No logs = no learning. Track every move: inputs, outputs, retries, tool calls, agent thoughts. Add your own app-specific dimensions (e.g., customer type, use case). Then build funnels.
 
 
 
