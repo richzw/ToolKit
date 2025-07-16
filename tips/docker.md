@@ -724,7 +724,7 @@
 - Why ["npm", "start"] is a poor choice for a Dockerfile CMD instruction
   - ["npm", "start"] in CMD leads to an unwanted shell in the container process tree, which in particular can cause signal propagation issues (hence, break graceful termination of your containerized application).
   - ![img.png](docker_npm_cmd.png)
-
+- [K8s Container 管理机制](https://mp.weixin.qq.com/s/ya0rHxP7_PU-uEhI1VbFog)
 
 
 

@@ -1806,6 +1806,13 @@
     - 接着，应用子模优化（Submodular Optimization）算法，从全局角度筛选出最具代表性的词句，确保以最少的 Tokens 覆盖尽可能多的原文信息。
     - 最后，借助 Tokenizer 将这些选定的 Tokens 还原至原文对应位置，实现高效压缩。你可以调整 top-k 控制压缩率，兼顾信息保留和处理效率。
     - https://colab.research.google.com/drive/1J4kLSGTkcR59jM5Xc2EbIkJtoQ0CdbPE#scrollTo=FFVXfk624mL-
+  - [子模优化的另外两大应用：文本选择（text selection）与段落重排（passage reranking）](https://mp.weixin.qq.com/s/X5k5xVC65u0puIvfYOjdfA)
+    - 经典优化难题：如何从一堆庞杂的信息集合中，挑出一个不冗余的最优子集
+    - 文本选择任务的核心目标：一是最小化所选内容之间的信息重叠；二是最大化所选内容对原文整体信息的覆盖范围。 当一个集合中的元素信息重叠最小时，我们称它们在语义上是“正交”的。
+    - 段落重排 则扩展了文本选择任务。它不仅要考虑段落之间的信息多样性，还必须引入一个优化目标：尽可能的贴近用户的查询
+    - 边际效益递减(diminishing marginal returns)。
+      - 这种价值增量随集合增大而递减的特性，天然地鼓励算法去构建一个多样化、不冗余的集合。因为当集合内元素越多样，新加入的元素才越有可能提供更高的价值
+    - https://github.com/jina-ai/submodular-optimization
 - 企业落地 AI 最佳实践以及常见错误 
   - Anthropic 通过和企业客户的协作过程中，发现主要的问题集中在这几个方面：
     - • 问题一：从何入手？ 你知道 AI 很强大，但具体到你的业务场景，应该从哪里开始？是做一个聊天机器人，还是做数据分析工具？抑或是更高级的 AI Agent？

@@ -1196,7 +1196,6 @@
         - 二进制量化——我们使用 torch.sign 数据类型将 FP32 标量值转换为一位，该数据类型仅提供两个值，占用一位来存储。 这会将 2048 维 向量模型 (Embedding) 从 8192 字节减少到 128 字节，减少了 64 倍。
       - 测试表明，滚动平均缩放方法优于简单的 min/max 方法
       - 虽然简单的训练后量化 (PTQ) 在内存和存储方面提供了立竿见影的好处，但我们的实验表明，量化感知训练 (QAT) 显着减轻了不可避免的精度损失。 微调始终产生更好的分数
-      - 
   - [Matryoshka Embeddings](https://milvus.io/blog/matryoshka-embeddings-detail-at-multiple-scales)
     - Matryoshka Representation Learning is a technique used in training embedding models. It allows you to trade off a small amount of accuracy in exchange for much smaller embedding sizes
       - Thus, you can store more information at a lower cost and search for it faster.
@@ -1528,13 +1527,24 @@
     - Agents shouldn’t act like email users in the ‘90s passing around files. Empower your agents to collaborate by co-editing shared docs, plans, or code.
   - 10. Log Everything (Seriously)
     - No logs = no learning. Track every move: inputs, outputs, retries, tool calls, agent thoughts. Add your own app-specific dimensions (e.g., customer type, use case). Then build funnels.
-
-
-
-
-
-
-
+- RAG Summary
+  - Naive RAG - LLM 容易“幻觉”，参数化知识难更新；需外部检索补充知识并提供可追溯的证据。
+    - 三步流程：文档切块 → 向量检索 → 拼接提示生成
+    - 一体化端到端微调（RAG-Sequence & RAG-Token）
+    - 减少参数化模型的幻觉，提升开放域 QA 准确率
+  - Advanced RAG - 用户查询与知识库语义不对齐；Naive RAG 检索噪声多、生成质量有限。
+    - 预检索(Pre Retrieval)：查询重写/扩展 (Rewrite)
+    - 检索(Retrieval)：语义向量检索
+    - 后检索(Post Retrieval)：结果重排序、摘要压缩
+  - Modular RAG - 随着检索器、LLM 等组件飞速迭代，传统管道难快速集成新功能、维护成本高。
+    - 七大模块: Indexing, Pre Retrieval, Retrievel, Post Retrievel, Memory, Generation, Orchestration
+    - 将检索、重排序、压缩、生成等拆分为可插拔模块
+    - 引入路由、调度、融合算子
+    - 模块化设计，灵活扩展，支持多种 RAG 模式（线性、条件、分支、循环）
+  - Agentic RAG - 需处理复杂多步任务、多轮决策，单轮静态流程不够；希望结合检索与规划能力。
+    - 多智能体架构：主智能体协调子智能体
+    - 动态决策：自主判断何时检索、何时生成
+    - 支持多轮迭代、任务自校正，提高复杂任务的适应性与鲁棒性
 
 
 
