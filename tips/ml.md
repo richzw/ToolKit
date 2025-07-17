@@ -1866,8 +1866,15 @@
   - "think"工具特别适用于Claude需要处理外部信息（如工具调用结果）的场景，更聚焦于模型在发现新信息后的思考过程
 - [Tracing the thoughts of a large language model](https://www.anthropic.com/research/tracing-thoughts-language-model)
 - [Turns Codebase into Easy Tutorial](https://the-pocket.github.io/Tutorial-Codebase-Knowledge/)
-
-
+- [Asymmetry of verification and verifier’s law](https://www.jasonwei.net/blog/asymmetry-of-verification-and-verifiers-law)
+  - “验证的不对称性”（Asymmetry of verification）指有些任务比起直接解题，用来验证候选答案是否正确要容易得多
+    - 数独或填字游戏：求解需要尝试多种组合，但验证正确性只需快速检查是否满足约束。
+    - 对一些数学习题（例如加法），验证和解题几乎同样费时。
+  - 如何改善验证不对称：
+    - 预先进行充分研究或准备，可以显著简化验证过程。例如，掌握答案要点或拥有完善的测试用例，使得验证任何候选解的过程更快捷。
+    - 有些任务只能部分提升验证效率，例如需要人工或额外信息做核对。
+  - Google 团队的 AlphaEvolve 项目，通过“猜解—验证”的迭代优化模式，解决了许多数学和工程问题。
+    - 在“最小外部六边形布局”这类符合上述五条属性的可验证任务上，AlphaEvolve表现出强大的单问题“过拟合”能力，能给出极高水准的解
 
 
 

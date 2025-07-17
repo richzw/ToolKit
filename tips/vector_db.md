@@ -800,6 +800,14 @@
     - Woodpecker is the storage layer that handles the actual persistence of write-ahead logs, providing durability and reliability
     - StreamingService is the service layer that manages log operations and provides real-time data streaming capabilities
     - [MinHash LSH ，低成本去重百亿文档](https://mp.weixin.qq.com/s/LKa5eznjqlUDzCwp4GnGqg)
+      - MinHash 就是通过压缩原始集合为固定长度的签名向量，近似估算相似度，从而大幅降低计算开销
+        - 先将每个文档拆分成由单词或字符构成的短语切片集合，然后将每个文档的切片集合应用多个哈希函数，并记录每个函数作用后得到的最小哈希值，为每个文档生成一个签名向量。
+        - 在计算相似度时，两个文档的 MinHash 签名中相同位置的哈希值一致的概率，可以很好地拟合原始切片集合之间的 Jaccard 相似度
+      - 即使使用了紧凑的 MinHash 签名，在数百万甚至数十亿个文档中进行两两比对，计算成本依然非常高。此时就需要引入 局部敏感哈希LSH方法（Locality Sensitive Hashing,）
+        - MinHash LSH的核心思想是：
+          - 把每个 MinHash 签名划分为 多个带（band），然后将相似条带使用标准哈希函数将其哈希到某个桶中，如果两个文档的任意一个条带落入同一个桶，即被标记为可能相似
+          - 高度相似的文档往往有很多相同的哈希值，因此至少在某一带中落入同一个桶的概率更高
+      - 我们可以通过调整带数和每带的维度数 ，在召回率（找到所有相似对）、精确率（减少误报）和速度之间进行权衡。
       - MinHash + LSH（局部敏感哈希） 提供了一种兼顾效率与效果的近似去重策略，适用于百亿级语料下的预处理优化；
       - MinHash 通过将文档压缩为签名，LSH 高效缩小搜索空间，可以快速定位潜在重复对
     - [2.6功能预览](https://mp.weixin.qq.com/s/UnvVbKSjTsyz8HzRTbs2gw)

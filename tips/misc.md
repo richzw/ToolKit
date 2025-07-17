@@ -459,6 +459,7 @@
   - NeighborHash采用了Lodger Relocation的方式来处理冲突，并采用Bidirectional Cacheline-aware的方法来进行probing
   - 为了进一步优化内存访问，采用inline-chaining来表示冲突链表
 - [What every SRE should know](https://biriukov.dev/)
+  - [Google SRE Video Gallery](https://sre.google/resources/videos/?utm_campaign=603f978448788b0001425700&utm_content=687696dbc543cf0001c8c9a0&utm_medium=smarpshare&utm_source=twitter)
 - [Deep dive aws S3](https://www.youtube.com/watch?v=NXehLy7IiPM)
 - [Digital hygiene](https://karpathy.bearblog.dev/digital-hygiene/)
 - [The Best Programmers I Know](https://endler.dev/2025/best-programmers/)
