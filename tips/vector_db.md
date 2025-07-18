@@ -1072,7 +1072,15 @@
       - The first important change is during building the graph. While it is true that a different pruning logic helps keep the graph connected, we decided not to modify the indexing from “vanilla” HNSW.
       - The second important difference is how we explore the graph while querying. Weaviate's ACORN implementation conditionally evaluates whether to use the two-hop expansion.
       - The third difference is how we seed additional entry points at layer zero of the graph to better deal with the problem of queries having low correlation to the filter.
-
+- [𝗠𝗨𝗩𝗘𝗥𝗔: converting multi-vector embeddings into single fixed-size vectors](https://weaviate.io/blog/muvera)
+  - 𝗦𝗽𝗮𝗰𝗲 𝗣𝗮𝗿𝘁𝗶𝘁𝗶𝗼𝗻𝗶𝗻𝗴
+    - Divides the vector space into "buckets" using techniques like SimHash or k-means clustering. Each vector gets assigned to a bucket, creating sub-vectors for each partition.
+  - 𝗗𝗶𝗺𝗲𝗻𝘀𝗶𝗼𝗻𝗮𝗹𝗶𝘁𝘆 𝗥𝗲𝗱𝘂𝗰𝘁𝗶𝗼𝗻
+    - Applies random linear projection to shrink those sub-vectors, which helps fill empty buckets and compress what's in them. This uses the Johnson-Lindenstrauss lemma to preserve important dot products while reducing size.
+  - 𝗠𝘂𝗹𝘁𝗶𝗽𝗹𝗲 𝗥𝗲𝗽𝗲𝘁𝗶𝘁𝗶𝗼𝗻𝘀
+    - Repeats steps 1-2 multiple times and concatenates results. This improves accuracy by capturing different aspects of the original embeddings.
+  - 𝗙𝗶𝗻𝗮𝗹 𝗣𝗿𝗼𝗷𝗲𝗰𝘁𝗶𝗼𝗻
+    - Creates the final single vector representation. The result? One fixed-size vector per document instead of hundreds.
 
 
 

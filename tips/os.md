@@ -1,4 +1,4 @@
-
+- [快速查询linux source code](https://elixir.bootlin.com/linux/v6.15.6/source)
 - [ptmalloc,tcmalloc和jemalloc内存分配策略](https://cloud.tencent.com/developer/article/1173720)
   - 操作系统内存布局
     ![img.png](os_32bit_memor.png)

@@ -434,6 +434,15 @@
       - 为每个文档块标注其所属的章节信息
       - 检索时不仅返回相关块，而是返回相关块所属的完整章节
   - [agentic retrieval](https://www.llamaindex.ai/blog/rag-is-dead-long-live-agentic-retrieval)
+  - [The Hitchhiker's Guide to Vector Search](https://qdrant.tech/blog/hitchhikers-guide/)
+    - Query Type
+      - Generic query: too broad, may confound the search process	
+        - Expansion: you can transform your query into a hypothetical document (HyDE), using a language model to generate a more detailed query text, which you can embed and use in retrieval.
+      - Specific query: asks for some specific information that can be easily identified within your documents	
+        - No transformation in this case, you can retrieve directly!
+      - Complex query: has many questions that generally cannot be answered by just one of the documents within your database	
+        - Decomposition: You can divide the query into several sub-queries, each of which is used for a multistep-like retrieval from the database. The results from each step will then form the final answer from the LLM.
+    -  RAGcoon https://github.com/AstraBert/RAGcoon. There, a query agent tries various retrieval techniques to get the best information for startup founders.
 - [RAG 问题](https://mp.weixin.qq.com/s/2dwnwQGsqKWZQX8gEUV0Sw)
   - 朴素的RAG通常将文档分成块，嵌入它们，并检索与用户问题具有高语义相似性的块。但是，这会带来一些问题
     - 文档块可能包含降低检索效果的无关内容

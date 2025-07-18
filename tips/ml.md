@@ -200,8 +200,10 @@
       - 解决语言模型语言理解和交互式决策制定等任务中推理（例如思维链提示）和行动（例如行动计划生成）能力结合的问题，现在已经是Agent流行的框架模式。
       - ReAct的核心思想是将推理和行动分为两个阶段，首先是推理阶段，通过CoT提示，生成一个行动计划，然后在行动阶段，执行这个行动计划，从而完成任务。
 - [Parameter optimization in neural networks](https://www.deeplearning.ai/ai-notes/optimization/index.html?_hsmi=218814757&utm_campaign=The%20Batch&utm_medium=email&utm_content=218804890&utm_source=hs_email&_hsenc=p2ANqtz-_FluhJbN2619klYO-hikBLp6-aEAP60t0VaLzoiEItfCyfrdJguDchLz7Q6h5imUeQp3SkfQaBZnlD8_aUcP5U97FiMA)
-- [Introduction to Uplift Modeling](https://juanitorduz.github.io/uplift/)
-- [What is Uplift modelling and how can it be done with CausalML](https://analyticsindiamag.com/what-is-uplift-modelling-and-how-can-it-be-done-with-causalml/)
+- Uplift
+  - [Introduction to Uplift Modeling](https://juanitorduz.github.io/uplift/)
+  - [What is Uplift modelling and how can it be done with CausalML](https://analyticsindiamag.com/what-is-uplift-modelling-and-how-can-it-be-done-with-causalml/)
+  - [智能营销Uplift模型多Treatment评估指标改进](https://mp.weixin.qq.com/s/rfXfnoRNlftKLqUVPvfwAQ)
 - [Prometheus for anomaly detection](https://about.gitlab.com/blog/2019/07/23/anomaly-detection-using-prometheus/)
   - z-score
     - z-score is measured in the number of standard deviations from the mean
