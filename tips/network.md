@@ -1643,11 +1643,15 @@
 - [超时重传、窗口管理 以及 拥塞控制](https://mp.weixin.qq.com/s/6MlebbExo3GVhj554J7Vnw)
 - [A General Overview of TCPCopy Architecture](https://dzone.com/articles/a-general-overview-of-tcpcopy-architecture)
 - [Tail Loss Probe (TLP)](https://mp.weixin.qq.com/s/PQ7C26aiUAcx7nmFbxPycw)
+  - TCP Tail Loss Probe (TLP) 是一种用于改进 TCP 在发生尾部丢包时的性能的机制，简单来说，就是在检测到可能发生尾部丢包时，也就是当连接一段时间（称为 Probe Timeout，即 PTO，且 PTO ≤ RTO）未收到 ACK 时，强制发送一个探测包
   - Tail Loss Probe (TLP)是一个发送端算法，主要目的是使用快速重传取代RTO超时重传来处理尾包丢失场景。如果TCP尾包丢失，如果依靠RTO超时进行重传会带来比较大的延迟，进而影响用户体验
   - 在 linux 系统中，它实际是一个 TLP 数据包，在SACK开启下，TLP 会重传强制传输还没有收到 ACK 确认的报文里面的最后一个报文或者未发送的新报文。
   - Tail Loss Probe (TLP) 是一种探测机制，用于在可能发生尾丢包时，主动发送探测包以快速确认数据包是否丢失。通过这种方式，TLP 可以在无需等待传统的重传超时（RTO）的情况下，迅速恢复数据传输，减少延迟。
   - 与传统的重传超时（RTO）机制：传统的 RTO 需要等待较长时间才能检测到丢包，而 TLP 可以在更短的时间内探测到尾丢包，从而更快地进行重传。
   - 与快速重传（Fast Retransmit）机制：快速重传依赖于接收到多个重复的 ACK 来确认丢包，而 TLP 则是在怀疑尾丢包时主动发送探测包，不需要等待多个重复的 ACK。
+  - Compare
+    - 没有TLP：出现尾部丢包 → 只能等很久RTO（比如1秒）超时后重传。
+    - 有TLP：出现尾部丢包 → 很快就试探性地重发一次 → 尽快被确认或触发重传，避免长时间等待。
 - Port Forwarding
   - ![img.png](network_port_forwarding.png)
 
