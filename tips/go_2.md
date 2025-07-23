@@ -2085,8 +2085,16 @@
     - 带有类型参数的type alias `type MySlice[T any] = []T`
     - 运行时性能优化
       - 基于Swiss Tables的原生map实现
+        - 将存储结构分为大量“组”（group），每组包含 8 个插槽与一个 64 位“控制字”（control word）。
+        -  利用 SIMT / SIMD 比较，对 8 个插槽一次性匹配哈希值后 7 位，提高查找与插入效率。
+        -  去除了溢出桶概念，以“探测序列”形式在相邻组中寻找空位；当达到负载上限（7/8）时，使用“可扩展哈希”（extendible hashing）将整张表拆分成多个子表。
+        -  这样既有更高负载因子、又避免旧桶残留，大幅减少高并发大 map 场景下的内存消耗
+        - 不同环境下的差异：
+          • 高流量环境：map 中元素数量庞大，Swiss Tables 带来的内存节省远超“mallocgc”问题造成的内存回升，最终净降数百 MiB～1 GiB 级别的 RSS。
+          • 低流量环境：map 规模相对较小，Swiss Tables 虽可减少数十 MiB，但远不足以抵消 Go 1.24 回归问题带来的 200～300 MiB 的 RSS 上涨。
       - 在 Go1.24 所引入的 swissmaps 中，map[int64]struct{} 的每个槽（slot）需要 16 字节空间，而不是预期的 8 字节
         - https://github.com/golang/go/issues/70835
+        - [How Go 1.24's Swiss Tables saved us hundreds of gigabytes](https://www.datadoghq.com/blog/engineering/go-swiss-tables/)
       - 针对当前runtime.lock2实现的问题进行优化
     - cgo改进：新增了#cgo noescape和#cgo nocallback注解，优化C代码调用的效率。
     - 编译器限制：禁止在C类型别名上声明方法，以提高类型安全性
@@ -2112,6 +2120,7 @@
           - FieldsSeq 会忽略连续的空白字符，不会产生空字符串
     - JSON 零值的优化。json.Marshal 支持省略零值 omitzero 标签
     - crypto/mlkem 包正式加入标准库  后量子密码学 (Post-Quantum Cryptography, 以下简称PQC) http://mp.weixin.qq.com/s/bK_MbyOhVNu2HxR6M5eS3A
+      - PQC 是指那些被认为能抵抗经典计算机和量子计算机攻击的加密算法。主要担忧是量子计算机能利用 Shor 算法等高效破解目前广泛使用的公钥密码系统，如 RSA 和椭圆曲线密码学（ECC）
       - RSA 加密了公司的核心商业机密，或者用 ECDSA 签名了重要的合同。这些操作的安全性，都依赖于经典计算机难以在有效时间内解决某些数学难题（如大数分解、离散对数）。
       - 在密钥封装/交换机制（KEM - Key Encapsulation Mechanism)方面，基于格密码学（Lattice-based cryptography）的ML-KEM被选为主要的KEM标准（FIPS 203）
       - 在数字签名方面，ML-DSA基于Dilithium算法，同样属于格密码学的范畴。该算法被选为主要的数字签名标准

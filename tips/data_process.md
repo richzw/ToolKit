@@ -68,7 +68,27 @@
   - 频繁更新的用户数据：文件格式为 Parquet，表格格式为 Delta Lake，流程为 Spark 读取用户表 → Merge 操作更新 → 写入 Delta Lake
   - 日志分析：文件格式为 JSON（初始导入）→ 转换为 ORC/Parquet，表格格式为 Hive 表，流程为日志文件（JSON）→ Hive 表分区存储（列式格式）→ Hive SQL 分析。
 - [ETL Tools for Unstructured Data](https://zilliz.com/blog/selecting-the-right-etl-tools-for-unstructured-data-to-prepare-for-ai)
-
+- 𝐃𝐚𝐭𝐚 𝐖𝐚𝐫𝐞𝐡𝐨𝐮𝐬𝐞, 𝐃𝐚𝐭𝐚 𝐋𝐚𝐤𝐞, 𝐃𝐚𝐭𝐚 𝐋𝐚𝐤𝐞𝐡𝐨𝐮𝐬𝐞, 𝐃𝐚𝐭𝐚 𝐌𝐞𝐬𝐡.
+  - 𝐃𝐚𝐭𝐚 𝐖𝐚𝐫𝐞𝐡𝐨𝐮𝐬𝐞: 𝐒𝐜𝐡𝐞𝐦𝐚-𝐨𝐧-𝐰𝐫𝐢𝐭𝐞, 𝐝𝐞𝐟𝐢𝐧𝐞 𝐟𝐢𝐫𝐬𝐭 𝐭𝐡𝐞𝐧 𝐬𝐭𝐨𝐫𝐞
+    - A centralized storage system optimized for structured data and business intelligence.
+    - ✅ Fast queries, strong governance—ideal for BI and compliance.
+    - ❌ Rigid schemas, not ideal for raw/unstructured data, expensive at scale.
+    - Go-to Tools:Snowflake , BigQuery, Redshift.
+  - 💧 𝐃𝐚𝐭𝐚 𝐋𝐚𝐤𝐞: 𝐒𝐜𝐡𝐞𝐦𝐚-𝐨𝐧-𝐫𝐞𝐚𝐝, 𝐬𝐭𝐨𝐫𝐞 𝐟𝐢𝐫𝐬𝐭 𝐭𝐡𝐞𝐧 𝐝𝐞𝐟𝐢𝐧𝐞
+    - A centralized repository that stores massive volumes of raw structured and unstructured data in native formats.
+    - ✅ Cheap, flexible, great for ML and exploration.
+    - ❌ Lacks governance, slower queries without tuning, data swamp risk.
+    - Go-to Tools: S3+Glue, Azure Data Lake.
+  - 🏞️ 𝐃𝐚𝐭𝐚 𝐋𝐚𝐤𝐞𝐡𝐨𝐮𝐬𝐞: 𝐋𝐚𝐤𝐞 𝐜𝐨𝐬𝐭𝐬 + 𝐖𝐚𝐫𝐞𝐡𝐨𝐮𝐬𝐞 𝐩𝐞𝐫𝐟𝐨𝐫𝐦𝐚𝐧𝐜𝐞
+    - A next-gen data platform that combines the flexibility of data lakes with the performance of data warehouses.
+    - ✅ Unified storage with strong analytics + ML performance.
+    - ❌ Complex to build and operate, tools still evolving.
+    - Go-to Tools: databricks , Apache Iceberg.
+  - 🌐 𝐃𝐚𝐭𝐚 𝐌𝐞𝐬𝐡: 𝐃𝐚𝐭𝐚 𝐚𝐬 𝐚 𝐩𝐫𝐨𝐝𝐮𝐜𝐭, 𝐝𝐨𝐦𝐚𝐢𝐧 𝐚𝐮𝐭𝐨𝐧𝐨𝐦𝐲
+    - A distributed architecture treating data as products, with each business domain owning and managing their own data.
+    - ✅ Scales with teams, empowers domain ownership.
+    - ❌ High governance overhead, needs strong org maturity.
+    - Go-to Tools: Requires combining multiple tools to implement.
 
 
 
