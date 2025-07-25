@@ -1663,6 +1663,7 @@
   2. **Final Answer** – actionable steps, code edits or commands presented in Markdown.
   3. **Next Actions** – bullet list of follow-up items for the team (if any).
   ```
-
+- [Gemini 2.5 Pro Capable of Winning Gold at IMO](https://arxiv.org/pdf/2507.15855)
+  
 
 

@@ -1485,18 +1485,42 @@
   - [How to Fix Your Context](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html)
     - 长上下文（long context）可能导致的常见问题，并提出了六大策略来避免或减轻这些问题。核心思想是：上下文并非越长越好，因其信息会直接影响模型的输出质量。
     - 常见问题
-      - Context Poisoning：上下文里混入了错误或幻觉信息，模型反复引用这些错误内容。
-      - Context Distraction：上下文太长时，模型过度依赖上下文信息，忽略了原先的训练知识。
-      - Context Confusion：上下文中含有过多无关信息，导致回复质量下降。
-      - Context Clash：上下文里新增的信息与已有内容冲突，引发矛盾答案。
-    - 解决策略
+      - Context Poisoning：上下文里混入了错误或幻觉信息，模型反复引用这些错误内容。Gemini playing Pokemon hallucinated an item + tried to re-use it
+      - Context Distraction：上下文太长时，模型过度依赖上下文信息，忽略了原先的训练知识。Gemini favored repeated actions over new plans as context > 100k tok
+      - Context Confusion：上下文中含有过多无关信息，导致回复质量下降。Models perform worse with more tools, esp if tools are similar
+      - Context Clash：上下文里新增的信息与已有内容冲突，引发矛盾答案。Models perform worse if back-to-back tool calls contradict each other
+    - [解决策略](https://docs.google.com/presentation/d/16aaXLu40GugY-kOpqDU4e-S0hD1FmHcNyF0rRRnb1OU/edit?slide=id.p#slide=id.p)
       - RAG（Retrieval-Augmented Generation）：只根据需求检索并添加与当前任务相关的文档，从而避免把所有内容一股脑加入上下文导致混乱。
+        - Mix of retrieval methods + re-ranking (see: Varun’s take from Windsurf).
+        - Systems to assemble retrievals into prompts (see: Preempt in Cursor).
+        - Retrieve relevant tools based upon tool descriptions (see: Drew’s post).
       - Tool Loadout：在上下文里只选用当前所需的工具或函数定义，避免工具定义过多相互干扰。引用的研究发现，超过一定数量的工具描述后，模型准确率显著下降。
       - Context Quarantine：用多代理、多线程的方式，将不同上下文分割在独立的任务或线程里，各自独立处理，减少上下文过载。Anthropic 的多代理研究系统就是典型案例。
       - Context Pruning：定期或在合适的时机对已有的上下文进行“修剪”，删除不再需要或不相关的信息。可以用专门的工具（如 Provence）自动筛除与问题无关的文本。
       - Context Summarization：将上下文提炼成简短摘要，以防上下文过长造成干扰。尤其在上下文超过一定大小后，模型可能倾向重复昔日答案而非产生新的见解。
+        - Summarize agent message history (see: Drew’s post, Claude Code).
+        - Prune irrelevant parts of message history (see: Drew’s post).
+        - Summarize / prune tool call outputs (see: open-deep-research).
+        - Summarize / prune at agent-agent handoffs (see: Cognition).
+        - But, care careful of information loss (see: Cognition and Manus)
       - Context Offloading：不把所有过程或信息都放在主上下文里，而是将其移到外部存储或工具（如“scratchpad”）里，只有需要时再引用，能显著提升效率和准确度。
-
+        - Use file system for notes (see: Drew’s post, Anthropic multi-agent).
+        - Use file system (e.g., todo.md) to plan/track progress (see: Manus).
+        - Use file system read/write tok-heavy context (see: Manus).
+        - Use files for long-term memories (see: Ambient Agents course/repo)
+      - Isolate context
+        - Split context across multi-agents (see: Drew’s post, Anthropic).
+        - But, be careful (see: Cognition/Walden Yan)!
+        - Multi-agents make conflicting decisions (see: Cognition/Walden Yan).
+        - Sub-agents lower risk if avoid decisions (see: open-deep-research).
+      - Cache Context
+        - Cached input tokens for Claude-sonnet 10x cheaper!
+        - Cache agent instructions, tool descriptions to prefix.
+        - Add mutable context / recent observations to suffix.
+    - Codes https://github.com/langchain-ai/how_to_fix_your_context
+  - [上下文工程原理](https://github.com/ForceInjection/AI-fundermentals/blob/main/context/%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E5%8E%9F%E7%90%86.md)
+  - [Why “Context Engineering” Matters](https://www.dbreunig.com/2025/07/24/why-the-term-context-engineering-matters.html)
+  - 
 - [Redefining Document Retrieval with Vision-Language Models](https://zilliz.com/blog/colpali-milvus-redefine-document-retrieval-with-vision-language-models?utm_source=x)
   - 传统检索流程痛点：
     • 需要进行 OCR、布局检测、段落/表格识别、文本切分与嵌入等诸多步骤，极其复杂且易出错。
