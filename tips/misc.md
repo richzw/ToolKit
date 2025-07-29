@@ -360,6 +360,11 @@
     - 内联编辑功能
     - Settings > General > Privacy Mode
     - Homebrew安装最新版本的Cursor `brew install --cask --force cursor`
+  - [cursor的codebase indexing](https://mp.weixin.qq.com/s/fj-9rOPEq_eF05VLQizX1g)
+    - 什么是Merkle Tree 哈希树
+      - 高效验证 数据完整性保证 增量同步
+    - turbopuffer的serverless架构, 缓存/冷热策略，为Cursor实现了成本和性能的完美平衡。
+    - Merkle tree 负责本地变更检测和高效同步，turbopuffer 负责云端的向量存储与检索。
   - [How I use Claude Code](https://www.reddit.com/r/ClaudeAI/comments/1lkfz1h/how_i_use_claude_code/)
     - 1. 维护 CLAUDE[.]md 文件
       - 建议为不同子目录（如测试、前端、后端）分别维护 CLAUDE[.]md，记录指令和上下文，便于 Claude 理解项目背景。

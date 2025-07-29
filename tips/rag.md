@@ -1520,7 +1520,13 @@
     - Codes https://github.com/langchain-ai/how_to_fix_your_context
   - [上下文工程原理](https://github.com/ForceInjection/AI-fundermentals/blob/main/context/%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E5%8E%9F%E7%90%86.md)
   - [Why “Context Engineering” Matters](https://www.dbreunig.com/2025/07/24/why-the-term-context-engineering-matters.html)
-  - 
+  - [薛定谔的缓存](https://mp.weixin.qq.com/s/A0D4wF1yv3nC3wye5Hcb4g)
+    - Go 语言的 map 遍历确实是随机的，但在其标准库进行 JSON 序列化时，它默认会对 map 的键（key）做一次排序
+    - Transformer 架构采用了一种极为高效的“状态传递”机制。这个状态，就是我们常说的 KV (Key-Value) 对
+      - 预填充 (Prefill) — 计算初始状态
+        - 当模型收到你的 Prompt 时，它会并行处理所有输入的 Token，并为每一个 Token 生成一组 K-V 向量。这些 K-V 向量可以被看作是整个输入 Prompt 在模型内部的“记忆快照”或“初始状态”
+      - 解码 (Decoding) — 增量更新状态并生成
+    - 序列化的绝对确定性是缓存的生命线
 - [Redefining Document Retrieval with Vision-Language Models](https://zilliz.com/blog/colpali-milvus-redefine-document-retrieval-with-vision-language-models?utm_source=x)
   - 传统检索流程痛点：
     • 需要进行 OCR、布局检测、段落/表格识别、文本切分与嵌入等诸多步骤，极其复杂且易出错。
