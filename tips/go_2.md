@@ -2235,8 +2235,17 @@
   $ go tool cover -html=c3.prof
   ```
 - [MCP SDK 过程中的取舍与思考](https://mp.weixin.qq.com/s/mrphW4tymbv1cVbFjpnl2w)
-
-
+- [Monotonic and Wall Clock Time in the Go time package](https://victoriametrics.com/blog/go-time-monotonic-wall-clock/)
+  - Modern operating systems usually keep track of two kinds of clocks: a wall clock and a monotonic clock.
+    - Wall clocks are for “telling time” (giving timestamps that have meaning globally).
+    - Monotonic clocks are for reliably “measuring time intervals.
+      - a monotonic clock. This clock never goes backward. It only moves forward steadily and cannot be manually adjusted.
+      - That m= value shows the monotonic clock offset (in seconds) at the exact moment your time.Time was captured.
+  - time.Now() 返回的 time.Time 才包含单调时间；其他构造函数（time.Date、time.Unix、time.Parse 等）仅生成包含壁钟的 time.Time。
+  -  在比较两个 time.Time 时，不能直接使用“==”操作符，因为单调时间、时区指针等会导致看似相同的时间不相等；应使用 now.Equal(other) 来比较。
+  -  当调用 now.UTC()、now.Truncate(0) 等方法后，新的 time.Time 将丢失单调时间信息（以及可能改变 Location 指针）。
+  -  time.Since(t) 本质上调用 time.Now().Sub(t)。若 t 带有单调时间，则用单调时间做计算；若仅有壁钟，则可能受系统时间调整影响。
+  - 在极端高频调用场景下，为了提升性能，可使用已有的 time.Time 加上 time.Since() 的方式，避免频繁调用 time.Now()。但此法不会反映时钟校准，需看实际需求决定是否可接受。
 
 
 

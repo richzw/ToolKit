@@ -1494,9 +1494,15 @@
         - Mix of retrieval methods + re-ranking (see: Varun’s take from Windsurf).
         - Systems to assemble retrievals into prompts (see: Preempt in Cursor).
         - Retrieve relevant tools based upon tool descriptions (see: Drew’s post).
+        - RAG 要有选择性的添加，而不是全部贴上；重点是围绕当前任务构建语义增强
+        - Manus 的做法是干脆放弃查入，把信息挂载在文件系统，留 path + 摘要 + 可调用工具
       - Tool Loadout：在上下文里只选用当前所需的工具或函数定义，避免工具定义过多相互干扰。引用的研究发现，超过一定数量的工具描述后，模型准确率显著下降。
+        - Manus 的哲学是工具全集保持不变，用 mask 控制直接把权重干成负数
+        - 只要你希望上下文命中率高、模型行为稳定，就必须构建一个“行为可变但结构不变”的系统。
       - Context Quarantine：用多代理、多线程的方式，将不同上下文分割在独立的任务或线程里，各自独立处理，减少上下文过载。Anthropic 的多代理研究系统就是典型案例。
       - Context Pruning：定期或在合适的时机对已有的上下文进行“修剪”，删除不再需要或不相关的信息。可以用专门的工具（如 Provence）自动筛除与问题无关的文本。
+        - 真正的 pruning，是删除“结构上已经失效的信息”。
+        - 他们的“能 offload 的就 offload，不能 offload 的就摘要” 一段带摘要的 context，远比一堆片段更有推理价值
       - Context Summarization：将上下文提炼成简短摘要，以防上下文过长造成干扰。尤其在上下文超过一定大小后，模型可能倾向重复昔日答案而非产生新的见解。
         - Summarize agent message history (see: Drew’s post, Claude Code).
         - Prune irrelevant parts of message history (see: Drew’s post).
@@ -1508,6 +1514,8 @@
         - Use file system (e.g., todo.md) to plan/track progress (see: Manus).
         - Use file system read/write tok-heavy context (see: Manus).
         - Use files for long-term memories (see: Ambient Agents course/repo)
+        - Manus 的做法是把失败信息 offload 到外部 trace 文件中，再在后续回顾或 summary 阶段引用
+        - Context Offloading 是少数能从认知层面、工程层面、可扩展性层面都闭环的设计策略。
       - Isolate context
         - Split context across multi-agents (see: Drew’s post, Anthropic).
         - But, be careful (see: Cognition/Walden Yan)!

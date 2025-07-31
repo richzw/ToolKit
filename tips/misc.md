@@ -408,6 +408,7 @@
   - [Claude Code 的自定义指令](https://docs.anthropic.com/en/docs/claude-code/slash-commands)
     - Claude Code 现在可以添加自定义指令，也就是你输入 “/” 可以出来命令提示，这个 ultrathink-task 可以调用架构智能体
     - https://www.reddit.com/r/ClaudeAI/comments/1lpvj7z/ultrathink_task_command/
+  - [Claude Code如何引爆全员生产力](https://mp.weixin.qq.com/s/TsDK6-aM0HU33CdSitging)
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。

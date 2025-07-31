@@ -1652,6 +1652,12 @@
   - Compare
     - 没有TLP：出现尾部丢包 → 只能等很久RTO（比如1秒）超时后重传。
     - 有TLP：出现尾部丢包 → 很快就试探性地重发一次 → 尽快被确认或触发重传，避免长时间等待。
+  - 重传的几个原因：
+    - 1. 超时重传
+    - 2. 快速重传
+      - 2.1 三次dupack触发
+      - 2.2 SACK数据缺口跨度过大触发
+    - 3. TLP
 - Port Forwarding
   - ![img.png](network_port_forwarding.png)
 
