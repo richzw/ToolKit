@@ -369,7 +369,7 @@
 - [Ds In database]
   - ![img_1.png](datastructure_db.png)
 - ![img.png](datastructure_design.png)
-
+- [Binary Indexed Tree](https://medium.com/@hzpang/understanding-binary-indexed-tree-724b3ab978df)
 
 
 

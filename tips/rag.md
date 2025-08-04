@@ -894,6 +894,7 @@
        - 航班状态 Agent，提供实时航班信息查询
        - FAQ Agent，回答常见问题和机型信息
        - 取消服务 Agent，处理退票和改签业务
+  - [地图全开的麦肯锡Agent](https://mp.weixin.qq.com/s/NP0pUhji_P5z2svxfio1_A)
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
@@ -1445,6 +1446,7 @@
 - [RAG Cost Calculator](https://zilliz.com/rag-cost-calculator/)
   - This calculator quickly estimates the cost of building a RAG pipeline, including chunking, embedding, vector storage/search, and LLM generation.
 - [Context Engineering for Agents](https://rlancemartin.github.io/2025/06/23/context_engineering/)
+  - [Awesome Context Engineering](https://github.com/Meirtz/Awesome-Context-Engineering)
   - 上下文内容可能随代理的多轮交互而不断膨胀，既会增加代价（token数量和时间），也可能导致模型的“Context Degradation Syndrome”——上下文越长，模型对关键信息的把握能力可能下降
   - 主要策略：Curate, Persist, Isolate
     - Curate（精简/管控上下文）
@@ -1535,6 +1537,32 @@
         - 当模型收到你的 Prompt 时，它会并行处理所有输入的 Token，并为每一个 Token 生成一组 K-V 向量。这些 K-V 向量可以被看作是整个输入 Prompt 在模型内部的“记忆快照”或“初始状态”
       - 解码 (Decoding) — 增量更新状态并生成
     - 序列化的绝对确定性是缓存的生命线
+  - Claude Code 的做法是大道至简：
+    - 当前会话所有历史记录保留（90%上下文之前不会主动压缩），不变换工具列表 这样可以保证上下文不因为压缩损耗，不修改历史会话记录也可以确保命中 Prompt Caching 节约成本
+    - 通过子 Agent （Task 工具），既可以让子 Agent 的上下文独立完整，又可以让主 Agent 的上下文清晰简洁。 就像一个专业的管理者，规划好后让下属去完成各种子任务，自己聚焦于主任务
+    - 用 TODO 工具，做计划，实时更新进度，让执行路径清晰，并可以让 AI 不迷失在上下文中，聚焦于要执行的 TODO List Item
+  - [Deep agent](https://blog.langchain.com/deep-agents/)
+    - A detailed system prompt
+    - Planning tool
+    - Sub agents
+    - File system
+    - https://github.com/hwchase17/deepagents
+  - Context Engineering 核心是两点：
+    - 更少的上下文
+      - 提示词太长会影响生成结果，产生幻觉，尤其是太多无关的内容在上下文更会如此。
+      - 多开新会话而不是同一个会话一直聊
+        - 当你会话太长，后续你发的内容，AI 不容易抓住重点，可能会忘记你前面说的，最好是到一定程度，让 AI 帮你总结一下重点，然后新开会话。如果是和当前会话无关的任务，直接新开会话。
+      - 一次一个小的任务，而不是太复杂的任务
+        - 这有点像人，当你任务太多太复杂，AI 很难完成好，但是你让 AI 一次完成一个小任务，就好很多。
+    - 更准确的上下文
+      - 我们提供准确和充足的上下文给 AI
+        - AI 并不知道我们知道的信息，所以我们需要主动告诉AI我们知道它不知道的信息，比如说让AI帮我写简历，那我得把我的信息都告诉AI，不然它也写不出来。
+        - 使用AI写代码，一个实用的技巧就是把你知道的相关的文件都提供给它参考，让它可以读到文件内容，这样它就不会遗漏重要信息。
+      - 让 AI 帮我们找到上下文
+        - 现在 AI Agent 都有能力帮我们找上下文，但能力有好优化，对于普通人来说，这几点直观重要：
+          - 选擅长 Agent 任务模型 Claude 4 Opus/Sonnet, OpenAI o3 是 Agent 效果最好的
+          - 为 AI 提供合适的工具 Agent 最重要的就是有工具能力，能借助工具去找上下文，但是它只有内置的几个工具
+          - 让 AI 先做计划，避免在错误的方向越走越远 
 - [Redefining Document Retrieval with Vision-Language Models](https://zilliz.com/blog/colpali-milvus-redefine-document-retrieval-with-vision-language-models?utm_source=x)
   - 传统检索流程痛点：
     • 需要进行 OCR、布局检测、段落/表格识别、文本切分与嵌入等诸多步骤，极其复杂且易出错。
@@ -1633,3 +1661,14 @@
     - 准确的错误信息可以 LLM 纠正错误
     - 要避免 AI 受到同质化的历史消息影响后续结果
   - https://mp.weixin.qq.com/s/5DQOnDausramvMZJUvPVVA
+
+
+
+
+
+
+
+
+
+
+

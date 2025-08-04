@@ -1117,5 +1117,27 @@
   - 数据小于等于或者大于 MSS 只是判断的条件之一，小于 MSS 时不一定就会延迟 ACK，同样大于 MSS 时也不一定就会快速 ACK
   - • quick ACK 模式下，系统会对前若干个数据段快速回复 ACK；当超过 quickacks 计数后，TCP 则转入 delayed ACK 模式，出现一定时延后再发送 ACK。
   - • quick ACK 计数与接收窗口大小、rcv_mss 以及系统默认的最大 quick ACK 节点值密切相关。通过调整 SO_RCVBUF、MSS 等参数，可以影响 quick ACK 被触发的次数
+- [How to stop running out of ephemeral ports and start to love long-lived connections](https://blog.cloudflare.com/how-to-stop-running-out-of-ephemeral-ports-and-start-to-love-long-lived-connections/)
+  - Linux 在处理大量并发出站连接时可能出现的一个常见问题——“耗尽临时端口”（ephemeral ports）
+  - 问题背景：
+    - Linux 默认会为每个新建的出站连接分配一个本地 IP 和源端口，通常会从系统的临时端口范围（ephemeral port range）内选取。
+    - 当开启大量长连接（例如 WebSockets）或者开启多类型流量后，如果每个连接都占据不可重用的源端口，可能导致可用端口被耗尽，进而无法再建立新连接。
+  - TCP 出站连接复用端口的方式：
+    - 直接使用 connect(dst_IP, dst_port)。如果不显式绑定本地 IP 或端口，Linux 会在不冲突的情况下自动复用 {源 IP, 源端口}，从而突破单一临时端口数目的限制。
+    - 手动指定源 IP 时，如果先 bind(src_IP, 0) 再 connect()，在没有启用特定参数时，内核会把端口“独占”给该连接，导致无法复用。
+    - 通过 setsockopt(IP_BIND_ADDRESS_NO_PORT) 或设置 SO_REUSEADDR 等技巧，可以让 TCP 在 bind 之后依旧能够复用端口，使并发数不被临时端口数严格限制。
+  - UDP 的特殊情况与困难：
+    - UDP 在 connect() 时，默认无法自动进行共享端口（two-tuple）复用；一次简单的 connect(dst_IP, dst_port) 便会独占一个源端口。
+    - SO_REUSEADDR 可以共享端口，但可能引发“overshadowing”问题：两个完全相同的四元组会导致后创建的 UDP 套接字“覆盖”之前的连接，且不会报错。
+    - 为避免 overshadowing，需要在用户态实现类似“connectx()”的逻辑：
+      - 在用户态手动选取源 IP、源端口（如需），并先设置 SO_REUSEADDR 做“占位”，再暂时关闭 SO_REUSEADDR 来锁定端口；
+      - 使用 netlink（类似 ss 命令）或 eBPF 来检测是否已有冲突的四元组；
+      - 成功后再 connect()，最后重新打开 SO_REUSEADDR。
+      - • 由于 UDP 没有内核级别的简化支持，需要通过更加繁琐的用户态流程来保证多并发、端口复用且不发生数据包覆盖。
+  - 用户态“connectx()”实现：
+    - 在 Python 中实现了一个“connectx()”函数，用于统一处理 TCP/UDP 在绑定和连接时对源 IP、端口的选择和端口复用。
+    - 对于 TCP，合理利用 IP_BIND_ADDRESS_NO_PORT 或 SO_REUSEADDR 就能实现端口共享。
+    - 对于 UDP，则需要结合用户态锁定和查询方法才能避免端口冲突或“覆盖”。
+
 
 

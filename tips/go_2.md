@@ -2246,7 +2246,7 @@
   -  当调用 now.UTC()、now.Truncate(0) 等方法后，新的 time.Time 将丢失单调时间信息（以及可能改变 Location 指针）。
   -  time.Since(t) 本质上调用 time.Now().Sub(t)。若 t 带有单调时间，则用单调时间做计算；若仅有壁钟，则可能受系统时间调整影响。
   - 在极端高频调用场景下，为了提升性能，可使用已有的 time.Time 加上 time.Since() 的方式，避免频繁调用 time.Now()。但此法不会反映时钟校准，需看实际需求决定是否可接受。
-
+- [从栈上理解 Go语言函数调用](https://www.luozhiyun.com/archives/518)
 
 
 
