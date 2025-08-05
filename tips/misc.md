@@ -409,6 +409,11 @@
     - Claude Code 现在可以添加自定义指令，也就是你输入 “/” 可以出来命令提示，这个 ultrathink-task 可以调用架构智能体
     - https://www.reddit.com/r/ClaudeAI/comments/1lpvj7z/ultrathink_task_command/
   - [Claude Code如何引爆全员生产力](https://mp.weixin.qq.com/s/TsDK6-aM0HU33CdSitging)
+  - 为了防止 claude code 习惯性代码过度膨胀，我的做法是使用一个 code-simplifie 的 sub agent ，要求每一个功能/todo之后都需要使 code-simplifie 优化代码。
+  - 用好 Coding Agent 的一个经验技巧，就是为 Agent 提供验证结果的方法，这样 Agent 就会自己去测试去修改，直到完成任务，不需要自己反复测试修改。
+    - 在用 Claude Code 或者 Copilot/Curosr 的 Agent mode，会在提示词中加一句类似的话：
+      Please write tests and verify the tests by running
+      `npx jest <testfilepath> -c './jest.config.ts' --no-coverage`
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。

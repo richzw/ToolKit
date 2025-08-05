@@ -2247,7 +2247,37 @@
   -  time.Since(t) 本质上调用 time.Now().Sub(t)。若 t 带有单调时间，则用单调时间做计算；若仅有壁钟，则可能受系统时间调整影响。
   - 在极端高频调用场景下，为了提升性能，可使用已有的 time.Time 加上 time.Since() 的方式，避免频繁调用 time.Now()。但此法不会反映时钟校准，需看实际需求决定是否可接受。
 - [从栈上理解 Go语言函数调用](https://www.luozhiyun.com/archives/518)
-
+- Data race
+  ```
+  func getInstance() (*UserInfo, error) {
+   if instance == nil {
+      lock.Lock()
+      defer lock.Unlock()
+      if instance == nil {
+         // 上面做各种初始化逻辑，如果有错误则return err
+         instance = &UserInfo{
+            Name: "test",
+         }
+      }
+   }
+   return instance, nil
+  ```
+  ```
+  var flag uint32
+  func getInstance() (*UserInfo, error) {
+   if atomic.LoadUint32(&flag) != 1 {
+      lock.Lock()
+      defer lock.Unlock()
+      if instance == nil {
+         // 其他初始化错误，如果有错误可以直接返回
+         stance = &UserInfo{
+            Age: 18,
+         }
+         atomic.StoreUint32(&flag, 1)
+      }
+   }
+   return instance, nil
+  ```
 
 
 
