@@ -391,6 +391,7 @@
     - 14. 消息排队: Claude 处理任务时可继续发送消息，排队等待处理。
     - 15. 注意会话压缩与上下文长度 : 合理压缩对话，避免丢失重要上下文，建议在自然停顿点进行。
     - 16. 自定义 PR 模板 : 不要用默认模板，针对项目定制更合适的 PR（pull request) 模板。
+  - [Claude Code 最佳实践](https://cc.deeptoai.com/docs/zh/best-practices/claude-code-best-practices)
   - [Vibe Coding 有“最后一公里”知识幻觉](https://mp.weixin.qq.com/s/loRz_3N_N_fz58yFt_BanQ)
     - Milvus Code Helper MCP 服务外，开发者还可以选择如 Context7、DeepWiki 等新兴工具来解决这类问题
   - [Claude Code 如何做任务进度跟进](https://gist.github.com/richzw/ebeb0f8b39af64f2dd3a765aa4662150)
