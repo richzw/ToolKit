@@ -1,5 +1,6 @@
 - [AIGC知识库](https://longalong.feishu.cn/wiki/Jm3EwrFcIiNZW7k1wFDcGpkGnfg?table=tblMuhjq52WBho11&view=vewj3UlzIX)
   - [CS336: Language Modeling from Scratch](https://stanford-cs336.github.io/spring2025/)
+  - [The Ultra-Scale Playbook: Training LLMs on GPU Clusters](https://huggingface.co/spaces/nanotron/ultrascale-playbook?section=high-level_overview)
   - [Top AI cheatsheet](https://www.aifire.co/p/top-ai-cheatsheets)
   - [Understanding Deep Learning](https://udlbook.github.io/udlbook/)
   - [LLM Course](https://github.com/mlabonne/llm-course)

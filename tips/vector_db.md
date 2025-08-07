@@ -884,6 +884,8 @@
       -  https://github.com/milvus-io/milvus/tree/master/deployments/export-log 这里有脚本可以看日志 
     - 日志里面待构建索引行数和已构建索引行数之和大于数据总行数是什么原因呢？而且这个pendingIndexRows的数量还会增加是怎么回事呢？ 索引的已构建行数最大是等于表的总行数
       - pendingrow增加是因为里面有compaction，有些segment已经建好了索引，但它要和其他segment合并成更大的segment，合并完之后又会再次建索引
+    -  milvus 如何做到不停止服务的情况下，全量重建索引
+      - milvus里有一个alias的功能，比较适合这种全量更新的场景
     - 按照标量查询数据，同样的表达式，为什么一个有结果一个没结果？
       - 表达式过滤搜索时，如果带有索引比如ivf_flat索引，查出的结果可能有时有有时没有，因为内部是先过滤再做ann search。你换成FLAT就有稳定结果。
     - milvus如果做成一项公共向量服务，每个系统都是按需load/release索引的话，在数据量几百万/几千万这个级别的时候，搬运一次其实挺慢的，要好几秒的时间，那milvus的查询不就变得很慢了么，有没有什么好的建议?
