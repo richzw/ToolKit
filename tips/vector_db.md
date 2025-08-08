@@ -455,6 +455,7 @@
       - Query node maps the file between RAM and disk by mmap(). And maps the index files into memory, but the files are not immediately read from disk to physical RAM, so the memory usage is very low.
       - Query node calls unlink() to drop the index file. But the mmap file still occupies disk space.
       - When search, query node actually read data from disk, acts like read from RAM.
+      - https://docs.zilliz.com/docs/use-mmap?utm_source=x
     - hnsw索引的向量类型只能用floatvector？ float16Vector可以使用和floatVector一样的索引，hnsw ivf都行
     - ivf_flat建索引的时间跟nlist的大小相关，设小点就快，大点就慢，1G的耗时1分钟也是有可能的
       - 推荐值是4*sqrt(n)，n是单个segment里的行数。4096 dim，默认单个segment 512MB，那每个segment里大约有15000条数据，那么nlist大约为4*sqrt(15000)=480，最好是转成2的比方数，那就选512。

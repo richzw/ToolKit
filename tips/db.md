@@ -49,6 +49,8 @@
       - 将 shard 分为主分片和副本分片，主分片挂了之后由副本分片顶上，提升系统的可用性。
       - 对 Node 进行角色分化，提高系统的性能和资源利用率，同时简化扩展和维护
     - Elasticsearch 的From/Size方式提供了基本的分页的功能，
+      - Elasticsearch分页查询性能瓶颈 https://mp.weixin.qq.com/s/msnMxOE28siZr5zJCv5yNA
+      - 替换分页方式：从from/size到search_after
     - 也有相应的问题。举个例子，一个索引，有10亿数据，分10个 shards，然后，一个搜索请求，from=1000000，size=100，这时候，会带来严重的性能问题：CPU，内存，IO，网络带宽。
     - 在 query 阶段，每个shards需要返回 1000100 条数据给 coordinating node，而 coordinating node 需要接收10 * 1000，100 条数据，即使每条数据只有 _doc _id 和 _score
     - 深度分页问题大致可以分为两类

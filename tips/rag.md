@@ -1588,6 +1588,15 @@
           - 选擅长 Agent 任务模型 Claude 4 Opus/Sonnet, OpenAI o3 是 Agent 效果最好的
           - 为 AI 提供合适的工具 Agent 最重要的就是有工具能力，能借助工具去找上下文，但是它只有内置的几个工具
           - 让 AI 先做计划，避免在错误的方向越走越远 
+  - [Context Engineering and memory deep dive](https://github.com/hellovai/ai-that-works/tree/main/2025-07-08-context-engineering)
+  - [The Rise of Context Engineering](https://jeffhuber.substack.com/p/the-rise-of-context-engineering)
+    - 上下文工程的目标
+      - • 找到并保留与用户查询或任务强相关的高价值信息。
+      - • 删除无关和噪声信息，避免对模型推理带来干扰。
+      - • 优化上下文中的信息呈现方式，为准确回答与推理奠定基础。
+    - 两阶段信息选择流程
+      - • Gather（“搜索”阶段）：“撒大网”覆盖潜在相关信息，以最大化召回率；往往会包含一些无关内容。
+      - • Glean（“筛选”阶段）：通过重新排序与过滤，剔除不相关部分，最大化精度。
 - [Redefining Document Retrieval with Vision-Language Models](https://zilliz.com/blog/colpali-milvus-redefine-document-retrieval-with-vision-language-models?utm_source=x)
   - 传统检索流程痛点：
     • 需要进行 OCR、布局检测、段落/表格识别、文本切分与嵌入等诸多步骤，极其复杂且易出错。

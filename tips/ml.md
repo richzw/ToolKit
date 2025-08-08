@@ -909,6 +909,7 @@
       - 生成器（Generator） 会不断提出新的想法或解决方案；
       - 判别器（Discriminator） 则负责衡量这些想法的好坏，并决定它们是否有效。
     - 当生成器越来越善于创造，而判别器的标准越来越高、判断越来越准确时，这两者之间的差距（gap）会推动AI持续地优化和创新。这就像一位学生（生成器）在不断地尝试新方案，而导师（判别器）则不停地告诉他“好不好”，引导他不断进步。
+  - [JinaVDR: 一个图文混排文档搜索任务的基准集](https://mp.weixin.qq.com/s/dcYaEVb4_29BU5A-JwiHdw)
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]
