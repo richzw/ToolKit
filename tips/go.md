@@ -1736,7 +1736,7 @@
       - 对 omitempty 的定义局限： v1 的 omitempty 基于 Go 类型的零值判断，对于某些场景（如希望指针为 nil 时才省略，而不是其指向的值为空时省略）不够灵活。v2 重新定义了 omitempty 并引入了 omitzero。注：v1版本也已经加入对omitzero支持的补丁。
       - 处理未知字段不便： v1 默认会丢弃 JSON 对象中未在 Go 结构体中定义的字段，缺乏一种内建的、优雅的方式来捕获这些未知字段。
       - nil Slice/Map 的序列化行为： v1 将 nil slice 和 nil map 序列化为 JSON null，而许多用户期望它们被序列化为空数组 [] 和空对象 {}。
-    
+    - [真流式Marshal和Unmarshal](https://mp.weixin.qq.com/s/pYlGeF1yBlIy07DDvsIzrw)
 - full slice expression
   - `a = a[0:len(a):len(a)]`
   - the slice a is restricted to itself, the elements past the end of the slice cannot be accessed or modified, even if you accidentally re-slice or append to it.

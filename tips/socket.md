@@ -204,6 +204,19 @@
       - 减少系统调用：通过 batch 的模式，可以将多次请求合并成一次，减少了系统调用次数
       - 可扩展性好：通过提供一个统一的异步 IO 框架，可以支持各种类型的IO 操作
     - 通过集成 io_uring 给 Netpoll 带来的价值
+  - [Go语言迟迟未能拥抱io_uring](https://mp.weixin.qq.com/s/naDyE51tlkmXy58o1uKVFg)
+    - 在 io_uring 出现之前，Linux 上最高效的 I/O 模型是 epoll
+      - 内核响应后，应用程序需要再为每个就绪的描述符分别发起 read 或 write 系统调用。这意味着，处理 N 个 I/O 事件至少需要 N+1 次系统调用。
+    - io_uring 则彻底改变了游戏规则。它在内核与用户空间之间建立了两个共享内存环形缓冲区：提交队列（Submission Queue, SQ）和完成队列（Completion Queue, CQ）。
+      - 它将 N+1 次系统调用压缩为 1 次甚至 0 次，极大地降低了上下文切换的开销，并且首次为 Linux 带来了真正意义上的、无需 O_DIRECT 标志的异步文件 I/O。
+      - io_uring 最大的吸引力在于“移除对文件 I/O 线程池的需求”，让文件 I/O 也能享受与网络 I/O 同等的高效与优雅
+    - 核心困境一：运行时模型的“哲学冲突”
+      - Go 的成功很大程度上归功于其简洁的并发模型——goroutine，以及对开发者完全透明的调度机制
+      - 问题不在于 io_uring 能否在 Go 中使用，而在于能否“透明地”将其融入现有的 os 和 net 包，而不破坏 Go 开发者早已习惯的 API 和心智模型。
+      - io_uring 的性能优势源于批处理。但 Go 的标准库 API，如 net.Conn.Read()，是一个独立的、阻塞式的调用。Go 用户习惯于在独立的 goroutine 中处理独立的连接
+    - 核心困境二：现实世界的“安全红线”
+      - 出于安全考虑，Docker 默认的 seccomp 配置文件已经禁用了 io_uring
+    - 
 - [Linux 网络包发送过程](https://mp.weixin.qq.com/s?__biz=MjM5Njg5NDgwNA==&mid=2247485146&idx=1&sn=e5bfc79ba915df1f6a8b32b87ef0ef78&scene=21#wechat_redirect)
 - [Linux网络包接收过程](https://mp.weixin.qq.com/s?__biz=MjM5Njg5NDgwNA==&mid=2247484058&idx=1&sn=a2621bc27c74b313528eefbc81ee8c0f&scene=21#wechat_redirect)
 - [127.0.0.1 之本机网络通信过程](https://mp.weixin.qq.com/s/_yRC90iThCsP_zlLA6J12w)
