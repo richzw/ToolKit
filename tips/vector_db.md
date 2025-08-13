@@ -217,7 +217,30 @@
       - Qdrant compresses 32-bit floating-point values (float32) into 8-bit unsigned integers (uint8), slashing memory usage by an impressive 75%
     - Binary Quantization
       - Binary quantization takes scalar quantization to the next level by compressing each vector component into just a single bit.
-      - 
+    - Summary
+      - 𝗕𝗶𝗻𝗮𝗿𝘆 𝗤𝘂𝗮𝗻𝘁𝗶𝘇𝗮𝘁𝗶𝗼𝗻 (𝗕𝗤)
+        - • Compresses each dimension to just 1 bit (positive/negative)
+        - • Memory reduction: 97%
+        - • Speed: 3-4x faster than uncompressed vectors due to bitwise operations
+        - • Perfect for high-volume, approximate searches
+      - 𝟮. 𝗣𝗿𝗼𝗱𝘂𝗰𝘁 𝗤𝘂𝗮𝗻𝘁𝗶𝘇𝗮𝘁𝗶𝗼𝗻 (𝗣𝗤)
+        - • Breaks vectors into segments and quantizes each independently
+        - • Memory reduction: 85%
+        - • Requires a training step to calculate centroids
+        - • Trade-off: Better accuracy than BQ, approaches uncompressed performance at 97%+ recall
+      - 𝟯. 𝗦𝗰𝗮𝗹𝗮𝗿 𝗤𝘂𝗮𝗻𝘁𝗶𝘇𝗮𝘁𝗶𝗼𝗻 (𝗦𝗤)
+        - • Maps dimension values into 256 buckets (8 bits)
+        - • Memory reduction: 75%
+        - • More accurate than BQ while still offering significant compression
+        - • Trade-off: Sweet spot between compression and accuracy
+      - 𝟰. 𝗥𝗼𝘁𝗮𝘁𝗶𝗼𝗻𝗮𝗹 𝗤𝘂𝗮𝗻𝘁𝗶𝘇𝗮𝘁𝗶𝗼𝗻
+        - • Another compression technique available in modern vector databases
+          - Rotate the vector by multiplying it with a rotation matrix, which is a random orthogonal matrix.
+            - This step works to distribute the amount of meaningful information across all dimensions of the vector, allowing for full use of each dimension.
+          - Quantize the rotated vector by reducing the number of bits used to represent each dimension of the vector.
+            - This step is similar to traditional scalar quantization, but it is applied to the rotated vector.
+        - • Memory reduction: 75%
+        - • Focuses on preserving angular relationships between vectors
 - [向量数据库](https://mp.weixin.qq.com/s/UCgJi7MfAnn8tAPvL3sldQ)
   - 向量检索算法
     - 基于树的方法，例如KDTree和Annoy
