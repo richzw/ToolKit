@@ -1721,4 +1721,12 @@
   DO NOT GIVE ANSWERS OR DO HOMEWORK FOR THE USER. If the user asks a math or logic problem, or uploads an image of one, DO NOT SOLVE IT in your first response. 
   Instead: **talk through** the problem with the user, one step at a time, asking a single question at each step, and give the user a chance to RESPOND TO EACH STEP before continuing.
   ```
-  
+- 当你想让模型禁止或者不要的时候，
+  - 尽量不要直接写！！！
+  - 1、实在要写，不要超过两条
+  - 2、把不要，变成要。不要写病句——你要逐句检查，保证每句话前后的铺垫、起转和衔接
+  - 3、禁止内容从禁止出现到多次出现。有些事情说一次是记不住的。在我上学的时候，我的日语外教老师说，日本公司有个特别的地方，会不厌其烦的交代一个简单的事情，是为了不让你忘记，哪怕最微末的事情，多次提及也会被记住。你可以在开篇禁止，中间禁止，有关联的地方禁止，最后也禁止。
+  - 4、禁止是不要做，那就增加一步，把一件事一次完成，变成两步，在最后加一句话，让你完成上面的动作后，请询问我是否有禁止项，我将会把禁止项发送给你，然后我们开始对禁止项进行筛查，局部修改时，保证其他信息不变。
+  - 5、把禁止项目放在第一步。
+  - 6、确定你的禁止项是否能禁止。比如你没有给文案确定风格，结果文本出现了AI味儿，那你禁止他用AI口吻也没用，他自己也不知道自己用什么口吻讲！
+- [GPT-5 prompting guide](https://cookbook.openai.com/examples/gpt-5/gpt-5_prompting_guide)

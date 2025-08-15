@@ -910,6 +910,15 @@
       - 判别器（Discriminator） 则负责衡量这些想法的好坏，并决定它们是否有效。
     - 当生成器越来越善于创造，而判别器的标准越来越高、判断越来越准确时，这两者之间的差距（gap）会推动AI持续地优化和创新。这就像一位学生（生成器）在不断地尝试新方案，而导师（判别器）则不停地告诉他“好不好”，引导他不断进步。
   - [JinaVDR: 一个图文混排文档搜索任务的基准集](https://mp.weixin.qq.com/s/dcYaEVb4_29BU5A-JwiHdw)
+  - [针对仅解码器向量模型的 GGUF 优化](https://jina.ai/news/optimizing-ggufs-for-decoder-only-embedding-models/)
+    - 在 L4 GPU 上，用 llama.cpp 将 3B 的向量模型推理速度推到了 4000 token/s 把模型适配、GGUF( llama.cpp 支持的 GGUF 格式) 量化和性能优化的完整经验
+    - 转换过程中的坑
+      - llama.cpp 对 Qwen2.5-VL-3B 的视觉塔（mmproj / ViT）有 BUG，导致同一张图片的嵌入与 PyTorch 结果不一致，因此暂时把视觉塔剥离，只保留文本分支。
+      - v4 的“多向量输出”(late-interaction) 也不在标准计算图里，作者把末层 MLP 单独导出到 numpy，作为后处理。
+      - 三个 LoRA 适配器（retrieval、text-matching、code）全部合回基座模型，生成三个各 3.09B 参量的 F16 GGUF 基线。
+    - 量化策略
+      - 用 calibration_data_v5_rc.txt 先跑 imatrix，再一次性输出 17 种量化（IQ1/2/3/4_*、Q2/3/4/5/6/8 等）。
+      - 质量与压缩权衡：IQ3_M/IQ3_S（≈3.8 bits per weight）几乎不降精度，文件 1.3 GB；2 bit 以下量化效果开始明显劣化。
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
 - [Tune LLM]

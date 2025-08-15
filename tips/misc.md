@@ -2,6 +2,7 @@
   - Inventing Wheels Is Learning
   - “重新发明轮子”是深度学习和理解的绝佳途径。引用物理学家费曼的话：“我无法创造的，我就不理解”，强调只有亲手尝试构建，哪怕只是一个简化版，才能真正从根本上理解事物
   - 为了洞察而重新发明，为了影响力而重用（Reinvent for insight. Reuse for impact.）
+- [Teach Yourself Computer Science](https://teachyourselfcs.com/)
 - [手机居然可以这么偷听你的秘密](https://mp.weixin.qq.com/s/U8fZbVgEHmKSZmt62XFEkw)
   - https://www.ndss-symposium.org/wp-content/uploads/2020/02/24076-paper.pdf
   - 可以采集内置加速传感器的信号，然后通过深度学习算法来解析出语音文字
@@ -428,6 +429,11 @@
     - 在用 Claude Code 或者 Copilot/Curosr 的 Agent mode，会在提示词中加一句类似的话：
       Please write tests and verify the tests by running
       `npx jest <testfilepath> -c './jest.config.ts' --no-coverage`
+  - Cursor vs Claude Code
+    - 用 Cursor 作为主要 IDE，享受熟悉的界面和顺滑的 Tab 补全；
+    - 遇到复杂问题/bug时，在 Cursor 的终端中启动 Claude Code；
+    - 让 Claude Code 负责思考和规划，Cursor 负责执行和微调；
+  - Claude Opus 4.1 for plan mode and Claude Sonnet 4 for all other work
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。
