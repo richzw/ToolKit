@@ -816,4 +816,4 @@
   tcp quick_ack 、 nodelay ，socket 编程 go 协程机制
   职业规划
   为什么换工作
-
+- [AI research interviews](https://docs.google.com/document/d/1ZV73D2vgaj2yu_tjN3TVOP6QVLWVPXJB2rrqSZQxYtI/edit?tab=t.0)

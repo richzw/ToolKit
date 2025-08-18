@@ -2195,8 +2195,11 @@
   - jonhoo/drwmutex 的分片读写锁
     - 为每个 CPU 核心提供其自己的 RWMutex 实例。读者只需要获取其核心本地的读锁，而写者则必须按顺序获取所有核心上的锁
 - [150-Line Go Script Is Actually a Full-On Load Balancer](https://hackernoon.com/this-150-line-go-script-is-actually-a-full-on-load-balancer)
-
-
+- [高性能本地缓存库LocalCache](https://mp.weixin.qq.com/s/PgVDX0y1uDC3U6twQ2xryw)
+  - 如果首要目标是最大化缓存命中率和利用最现代化的缓存算法，请首选 Ristretto。
+  - 如果核心痛点是 Value 很大，或者缓存的条目数非常多，且希望服务延迟绝对平稳，那么 BigCache 或 FreeCache 是最佳选择。它们两个之间可以都进行测试，看看哪个在具体业务中的具体负载下表现更好。
+  - 如果追求的是无情的原始速度，并且相信 VictoriaMetrics 的工程能力，FastCache 是一个极具竞争力的选项。
+  - 如果需要的是一个分布式缓存解决方案而不仅仅是本地缓存，那么 groupcache 是官方背景、经过验证的可靠选择。
 
 
 

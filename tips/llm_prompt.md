@@ -1730,3 +1730,39 @@
   - 5、把禁止项目放在第一步。
   - 6、确定你的禁止项是否能禁止。比如你没有给文案确定风格，结果文本出现了AI味儿，那你禁止他用AI口吻也没用，他自己也不知道自己用什么口吻讲！
 - [GPT-5 prompting guide](https://cookbook.openai.com/examples/gpt-5/gpt-5_prompting_guide)
+  - [GPT-5 Prompt Migration and Improvement Using the New Optimizer](https://cookbook.openai.com/examples/gpt-5/prompt-optimization-cookbook)
+  - [GPT-5 for Coding](https://cdn.openai.com/API/docs/gpt-5-for-coding-cheatsheet.pdf)
+    - Be precise and avoid conflicting information
+      - The new GPT-5 models are significantly better at instruction following, 
+      - but a side effect is that they can struggle when asked to follow vague or conflicting instructions, especially in your .cursor/rules or AGENTS.md 
+    - Use the right reasoning effort
+      - GPT-5 will always perform some level of reasoning as it solves problems. 
+      - To get the best results, use high reasoning effort for the most complex tasks. If you see the model overthink simple problems, be more specific or choose a lower reasoning level like medium or low.
+    -  Use XML-like syntax to help structure instructions
+      - Together with Cursor, we found GPT-5 works well when using XML-like syntax to give the model more context. For example, you might give the model coding guidelines:
+        ```
+        <code_editing_rules>
+        <guiding_principles>
+          - Every component should be modular and
+          reusable
+          - ...
+        </guiding_principles>
+        <frontend_stack_defaults>
+        - Styling: TailwindCSS
+        </frontend_stack_defaults>
+        </code_editing_rules>
+        ```
+    - Avoid overly firm language
+      - With other models you might have used firm language like:
+        Be THOROUGH when gathering information. Make sure you have the FULL picture before replying.
+      - With GPT-5, these instructions can backfire as the model might overdo what it would naturally do. For example, it might be overly thorough with tool calls to gather context.
+    - Give room for planning and self-reflection
+    -  Control the eagerness of your coding agent
+      - GPT-5 by default tries to be thorough and comprehensive in its context gathering. Use prompting to be more prescriptive about how eager it should be, and whether it should parallelize discovery/tool calling.
+
+
+
+
+
+
+
