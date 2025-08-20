@@ -2095,6 +2095,19 @@
       - 在 Go1.24 所引入的 swissmaps 中，map[int64]struct{} 的每个槽（slot）需要 16 字节空间，而不是预期的 8 字节
         - https://github.com/golang/go/issues/70835
         - [How Go 1.24's Swiss Tables saved us hundreds of gigabytes](https://www.datadoghq.com/blog/engineering/go-swiss-tables/)
+          - Go 1.23 与 1.24 map 实现差异
+            - Go 1.23 采用“桶 + 溢出桶”结构；装载因子上限 81.25%，扩容期间旧桶与新桶并存，内存占用高。
+            - Go 1.24 采用 Swiss Tables + Extendible Hashing：
+               - 每组 8 个 slot + 1 个 64-bit 控制字，可用 SIMD 一次性比较 8 个键。
+               - 装载因子提高到 87.5%，不再需要溢出桶。
+               - 单表最多 128 组，通过目录分割表，扩容时只复制受影响的 128 组，避免双份占用。
+            - 结果：大 map 内存显著下降，CPU 也因 SIMD/探测减少而受益。
+          - 典型案例 – shardRoutingCache
+            - 约 350 万条记录。
+            - Go 1.23：主/旧桶 + 溢出桶 ≈ 726 MiB；加上键字符串约 930 MiB。
+            - Go 1.24：Swiss Tables ≈ 217 MiB；节省 ~500 MiB heap，折合 ~1 GiB RSS（含 GOGC）。
+          - 小流量环境差异
+             -  仅 55 万条记录时，Swiss Tables 只节省约 28 MiB；不足以抵消 mallocgc 的 200-300 MiB 回退，因此整体 RSS 仍上升。
       - 针对当前runtime.lock2实现的问题进行优化
     - cgo改进：新增了#cgo noescape和#cgo nocallback注解，优化C代码调用的效率。
     - 编译器限制：禁止在C类型别名上声明方法，以提高类型安全性

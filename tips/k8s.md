@@ -1108,7 +1108,18 @@
     # 宿主机执行，根据 index 号查询 veth pair
     ip a | grep ${index}
     ```
-
+- [Tuning Linux Swap for Kubernetes: A Deep Dive](https://kubernetes.io/blog/2025/08/19/tuning-linux-swap-for-kubernetes-a-deep-dive/)
+  - Kubernetes v1.34 将把 NodeSwap 功能升级为稳定版，容许 Linux 节点开启 swap，从而在内存紧张时把冷页调出到磁盘，减少 OOM Kill 并提升节点利用率。
+    - 但 swap 不是一键启用即可，需要结合 Linux 内核参数进行精细调优，否则可能导致性能劣化或干扰 kubelet 驱逐逻辑
+  - Linux Swap 基础
+    - 页面分为匿名页与文件缓存页；无 swap 时只能回收文件缓存，无法迁移匿名页。
+    - 启用 swap 后，内核可把不常用的匿名页写入磁盘，释放 RAM。
+  - 二、影响 swap 行为的关键内核参数
+    - vm.swappiness（0–200）：决定倾向交换匿名页还是丢弃缓存。
+      - • 高值（≈90）主动换出匿名页，保持文件缓存；I/O 压力大。
+      - • 低值（≈0-10）优先丢缓存，延迟交换。
+    - vm.min_free_kbytes：强制保留的最小空闲内存，数值越高，内核越早开始回收/换页。
+    - vm.watermark_scale_factor：决定 free watermark（high/low/min）之间的间隔；值越大，kswapd 有更宽裕的“换页窗口”，可在达到危险阈值前腾出内存
 
 
 

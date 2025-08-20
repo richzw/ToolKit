@@ -89,7 +89,13 @@
     - ✅ Scales with teams, empowers domain ownership.
     - ❌ High governance overhead, needs strong org maturity.
     - Go-to Tools: Requires combining multiple tools to implement.
-
+- [VictoriaMetrics联创揭示PB级日志处理性能奥秘]
+  - 10 秒查询的四级加速路径
+    -  压缩：VictoriaLogs 对结构化/半结构化日志可做到 8–50 倍压缩；1 PB 原始日志变 64 TB，扫描时间自 70 h 降到 4.6 h。
+    -  列式存储：只读所需列＋针对同质数据做专用编码，使扫描量再降到 4 TB，约 17 min。
+    -  时间分区：绝大多数查询带时间条件；按小时/天切分，可跳过 90 % 数据，剩 400 GB，≈100 s。
+    -  日志流索引：按 service／pod 等标签拆分流，只扫相关流，再降 90 %，剩 40 GB，≈10 s。 稀疏索引 + append-only 写模式消除了行库随机 I/O 与写放大。）
+    -  Bloom Filter（可选）：为每块建立过滤器，做“trace_id 大海捞针”式查询时可再提速百倍。
 
 
 

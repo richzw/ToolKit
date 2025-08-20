@@ -1472,6 +1472,7 @@
   - This calculator quickly estimates the cost of building a RAG pipeline, including chunking, embedding, vector storage/search, and LLM generation.
 - [Context Engineering for Agents](https://rlancemartin.github.io/2025/06/23/context_engineering/)
   - [Awesome Context Engineering](https://github.com/Meirtz/Awesome-Context-Engineering)
+  - ![img.png](rag_context_engineering.png)
   - 上下文内容可能随代理的多轮交互而不断膨胀，既会增加代价（token数量和时间），也可能导致模型的“Context Degradation Syndrome”——上下文越长，模型对关键信息的把握能力可能下降
   - 主要策略：Curate, Persist, Isolate
     - Curate（精简/管控上下文）
