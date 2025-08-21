@@ -2169,6 +2169,21 @@
       - go vet 新增 waitgroup 和 hostport 分析器
       - testing/synctest 提供测试并发代码的支持，包括伪造时钟和 goroutine 等待机制
       - 容器感知 GOMAXPROCS 在 Linux 上自动根据 cgroup CPU 限制调整 GOMAXPROCS，并动态更新
+        - [Container-aware GOMAXPROCS](https://go.dev/blog/container-aware-gomaxprocs)
+        - Go 1.25 的新默认
+          - 运行在有 CPU Limit 的容器里时，Go 会把 GOMAXPROCS 默认改为「CPU Limit 向上取整后所得的整数」。
+          - Go 会定期检测 CPU Limit 变化并动态调整 GOMAXPROCS。
+          - 若用户显式设置了 GOMAXPROCS（环境变量或 runtime.GOMAXPROCS 调用），行为与以前完全一致。
+        - 并行度限制 vs. 带宽限制
+          - • GOMAXPROCS 是“并行度”上限：同时最多运行多少个 goroutine 对应的线程。
+          - • cgroup CPU Limit 是“吞吐量”上限：在固定 100 ms 周期内可消耗的 CPU 时间。
+          - • Go 将 Limit 向上取整后再用作 GOMAXPROCS，因此对极端突发型负载可能略微抑制短暂的高并行峰值，但通常比过高的 GOMAXPROCS 更可取。
+        - 关于 CPU Request
+          - • CPU Request 只是最小保证额度；当节点空闲时容器可超额使用。
+          - • 若仅设置 Request 而不设 Limit，Go 仍会退回到“宿主机 CPU 数”这一旧默认，以便利用额外空闲资源。
+        - 该不该给容器设 CPU Limit？
+          - • 如需更可预测的延迟或避免小容器在大机器上被严重 throttle，可考虑设置 CPU Limit（或手动调小 GOMAXPROCS）。
+          - • 若更看重利用集群空闲算力，仍可只设 Request 或手动管理并发度。
       - TLS SHA-1 禁用
       - DWARF v5 调试信息 编译器和链接器生成 DWARF v5 调试信息
       - Go.25 要求 macOS2 Monterey 或更高版本

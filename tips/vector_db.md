@@ -898,6 +898,12 @@
     - failed to search: out of range in json: ef(56) should be larger than k(200)
       - 这个报错意思是你给search设置的topk值是200，hnsw的ef参数要大于topk，但你给ef设值是56。ef的值要大于topk的值，设计上如此
   - QA
+    - [𝗛𝗼𝘄 𝗠𝗶𝗹𝘃𝘂𝘀 𝗦𝗼𝗹𝘃𝗲𝘀 𝘁𝗵𝗲 𝗦𝗰𝗮𝗹𝗮𝗯𝗶𝗹𝗶𝘁𝘆 𝗣𝗿𝗼𝗯𝗹𝗲𝗺](https://milvus.io/blog/why-manual-sharding-is-a-bad-idea-for-vector-databases-and-how-to-fix-it.md) 
+      - Milvus takes a fundamentally different approach, enabling seamless scaling from millions to billions of vectors without the complexity:
+      - 𝗔𝘂𝘁𝗼𝗺𝗮𝘁𝗲𝗱 𝗦𝗰𝗮𝗹𝗶𝗻𝗴 𝗪𝗶𝘁𝗵𝗼𝘂𝘁 𝗧𝗲𝗰𝗵 𝗗𝗲𝗯𝘁: Kubernetes + disaggregated storage-compute architecture
+      - 𝗦𝗲𝗴𝗺𝗲𝗻𝘁-𝗕𝗮𝘀𝗲𝗱 𝗔𝗿𝗰𝗵𝗶𝘁𝗲𝗰𝘁𝘂𝗿𝗲: Growing segments on StreamNodes for real-time data, sealed segments on QueryNodes with powerful indexes
+      - 𝗧𝘄𝗼-𝗟𝗮𝘆𝗲𝗿 𝗥𝗼𝘂𝘁𝗶𝗻𝗴: Each shard stores 1+ billion data points, with segments automatically balanced across machines
+      - 𝗘𝗳𝗳𝗼𝗿𝘁𝗹𝗲𝘀𝘀 𝗘𝘅𝗽𝗮𝗻𝘀𝗶𝗼𝗻: Adding capacity is as simple as increasing shard count — no manual intervention required
     - [De duplication of the same vector](https://github.com/milvus-io/milvus/issues/5607)
     - milvus创建一个collection后，还能再添加动态字段吗？dynamic schema 打开之后，就可以再加列
     - 为何不用float64来保证小数点后十几位？
