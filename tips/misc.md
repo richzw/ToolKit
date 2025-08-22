@@ -394,6 +394,8 @@
     - 16. 自定义 PR 模板 : 不要用默认模板，针对项目定制更合适的 PR（pull request) 模板。
   - [claude-code-cookbook](https://github.com/wasabeef/claude-code-cookbook/blob/main/README_zh.md)
   - [Getting Good Results from Claude Code](https://www.dzombak.com/blog/2025/08/getting-good-results-from-claude-code/)
+    - Claude Code 新的 Learning mode 就是一个例子，你可以在启动Claude 后，输入 “/output-styles” 命令，选择 Learning 模式 “3. Learning” ，那么 Claude 就会只实现整体框架，留一个小模块让你自己实现。
+    - 可以选择“2. Explanatory”，Claude 会在工作过程中生成其决策过程的摘要，让你有机会更好地理解它在做什么
   - [Claude Code 最佳实践](https://cc.deeptoai.com/docs/zh/best-practices/claude-code-best-practices)
     - `claude --permission-mode bypassPermissions`
     - 在 ~/.claude/settings.json  加入下面的配置，就可以看你 Claude Code 的实时消耗了
