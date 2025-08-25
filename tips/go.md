@@ -2200,7 +2200,13 @@
   - 如果核心痛点是 Value 很大，或者缓存的条目数非常多，且希望服务延迟绝对平稳，那么 BigCache 或 FreeCache 是最佳选择。它们两个之间可以都进行测试，看看哪个在具体业务中的具体负载下表现更好。
   - 如果追求的是无情的原始速度，并且相信 VictoriaMetrics 的工程能力，FastCache 是一个极具竞争力的选项。
   - 如果需要的是一个分布式缓存解决方案而不仅仅是本地缓存，那么 groupcache 是官方背景、经过验证的可靠选择。
-
+- [Go is still not good ](https://news.ycombinator.com/item?id=44982491)
+  - 一个持有nil指针的接口变量，其自身并不等于nil。
+  - Go通过if err := foo(); err != nil语法，优雅地将err变量的作用域限制在if块内，这被广泛认为是最佳实践。然而，当函数调用需要返回除error之外的值时，这种优雅便荡然无存
+  - append的隐式副作用
+  - defer是Go处理资源释放的利器，但它的作用域是整个函数，而非其所在的词法块（lexical scope）
+  - 标准库中的fmt.Print和net/http服务器等关键部分，会主动recover从panic中恢复，这破坏了panic的基本约定
+  - Go的string类型本质是只读的[]byte，不强制其为合法的UTF-8。这在与操作系统交互（如处理文件名）时提供了灵活性，但也埋下了隐患
 
 
 
