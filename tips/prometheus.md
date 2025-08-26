@@ -19,37 +19,37 @@
     - 利用黑白名单
     - 利用环比和同比
 - [Sidecar 的资源和性能管理]
-```shell
-record: "container_cpu_usage_against_request:pod:rate1m"
-   expr: |
-    (   
-      count(kube_pod_container_resource_requests{resource="cpu", container!=""}) by (container, pod, namespace)
-      *   
+  ```shell
+  record: "container_cpu_usage_against_request:pod:rate1m"
+     expr: |
+      (   
+        count(kube_pod_container_resource_requests{resource="cpu", container!=""}) by (container, pod, namespace)
+        *   
+        avg(
+          irate(
+            container_cpu_usage_seconds_total{container!=""}[1m]
+          )   
+        ) by (container, pod, namespace)
+      )   
+      /   
       avg(
-        irate(
-          container_cpu_usage_seconds_total{container!=""}[1m]
+        avg_over_time(
+          kube_pod_container_resource_requests{resource="cpu", container!=""}[1m]
         )   
-      ) by (container, pod, namespace)
-    )   
-    /   
-    avg(
-      avg_over_time(
-        kube_pod_container_resource_requests{resource="cpu", container!=""}[1m]
-      )   
-    ) by (container, pod, namespace) * 100 
-    *   
-    on(pod) group_left(workload) (
-      avg by (pod, workload) (
-        label_replace(kube_pod_info{created_by_kind=~"ReplicaSet|Job"}, "workload", "$1", "created_by_name", "^(.*)-([^-]+)$")
-        or  
-        label_replace(kube_pod_info{created_by_kind=~"DaemonSet|StatefulSet"}, "workload", "$1", "created_by_name", "(.*)")
-        or  
-        label_replace(kube_pod_info{created_by_kind="Node"}, "workload", "node", "", "") 
-        or  
-        label_replace(kube_pod_info{created_by_kind=""}, "workload", "none", "", "") 
-      )   
-    )
-```
+      ) by (container, pod, namespace) * 100 
+      *   
+      on(pod) group_left(workload) (
+        avg by (pod, workload) (
+          label_replace(kube_pod_info{created_by_kind=~"ReplicaSet|Job"}, "workload", "$1", "created_by_name", "^(.*)-([^-]+)$")
+          or  
+          label_replace(kube_pod_info{created_by_kind=~"DaemonSet|StatefulSet"}, "workload", "$1", "created_by_name", "(.*)")
+          or  
+          label_replace(kube_pod_info{created_by_kind="Node"}, "workload", "node", "", "") 
+          or  
+          label_replace(kube_pod_info{created_by_kind=""}, "workload", "none", "", "") 
+        )   
+      )
+  ```
 - [Metrics 系统架构演进](https://mp.weixin.qq.com/s/ezG3VQLgE2e0AWSxsoBHRg)
   -  Thanos
     - 可以从多个 Prometheus 集群查询数据，统一了查询入口，提高了用户的体验。同时提供长期数据，另外 Thanos 可以通过 Prometheus-Operator 来管理，所以大大降低了整体管理成本和入侵性
@@ -82,7 +82,6 @@ record: "container_cpu_usage_against_request:pod:rate1m"
       - `avg(container_memory_working_set_bytes{namespace=~"alpha|beta|prod", pod=~".*$project.*", container!="POD"} > 0) by (pod) /
         avg(kube_pod_container_resource_requests_memory_bytes{namespace=~"alpha|beta|prod", pod=~".*$project.*", container!="POD"} > 0) by (pod) * 100`
     - Network
-    - 
 - [Prometheus 指标值为何不准](https://mp.weixin.qq.com/s/A3W3hSCpQi8DQYJxOS1ZGA)
   - Overview
     - Prometheus 指标值不准的“怪现象”，其实是在下面的“不可能三角”中，做出了取舍——为保全效率和可用性，舍弃了精度
@@ -215,8 +214,8 @@ record: "container_cpu_usage_against_request:pod:rate1m"
     - USE方法 (Utilization, Saturation, Errors) 比如CPU使用率、内存饱和度、磁盘错误等。它是RED方法的重要补充，当RED指标显示服务异常时，USE指标能帮助我们判断是不是资源瓶颈导致的。
     - 四个黄金信号 (Latency, Traffic, Errors, Saturation): Google SRE实践的精华 RED中的Rate对应Traffic，Duration对应Latency，Errors对应Errors。
 - [关于 Distributed Tracing 的调研](https://mp.weixin.qq.com/s/Ru9Tl4zWSCBsGO4Pe57vEA)
-  
-
+- [Alerting Best Practices](https://victoriametrics.com/blog/alerting-best-practices/)
+  - 配置 vmalert 的 -external.url / -external.alert.source，使告警自带 “查看规则 / 一键静默 / Grafana 面板” 等可点击链接
 
 
 

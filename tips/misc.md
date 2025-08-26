@@ -436,6 +436,21 @@
     - 遇到复杂问题/bug时，在 Cursor 的终端中启动 Claude Code；
     - 让 Claude Code 负责思考和规划，Cursor 负责执行和微调；
   - Claude Opus 4.1 for plan mode and Claude Sonnet 4 for all other work
+  - [How to build a Claude Code like agent](https://minusx.ai/blog/decoding-claude-code/)
+    - 1. Control Loop
+         1.1 Keep one main loop (with max one branch) and one message history
+         1.2 Use a smaller model for all sorts of things. All. The. Frickin. Time.
+    - 2. Prompts
+    -    2.1 Use claude.md pattern to collaborate on and remember user preferences
+    -    2.2 Use special XML Tags, Markdown, and lots of examples
+    - 3. Tools
+    -    3.1 LLM search >>> RAG based search
+    -    3.2 How to design good tools? (High vs Low level tools)
+    -    3.3 Let your agent manage its own todo list
+    - 4. Steerability
+    -    4.1 Tone and style
+    -    4.2 "PLEASE THIS IS IMPORTANT" is unfortunately still state of the art
+    -    4.3 Write the algorithm, with heuristics and examples
 - [Web预加载](https://mp.weixin.qq.com/s/2C7w4iL4DLa1QXqq-37SAw)
 - systemd-resolved:
   - systemd-resolved 是一个系统服务，负责为本地应用程序提供网络名称解析。
