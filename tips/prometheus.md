@@ -216,7 +216,7 @@
 - [关于 Distributed Tracing 的调研](https://mp.weixin.qq.com/s/Ru9Tl4zWSCBsGO4Pe57vEA)
 - [Alerting Best Practices](https://victoriametrics.com/blog/alerting-best-practices/)
   - 配置 vmalert 的 -external.url / -external.alert.source，使告警自带 “查看规则 / 一键静默 / Grafana 面板” 等可点击链接
-
+- [VictoriaLogs: What if logs management became simple and performant?](https://blog.ogenki.io/post/series/observability/logs/)
 
 
 

@@ -694,6 +694,13 @@
     - 服务器必须提供一个单一的 HTTP 端点（例如 https://example.com/mcp），支持 POST 和 GET 方法 (Model Context Protocol Specification - Transports)。
     - 客户端通过 HTTP POST 请求发送 JSON-RPC 消息到该端点，消息体可以是单一 JSON-RPC 消息或批处理请求/通知/响应。
     - 客户端必须在请求头中包含 Accept 头，支持 application/json 和 text/event-stream
+- [TLS 1.3 多了一个 RTT](https://mp.weixin.qq.com/s/-b97t9rzIfSR_JJKOAzr4A)
+  - 排查过程
+    - a. 浏览器与 Wireshark 证实：Server 在收到 Client 对第 9 号包的 ACK 之后才发送 Certificate Verify 与 Finished，导致多出 1 RTT。
+    - b. 从 TCP 角度逐项排除 RWND、MSS、拥塞控制、tcp_wmem 等限制后，注意到 nginx 配置中 tcp_nodelay off，说明 Nagle 算法被启用。
+    - c. Nagle 算法规则：当待发数据小于 MSS 且之前的未确认数据存在时，需等 ACK 或超时（≈200 ms）后才能再发新包。这里 Server 的第 9、12 号包都是小包，因此 12 号包被 Nagle 延迟，正好形成 1 RTT 的额外等待。
+  -  “TLS 1.3 1 RTT”只描述协议层逻辑，实际耗时仍受 TCP 机制影响。
+  - 对时延敏感的场景（Web、RPC、游戏等）通常应关闭 Nagle
 
 
 
