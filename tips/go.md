@@ -1,4 +1,4 @@
-
+- [Go features by version](https://antonz.org/which-go/)
 - [Applying Modern Go Concurrency Patterns to Data Pipelines](https://medium.com/amboss/applying-modern-go-concurrency-patterns-to-data-pipelines-b3b5327908d4)
   - A Simple Pipeline
   - you run this with go run main.go you'll see a deadlock

@@ -1797,7 +1797,12 @@
   - 确认是否需要其他帮助：我会询问你是否需要进一步协助，或者是否希望进行其他修改或指导。
   - 主动生成修改后的文本：我会提议将所有建议整合起来，直接为你生成一篇修改好的全文。
   ```
-
+- Preventing Hallucinations
+  - Try the following to troubleshoot or minimize hallucinations:
+  - Have Claude say "I don't know" if it doesn't know
+  - Tell Claude to answer only if it is very confident in its response
+  - Have Claude think before answering
+  - Ask Claude to find relevant quotes from long documents then answer using the quotes
 
 
 

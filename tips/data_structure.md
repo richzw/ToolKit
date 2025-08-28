@@ -370,8 +370,21 @@
   - ![img_1.png](datastructure_db.png)
 - ![img.png](datastructure_design.png)
 - [Binary Indexed Tree](https://medium.com/@hzpang/understanding-binary-indexed-tree-724b3ab978df)
-
-
+- 6 Data Structures to Save Database Storage
+  - Bloom Filter
+    - Purpose: Reduce costly lookups by testing whether an element is a member of a set.
+  - Hyperloglog
+    - Purpose: Estimate number of unique elements.
+    - 记“有多少种，不管几次。”（统计多少个不重复的人/物）- 哈希+位图寄存器
+  - Cuckoo Filter
+    - Purpose: It checks if an item belongs to a set.
+  - Minhash
+    - Purpose: If finds the similarity between sets.
+  - SkipList
+    - Purpose: It efficiently searches, inserts, and deletes items from a sorted list.
+  - Count-Min Sketch
+    - Purpose: Finds the frequency of items in a large data stream.
+    - 记“各出现几次，不能去重。”（每个出现了多少次，不管重复）- 哈希表+二维计数数组
 
 
 

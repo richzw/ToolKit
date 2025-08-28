@@ -1113,7 +1113,7 @@
     - Repeats steps 1-2 multiple times and concatenates results. This improves accuracy by capturing different aspects of the original embeddings.
   - 𝗙𝗶𝗻𝗮𝗹 𝗣𝗿𝗼𝗷𝗲𝗰𝘁𝗶𝗼𝗻
     - Creates the final single vector representation. The result? One fixed-size vector per document instead of hundreds.
-
+- [Data Lakehouse vs. Data Lake vs. Data Warehouse](https://zilliz.com/glossary/data-lakehouse)
 
 
 
