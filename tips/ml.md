@@ -2,6 +2,7 @@
   - [CS336: Language Modeling from Scratch](https://stanford-cs336.github.io/spring2025/)
   - [Implement a ChatGPT-like LLM in PyTorch from scratch](https://github.com/rasbt/LLMs-from-scratch)
     - LLM from scratch book
+  - [Mathematics for Computer Science](https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/)
   - [The Ultra-Scale Playbook: Training LLMs on GPU Clusters](https://huggingface.co/spaces/nanotron/ultrascale-playbook?section=high-level_overview)
   - [Top AI cheatsheet](https://www.aifire.co/p/top-ai-cheatsheets)
   - [Understanding Deep Learning](https://udlbook.github.io/udlbook/)
@@ -1899,7 +1900,7 @@
     - 以交叉熵函数作为损失函数的数学基础来自于统计学中的最大似然估计 Maximum Likelihood Estimation
     - 最大似然估计是一种参数估计，更确切的说，是一个点估计
     - 最大似然估计的思想: 使得观测数据（样本）发生概率最大的参数就是最好的参数
-
+- 
 
 
 

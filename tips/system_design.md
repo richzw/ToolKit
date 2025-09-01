@@ -1161,8 +1161,49 @@
     - MySQL 会话时间戳改为严格单调、微秒精度，在存储节点及其 Raft 组内唯一。
     - 事务提交前按时间戳索引回读本事务更新到的行键（含软删），将“受影响行集+提交时间戳”返回给查询引擎。
     - 写路径拦截与失效：查询层拦截写 API，拿到“受影响行集+提交会话时间戳”后向 Redis 写失效标记，可选择同步（更强读己之写/插入保障，增加写延迟）或异步；同时保留 TTL 与 Flux 三路协同。使用数据库生成的提交时间戳对缓存回填与失效标记去重，淘汰了旧的显式失效 API，提高一致性与命中率。
-
-
+- [Everything I know about good API design](https://www.seangoedecke.com/good-api-design/)
+  - WE DO NOT BREAK USERSPACE
+    - • 只能做“加法”变更（新增字段、枚举值）；删除字段、修改类型或层级必然破坏客户端。
+    - • HTTP 的 “referer” 拼写错误几十年都没改就是活例子。
+  - 真的非改不可 → 版本化（最后手段）
+    - • 做法：同时提供旧版与新版，如 /v1/… 和 /v2/…；或学 Stripe 把版本放在 Header 并允许账号级默认值。
+    - • 代价：每新增 1 个版本就要维护 n×端点；即使有 “翻译层” 只处理序列化/反序列化，业务逻辑仍会出现条件分支渗漏。
+    - • 迁移周期以“月/年”为单位，最终下线仍会收到大量投诉。
+  - 产品＞API
+    - • API 再烂，若产品（OpenAI 推理、Twilio SMS 等）足够有吸引力，开发者仍会忍受。
+    - • 没产品价值，API 设计得再优雅也没人用。
+  - 架构差的产品→无法做出优雅 API
+    - • API 通常直接暴露核心资源。如果底层数据模型畸形，接口也会随之畸形。
+    - • 示例：评论存链表 → 为获取完整串必须做分页或后台作业 → API 被迫设计成 /comments/fetch_job。
+  - 鉴权
+    - • 一定要支持“长寿命 API Key”，哪怕同时提供 OAuth 等更安全方案。
+    - • 许多调用者不是专业程序员；若入门就要求 OAuth handshake，会劝退大量脚本/业余用户。
+  - 幂等性与重试
+    - • 对“执行动作”的请求（建单、付款、发药）必须支持“可安全重试”。
+    - • 通用做法：客户端生成 idempotency-key（UUID 等）放入 Header/参数；
+  - 服务器查表或查 Redis：已见过则返回之前结果；未见过才执行业务并记录 key。
+    - • 读请求无需幂等键；ID 定位的 DELETE 通常天然幂等。
+    - • 幂等键可存 Redis 并设置过期；若是支付领域需用数据库事务保证原子性。
+    - 安全性与限流
+     - • 代码可比人手快几个数量级，任何昂贵操作都可能被无意或恶意滥用。
+     - • 建议：
+       - 对整体 API 设置基础速率限制，对高成本端点设置更严限制；
+       - 保留按客户“拔网线”或降级的 kill-switch；
+       - 在响应中加入 X-Limit-Remaining 与 Retry-After，方便客户端自适应。
+  - 分页
+    - • 偏小数据集可用 page/offset 模式：/tickets?page=2 或 offset=20。
+    - • 大数据集应切换“游标分页”——传回最后一条记录的 ID，再用 WHERE id > cursor ORDER BY id LIMIT n；性能与位置无关。
+    - • 在响应体内返回 next_page / next_cursor，免去客户端推算。
+- [Do the simplest thing that could possibly work](https://www.seangoedecke.com/the-simplest-thing-that-could-possibly-work/)
+  - 做系统设计、修 Bug 或扩展现有系统时，始终先做 “the simplest thing that could possibly work”（STTCPW，最简单且可行的方案）。
+  - Rate-Limiting 功能（以 Golang 服务为例） 候选方案自上而下对比：
+    - 编辑边缘代理（Nginx／Envoy 等）配置
+      - • 如果 proxy 已内建限流，写几行配置即可完成。
+    - 进程内 map[int]Counter，定时清零
+      - • 无外部依赖；重启时数据丢失 → 若业务可接受，这是最简单方案。
+    - Redis + 漏桶 / 令牌桶算法
+      - • 适用于多实例部署、数据丢失不可接受的场景。
+      - • 代价：部署、运维、监控、故障处理、跨环境复制均增加复杂度。 
 
 
 

@@ -920,6 +920,9 @@
        - FAQ Agent，回答常见问题和机型信息
        - 取消服务 Agent，处理退票和改签业务
   - [地图全开的麦肯锡Agent](https://mp.weixin.qq.com/s/NP0pUhji_P5z2svxfio1_A)
+  - 𝜏-Bench（也称为Tau Bench或τ-Bench）是一个专为评估AI代理
+    - 𝜏-Bench旨在桥接现有AI基准（如单轮工具调用测试）和真实世界应用的差距。它强调代理在处理不确定用户查询、遵守领域特定规则（如退款政策）以及与工具（如数据库或API）互动时的可靠性和效率，揭示代理在函数调用和多步推理中的潜在不一致性。
+    - https://github.com/sierra-research/tau-bench?tab=readme-ov-file
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
