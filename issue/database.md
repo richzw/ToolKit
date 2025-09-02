@@ -213,9 +213,15 @@
   - Writes are acknowledged only after the log hits persistent storage
   - WAL is used for crash recovery, replication, and backup
   - PostgreSQL, MongoDB, Kafka, and many other systems rely on WAL-like designs
-
-
-
+- Postgresql 18 async io
+  - io_method：选择异步 I/O 实现方式，取值 sync（与 PG17 一致的同步行为）、worker（由专门的 I/O worker 进程代执行）、io_uring（Linux 5.1+ 的高性能异步 I/O，需要编译启用 liburing）。该参数需重启生效。(postgresql.org, postgresqlco.nf)
+    - io_workers：当 io_method=worker 时，控制 I/O worker 进程数（默认 3）。
+    - io_max_concurrency：限制单进程同时进行的 I/O 数量上限
+    - io_combine_limit / io_max_combine_limit：限制合并读写的最大 I/O 大小（默认通常 128kB，可在 18 中放宽上限以便试验更大的合并 I/O）。(postgresql.org, postgresqlco.nf)
+    - effective_io_concurrency、maintenance_io_concurrency：在具备“预取建议”支持的平台上，控制预取距离/并发度；PG18 文档默认值提升为 16
+  - 支持范围与收益（概览）
+    - 以读路径为主：顺序扫描、位图堆扫描以及 VACUUM 等维护读操作首先受益；写入（含 WAL）仍以同步为主。实际测试在冷缓存、云盘/高时延存储上提升最明显
+    - io_uring 一般优于 worker（更少上下文切换/系统调用开销），但要求 Linux 5.1+ 且构建包含 liburing
 
 
 

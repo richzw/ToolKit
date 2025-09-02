@@ -1204,8 +1204,23 @@
     - Redis + 漏桶 / 令牌桶算法
       - • 适用于多实例部署、数据丢失不可接受的场景。
       - • 代价：部署、运维、监控、故障处理、跨环境复制均增加复杂度。 
+- Algorithms you should know before system design
 
-
+  | Algorithm            | How it Works                     | Priority | Use Cases                  |
+  |-----------------------|-----------------------------------|----------|----------------------------|
+  | Geohash / Quadtree    | [Image: Grid with binary labels] | ★★★★★    | Location based service     |
+  | Consistent Hashing    | [Image: Circular ring with nodes]| ★★★★☆    | Balance the load within a cluster of services |
+  | Leaky bucket / Token bucket | [Image: Bucket with tokens] | ★★★★☆    | Rate limiter               |
+  | Trie                  | [Image: Tree structure]         | ★★★★☆    | Search autocomplete        |
+  | Rsync                 | [Image: Data blocks comparison] | ★★★★☆    | File transfers             |
+  | Raft/Paxos            | [Image: Node tree]              | ★★★★☆    | Consensus algorithms       |
+  | Bloomfilter           | [Image: Bit array with hashes]  | ★★★★☆    | Eliminate costly lookups   |
+  | Merkle tree           | [Image: Tree with hashes]       | ★★★★☆    | Identify inconsistencies between nodes |
+  | Count-min sketch      | [Image: Grid with counters]     | ★★★☆☆    | Estimate frequencies of items |
+  | Hierarchical timing wheels | [Image: Wheel with timers] | ★★★☆☆    | Job scheduler              |
+  | Operational transformation | [Image: Node connections] | ★★★☆☆    | Collaborative editing      |
+   
+   - Rsync 算法用“弱滚动校验快速定位 + 强哈希确认”的两级匹配，把“传整个文件”变成“传差异和拷贝指令”，在网络不变的情况下显著减少传输量与同步时间
 
 
 

@@ -1,4 +1,5 @@
 - [Go features by version](https://antonz.org/which-go/)
+- [Go Concurrency Explorer](https://www.concurrency.rocks/patterns/google3)
 - [Applying Modern Go Concurrency Patterns to Data Pipelines](https://medium.com/amboss/applying-modern-go-concurrency-patterns-to-data-pipelines-b3b5327908d4)
   - A Simple Pipeline
   - you run this with go run main.go you'll see a deadlock
@@ -2208,7 +2209,7 @@
   - 标准库中的fmt.Print和net/http服务器等关键部分，会主动recover从panic中恢复，这破坏了panic的基本约定
   - Go的string类型本质是只读的[]byte，不强制其为合法的UTF-8。这在与操作系统交互（如处理文件名）时提供了灵活性，但也埋下了隐患
 - [Go并发操作的成本层级清单](https://mp.weixin.qq.com/s/Bm5XPj3LLYubS_njjmsQ0A)
-
+- [Be Careful with Go Struct Embedding](https://mattjhall.co.uk/posts/be-careful-with-go-struct-embedding.html)
 
 
 
