@@ -1221,7 +1221,19 @@
   | Operational transformation | [Image: Node connections] | ★★★☆☆    | Collaborative editing      |
    
    - Rsync 算法用“弱滚动校验快速定位 + 强哈希确认”的两级匹配，把“传整个文件”变成“传差异和拷贝指令”，在网络不变的情况下显著减少传输量与同步时间
-
+- [Uber 核心存储栈](https://mp.weixin.qq.com/s/Egsk533PSX8-HkqTJCUaYA)
+  - 其核心在线存储系统不仅要处理 PB 级的海量数据，还要以毫秒级的延迟响应每秒上亿次的请求。
+  - 最初为解决 MySQL 扩展性难题而生的 Schemaless，
+    - Schemaless 的设计目标非常明确：在 MySQL 之上构建一个水平可扩展的、对开发者透明的分片层。
+    - 无模式 (Schemaless)：这并非真的没有模式，而是“读时模式”（schema-on-read）
+    - 二级索引：通过一个独立的索引系统，Schemaless 实现了对非主键字段的查询
+  - 到拥抱 SQL 和强一致性的分布式数据库 Docstore，
+    - 将 Schemaless演进为一个通用的、支持事务的分布式 SQL 数据库。Docstore 就此诞生。
+    - 写时模式 (Schema-on-write)：与 Schemaless 相反，Docstore 默认强制执行模式。
+    - 开发者控制的数据局部性：通过引入分区键 (Partition Key) 的概念，Docstore 允许开发者显式地控制哪些数据应该物理上存储在一起
+  - 再到最终通过集成式缓存 CacheFront 将读取性能推向 1.5 亿 QPS 的极致
+    - 为 Docstore 构建一个深度集成的、透明的分布式缓存层——CacheFront。 读多写少
+    - CacheFront 没有采用简单的 TTL（Time-To-Live）过期策略，因为它无法保证数据的一致性。其真正的“杀手锏”是利用了 Docstore 内建的变更数据捕获（Change Data Capture, CDC）服务——Flux
 
 
 

@@ -1803,7 +1803,7 @@
   - Tell Claude to answer only if it is very confident in its response
   - Have Claude think before answering
   - Ask Claude to find relevant quotes from long documents then answer using the quotes
-
+- [How to prompt Gemini 2.5 Flash Image Generation for the best results](https://drive.google.com/file/d/1Pl9aeG1XuqQyvXBQhdpdY-iI4-XQR3wU/view)
 
 
 
