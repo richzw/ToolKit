@@ -455,7 +455,7 @@
     - 运维人员应制定DLQ消息的处理流程，包括定期扫描分析DLQ原因、针对可重试的消息执行补处理或重新投递，对确属BUG导致的则在修复后回放。
 - [ Dynamic Tracing](https://blog.openresty.com/en/dynamic-tracing-part-1/)
   - random bugs that might only occur once every few months, the best approach could be Dynamic Tracing
-
+- [Nginx 撑住高并发](https://mp.weixin.qq.com/s/KEOxc33IL0sz3TSHQ6R3SA)
 
 
 

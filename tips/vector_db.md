@@ -1114,8 +1114,12 @@
   - 𝗙𝗶𝗻𝗮𝗹 𝗣𝗿𝗼𝗷𝗲𝗰𝘁𝗶𝗼𝗻
     - Creates the final single vector representation. The result? One fixed-size vector per document instead of hundreds.
 - [Data Lakehouse vs. Data Lake vs. Data Warehouse](https://zilliz.com/glossary/data-lakehouse)
-
-
+- [S3Vector](https://mp.weixin.qq.com/s/cB4dzM6IUZB5QW1IwrXBsA)
+  - 动态局部更新索引（SPFresh）：写数据后只更一部分索引，不用全重建。 好处是写代价比较低，不需要重建索引，坏处是更新后recall会下降几个百分点；
+  - 深度量化（4-bit PQ）：把高维向量压小，减少 S3 读写量 —— 好处是便宜、查得快，坏处依然是召回率低，Recall 稳定在 85% 左右，而且用户几乎无调参余地。
+  - 后过滤（Post-Filter）机制 ：先粗略查一批，再按条件筛 —— 好处是好实现，能利用统一的底层索引结构，缺点是在过滤条件较多时，TopK 结果可能严重不足（我们测到删除 50% 数据后，TopK 20 只能返回 15 个结果）。说明S3团队用的基本就是开源索引，没有在索引侧做太多改造。
+  - 分层缓存（Multi-tier Cache）：可能用 SSD  或者NVMe 做缓存，存最近查过的索引。新查询不命中SSD缓存时延迟明显较高
+  - 大规模分布式调度 ：S3 本身有海量机器池，S3Vector 可能利用微服务将“读取-解压-检索”拆成流水线，让查询延迟分布非常稳。
 
 
 

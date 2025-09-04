@@ -1120,8 +1120,31 @@
       - • 低值（≈0-10）优先丢缓存，延迟交换。
     - vm.min_free_kbytes：强制保留的最小空闲内存，数值越高，内核越早开始回收/换页。
     - vm.watermark_scale_factor：决定 free watermark（high/low/min）之间的间隔；值越大，kswapd 有更宽裕的“换页窗口”，可在达到危险阈值前腾出内存
-
-
+- [Kubernetes v1.34: Introducing CPU Manager Static Policy Option for Uncore Cache Alignment]
+  - 出现背景
+    - 现代 AMD64 / ARM 处理器越来越多采用 “Split Uncore Cache” 结构——L3（uncore）被拆分成多个物理 cache，每组 cache 负责一簇 CPU Core。
+    - 同一 uncore cache 内核心间延迟更低；跨 cache 延迟显著升高。若容器的 vCPU 跨 cache 分布，会带来额外延迟并加剧竞争。
+  - 功能概述
+    -  在 Static CPU Manager 策略下启用 policy option prefer-align-cpus-by-uncorecache（v1.32 α → v1.34 β）。
+    -  kubelet 分配 CPU 时会“尽量”把单个容器/Pod 所需的全部 CPU 放进同一个 uncore cache，为多容器/多 Pod 间做隔离。
+    -  若节点仍是单块 L3（传统架构），该选项退化为类似 socket-level pack 行为，对现有部署无负作用。
+  - 预期收益
+    - • 降低同一容器内部的跨-CPU cache 访问延迟。
+    - • 减少不同容器间的 L3 争用（“noisy-neighbor”）。
+    - • 对频繁缓存交互、低延迟敏感的场景（vRAN、移动核心网、防火墙等）提升吞吐与稳定性。
+    -  对主要受内存带宽限制的应用可能收益有限。
+  - 开启方法（Kubernetes 1.34 β）
+    - kubelet 配置示例：
+    - featureGates:
+    - CPUManagerPolicyBetaOptions: true
+    - cpuManagerPolicy: "static"
+    - cpuManagerPolicyOptions:
+    - prefer-align-cpus-by-uncorecache: "true"
+    - reservedSystemCPUs: "0"
+    - • 首次开启或修改旧节点需删除 /var/lib/kubelet/cpu_manager_state 并重启 kubelet。
+  - 适用范围与限制
+    - • 仅在静态 CPU Manager 模式下生效；Best-Effort，若节点资源不足仍会跨 cache 分配。
+    - • 与 NUMA / Topology Manager 等可联合使用，但需评估整体亲和策略。
 
 
 
