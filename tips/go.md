@@ -2210,7 +2210,7 @@
   - Go的string类型本质是只读的[]byte，不强制其为合法的UTF-8。这在与操作系统交互（如处理文件名）时提供了灵活性，但也埋下了隐患
 - [Go并发操作的成本层级清单](https://mp.weixin.qq.com/s/Bm5XPj3LLYubS_njjmsQ0A)
 - [Be Careful with Go Struct Embedding](https://mattjhall.co.uk/posts/be-careful-with-go-struct-embedding.html)
-
+- [Memory Order Side Chapter - The Story Of Strongly Happens Before](https://nekrozqliphort.github.io/posts/happens-b4/)
 
 
 

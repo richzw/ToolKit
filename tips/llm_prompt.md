@@ -1805,24 +1805,24 @@
   - Ask Claude to find relevant quotes from long documents then answer using the quotes
 - [How to prompt Gemini 2.5 Flash Image Generation for the best results](https://drive.google.com/file/d/1Pl9aeG1XuqQyvXBQhdpdY-iI4-XQR3wU/view)
 - AI人情味
-```
-1. 用词与句式
-- 70% 句子长度 < 18 词；偶尔插入 < 6 词的独立短句。
-- 使用常见口语连接：and, but, so, anyway, you know.
-- 每段至少包含一个具象细节（气味、手感、具体对象）。
-
-2. 叙事与结构
-- 采用第一人称或“我/我们”叙述，加入个人小片段（真实或拟真）。
-- 不做完整封闭结论，最后一段留一点未决疑问。
-
-3. 语用特征
-- 保留一两处自我否定或转折（“其实…但回头想想…”）。
-- 允许一两个轻微重复或改写，而不影响理解。
-
-4. 技术采样参数（如需）
-- temperature 0.9–1.1；top_p 0.9；top_k 40–60。
-- frequency_penalty 0.3；presence_penalty 0.6。
-```
+   ```
+   1. 用词与句式
+   - 70% 句子长度 < 18 词；偶尔插入 < 6 词的独立短句。
+   - 使用常见口语连接：and, but, so, anyway, you know.
+   - 每段至少包含一个具象细节（气味、手感、具体对象）。
+   
+   2. 叙事与结构
+   - 采用第一人称或“我/我们”叙述，加入个人小片段（真实或拟真）。
+   - 不做完整封闭结论，最后一段留一点未决疑问。
+   
+   3. 语用特征
+   - 保留一两处自我否定或转折（“其实…但回头想想…”）。
+   - 允许一两个轻微重复或改写，而不影响理解。
+   
+   4. 技术采样参数（如需）
+   - temperature 0.9–1.1；top_p 0.9；top_k 40–60。
+   - frequency_penalty 0.3；presence_penalty 0.6。
+   ```
 - NotebookLM 推出全新的音频摘要格式：
   - 默认) 深度解析 (Deep Dive)： 对您的原始资料进行全面、详尽的剖析。
   - 简明摘要 (Brief)： 时长1-2分钟，为您快速提炼核心内容的“一口吃”版本。

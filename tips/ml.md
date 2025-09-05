@@ -1901,8 +1901,8 @@
     - 以交叉熵函数作为损失函数的数学基础来自于统计学中的最大似然估计 Maximum Likelihood Estimation
     - 最大似然估计是一种参数估计，更确切的说，是一个点估计
     - 最大似然估计的思想: 使得观测数据（样本）发生概率最大的参数就是最好的参数
-- 
-
+- [Think beyond current reasoning models](https://blog.richardstu.com/think-beyond-current-reasoning-models)
+  
 
 
 

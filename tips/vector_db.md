@@ -897,6 +897,8 @@
       - 这种报错有可能是collection或者partition的数量太多了，datanode在处理timetick消息的过程中超时。要么减少表和分区的数量，要么把milvus.yaml里的watchTimeoutInterval改高点。
     - failed to search: out of range in json: ef(56) should be larger than k(200)
       - 这个报错意思是你给search设置的topk值是200，hnsw的ef参数要大于topk，但你给ef设值是56。ef的值要大于topk的值，设计上如此
+    -  'Timeout was reached' when loading collection https://github.com/milvus-io/milvus/discussions/41043
+      - Try increasing the timeout value minio.requestTimeoutMs: Or decrease the common.threadCoreCoefficient.middlePriority to lower the concurrence of loading chunk files
   - QA
     - [𝗛𝗼𝘄 𝗠𝗶𝗹𝘃𝘂𝘀 𝗦𝗼𝗹𝘃𝗲𝘀 𝘁𝗵𝗲 𝗦𝗰𝗮𝗹𝗮𝗯𝗶𝗹𝗶𝘁𝘆 𝗣𝗿𝗼𝗯𝗹𝗲𝗺](https://milvus.io/blog/why-manual-sharding-is-a-bad-idea-for-vector-databases-and-how-to-fix-it.md) 
       - Milvus takes a fundamentally different approach, enabling seamless scaling from millions to billions of vectors without the complexity:
