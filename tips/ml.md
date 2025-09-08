@@ -925,6 +925,10 @@
       - 质量与压缩权衡：IQ3_M/IQ3_S（≈3.8 bits per weight）几乎不降精度，文件 1.3 GB；2 bit 以下量化效果开始明显劣化。
 - [Token]
   - [Embedding Spaces - Transformer Token Vectors Are Not Points in Space](https://www.lesswrong.com/posts/pHPmMGEMYefk9jLeh/llm-basics-embedding-spaces-transformer-token-vectors-are)
+  - [Jina Code Embeddings](https://mp.weixin.qq.com/s/I2U7eLUxk08oyAxAqfZEIQ)
+    - Pooling：last-token > latent-attention > mean（78.41 % vs 78.27 % vs 77.20 %）
+    - Matryoshka：直接截断前缀即可得到 64/128/256/512… 低维向量，无需重算
+    - 小参数 + 强基座 + 精准微调，可在 <2 B 规模达到业内顶尖代码检索效果
 - [Tune LLM]
   - [TRL](https://huggingface.co/docs/trl/index)
     - TRL is a full stack library where we provide a set of tools to train transformer language models with Reinforcement Learning, from the Supervised Fine-tuning step (SFT), Reward Modeling step (RM) to the Proximal Policy Optimization (PPO) step. The library is integrated with 🤗 transformers.

@@ -1843,7 +1843,7 @@
     - • CPU Utilization = 忙周期 / 总周期。核心数增多 → 时钟下降 → 分母变小，导致利用率增速快于实际吞吐。
   - 结论与建议
     - • 不同 CPU 的 SMT 效果、Turbo 策略差异巨大，无法用统一阈值解读 “80 % 就要扩容”等经验法。
-
+- [Simultaneous Multithreading](https://www.thecoder.cafe/p/simultaneous-multithreading)
 
 
 

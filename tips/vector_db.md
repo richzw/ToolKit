@@ -1122,8 +1122,43 @@
   - 后过滤（Post-Filter）机制 ：先粗略查一批，再按条件筛 —— 好处是好实现，能利用统一的底层索引结构，缺点是在过滤条件较多时，TopK 结果可能严重不足（我们测到删除 50% 数据后，TopK 20 只能返回 15 个结果）。说明S3团队用的基本就是开源索引，没有在索引侧做太多改造。
   - 分层缓存（Multi-tier Cache）：可能用 SSD  或者NVMe 做缓存，存最近查过的索引。新查询不命中SSD缓存时延迟明显较高
   - 大规模分布式调度 ：S3 本身有海量机器池，S3Vector 可能利用微服务将“读取-解压-检索”拆成流水线，让查询延迟分布非常稳。
-
-
+- How to choose between Milvus, Elasticsearch and Pgvector
+  - ## Milvus: **The first choice for vector databases**
+    - Purpose-built for vectors
+    - Superior performance at scale
+    - Advanced indexing (IVF, HNSW)
+    - Excellent horizontal scaling
+    ### LIMITATIONS
+    - Operational complexity
+    - No relational data support
+    ### BEST FOR
+    - High-performance vector workloads at massive scale
+  - ## Elasticsearch: **The preferred choice for traditional search**
+    ### STRENGTHS
+    - Advanced full-text search features (fuzzy matching, phrase queries)
+    - Mature ecosystem & tooling
+    - Rich aggregation capabilities
+    ### LIMITATIONS
+    - Vector performance lags
+    - Resource-heavy stack
+    - Complex query DSL
+    ### BEST FOR
+    - Applications need sophisticated search with aggregation capabilities.
+  - ## Pgvector: **The PostgreSQL native**
+    ### STRENGTHS
+    - Familiar SQL interface
+    - ACID compliance
+    - Direct PostgreSQL integration
+    - Unified data model
+    ### LIMITATIONS
+    - Performance ceiling
+    - Limited indexing options
+    - Traditional scaling issues
+    - Not optimized for vectors
+    ### BEST FOR
+    - Adding vector capabilities to existing PostgreSQL applications
+- [wal3: A Write-Ahead Log for Chroma, Built on Object Storage](https://trychroma.com/engineering/wal3)
+  - 本质是“本地顺序写 + 后台异步复制到对象存储（S3 及其他
 
 
 
