@@ -556,18 +556,27 @@
       - In practice, temperature affects the probability distribution over the possible tokens at each step of the generation process. A temperature of 0 would make the model completely deterministic, always choosing the most likely token.
     - Top_p：
       - top_p一种称为核采样的温度采样技术，可以控制模型在生成响应时的确定性。如果您正在寻找准确和事实的答案，请保持低调。如果您正在寻找更多样化的响应，请增加到更高的值。
+      - 比Top-k更灵活的方法。不是固定选择前k个词，而是选择累计概率达到p的最小词集合。比如top_p=0.9，就从覆盖90%概率的词中选择。
       - Top_p sampling is an alternative to temperature sampling. Instead of considering all possible tokens, GPT-3 considers only a subset of tokens (the nucleus) whose cumulative probability mass adds up to a certain threshold (top_p).
       - For example, if top_p is set to 0.1, GPT-3 will consider only the tokens that make up the top 10% of the probability mass for the next token. This allows for dynamic vocabulary selection based on context.
     - Top K:
       - Sample from the k most likely next tokens at each step. Lower k focuses on higher probability tokens.
       - Lower top-k also concentrates sampling on the highest probability tokens for each step.
+      - 从概率最高的k个候选词里选择下一个词。限制了选择范围，让输出更聚焦，但k太小容易重复
     - Difference
       - ![img.png](ml_top_p_vs_temperature.png)
       - Nucleus Sampling的工作原理是：在每一步，模型计算出所有可能词的概率分布，然后选择累积概率超过预设阈值p的最小词集，这个词集就是nucleus。然后，从这个nucleus中随机选择一个词作为这一步的输出。这个阈值p通常被设置在0.9左右，这意味着选择的词集将包含大约90%的概率质量。 
       - Nucleus Sampling相比于Top-k Sampling，有一个优点是它能动态地调整选择的词的数量。在概率分布比较尖锐（即有一个词的概率远高于其他词）的情况下，nucleus会比较小，选择的词的数量会减少；在概率分布比较平坦的情况下，nucleus会比较大，选择的词的数量会增加。这使得Nucleus Sampling能更好地平衡生成文本的质量和多样性。
+    - Frequency Penalty（频率惩罚）
+      - 对已经频繁出现的词进行惩罚。正值减少重复，负值反而加重重复。写摘要时很有用，避免冗余；写诗时也能控制重复的韵律。
+    - Presence Penalty（存在惩罚）
+      - 鼓励模型使用文本中尚未出现的新词。数值高了推向新颖性，数值低了倾向于已知模式。适合需要思路发散的场景。
+    - Stop（停止词）
+      - 自定义停止生成的触发词列表。在需要结构化输出（比如JSON）时很有用，防止模型继续"废话"。
     - system: "role define"
     - user: "some question"
     - assistant: "some answer"
+    - Temperature控制创意度，两个penalty控制重复，Stop控制边界
   - Best Practice
     - 提供清晰和具体的指令 (Write clear and specific instructions)
       - 使用分隔符清楚地指示输入的不同部分（Use delimiters to clearly indicate distinct parts of the input）
@@ -1080,6 +1089,25 @@
     - n-gram 概率生成 “随机词”但问题是：没有足够的英文文本可以推导出这些概率
     - ChatGPT 的核心正是一个所谓的 “大型语言模型”（LLM），它的建立可以很好地估计这些概率。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。这个模型的训练是一个非常复杂的过程，但是它的基本思想是，我们可以从大量的英文文本中学习到一个模型，这个模型可以预测下一个词是什么。
   - [Fixing Hallucinations in LLMs](https://betterprogramming.pub/fixing-hallucinations-in-llms-9ff0fd438e33)
+  - [Why language models hallucinate](https://openai.com/index/why-language-models-hallucinate/)
+    - 规则的“锅”：AI 被鼓励去猜测，而非承认无知
+      - 大语言模型之所以会产生“幻觉”，是因为我们现有的训练和评估方式存在一个根本性问题：它奖励猜测，而不是鼓励模型承认自己的不确定性。
+    - 训练/评测激励不当
+      - 现行评测（Accuracy-only leaderboard）只统计“答对率”，不区分“错误”与“不确定而回避”。
+    - 预训练机制限制
+      - 预训练目标是“预测下一个词”，语料里只有正样本（流畅文本），没有“错误标注”；模型只能逼近词分布。
+      - 语法/拼写等高频规律易学；低频且随机的事实（如生日）缺少统计模式 → 必然出现预测错误。
+    - 技术误区澄清
+      - “把准确率提到 100% 就没有幻觉”——不现实；世界中存在本质不可答的问题。
+      - “小模型更易幻觉”——相反，小模型若完全不了解某领域，反而能坦然说“不知道”。
+      - “幻觉是神秘 bug”——统计机制和评测激励已能解释其来源。
+      - “做一个专门的幻觉评测就够”——若主流榜单仍以 Accuracy 计分，模型仍会学会猜测。
+    - 改进方向
+      - 在主评测指标中：
+        - 对自信错误赋更高罚分（negative marking）。
+        - 对合理的不确定表达或澄清请求给予部分加分。
+          - 参考标准化考试早已有“错倒扣分/空题给零分”的实践。
+          - 将“不确定性校准（calibration）”作为与准确率同等重要的核心指标。
   - [Enhancing AI Reliability Through Fine-Grained Hallucination Detection and Correction with FAVA](https://zilliz.com/blog/enhancing-ai-reliability-through-fine-grained-hallucination-detection-and-correction-with-fava#Understanding-the-Categories-of-Hallucinations)
   - [Evaluate fairness in ChatGPT](https://mp.weixin.qq.com/s/-zAlMyXzmCvN05PTtiY6Qg)
     - “第一人称公平性”问题

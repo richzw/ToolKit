@@ -1,6 +1,7 @@
 
 - [资料]
   - [Kubernetes 实践指南](https://imroc.cc/kubernetes/index.html)
+  - [K8s源码分析](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=Mzg2NTU3NjgxOA==&action=getalbum&album_id=2958341226519298049&scene=21#wechat_redirect)
   - [K8S训练营](https://www.qikqiak.com/k8strain/)
   - [Out-of-memory (OOM) in Kubernetes](https://mihai-albert.com/2022/02/13/out-of-memory-oom-in-kubernetes-part-4-pod-evictions-oom-scenarios-and-flows-leading-to-them/)
   - [A Guide to Kubernetes](https://www.newsletter.swirlai.com/p/a-guide-to-kubernetes-part-1)

@@ -400,6 +400,8 @@
     - 可以选择“2. Explanatory”，Claude 会在工作过程中生成其决策过程的摘要，让你有机会更好地理解它在做什么
   - [Claude Code 最佳实践](https://cc.deeptoai.com/docs/zh/best-practices/claude-code-best-practices)
     - `claude --permission-mode bypassPermissions`
+    - `claude --dangerously-skip-permissions
+       codex --dangerously-bypass-approvals-and-sandbox`
     - 在 ~/.claude/settings.json  加入下面的配置，就可以看你 Claude Code 的实时消耗了
       ```
       {

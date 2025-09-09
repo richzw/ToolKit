@@ -1028,11 +1028,44 @@
         - Set the -f parameter (e.g., TCP and destination port 80, destination host 10.10.0.12) and the -i parameter (network interface) to bypass IP layer capturing.
         - If all clt:xx (where xx > 0) is seen in the log, it means tcpcopy captured the packet, but it was filtered out by the IP layer on the online server.
         - Check iptables restrictions on the output chain; if iptables cannot be modified, use the --pcap-send option to send packets from the data link layer.
-
-
-
-
-
+- EKS issue
+  - Pod负载不均衡
+    - Amazon EKS的kube-proxy默认使用iptables模式
+      - 连接级别的随机性：负载均衡在连接级别，导致短连接场景下分布不均。
+      - 忽略实际负载状态：分配机制没有考虑Pod的实际负载、连接数或处理能力。
+      - 连接持久性问题：长连接可能导致某个Pod长时间“粘住”大量请求
+    - 优化策略
+      - 可以考虑切换到IPVS（IP Virtual Server）模式：将kube-proxy配置为IP Virtual Server（IPVS）模式，相比iptables模式有以下优势：
+        - 使用哈希表而非线性搜索处理数据包，性能更高。 提供多种负载均衡算法，如Round Robin，Weighted Round Robin等。
+  - 连接跟踪表溢出 
+    - 高流量场景下，节点可能出现连接跟踪表（conntrack）溢出的情况，表现为：
+      - 间歇性的连接超时或请求被拒绝。
+      - 系统日志中出现“nf_conntrack：table full，dropping packet”错误。
+      - 更新Service的selector后，流量仍然导向旧的Pod长达几十秒。
+    - Linux内核的conntrack模块跟踪所有网络连接状态。当连接数超过net.netfilter.nf_conntrack_max设置的最大值时，新的连接会被丢弃
+    - sudo dmesg | grep conntrack
+    - 优化conntrack超时设置
+      ```
+      # 已建立连接的超时时间
+      sudo sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=86400
+      # TIME_WAIT 状态的超时时间（默认 120 秒，可减少）
+      sudo sysctl -w net.netfilter.nf_conntrack_tcp_timeout_time_wait=30
+      ```
+    - 定期清理conntrack表 sudo conntrack -D -p tcp --dport <service-port>
+  - 滚动更新期间出现5xx
+    - 使用Amazon Load Balancer Controller的应用在滚动更新期间，出现502 Bad Gateway或504 Gateway Timeout错误。这一现象在使用target-type: ip模式（ALB直接路由到Pod IP）时尤为明显。
+    - 本质上是由Amazon ALB控制面与数据面之间的异步更新机制，以及Kubernetes Pod终止过程的时序不匹配导致的
+    - 优化策略
+      - 给容器添加preStop钩子延迟，这会在Pod终止前增加一个延迟，给负载均衡器足够的时间将目标标记为排空状态并停止发送新请求
+      - 设置terminationGracePeriodSeconds。这为Pod提供了更长的“优雅退出”时间，确保有足够的时间处理现有请求并完成清理工作
+      - 减少ALB的注销延迟。加快目标从ALB目标组中移除的速度 deregistration_delay.timeout_seconds=30
+      - 启用Pod Readiness Gates。确保Pod只有在成功注册到ALB目标组后才被标记为就绪，同样，只有在成功从ALB目标组中注销后才会被终止。
+  - Service更新selector后 流量延迟切换问题
+    - 部署了新的deployment，并通过更新Service的pod selector切换到新deployment时，会出现一个持续数秒到数分钟的时间窗口，流量仍然会导向旧的Pod
+    - 这是因为当更新Service的selector时，kube-proxy更新iptables规则，但Linux内核的conntrack模块会保持现有的连接记录，直到这些连接超时或被显式清除
+    - 停止旧Deployment断开conntrack中的连接。
+    - 主动清除Amazon EKS节点上相关的conntrack表项。
+    - 蓝绿部署策略。创建新的Service指向新的deployment，并更新Ingress指向新的Service。
 
 
 
