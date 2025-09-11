@@ -572,7 +572,7 @@
     - 2. 报名 高级保护计划，拦截恶意软件和第三方应用；
     - 3. 最关键的，可以改用 Passkeys 无密码登录，直接避开钓鱼密码招式。
 - [杀死那个“正确”的项目，才是一切的开始](https://mp.weixin.qq.com/s/6b2qoZ39nmGc2m2W6Vu4Fg)
-
+- [做好GEO](https://mp.weixin.qq.com/s/PMwDvGVtP0TKF2SH9rVw9Q)
 
 
 

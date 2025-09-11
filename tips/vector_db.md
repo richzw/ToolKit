@@ -1062,7 +1062,9 @@
   - • 𝗕𝗶𝗻𝗮𝗿𝘆 𝗘𝗺𝗯𝗲𝗱𝗱𝗶𝗻𝗴𝘀: https://weaviate.io/learn/knowledgecards/binary-embeddings?utm_source=channels&utm_medium=w_social&utm_campaign=dev_education&utm_content=knowledge_cards_680640507
   - • 𝗤𝘂𝗮𝗻𝘁𝗶𝘇𝗲𝗱 𝗘𝗺𝗯𝗲𝗱𝗱𝗶𝗻𝗴𝘀: https://weaviate.io/learn/knowledgecards/quantized-embeddings?utm_source=channels&utm_medium=w_social&utm_campaign=dev_education&utm_content=knowledge_cards_680040494
   - • 𝗩𝗮𝗿𝗶𝗮𝗯𝗹𝗲 𝗗𝗶𝗺𝗲𝗻𝘀𝗶𝗼𝗻 𝗘𝗺𝗯𝗲𝗱𝗱𝗶𝗻𝗴𝘀: https://weaviate.io/learn/knowledgecards/variable-dimensions?utm_source=channels&utm_medium=w_social&utm_campaign=dev_education&utm_content=knowledge_cards_680791951
+    - 可以只使用前8、16、32等维度，同时保留大部分信息。这种能力来自模型训练：前面的维度比后面的维度捕获更多信息
   - • 𝗠𝘂𝗹𝘁𝗶-𝗩𝗲𝗰𝘁𝗼𝗿 𝗘𝗺𝗯𝗲𝗱𝗱𝗶𝗻𝗴𝘀: https://weaviate.io/learn/knowledgecards/multivector-embeddings?utm_source=channels&utm_medium=w_social&utm_campaign=dev_education&utm_content=knowledge_cards_680980442
+    - 多向量Embedding 不是每个对象一个向量，而是获得代表对象不同部分的多个向量（如文本的token，图像的patch）。这实现了"延迟交互" - 比较文本的各个部分而不是整个文档
   - 𝗪𝗵𝗶𝗰𝗵 𝘁𝘆𝗽𝗲 𝘀𝗵𝗼𝘂𝗹𝗱 𝘆𝗼𝘂 𝘂𝘀𝗲? It depends on your use case:
     - • Need semantic matching? → Dense embeddings
     - • Storage-constrained? → Binary or quantized

@@ -113,6 +113,30 @@
     - 您使用的是哪种Embedding模型，它在多大的块大小上表现最佳？例如，sentence-transformer模型在单个句子上工作得很好，但像text- embedt-ada -002~[2]~这样的模型在包含256或512个tokens的块上表现得更好。
     - 你对用户查询的长度和复杂性有什么期望？用户输入的问题文本是简短而具体的还是冗长而复杂的？这也直接影响到我们选择分组内容的方式，以便在嵌入查询和嵌入文本块之间有更紧密的相关性。
     - 如何在您的特定应用程序中使用检索结果？ 例如，它们是否用于语义搜索、问答、摘要或其他目的？例如，和你底层连接的LLM是有直接关系的，LLM的tokens限制会让你不得不考虑分块的大小。
+  - [Chunking Strategies to Improve Your RAG Performance](https://weaviate.io/blog/chunking-strategies-for-rag)
+    - (1) 固定大小（Fixed-size / Token）
+      - 典型参数：512 tokens + 10–20% overlap
+      - 优点：实现简单、适合原型；缺点：无语义边界
+    - (2) 递归（Recursive）
+      - 按优先级分隔符递归切割，如\n\n→\n→句号→空格；最大长度不超阈值。
+    - (3) 文档结构驱动（Document-based）
+      - 根据 Markdown 头、HTML tag、代码函数等显式结构切块。
+    - (4) 语义切块（Semantic）
+      - 先句子分割→句子 embedding→相邻余弦相似度突变点作断点。
+      - 适合学术、法律等主题密集文本。
+    - (5) LLM-based 切块
+      - 让 LLM 识别命题／摘要并决定边界，甚至在 chunk 中添加摘要或关键词。
+      - 最高精度但最贵、最慢。
+    - (6) Agentic 切块
+      - 由代理（多次 LLM 调用）动态选择最合适策略及参数，可混合结构、语义方法并写入丰富元数据。
+    - (7) Late Chunking
+      - 先用长上下文 embedding 模型嵌入整篇 → 再按 token 范围平均 token embeddings 生成 chunk 向量。
+      - Chunk embedding 拥有全局语境；适合需要引用跨段关系的技术/法律文档。
+    - (8) 分层（Hierarchical）
+      - 多粒度：顶层大块(章节摘要) → 子层细块。
+      - 检索流程可先 coarse→fine，兼顾摘要与深钻。
+    - (9) 自适应（Adaptive）
+      - 基于语义密度动态调整 chunk_size/overlap；稠密段落切小块，稀疏段落切大块。
   - [分块的方法](https://stackoverflow.blog/2024/06/06/breaking-up-is-hard-to-do-chunking-in-rag-applications/)
     - 固定大小分块
       - 我们会在块之间保持一些重叠，以确保语义上下文不会在块之间丢失。在大多数情况下，固定大小的分块将是最佳方式

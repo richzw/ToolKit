@@ -2187,6 +2187,46 @@
       - TLS SHA-1 禁用
       - DWARF v5 调试信息 编译器和链接器生成 DWARF v5 调试信息
       - Go.25 要求 macOS2 Monterey 或更高版本
+      - [encoding/json/v2 and encoding/json/jsontext](https://go.dev/blog/jsonv2-exp)
+        - 通过 GOEXPERIMENT=jsonv2 或 build tag goexperiment.jsonv2 启用
+        - v1 主要问题
+          - 行为缺陷
+            - 接受无效 UTF-8。
+            - 允许 JSON 对象重复键。
+            - 将 nil slice/map 编码为 null（多数实现希望 [] / {}）。
+            - Unmarshal 时字段名大小写不敏感。
+            - *T.MarshalJSON() 被不一致地调用。
+          - API 缺陷
+            -  json.Decoder.Decode 不会拒绝尾随垃圾。
+            -  Encoder/Decoder 级别的选项无法向下层 Marshal/Unmarshal 传递。
+            -  Compact / Indent / HTMLEscape 只能写入 bytes.Buffer。
+          - 性能上限
+            - MarshalJSON 强制分配 []byte 且结果需二次验证/缩进。
+            - UnmarshalJSON 先解析完整值再二次解析。
+            - Encoder/Decoder 需将整段 JSON 缓存在内存；Token API 分配多且无写入端。
+        - jsontext：语法层基石
+          - 仅处理“JSON-text”语法，无反射依赖。
+          - 核心类型
+            - Encoder / Decoder：完全流式，支持 WriteValue/ReadValue 及 WriteToken/ReadToken。
+            - Value ([]byte 的命名类型) 与 Token（零分配表示任意标记）。
+          - 为解决流式编解码，引入接口：
+            - MarshalJSONTo(*jsontext.Encoder) error
+            - UnmarshalJSONFrom(*jsontext.Decoder) error
+        - encoding/json/v2：语义层新 API
+          - 基本函数（均接受可选 Options）
+            - Marshal, Unmarshal （[]byte 接口）
+            - MarshalWrite(io.Writer), UnmarshalRead(io.Reader)
+            - MarshalEncode(*jsontext.Encoder), UnmarshalDecode(*jsontext.Decoder)
+          - 类型自定义接口
+            - 旧：Marshaler / Unmarshaler（与 v1 相同）。
+            - 新：MarshalerTo / UnmarshalerFrom —— 支持无分配流式实现并自动继承 Encoder/Decoder 上的 Options。
+        - 默认行为变化
+          - 无效 UTF-8 / 重复键 → 返回错误。
+          - nil slice/map → 编码为 [] / {}。
+          - 结构体字段匹配改为大小写敏感。
+          - omitempty 规则：若结果为 “空 JSON 值”（null, "", [], {}) 则省略。
+          - time.Duration 默认报错，需通过格式化选项显式指定。
+        -  v1 将内部重写为调用 v2
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
   - errors.Is() is expensive. If you use it, check the error is non-nil first to avoid a pretty big performance penalty on the happy path.
   - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.

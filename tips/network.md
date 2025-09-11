@@ -1658,6 +1658,8 @@
       - 2.1 三次dupack触发
       - 2.2 SACK数据缺口跨度过大触发
     - 3. TLP
+  - tcp_early_retrans 的含义因内核版本而异。
+    - Linux 3.10 中它同时控制 Early Retransmit（ER，RFC 5827）和 Tail Loss Probe（TLP）；后来内核移除了 ER，由 RACK/TLP 机制取代，如今该开关基本只控制 TLP
 - TCP RACK
   - TCP RACK（Recent ACKnowledgment）是一种基于时间序的丢包检测机制。
   - 其核心思想是通过比较数据包的发送时间戳和确认到达时间来智能判断丢包：
