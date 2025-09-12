@@ -1934,7 +1934,9 @@
     - 最大似然估计是一种参数估计，更确切的说，是一个点估计
     - 最大似然估计的思想: 使得观测数据（样本）发生概率最大的参数就是最好的参数
 - [Think beyond current reasoning models](https://blog.richardstu.com/think-beyond-current-reasoning-models)
-  
+- [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/)
+  - 真正导致 LLM 推理“同输入不同输出”的并不是大家常提到的“GPU 并行 + 浮点非结合律”，而是多数算子对批量大小（batch size）不具备“批量不变性（batch-invariance）”。
+  - 推理服务在动态排队、动态拼 batch 时，单个请求实际经历的 batch 大小会随机变化，从而引入可观的数值差异。
 
 
 
