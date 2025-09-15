@@ -1844,6 +1844,35 @@
   - 结论与建议
     - • 不同 CPU 的 SMT 效果、Turbo 策略差异巨大，无法用统一阈值解读 “80 % 就要扩容”等经验法。
 - [Simultaneous Multithreading](https://www.thecoder.cafe/p/simultaneous-multithreading)
+- [Linux 内核内存模型](https://mp.weixin.qq.com/s/Qmv0Ts0QAjeMkeLlxBwZag)
+  - Linux 内核内存模型（LKMM）
+    - 内存一致性模型概览
+      • 顺序一致性 (SC)：所有 CPU 的操作可串行化。最直观、最慢。
+      • TSO (x86/SPARC)：对写→读重排稍宽松。
+      • ARM/POWER：更宽松，写后读、读后读都可能重排
+    - LKMM 采取了一种保守的策略：它必须兼容所有支持的架构。这意味着如果某种行为在任何一种架构上可能发生，LKMM 就必须认为它是可能的。这样写出的代码才能在所有平台上正确运行。
+  - 事件是内存模型的基本单位，主要包括三类：
+    - 读事件：从共享内存读取数据
+    - 写事件：向共享内存写入数据
+    - 栅栏事件：内存屏障，用于控制其他事件的顺序
+    - program-order (po) – 同核指令顺序
+    -  reads-from (rf) – 某读取自哪次写
+    -  coherence-order (co) – 同一地址所有写的全局顺序
+   - happens-before (hb)
+     - hb = 程序顺序(+屏障) ∪ 释放/获取语义 ∪ rf 等。
+     - hb 必须无环；A hb B ⇒ A 的写对 B 可见。
+   - RCU（Read-Copy-Update）
+     - • 读端完全无锁；写端复制→更新→等待 grace period。
+     - • 宽限期定义：在其开始前进入的读临界区必须在结束前退岀。
+     - • 适用于“读多写少”热点路径。
+   - 锁的内存语义
+     - • 获取 = acquire：后续访问不可跑到获取之前
+     - • 释放 = release：释放前的访问不可跑到释放之后
+     - • 传递性：CPU_A release → CPU_B acquire ⇒ A 之前的写对 B 之后的读可见。
+
+
+
+
 
 
 

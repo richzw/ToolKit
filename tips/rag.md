@@ -801,6 +801,21 @@
 - [Beyond RAG: Building Advanced Context-Augmented LLM Applications](https://docs.google.com/presentation/d/1IWjo8bhoatWccCfGLYw_QhUI4zfF-MujN3ORIDCBIbc/edit#slide=id.g2bac367b3d6_0_0)
   - [Agent Course](https://huggingface.co/learn/agents-course/unit0/introduction)
   - [12-factor-agents](https://github.com/humanlayer/12-factor-agents)
+  - [Writing effective tools for agents — with agents](https://www.anthropic.com/engineering/writing-tools-for-agents)
+    - 编写高质量工具的五条原则
+      - 精选工具
+      - • 不要机械地把每个底层 API 都暴露出来；选择对任务最关键、能减少上下文占用的复合型工具。
+      - • 例：用 search_logs 代替 read_logs，或一次返回客户综合信息而非多次查询。
+      - 合理命名空间
+      - • 用前缀/后缀分组（如 asana_search、jira_search）来划清边界，避免代理混淆相近功能。
+      - 返回有用上下文
+      - • 只返回对后续决策真正重要的信息；尽量用自然语言或易懂 ID，而非长串 UUID。
+      - • 可提供 response_format（concise / detailed）等参数，让代理按需控制详略。
+      - 控制 token 开销
+      - • 对大结果实现分页、过滤或截断，并在错误信息里给出具体、可行动的修正建议。
+      - 精心撰写描述
+      - • 把你会对新同事解释的一切隐含知识全写进 description 和 schema，避免歧义。
+      - • 清晰命名参数（如 user_id 而非 user），用严格数据模型强约束输入输出。
   - RAG Pains
     - Summarization Questions: “Give me a summary of the entire <company> 10K annual report”
     - Comparison Questions: “Compare the open-source contributions of candidate A and candidate B”

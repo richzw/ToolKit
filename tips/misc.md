@@ -4,25 +4,26 @@
   - 为了洞察而重新发明，为了影响力而重用（Reinvent for insight. Reuse for impact.）
 - [Effective learning: Twenty rules of formulating knowledge](https://www.supermemo.com/en/blog/twenty-rules-of-formulating-knowledge)
   - Understand it first.
-    See the whole picture, then learn the parts.
-    Master the basics before adding detail.
-    Keep each fact as short and simple as you can.
-    Turn sentences into fill-in-the-blank (cloze) questions.
-    Use images whenever they help.
-    Apply mnemonic tricks for hard items.
-    Hide parts of pictures (graphic deletion) just like cloze.
-    Don’t try to learn unordered lists (sets).
-    Split long ordered lists (enumerations) into smaller chunks.
-    Watch for similar items that you keep mixing up and separate or clarify them.
-    Write questions and answers in the fewest, clearest words.
-    Link new facts to things you already know.
-    Personalize with your own examples.
-    Tie facts to strong emotions or vivid stories.
-    Use labels or categories to give quick context.
-    Useful redundancy (e.g., both “cat-gato” and “gato-cat”) is fine.
-    Note the source of each fact.
-    Add dates or version tags to facts that can change.
-    Decide what is most important and study that first.
+  - See the whole picture, then learn the parts.
+  - Master the basics before adding detail.
+  - Keep each fact as short and simple as you can.
+  - Turn sentences into fill-in-the-blank (cloze) questions.
+  - Use images whenever they help.
+  - Apply mnemonic tricks for hard items.
+  - Hide parts of pictures (graphic deletion) just like cloze.
+  - Don’t try to learn unordered lists (sets).
+  - Split long ordered lists (enumerations) into smaller chunks.
+  - Watch for similar items that you keep mixing up and separate or clarify them.
+  - Write questions and answers in the fewest, clearest words.
+  - Link new facts to things you already know.
+  - Personalize with your own examples.
+  - Tie facts to strong emotions or vivid stories.
+  - Use labels or categories to give quick context.
+  - Useful redundancy (e.g., both “cat-gato” and “gato-cat”) is fine.
+  - Note the source of each fact.
+  - Add dates or version tags to facts that can change.
+  - Decide what is most important and study that first.
+- [付费信息才是最好的过滤器](https://blog.devtang.com/2025/08/31/pay-your-information/)
 - [Teach Yourself Computer Science](https://teachyourselfcs.com/)
 - [手机居然可以这么偷听你的秘密](https://mp.weixin.qq.com/s/U8fZbVgEHmKSZmt62XFEkw)
   - https://www.ndss-symposium.org/wp-content/uploads/2020/02/24076-paper.pdf

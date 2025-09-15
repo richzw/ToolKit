@@ -834,6 +834,10 @@
       - 我们可以通过调整带数和每带的维度数 ，在召回率（找到所有相似对）、精确率（减少误报）和速度之间进行权衡。
       - MinHash + LSH（局部敏感哈希） 提供了一种兼顾效率与效果的近似去重策略，适用于百亿级语料下的预处理优化；
       - MinHash 通过将文档压缩为签名，LSH 高效缩小搜索空间，可以快速定位潜在重复对
+      - https://milvus.io/blog/minhash-lsh-in-milvus-the-secret-weapon-for-fighting-duplicates-in-llm-training-data.md
+      - 𝗠𝗶𝗻𝗛𝗮𝘀𝗵 𝗟𝗦𝗛 𝘂𝘀𝗲𝘀 𝗮 𝘁𝘄𝗼-𝘀𝘁𝗲𝗽 𝗽𝗿𝗼𝗰𝗲𝘀𝘀:
+        - 𝗠𝗶𝗻𝗛𝗮𝘀𝗵 𝗙𝗶𝗻𝗴𝗲𝗿𝗽𝗿𝗶𝗻𝘁𝗶𝗻𝗴: Converts documents into compact signatures using word sequences and hash functions.
+        - 𝗟𝗼𝗰𝗮𝗹𝗶𝘁𝘆-𝗦𝗲𝗻𝘀𝗶𝘁𝗶𝘃𝗲 𝗛𝗮𝘀𝗵𝗶𝗻𝗴(𝗟𝗦𝗛): Groups similar documents into buckets, transforming exponential comparisons into linear operations.
     - [2.6功能预览](https://mp.weixin.qq.com/s/UnvVbKSjTsyz8HzRTbs2gw)
       - https://www.youtube.com/watch?v=Wb3jPzfx97Y&list=PLPg7_faNDlT4UvZtZ5GIZb8YGG_1tfKp-
       - 降本提速：
