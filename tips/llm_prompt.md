@@ -1184,6 +1184,7 @@
     - 3. 定义验证逻辑：使用验证度量和优化器定义优化程序的逻辑，并根据输出结果和指标得分对流水线进行评估。
     - 4. 编译DSPy程序：DSPy编译器考虑训练数据、编写程序、优化器和验证度量，以优化程序（如提示或微调）。
     - 5. 迭代：通过改进数据、编写程序或验证来重复该过程，直到对流水线的性能感到满意为止。 
+  - [Let the Model Write the Prompt](https://www.dbreunig.com/2025/06/10/let-the-model-write-the-prompt.html)
 - ThinkAny Search
   ```
   You are a large language AI assistant built by ThinkAny AI. You are given a user question, and please write clean, concise and accurate answer to the question. You will be given a set of related contexts to the question, each starting with a reference number like [[citation:x]], where x is a number. Please use the context and cite the context at the end of each sentence if applicable.

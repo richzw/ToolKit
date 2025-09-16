@@ -1771,8 +1771,8 @@
     - 灰度发布与回滚：小流量试点、实时监控、异常即刻回滚，降低上线风险。
     - 知识管理：规范知识库来源、版本与更新流程，保持智能体回答与现实同步。
     - 第三方依赖管理：健康检查、熔断/降级、重试、配额控制，保证外部接口问题不外溢。
-
-
+- [MarkItDown](https://github.com/microsoft/markitdown)
+  - 把各种格式的文件（Word、PDF、Excel、PPT、图片、音频、HTML、JSON、甚至 zip 包）一键变成结构化 Markdown
 
 
 

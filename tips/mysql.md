@@ -1139,8 +1139,21 @@
   - 切换到 RC 需注意
     - • binlog 必须使用 Row 或 Mixed 模式，绝不能再用 Statement。
     - • 对核心强一致业务（金融、库存等）要额外评估幻读风险并加防护逻辑。
-
-
+- 事务内 UPDATE 后立刻 SELECT 却读到旧值
+  - MySQL 5.7.44，事务隔离级别 REPEATABLE-READ。
+    - 在同一事务内先执行 update qc_order set status = 20 where id in (1001,1002); 紧接着 select id,status … from qc_order where id in (1001,1002); 偶发地得到了 status = 10 的旧值，导致后续业务走错分支
+  - 怀疑点排除
+    - 主从延迟：同一数据源、同一连接池连接，排除。
+    - 事务未生效：Spring @Transactional 已确认，且未提交前其他会话读不到，排除。
+    - 快照读机制：需要深入 UPDATE 内部实现。
+  - 现象成因
+    - “并发事务把同一行改成相同值 + RR 级别 + 第一次 SELECT 已生成快照”
+    - → A 的 UPDATE 被 compare_records() 略过
+    - → A 再读只能看到旧版本。
+    - 解决思路
+    - • 显式加锁：事务开始即 select … for update 把待处理记录锁住。
+    - • 若必须“先更后读”，可直接使用 UPDATE…RETURNING / 或把新值带入内存，不再回表读。
+    - • 乐观锁：增加 version 字段，UPDATE version=version+1 并检查影响行数，保证确实被写入。
 
 
 
