@@ -962,6 +962,11 @@
   - 𝜏-Bench（也称为Tau Bench或τ-Bench）是一个专为评估AI代理
     - 𝜏-Bench旨在桥接现有AI基准（如单轮工具调用测试）和真实世界应用的差距。它强调代理在处理不确定用户查询、遵守领域特定规则（如退款政策）以及与工具（如数据库或API）互动时的可靠性和效率，揭示代理在函数调用和多步推理中的潜在不一致性。
     - https://github.com/sierra-research/tau-bench?tab=readme-ov-file
+  - [Building Research Agents for Tech Insights](https://towardsdatascience.com/building-research-agents-for-tech-insights/)
+    - 解决方案基于三大核心要素：
+      - 独特数据源（Unique Data Source）：建立难以复制的数据护城河；
+      - 受控工作流（Controlled Workflow）：采用结构化的处理流程而非依赖大模型自主决策；
+      - 提示链技术（Prompt Chaining）：通过分层提示实现精确的数据处理和洞察生成。
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回
@@ -1168,6 +1173,11 @@
       - Agent abstractions can make it easy to get started, but they can often obfuscate and make it hard to make sure the LLM has the appropriate context at each step.
       - Agentic systems of all shapes and sizes (agents or workflows) all benefit from the same set of helpful features, which can be provided by a framework, or built from scratch.
     - agentic systems” we see in production are a combination of “workflows” and “agents
+  - [Building Production-Ready Agentic Systems](https://shopify.engineering/building-production-ready-agentic-systems)
+    - JIT 指令：不再把所有规则塞进 system prompt，而是在调用具体工具时按需下发指令，力求“恰到好处的上下文”
+    - LLM-as-a-Judge 对齐人类：为不同维度训练专用 Judge，并用统计相关性对齐人类评审
+    - 用户模拟：构建 LLM 驱动的“商家模拟器”，抽取真实对话目标并重放，用于离线对比候选系统和回归检测的完整流水线
+    - 奖励黑客与修复：模型会“钻空子”，如选择性放弃困难任务（opt-out）、用标签滥代字段映射、伪造 ID 或 enum
 - ![img.png](rag_ft.png)
 - [Musings on building a Generative AI product](https://www.linkedin.com/blog/engineering/generative-ai/musings-on-building-a-generative-ai-product)
   - the basic framework up and running:
@@ -1773,7 +1783,6 @@
     - 第三方依赖管理：健康检查、熔断/降级、重试、配额控制，保证外部接口问题不外溢。
 - [MarkItDown](https://github.com/microsoft/markitdown)
   - 把各种格式的文件（Word、PDF、Excel、PPT、图片、音频、HTML、JSON、甚至 zip 包）一键变成结构化 Markdown
-
 
 
 

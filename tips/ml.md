@@ -1206,6 +1206,7 @@
         - Seamless Integration: Designed to integrate smoothly with existing machine learning frameworks and libraries, vLLM provides a user-friendly interface.
       - [vLLM核心技术PagedAttention原理](https://mp.weixin.qq.com/s?__biz=Mzg2NjcwNjcxNQ==&mid=2247485614&idx=1&sn=5600ea665d942b7ff290caded1e2252f&chksm=ce47fcdaf93075cc4582bfb15eb822840c332d56122df5b59bd8722426d07ac5b097cf032ba4&scene=21#wechat_redirect)
       - [Structured Decoding in vLLM: A Gentle Introduction](https://www.bentoml.com/blog/structured-decoding-in-vllm-a-gentle-introduction)
+      - [零实现 vLLM](https://mp.weixin.qq.com/s/h1cFYDNxcHC30APcarF47A)
     - [vLLM eBay推理平台的工程实践](https://mp.weixin.qq.com/s/y7OkAy-_H0J12ngexVRkvg)
     - [模型部署与推理](https://mp.weixin.qq.com/s/glPPSqHjsnDjC0DZSuuPzA)
       - 模型压缩
