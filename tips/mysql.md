@@ -1154,7 +1154,12 @@
     - • 显式加锁：事务开始即 select … for update 把待处理记录锁住。
     - • 若必须“先更后读”，可直接使用 UPDATE…RETURNING / 或把新值带入内存，不再回表读。
     - • 乐观锁：增加 version 字段，UPDATE version=version+1 并检查影响行数，保证确实被写入。
-
+- [MySQL表膨胀](https://mp.weixin.qq.com/s/gkRqwk_kvY1BVzML6cPfpQ)
+  - 一次普通 DDL。
+    • 变更后表大小从 33 G 激增到 67 G；主键 n_rows 只剩 20 W；多条带 ORDER BY + LIMIT 的 SQL 变慢。
+  - 全量 copy + 实时回放 binlog“并行交叉”执行，导致“主键大的行先写，新老行乱序进入同一页”
+  - 交叉写入触发“插入点右分裂”的特殊分支
+  - 低峰期执行 ALTER TABLE t ENGINE=InnoDB；MySQL 内部重建表，按主键顺序 copy，页重新均匀排布。缺点：无法限速、主从延迟大
 
 
 
