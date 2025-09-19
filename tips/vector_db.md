@@ -710,7 +710,7 @@
                 - The second is that setting the diameter of an RNG is difficult
           - IVF_PQ
             - 对于精确度要求不高的场景或者性能要求极高的场景。
-            - IVF 参数
+            - [IVF 参数](https://mp.weixin.qq.com/s/BSPGfBNA2gw2_Wud8JobQA)
               - nlist：一般建议 nlist = 4*sqrt(N)，对于 Milvus 而言，一个 Segment 默认是 512M 数据，对于 128dim 向量而言，一个 segment 包含 100w 数据，因此最佳 nlist 在 1000 左右。
               - nprobe：nprobe 可以 Search 时调整搜索的数据量，nprobe 越大，recall 越高，但性能越差
             - PQ 参数

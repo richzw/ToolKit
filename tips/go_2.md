@@ -2354,12 +2354,42 @@
    return instance, nil
   ```
 - [Future-Proof Go Packages](https://abhinavg.net/2023/09/27/future-proof-packages/)
-
-
-
-
-
-
+- [arena、memory region到runtime.free：Go内存管理](https://mp.weixin.qq.com/s/zK-s6t7g12D5ejJvORaZ0g)
+  - Go 内存管理三步曲：arena → memory region → runtime.free
+  - arena 实验（issue #51317）
+    - API：显式创建 arena.Arena，所有对象放入该区域，调用 arena.Free 一次性释放。
+    - 优点：成批释放，大幅减少 GC 扫描。
+    - 致命缺点
+    - 几乎所有调用链都必须多带一个 *arena 参数，接口“病毒式”扩散。
+    - 与逃逸分析/接口转换交互极差，可组合性差。
+    - 结果：已搁置，未合入 release。
+  - memory regions 构想（discussion #70257）
+    - • 语法：region.Do(func() { … }) 在回调范围内的堆对象自动归属临时 region。
+    - • 内存安全：若对象逃逸出 region，运行时写屏障把它“救”回常规堆。
+    - • 关键实现点
+    - – 需为所在 goroutine 启用“region-aware”写屏障追踪逃逸；
+    - – 需在 STW 期间搬迁仍被引用的 region 对象。
+    - • 挑战：写屏障逻辑和 GC 交互极复杂，性能收益与实现成本不匹配，目前仍属研究。
+  - runtime.free 提案（issue #74299，GOEXPERIMENT=runtimefree）
+    - 目标：由编译器/少量标准库在“证明绝对安全”的场景下，直接释放单个堆对象并立即重用，完全隐藏于普通开发者
+    - 3.1 编译器自动路径 – runtime.freetracked
+    - • 触发条件：
+    - – 如 make([]T, n) 必须上堆（大小未知或 >32 B），且编译器能证明 slice 不逃出当前函数。
+    - 3.2 标准库手动路径 – runtime.freesized
+    - • 原型：func freesized(ptr unsafe.Pointer, size uintptr)
+    - • 仅供 runtime/标准库内部调用，不对外暴露。
+    - • 应用场景
+    - – strings.Builder / bytes.Buffer 扩容时立即 free 旧 buffer；
+    - – map 扩容、slices.Collect 产生的临时切片；
+    - – 未来可能用于 sort, json 等热点。
+- [Memory Allocation in Go](https://nghiant3223.github.io/2025/06/03/memory_allocation_in_go.html)
+  - Go 运行时主要用 mmap 管理“堆”，分层为 64MB arena → 8KB page → span；有 68 个 size class，结合是否含指针形成 136 个 span class，并用 span set 管理。小对象会向上取整到最近的 size class，并讨论了 tail waste 与外部碎片
+  - GC 元数据：≤512B 的对象用 heap bits 位图；>512B 的“含指针”小对象在对象头前加 8 字节 malloc header 指向类型信息（含 GCData）
+  - 堆管理（mheap）：用位图+三元摘要（start/end/max）构建全局 radix tree 快速寻找连续空页；找不到就通过 mmap 以 64MB 为粒度扩展；为降低全局锁竞争，每个 P 维护 pageCache，并对 mspan 做 per-P 缓存
+  - 中央分配器（mcentral）：按 span class 维护 full/partial × swept/unswept 四类集合，为各 P 的 mcache 提供或回收可用 span
+  - 每个 P 的分配器（mcache）：缓存各类 span；tiny 分配（<16B）统一走 span class 5，通过 tiny/tinyoffset 聚合；small 分配按是否含指针与大小选择不同路径；large（>32760B）直接由 mheap 申请
+  - 栈管理：区分系统栈与 goroutine 栈；Linux 上非主线程系统栈可由运行时分配（16KB），goroutine 栈起始 2KB，来自栈池/栈缓存；自 Go 1.4 起采用连续栈按倍数扩张，并在 GC 期间可收缩；引入 nosplit 与 stack guard 优化调用开销与溢出检查
+  - https://nghiant3223.github.io/2025/06/03/memory_allocation_in_go.html
 
 
 
