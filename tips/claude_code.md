@@ -202,6 +202,7 @@
   - codex --dangerously-bypass-approvals-and-sandbox 全自动跑
   - codex resume用来选择历史记录sessions
   - codex目前没有plan模式，可以/approvals选择read-only进行讨论，或者直接在提示词里要求codex进行plan，写到一个文档中
+  - /review 命令很实用，在写完代码后让 codex review
 - Codex Prompt
   - Make a pixel art game where I can walk around and talk to other villagers, and catch wild bugs
   - Give me a work management platform that helps teams organize, track, and manage their projects and tasks. Give me the platform with a kanban board, not the landing page.

@@ -1938,6 +1938,41 @@
 - [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/)
   - 真正导致 LLM 推理“同输入不同输出”的并不是大家常提到的“GPU 并行 + 浮点非结合律”，而是多数算子对批量大小（batch size）不具备“批量不变性（batch-invariance）”。
   - 推理服务在动态排队、动态拼 batch 时，单个请求实际经历的 batch 大小会随机变化，从而引入可观的数值差异。
+- [Detecting and reducing scheming in AI models](https://openai.com/index/detecting-and-reducing-scheming-in-ai-models/)
+  - Scheming = when an AI behaves one way on the surface while hiding its true goals.
+  - 探索了一种名为“深思熟虑对齐法”（deliberative alignment）的方法：通过训练模型进行更透明、更明确的推理，并且在模型规范（Model Spec）中明确禁止算计行为。
+- LLM Question
+  - 你的大语言模型每天要生成数百万条回复，如何在不进行人工审阅的情况下评估这些回复的质量？
+    - 用一个LLM来评判另一个LLM（LLM as a Judge）
+    - 自动裁判系统一般分三种类型：
+      • 单条输出评分：直接对单一的回复内容，依据相关性、准确性、帮助性等指标逐条打分。
+      • 参考答案对比：将模型的回复与标准答案进行对照，衡量其准确程度。
+      • 成对比较法：同时给出两条回复，让模型选出其中表现更好的一条。
+    - 主流的方法是使用 思维链提示（Chain-of-Thought prompting）：
+      - 1. 裁判LLM会逐步详细阐述自己打分的理由和逻辑。
+      - 2. 明确使用特定的评价标准。
+      - 3. 输出具体分值，并附带详细解释。
+      - 4. 对特殊或边界情况，使用少量示例来提高稳定性。
+    - 如果实际落地，我建议使用：
+      - G-Eval框架：针对特定领域或自定义评估标准，灵活创建评估机制。
+      - 成对裁判（Pairwise judges）：用于模型A/B测试，快速确定模型表现的相对优劣。
+      - DAG决策树结构：适用于较复杂的评估任务，明确逻辑和评判流程。
+      - 位置交换法（position swapping）：减少裁判模型对回复顺序产生的偏见。
+      - 多裁判共识（multi-judge consensus）：在涉及重大决策时，引入多个裁判LLM，提高评估结果的稳健性。
+    - 裁判LLM也不完美，会出现：
+      - 位置偏差（Position Bias）：倾向于选第一个选项。
+      - 冗长偏差（Verbosity Bias）：倾向于选择更长、更详细的回答。
+      - 自我偏好（Self-preference）：在评估自身模型输出时倾向于给出更高分数。
+      - 温度敏感性（Temperature Sensitivity）：生成时随机性参数影响结果。
+  - 既然LLM裁判的评分是不确定的（non-deterministic），你怎么处理这种情况？
+    - 建立共识机制（Consensus Mechanisms），监控评分分布（Score Distributions），对连续分数进行概率加权（Probability Weighting），并定期验证与人工基准（Human Benchmarks）的一致性
+
+
+
+
+
+
+
 
 
 

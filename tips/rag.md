@@ -962,6 +962,7 @@
   - 𝜏-Bench（也称为Tau Bench或τ-Bench）是一个专为评估AI代理
     - 𝜏-Bench旨在桥接现有AI基准（如单轮工具调用测试）和真实世界应用的差距。它强调代理在处理不确定用户查询、遵守领域特定规则（如退款政策）以及与工具（如数据库或API）互动时的可靠性和效率，揭示代理在函数调用和多步推理中的潜在不一致性。
     - https://github.com/sierra-research/tau-bench?tab=readme-ov-file
+  - [Tau² Benchmark: How a Prompt Rewrite Boosted GPT-5-mini](https://quesma.com/blog/tau2-benchmark-improving-results-smaller-models/)
   - [Building Research Agents for Tech Insights](https://towardsdatascience.com/building-research-agents-for-tech-insights/)
     - 解决方案基于三大核心要素：
       - 独特数据源（Unique Data Source）：建立难以复制的数据护城河；
