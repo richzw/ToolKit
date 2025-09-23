@@ -1966,8 +1966,24 @@
       - 温度敏感性（Temperature Sensitivity）：生成时随机性参数影响结果。
   - 既然LLM裁判的评分是不确定的（non-deterministic），你怎么处理这种情况？
     - 建立共识机制（Consensus Mechanisms），监控评分分布（Score Distributions），对连续分数进行概率加权（Probability Weighting），并定期验证与人工基准（Human Benchmarks）的一致性
-
-
+  - [LLM 应用的质量守门人](https://mp.weixin.qq.com/s/fwqyQOTtO2PXh00SGtkoWw)
+    - 评估方法二分法
+      - 决 determinism：BLEU/ROUGE/Exact-Match；快速、零额外成本，但无法识别语义、惩罚多样性
+      - BLEU("I’m good","I am good") ➜ 0.18 - 模型评判 LLM-as-a-Judge：强模型评弱模型，达到人类一致率≈80%
+    - RAG 评估三件套（RAG Triad，不需要参考答案）
+      - Context Relevance ：检索内容是否回答问题
+      - Faithfulness ：答案是否仅基于检索内容
+      - Answer Relevance ：最终回答是否满足提问
+    - Agent / 工具轨迹评估
+      • 过程=结果，同步验证每步调用
+    - 安全防护框架
+      • OWASP LLM Top-10 风险矩阵：Prompt Injection、Data Leakage、Excessive Agency …
+      • LLM Guard：输入扫描 + 输出脱敏
+    - Tools
+      - Google Cloud 用户：Vertex AI 的 GenAI Evaluation Service
+      - 需要灵活性：Deep Eval（Python，类单元测试风格）
+      - 专注 RAG：Ragas（专门的 RAG 指标）
+      - 安全优先：Promptfoo（内置安全测试）
 
 
 

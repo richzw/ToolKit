@@ -1066,8 +1066,12 @@
     - 停止旧Deployment断开conntrack中的连接。
     - 主动清除Amazon EKS节点上相关的conntrack表项。
     - 蓝绿部署策略。创建新的Service指向新的deployment，并更新Ingress指向新的Service。
-
-
+- [基于 NodeLocal DNSCache 优化 EKS DNS 查询时延和深层降低跨 AZ 流量费](https://aws.amazon.com/cn/blogs/china/optimize-eks-dns-query-latency-based-on-nodelocal-dnscache-and-deeply-reduce-cross-az-traffic-charges/)
+  - 场景与问题：EKS 集群跨 3 个 AZ，前端无状态应用经 NLB 访问后端 Squid，业务高峰出现 DNS 查询超时，平均约 1.5s、峰值 2.5s；跨 AZ 东西向流量约 4.81 TB/日，带来约 48 美元/日成本。 
+  - 方案概览：
+    - 在每个节点以 DaemonSet 部署 NodeLocal DNSCache，缓存就近解析以缓解 CoreDNS 压力与单网卡 PPS 瓶颈。 
+    - NodeLocalDNS 对特定域名（暴露于 NLB 的服务）直接返回同 AZ 的 NLB 私网 IP，从源头减少跨 AZ 转发。实现上依据节点 IP 判断所处子网，按条件写入 /etc/hosts 映射。
+    - Service 配置关闭 NLB 跨区均衡 annotation: service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "false"，并设 externalTrafficPolicy: Local，使流量仅落到本节点上的 Pod，进一步降低 kube-proxy 转发与跨 AZ 命中。
 
 
 

@@ -2234,6 +2234,13 @@
           - omitempty 规则：若结果为 “空 JSON 值”（null, "", [], {}) 则省略。
           - time.Duration 默认报错，需通过格式化选项显式指定。
         -  v1 将内部重写为调用 v2
+  - 运行时与工具链新动向
+    - Green Tea GC
+    - Goroutine 泄漏检测 - 与 Uber 合作，将现有基于 GC 的“部分死锁”检测算法并入 runtime
+    - 结构体字段自动重排
+    - WebAssembly 原生 GC 最大障碍：Go runtime 大量使用 interior pointers，WASM GC 目前不支持
+    -  io_uring
+       – 性能惊人，但 API 复杂且漏洞多，Google 服务器全部禁用
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
   - errors.Is() is expensive. If you use it, check the error is non-nil first to avoid a pretty big performance penalty on the happy path.
   - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.
