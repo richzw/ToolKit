@@ -968,6 +968,7 @@
       - 独特数据源（Unique Data Source）：建立难以复制的数据护城河；
       - 受控工作流（Controlled Workflow）：采用结构化的处理流程而非依赖大模型自主决策；
       - 提示链技术（Prompt Chaining）：通过分层提示实现精确的数据处理和洞察生成。
+  - [一个让 AI 智能体（AI Agent）工作更出色的绝妙方法，简单到令人惊讶：只要给它们设定一个人格](https://x.com/IntuitMachine/status/1969723501675164157)
 - [知识召回调优](https://aws.amazon.com/cn/blogs/china/practice-of-knowledge-question-answering-application-based-on-llm-knowledge-base-construction-part-3/)
   - 倒排召回 & 向量召回
     - 倒排召回

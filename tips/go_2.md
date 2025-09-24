@@ -2241,6 +2241,7 @@
     - WebAssembly 原生 GC 最大障碍：Go runtime 大量使用 interior pointers，WASM GC 目前不支持
     -  io_uring
        – 性能惊人，但 API 复杂且漏洞多，Google 服务器全部禁用
+  - [Wasm 3.0](https://mp.weixin.qq.com/s/2ym-RMNrPHT_vEeBsccW1g)
 - [Sentinel errors and errors.Is() slow your code](https://www.dolthub.com/blog/2024-05-31-benchmarking-go-error-handling/)
   - errors.Is() is expensive. If you use it, check the error is non-nil first to avoid a pretty big performance penalty on the happy path.
   - Using == to check for sentinel errors is likewise expensive, but less so. If you do this, check the error is non-nil first to make it cheaper on the happy path. But because of error wrapping, you probably shouldn't do this at all.
