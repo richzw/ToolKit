@@ -1,6 +1,16 @@
 
 - [The Things I Find Myself Repeating About Go](https://www.youtube.com/watch?v=RZe8ojn7goo)
   - https://mp.weixin.qq.com/s/vmOMjLNcWFxzHJZOSh8DaA
+- [Evolving Your API ](https://www.youtube.com/watch?v=9Mb0yy8u-Gs)
+  - 原则一：未来防护（Future-Proofing）
+    - 缩小暴露面
+      • 非必要不导出；跨包复用用 internal
+    - 预留扩展位──优先选「选项结构体」而不是「可变函数选项」
+    - 锁定接口，禁止外包实现
+  - 原则二：增加而非修改
+  - 原则三：//go:fix inline（Go 1.26 新指令
+  - 原则四：用构建标签做可撤销实验
+    - go run -tags=mymodule_coolfeature
 - [unsafe 包](https://mp.weixin.qq.com/s/wdFdPv3Bdnhy5pc8KL6w6w)
   - unsafe 实现原理
     - Sizeof(x ArbitrayType)方法主要作用是用返回类型x所占据的字节数，但并不包含x所指向的内容的大小，与C语言标准库中的Sizeof()方法功能一样，比如在32位机器上，一个指针返回大小就是4字节。

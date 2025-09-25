@@ -1877,7 +1877,12 @@
    以下是故事内容：
    {故事内容}
   ```
-
+- [GPT-5-Codex Prompting Guide](https://cookbook.openai.com/examples/gpt-5-codex_prompting_guide)
+  - The core prompting principle for GPT-5-Codex is “less is more.”, this includes:
+    - Start with a minimal prompt inspired by the Codex CLI system prompt, then add only the essential guidance you truly need.
+    - Remove any prompting for preambles, because the model does not support them. Asking for preambles will lead to the model stopping early before completing the task.
+    - Reduce the number of tools to only the a terminal tool, and apply_patch.
+    - Make tool descriptions as concise as possible by removing unnecessary details.
 
 
 

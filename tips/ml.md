@@ -295,6 +295,13 @@
   - [LLM_Agent_Memory_Survey](https://github.com/nuster1128/LLM_Agent_Memory_Survey)
   - [AI智能体](https://vintagedata.org/blog/posts/designing-llm-agents)
     - 真正的LLM智能体，根本不需要「提示」 LLM智能体动态地决定自己的流程和工具用法，完全自主
+  - [AI智能体（AI Agent）的真实项目](https://www.mckinsey.com/capabilities/quantumblack/our-insights/one-year-of-agentic-ai-six-lessons-from-the-people-doing-the-work)
+    - 聚焦流程而非“代理本体”：从端到端重构业务流程，按环节混搭规则系统/分析式AI/LLM/Agent，由代理充当编排与集成“胶水”；可用开源编排框架：AutoGen、CrewAI、LangGraph。
+    - 代理并非处处适用：低方差、高标准化任务（如投资者入职、监管披露）更适合规则/预测/Prompt；高方差、低标准化任务（如复杂信息抽取、合规核验）更适合代理。
+    - 治“AI slop”靠评测与反馈：把代理当“新员工”入职与培养，建立细粒度评测与学习回路。指标包括：端到端成功率、F1/精确率-召回率、检索准确率、语义相似度、LLM 评审、偏差检测（混淆矩阵）、幻觉率、校准误差。
+    - 全链路可观测与可追溯：对工作流每一步做监控与验证，快速定位错误成因（如上游数据质量），及时修正数据规范与解析逻辑。
+    - “最佳用例=可复用用例”：识别摄取/抽取/搜索/分析等共性动作，建设集中化服务与资产库（LLM 可观测、预审 Prompt、复用代码/模式/培训资料）；平台化可消除约30–50%的非必要工作。
+    - 人仍然关键但角色变化：明确人机分工（审核、合规、边界与签署责任），并以可解释的UI交互（高亮、框选、自动滚动与定位）提高核验效率，实测可达~95%用户接受度。
 - 时间序列异常值检测
   - 正确体现各种指标多样的变化趋势和行为特性
     - 为消除每个分组中的趋势和季节性影响因素，我们利用了 statsmodels 库中强大的 seasonal_decompose（季节性分解函数）
@@ -1658,6 +1665,7 @@
         - • Supabase MCP 提供只读模式选项，能有效避免在自动化操作中执行 INSERT、UPDATE 等危险操作。
       - (2) 对用户输入进行 Prompt Injection 过滤：
         - • 在让 LLM 助手读取数据前，先对用户内容进行检查，过滤掉看上去包含 SQL 或可疑指令的文本，降低指令注入风险。
+  - [ Chrome DevTools MCP ](https://developer.chrome.com/blog/chrome-devtools-mcp?hl=en)
 - [Agent2Agent](https://mp.weixin.qq.com/s/8nh4Cg-TH0eF2gWYUiwh3A)
   - https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability
   - A2A（Agent2Agent）协议 是由 Google Cloud 推出的一个开放协议，旨在促进不同 AI 代理之间的互操作性
