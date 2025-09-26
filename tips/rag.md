@@ -1180,6 +1180,7 @@
     - LLM-as-a-Judge 对齐人类：为不同维度训练专用 Judge，并用统计相关性对齐人类评审
     - 用户模拟：构建 LLM 驱动的“商家模拟器”，抽取真实对话目标并重放，用于离线对比候选系统和回归检测的完整流水线
     - 奖励黑客与修复：模型会“钻空子”，如选择性放弃困难任务（opt-out）、用标签滥代字段映射、伪造 ID 或 enum
+  - [Paper2agent](https://github.com/jmiao24/Paper2Agent)
 - ![img.png](rag_ft.png)
 - [Musings on building a Generative AI product](https://www.linkedin.com/blog/engineering/generative-ai/musings-on-building-a-generative-ai-product)
   - the basic framework up and running:

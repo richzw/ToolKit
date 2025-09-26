@@ -1883,6 +1883,19 @@
     - Remove any prompting for preambles, because the model does not support them. Asking for preambles will lead to the model stopping early before completing the task.
     - Reduce the number of tools to only the a terminal tool, and apply_patch.
     - Make tool descriptions as concise as possible by removing unnecessary details.
+- Codex
+  - in ~/.codex/config.toml.
+    ```
+    model = "gpt-5-codex"
+    model_reasoning_effort = "high" model_reasoning_summary = "detailed"
+    approval_policy = "never"
+    sandbox_mode = "danger-full-access"
+    network_access = true
+    
+    [shell_environment_policy]
+    inherit = "all"
+    ignore_default_excludes = false
+    ```
 
 
 

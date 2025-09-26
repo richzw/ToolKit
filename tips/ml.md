@@ -996,6 +996,7 @@
     - GPTQ vs AWQ
       - GPTQ (Gradient-based Post-training Quantization) 使用数据集，如C4，来进行权重的精细调整和量化，这是因为它依赖于数据驱动的方法来确定哪些权重对模型性能最为关键。通过在具体的数据集上进行微调，GPTQ可以更准确地确定哪些权重在量化时需要保持更高的精度。
       - AWQ (Adaptive Weight Quantization) 采用了一种不依赖于特定数据集的方法。它利用模型权重本身的统计信息来指导量化过程，而不是依赖于外部数据。这种方法的优势在于它不需要额外的数据来进行权重的量化，从而简化了量化过程。 AWQ关注权重的分布和重要性，使用这些信息来适应性地量化不同的权重，从而在不牺牲太多模型性能的情况下减少模型大小。
+  - [Why, When and How to Fine-Tune a Custom Embedding Model](https://weaviate.io/blog/fine-tune-embedding-model?=undefined&utm_source=channels&utm_medium=fp_social&utm_campaign=dev_education&utm_content=animated_diagram_post_680387995)
   - [从黑箱调参到工程可控：大模型强化学习的破局实践](https://mp.weixin.qq.com/s/i3ZdKz6dbOYPV5x70cw8xQ)
     - 背景：RL 在 LLM 中的重要意义
       • 强化学习（RL）可帮助大模型“学会学习”，是提升复杂推理和生成质量的重要途径。
