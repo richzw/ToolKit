@@ -439,6 +439,17 @@
       - Assume a query node has 16 cores, we say the CPU ability is 1600. The collection has 5 segments. Now you send 100 search requests at the same time with nq=8. cpuRatio=10.
         - The search engine estimates usage of each request to be 8510=400. Then it allows 1600/400=4 requests to be executed at the same time
       - maxNQ is for search requests combination. The search engine can combine similar search requests into a big request to execute.
+    - [Similarity Metrics for Vector Search](https://zilliz.com/blog/similarity-metrics-for-vector-search)
+      - 𝗘𝘂𝗰𝗹𝗶𝗱𝗲𝗮𝗻 𝗗𝗶𝘀𝘁𝗮𝗻𝗰𝗲 (𝗟𝟮) – for absolute distances
+      -  𝗖𝗼𝘀𝗶𝗻𝗲 𝗦𝗶𝗺𝗶𝗹𝗮𝗿𝗶𝘁𝘆 – for directional comparison
+      -  𝗜𝗻𝗻𝗲𝗿 𝗣𝗿𝗼𝗱𝘂𝗰𝘁 – for combined direction and magnitude
+      -  𝗠𝗮𝗻𝗵𝗮𝘁𝘁𝗮𝗻 𝗗𝗶𝘀𝘁𝗮𝗻𝗰𝗲 (𝗟𝟭) – for grid-based calculations
+      -  𝗛𝗮𝗺𝗺𝗶𝗻𝗴 𝗗𝗶𝘀𝘁𝗮𝗻𝗰𝗲 – for binary vector comparison
+      - Choose the right metric based on your data characteristics and application needs.
+        - Use Euclidean distance when you care about the difference in magnitude. It's great for when your vectors have different magnitudes and you primarily care about how far your data points are in space.
+        - Use Cosine similarity when you care about the difference in orientation. Perfect for NLP applications and scenarios where vector direction matters more than magnitude.
+        - Use Inner product when you care about both magnitude and orientation. It's a versatile option that works well for both normalized and non-normalized datasets.
+        - Use specialized metrics like Hamming or Jaccard for binary data or specific applications where these metrics are more appropriate.
   - 索引
     - [index overview](https://www.slideshare.net/slideshow/introduction-to-multilingual-retrieval-augmented-generation-rag/267957576)
       - L2 (Euclidean) - Spatial distance 主要运用于计算机视觉领域

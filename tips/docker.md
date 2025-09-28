@@ -725,8 +725,25 @@
   - ["npm", "start"] in CMD leads to an unwanted shell in the container process tree, which in particular can cause signal propagation issues (hence, break graceful termination of your containerized application).
   - ![img.png](docker_npm_cmd.png)
 - [K8s Container 管理机制](https://mp.weixin.qq.com/s/ya0rHxP7_PU-uEhI1VbFog)
-
-
+- [Docker镜像优化](https://mp.weixin.qq.com/s/YX8hdINq59exNZHfkGc55g)
+  - 选对基础镜像
+    - Ubuntu → Alpine \ gcr.io/distroless/nodejs:16
+  - 多阶段构建（multi-stage build）
+  - .dockerignore 减少构建上下文
+    - 常见忽略项：.git/** 、docs/** 、test/** 、node_modules/
+  - 镜像层优化
+    - 合并 RUN
+    - 先 COPY package*.json，再 RUN npm ci，再 COPY 代码 → 提高缓存命中
+  - 运行时优化
+    - 创建非 root 用户
+  - 进阶加速
+    - BuildKit：export DOCKER_BUILDKIT=1
+    - dive 分析镜像层；trivy / docker scan 做漏洞扫描
+  - 衡量指标与测试脚本
+    - docker images 查看体积趋势、time docker build 测构建耗时，docker stats 测内存
+  - CI/CD 自动化示例（GitHub Actions）
+    –build-arg BUILDKIT_INLINE_CACHE=1
+    --cache-from myapp:latest
 
 
 
