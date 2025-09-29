@@ -2211,9 +2211,21 @@
 - [Go并发操作的成本层级清单](https://mp.weixin.qq.com/s/Bm5XPj3LLYubS_njjmsQ0A)
 - [Be Careful with Go Struct Embedding](https://mattjhall.co.uk/posts/be-careful-with-go-struct-embedding.html)
 - [Memory Order Side Chapter - The Story Of Strongly Happens Before](https://nekrozqliphort.github.io/posts/happens-b4/)
-
-
-
+- [防文件路径遍历攻击](https://mp.weixin.qq.com/s/UuvDopmi0XCJE7XSQ0yhig)
+  - 常见攻击手法
+    • 相对路径 (“../../etc/passwd”)
+    • Windows 设备名（“CONOUT$” 等）
+    • 符号链接跳转
+    • TOCTOU（Time-Of-Check-Time-Of-Use）竞态
+  - 现有做法
+    • filepath.IsLocal / filepath.Localize（只能做词法检查）
+    • 第三方库 github.com/google/safeopen
+    • 仍挡不住符号链接或 TOCTOU
+  - os.Root 的设计与用法
+    - 打开根目录 r, err := os.OpenRoot("/safe/dir")  defer r.Close()
+    - 一次性快捷函数 f, err := os.OpenInRoot("/safe/dir", untrustedPath)
+  - 安全原理（平台细节） • Linux / macOS：全部基于 openat* 系列系统调用，并把目录 fd 当作“锚点”；解析每一级时禁止 “..”、符号链接等跳逸。
+  - 
 
 
 

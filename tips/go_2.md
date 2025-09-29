@@ -2199,10 +2199,13 @@
       - TLS SHA-1 禁用
       - DWARF v5 调试信息 编译器和链接器生成 DWARF v5 调试信息
       - Go 1.25 要求 macOS2 Monterey 或更高版本
-      - Trace Flight Recorder (飞行记录)
+      - [Trace Flight Recorder (飞行记录)](https://go.dev/blog/flight-recorder)
         - 提供了一种更高效、更轻量级的生产环境调试和性能分析方法
         - Tracing (跟踪): Tracing 是一种监控和调试技术，通过收集程序执行的详细信息，例如函数调用、goroutine 活动、内存分配等，来帮助开发者识别性能瓶颈和调试复杂问题
+          - runtime/trace 通过 trace.Start / trace.Stop 收集完整时间窗内的事件（调度、系统调用、垃圾收集等）。
+          - 适合短程序；对常驻服务则数据过大，而且故障发生时往往已来不及再调用 trace.Start。
         - Flight Recording (飞行记录): 飞行记录是一种更精妙的跟踪方法 在一个循环缓冲区中维护最新的执行数据。这意味着它只保留最近的程序活动，并自动丢弃较旧的信息，以节省空间并显著减少开销
+          - 在后台持续记录 trace，但仅保留最近一小段时间（环形缓冲区）
         - trace.FlightRecorder https://go.googlesource.com/proposal/+/ac09a140c3d26f8bb62cbad8969c8b154f93ead6/design/60773-execution-tracer-overhaul.md
       - [encoding/json/v2 and encoding/json/jsontext](https://go.dev/blog/jsonv2-exp)
         - 通过 GOEXPERIMENT=jsonv2 或 build tag goexperiment.jsonv2 启用

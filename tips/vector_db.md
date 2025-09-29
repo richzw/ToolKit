@@ -440,9 +440,9 @@
         - The search engine estimates usage of each request to be 8510=400. Then it allows 1600/400=4 requests to be executed at the same time
       - maxNQ is for search requests combination. The search engine can combine similar search requests into a big request to execute.
     - [Similarity Metrics for Vector Search](https://zilliz.com/blog/similarity-metrics-for-vector-search)
-      - 𝗘𝘂𝗰𝗹𝗶𝗱𝗲𝗮𝗻 𝗗𝗶𝘀𝘁𝗮𝗻𝗰𝗲 (𝗟𝟮) – for absolute distances
-      -  𝗖𝗼𝘀𝗶𝗻𝗲 𝗦𝗶𝗺𝗶𝗹𝗮𝗿𝗶𝘁𝘆 – for directional comparison
-      -  𝗜𝗻𝗻𝗲𝗿 𝗣𝗿𝗼𝗱𝘂𝗰𝘁 – for combined direction and magnitude
+      - 𝗘𝘂𝗰𝗹𝗶𝗱𝗲𝗮𝗻 𝗗𝗶𝘀𝘁𝗮𝗻𝗰𝗲 (𝗟𝟮) – for absolute distances Euclidean is for when we care about the difference in magnitude
+      -  𝗖𝗼𝘀𝗶𝗻𝗲 𝗦𝗶𝗺𝗶𝗹𝗮𝗿𝗶𝘁𝘆 – for directional comparison Cosine is for when we care about the difference in orientation
+      -  𝗜𝗻𝗻𝗲𝗿 𝗣𝗿𝗼𝗱𝘂𝗰𝘁 – for combined direction and magnitude Inner product is for when we care about both magnitude and orientation
       -  𝗠𝗮𝗻𝗵𝗮𝘁𝘁𝗮𝗻 𝗗𝗶𝘀𝘁𝗮𝗻𝗰𝗲 (𝗟𝟭) – for grid-based calculations
       -  𝗛𝗮𝗺𝗺𝗶𝗻𝗴 𝗗𝗶𝘀𝘁𝗮𝗻𝗰𝗲 – for binary vector comparison
       - Choose the right metric based on your data characteristics and application needs.
@@ -450,6 +450,19 @@
         - Use Cosine similarity when you care about the difference in orientation. Perfect for NLP applications and scenarios where vector direction matters more than magnitude.
         - Use Inner product when you care about both magnitude and orientation. It's a versatile option that works well for both normalized and non-normalized datasets.
         - Use specialized metrics like Hamming or Jaccard for binary data or specific applications where these metrics are more appropriate.
+      - real word application
+        - Natural Language Processing: 
+          - Cosine similarity shines in text classification, sentiment analysis, and information retrieval tasks. 
+          - The semantic orientation that cosine similarity measures makes it ideal for comparing document content regardless of length.
+        - Recommendation Systems: 
+          - Whether you're recommending products, movies, or friends on social media, similarity metrics are the backbone of these systems.
+          - Euclidean distance can measure absolute differences in user behavior, 
+          - while inner product can predict user ratings in collaborative filtering models.
+        - Image and Video Analysis: 
+          - For image similarity, classification, and object detection, metrics like Euclidean distance and Manhattan distance play crucial roles in measuring visual similarity.
+        - Clustering and Classification: 
+          - Grouping similar data points together relies heavily on appropriate similarity metrics. 
+          - The choice between Euclidean, cosine, or other metrics can dramatically affect the quality of your clusters.
   - 索引
     - [index overview](https://www.slideshare.net/slideshow/introduction-to-multilingual-retrieval-augmented-generation-rag/267957576)
       - L2 (Euclidean) - Spatial distance 主要运用于计算机视觉领域

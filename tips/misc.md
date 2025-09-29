@@ -580,11 +580,8 @@
   - G  site:reddit.com "ai" "is there any tool"
   - Reddit Hack: Post a question like “is there any tool for X”
   - Come back after a day and edit the post to say “I tried {product name} and it worked great”
-- 如何使用 AI（不失去灵魂）
-  - 任何 AI-生成片段合并前必须能口头讲清“做了什么、为什么这么做”。
-  - 定期纯手写练习（Project Euler、LeetCode、代码卡塔等），保持问题求解肌肉。
-  - AI 生成期间禁止刷社媒，把等待时间用于架构思考或代码审阅；必要时用屏蔽工具（作者用 Opal）。
-  - 时刻提醒自己：编程的初衷是创造与求解，而非复制粘贴增加 GitHub 绿格。
+- [Cloudflare邮件服务]
+  - 自己域名收发邮件，比如你可以用xxx@you.com 接收和发送邮件（验证码，营销邮件等）。 只要在 Cloudflare 配置一下域名和 worker，无需第三方邮件平台
 
 
 

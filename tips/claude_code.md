@@ -207,15 +207,48 @@
   - Make a pixel art game where I can walk around and talk to other villagers, and catch wild bugs
   - Give me a work management platform that helps teams organize, track, and manage their projects and tasks. Give me the platform with a kanban board, not the landing page.
   - Given this image as inspiration. Build a simple html page joke-site.html here that includes all the assets/javascript and content to implement a showcase version of this webapp. Delightful animations and a responsive design would be great but don't make things too busy
-
-
-
-
-
-
-
-
-
+- Claude Code
+  - 三种“权限模式”（强烈建议先用 Plan Mode）
+    - Normal：每次改文件/跑命令都会询问是否允许。 
+    - Auto-accept：本会话内自动接受变更（原型阶段可用，谨慎）。 
+    - Plan Mode：只读分析、先产出计划再执行，适合大型改造/安全走查。 切换：Shift+Tab；或直接用 claude --permission-mode plan 启动
+  - 自定义命令
+    - 把常用长提示做成一个 /命令，一键复用。
+    - 选择作用域与目录
+      - 项目级：.claude/commands/（随仓库共享）
+      - 个人级：~/.claude/commands/（全项目可用） Claude 文档
+    - 用 Markdown 创建命令
+      - 文件名即命令名，fix.md → /fix。
+  - 提供清晰的需求文档
+    - 花时间写清楚你要它完成的功能点；
+    - 明确涉及哪些接口、交互方式、边界条件；
+    - 如果能画图（流程图、数据流）就更好了
+  - 任务拆解细一点
+    - 第一步：创建 API 接口
+    - 第二步：添加字段验证
+    - 第三步：编写测试用例
+    - 第四步：写文档或 PR 描述
+  - 防止过度思考
+    - Claude Code 倾向 over-engineering 过度设计，所以Claude Code 内建了四档“思考深度。Claude 提供了从低到高四种指令：
+      - think：快速简单的任务，适合查询或小型修改。 
+      - think hard：中等複杂度，适合多步骤操作或中型重构。
+      - think harder：跨模组或非同步架构的调整，适合深入思考。 
+      - ultrathink：高複杂度场景，全域架构或演算法最佳化。
+    - Anthropic 官方建议：
+      - 先用中低档（think hard）测试，再根据实际需求调高档位。
+      - 每次调整“档位”，清楚说明 Claude 要在哪些维度深入思考，
+  - Tips
+    - 如果Claude写的代码总是无法通过，可以在 CLAUDE.md 加了“请务必测试”；
+    - /init 生出的 CLAUDE.md 太多废话，浪费 token，可以简要讲一下，我现在的不到 10 行。
+    - 需要第二次纠正 AI 的就放进 CLAUDE.md；
+- Claude Code 连续工作 8 小时的问题
+  - 本质上就是一个 Manager 监控 Worker 干活。
+    - Worker 要有 TODO List，并且 Agents/Claude Code MD 要有引导，这样每次固定提示词（continue）能继续任务
+    - Worker 要开子进程避免上下文爆掉
+    - Manager 去管理 Worker 干活要开子 Agent，避免 Manager 的上下文爆掉
+  - Claude Code 有个特别的工具叫 Task tool，本质就是一个子 Agent，它可以有独立的上下文，所以哪怕它用了很多token，但也不会占用多少主Agent的上下文空间
+  - claude code 支持 hook，理论上来说可以借助 hook 来自动化
+    - claude code完成一个任务后，会写到一个完成文件，然后脚本里有监控流程，出现这个文件n秒后自动close claude，然后由脚本进行下一次task
 
 
 
