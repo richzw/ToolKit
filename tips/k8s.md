@@ -1146,6 +1146,12 @@
   - 适用范围与限制
     - • 仅在静态 CPU Manager 模式下生效；Best-Effort，若节点资源不足仍会跨 cache 分配。
     - • 与 NUMA / Topology Manager 等可联合使用，但需评估整体亲和策略。
-
+- [Top Kubernetes (K8s) Troubleshooting Techniques](https://www.cncf.io/blog/2025/09/12/top-kubernetes-k8s-troubleshooting-techniques-part-1/)
+  - https://www.cncf.io/blog/2025/09/19/top-kubernetes-k8s-troubleshooting-techniques-part-2/
+  - kubectl top pods --all-namespaces --sort-by=cpu
+  - Advanced live debugging with kubectl debug
+    • Inject an ephemeral container: kubectl debug pod-name -it --image=busybox --target=main-container.
+    • Use tool images (nicolaka/netshoot, ubuntu, golang) to ping services, dig DNS, run tcpdump, or attach profilers without restarting the workload.
+    • Broader options: duplicate a pod (--copy-to), spin up a privileged pod on a node (kubectl debug node/worker-1 --image=ubuntu; chroot /host), or replace container images to test hypotheses—all while production traffic keeps flowing.
 
 

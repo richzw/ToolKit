@@ -2180,6 +2180,7 @@
       - 实验性垃圾回收器 (greenteagc) 标记和扫描小对象性能提升，预计减少 0-40% GC 开销
       - go vet 新增 waitgroup 和 hostport 分析器
       - testing/synctest 提供测试并发代码的支持，包括伪造时钟和 goroutine 等待机制
+        - https://mp.weixin.qq.com/s/cBsuMBs_bR98mCk6XzlD2g
       - 容器感知 GOMAXPROCS 在 Linux 上自动根据 cgroup CPU 限制调整 GOMAXPROCS，并动态更新
         - [Container-aware GOMAXPROCS](https://go.dev/blog/container-aware-gomaxprocs)
         - Go 1.25 的新默认
