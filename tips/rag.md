@@ -1786,7 +1786,17 @@
     - 第三方依赖管理：健康检查、熔断/降级、重试、配额控制，保证外部接口问题不外溢。
 - [MarkItDown](https://github.com/microsoft/markitdown)
   - 把各种格式的文件（Word、PDF、Excel、PPT、图片、音频、HTML、JSON、甚至 zip 包）一键变成结构化 Markdown
-
+- [如何编写 prompt 才能让大模型更好地理解工具]
+  - 这个问题的答案很简单：让模型来写 Prompt，让模型给你反馈。Claude Agent SDK
+  - 举个案例，我上个帖子说到帮朋友做一个他们设计系统的 Coding Agent，初始提示词的产生是这样的：
+    - 1. 先让 Claude Code，去基于设计系统（Design System）做一个 Login 页面，要求只能用设计系统的组件，要求搜索、阅读设计系统的文档去了解怎么使用这个设计系统。
+    - 2. 当 Claude Code 完成这个任务后，实际上它已经收集够了基于这套设计系统完成一个登录页面所需要的所有信息，然后基于当前会话当前上下文，让 Claude Code 为一个 Coding Agent 写一个 System Prompt，让这个 Coding Agent 也能像它一样：
+       - high level 的了解这套设计系统
+       - 知道去什么地方检索文档
+       - 常用的组件有哪些
+       - 最佳实践是什么
+    - 3. 将 Claude Code 生成的 System Prompt 去测试，看差距在哪，然后回到之前 Claude Code 的会话，告诉它之前的 Prompt 存在的问题，让它优化，这样迭代几个版本就没问题了。
+   
 
 
 

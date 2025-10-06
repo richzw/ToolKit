@@ -1067,6 +1067,9 @@
     - StreamingLLM 的工作原理是识别并保存模型固有的「注意力池」（attention sinks）锚定其推理的初始 token。
     - StreamingLLM 利用了注意力池具有高注意力值这一事实，保留这些注意力池可以使注意力分数分布接近正态分布。因此，StreamingLLM 只需保留注意力池 token 的 KV 值（只需 4 个初始 token 即可）和滑动窗口的 KV 值，就能锚定注意力计算并稳定模型的性能。
     - 「注意力池」
+  - [Tinker: a flexible API for fine-tuning language models](https://thinkingmachines.ai/tinker/)
+    - Write training loops in Python on your laptop; we'll run them on distributed GPUs.
+    - Private beta starts today. We can't wait to see what researchers and developers build with cutting-edge open models!
 - [Kaggle] 
   - [时间序列](https://mp.weixin.qq.com/s/j4PsEdZ3VWhuWgPsIEST0A)
     - [蛋白功能预测大赛](https://www.kaggle.com/competitions/cafa-5-protein-function-prediction)

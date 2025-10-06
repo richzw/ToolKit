@@ -253,5 +253,21 @@
   - 还有一个实用的新功能：检查点（checkpoints）。通过它，你可以快速撤销Claude刚刚做出的修改，只需轻松按下Esc+Esc快捷键，或者输入指令/rewind即可实现。
   - Sonnet 4.5模型，发现它有个非常明显的进步，那就是在压缩对话上下文（compacting conversations）方面，比其他用过的模型都要强不少。
   - Anthropic甚至专门建议用户可以让Sonnet 4.5以维护上下文文件的形式来记录状态，而不仅仅是简单的“上下文总结”（context summarization）。
-
+- [“榨干” Claude Code 和 OpenAI Codex 们的性能](https://simonwillison.net/2025/Sep/30/designing-agentic-loops/)
+  - 在 AGENTS. md 中记录命令：“shot-scraper http://www.example. com/ -w 800 -o example.jpg”，让智能体轻松捕获网页截图
+  - “Agentic loop” 概念
+    - 作者把 LLM 代理定义为“在循环中调用工具以达成目标的系统”。
+    - 这类代理本质上是一种“暴力搜索”——只要把问题拆成一个清晰目标＋可迭代的工具集，代理就能不停尝试直到找到可行解
+  - YOLO mode：让代理全自动执行命令
+    - Claude Code、Codex CLI 等默认每次执行 shell 命令前都要求人工确认，效率低。开启 “YOLO mode” 可自动批准一切命令，但极其危险
+    - 未加监管时主要有三类风险：破坏性 shell 命令、数据外泄（源码/环境变量）、把本机当跳板发起攻击。
+    - 作者给出三种缓解策略：
+      - 在受限沙箱（Docker 或苹果新 container 工具）里运行代理；
+      - 直接“用别人的电脑”——例如 GitHub Codespaces；
+      - 承担风险、靠人工盯梢
+  - 与其用复杂的 MCP（Model Context Protocol），作者更倾向直接暴露 shell 命令，因为 LLM 对它们最熟悉
+- [Jina MCP](https://mp.weixin.qq.com/s/pZJr7-rfalOhZ1XRIOjGzw)
+  - CC
+    - `claude mcp add --transport sse jina https://mcp.jina.ai/sse --header "Authorization : Bearer ${JINA_API_KEY}"`
+  - 在 OpenAI Codex 中配置： 编辑 ~/.codex/config.toml 文件，添加以下配置
 
