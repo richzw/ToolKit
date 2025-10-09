@@ -137,6 +137,11 @@
       - 检索流程可先 coarse→fine，兼顾摘要与深钻。
     - (9) 自适应（Adaptive）
       - 基于语义密度动态调整 chunk_size/overlap；稠密段落切小块，稀疏段落切大块。
+  - [𝗖𝗵𝘂𝗻𝗸-𝗢𝗻-𝗗𝗲𝗺𝗮𝗻𝗱](https://weaviate.io/blog/elysia-agentic-rag)
+    - 1. Initial searches use document-level vectors for a broad overview.
+    - 2. When documents exceed a token threshold and prove relevant to your query, Elysia dynamically chunks them.
+    - 3. These chunks get stored in a parallel, quantized collection with cross-references to the original documents.
+    - 4. Subsequent similar queries can leverage previously chunked content, making the system more efficient over time.
   - [分块的方法](https://stackoverflow.blog/2024/06/06/breaking-up-is-hard-to-do-chunking-in-rag-applications/)
     - 固定大小分块
       - 我们会在块之间保持一些重叠，以确保语义上下文不会在块之间丢失。在大多数情况下，固定大小的分块将是最佳方式
@@ -1796,7 +1801,7 @@
        - 常用的组件有哪些
        - 最佳实践是什么
     - 3. 将 Claude Code 生成的 System Prompt 去测试，看差距在哪，然后回到之前 Claude Code 的会话，告诉它之前的 Prompt 存在的问题，让它优化，这样迭代几个版本就没问题了。
-   
+- 
 
 
 
