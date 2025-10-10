@@ -1948,6 +1948,6 @@
   * **专有名词处理：** 保留原文专有名词，并在首次出现时于括号内提供中文翻译。
   * **纯粹输出：** 最终交付的内容应只有纯粹的文章本身，不包含任何关于指令（如字数要求）或创作过程的元语言。
   ```
-
+- [Sora 2 Prompting Guide](https://cookbook.openai.com/examples/sora/sora2_prompting_guide)
 
 

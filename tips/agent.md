@@ -1,0 +1,42 @@
+- [Agentic Design Patterns ](https://docs.google.com/document/d/1rsaK53T3Lg5KoGwvf8ukOUvbELRtH-V0LnOIFDxBryE/preview?tab=t.0)
+- 智能体的崛起：“上下文”才是真正的护城河
+  - AI 智能体的出现，标志着我们与 AI 协作的模式，从被动的“请求-响应”转变为主动的“指令-执行”。
+    - 我们可以用自然语言下达一个宏观的目标，例如“重构用户认证模块以支持新的第三方登录”，然后由智能体自主地分析、定位、修改并验证相关代码。
+  - 上下文工程，则是一种构建信息环境的科学，它更关注于为模型提供一个高质量、高信噪比的信息场。在这个信息场中，模型不再需要去“猜”，而是能够基于充分的依据去“推理”和“决策”。
+  - 一个高质量的上下文环境是如何构建的呢？其核心在于建立一个能够深刻理解开发者“意图”的检索系统。
+- [如何为 AI Agent设计有效上下文工程](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+  - 为什么需要上下文工程
+    - 上下文窗口虽在扩大，但 LLM 仍会出现“context rot”——随着 token 数量增加，检索与长程推理准确率下降。
+    - Transformer 对 n 个 token 需处理 n² 组注意力关系；再叠加训练语料长序列稀缺，模型在长上下文上天然性能递减。
+    - 因此 token 是“注意力预算”的稀缺资源：必须策划最小、高信号的 token 集合来驱动期望行为
+  - 有效上下文的组成
+    - 系统提示
+    - • 选择合适 “高度” ：避免写死复杂逻辑，也避免过于抽象；用简单直接的语言定义角色、目标、约束。
+    - • 用区块 / 标签（XML、Markdown）分隔：如 ## Tool guidance、## Output format 等。
+    - • 先用最小提示测试 → 根据失败模式迭代添加具体指令或示例。
+    - 工具（Tools）
+    - • 每个工具应自包含、语义明确、少重叠；输入参数描述性强。
+    - • 维持“最小可行工具集”，否则代理和人类都难以选择正确工具。
+    - 范例（Few-shot）
+    - • 选多样、规范案例，而非塞满所有边缘情况；示例对 LLM 是高效信号
+  - 长时程任务的三大技术
+    - 压缩（Compaction）
+    - • 当聊天或任务 token 接近上限时，总结并开启新窗口。
+    - • 先保证高召回，再逐步提高压缩精度；常见“低垂果实”是清理旧的工具调用输出。
+    - • Claude Developer Platform 已内置“工具结果清除”特性。
+    - 结构化笔记 / 代理记忆（Agentic Memory）
+    - • 代理定期写 NOTES.md / to-do list 存储到上下文外，后续按需检索。
+    - • 适用于迭代开发、游戏通关等需跨会话保持状态的场景；Claude 平台已提供文件式记忆工具。
+    - 子代理架构（Sub-agent Architecture）
+    - • 主代理负责高层规划；多个子代理各自用干净窗口深度探索，通过 1-2k token 摘要向主代理汇报。
+    - • 适用于需要并行搜索的大型研究与分析任务。
+  - 实践要点
+    - 始终把上下文当做有限资源：token 数≠信息量，高信噪比才关键。
+    - 对系统提示、工具、范例、历史数据统一采用“最小高信号”原则。
+    - 根据任务特征选择：
+    - • 高频互动 → 首选压缩
+    - • 有明显里程碑 → 加记忆
+    - • 并行探索 → 多代理
+- [Building agents with the Claude Agent SDK](https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk)
+
+

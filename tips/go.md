@@ -1738,6 +1738,42 @@
       - 处理未知字段不便： v1 默认会丢弃 JSON 对象中未在 Go 结构体中定义的字段，缺乏一种内建的、优雅的方式来捕获这些未知字段。
       - nil Slice/Map 的序列化行为： v1 将 nil slice 和 nil map 序列化为 JSON null，而许多用户期望它们被序列化为空数组 [] 和空对象 {}。
     - [真流式Marshal和Unmarshal](https://mp.weixin.qq.com/s/pYlGeF1yBlIy07DDvsIzrw)
+  - [JSON的跨语言陷阱与Go防御指南](https://mp.weixin.qq.com/s/caEEVCh7h9AyH9-_NiQryA)
+    - 陷阱一：数字精度 —— 无声的整数溢出
+      - JavaScript 将所有数字都表示为 64 位浮点数，其能精确表示的最大安全整数是 Number.MAX_SAFE_INTEGER (2^53 - 1)。任何超过这个值的整数，都会在解析时无声地丢失精度。
+      - 在 Python 或 Java 中，则能正确解析
+      - Go 的 encoding/json (v1) 在处理数字时，若反序列化到 interface{}，会 默认将所有 JSON 数字解析为 float64，从而掉入和 JavaScript 同样的精度陷阱
+      - 防御指南：
+        - 首选强类型结构体：这是最根本的解决方案。始终使用带有明确整型（如 int64）的结构体来反序列化。
+        - 拥抱“数字即字符串”：对于所有需要跨语言传递的、可能会超过 2^53 - 1 的整数 ID（如数据库自增 ID），最佳实践是在 API 层面约定俗成地使用字符串类型
+    - 陷阱二：浮点数运算 —— 0.1 + 0.2 ≠ 0.3
+      - 永远不要使用 float64 来处理货币或任何要求精确计算的场景。 建议大家遵循以下模式：
+        - 使用字符串传输：在 JSON 中将金额表示为字符串（如 "19.99"），在 Go 中使用 github.com/shopspring/decimal 或 math/big.Rat 等高精度库进行处理。
+        - 使用整数单位：将金额转换为最小单位的整数（如“分”）进行传输和计算，例如用 1999 代表 19.99元。这是在工程实践中非常常见且高效的解决方案
+    - 陷阱三：Unicode 规范化 —— 看似相同的“José”
+      - Unicode 允许同一个字符（如 é）有多种字节表示方式（单一码点 vs. 组合形式）
+      - 在进行任何需要比较、索引或持久化的字符串操作之前，必须对 Unicode 字符串进行规范化。
+        - Go 的 golang.org/x/text/unicode/norm 包为此提供了强大的工具：norm.NFC.String
+    - 陷阱四：对象键序 —— 加密签名的噩梦
+      - JSON 规范明确指出：“对象是无序的键值对集合。” 然而，在 HMAC 签名、内容哈希、缓存键生成等需要字节级别稳定性的场景中，我们又隐式地依赖于一个确定的序列化顺序
+      - 反序列化/迭代：Go 的 map 迭代顺序是故意随机化的。
+      - 序列化 map：encoding/json 在序列化 map 时，会默认按字母顺序对键进行排序。
+      - 序列化 struct：会遵循结构体中字段的定义顺序
+      - 对于任何需要字节级一致性的操作，必须使用“规范化 JSON” (Canonical JSON)。最简单的规范化方法，就是在序列化前，始终对对象的键按字母顺序进行排序。
+        - 幸运的是，Go 的 encoding/json 在处理 map 时默认就在这样做
+    - 陷阱五：空值的迷思 —— null vs. 零值 vs. 缺失
+      - 用指针区分“零值”与“值的缺失”
+      - 当必须区分 null 与 missing 时
+        - 在某些严格的 API 或数据同步场景中，你可能必须区分“用户显式地将值设为 null”和“用户完全没有提及这个字段”。借助 json.RawMessage
+    - 陷阱六：时间格式 —— 无尽的变体
+      - 善用 time.Time 的默认行为：Go 的 time.Time 类型在 json.Unmarshal 时，默认就能正确解析符合 RFC 3339 标准（ISO 8601 的一个常见子集）的字符串。这是最推荐、最无痛的方式。
+      - 为非标准格式实现自定义 UnmarshalJSON：对于 Unix 时间戳或其他自定义格式，我们可以通过为自定义类型实现 json.Unmarshaler 接口，来精确控制解析逻辑。
+    - 陷阱七：错误处理 —— 宽容还是严格
+      - 具体对比 v1 和 v2 在处理不规范 JSON 时的行为差异
+        - 重复的键 (Duplicate Keys): v1 行为：“最后出现者获胜”; v2 行为：显式错误
+        - 尾随逗号 (Trailing Commas): v1 行为：语法错误; v2 行为：更精确的错误
+        - 数字中的前导零 (Leading Zeros); v1 行为：语法错误; v2 行为：更精确的错误
+        - 使用单引号 (Single Quotes)
 - full slice expression
   - `a = a[0:len(a):len(a)]`
   - the slice a is restricted to itself, the elements past the end of the slice cannot be accessed or modified, even if you accidentally re-slice or append to it.
@@ -2226,9 +2262,14 @@
     - 一次性快捷函数 f, err := os.OpenInRoot("/safe/dir", untrustedPath)
   - 安全原理（平台细节） • Linux / macOS：全部基于 openat* 系列系统调用，并把目录 fd 当作“锚点”；解析每一级时禁止 “..”、符号链接等跳逸。
   - 
-
-
-
+- [How we found a bug in Go's arm64 compiler](https://blog.cloudflare.com/how-we-found-a-bug-in-gos-arm64-compiler/)
+  - 线上异常现象
+    • Cloudflare 在数百台 ARM64 节点上偶尔遭遇 Go 进程崩溃，错误集中在 “traceback did not unwind completely” 或 SIGSEGV。堆栈显示问题都发生在 runtime.(*unwinder).next 里进行栈回溯时。
+    • 进一步比对日志发现：每一次崩溃都发生在 goroutine 被 异步抢占（async preemption） 且代码位于 (*NetlinkSocket).Receive 的函数尾（epilogue）时。
+  - 技术分析——单指令竞态
+    - 自 Go 1.14 起，runtime 会给长时间运行的 goroutine 发送 SIGURG 并在信号处理器里伪造一次对 asyncPreempt 的调用；这可能在任意指令边界暂停执行。
+    - 当函数栈帧大于 16 KiB（> 1<<15）时，Go ARM64 汇编器把 “ADD $big, RSP, RSP” 拆成两条指令（例如：ADD $80, RSP, RSP 后紧跟 ADD $(16<<12), RSP, RSP）以绕过 12-bit 立即数限制。
+    - 如果 sysmon 正好在这两条指令之间抢占，RSP 处于“半修改”状态：它既不指向当前栈帧，又不指向上一帧。随后 GC 或 panic 触发的栈回溯会把 RSP 当作指针去解析父帧，结果解引用到垃圾数据导致 fatal error 或 SEGFAULT。这就是“一条指令宽”的竞态窗口。
 
 
 
