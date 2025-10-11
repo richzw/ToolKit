@@ -253,6 +253,20 @@
   - 还有一个实用的新功能：检查点（checkpoints）。通过它，你可以快速撤销Claude刚刚做出的修改，只需轻松按下Esc+Esc快捷键，或者输入指令/rewind即可实现。
   - Sonnet 4.5模型，发现它有个非常明显的进步，那就是在压缩对话上下文（compacting conversations）方面，比其他用过的模型都要强不少。
   - Anthropic甚至专门建议用户可以让Sonnet 4.5以维护上下文文件的形式来记录状态，而不仅仅是简单的“上下文总结”（context summarization）。
+- Claude Code 插件系统
+  - 有一个公开的 GitHub Repo，按照它的规范提供一个 .claude-plugin/marketplace.json 文件就好，官方也提供了官方插件市场，只要在 CC 中输入
+     `> /plugin marketplace add anthropics/claude-code`
+  - 插件可以简单地打包和分享以下自定义内容：
+    - 斜杠命令（slash commands）：为常用的操作创建自定义快捷方式；
+    - 专属智能体（subagents）：安装专为特定任务打造的智能体，协助你完成专业的开发工作；
+    - MCP服务器：通过模型上下文协议（Model Context Protocol，简称MCP）连接外部工具和数据源；
+    - 钩子函数（hooks）：在Claude Code的工作流关键节点，自定义它的行为。
+  - 插件的典型应用场景
+    - 强制团队规范：技术负责人可以通过插件设定统一的代码审查、测试流程等工作流标准；
+    - 支持用户开发：开源项目维护者可以提供一些斜杠命令，帮助其他开发者更便捷地使用他们的代码库；
+    - 分享实用工作流：开发者可以把自己精心设计的调试环境、部署流水线、测试框架等生产力工具打包分享；
+    - 连接各种工具：团队可以用插件通过MCP快速、安全地连接内部数据和工具；
+    - 打包个性化组合：框架作者或技术负责人能将针对特定场景的多种自定义设置进行打包，提供给团队成员使用
 - [“榨干” Claude Code 和 OpenAI Codex 们的性能](https://simonwillison.net/2025/Sep/30/designing-agentic-loops/)
   - 在 AGENTS. md 中记录命令：“shot-scraper http://www.example. com/ -w 800 -o example.jpg”，让智能体轻松捕获网页截图
   - “Agentic loop” 概念

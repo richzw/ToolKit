@@ -2270,9 +2270,15 @@
     - 自 Go 1.14 起，runtime 会给长时间运行的 goroutine 发送 SIGURG 并在信号处理器里伪造一次对 asyncPreempt 的调用；这可能在任意指令边界暂停执行。
     - 当函数栈帧大于 16 KiB（> 1<<15）时，Go ARM64 汇编器把 “ADD $big, RSP, RSP” 拆成两条指令（例如：ADD $80, RSP, RSP 后紧跟 ADD $(16<<12), RSP, RSP）以绕过 12-bit 立即数限制。
     - 如果 sysmon 正好在这两条指令之间抢占，RSP 处于“半修改”状态：它既不指向当前栈帧，又不指向上一帧。随后 GC 或 panic 触发的栈回溯会把 RSP 当作指针去解析父帧，结果解引用到垃圾数据导致 fatal error 或 SEGFAULT。这就是“一条指令宽”的竞态窗口。
-
-
-
+- [Go零拷贝“最后一公里”：Peek API](https://mp.weixin.qq.com/s/IZ_csX4ZwVoq8wGn5S-5jQ)
+  - Issue
+    - 许多标准库 API（如 image.Decode）只接收 io.Reader；
+    - 开发者手里往往已经有完整的 []byte，需要零拷贝传给这些 API；
+    - 用 bytes.Reader/bytes.Buffer 包装后又缺少 Peek，image.Decode 只好再套一层 bufio.Reader，导致额外拷贝——这被称为 io 体系的“最后一公里”成本
+  - 日常开发的启示
+    - 尽量提供双形态 API：([]byte, io.Reader)。encoding/json 即是范例。
+    - “Peek-aware” 代码模板： if p, ok := r.(interface{ Peek(int)([]byte,error) }); ok { … } else { r = bufio.NewReader(r) }
+    - 标准库对 bytes.Buffer/Reader/strings.Reader 的“特殊通道”是官方认可的性能优化手段，大胆使用
 
 
 

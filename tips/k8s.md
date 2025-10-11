@@ -168,6 +168,20 @@
     - Do NOT use CPU limits.
     - [For Golang](https://www.ardanlabs.com/blog/2024/02/kubernetes-cpu-limits-go.html)
       - If you are setting CPU limits for your service, it’s up to you to set the GOMAXPROCS value to match
+      ```
+      resources:
+        requests:
+        cpu: "250m"
+        limits:
+        cpu: "250m"
+        env:
+      - name: GOMAXPROCS
+        valueFrom:
+        resourceFieldRef:
+        resource: limits.cpu   # 自动把 250m 映射为 1
+      ```
+    - 通过 resourceFieldRef，Kubelet 启动容器时会把 250 m 向下取整为 0.25 核，再按 Go 规则映射为 1。
+    - 若改动频繁，可使用 Uber 的 github.com/uber-go/automaxprocs 自动在启动时检测 cgroup CPUQuota 并设置 GOMAXPROCS
   - Best practices for Memory limits and requests on Kubernetes
     - Use memory limits and memory requests 
     - Set memory limit= memory request

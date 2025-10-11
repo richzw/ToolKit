@@ -495,6 +495,8 @@
     - • 以 Grid、Block、Thread 的层次结构管理并行，Warp（32 线程）是实际的硬件调度单位。
     - • SIMT（单指令多线程）模型在硬件底层以 SIMD 执行，每个 Warp 中的线程共享指令但拥有各自的索引和活动掩码。
     - • Warp Divergence（分支分化）可能导致并行效率下降，通过提高占用率、优化访存方式等可隐藏部分延迟。
+  - [一份数据在NCCL/CUDA 框架中的旅程](https://mp.weixin.qq.com/s/LrUuKqcJYavAxbypSElLiQ)
+    - 数据包“从 cudaMalloc 地址 → ncclSend → GPU kernel → (IPC 或网络) → ncclRecv → 目标内存”全过程
 - [NeighborHash]
   - 场景
     - 只有导入没有commit，过程中没有一致性要求，只需要最终一致性，也就是一个在线分析处理 (OLAP) 系统。我们应用场景的特点是批量点查、无范围查询需求且查询命中率高
@@ -582,8 +584,17 @@
   - Come back after a day and edit the post to say “I tried {product name} and it worked great”
 - [Cloudflare邮件服务]
   - 自己域名收发邮件，比如你可以用xxx@you.com 接收和发送邮件（验证码，营销邮件等）。 只要在 Cloudflare 配置一下域名和 worker，无需第三方邮件平台
-
-
+- [I’m Building a Browser for Reverse Engineers](https://nullpt.rs/reverse-engineering-browser)
+  - 背景知识是现在很多大网站都会借助一种 fingerprinting 的技术来唯一识别一个用户，不管你怎么换匿名模式或者换浏览器，都知道你是同一台电脑使用。
+    - 基于浏览器画布Canvas API，在你看不见的位置在一个 <canvas> 画一张图，然后调用 toDataURL()（或读取像素数据），
+    - 利用不同 GPU 之间微小的渲染差异生成的哈希值来给你打上指纹。通过将 Canvas 哈希与其他信号（如用户代理、安装的字体等）关联起来，追踪器可以构建一个相当稳健的指纹。
+  - 作者就是介绍了怎么一步步去监控和伪造 Canvas API 中的 toDataURL 函数。
+    - Claude Trace，就是修改了 JavaScript 的 fetch 函数，直接拿到了所有 Claude Code 的请求。
+    - 用 Electron 打造一个浏览器，由于 Electron 可以比扩展程序有更高的对网页操作的优先级和权限，所以它的方法被验证是可行的，并且有一个 electron-browser-shell 开源程序可以直接实现一个浏览器套壳应用
+    - Cloudflare 在一个沙盒化的 iframe 里渲染 Canvas，而这个 iframe 又藏在一个封闭的 Shadow DOM (一种将 DOM 封装起来，与主文档隔离的技术) 中
+      - 这个 iframe 是一个 OOPIF (out-of-process iframe)，也就是跨进程 iframe。它运行在一个不同的渲染进程里，所以页面级的脚本（以及我们注入的钩子）根本无法在那里运行，因此，也就没有日志了。
+      - Cloudflare 早就预判了会有人通过篡改系统 API 来逆向，在 JavaScript 中，函数包含一个 toString 方法，如果你篡改了系统函数，返回的结果是不一样的
+    - 重新编译 Electron 源码，魔改 Chromium
 
 
 

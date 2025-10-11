@@ -1869,6 +1869,22 @@
      - • 获取 = acquire：后续访问不可跑到获取之前
      - • 释放 = release：释放前的访问不可跑到释放之后
      - • 传递性：CPU_A release → CPU_B acquire ⇒ A 之前的写对 B 之后的读可见。
+- [Google File System（GFS）技术要点](https://mp.weixin.qq.com/s/KFVJ8RIUvbKfQfOiM5Oj1g)
+  - 设计背景
+    • 2000 年前后 Google 需在普通服务器上保存 PB 级数据、支撑海量顺序读写和追加。
+    • 假设：硬件故障是常态、文件以 GB 计、主要操作＝顺序读＋顺序追加、极少随机写。
+  - 架构概览
+    - • 单 Master + 多 ChunkServer + Client 库。
+    - • 控制流（Client⇄Master）与数据流（Client⇄ChunkServer）彻底分离。
+    - • 文件被切分成固定 64 MB chunk；每个 chunk 默认 3 副本、跨机架放置，用 64 位 chunk handle 唯一标识。
+  - Master 关键机制
+    - • 保存命名空间、文件→chunk 映射两类元数据（内存+磁盘日志+checkpoint）；chunk 位置信息仅在内存中，靠 ChunkServer 心跳重建。
+    - • 租约(lease)：一次授予某副本 60 s 主权；主副本给写操作分配全局序列号，保持写序顺序。
+    - • 故障恢复＝加载 checkpoint → 重放 operation log → 等待心跳；影子 Master 持实时只读副本。
+  - ChunkServer 实现细节
+    - • Chunk 以普通 Linux 文件保存；每 64 KB 计算 32-bit CRC，校验和单独存储。
+    - • 心跳周期≈3 s，附带存活状态和 chunk 列表。
+    - • 副本复制/迁移在 ChunkServer 之间直接进行；检测坏块后按校验和自行修复。
 
 
 
