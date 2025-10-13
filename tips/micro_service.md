@@ -1081,6 +1081,18 @@
       - 每次选出新领导者时，时钟数字(generation number)都会增加。这意味着，如果旧领导者的时钟数为“1”，则新领导人的时钟数将为“2”。此时钟号包含在从领导发送到其他节点的每个请求中。通过这种方式，节点现在可以通过简单地信任具有最高数字的领导者来轻松区分真正的领导者。
     - Kafka：为了处理脑裂（我们可以有多个active controller broker），Kafka使用“纪元数”（Epoch number），这只是一个单调增加的数字来表示服务器的代次(generation)。
     - HDFS：ZooKeeper用于确保任何时候只有一个NameNode处于活动状态。epoch 编号作为每个事务 ID 的一部分进行维护，以反映 NameNode 的代次。
+      - [HDFS 分布式文件系统原理与设计](https://mp.weixin.qq.com/s/UM1ee_Tg_-D8CMhCfTeW7g)
+      - 设计目标：在商用 PC 集群上提供 PB 级高吞吐、可扩展、容错的文件系统，服务“一次写入、多次读取”的离线批处理场景
+      - 核心设计假设
+        - 硬件故障常态化——靠软件冗余恢复；
+        - 文件大（GB~TB）、顺序访问占主导；
+        - 写入只有 1 个客户端，关闭后才被并发读取；
+        - 网络分层（机架）带宽有限，需数据本地化；
+        - CAP 取 CP：保证一致性和分区容忍，借 HA 降低可用性损失。
+      - 架构概览- NameNode（主控） + DataNode（工作），“控制流/数据流分离”。
+        - NameNode：全量元数据常驻内存；持久化采用 FSImage + EditLog；Checkpoint 由 SecondaryNN / CheckpointNN 完成。
+        - DataNode：块文件 blk_* 与 .meta 校验文件并存；以 3 s 心跳 + 周期块汇报向 NameNode 报告状态。
+        - 客户端：元数据 RPC→NameNode，数据直通 DataNode；支持本地短路读取（domain socket）
   - 校验和 (checksum)
     - 要计算校验和，请使用 MD5、SHA-1、SHA-256 或 SHA-512 等加密哈希函数。哈希函数获取输入数据并生成固定长度的字符串（包含字母和数字）;此字符串称为校验和。
   - CAP定理

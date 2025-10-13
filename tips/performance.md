@@ -1,5 +1,6 @@
 
 - [High Performance Go](https://dave.cheney.net/high-performance-go-workshop/gophercon-2019.html#benchmarking)
+- [Go Optimization Guide](https://goperf.dev/)
 - [Go 编码建议——性能篇](https://dablelv.blog.csdn.net/article/details/122281882)
   - 1.反射虽好，切莫贪杯
     - 优先使用 strconv 而不是 fmt

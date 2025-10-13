@@ -1236,6 +1236,7 @@
     - CacheFront 没有采用简单的 TTL（Time-To-Live）过期策略，因为它无法保证数据的一致性。其真正的“杀手锏”是利用了 Docstore 内建的变更数据捕获（Change Data Capture, CDC）服务——Flux
 - [开源限流方案，抛弃redis](https://www.databricks.com/blog/high-performance-ratelimiting-databricks)
   - 大部分限流都是按秒计算的，这些计数本质上是临时数据。既然不需要持久化，为什么要用 Redis？
+    - 随着实时模型推理等高 QPS 场景出现，暴露出三大问题：P99 尾延迟 10–20 ms、水平扩展受限、Redis 单点故障
   - 两个关键设计来重构整个系统：内存分片和客户端批量报告。
     - 内存分片：分而治之
       - 传统的集中式限流有个天然瓶颈 - 所有请求都要经过同一个 Redis 实例。内存分片的思路是把限流计数分散到多个节点上
@@ -1248,7 +1249,12 @@
        4. 服务器返回哪些需要限流，以及限流比例
        5. 客户端根据指令调整后续的限流行为
       ```
-
+  - 低延迟方案：Dicer 自动分片 + 内存计数
+    • 引入 Dicer，把每个 RateLimitGroup/维度映射到唯一服务器，实现“状态有主”但部署依旧无状态。
+    • 所有计数存放于进程内存，完全去掉 Redis 热路径，消除两次网络跳跃，尾延迟显著降低
+  - 高吞吐方案：客户端 Batch-Reporting
+    • 客户端本地乐观放行并计数，每 ~100 ms 把 (outstandingHits, rejectedHits) 作为批量报告发给服务端；服务端返回 rejectTilTimestamp + rejectionRate。
+    • 批量上报将“尖峰请求”摊平成近似常量 QPS，单次限流调用几乎零延迟，尾延迟可提升 10
 
 
 

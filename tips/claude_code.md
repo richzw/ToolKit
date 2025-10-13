@@ -253,6 +253,10 @@
   - 还有一个实用的新功能：检查点（checkpoints）。通过它，你可以快速撤销Claude刚刚做出的修改，只需轻松按下Esc+Esc快捷键，或者输入指令/rewind即可实现。
   - Sonnet 4.5模型，发现它有个非常明显的进步，那就是在压缩对话上下文（compacting conversations）方面，比其他用过的模型都要强不少。
   - Anthropic甚至专门建议用户可以让Sonnet 4.5以维护上下文文件的形式来记录状态，而不仅仅是简单的“上下文总结”（context summarization）。
+  - Claude Code 读取 PDF、图片，都是把文件 base64 编码成字符串，一起传到 API，服务端解析，就这么简单粗暴
+    - Base64 不是以字符的形式直接传入 prompt，而是在服务器端再还原成图片或 PDF，PDF 再转成图片
+    - https://www.datastudios.org/post/how-claude-reads-pdf-files-in-2025-workflow-capabilities-and-limitations
+  - Claude Code 默认是开启自动压缩上下文的，但是可以禁用： 输入“/config”，在菜单中将 Auto-compact 设置为 false
 - Claude Code 插件系统
   - 有一个公开的 GitHub Repo，按照它的规范提供一个 .claude-plugin/marketplace.json 文件就好，官方也提供了官方插件市场，只要在 CC 中输入
      `> /plugin marketplace add anthropics/claude-code`

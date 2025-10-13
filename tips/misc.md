@@ -595,8 +595,20 @@
       - 这个 iframe 是一个 OOPIF (out-of-process iframe)，也就是跨进程 iframe。它运行在一个不同的渲染进程里，所以页面级的脚本（以及我们注入的钩子）根本无法在那里运行，因此，也就没有日志了。
       - Cloudflare 早就预判了会有人通过篡改系统 API 来逆向，在 JavaScript 中，函数包含一个 toString 方法，如果你篡改了系统函数，返回的结果是不一样的
     - 重新编译 Electron 源码，魔改 Chromium
-
-
+- EEAT 是 Google 在评估网页内容质量时使用的核心框架，全称为 Experience（经验）、Expertise（专业性）、Authoritativeness（权威性） 和 Trustworthiness（可信度）
+  - https://github.com/googleapis/elixir-google-api/blob/main/clients/content_warehouse/lib/google_api/content_warehouse/v1/api/projects.ex
+  - Experience（经验）
+    - API 字段：contentEffort, originalContentScore, isAuthor, lastSignificantUpdate
+    - Google 通过这些指标判断内容是否源自真实体验。
+  - Expertise（专业性）
+    - API 字段：siteFocusScore, onsiteProminence, EntityAnnotations, yymlyHealthScore
+    - 算法在看内容聚焦度与实体清晰度。
+  - Authoritativeness（权威性）
+    - API 字段：siteAuthority, PageRankPerDocData, authorityPromotion
+    - Google 评估你是否被同行或生态认可。
+  - Trust（可信度）
+    - API 字段：pandaDemotion, serpDemotion, badSslCertificate, ContentChecksum96
+    - 系统在检测技术安全、内容一致性与反垃圾信号。
 
 
 
