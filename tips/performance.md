@@ -1177,7 +1177,31 @@
    - Understanding why compilers make decisions with regard to memory allocation is important for writing performant code. Tools like -gcflags "-m" that provide insight into compiler decisions are incredibly useful for understanding and optimizing performance.
    - Storing a value on the heap is always safe in a garbage-collected language, but comes at a performance cost: both during the initial allocation and again during garbage collection. Since it's always safe, Golang can always choose to allocate a value on the heap, and will unless it can prove that a stack allocation is also safe.
    - Prefer pointer receivers in order to avoid unnecessary copies, because those copies can easily result in extra heap allocations.
-
+- [CPU Cache-Friendly Data Structures in Go](https://skoredin.pro/blog/golang/cpu-cache-friendly-go)
+  - Reading from RAM is approximately 60x slower than L1 cache. One cache miss equals 60 cache hits
+  - Measure Cache Misses (Linux)
+    ```
+    # Profile cache misses
+    perf stat -e cache-misses,cache-references ./myapp
+    
+    # Detailed cache analysis
+    perf record -e cache-misses ./myapp
+    perf report
+    
+    # Go benchmark with perf
+    go test -bench=. -benchtime=10s & pid=$!
+    perf stat -p $pid -e L1-dcache-load-misses,L1-dcache-loads
+    ```
+  - Data-Oriented Design: Array of Structs vs Struct of Arrays
+    - Struct of Arrays (SoA) - Cache FRIENDLY
+  - Hot/Cold Data Splitting - Pack hot data together: Frequently accessed fields in same cache line
+  - Branch Prediction Friendly Code - Sort first to make branches predictable
+  - Takeaways
+    - Cache misses can slow down your code by 60x compared to L1 cache hits
+    - False sharing occurs when multiple cores update different variables in the same cache line
+    - Proper data structure padding can improve performance by 5-10x in specific scenarios
+    - Data-oriented design beats object-oriented for high-performance systems
+    - Always measure with benchmarks - cache effects are hardware-specific
 
 
 

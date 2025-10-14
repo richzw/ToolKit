@@ -1,4 +1,16 @@
 - [Agentic Design Patterns ](https://docs.google.com/document/d/1rsaK53T3Lg5KoGwvf8ukOUvbELRtH-V0LnOIFDxBryE/preview?tab=t.0)
+- [Agents 2.0: From Shallow Loops to Deep Agents](https://www.philschmid.de/agents-2.0-deep-agents)
+  - 显式规划（Explicit Planning）
+    • 先用工具写出可持久化的 To-Do 列表／Markdown 计划，而不是在思维链里隐式规划。
+    • 每一步执行后都会标记 pending / in_progress / done，并在失败时动态修改计划。
+  - 分层委派（Hierarchical Delegation）
+    - • 采用 Orchestrator → Sub-Agent 模式。
+    - • 主控代理只负责拆任务、汇总结果；子代理（Researcher、Coder、Writer 等）各自带独立上下文执行多轮 while-loop，并返回精炼输出而非原始日志。
+  - 持久化记忆（Persistent Memory）
+    - • 关键状态写入外部文件系统或向量数据库，如 Claude Code、Manus 这类框架暴露 read/write 文件接口。
+    - • 后续步骤按文件路径或向量检索“拉取”所需切片，实现“知道去哪里找”而非“记住全部文本”。
+  - 极端上下文工程（Extreme Context Engineering）
+    - • 通过冗长且结构化的系统提示，规定：何时先规划再行动、何时生成子代理、工具用法示例、文件命名规范、人-机协作协议等。简单一句“You are a helpful AI”无法触发深度行为。
 - 智能体的崛起：“上下文”才是真正的护城河
   - AI 智能体的出现，标志着我们与 AI 协作的模式，从被动的“请求-响应”转变为主动的“指令-执行”。
     - 我们可以用自然语言下达一个宏观的目标，例如“重构用户认证模块以支持新的第三方登录”，然后由智能体自主地分析、定位、修改并验证相关代码。

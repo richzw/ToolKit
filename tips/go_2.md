@@ -2412,7 +2412,27 @@
   - 每个 P 的分配器（mcache）：缓存各类 span；tiny 分配（<16B）统一走 span class 5，通过 tiny/tinyoffset 聚合；small 分配按是否含指针与大小选择不同路径；large（>32760B）直接由 mheap 申请
   - 栈管理：区分系统栈与 goroutine 栈；Linux 上非主线程系统栈可由运行时分配（16KB），goroutine 栈起始 2KB，来自栈池/栈缓存；自 Go 1.4 起采用连续栈按倍数扩张，并在 GC 期间可收缩；引入 nosplit 与 stack guard 优化调用开销与溢出检查
   - https://nghiant3223.github.io/2025/06/03/memory_allocation_in_go.html
-
+- [string与rune的设计](https://mp.weixin.qq.com/s/IJelvF0c3qNZMpKlXM5oEg)
+  - 乱码的根源
+    • 计算机只能处理比特；“字符”必须通过“字符集 + 编码规则”才能变为比特序列。
+    • 如果用错误的字符集/编码去解释字节流，就会出现乱码。
+  - Go 的“独断”选择
+    - • Go 规定源文件必须是 UTF-8。
+    - • 标准库几乎所有字符串操作都默认字节序列是合法 UTF-8。
+    - → 绝大多数编码问题在语言层面被消解。
+  - string 与 rune 的角色分工
+    - • string = 只读 []byte，保存 UTF-8 编码后的“物理表示”。
+    - • rune = int32，保存单个 Unicode Code Point 的“逻辑表示”。
+    - • Go 通过这对类型把“字节”与“字符”彻底分离。
+  - len 与 for range 的差异
+    - 示例：s := "你好, Go"
+    - • len(s) → 10（字节数：中文 3×2 + 英文/标点 1×4）。
+    - • utf8.RuneCountInString(s) → 6（字符数）。
+    - • for i := 0; i < len(s); i++ { … } - 按字节遍历，多字节字符会被拆散，产生乱码。
+    - • for index, r := range s { … } - 逐 rune 遍历，每步返回起始字节索引与字符本身。
+  - 结论：
+    - len 适用于网络传输、内存大小等底层需求。
+    - for-range / rune 面向文本逻辑。
 
 
 
