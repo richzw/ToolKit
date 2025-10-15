@@ -19,6 +19,8 @@
       - 过度依赖权威和技术工具，可能导致思维局限、系统僵化，甚至忽视实际情况，从而丧失对“沉默变量”的敏锐洞察，陷入“过度自信陷阱”。
     - 3. 构建个人认知坐标系需掌握五大关键，以重塑独立思考能力。
       - 包括主动管理注意力、以终极目标为导向、过滤信息噪声、综合多重视角寻求解决方案，以及在专家意见前保持自主决策，做意见的指挥官
+  - [nanochat: The best ChatGPT that $100 can buy](https://github.com/karpathy/nanochat/discussions/1)
+    - an end-to-end framework to train, fine-tune, and chat with a small-scale ChatGPT clone
 - [LLM (ML) Job Interviews ](https://mimansajaiswal.github.io/posts/llm-ml-job-interviews-fall-2024-process/)
 - [基于趋势和季节性的时间序列预测](https://mp.weixin.qq.com/s/Ln4E9iZd3b3EZqeEjNNsag)
   - 时间序列模式

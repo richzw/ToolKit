@@ -1009,6 +1009,14 @@
     - [使用外部pulsar](https://github.com/milvus-io/milvus/discussions/40914)
       - 除了milvus.yaml中的mq.type设置成pulsar之外，还要milvus.yaml中的pulsar.address/port这些设置正确
       - 这个pulsar最好能允许milvus创建topic，如果不能创建，那就得设置milvus.yaml中的common.preCreatedTopic指定你预先设置的topic
+    - Your got efficient vector index, QPS isn't too high, but filtered search are still slow. Why?
+      - Missing the scalar index on the filtered field? That would force a full table scan so filtered search gets slow.
+      - Did you use strong consistency level? That will wait until all nodes synchronize before querying.
+      - 𝐟𝐢𝐱 𝐢𝐭?
+        - 𝐈𝐧𝐝𝐞𝐱 𝐭𝐡𝐞 𝐅𝐢𝐞𝐥𝐝 𝐘𝐨𝐮 𝐅𝐢𝐥𝐭𝐞𝐫: No indexes = full scans.
+        - 𝐃𝐞𝐟𝐢𝐧𝐞 𝐈𝐧𝐝𝐞𝐱𝐞𝐬 𝐟𝐨𝐫 𝐉𝐒𝐎𝐍 𝐚𝐧𝐝 𝐃𝐲𝐧𝐚𝐦𝐢𝐜 𝐒𝐜𝐡𝐞𝐦𝐚: For JSON fields, Milvus 2.6 introduced path and flat index.
+        - 𝐂𝐡𝐨𝐨𝐬𝐞 𝐭𝐡𝐞 𝐑𝐢𝐠𝐡𝐭 𝐂𝐨𝐧𝐬𝐢𝐬𝐭𝐞𝐧𝐜𝐲: Avoid Strong consistency level unless absolutely necessary → Choose Bounded/Eventually when you can.
+        - 𝐎𝐩𝐭𝐢𝐦𝐢𝐳𝐞 𝐅𝐢𝐥𝐭𝐞𝐫 𝐄𝐱𝐩𝐫𝐞𝐬𝐬𝐢𝐨𝐧𝐬: BAD: tag == "A" OR tag == "B" OR tag == "C" → GOOD: tag IN ["A", "B", "C", "D"]
 - [BigANN 2023](https://mp.weixin.qq.com/s/7H7xtGzEfAdu-zQv0NHYzg)
   - Filters 赛道: 本赛道使用了 YFCC 100M 数据集，要求参赛者处理从该数据集中选取的 1000 万张图片
     - 具体任务要求为提取每张图片的特征并使用 CLIP 生成 Embedding 向量，且需包含图像描述、相机型号、拍摄年份和国家等元素的标签（元素均来自于词汇表）。

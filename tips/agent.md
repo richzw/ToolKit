@@ -50,5 +50,20 @@
     - • 有明显里程碑 → 加记忆
     - • 并行探索 → 多代理
 - [Building agents with the Claude Agent SDK](https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk)
+- [What Makes 5% of AI Agents Actually Work in Production](https://www.motivenotes.ai/p/what-makes-5-of-ai-agents-actually)
+  - 现在大家都还在拼 prompt，只有少数人开始拼上下文结构。
+    - prompt engineering 已经不是核心了，context engineering 才是下一阶段的主战场。给再聪明的大模型喂进去一堆乱七八糟的输入，它还是只会胡说八道。
+    - 市面上跑得稳的 Agent，都是在“什么该让模型看、怎么看、以什么形式看”上下了大功夫的，这一点现在应该是共识了。
+  - 记忆系统这事，光是能存起来远远不够
+    - 很多公司的 memory，说得好听点是长期记忆，难听点就是个聊天记录仓库。
+    - 真正落地的系统要分层记忆（用户级 / 团队级 / 系统级）。文章读完我感觉更多的篇 B 端，C 端要思考的是结合业务来做分层记忆，并且要能让人知道 它记住了什么，并且用户能自己改。否则就不是记忆是监控。
+  - 不迷信单模型，这年头还不做 routing 的 agent 就别说自己做 infra 了。
+    - 这篇文章提到多模型路由，说得很对。不可能所有请求都丢给 GPT5，成本和时延直接炸掉，表现也未必好。
+    - 真正合理的系统，一定是： 快速反应的轻模型做分类和前处理、重模型做主任务、补一个模型做验证或追问。 一个 agent 后面绑定的一定是一个 LLM 团队。
+  - 可追溯/可控/可信，是企业愿意用 Agent 的底线
+    - 很多人只想着怎么让 agent 能回答，但企业更关心：这句话是从哪里来的？有没有越权？出了错我怎么追责？ AI 要可治理。
+  - 最被低估的一点：Agent ≠ Chatbot
+    - 这篇文章最后说到的一点我非常赞同但还不够狠：如果还在用聊天当所有用户交互的方式，那agent 最多是个语音助理。
+    - 真的 agent 应该是：先用语言调度任务，然后在页面上看到结构化结果，还能继续点选、调整、组合下一步。这部分很多公司现在在尝试了，交互上比之前全部自然语言高效了太多。
 
 
