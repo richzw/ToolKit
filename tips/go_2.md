@@ -383,6 +383,14 @@
     - 该指令指向函数调用 runtime.deferreturn，这个指令被编译器插入到每个函数的末尾，而它运行 defer 函数。在前面的例子中，这些 defer 函数中的大多数已经运行了——直到恢复，因此，只有剩下的那些会在调用者返回前运行
   - goexit
     - 函数 runtime.Goexit 使用完全相同的工作流程。runtime.Goexit 实际上创造了一个 panic 对象，且有着一个特殊标记来让它与真正的 panic 区别开来。这个标记让运行时可以跳过恢复以及适当的退出，而不是直接停止程序的运行
+  - [defer 的“救赎”](https://mp.weixin.qq.com/s/ugl3Op6GvRO0mqDMFQZGVg)
+    - 语言层面的价值
+      - 就近注册：资源获取与释放写在一起，降低心智负担。
+      - 作用域=函数：任意 return/​panic 前必执行，重构友好。
+      - 运行时可动态出现：可放在 if / for 中做“条件化清理”，这是 RAII 与 try-finally 难以覆盖的场景
+    - Go≤1.12：堆 + runtime ⇒ ~44 ns  涉及堆分配，GC 敏感，runtime 开销大
+    -  Go 1.13：栈 + runtime ⇒ ~32 ns  避免堆分配，但仍需 runtime 交互
+    -  Go 1.14+：Open-coded ⇒ ~3 ns  栈上存储 + 编译器生成代码，正常路径无 runtime 调用
 - [怎么让goroutine跑一半就退出](https://mp.weixin.qq.com/s/KBDXzcPLXFovnuY6WSIdoA)
   - Ans: 插入一个 `runtime.Goexit()`， 协程就会直接结束。并且结束前还能执行到defer 函数
   - runtime.Goexit()是什么

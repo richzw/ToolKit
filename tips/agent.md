@@ -54,16 +54,49 @@
   - 现在大家都还在拼 prompt，只有少数人开始拼上下文结构。
     - prompt engineering 已经不是核心了，context engineering 才是下一阶段的主战场。给再聪明的大模型喂进去一堆乱七八糟的输入，它还是只会胡说八道。
     - 市面上跑得稳的 Agent，都是在“什么该让模型看、怎么看、以什么形式看”上下了大功夫的，这一点现在应该是共识了。
-  - 记忆系统这事，光是能存起来远远不够
+  - 记忆系统这事，光是能存起来远远不够 Memory Isn’t Just Storage, It’s Architectural
     - 很多公司的 memory，说得好听点是长期记忆，难听点就是个聊天记录仓库。
     - 真正落地的系统要分层记忆（用户级 / 团队级 / 系统级）。文章读完我感觉更多的篇 B 端，C 端要思考的是结合业务来做分层记忆，并且要能让人知道 它记住了什么，并且用户能自己改。否则就不是记忆是监控。
   - 不迷信单模型，这年头还不做 routing 的 agent 就别说自己做 infra 了。
     - 这篇文章提到多模型路由，说得很对。不可能所有请求都丢给 GPT5，成本和时延直接炸掉，表现也未必好。
     - 真正合理的系统，一定是： 快速反应的轻模型做分类和前处理、重模型做主任务、补一个模型做验证或追问。 一个 agent 后面绑定的一定是一个 LLM 团队。
+    - For trivial queries → local model (no network call)
+    - For structured queries → call DSL → SQL translator
+    - For complex analysis → call OpenAI / Anthropic / Gemini
+    - Fallback or verification → dual-model redundancy (judge + responder)
   - 可追溯/可控/可信，是企业愿意用 Agent 的底线
     - 很多人只想着怎么让 agent 能回答，但企业更关心：这句话是从哪里来的？有没有越权？出了错我怎么追责？ AI 要可治理。
   - 最被低估的一点：Agent ≠ Chatbot
     - 这篇文章最后说到的一点我非常赞同但还不够狠：如果还在用聊天当所有用户交互的方式，那agent 最多是个语音助理。
     - 真的 agent 应该是：先用语言调度任务，然后在页面上看到结构化结果，还能继续点选、调整、组合下一步。这部分很多公司现在在尝试了，交互上比之前全部自然语言高效了太多。
+- [Context Engineering for AI Agents with LangChain and Manus](https://www.youtube.com/watch?v=6_BcCthVvb8)
+  - 上下文工程对于 AI 智能体至关重要，可以对抗“上下文腐烂”并管理工具调用产生的上下文信息。 
+    - 当智能体自主使用工具时，观察结果会累积，从而导致较长的上下文，进而降低 LLM 的性能。上下文工程优化了信息流，仅提供必要的数据。
+  - 上下文缩减涉及基于上下文长度的可逆“压缩”和不可逆“摘要”。 
+    - 压缩将可重构的信息（例如，文件路径而不是完整内容）外部化，而摘要则会浓缩数据，始终保留最近的交互以保持模型的一致性。
+  - “分层行动空间”有效地卸载了工具，扩展了智能体功能，而不会过度占用 LLM 的直接上下文。 
+    - 这涉及核心原子函数调用、沙箱实用程序（Shell 命令）以及用于包 / API 的 Python 脚本，从而允许广泛的、可组合的功能，同时保持 LLM 接口的简单性。
+  - 多代理系统受益于简单任务的“通信模式”和复杂、依赖历史的任务的“共享内存模式”。 
+    - 通信模式传递特定指令，而共享内存模式授予完全的上下文访问权限。为子智能体定义输出模式可确保结构化和可靠的信息交换。
+  - https://drive.google.com/file/d/1QGJ-BrdiTGslS71sYH4OJoidsry3Ps9g/view
+  - https://docs.google.com/presentation/d/16aaXLu40GugY-kOpqDU4e-S0hD1FmHcNyF0rRRnb1OU/edit?slide=id.p#slide=id.p
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -4,6 +4,17 @@
   - [RAG 2.0]()
     - 基础检索生成（Naive RAG）→ 检索全流程优化（Advanced RAG）→ 具备反思能力的模块化系统（Modular RAG）
     - 全文搜索 with BM25 + 稠密向量（语义匹配） + 稀疏向量（关键词增强）
+  - [REFRAG：Make RAG Great Again](https://www.alphaxiv.org/pdf/2509.01092)
+    - 就是检索的时候，返回的结果不是文本块，而是文本块的向量，只有少量重要的文本块的向量会返回原始的文本内容，其他的文本块只返回向量。这样既节约了上下文空间，也让 LLM 能够专注于处理重要的文本。
+    - https://x.com/dotey/status/1978211783157731601?s=46
+    - https://notebooklm.google.com/notebook/ef7b9e28-e496-4c2e-84a6-e1a37d6874a6?artifactId=8a6c1a8b-6a5c-4e0e-bf71-7e32f242b69d
+    - 这就解决了三个痛点：
+      - 首字节很慢 → 少传大量 token，更快开始说话。
+      - 显存/KV 压力大 → 输入更短，占用更小，同卡跑更多并发。
+      - 吞吐不稳 → 注意力计算随 token 增长很快；压成向量后，每次算得更轻。
+    - 在哪些场景有用呢？
+       - 客服问答、知识搜索、长文总结、垂直智能体：资料多但不需要句句逐字引用。
+       - 多轮对话/很长上下文：能把中间那些“参考资料”大部分用缩略图带着走
 - [RAG速通](https://mp.weixin.qq.com/s/11NcuacIALFWcAtQ9rWaMA)
   - RAG优化核心策略主要基于Information Retrieval的2-stage经典思路展开：即同时保证高召回率和精度
     - 第一阶段：最大化召回率(High Recall)，同时接受较低的精度( Low Precision)。此阶段涵盖RAG的Indexing和Retrieval部分

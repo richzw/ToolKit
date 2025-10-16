@@ -969,6 +969,13 @@
   - [Tune Llama2](https://mp.weixin.qq.com/s/GHwBVGS9zAApRpp088yc-Q)
     - https://www.anyscale.com/blog/fine-tuning-llama-2-a-comprehensive-case-study-for-tailoring-models-to-unique-applications
     - 微调LLaMa 2时的经验和结果，非结构化文本和写SQL方面，微调后的结果好于GPT-4，但数学方面微调后也比不上GPT-4
+  - [大语言模型结构化输出（Structured Output）的技术原理和实现](https://mp.weixin.qq.com/s/bT5Z9HBgLl2I4Ylbxklw0A)
+    - Prompt ↔ 成本最低 / 不确定性高
+    -  Guardrails ↔ 易集成 / 多轮开销大
+    -  约束解码 ↔ 结构100% / 需 logit or Sketch
+    -  SFT ↔ 推理快 / 受限高原
+    -  RL(SRL) ↔ 性能极佳 / 训练费用高
+    -  API-Native ↔ 开箱即用 / 受制厂商功能
   - [GPT-3.5 Turbo fine-tuning and API updates](https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates)
     - [Tune gpt3.5 sample](https://github.com/LearnPrompt/LLMs-cookbook/tree/main/gpt3.5)
   - [Efficient Fine-Tuning for Llama2-7b on a Single GPU](https://colab.research.google.com/drive/1Ly01S--kUwkKQalE-75skalp-ftwl0fE?usp=sharing)
