@@ -1,6 +1,7 @@
 
 - [eBPF/Ftrace 双剑合璧：no space left on device 无处遁形](https://mp.weixin.qq.com/s/VuD20JgMQlbf-RIeCGniaA)
 - [eBPF 经典入门指南](https://mp.weixin.qq.com/s/d6lOxtiEheegCduTpHXQew)
+- [eBPF Beginner Skill Path](https://labs.iximiuz.com/skill-paths/ebpf-beginner-skill-path-aa16c6e8)
 - [From XDP to Socket: Routing of packets beyond XDP with BPF](https://mp.weixin.qq.com/s/a8OAnprwxggnMEGRHodmMA)
 - [eBPF and XDP](https://mp.weixin.qq.com/s/VmDfYDVlz7PVN6sz6HrIgg)
   - 新技术出现的历史原因

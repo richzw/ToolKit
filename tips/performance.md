@@ -1202,7 +1202,21 @@
     - Proper data structure padding can improve performance by 5-10x in specific scenarios
     - Data-oriented design beats object-oriented for high-performance systems
     - Always measure with benchmarks - cache effects are hardware-specific
-
+  - [CPU 缓存友好的数据结构设计指南](https://mp.weixin.qq.com/s/0H2vImIc93hNqiSj-O3l7Q)
+    - 数据在内存和 CPU 缓存之间的移动。一次 L1 缓存的命中可能仅需数个时钟周期（~1ns），而一次主内存的访问则需要超过上百个周期（~100ns）
+    - 缓存行 (Cache Line) -  x86_64 架构上，一个缓存行通常是 64 字节。
+    - 如何测量缓存未命中
+      - perf stat -e cache-misses,cache-references ./myapp
+      - go test -c -o benchmark.test && perf stat -e cache-misses,cache-references ./benchmark.test -test.benchmem -test.bench "BenchmarkFalseSharing/Padded"
+      - 先执行dmesg | grep -i perf来确认你的物理机器或虚拟机是否有支持perf的驱动
+    - 黄金法则
+      - 打包热数据：将频繁访问的字段放在同一个结构体和缓存行中，以提高数据密度。
+      - 填充并发数据：用内存填充将不同 goroutine 独立更新的数据隔离开来，避免伪共享。
+      - 数组优于链表：线性、连续的内存访问远胜于随机跳转，能最大限度地发挥硬件预取器的作用。
+      - 使用更小的数据类型：在范围允许的情况下，使用 int32 而非 int64，可以在一个缓存行中容纳更多数据。
+      - 处理前先排序：可以极大地提升分支预测的准确率和数据预取的效率（但在性能测试中要小心将排序本身的开销计算在内）。
+      - 池化分配：通过重用内存（如 sync.Pool）可以避免 GC 开销，并有很大概率保持缓存的热度。
+      - 剖析，不要猜测：始终使用 perf, pprof 和精心设计的基准测试来指导你的优化。
 
 
 
