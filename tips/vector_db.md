@@ -934,6 +934,38 @@
       - 𝗦𝗲𝗴𝗺𝗲𝗻𝘁-𝗕𝗮𝘀𝗲𝗱 𝗔𝗿𝗰𝗵𝗶𝘁𝗲𝗰𝘁𝘂𝗿𝗲: Growing segments on StreamNodes for real-time data, sealed segments on QueryNodes with powerful indexes
       - 𝗧𝘄𝗼-𝗟𝗮𝘆𝗲𝗿 𝗥𝗼𝘂𝘁𝗶𝗻𝗴: Each shard stores 1+ billion data points, with segments automatically balanced across machines
       - 𝗘𝗳𝗳𝗼𝗿𝘁𝗹𝗲𝘀𝘀 𝗘𝘅𝗽𝗮𝗻𝘀𝗶𝗼𝗻: Adding capacity is as simple as increasing shard count — no manual intervention required
+    - [How to Debug Slow Search Requests in Milvus](https://milvus.io/blog/how-to-debug-slow-requests-in-milvus.md)
+      - Milvus 搜索通常只需毫秒级，但在高并发、复杂过滤或运行环境受限时，延迟可升至秒级，影响用户体验。定位慢查询需回答两个问题：①出现频率；②耗时在哪个阶段
+      - 定位工具
+        - 指标（Prometheus + Grafana）
+          - • Service Quality → Slow Query：超出 proxy.slowQuerySpanInSeconds（默认 5 s）的请求会被标记。
+          - • Service Quality → Search Latency：整体分布；如面板正常而客户端仍慢，多半是网络或应用层问题。
+          - • Query Node → Search Latency by Phase：拆分 queue / query / reduce；辅助面板 Scalar Filter Latency、Vector Search Latency、Wait tSafe Latency 可进一步定位。
+        - 日志
+          - • Milvus 对执行 > 1 s 的请求加 “[Search slow]” 标记并记录 traceID、collection、filter DSL、topk、metric_type、nprobe、nq 等详细参数。
+          - • 经验阈值：< 30 ms = 健康；> 100 ms = 需关注；> 1 s = 慢查询。
+        - metrics tell you where the time is going; logs tell you which queries are hit.
+      - 常见根因与修复方案
+        - 负载过重
+          - 现象：所有请求延迟升高，队列（queue）延迟显著；日志中某个请求 NQ 很大。
+          - 解决：控制单次 NQ，或横向扩容 Query Node。
+        - 过滤效率低
+          - 现象：仅带 filter 的查询变慢，Scalar Filter Latency 或 Wait tSafe Latency 升高。
+          - 解决：
+            - • 用 IN 代替长 OR 链；利用表达式模板减少解析开销。
+            - • 给过滤字段建 scalar index；对于 JSON 字段使用 path/flat index（2.6 起提供），未来支持 JSON shredding。
+            - • 若一致性要求不高，改用 Bounded / Eventually，减少 tSafe 等待。
+        - 向量索引选择不当
+          - 现象：Vector Search Latency 高，或磁盘 I/O 饱和（DiskANN/MMAP），重启后冷启动慢。
+          - 建议：
+            - • Float 向量：HNSW（内存优先），IVF 系列（折中），DiskANN（十亿级数据，需高带宽）。
+            - • Binary 向量：2.6 新增 MINHASH_LSH + MHJACCARD。
+            - • 启用 MMAP 让索引按需映射；合理调 index / search 参数；重启后预热热段。
+        - 运行时与环境
+          - 现象：后台 compaction / migration / build index 时 CPU、I/O 峰值；频繁 upsert 生成大量未索引小段；版本 Bug。
+          - 对策：
+          - • 将后台任务排到低峰期；释放无用 collection；预热缓存。
+          - • 批量 upsert 减少小段；及时升级版本；为延迟敏感负载预留资源
     - [De duplication of the same vector](https://github.com/milvus-io/milvus/issues/5607)
     - milvus创建一个collection后，还能再添加动态字段吗？dynamic schema 打开之后，就可以再加列
     - 为何不用float64来保证小数点后十几位？

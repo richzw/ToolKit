@@ -80,7 +80,17 @@
     - 通信模式传递特定指令，而共享内存模式授予完全的上下文访问权限。为子智能体定义输出模式可确保结构化和可靠的信息交换。
   - https://drive.google.com/file/d/1QGJ-BrdiTGslS71sYH4OJoidsry3Ps9g/view
   - https://docs.google.com/presentation/d/16aaXLu40GugY-kOpqDU4e-S0hD1FmHcNyF0rRRnb1OU/edit?slide=id.p#slide=id.p
-
+- Context Offload
+  - 工具分成了 3 层：
+    - 第 1 层：函数调用 (Function Calling) 这是最基础的一层，只保留一小组固定的、原子化的函数，比如：读写文件、执行 Shell 命令、搜索文件等。
+    - 第 2 层：沙箱实用程序 (Sandbox Utilities) 这一层包含了一些更复杂的工具，Manus 在系统提示词里会直接告诉 LLM，在一个特定的文件夹里有很多预装的命令行工具。
+    - 第 3 层：代码包与 API (Packages and APIs)  LLM 实时编写 Python 代码，通过代码实现更复杂的功能。比如用户想查询某个 API 的数据，可以直接用 Python 写一个函数，fetch API 的数据，并解析成需要的格式。
+  - Manus 也是大量采用“智能体即工具 (agent as tool)”的模式。把子智能体当工具用，比如负责检索是一个子智能体，但是这个子智能体在主 Agent 看来就是一个工具
+- [Claude 的 Agent Skills ](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview)
+  - Skills let you package specialized knowledge into reusable capabilities that Claude loads on demand as agents tackle more complex tasks
+  - 本质上是一种“上下文卸载”，把冗长的技能信息移出上下文，按需加载
+  - 在全局或者项目目录下的 .claude/skills 下面添加目录，并且放一个包含meta信息的 SKILL\.md 文件，就可以引导 Agents 去学习使用这些 Skill。
+  - 
 
 
 

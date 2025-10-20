@@ -381,6 +381,7 @@
 - [Theory](https://mp.weixin.qq.com/s/oUe_Vw0vfMvXJ-w97dkK4w)
   - [The Little Book of Deep Learning](https://fleuret.org/francois/lbdl.html)
   - [Transformer模型之输入处理](https://mp.weixin.qq.com/s/ryjV4IVLbjUO-QVieOrW3A)
+  - [Let’s Build the GPT Tokenizer: A Complete Guide to Tokenization in LLMs](https://www.fast.ai/posts/2025-10-16-karpathy-tokenizers)
   - [Transformer模型之Encoder-Decoder](https://mp.weixin.qq.com/s/MPFq_-Jqu0DC7QffSK4oNg)
     - https://github.com/heiyeluren/black-transformer
   - [Transformer Math 101](https://blog.eleuther.ai/transformer-math/)

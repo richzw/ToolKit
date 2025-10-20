@@ -288,4 +288,27 @@
   - CC
     - `claude mcp add --transport sse jina https://mcp.jina.ai/sse --header "Authorization : Bearer ${JINA_API_KEY}"`
   - 在 OpenAI Codex 中配置： 编辑 ~/.codex/config.toml 文件，添加以下配置
+- [Anthropic Skills vs. OpenAI AgentKit]
+  - Skills 是为 Claude 定制的技能包，用户通过对话定义，Claude 会在需要时自动调用，无需手动编辑。
+  - AgentKit 期望通过开发者构建和管理多步骤工作流，人工编排逻辑，成为企业 AI “自动化”的操作系统。
+  - [Claude Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)
+    - 一个Skill就是一个文件夹，包含指令、脚本与资源。具体来说，每个Skill包含三样东西：
+      - 指令(Instructions)告诉Claude该做什么、脚本(Scripts)执行具体任务、资源(Resources)提供模板和辅助内容。因为自然语言也是代码，指令和脚本其实是分不清的，都属于程序
+    - Claude只会在Skill与当前任务相关时才会调用，并且采用渐进式披露：先加载元数据(约100词)，再加载http://SKILL.md主体(也比较小)，最后才是具体的资源文件。
+    - Skills 的核心概念
+      - 每个 Skill 是一个文件夹，至少包含一个 SKILL.md。文件首部必须是 YAML front-matter，含 name 与 description 两个字段。启动时，代理只把所有已安装技能的这两段元数据注入 system prompt，用于后续匹配任务场景。
+      - 若代理判定某 Skill 相关，它会再读取完整 SKILL.md；若仍需更多细节，则按引用逐步打开同目录下的其他 Markdown、脚本或资源文件，实现「逐层披露（progressive disclosure）」的上下文加载策略，理论上可容纳无限量资料而不挤占上下文窗口
+    - Skill 开发与评估最佳实践
+      - 先做评估：用代表性任务找出代理能力缺口，再增量写 Skill。
+      - 结构化扩展：当 SKILL.md 过长就拆分文件；互斥上下文放不同路径减少 token；把脚本既当工具也当文档。
+      - 代理视角调试：观察 Claude 何时触发技能、是否走偏，并反复迭代 name/description。
+      - 与 Claude 协同：让它把成功步骤、常见错误写回 Skill 以自我改进
+
+
+
+
+
+
+
+
 
