@@ -90,11 +90,28 @@
   - Skills let you package specialized knowledge into reusable capabilities that Claude loads on demand as agents tackle more complex tasks
   - 本质上是一种“上下文卸载”，把冗长的技能信息移出上下文，按需加载
   - 在全局或者项目目录下的 .claude/skills 下面添加目录，并且放一个包含meta信息的 SKILL\.md 文件，就可以引导 Agents 去学习使用这些 Skill。
-  - 
-
-
-
-
+  - https://github.com/anthropics/skills
+- [Agent 的底层逻辑](https://mp.weixin.qq.com/s/tewBKHgbyrjxUjAOmkXI7A)
+  - 核心立论
+    - Agent 的质变不在于模型智力再次飞跃，而在于“思考→行动→观察”这一闭环流程带来的新型认知能力。
+    - Agent = LLM + 结构化流程 + 工具接口 + 长/短期记忆管理。开发者的角色正在从 Prompt Engineer 转向 Agent 流程架构师
+  - 能力演进五阶段
+    - 原生天才：一次性回答＝普通 ChatGPT 调用。
+    - 思考者：Chain of Thought（CoT）强制显式推理步骤。
+    - 细心人：Reflexion 自我反思→复盘→下一轮改进。
+    - 战略家：Planning 先拆解宏观任务、动态重排。
+    - 学者：ReAct 将 Thought-Act-Observe 与外部工具深度耦合，突破训练语料边界。
+  - 流程的三重技术价值
+    - 结构化：CoT / ToT / Planning 为推理搭脚手架，对抗思维混沌。
+      - 规划（Planning） 流程 在“宏观”层面，用结构对抗混沌
+      - 思维链（Chain of Thought, CoT） 在“微观”层面，用结构对抗混沌
+    - 迭代化：Reflexion / Summarization 把失败压缩成高信息密度“经验便签”，对抗上下文窗口限制。
+      - 我们设计的反思（Reflection）、总结（Summarization）等流程，本质上是在为AI的记忆，量身打造了一套“高效的压缩算法”
+    - 交互化：ReAct + ToolUse 让模型通过 API、数据库、代码执行等触手感知世界，对抗幻觉
+  - 结论：重新定义上下文（Context）
+    - 上下文不是需要我们去“填充”的目标，而是我们设计的卓越流程所“产出”的结果
+    - 一个好的流程，天然就是一位“上下文架构师”。它通过两大核心机制来对抗遗忘和混乱：
+      - 高效的信息压缩：精准的选择性注入
 
 
 

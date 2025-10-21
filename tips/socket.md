@@ -1123,6 +1123,10 @@
   - quick ACK 与 delayed ACK
     - • 在 TCP 连接建立初期，Linux 会进入 quick ACK 模式，以便更快地确认初始数据段。
     - • quick ACK 模式通常会被限制在最大计数（TCP_MAX_QUICKACKS，通常为 16）以内，当超过该计数后，TCP 会转为 delayed ACK 模式。
+  - TCP Delayed ACK（延迟确认）是一种为了减少网络中小数据包数量的优化机制
+    - 当接收方收到数据后，它不会立即对每个收到的数据包单独发送 ACK（确认）数据包，而是等待一小段时间，期望在此期间有顺路的数据（比如应用层的响应）可以携带这个 ACK 一起发送给对方。
+    - 如果在超时前都没有数据要发送，则再单独发送 ACK 数据包。这样做的目的是提高网络带宽利用率，减少纯 ACK 数据包的数量
+    - Linux 在实现上有个延迟 ACK 定时器，它的定时时间保存在一个 ato 变量中，默认值是 40 ms，但是会动态调整，最大定时时间为 500ms
   - quick ACK 计数器的计算
     - quickacks = (接收窗口大小 / (2 × rcv_mss))，然后再与 TCP_MAX_QUICKACKS 进行比较，取较小值。
     - 这意味着实际可用的 quick ACK 数目既受接收窗口大小（rcv_wnd）影响，也会根据 rcv_mss 动态调整。

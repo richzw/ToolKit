@@ -303,6 +303,19 @@
       - 结构化扩展：当 SKILL.md 过长就拆分文件；互斥上下文放不同路径减少 token；把脚本既当工具也当文档。
       - 代理视角调试：观察 Claude 何时触发技能、是否走偏，并反复迭代 name/description。
       - 与 Claude 协同：让它把成功步骤、常见错误写回 Skill 以自我改进
+- 在 Claude Code 中配置 GLM 4.6 的方法
+  ```
+  {
+  "env": {
+  "ANTHROPIC_AUTH_TOKEN": "your_zai_api_key",
+  "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
+  "API_TIMEOUT_MS": "3000000",
+  "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
+  "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-4.6",
+  "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-4.6"
+  }
+  }
+  ```
 
 
 
