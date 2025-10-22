@@ -2441,7 +2441,7 @@
   - 结论：
     - len 适用于网络传输、内存大小等底层需求。
     - for-range / rune 面向文本逻辑。
-
+- [Writing Better Go: Lessons from 10 Code Reviews](https://speakerdeck.com/konradreiche/writing-better-go-lessons-from-10-code-reviews)
 
 
 

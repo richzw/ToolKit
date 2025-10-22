@@ -1167,5 +1167,10 @@
     • Inject an ephemeral container: kubectl debug pod-name -it --image=busybox --target=main-container.
     • Use tool images (nicolaka/netshoot, ubuntu, golang) to ping services, dig DNS, run tcpdump, or attach profilers without restarting the workload.
     • Broader options: duplicate a pod (--copy-to), spin up a privileged pod on a node (kubectl debug node/worker-1 --image=ubuntu; chroot /host), or replace container images to test hypotheses—all while production traffic keeps flowing.
-
+- [7 Common Kubernetes Pitfalls](https://kubernetes.io/blog/2025/10/20/seven-kubernetes-pitfalls-and-how-to-avoid/)
+  - 未设置资源 requests/limits：为 Pod 指定 CPU/内存起始值（如 100m/128Mi），结合监控逐步收敛；用 HPA 基于指标自动扩缩；用 kubectl top 验证不欠配/超配。
+  - 忽视存活/就绪/启动探针：配置 liveness/readiness/startup；健康检查可用 /healthz；探针保持简单，避免误报与无谓重启。
+  - 仅靠 kubectl logs 排障：集中化日志（Fluent Bit/Fluentd），统一遥测用 OpenTelemetry；配合 Prometheus 指标，必要时加 Jaeger 追踪。
+  - Dev/Prod 一套模版硬套：用 kustomize overlays 共享基线又因环境差异定制；配置落入 ConfigMap/Secret；机密用 Sealed Secrets；生产按流量/容量单独设 replicas 与 requests。
+  - 集群里遗留“悬挂”资源：统一打 owner/purpose 等标签便于筛查；定期审计 kubectl get all -n ；利用 Kubernetes 垃圾回收（OwnerReferences）与 Kyverno 等策略工具做到期清理/阻断陈旧资源。
 
