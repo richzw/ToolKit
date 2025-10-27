@@ -750,6 +750,24 @@
   - [Generative Agents: Interactive Simulacra of Human Behavior](https://github.com/joonspk-research/generative_agents)
 - Models
   - [M3E Models](https://huggingface.co/moka-ai/m3e-base)
+  - [DeepSeek-OCR](https://mp.weixin.qq.com/s/We8GNJTQKluEF-xtI1_iJA)
+    - 传统长上下文瓶颈
+      • 对文本序列做自注意力，计算复杂度 O(n²)。1000 → 10000 token 时算量 ×100，易 GPU 爆显存、超时。
+      • token 太多时注意力变散或只看首尾，输出质量下降。
+      • 文档中布局、图表、公式等非文本信息在 tokenize 时全部丢失。
+      • 多语言须维护多套分词器；压缩率仅 1–2 倍，难支撑万级 token。
+    - Contexts Optical Compression（COC）范式
+      - ① 把全文渲染成结构化文档图像，完整保留文字、排版、图表、公式。
+      - ② 用视觉编码器将图像 → 少量视觉 token，平均压缩 7–20 倍，OmniDocBench 最高 60 倍；1024×1024 图像可由 4096 token 压到 256 token。
+      - ③ 语言解码器把视觉 token 还原为文本（识别准确率 ≈97%）。
+    - 技术意义
+      • 图文混合端到端：省去“独立 OCR → token 化”链路，格式、数值趋势不丢失。
+      • 多语言统一：图像中介无需分词器即可覆盖 100+ 语言。
+      • 长上下文降本：把“文本 token”问题重构为“视觉 token”问题；还能动态调整分辨率实现记忆衰减。
+    - 对 RAG 的启发
+      • 压缩视觉 token 与 Sentence-BERT 做 embedding 类似——先升维再降 token。
+      • 可以直接把检索到的视觉/向量 token 输给多模态 LLM，省去“检索→取原文→再 tokenize”流程。
+      • 离线批量生成 embedding + 在线 Top-K 检索，将在线复杂度压缩到常数级，思路与 Meta REFRAG 类似
   - [Llama2](https://github.com/karpathy/llama2.c/tree/master)
   - [Code Llama](https://mp.weixin.qq.com/s/yU1haYz0j0E5B1vojAqlRQ)
     - https://ai.meta.com/blog/code-llama-large-language-model-coding/

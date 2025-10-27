@@ -609,6 +609,20 @@
   - Trust（可信度）
     - API 字段：pandaDemotion, serpDemotion, badSslCertificate, ContentChecksum96
     - 系统在检测技术安全、内容一致性与反垃圾信号。
-
+- [The Practical Guide to Improving Visual Design](https://blog.designary.com/p/the-practical-guide-to-improving)
+  - 打好「四大基础」
+    • 排版（Typography）
+    • 配色（Color）
+    • 视觉层级（Hierarchy）
+    • 布局与留白（Layout & Spacing）
+  - 研究主流设计语言（Design Language）
+    • Apple Human Interface Guidelines
+    • Google Material 3
+  - 借鉴公开设计系统
+    建议使用 Component Gallery 等网站，比较不同公司的设计系统，理解同一组件在多种系统中的变体与使用场景，从而“按系统思考而非按页面思考”
+  - 汲取「实战型」资料 推荐三本以操作技巧为主的 UI 书籍：
+    • Practical UI（Adham Dannaway）
+    • Refactoring UI
+    • The Design Manual
 
 
