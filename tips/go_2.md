@@ -2442,8 +2442,13 @@
     - len 适用于网络传输、内存大小等底层需求。
     - for-range / rune 面向文本逻辑。
 - [Writing Better Go: Lessons from 10 Code Reviews](https://speakerdeck.com/konradreiche/writing-better-go-lessons-from-10-code-reviews)
-
-
+- [iota：设计缺陷还是“黑魔法”](https://mp.weixin.qq.com/s/bAX1vg81DPSfvEGs9DNkxg)
+  - iota 似乎是一个失败的设计：
+    - 隐式重复：如果一个常量声明没有赋值，编译器会自动重复上一行的表达式。这个规则本身就不那么广为人知。
+    - 动态的值：iota 不是一个真正意义上的常量，它的值在 const 块的每一行都会变化。
+  - 要理解 iota 的所有行为，你只需要掌握两大核心法则，它们简单、一致且没有例外：
+    - iota 是行索引：在一个 const 块中，iota 的值就是它所在的行号（从 0 开始）。每当遇到一个新的 const 关键字，iota 就会重置为 0。
+    - 表达式隐式重复：如果一个常量声明没有赋值，编译器会自动重复上一行的表达式，而不是值。
 
 
 

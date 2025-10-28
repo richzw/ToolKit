@@ -1812,7 +1812,19 @@
        - 常用的组件有哪些
        - 最佳实践是什么
     - 3. 将 Claude Code 生成的 System Prompt 去测试，看差距在哪，然后回到之前 Claude Code 的会话，告诉它之前的 Prompt 存在的问题，让它优化，这样迭代几个版本就没问题了。
-- 
+- [Causal RAG](https://mp.weixin.qq.com/s/5Crs5tiLJ8PndZCQ1ztExA)
+  - 为何要改造 RAG
+    • 传统 RAG 对“定量 Why / 深层 What”问题无能为力，如财报里异常点、增长驱动因素
+    • 新思路：让“轻量级概化模型”先解决 60–70% 深层问题，再用普通 RAG 处理剩余浅层事实
+  - Causal RAG 的核心框架
+    - (1) 用 Causal AI 搭建概化模型（Approximation）
+      - 以三张财务报表为节点，补充盈利能力等衍生指标
+      - 兼具因果关系、定性 + 定量推理、可验证假设
+    - (2) LLM 生成 Code 在概化模型上执行检索与推理
+      - 问题被转化为代码（SQL / Python）
+      - 代码在模型图中定位根因或最优路径
+    - (3) Vector Search 只做佐证
+      - 对推理得到的 Facts / Insights 再检索原文段落
 
 
 
