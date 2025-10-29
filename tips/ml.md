@@ -516,6 +516,11 @@
       - Pass it through a pretrained CNN such as ResNet, VGG, or EfficientNet.
       - Capture the output embedding for that frame.
       - Repeat for multiple frames across the video.
+  - [On-Policy Distillation](https://thinkingmachines.ai/blog/on-policy-distillation/)
+    -  后训练(post-training)通常有三条路线：
+       – 强化学习(RL)：on-policy、但奖励稀疏；
+       – 监督微调 / 传统蒸馏(SFT)：off-policy、奖励密集；
+       – 本文提出的 on-policy distillation：既 on-policy 又密集奖励，把二者优势结合起来
 - [Prompt](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
   - `Prompt Engineering`, also known as `In-Context Prompting`, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes without updating the model weights.
   - `Instructed LM` (e.g. InstructGPT, natural instruction) finetunes a pretrained model with high-quality tuples of (task instruction, input, ground truth output) to make LM better understand user intention and follow instruction

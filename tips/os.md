@@ -818,6 +818,27 @@
   - 当写入量很小并且无法分组或缓冲时，才使用多线程写
   - 对于读写负载很高的工作，应该配置更大的预留空间
   - [SSD硬件速度飙升，唯独云存储未能跟上](https://mp.weixin.qq.com/s/hsh0y4eyPD2Rq1fjGK8jkg)
+  - [作为开发需要了解 SSD 的一切](https://www.luozhiyun.com/archives/833)
+    - 性能量级
+      • HDD：10-15 ms 寻道/旋转延迟，≈200 IOPS，顺序读写≈300 MB/s。
+      • 以 Samsung 990 Pro 为例的 PCIe 4.0 SSD：顺序读写 > 7 GB/s，≈1.4 M IOPS，平均延迟 ≈ 41 µs——比 HDD 快 2-3 个数量级。
+    - 物理结构
+      - • Controller：调度读写、垃圾回收 (GC)、磨损均衡 (Wear-Leveling)。
+      - • DRAM/HMB：存放 FTL 映射表 + 写缓存；无 DRAM 盘借助 HMB（PCIe 直借 64 MB 系统内存）。
+      - • NAND：浮栅晶体管堆叠形成 Page/Block。
+      - – Page：4 KB / 8 KB / 16 KB（990 Pro）。写入基本单位。
+      - – Block：128-256 Page，擦除基本单位。
+      - – Cell 类型：SLC(1 bit) / MLC(2 bit) / TLC(3 bit) → bit 数越高，寿命与速度越低。
+      - • 寿命来源：P/E 周期受限，电子反复穿越氧化层导致隧穿层退化。
+    - 对开发者的实战建议
+      • 将频繁更新的热数据缓存于内存，批量落盘；冷热分离可减少 WA。
+      • 数据结构要紧凑，相关记录在同一 Page/Block，利于顺序读写与预读。
+      • 写入块大小 = Page 大小的整数倍（最大 16 KB），不足时先缓冲再合并写。
+      • 相关数据一次性大块写入，后续读取可在多 Plane/Die 并发完成。
+      • 避免小交错读写：先批量读，再批量写。
+      • 随机写不一定慢：只要满足“对齐 + ≥ Cluster”。
+      • 大型单线程 I/O 通常优于同容量的多线程小 I/O；只有当写入极小且无法聚合时再并发。
+      • 高随机写业务给 SSD 预留 ≥ 20 % 空间，显著提升性能与寿命。
 - [如何排查问题](https://mp.weixin.qq.com/s/g6UuqlWb-0h3eW69-VG52Q)
   - CPU过高，怎么排查问题
     - CPU 指标解析
