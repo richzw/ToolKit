@@ -55,8 +55,14 @@
     - 查看所有用户的最后登录时间 lastlog | grep -v "Never logged in"
     - 服务器上的文件突然丢失，要 “查看 root 用户最近执行的 20 条含 rm -rf、chmod、chown 的命令”，判断是否有人误操作删除文件或修改权限。
       - grep -E "rm -rf|chmod|chown" /root/.bash_history | tail -20
-    
-    
+- SSH
+  - [史上最全 SSH 暗黑技巧详解](https://plantegg.github.io/2019/06/02/%E5%8F%B2%E4%B8%8A%E6%9C%80%E5%85%A8_SSH_%E6%9A%97%E9%BB%91%E6%8A%80%E5%B7%A7%E8%AF%A6%E8%A7%A3--%E6%94%B6%E8%97%8F%E4%BF%9D%E5%B9%B3%E5%AE%89/)
+  - 把远端机器的一个 port 映射到本地的一个 port，比如我在开发 NebulaGraph Catalyst 的时候，会把集群中的一堆服务跑在服务器，映射到本地，主进程在本地开发调试，轻量、方便（local）
+  - 把本地端口映射到远端一个端口，比如调试需要公网上的 api hook 的接口时候可用，这里要注意，需要 sshd 开相关的配置允许
+  - 把本地端口作为一个 socks5 代理，网络从 sshd 服务端走（dynamic），这是我常用的非全局连公司网络、家庭网落的方法
+  - 除了隧道，ssh 还支持 chain，写在配置里非常简单，加一行 ProxyJump foo 的意思是这个 host 通过配置里的另一个 host foo 的隧道连接
+  - ssh -w 可以创建tun，自己写脚本就可以建VPN了 proxycommand 非常强大，曾经用这个走squid 穿防火墙
+    - authorized_keys的key前面是可以加配置的，比如限定from 的IP，给不给pty 
 
 
 

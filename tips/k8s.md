@@ -6,6 +6,7 @@
   - [Out-of-memory (OOM) in Kubernetes](https://mihai-albert.com/2022/02/13/out-of-memory-oom-in-kubernetes-part-4-pod-evictions-oom-scenarios-and-flows-leading-to-them/)
   - [A Guide to Kubernetes](https://www.newsletter.swirlai.com/p/a-guide-to-kubernetes-part-1)
   - [KubeCon China 2025 video](https://mp.weixin.qq.com/s/GlnCyx-AIZbjsZPRPeItew)
+  - [Kubernetes API Basics - Resources, Kinds, and Objects](https://iximiuz.com/en/posts/kubernetes-api-structure-and-terminology/)
 - Tools
   - [netshoot: a Docker + Kubernetes network trouble-shooting swiss-army container](https://github.com/nicolaka/netshoot)
 - HPA

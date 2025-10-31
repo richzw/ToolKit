@@ -1072,8 +1072,12 @@
     - 在每个节点以 DaemonSet 部署 NodeLocal DNSCache，缓存就近解析以缓解 CoreDNS 压力与单网卡 PPS 瓶颈。 
     - NodeLocalDNS 对特定域名（暴露于 NLB 的服务）直接返回同 AZ 的 NLB 私网 IP，从源头减少跨 AZ 转发。实现上依据节点 IP 判断所处子网，按条件写入 /etc/hosts 映射。
     - Service 配置关闭 NLB 跨区均衡 annotation: service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "false"，并设 externalTrafficPolicy: Local，使流量仅落到本节点上的 Pod，进一步降低 kube-proxy 转发与跨 AZ 命中。
-
-
+- [Defending QUIC from acknowledgement-based DDoS attacks](https://blog.cloudflare.com/defending-quic-from-acknowledgement-based-ddos-attacks/)
+  - QUIC（HTTP/3背后的传输层协议）与TCP/TLS等价，但运行于 UDP 并默认加密；其拥塞控制、丢包恢复等全部依赖“确认报文（ACK）”信号。
+  - Cloudflare 自研 QUIC 实现 quiche 在 ACK 处理上存在两类缺陷：
+    - ACK Range Validation 缺失：客户端可以回报并不存在的包号区间，服务器未做严格校验
+    - Optimistic ACK 攻击：攻击者预测未来包号，提前伪造 ACK，使服务器误判 RTT 极低、带宽极高，从而 无限增大发包速率，形成放大式 DDoS
+  - 服务器间歇性跳号（skip packet numbers），如果客户端 ACK 了被跳过的编号即可识破攻击 - Cloudflare 的动态 CWND-aware Skip 算法
 
 
 

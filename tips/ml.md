@@ -1266,6 +1266,12 @@
       - [Structured Decoding in vLLM: A Gentle Introduction](https://www.bentoml.com/blog/structured-decoding-in-vllm-a-gentle-introduction)
       - [零实现 vLLM](https://mp.weixin.qq.com/s/h1cFYDNxcHC30APcarF47A)
     - [vLLM eBay推理平台的工程实践](https://mp.weixin.qq.com/s/y7OkAy-_H0J12ngexVRkvg)
+    - [vLLM 睡眠模式：零重载的模型切换](https://mp.weixin.qq.com/s/q_ilItR-i1PDQqP0JpEqpw)
+      - 解决同一块 GPU 上多模型复用的“要么双倍显存、要么数十秒重载”难题，vLLM Sleep Mode 把模型切换时间压到亚秒级，同时首条推理也无需冷启动惩罚。
+      - 进程常驻
+        - GPU 进程、CUDA 上下文、内存分配器、CUDA Graph、JIT-compiled kernel 不退出。
+      - 按需转移 / 丢弃权重
+        - 只针对模型权重与 KV-cache 采取“卸载或销毁”，其余 runtime 资产全部保留。
     - [模型部署与推理](https://mp.weixin.qq.com/s/glPPSqHjsnDjC0DZSuuPzA)
       - 模型压缩
         - 模型压缩的方向大致分为剪枝（Pruning），知识蒸馏（Knowledge Distillation，KD），量化（Quantization），低秩分解（Low-Rank Factorization），权重共享（Weight sharing），神经网络架构搜索（NAS

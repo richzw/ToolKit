@@ -1196,6 +1196,18 @@
   - 当使用值接收者时，方法内部操作的是接收者值的一个副本（Copy）运行时会创建一个 nodeStore 结构体的副本，并将这个副本传递给 ReadBytes 方法内部的vs变量。
   - 本该廉价的栈上复制，变成了昂贵的堆上分配
 - [Go GC Green Tea](https://github.com/golang/go/issues/73581)
+  - https://go.dev/blog/greenteagc
+    - Go 1.25 新增实验性 Green Tea GC（设置 GOEXPERIMENT=greenteagc 启用）。多数负载可减少 10% GC CPU，最佳可达 40%。Go 1.26 计划默认启用
+    - 传统 Go GC
+      - 并发、并行的 mark–sweep 跟踪式 GC
+        - ① Mark：从根开始深度/广度遍历对象图，用 “seen-bit” 标记访问过的对象
+        - ② Sweep：回收未标记对象
+      - 瓶颈
+        - 90% GC 时间花在 Mark
+        - Mark 中 ≥35% 纯粹在等待随机内存访问（cache miss）
+        - 多核时代问题加剧：NUMA、带宽下降、工作队列竞争
+    - Green Tea : Work with pages, not objects
+      - 页级工作 + 双位元数据 + 向量批处理 - 重新实现 Mark，显著降低耗时并让 GC 更契合现代 CPU
   - 通过一种内存感知 (memory-aware) 的新方法，显著改善 GC 过程中的内存访问模式，降低 CPU 开销，尤其是在多核和 NUMA 架构下。
     - 随着 CPU 核心数量的激增和内存访问速度日益成为瓶颈，现代计算系统对内存局部性（Spatial & Temporal Locality）和拓扑感知（Topology-awareness）提出了更高的要求
     - 传统的垃圾收集（GC）算法，包括 Go 当前使用的并行三色标记清除法，往往与这些趋势背道而驰。
