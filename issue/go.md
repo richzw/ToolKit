@@ -1197,6 +1197,7 @@
   - 本该廉价的栈上复制，变成了昂贵的堆上分配
 - [Go GC Green Tea](https://github.com/golang/go/issues/73581)
   - https://go.dev/blog/greenteagc
+  - https://mp.weixin.qq.com/s/PMmj-jloOUGpCJYlD6IfQQ
     - Go 1.25 新增实验性 Green Tea GC（设置 GOEXPERIMENT=greenteagc 启用）。多数负载可减少 10% GC CPU，最佳可达 40%。Go 1.26 计划默认启用
     - 传统 Go GC
       - 并发、并行的 mark–sweep 跟踪式 GC
@@ -1207,7 +1208,11 @@
         - Mark 中 ≥35% 纯粹在等待随机内存访问（cache miss）
         - 多核时代问题加剧：NUMA、带宽下降、工作队列竞争
     - Green Tea : Work with pages, not objects
+      -  设计目标
+         - 降低 内存访存随机性 与 work-queue 争用
+         - 为向量化做准备：让待处理数据颗粒度稳定、大小固定
       - 页级工作 + 双位元数据 + 向量批处理 - 重新实现 Mark，显著降低耗时并让 GC 更契合现代 CPU
+      - work-list = 页 (page) ； 遇到跨页指针就把 整页 入队(FIFO)； 一次顺序扫描同页内 N 个对象； 2 bit/obj：seen、scanned；差集 =seen & !scanned 就是当前需扫描的对象集合
   - 通过一种内存感知 (memory-aware) 的新方法，显著改善 GC 过程中的内存访问模式，降低 CPU 开销，尤其是在多核和 NUMA 架构下。
     - 随着 CPU 核心数量的激增和内存访问速度日益成为瓶颈，现代计算系统对内存局部性（Spatial & Temporal Locality）和拓扑感知（Topology-awareness）提出了更高的要求
     - 传统的垃圾收集（GC）算法，包括 Go 当前使用的并行三色标记清除法，往往与这些趋势背道而驰。

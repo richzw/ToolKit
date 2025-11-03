@@ -62,8 +62,9 @@
     - 真正合理的系统，一定是： 快速反应的轻模型做分类和前处理、重模型做主任务、补一个模型做验证或追问。 一个 agent 后面绑定的一定是一个 LLM 团队。
     - For trivial queries → local model (no network call)
     - For structured queries → call DSL → SQL translator
-    - For complex analysis → call OpenAI / Anthropic / Gemini
-    - Fallback or verification → dual-model redundancy (judge + responder)
+For complex analysis → call OpenAI / Anthropic / Gemini
+
+Fallback or verification → dual-model redundancy (judge + responder)
   - 可追溯/可控/可信，是企业愿意用 Agent 的底线
     - 很多人只想着怎么让 agent 能回答，但企业更关心：这句话是从哪里来的？有没有越权？出了错我怎么追责？ AI 要可治理。
   - 最被低估的一点：Agent ≠ Chatbot
@@ -112,9 +113,7 @@
     - 上下文不是需要我们去“填充”的目标，而是我们设计的卓越流程所“产出”的结果
     - 一个好的流程，天然就是一位“上下文架构师”。它通过两大核心机制来对抗遗忘和混乱：
       - 高效的信息压缩：精准的选择性注入
-
-
-
+- [Master multi-agent system](https://drive.google.com/file/d/1WN7o417VOpvQWaV5nNFecEMYqOzEtZlc/view)
 
 
 
