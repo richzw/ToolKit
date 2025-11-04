@@ -316,7 +316,11 @@
   }
   }
   ```
-
+- [Claude Agent Skills: A First Principles Deep Dive](https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/)
+  - Skills 不是可执行代码：不跑 Python/JS、不起 HTTP server；本质是“注入式指令”
+  - 技能（skills）= Prompt 模板 + 对话上下文注入 + 执行环境修改。它们本质上是一段 Markdown（SKILL.md）而非可执行代码，通过“Skill”元工具在运行时注入到 Claude 的上下文中
+- [Claude Code 核心](https://mp.weixin.qq.com/s/7g5DugzATAIX1by4yAYtTg)
+  - Agent（主战力） + MCP（能力扩展） + Slash（效率） + Hook（可控 / 自动化）
 
 
 

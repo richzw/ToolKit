@@ -1265,8 +1265,27 @@
     - 更强的未知键控制： v2 提供了 RejectUnknownMembers 选项（虽然非默认启用，但行为等同于 v1 的 DisallowUnknownFields），并引入了 unknown 标签，允许开发者将未知字段捕获到指定的 map 或 jsontext.Value 类型的字段中，而不是简单忽略。
     - UnmarshalRead 校验 EOF： v2 的 UnmarshalRead 函数（用于处理 io.Reader）会校验整个输入流直到 EOF，从而有效阻止尾部垃圾数据的问题。
     - 更严格的 UTF-8 处理： v2 默认要求严格的 UTF-8 编码，对无效 UTF-8 会报错
-
-
+- [Go and enhance your calm: demolishing an HTTP/2 interop problem](https://blog.cloudflare.com/go-and-enhance-your-calm/)
+  - Cloudflare 用 GOAWAY + ENHANCE_YOUR_CALM 错误码 来终止看似恶意的 HTTP/2 连接（例如 PING 泛滥）。内部微服务在互相调用时触发了此防御，引发排障
+  - 受影响客户端基于 Go 标准库 net/http + HTTP/2 Transport。
+  - 日志 (GODEBUG=http2debug=2) 显示每个 PING 之前都会发送 RST_STREAM
+  - 进一步抓包发现：服务器已用 END_STREAM 发送了空 DATA，按状态机客户端此时应直接关闭流，却多余地发出 RST_STREAM，随后 Go 运行时为了区分“服务器慢”还是“服务器挂”又立即发送 PING。
+  ```
+  resp, err := http.DefaultClient.Do(req)
+  if err != nil {
+    return err
+  }
+  defer func() {
+    //  ensure that response bodies are always fully read
+    io.Copy(io.Discard, resp.Body)
+    resp.Body.Close()
+  }()
+  
+  // json.Decoder stops reading as soon as it finds a complete JSON document or errors. If the response body contains multiple JSON documents or invalid JSON, then the entire response body may still not be read
+  if err := json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
+  return err
+  }
+  ```
 
 
 

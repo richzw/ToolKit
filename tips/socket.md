@@ -1155,6 +1155,10 @@
     - 在 Python 中实现了一个“connectx()”函数，用于统一处理 TCP/UDP 在绑定和连接时对源 IP、端口的选择和端口复用。
     - 对于 TCP，合理利用 IP_BIND_ADDRESS_NO_PORT 或 SO_REUSEADDR 就能实现端口共享。
     - 对于 UDP，则需要结合用户态锁定和查询方法才能避免端口冲突或“覆盖”。
-
+- [手搓 TCP RST](https://mp.weixin.qq.com/s/UO3GgelOpHerZlJr7xxnQQ)
+  - 在 Linux __tcp_close() 中，出现下面两个分支就会主动 tcp_send_active_reset()
+    - data_was_unread	关闭时接收缓冲区还有未读数据
+    - SOCK_LINGER && !sk->sk_lingertime	SO_LINGER 开启且超时时间=0
+  
 
 
