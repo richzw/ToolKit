@@ -1174,4 +1174,21 @@
   - 仅靠 kubectl logs 排障：集中化日志（Fluent Bit/Fluentd），统一遥测用 OpenTelemetry；配合 Prometheus 指标，必要时加 Jaeger 追踪。
   - Dev/Prod 一套模版硬套：用 kustomize overlays 共享基线又因环境差异定制；配置落入 ConfigMap/Secret；机密用 Sealed Secrets；生产按流量/容量单独设 replicas 与 requests。
   - 集群里遗留“悬挂”资源：统一打 owner/purpose 等标签便于筛查；定期审计 kubectl get all -n ；利用 Kubernetes 垃圾回收（OwnerReferences）与 Kyverno 等策略工具做到期清理/阻断陈旧资源。
-
+- [Kubernetes Pod Scheduling: Balancing Cost and Resilience](https://cast.ai/blog/kubernetes-pod-scheduling-balancing-cost-and-resilience/)
+  - Bin-Packing 与 Spreading 的平衡
+    • 过度“均摊”（spreading）可能导致资源碎片化，降低节点利用率。
+    • 纯“打包”（bin-packing）虽提升密度，但会放大单点或单节点故障的影响
+  - 不建议在节点级使用硬性反亲和作为默认策略，否则容易过度分散
+  - 成本与韧性的实用平衡法则
+    - 非关键服务：节点级软反亲和，既保持一定分散，又允许密度提升
+    - 关键服务：在区域/可用区采用严格约束，在节点级放宽
+    - 相关非关键服务应尽量同置（亲和）以降低跨节点通信开销
+  - 多层级韧性策略
+    • 区域级与可用区级使用严格均衡，节点级适度放宽，实现自上而下的韧性保护
+  - Cascading Constraint Patterns
+    - Hard constraints at broad topology levels (region, zone)
+    - Softer constraints at narrow levels (node, rack)
+    - Fallback provisions for scheduling when an ideal distribution isn’t possible
+  - 三种核心调度机制
+    - Affinity/Anti-Affinity 更像“要/不要在同一节点”，
+    - TSC(Topology Spread Constraints按比例将 Pod 均匀分布到多个拓扑域) 像“每个域最多差 N 个副本

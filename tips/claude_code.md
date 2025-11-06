@@ -321,8 +321,24 @@
   - 技能（skills）= Prompt 模板 + 对话上下文注入 + 执行环境修改。它们本质上是一段 Markdown（SKILL.md）而非可执行代码，通过“Skill”元工具在运行时注入到 Claude 的上下文中
 - [Claude Code 核心](https://mp.weixin.qq.com/s/7g5DugzATAIX1by4yAYtTg)
   - Agent（主战力） + MCP（能力扩展） + Slash（效率） + Hook（可控 / 自动化）
-
-
+- [How I Use Every Claude Code Feature](https://blog.sshh.io/p/how-i-use-every-claude-code-feature)
+  - CLAUDE.md
+    - Start with Guardrails, Not a Manual. CLAUDE.md 应该很短，只在 Claude 容易出错的地方加说明
+    - 如果你有详细文档，可能想在 CLAUDE.md 里用 @ 引用。但这会把整个文件塞进上下文，非常臃肿
+      - 正确做法是推销这个文件，告诉它为什么和何时该读。例如：遇到复杂用法或 FooBarError 错误时，参考 path/to/docs.md 的高级故障排除。
+    - 不要写纯否定约束
+    - Use CLAUDE.md as a Forcing Function 
+    - Treat your CLAUDE.md as a high-level, curated set of guardrails and pointers. 
+    - Use it to guide where you need to invest in more AI (and human) friendly tools, rather than trying to make it a comprehensive manual.
+  - Compact, Context, & Clear
+    - /compact (Avoid): I avoid this as much as possible
+    - /clear + /catchup (Simple Restart): My default reboot. I /clear the state, then run a custom /catchup command to make Claude read all changed files in my git branch.
+    - “Document & Clear” (Complex Restart): For large tasks. I have Claude dump its plan and progress into a .md, /clear the state, then start a new session by telling it to read the .md and continue.
+  - Custom Slash Commands
+    - Use slash commands as simple, personal shortcuts, not as a replacement for building a more intuitive CLAUDE.md and better-tooled agent.
+  - Custom subagents are a brittle solution. Give your main agent the context (in CLAUDE.md) and let it use its own Task/Explore(...) feature to manage delegation.
+  - Use claude --resume and claude --continue to restart sessions and uncover buried historical context
+  - 
 
 
 

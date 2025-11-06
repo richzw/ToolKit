@@ -81,6 +81,13 @@ Fallback or verification → dual-model redundancy (judge + responder)
     - 通信模式传递特定指令，而共享内存模式授予完全的上下文访问权限。为子智能体定义输出模式可确保结构化和可靠的信息交换。
   - https://drive.google.com/file/d/1QGJ-BrdiTGslS71sYH4OJoidsry3Ps9g/view
   - https://docs.google.com/presentation/d/16aaXLu40GugY-kOpqDU4e-S0hD1FmHcNyF0rRRnb1OU/edit?slide=id.p#slide=id.p
+  - building production-ready AI applications through 6 core components:
+   - 𝗔𝗴𝗲𝗻𝘁𝘀: The decision-making brain that orchestrates information flow and adapts strategies dynamically
+   - 𝗤𝘂𝗲𝗿𝘆 𝗔𝘂𝗴𝗺𝗲𝗻𝘁𝗮𝘁𝗶𝗼𝗻: Techniques for transforming messy user requests into precise, machine-readable intent through rewriting, expansion, and decomposition
+   - 𝗥𝗲𝘁𝗿𝗶𝗲𝘃𝗮𝗹: Strategies for chunking and retrieving the perfect piece of information from your knowledge base (semantic chunking, late chunking, hierarchical approaches)
+   - 𝗣𝗿𝗼𝗺𝗽𝘁𝗶𝗻𝗴 𝗧𝗲𝗰𝗵𝗻𝗶𝗾𝘂𝗲𝘀: From Chain of Thought to ReAct frameworks - how to guide model reasoning effectively
+   - 𝗠𝗲𝗺𝗼𝗿𝘆: Architecting short-term and long-term memory systems that give your application a sense of history and the ability to learn
+   - 𝗧𝗼𝗼𝗹𝘀: Connecting LLMs to the outside world through function calling, the Model Context Protocol (MCP), and composable architectures
 - Context Offload
   - 工具分成了 3 层：
     - 第 1 层：函数调用 (Function Calling) 这是最基础的一层，只保留一小组固定的、原子化的函数，比如：读写文件、执行 Shell 命令、搜索文件等。
