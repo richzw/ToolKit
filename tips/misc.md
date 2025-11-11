@@ -497,6 +497,7 @@
     - • Warp Divergence（分支分化）可能导致并行效率下降，通过提高占用率、优化访存方式等可隐藏部分延迟。
   - [一份数据在NCCL/CUDA 框架中的旅程](https://mp.weixin.qq.com/s/LrUuKqcJYavAxbypSElLiQ)
     - 数据包“从 cudaMalloc 地址 → ncclSend → GPU kernel → (IPC 或网络) → ncclRecv → 目标内存”全过程
+  - [How to Think About GPUs](https://jax-ml.github.io/scaling-book/gpus/)
 - [NeighborHash]
   - 场景
     - 只有导入没有commit，过程中没有一致性要求，只需要最终一致性，也就是一个在线分析处理 (OLAP) 系统。我们应用场景的特点是批量点查、无范围查询需求且查询命中率高
@@ -625,4 +626,22 @@
     • Refactoring UI
     • The Design Manual
 - [OpusClip 增长秘诀：如果每个阶段只让我选一件事做](https://mp.weixin.qq.com/s/Wf-rJGrZ0Oe2-vPc_2cvrA)
-  
+  - [Lessons from Growing a B2C](https://prison.josh.mn/lessons)
+    - 极致的用户沟通与信任建设
+      - 永远用可回复邮箱（“noreply@ is stupid”）。邮件末尾固定邀请 “Just reply :)”。
+      - 所有邮件（包括系统通知）都用自嘲幽默的口吻，借此拉近距离、强化品牌人格。
+    - 数据驱动的 On-boarding & Retention 流程
+      - 订阅后 3 天：检测是否观看；若无，主动询问帮助。
+      - 累积观看 n 分钟：发送 NPS（1-10）调查；得分 9/10 时邀请写公开评价。
+      - 2 周内 0 观看：自动提出退款+替代观看方案。
+      - 续费失败或流失：邮件直接询问原因并征求改进意见。
+    - 定价与定位
+      - 高于竞品：用价格筛选更懂技术、愿为品质付费的用户。
+      - 聚焦单一痛点：只做体育，不上通用 IPTV 频道，保证质量而非求大而全。
+    - 退款与口碑策略
+      - 全程 “无条件退款”——哪怕对方已完整使用服务。结果几乎没有诈骗与拒付。
+      - 如产品不适配，主动推荐竞争对手，反而提升信任度。
+    - “黑客式”增长 (Growth Hack)
+      - 利用 Reddit API 实时筛选含 “NBA League Pass”、 “blackouts” 等关键词的帖文（尤其球队子版）。
+      - 把帖子列表推送给现有用户，鼓励他们透明地分享体验+专属推荐链接。
+      - 激励机制：每拉新 1 人，推荐人获 余额，新用户下月减

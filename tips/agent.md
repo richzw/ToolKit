@@ -62,9 +62,8 @@
     - 真正合理的系统，一定是： 快速反应的轻模型做分类和前处理、重模型做主任务、补一个模型做验证或追问。 一个 agent 后面绑定的一定是一个 LLM 团队。
     - For trivial queries → local model (no network call)
     - For structured queries → call DSL → SQL translator
-For complex analysis → call OpenAI / Anthropic / Gemini
-
-Fallback or verification → dual-model redundancy (judge + responder)
+    - For complex analysis → call OpenAI / Anthropic / Gemini
+    - Fallback or verification → dual-model redundancy (judge + responder)
   - 可追溯/可控/可信，是企业愿意用 Agent 的底线
     - 很多人只想着怎么让 agent 能回答，但企业更关心：这句话是从哪里来的？有没有越权？出了错我怎么追责？ AI 要可治理。
   - 最被低估的一点：Agent ≠ Chatbot
@@ -121,10 +120,40 @@ Fallback or verification → dual-model redundancy (judge + responder)
     - 一个好的流程，天然就是一位“上下文架构师”。它通过两大核心机制来对抗遗忘和混乱：
       - 高效的信息压缩：精准的选择性注入
 - [Master multi-agent system](https://drive.google.com/file/d/1WN7o417VOpvQWaV5nNFecEMYqOzEtZlc/view)
-
-
-
-
+- AI 智能体在调用工具时遇到的三大难题：Token 成本、延迟 (latency) 和工具组合的效率
+  - 把“代码执行”和“模型编写的代码” (MCP, Model-Written Code) 结合了起来。它不再让 AI 智能体直接去“调用工具”，而是把这些工具“伪装”成代码 API，让 AI 智能体像程序员一样通过写代码来使用它们。
+  - 把这些“模型编写的代码” (MCP) 工具包打包成代码 API（比如 TypeScript 模块）。AI 智能体可以像程序员一样“导入” (import) 并通过编程来调用它们
+  - 工具的“渐进式发现”：不再一股脑加载所有工具
+    - AI 智能体学会了“按需取用”，通过搜索文件系统或调用 search_tools（搜索工具）函数，只在需要时才加载当前任务相关的工具定义
+  - “数据本地处理”：在把结果喂给大语言模型 (LLM) 之前，先在代码执行环境里把数据处理好（比如筛选、转换、汇总）
+  - 更优的控制流 (Control Flow)：与其让 AI 智能体一步步地“指挥”工具（比如“做完A，再做B”），不如直接用代码原生的循环 (loops)、条件判断 (conditionals) 和错误处理来管理流程。
+  - 隐私保护：敏感数据可以在整个工作流中传递，而完全不进入大模型的“视野”（上下文）
+  - 状态持久化 (State Persistence)：AI 智能体可以把中间结果存成文件，“断点续传”
+  - 可复用的“技能包”：AI 智能体可以把写好的有效代码保存成“可复用函数”（并配上 SKILL .MD 文档）
+- [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+  - Context Engineering → 在整个推理生命周期内，持续策划进入 LLM 上下文窗口的所有 token：
+    - 系统指令 + 工具定义 + MCP 协议 + 检索数据 + 消息历史 …
+    - 目标：在模型固有限制下，找到最小且高信号的 token 集合，最大化期望行为
+  - 为什么必须做上下文工程？
+    - 上下文衰减（context-rot）：随着 token 数量增加，模型回忆上下文细节的准确率下降。
+    - 注意力预算：Transformer 对 n 个 token 形成 n² 关系，长序列时注意力被“稀释”。
+    - 位置插值等技术虽可扩长窗口，但会引入位置理解退化 → “性能梯度而非硬崖”。
+    - 结论：上下文是一种递减边际收益的有限资源，需要精打细算。
+  - 长时域任务三大技术
+    ① 压缩 (Compaction)	当对话接近窗口上限时，总结后重启新窗口	优先召回 → 再压缩；先删除易冗余的“工具 I/O”
+    ② 结构化笔记 (Structured Note-Taking / Agent Memory)	将笔记持久化到外部存储，后续按需检索	TODO 列表、NOTES.md、游戏坐标等；Claude Memory 工具已上线
+    ③ 子智能体架构 (Sub-Agents)	用专门子智能体 + 主控智能体分治上下文	主智能体保持宏观计划，子智能体各自使用干净窗口
+  -  黄金法则
+    - 少即是多 📉不是上下文越多越好，而是相关信息越精准越好
+    - 结构化胜于混乱 📋结构化的上下文比杂乱的信息堆砌更有效
+    - 外部记忆解放内部上下文 💾使用外部存储保存长期信息
+    - 专业化提升效率 🎯多智能体架构中的专业分工优于单一通用智能体
+    - 动态管理优于静态配置 🔄根据任务阶段动态调整上下文内容
+  - Future
+    - 自动化上下文优化：AI 自主决定保留什么信息
+    - 智能压缩算法：更高效的信息提炼
+    - 记忆管理系统：类人的长短期记忆机制
+    - 跨模态上下文：整合文本、图像、代码等多种形式
 
 
 
