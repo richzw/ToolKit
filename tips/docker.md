@@ -744,11 +744,34 @@
   - CI/CD 自动化示例（GitHub Actions）
     –build-arg BUILDKIT_INLINE_CACHE=1
     --cache-from myapp:latest
-
-
-
-
-
+- Dockerfile Best Practices
+  - Use Official and Minimal Base Images
+    - Always start from trusted and official images like ubuntu, alpine, or language-specific ones such as node, python, or golang.
+    - Prefer lightweight base images (e.g., alpine) to reduce image size and attack surface.
+  -  Minimize the Number of Layers
+    - Each Dockerfile instruction (RUN, COPY, ADD) creates a new image layer.
+    - Combine related commands into a single RUN statement using && to reduce layers.
+    - Example:  RUN apt-get update && apt-get install -y python3 && rm -rf /var/lib/apt/lists/* 
+  - Use Multi-Stage Builds
+    - Multi-stage builds help produce smaller and cleaner final images.
+    - They allow you to build and compile dependencies in one stage and copy only necessary files into the final stage.
+    - Example: FROM golang:1.22 AS builder WORKDIR /app COPY . . RUN go build -o main . FROM alpine:latest WORKDIR /app COPY --from=builder /app/main . CMD ["./main"] 
+  - Leverage .dockerignore
+    - Use a .dockerignore file to exclude unnecessary files and directories (like .git, node_modules, tmp) from the build context.
+  -  Order Instructions Efficiently
+    - Place less frequently changed instructions (like installing OS packages) at the top.
+    - Place frequently changed instructions (like copying source code) at the bottom.
+    - This ensures maximum use of Docker’s layer caching, reducing rebuild time.
+  - Use COPY Instead of ADD
+    - Use COPY for copying local files and directories into the image.
+    - Use ADD only when you need additional functionality like downloading files from a URL or extracting compressed archives.
+  - Set a Working Directory
+   - Always define a working directory using WORKDIR instead of chaining paths in commands.
+   - It improves readability and avoids path-related issues
+  - Run as a Non-Root User
+    - Running containers as non-root enhances security and prevents privilege escalation.
+    - Example: RUN adduser -D appuser USER appuser 
+  
 
 
 

@@ -663,7 +663,7 @@
     | 在线离线混部          | 不支持                                                                                  | 支持在线 Pod(LSE/LSR/LS) 和离线 Pod (BE)                                            |
     | hotValue 资源预估     | 支持                                                                                     | 支持                                                                                |
     | 使用率 分母           | 宿主机 Total 资源（不合理）                                                              | Node allocatable（合理）                                                             |
-- 
+
 - [K8s 一条默认参数引起的性能问题](https://mp.weixin.qq.com/s/w6ufHeQqf4I2IygJ_yg9zg)
   - 问题
     - 接口响应超时 接口偶发性超时
@@ -1192,3 +1192,19 @@
   - 三种核心调度机制
     - Affinity/Anti-Affinity 更像“要/不要在同一节点”，
     - TSC(Topology Spread Constraints按比例将 Pod 均匀分布到多个拓扑域) 像“每个域最多差 N 个副本
+- [Intelligent Kubernetes Load Balancing ](https://www.databricks.com/blog/intelligent-kubernetes-load-balancing-databricks)
+  - kube-proxy）方案的痛点
+    - 一次连接决定一生：L4 规则只在 TCP 连接建立时 选定后端，HTTP/2/gRPC 的长连接导致流量倾斜。
+    - 尾延迟高、资源浪费：部分 Pod 过载，部分闲置，需过度扩容。
+    - 算法贫乏：仅 RR / Random；无权重、错误感知、分区感知等策略。
+  - 在单集群内用 “无 sidecar、无 kube-proxy、无 DNS” 的 客户端负载均衡（client-side LB）体系替代 Kubernetes 默认 L4 方案，以优化高并发 gRPC 流量。
+  - watch K8s API（Service / EndpointSlice），生成 xDS ClusterLoadAssign
+  - 在 rpc client 中嵌入 xDS 订阅、健康探测、LB 算法，实现“代理旁路”
+
+
+
+
+
+
+
+

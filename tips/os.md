@@ -1906,7 +1906,11 @@
     - • Chunk 以普通 Linux 文件保存；每 64 KB 计算 32-bit CRC，校验和单独存储。
     - • 心跳周期≈3 s，附带存活状态和 chunk 列表。
     - • 副本复制/迁移在 ChunkServer 之间直接进行；检测坏块后按校验和自行修复。
-
+- [Linux 挂载传播机制原理](https://mp.weixin.qq.com/s/bUCswX89PGKd6KOokxK5CA)
+  - Shared / Slave / Private / Unbindable 四种标记控制挂载事件的复制方向。
+  - /proc/self/mountinfo 是判断传播关系的唯一来源。
+  - 容器场景下应显式设置 mountPropagation 或 --make-private / 避免意外传播。
+  - 内核实现重点：propagate_mount() + peer group 链表 + MNT_* 标志
 
 
 

@@ -338,8 +338,12 @@
     - Use slash commands as simple, personal shortcuts, not as a replacement for building a more intuitive CLAUDE.md and better-tooled agent.
   - Custom subagents are a brittle solution. Give your main agent the context (in CLAUDE.md) and let it use its own Task/Explore(...) feature to manage delegation.
   - Use claude --resume and claude --continue to restart sessions and uncover buried historical context
-  - 
-
+- Claude Code 驱动任务执行 + Codex 深度代码分析与生成 https://github.com/Pluviobyte/Claude-Codex
+  - 多agent协作 https://github.com/jeanchristophe13v/codex-mcp-async
+    - 一个Claude Code作为orchestrator 同时调用gemini-cli看文档，调用2个codex做规划，最后再调用几个cc去执行
+- 真实IP正在“裸奔”！难怪AI总提示“异常流量”
+  - 看看是否存在WebRTC泄露和DNS泄露 https://ipcheck.ing/#/
+  - 代理工具（Clash）一般有个TUN 模式
 
 
 
