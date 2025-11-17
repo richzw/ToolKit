@@ -319,6 +319,10 @@
 - [Claude Agent Skills: A First Principles Deep Dive](https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/)
   - Skills 不是可执行代码：不跑 Python/JS、不起 HTTP server；本质是“注入式指令”
   - 技能（skills）= Prompt 模板 + 对话上下文注入 + 执行环境修改。它们本质上是一段 Markdown（SKILL.md）而非可执行代码，通过“Skill”元工具在运行时注入到 Claude 的上下文中
+  - 什么是Claude Skills？ 简单来说，它是一种Agent能力扩展机制，通过将指令、脚本和资源组织成文件夹（即一个Skill目录），让Agent能够动态发现和加载这些专业知识，从而将通用Agent转化为特定任务的专家。
+  - 核心思想就是——信息分层设计哲学 - 细节分层 (LOD) 与 按需加载
+    - LOD (Level of Detail)，即“细节层次”，是3D游戏渲染中的一项核心技术。它的基本思想是：一个物体离你越远，展示的细节就应该越少
+    - LOD负责管理信息的精度，按需加载负责管理信息的时机。
 - [Claude Code 核心](https://mp.weixin.qq.com/s/7g5DugzATAIX1by4yAYtTg)
   - Agent（主战力） + MCP（能力扩展） + Slash（效率） + Hook（可控 / 自动化）
 - [How I Use Every Claude Code Feature](https://blog.sshh.io/p/how-i-use-every-claude-code-feature)
@@ -344,7 +348,11 @@
 - 真实IP正在“裸奔”！难怪AI总提示“异常流量”
   - 看看是否存在WebRTC泄露和DNS泄露 https://ipcheck.ing/#/
   - 代理工具（Clash）一般有个TUN 模式
-
+- 如何在 Codex CLI 里面用 SKILLs
+  - 在你的项目目录下创建一个 “.claude/skills”目录，如果你不想提交到 git 就把 .claude 加到 .gitignore
+    - 注：也可以是任意其他目录，放在“.claude/skills”目录下有个好处就是 claude code 默认能使用，不需要额外配置。
+  - 把你要用到 skill 复制到“.claude/skills”目录下（可以去 http://github.com/anthropics/skills 这里找现成的）
+  - 如果你需要用到哪个 skill，只需要手动 @ 一下相应的 skill 文件即可，比如：> 请使用 @.claude/skills/artifacts-builder/SKILL.md ，创建一个 whiteboard 项目
 
 
 

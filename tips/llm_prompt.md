@@ -1949,5 +1949,37 @@
   * **纯粹输出：** 最终交付的内容应只有纯粹的文章本身，不包含任何关于指令（如字数要求）或创作过程的元语言。
   ```
 - [Sora 2 Prompting Guide](https://cookbook.openai.com/examples/sora/sora2_prompting_guide)
-
-
+- 提示词经验：不只是在提示词写不让它做什么，还要建议它怎么做
+  - 示例：
+    - ❌ 避免生硬的引导语或过于 AI 化的词，如：本文介绍了…、作者提出了…、原文大意是…、作者坦言… 等。
+    - ✅ 直接切入正题，像和朋友聊天或刚上课点题那样。
+    - ❌ 避免术语堆砌与长难句；避免相邻句用同一词开头；避免空洞套话与过多副词。
+    - ✅ 以“理解成本最小化”为准绳：具体、简洁、连贯。
+    - ❌ 避免使用 Markdown 加粗、大小标题、链接、图片等。
+    - ✅ 使用长推文友好的纯文本格式。
+- [Best practices for prompt engineering](https://claude.com/blog/best-practices-for-prompt-engineering)
+  -  核心原则 (Core Principles)
+    - 清晰明确胜过冗长复杂 (Clarity over Complexity)
+      - 最好的提示词不是最长或最复杂的，而是能够可靠地实现目标并使用最少必要结构的提示词
+      - Claude 4.x 模型对清晰、明确的输出指令反应良好
+    - 精确的指令遵循 (Precise Instruction Following)
+      - Claude 4.x 系列模型会密切关注细节和示例
+      - 模型具有精确的指令遵循能力
+  - 主要技术 (Key Techniques)
+    - 多样本提示 (Multishot Prompting)
+      - 包含 3-5 个多样化、相关的示例
+      - 向 Claude 展示你期望的确切输出格式和风格
+      - 示例应该涵盖不同的场景和边缘情况
+    - 提示链 (Prompt Chaining)
+      - 将复杂任务分解为更小、可管理的子任务
+      - 每个子任务的输出成为下一个任务的输入
+      - 提高整体任务的准确性和可靠性
+    - 角色设定 (Role Prompting)
+      - 使用系统提示词 (system prompt) 是最强大的方式
+      - 通过 system 参数为 Claude 设定角色和行为准则
+      - 帮助建立一致的响应风格和专业知识水平
+    - 提示词优化工具 (Prompt Improver)
+     - Anthropic 提供的自动优化工具
+     - 使用高级提示工程技术自动改进提示词
+     - 测试显示在多标签分类任务中准确率提高了 30%
+- [GPT-5.1 Prompting Guide](https://cookbook.openai.com/examples/gpt-5/gpt-5-1_prompting_guide)
