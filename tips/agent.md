@@ -174,7 +174,9 @@
     | 隔离级别 | 通常共享       | 高度隔离（每用户）  |
     | 信息类型 | 静态权威事实     | 动态用户特定信息   |
     | 读取模式 | 几乎总是工具方式   | 工具方式或静态检索  |
-  
+- [When Software Disappears: The Real Beginning of AI-Native Systems](https://www.entropycontroltheory.com/p/when-software-disappears-the-real)
+  - 一场“从点按钮到用语言表达意图”的认知迁移
+  - 
 
 
 

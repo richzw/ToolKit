@@ -2,6 +2,9 @@
   - Inventing Wheels Is Learning
   - “重新发明轮子”是深度学习和理解的绝佳途径。引用物理学家费曼的话：“我无法创造的，我就不理解”，强调只有亲手尝试构建，哪怕只是一个简化版，才能真正从根本上理解事物
   - 为了洞察而重新发明，为了影响力而重用（Reinvent for insight. Reuse for impact.）
+- [Feeds, Feelings, and Focus:
+  A Systematic Review and Meta-Analysis Examining the Cognitive and
+  Mental Health Correlates of Short-Form Video Use](https://psycnet.apa.org/fulltext/2026-89350-001.html)
 - [Effective learning: Twenty rules of formulating knowledge](https://www.supermemo.com/en/blog/twenty-rules-of-formulating-knowledge)
   - Understand it first.
   - See the whole picture, then learn the parts.
@@ -645,3 +648,17 @@
       - 利用 Reddit API 实时筛选含 “NBA League Pass”、 “blackouts” 等关键词的帖文（尤其球队子版）。
       - 把帖子列表推送给现有用户，鼓励他们透明地分享体验+专属推荐链接。
       - 激励机制：每拉新 1 人，推荐人获 余额，新用户下月减
+- SEO
+  - 首先找关键词: 低竞争 + 高购买意图 + 用户已有品牌认知 如“Webflow alternative cheaper”而非“what is Webflow”）。
+  - 其次制作内容: 创建三种类型的页面
+    - 信息类页面: 写得比竞争对手还好 针对竞品痛点，写得比竞品官网更好（如Wise的PayPal费用计算器页面，抢走竞品流量）。加图表、视频，提升用户体验
+    - 对比页面: 截胡底部漏斗流量  如“Slack vs Microsoft Teams”，深度对比价格/功能/集成，用表格/视频。针对决策阶段用户，转化高。
+    - 替代品页面: 最容易排名,转化率最高  如“Slack alternative”，客观列10个选项（含自家），分析优缺点。竞争小，排名易，意图强。
+  - 最后提高转化: CTA + 互动工具
+  - AI时代被推荐的ROI最高策略：写“Top 10 XXXX in 2025”类Listicle（列表式文章）。核心逻辑是让内容易被AI搜索引擎（如Google）抓取和推荐，适合新站或低权重站点。
+    - 发布平台：优先第三方高权重站点（如LinkedIn、X、Medium、Quora），而非自家低权站点，确保收录和排名，让AI“看见”。
+    - 标题优化：别用“Best CRM”，改成“Best CRM for small creative teams”。避免自夸，精准长尾高转化词，吸引目标用户。
+    - 内容添加：客观事实基础上，融入个人直接体验（如使用心得）。提升独特性，满足“Information Gain”标准（信息增益），易被AI推荐。
+    - 外链策略：大方链接竞争对手。B2B领域无绝对“最好”，目标是进入用户考虑范围；链接权威站提升自身文章权威性，看起来更中立。
+
+

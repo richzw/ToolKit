@@ -1286,6 +1286,10 @@
   return err
   }
   ```
+- Golang HTTP 请求超时与重试
+  - 为什么要做超时控制
+    - 慢速 DoS 放大
+    - ReadTimeout 过长导致“资源利用率倒挂
 
 
 
