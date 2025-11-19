@@ -1160,7 +1160,7 @@
   - 全量 copy + 实时回放 binlog“并行交叉”执行，导致“主键大的行先写，新老行乱序进入同一页”
   - 交叉写入触发“插入点右分裂”的特殊分支
   - 低峰期执行 ALTER TABLE t ENGINE=InnoDB；MySQL 内部重建表，按主键顺序 copy，页重新均匀排布。缺点：无法限速、主从延迟大
-
+- [千万级的大表如何新增字段](https://mp.weixin.qq.com/s/umly5DAFEke-f30LHq4NsA)
 
 
 

@@ -43,6 +43,19 @@
   - Iceberg 广泛的兼容性则可以摆脱厂商锁定。
   - Iceberg 支持多引擎，用户可以根据任务类型选择最合适的工具。
     - 例如，将 Iceberg 与 Snowflake 配对以处理复杂的分析查询（OLAP），与 DuckDB 配对进行轻量级分析。这类组合既节省成本，又不影响灵活性。
+  - [Advancing the Lakehouse with Apache Iceberg v3 on Databricks](https://www.databricks.com/blog/advancing-lakehouse-apache-iceberg-v3-databricks)
+    - With Iceberg v3, deletion vectors, row-level lineage, and the Variant data type are now available on all managed tables
+      -  V2： 支持实时，行级删除 + CDC + 流式更新
+      - V3： 性能飞跃，删除向量 + 新数据类型 + 格式统一
+    - Deletion Vectors：更高效的更新/删除
+      - 行级删除/更新通过“逻辑标记 + 延迟合并”实现。
+      - 物理文件更稳定，减少重写与小文件问题
+    - Row Lineage：行级并发控制
+      - 行级唯一 ID（row-id）是并发控制、审计、回溯、CDC 的基础。
+      - 写入流程中，乐观并发控制可以利用 row-id 做更精细的冲突判定
+    - Variant 数据类型：面向半结构化数据的灵活建模
+      - Variant = 半结构化数据的统一存储抽象 + 查询时结构化（shredding）。
+      - 兼容多格式导入（JSON/CSV/XML），对真实业务杂乱数据友好
 - [表格格式” vs. “文件（存储）格式]
   - Parquet 等文件格式与 Iceberg 等表格格式之间的主要区别在于它们的用途。
     - 文件格式专注于高效存储和压缩数据。它们定义了如何在磁盘或分布式文件系统（如 Amazon S3）中组织和编码表示记录和列的原始字节。
