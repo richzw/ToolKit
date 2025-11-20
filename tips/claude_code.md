@@ -353,6 +353,35 @@
     - 注：也可以是任意其他目录，放在“.claude/skills”目录下有个好处就是 claude code 默认能使用，不需要额外配置。
   - 把你要用到 skill 复制到“.claude/skills”目录下（可以去 http://github.com/anthropics/skills 这里找现成的）
   - 如果你需要用到哪个 skill，只需要手动 @ 一下相应的 skill 文件即可，比如：> 请使用 @.claude/skills/artifacts-builder/SKILL.md ，创建一个 whiteboard 项目
+  - 在 CC 里优雅管理 Skills 的正确姿势是：一律“插件化 + marketplace化”，不要散落的文件。
+    - Anthropic 官方 anthropics/skills 仓库已经给了非常明确的路线：通过 /plugin 把整个仓库当成一个 Plugin Marketplace 来挂载，再按需安装 Skill 套件。
+    - /plugin marketplace add anthropics/skills 命令含义：
+      - 告诉 Claude Code：anthropics/skills 仓库里有 .claude-plugin 配置，可以作为一个插件源。
+      - 之后 /plugin 打开的 UI 里，你会看到一个叫 anthropic-agent-skills 的插件“市场”。
+    - 1. 对于官方 Skills
+      ```
+      # 先从官方插件市场安装 Skills 插件
+      /plugin marketplace add anthropics/skills
+      
+      # 从这个市场里按需安装插件化的 Skill 套件
+      /plugin install example-skills@anthropic-agent-skills
+      
+      # 若有确定的文档处理需求，可以直接安装：
+      /plugin install document-skills@anthropic-agent-skills
+      ```
+    - 2. 对于自定义 Skills
+       - 在你自己的 GitHub org 建一个 org-claude-skills 仓库：
+       - 初始化 .claude-plugin，定义 org-document-skills/org-dev-workflow 等插件。 把你最常用的两三类流程包装成 Skills（可以直接借鉴 skill-creator 模板）
+    - 如何使用？
+       - 安装完之后，Claude Code 会自动把插件里 skills/ 目录下的各个 Skill 注册进“可用 Skills”列表。
+       - 你只需要“自然语言调用”即可，比如： “使用 PDF skill 从这个文档中提取表格：path/to/some-file.pdf” 不需要你手动 /skill xxx，也不需要写什么配置
+
+
+
+
+
+
+
 
 
 
