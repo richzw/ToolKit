@@ -2059,6 +2059,18 @@
       - 需要灵活性：Deep Eval（Python，类单元测试风格）
       - 专注 RAG：Ragas（专门的 RAG 指标）
       - 安全优先：Promptfoo（内置安全测试）
+- [Enhancing Uber’s Guidance Heatmap with Deep Probabilistic Models](https://www.uber.com/en-HK/blog/enhancing-ubers-guidance-heatmap-with-deep-probabilistic-models/)
+  - Uber 为司机提供 “Earnings Heatmap（收益热力图）”，每 10 分钟更新一次，按细粒度空间单元（hex-9 六边形网格）显示“未来一小时单位时间收益 EpH（Earnings per Hour）”的预测。
+  - 预测目标：EpH（Earnings per Hour），细粒度 hex-9 + 时间。
+  - 模型演进：
+    - 1. XGBoost 回归（点估计，MSE）
+    - 2. DNN + Gaussian NLL（单峰高斯，输出 μ, σ）
+    - 3. DNN + GMM（3-mode，高斯混合，输出各 mode 的 w, μ, σ + overall mean/std）
+  - 损失函数：高斯 / 高斯混合负对数似然（NLL）。
+
+
+
+
 
 
 

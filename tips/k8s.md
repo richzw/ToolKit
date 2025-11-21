@@ -1200,7 +1200,7 @@
   - 在单集群内用 “无 sidecar、无 kube-proxy、无 DNS” 的 客户端负载均衡（client-side LB）体系替代 Kubernetes 默认 L4 方案，以优化高并发 gRPC 流量。
   - watch K8s API（Service / EndpointSlice），生成 xDS ClusterLoadAssign
   - 在 rpc client 中嵌入 xDS 订阅、健康探测、LB 算法，实现“代理旁路”
-
+- [AIOps](https://mp.weixin.qq.com/s/cNJYA0XNiyUlBWj8GQUSkg)
 
 
 

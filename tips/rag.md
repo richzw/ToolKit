@@ -1825,7 +1825,30 @@
       - 代码在模型图中定位根因或最优路径
     - (3) Vector Search 只做佐证
       - 对推理得到的 Facts / Insights 再检索原文段落
-
+- [RAG 的评估体系](https://mp.weixin.qq.com/s/nfR53Wv0-LbvW9yzaSjm0w)
+  - 检索评估（Retrieval Evaluation）
+    - Recall; Precision; MRR（Mean Reciprocal Rank）**：衡量“第一个正确答案出现的平均排名” ;**nDCG（Normalized Discounted Cumulative Gain）**：带位置加权的排序指标 
+  - 生成一致性评估（Generation Consistency）
+    - **Faithfulness Score（忠实度）**
+      - 利用 embedding 计算“答案”与“检索材料”在语义空间的相似度
+    - **Groundedness Score**
+      - 判断回答中的每一条结论，是否都能在检索片段中找到依据  
+    - **Factual Consistency（事实一致性）**
+      - 用另一个 LLM 做“自检评估”，判断回答是否自洽、是否编造事实
+    - 典型技术流程示例（以金融场景为例）
+    - 人工评测指标（高风险行业常用）
+  - System Eval
+    - - **Latency（延迟）**
+      - 检索 + 生成全链路响应时间
+      - 用户等待体验的核心指标
+    - **Throughput（吞吐量）**
+      - 高并发下系统 QPS / TPS 与性能稳定性
+    - **Cache Hit Rate（缓存命中率）**
+      - 是否避免重复计算，缓存策略是否有效
+    - **Reproducibility（可复现性）**
+      - 同样输入在无特殊变动时，输出是否稳定、可复现
+    - **Recency（时效性）**
+      - 知识库更新后，系统返回结果是否及时反映最新内容
 
 
 
