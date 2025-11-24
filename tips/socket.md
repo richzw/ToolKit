@@ -1159,6 +1159,6 @@
   - 在 Linux __tcp_close() 中，出现下面两个分支就会主动 tcp_send_active_reset()
     - data_was_unread	关闭时接收缓冲区还有未读数据
     - SOCK_LINGER && !sk->sk_lingertime	SO_LINGER 开启且超时时间=0
-  
+- [网络包的一生](https://mp.weixin.qq.com/s/P33sWPi9PHNEd2M-NIPqww)
 
 

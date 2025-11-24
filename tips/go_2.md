@@ -2450,6 +2450,10 @@
     - iota 是行索引：在一个 const 块中，iota 的值就是它所在的行号（从 0 开始）。每当遇到一个新的 const 关键字，iota 就会重置为 0。
     - 表达式隐式重复：如果一个常量声明没有赋值，编译器会自动重复上一行的表达式，而不是值。
 - [如何编译调试 Go runtime 源码](https://www.luozhiyun.com/archives/506)
+- [后量子时代的防御与 FIPS 的“纯 Go”革命](https://mp.weixin.qq.com/s/FqdMlSntCFyrkHpQtY8LaQ)
+  - https://www.youtube.com/watch?v=YnyeAQblUyA
+  - 默认启用后量子混合密钥交换：升级 Go 即自动获得更强的 TLS 安全性。
+  - 纯 Go FIPS 模块：合规性开关由运维/配置决定，对开发体验几乎无感
 
 
 

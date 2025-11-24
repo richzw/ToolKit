@@ -339,6 +339,7 @@
       - Broker 多副本 / 禁止 unclean 选举
     - 消费	业务未处理完即提交 offset，进程崩溃
       - 消费端手动提交 + 业务幂等
+- [B站消息新架构升级](https://mp.weixin.qq.com/s/MhGLWaaH0MNDM-b0rU8XZQ)
 
 
 
