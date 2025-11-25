@@ -771,7 +771,8 @@
   - Run as a Non-Root User
     - Running containers as non-root enhances security and prevents privilege escalation.
     - Example: RUN adduser -D appuser USER appuser 
-  
+- Container lifecycle
+  - ![img.png](docker_container_lifecycle.png)
 
 
 

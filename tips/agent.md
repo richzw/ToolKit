@@ -176,7 +176,10 @@
     | 读取模式 | 几乎总是工具方式   | 工具方式或静态检索  |
 - [When Software Disappears: The Real Beginning of AI-Native Systems](https://www.entropycontroltheory.com/p/when-software-disappears-the-real)
   - 一场“从点按钮到用语言表达意图”的认知迁移
-  - 
+- 长上下文能力在迅速提升（百万级 token），但“能放”不等于“多放就好”：信息冗余会带来干扰、成本上升与效果下降。
+  - 长上下文在实际应用中有 4 种典型失败模式，需要通过“上下文工程（Context Engineering）”解决。
+  - 在多种上下文管理策略中，**Context Pruning（上下文剪枝）**是 RAG 优化的核心环节：在检索后、生成前精准过滤无关内容。
+  - Naver 的 Provence / XProvence 是专门为 Context Pruning 设计的轻量模型，可同时完成 重排序（rerank）+ 句子级剪枝，并支持多语言版本
 
 
 
