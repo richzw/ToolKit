@@ -180,7 +180,14 @@
   - 长上下文在实际应用中有 4 种典型失败模式，需要通过“上下文工程（Context Engineering）”解决。
   - 在多种上下文管理策略中，**Context Pruning（上下文剪枝）**是 RAG 优化的核心环节：在检索后、生成前精准过滤无关内容。
   - Naver 的 Provence / XProvence 是专门为 Context Pruning 设计的轻量模型，可同时完成 重排序（rerank）+ 句子级剪枝，并支持多语言版本
-
+- [Agents are hard](https://lucumr.pocoo.org/2025/11/21/agents-are-hard/)
+  - LLM 本质还是一个API，除了做一层抽象把各家接口进行统一（openrouter），没有其他任何抽象的需要；
+  - 缓存不太认同，隐式缓存无脑，也很好用；
+  - think tool 是所有做 agent 都会用的高阶技巧，可以看看 anthropic 的 think tool 博客。我打算专门写一篇文章来讨论；
+  - agent 搭配沙盒，用文件系统做上下文是一个非常好的偷懒办法；
+  -  还有 hacker news 的一些讨论
+    - 不应该是 sub-agent 而是 agent as a tool; sub-agent太容易误导人了；
+    - 很多团队都没有 eval 上的基建，或者大家都没有意识到 ，Prompt 工程最重要的一部分就可以可观测，可验证，并且要快。
 
 
 

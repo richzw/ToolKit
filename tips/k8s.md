@@ -1201,7 +1201,8 @@
   - watch K8s API（Service / EndpointSlice），生成 xDS ClusterLoadAssign
   - 在 rpc client 中嵌入 xDS 订阅、健康探测、LB 算法，实现“代理旁路”
 - [AIOps](https://mp.weixin.qq.com/s/cNJYA0XNiyUlBWj8GQUSkg)
-
+- [etcd数据库碎片化](https://mp.weixin.qq.com/s/-otBqDoDbnZYJzuIRYdRfQ)
+  - etcd 后端数据文件高度碎片化，实际有效数据仅百余 MB，但 DB 文件占用 8GB+，触发空间上限，导致 etcd database space exceeded，进而影响整个 K8s 控制面
 
 
 

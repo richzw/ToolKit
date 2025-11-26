@@ -375,7 +375,18 @@
     - 如何使用？
        - 安装完之后，Claude Code 会自动把插件里 skills/ 目录下的各个 Skill 注册进“可用 Skills”列表。
        - 你只需要“自然语言调用”即可，比如： “使用 PDF skill 从这个文档中提取表格：path/to/some-file.pdf” 不需要你手动 /skill xxx，也不需要写什么配置
-
+- [Antigravity Grounded! Security Vulnerabilities in Google's Latest IDE](https://embracethered.com/blog/posts/2025/security-keeps-google-antigravity-grounded/)
+  - 1. **谨慎启用 MCP 服务器与工具**
+    - 默认禁用高风险工具（尤其是具有写、执行、外联能力的）。
+    - 根据实际业务需求最小化工具权限范围。
+  - 2. **尽可能增加 Human in the Loop**
+    - 在 Antigravity 中关闭或减少自动执行（Auto-Execute）：
+      - 关闭终端命令的自动执行；
+      - 对敏感命令、外联操作、文件读写等启用手动审批。
+    - 使用“终端命令白名单”功能，只允许 AI 执行预先审核过的一小部分命令。
+  - 3. **针对隐藏 Unicode 指令进行检测**
+    - 在 CI/CD 中增加对 Unicode Tag Characters 等不可见字符的扫描，自动阻断或告警。
+    - 不要仅依赖人工代码审查来应对提示注入，**视觉上看不到的东西需要自动化工具**来发现。
 
 
 

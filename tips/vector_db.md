@@ -1229,8 +1229,33 @@
     - Adding vector capabilities to existing PostgreSQL applications
 - [wal3: A Write-Ahead Log for Chroma, Built on Object Storage](https://trychroma.com/engineering/wal3)
   - 本质是“本地顺序写 + 后台异步复制到对象存储（S3 及其他
-
-
+- [8-bit Rotational Quantization]
+  - RQ 受 1-bit RaBitQ（SIGMOD 2024）及其 B-bit 扩展（SIGMOD 2025）的启发：
+    - 这些工作展示了“随机旋转 + 二进制/标量量化”的威力，并已在业界落地。
+  - 区别与改动：
+    - RaBitQ 更偏向 IVF 场景，数据向量围绕聚类中心、距离可以批量计算；
+    - RQ 需要适配 **HNSW 单点距离**，因此对 RaBitQ 做了若干简化/优化：
+      - 不做聚类居中（centering）；
+      - 算法实现上更偏向单向量高吞吐的 SIMD 内积。
+    - 与 RaBitQ 的一个主要不同：
+      - RaBitQ 会做**居中（centering）**：先对数据做 k-means 聚类，再量化“向量与其最近聚类中心的差值”，这样量化误差更小。
+      - Weaviate 的实验表明：
+        - 简单居中（如少量 k-means 中心）可以相当于多给量化码增加 1–2 bit 的效果；
+        - 但居中需要训练和维护中心（处理数据漂移），工程复杂度更高；
+        - 对 8-bit RQ 来说，即使不居中也能得到非常高的召回；
+        - 在 4-bit 或 1-bit 压缩下，居中的重要性会显著上升（否则召回损失较大）。
+  - 技术上，8-bit Rotational Quantization 具备以下特点：
+    1. **4x 内存压缩**：
+      - 在典型的 1536 维 OpenAI 向量上，将 5.7 GB 级别压到 ~1.5 GB 级别（100 万条）。
+    2. **明显的距离计算加速**：
+      - SIMD-优化的 8-bit 内积，相比 float32 距离估计约 2.3x 加速。
+    3. **无需训练**：
+      - 无需额外的聚类或学习码本，避免数据漂移带来的维护复杂度。
+    4. **召回接近未压缩**：
+      - 在高维嵌入数据上 recall10@20 几乎 100%，作为 RAG、检索等应用的主力方案足够稳健。
+    5. **工程简洁**：
+      - 编码流程简单（旋转 + 标量量化），容易在现有系统中集成；
+      - 对 HNSW、单向量距离计算场景进行了专门优化
 
 
 
