@@ -1203,8 +1203,12 @@
 - [AIOps](https://mp.weixin.qq.com/s/cNJYA0XNiyUlBWj8GQUSkg)
 - [etcd数据库碎片化](https://mp.weixin.qq.com/s/-otBqDoDbnZYJzuIRYdRfQ)
   - etcd 后端数据文件高度碎片化，实际有效数据仅百余 MB，但 DB 文件占用 8GB+，触发空间上限，导致 etcd database space exceeded，进而影响整个 K8s 控制面
-
-
+- [How Google Does It: Building the largest known Kubernetes cluster, with 130,000 nodes](https://cloud.google.com/blog/products/containers-kubernetes/how-we-built-a-130000-node-gke-cluster/)
+  - 关键是：
+    - 控制平面读路径（内存一致性缓存），
+    - 存储后端（Spanner 替代 etcd），
+    - 调度模型（Job-level + Kueue + Gang Scheduling），
+    - 数据访问链路（GCS FUSE + 区域缓存）。
 
 
 

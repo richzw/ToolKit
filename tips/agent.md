@@ -188,6 +188,11 @@
   -  还有 hacker news 的一些讨论
     - 不应该是 sub-agent 而是 agent as a tool; sub-agent太容易误导人了；
     - 很多团队都没有 eval 上的基建，或者大家都没有意识到 ，Prompt 工程最重要的一部分就可以可观测，可验证，并且要快。
-
+- [10个上下文处理技巧](https://arxiv.org/html/2507.13334v1)
+  - 长上下文 ≠ 简单增大 context window：需要从架构（SSM、Dilated/Linear Attention）、位置编码（RoPE/NTK 插值）、工程优化（FlashAttention、GQA、KV 削减）多层联动。
+  - 自我精炼将成为“默认范式”：通过 Self-Refine / Reflexion / N-CRITICS 等框架，让模型在一次请求内完成多轮“审—改”会是常态。
+- [Introducing advanced tool use on the Claude Developer Platform](https://www.anthropic.com/engineering/advanced-tool-use)
+  - 在发 skills 的时候，针对工具膨胀浪费 token 提出了， Prompt 分层加载/复用，用代码执行&串联api/mcp（manus 把这个叫做上下文卸载）两个方法
+  - 发 opus 的同时，把这两个方法固定到了推理 API 层面，Tool Search Tool，解决工具的发现&懒加载，Programmatic Tool Calling 实现代码执行工具。
 
 
