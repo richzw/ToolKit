@@ -1286,8 +1286,24 @@
       - 到达间隔遵循正态分布（Normal Distribution）
       - 算法对概率密度函数（PDF）在区间 (t, ∞) 上进行积分
       - 计算在 t 时间单位后接收心跳的概率
- 
-
+- [On Idempotency Keys](https://www.morling.dev/blog/on-idempotency-keys/)
+  - 1. UUIDv4 (Random Identifiers) ❌ Not Recommended
+    - How it works: Each message gets a random UUID
+    - Problem: Consumer must store ALL previous UUIDs to identify duplicates
+    - Drawback: Not practical at scale due to storage requirements growing indefinitely
+  - 2. UUIDv7 or ULID (Time-based Identifiers) ⚠️ Better
+     - Structure:
+       - First 48 bits: timestamp
+       - Remaining bits: random component
+     - Advantage: Consumer can detect messages that are "too old"
+     - Limitation: Can't definitively determine if an old message is a duplicate, but can flag it to the producer as unhandleable
+     - Storage: Still requires storing a reasonably-sized subset of keys
+  - 3. Monotonically Increasing Sequences ✅ Best Practice
+     - How it works: Use sequential numbers (1, 2, 3, ...) as idempotency keys
+     - Storage efficiency: Consumer only needs to store one value - the latest processed message ID
+     - Duplicate detection: Any message with ID ≤ latest processed ID is a duplicate
+     - Scalability: The more messages you process, the more attractive this becomes
+     - Space efficiency: No matter how many messages, you only track one number
 
 
 

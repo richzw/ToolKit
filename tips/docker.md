@@ -773,6 +773,7 @@
     - Example: RUN adduser -D appuser USER appuser 
 - Container lifecycle
   - ![img.png](docker_container_lifecycle.png)
+  - ![img.png](docker_container_fs.png)
 
 
 

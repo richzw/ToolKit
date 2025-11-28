@@ -180,7 +180,7 @@
   - 长上下文在实际应用中有 4 种典型失败模式，需要通过“上下文工程（Context Engineering）”解决。
   - 在多种上下文管理策略中，**Context Pruning（上下文剪枝）**是 RAG 优化的核心环节：在检索后、生成前精准过滤无关内容。
   - Naver 的 Provence / XProvence 是专门为 Context Pruning 设计的轻量模型，可同时完成 重排序（rerank）+ 句子级剪枝，并支持多语言版本
-- [Agents are hard](https://lucumr.pocoo.org/2025/11/21/agents-are-hard/)
+- [Agent Design Is Still Hard](https://lucumr.pocoo.org/2025/11/21/agents-are-hard/)
   - LLM 本质还是一个API，除了做一层抽象把各家接口进行统一（openrouter），没有其他任何抽象的需要；
   - 缓存不太认同，隐式缓存无脑，也很好用；
   - think tool 是所有做 agent 都会用的高阶技巧，可以看看 anthropic 的 think tool 博客。我打算专门写一篇文章来讨论；
@@ -188,11 +188,57 @@
   -  还有 hacker news 的一些讨论
     - 不应该是 sub-agent 而是 agent as a tool; sub-agent太容易误导人了；
     - 很多团队都没有 eval 上的基建，或者大家都没有意识到 ，Prompt 工程最重要的一部分就可以可观测，可验证，并且要快。
+  - 选择哪个 Agent SDK：目前更倾向直接使用底层平台 SDK，而不是高层抽象 SDK
+  - 缓存（Caching）：Anthropic 的「显式缓存点」虽然麻烦，但给予了极大的控制力和成本可预期性
+  - 在 Agent 循环中的 Reinforcement（强化： 每次工具调用都是一次插入「额外信息/纠偏指令」的机会
+  - 隔离失败（Isolate Failures）：避免大量失败日志和错误状态污染主上下文
+  - 所有工具/子代理共享一个虚拟文件系统作为「公共状态」
+  - agent 主循环并不直接「对话」，而是通过一个专门的 output tool 向人类输出
+  - Anthropic Claude（Haiku/Sonnet）作为主 agent loop 的工具调用模型 + Gemini 系列做大文档/图像处理
 - [10个上下文处理技巧](https://arxiv.org/html/2507.13334v1)
   - 长上下文 ≠ 简单增大 context window：需要从架构（SSM、Dilated/Linear Attention）、位置编码（RoPE/NTK 插值）、工程优化（FlashAttention、GQA、KV 削减）多层联动。
   - 自我精炼将成为“默认范式”：通过 Self-Refine / Reflexion / N-CRITICS 等框架，让模型在一次请求内完成多轮“审—改”会是常态。
 - [Introducing advanced tool use on the Claude Developer Platform](https://www.anthropic.com/engineering/advanced-tool-use)
   - 在发 skills 的时候，针对工具膨胀浪费 token 提出了， Prompt 分层加载/复用，用代码执行&串联api/mcp（manus 把这个叫做上下文卸载）两个方法
   - 发 opus 的同时，把这两个方法固定到了推理 API 层面，Tool Search Tool，解决工具的发现&懒加载，Programmatic Tool Calling 实现代码执行工具。
+  - 高级工具使用能力，提出了构建大规模 Agent 时的三大技术方向：
+     - Tool Search Tool： 通过 defer_loading 和搜索式加载工具定义，大幅减小工具定义对上下文的占用，并提高工具选择准确率。
+     - Programmatic Tool Calling： 通过让 Claude 写代码来 orchestrate 工具调用，把复杂工作流中的中间数据处理放在代码执行环境中执行，从而：
+       - 减少 token 消耗和延迟；
+       - 显式控制流程，提高复杂场景的可靠性和准确率。
+     - Tool Use Examples： 在工具 schema 中补充多条真实使用示例，向模型传达格式规范、参数关联和使用模式，显著降低参数错误和误用。
+  - 先识别当前 agent 的最大瓶颈：
+    - 上下文被工具定义挤爆 → 优先上 Tool Search Tool。
+    - 中间结果太多污染上下文 → 优先上 Programmatic Tool Calling。
+    - 参数错误/调用错误多 → 优先上 Tool Use Examples。
+  - Tool Search Tool：保证 找到正确的工具，且不拖垮上下文。
+  - Programmatic Tool Calling：保证 高效执行和编排 工具调用。
+  - Tool Use Examples：保证 调用参数和用法正确。
+- [Effective harnesses for long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
+  - 问题背景：长时运行 Agent 的核心难题
+    - 随着 AI 智能体承担跨越数小时或数天的复杂任务，如何让智能体在多个上下文窗口之间保持一致的进展仍然是一个开放性问题
+  - 解决方案：双智能体框架系统 Anthropic 为 Claude Agent SDK 开发了受软件工程实践启发的两阶段智能体框架：
+    - 1. Initializer Agent（初始化智能体）
+      - 使用时机： 第一次会话
+      - 功能： 使用专门的提示词要求模型设置初始环境
+      - 创建的组件：
+        - init.sh 脚本：环境初始化脚本
+        - claude-progress.txt 文件：记录智能体所做工作的日志
+        - 初始 git commit：显示添加了哪些文件的首次提交
+    - 2. Coding Agent（编码智能体）
+      - 使用时机： 每个后续会话
+      - 核心任务：
+        - 进行增量式进展（incremental progress）
+        - 留下结构化更新（structured updates）
+        - 在会话结束时将环境保持在干净状态
+
+
+
+
+
+
+
+
+
 
 
