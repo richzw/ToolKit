@@ -21,6 +21,17 @@
       - 包括主动管理注意力、以终极目标为导向、过滤信息噪声、综合多重视角寻求解决方案，以及在专家意见前保持自主决策，做意见的指挥官
   - [nanochat: The best ChatGPT that $100 can buy](https://github.com/karpathy/nanochat/discussions/1)
     - an end-to-end framework to train, fine-tune, and chat with a small-scale ChatGPT clone
+  - [The Journey of a Token: What Really Happens Inside a Transformer](https://machinelearningmastery.com/the-journey-of-a-token-what-really-happens-inside-a-transformer/)
+    - 原始文本 → tokenizer 切分 → token IDs。
+    - token IDs → 嵌入表查表 → 得到 token 嵌入向量 (e_t)。
+    - 加上位置编码 (p_{\text{pos}}(t)) → 得到带顺序信息的输入向量 (x_t^{(0)})。
+    - 多层 Transformer 堆叠：
+    - 在每层中，先通过多头注意力整合全局上下文，再由前馈网络精炼特征。
+    - 残差与层归一化在各子层中维持表示稳定、训练可行。
+    - 顶层得到当前预测位置 (t^*) 的表示 (h_{t^*}^{(L)})。
+    - 线性输出层将该表示映射为所有词表 token 的 logits。
+    - Softmax 将 logits 转为概率分布 (P(\text{token} = j))。
+    - 根据该分布选择下一 token，续写模型输出。
 - [LLM (ML) Job Interviews ](https://mimansajaiswal.github.io/posts/llm-ml-job-interviews-fall-2024-process/)
 - [基于趋势和季节性的时间序列预测](https://mp.weixin.qq.com/s/Ln4E9iZd3b3EZqeEjNNsag)
   - 时间序列模式

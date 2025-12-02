@@ -1304,8 +1304,14 @@
      - Duplicate detection: Any message with ID ≤ latest processed ID is a duplicate
      - Scalability: The more messages you process, the more attractive this becomes
      - Space efficiency: No matter how many messages, you only track one number
-
-
+- [OOP: the worst thing that happened to programming](https://alexanderdanilov.dev/en/articles/oop)
+  - 编程实践中，OOP（尤其是类为中心的 OOP）带来的问题远多于好处；FP（数据结构 + 函数）在可复用性、类型系统利用、组合性与简单性上全面优于 OOP
+  - 继承：
+    - 是反模式；应避免。
+    - 尤其是单继承语言中，用类型组合/别名/联合来演化模型更灵活、安全。
+  - 多态：
+    - OOP 多态通过继承/接口 + 虚方法调度实现，复杂且与类强绑定。
+    - FP 多态使用代数数据类型、泛型和结构类型，简单而强大，并受类型系统保护。
 
 
 

@@ -1160,5 +1160,22 @@
     - data_was_unread	关闭时接收缓冲区还有未读数据
     - SOCK_LINGER && !sk->sk_lingertime	SO_LINGER 开启且超时时间=0
 - [网络包的一生](https://mp.weixin.qq.com/s/P33sWPi9PHNEd2M-NIPqww)
+  - https://www.0xkato.xyz/life-of-a-packet-in-the-linux-kernel/
+  - 路由决策：ip route get 192.0.2.10
+  - 路由与策略：ip route; ip rule
+  - 下一跳信息：ip neigh show
+  - 防火墙/NAT： sudo nft list ruleset 或 sudo iptables -L -n -v; sudo iptables -t nat -L -n -v
+  - 活跃套接字：ss -tni
+  - 抓包： sudo tcpdump -ni eth0 -e -vvv 'host 192.0.2.10 and tcp port 80'
+  - 队列状态：tc -s qdisc show dev eth0
+  - NIC 状态： ip -s link show dev eth0 ； ethtool -S eth0
+  - 网络栈计数器： nstat -a | grep -E 'InErrors|OutErrors|InNoRoutes|InOctets|OutOctets'
+  - 路径 MTU： tracepath 192.0.2.10（依赖 IPv4 Type 3 Code 4 / IPv6 Type 2 ICMP）
+
+
+
+
+
+
 
 

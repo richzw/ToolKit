@@ -237,6 +237,11 @@
   - Improving performance
     - Memory Access - This can be done with manual memory management and using a custom memory pool.
     - Unrolled SkipList is one which stores multiple elements in each node. Unrolling is designed to give a better cache performance which can depend on the size of the objects which are accessed.
+  - [LSM Tree MemTable 的核心结构 SkipList](https://mp.weixin.qq.com/s/f0f_ny23Wb-cyt2fGQ_B7g)
+    - 在 LSM Tree 中，MemTable 是前台所有写入（Put/Delete）的第一落点，需要同时满足：
+      - 快速写入、低写入延迟
+      - 有序存储，支持 point lookup 与 range scan
+      - 高并发访问能力
 - Quick Sort
   - 答案的任何一个分支都是等概率的
   - ![img.png](data_structure_weight_ball.png)

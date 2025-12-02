@@ -819,6 +819,7 @@
         - 倒排索引支持：实现基于 WAND 算法的倒排索引，同时 Block-Max WAND 算法和图索引的支持也在开发中。
           - WAND的核心思想是利用打分上界（Upper Bound Score）来提前跳过不会进入Top-K的文档，做到高效剪枝
   - Milvus 2.6
+    - [Milvus 2.5到2.6升级官方手把手教程](https://mp.weixin.qq.com/s/cpe8WhP_I9PBKcAvRddstg)
     - [IVF_RABITQ 索引](https://mp.weixin.qq.com/s/jx2Isz0zfcERri3EdXc6jg)
       - 融合了 RaBitQ、IVF 倒排索引、随机旋转变换（Random Rotation）以及后处理优化机制（refinement），在高效压缩和高精度检索之间取得更优平衡。
       - 关于 IVF、RaBitQ 以及精调过程（refinement）过程的一些底层配置参数说明：

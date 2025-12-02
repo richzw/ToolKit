@@ -231,7 +231,11 @@
     - 更适配磁盘块读写模型；
     - 减少随机磁盘 I/O 次数；
     - 兼顾读和写性能。
-
+- [Robust Database Backup Recovery at Uber](https://www.uber.com/en-HK/blog/robust-database-backup-recovery-at-uber/?uclick_id=1710c187-26ed-4c1b-9134-278f616291e7)
+  - Uber 在 Stateful Platform 上构建了 **统一的、技术无关的快照式备份与恢复体系**，核心是：
+    - **Continuous Backup（Time Machine）**
+    - **Backup/Restore Framework + 技术插件**
+    - **Continuous Restore（持续恢复演练与验证）**
 
 
 

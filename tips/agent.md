@@ -231,9 +231,26 @@
         - 进行增量式进展（incremental progress）
         - 留下结构化更新（structured updates）
         - 在会话结束时将环境保持在干净状态
-
-
-
+- [How agents can use filesystems for context engineering](https://blog.langchain.com/how-agents-can-use-filesystems-for-context-engineering/)
+  - 上下文工程 = 在有限窗口中精确选取“刚好够”的信息，常见失败模式有：缺信息、检索不到、过多无用信息，或不会随时间更新。
+  - 文件系统作为统一上下文层：
+    - 可存储无限量上下文；
+    - Agent 通过工具（读/写/编辑/列目录/搜索）灵活操作。
+  - 解决 Token 胀大：
+    - 工具大结果写文件，不塞入对话历史；
+    - 通过 grep/关键字搜索择要读回。
+  - 支撑长流程任务与多 Agent 协作：
+    - 计划、子 Agent 结果、指令集等都写作文件；
+    - 随用随读，减少系统 Prompt 和消息历史负担。
+  - 查找细粒度信息：
+    - 通过 ls/glob/grep/read_file(line_range) 精确定位文件和行；
+    - 特别适用于代码、API 文档、技术参考资料；
+    - 可与语义搜索结合。
+  - 自我学习与自我指令更新：
+    - 把用户反馈与新技能写入文件；
+    - 下次任务中读取，形成持续进化的“指令/技能库”。
+  - 提供 read_file, grep, edit_line 等原子工具。这种设计充分发挥了 LLM 的规划（Reasoning）能力。因为工具是透明且原子的，模型可以自己组合步骤，并根据报错动态调整策略（Self-Correction）。
+  - 
 
 
 
