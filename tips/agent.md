@@ -250,7 +250,13 @@
     - 把用户反馈与新技能写入文件；
     - 下次任务中读取，形成持续进化的“指令/技能库”。
   - 提供 read_file, grep, edit_line 等原子工具。这种设计充分发挥了 LLM 的规划（Reasoning）能力。因为工具是透明且原子的，模型可以自己组合步骤，并根据报错动态调整策略（Self-Correction）。
-  - 
+- [Agents Should Be More Opinionated](https://www.vtrivedy.com/posts/agents-should-be-more-opinionated/)
+  - 产品方应该对工具设计和提示词（prompts）做出强硬决策，为特定任务做到极致，而不是试图支持所有任务
+  - 简化的心智模型： Agent = 有主见的框架 + 模型
+  - 最佳起点：深而窄
+    - 避免两个失败模式：
+    - 1. 宽泛的 Agent - 试图处理太多不同类型的任务，导致每个能力都是 Bug 的表面积
+    - 2. 浅层的 Agent - 不够复杂到需要成为 Agent（如果不需要迭代、判断、多步推理，也许不该是 Agent）
 
 
 
