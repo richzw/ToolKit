@@ -164,6 +164,7 @@
     - kube-apiserver -> kubelet -> dockerd -> containerd (-> containerd-shim) -> runc
     - ![img.png](k8s_pod_creation.png)
 - [limits and requests](https://stackoverflow.com/a/73703128/3011380)
+  - [K8s CPU Limits Deconstructed](https://www.youtube.com/watch?v=jECXV2BdsI8)
   - Best practices for CPU limits and requests on Kubernetes
     - Use CPU requests for everything and make sure they are accurate
     - Do NOT use CPU limits.

@@ -210,8 +210,14 @@
      - 写放大：Compaction 带来额外 IO。
    - Compaction 策略：
      - Size-Tiered vs Leveled，是调参核心。
-
-
+- [How Netflix Built a Distributed Write Ahead Log For Its Data Platform](https://blog.bytebytego.com/p/how-netflix-built-a-distributed-write)
+  -  关键设计原则
+    - 1. 可插拔架构
+      - 首先是可插拔架构，允许 Netflix 在不更改应用代码的情况下切换不同技术（如 Kafka 或 Amazon SQS）。这种灵活性确保团队可以为特定用例选择最合适的底层系统，同时依赖相同的核心框架。
+    - 2. 复用现有基础设施
+      - 另一个原则是复用现有基础设施。Netflix 没有从头构建所有东西，而是在已建立的系统（如 Data Gateway 平台和 Key-Value 抽象）之上构建 WAL。这种方法节省了开发时间，并使新系统自然融入公司更广泛的数据架构。
+    - 3. 生产者与消费者分离
+      - 同样重要的是生产者和消费者之间的关注点分离。由于这些组件独立扩展，Netflix 可以根据流量模式或系统负载调整每个组件。
 
 
 

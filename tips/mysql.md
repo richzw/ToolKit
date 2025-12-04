@@ -1162,7 +1162,15 @@
   - 低峰期执行 ALTER TABLE t ENGINE=InnoDB；MySQL 内部重建表，按主键顺序 copy，页重新均匀排布。缺点：无法限速、主从延迟大
 - [千万级的大表如何新增字段](https://mp.weixin.qq.com/s/umly5DAFEke-f30LHq4NsA)
 - [MySQL 性能压测工具](https://github.com/plantegg/sysbench_report)
-
+- [Improving MySQL® Cluster Uptime](https://www.uber.com/en-HK/blog/improving-mysql-cluster-uptime-part1/)
+  - Uber 通过引入 MySQL Group Replication，在每个集群内构建 三节点共识组（单主模式）+ 可扩展只读副本 的高可用架构：
+    - 主库故障由组内自动选举处理，摒弃对外部健康检查系统的强依赖。
+    - 借助共识协议与内建流控机制，确保数据强一致并维持组内节点健康。
+    - 通过只读副本继续承担大规模读流量，对写性能影响有限。
+  - 基准测试结果表明，新架构仅以 少量写延迟开销 换来了：
+    - 显著缩短的 failover 时间与更高的集群可用性
+    - 更强的数据一致性与对 errant GTID 的防护
+    - 与传统异步方案几乎等同的读性能
 
 
 

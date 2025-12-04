@@ -903,7 +903,14 @@
         - 优化File format v2和Coord Merge 。
         - N-gram 索引 (N-gram Index)：通过将数据拆分为更小的 token（例如 2-gram、3-gram）并对其构建索引来加速文本匹配和正则表达式
         - Minhash：一种局部敏感哈希索引，专门用于大规模数据去重（例如 100 亿个向量），实现相似性去重而非精确哈希比较。这有助于识别和删除近似重复的内容
-  - Milvus 3.0
+    - [Struct Array 如何让多向量检索返回完整实体](https://mp.weixin.qq.com/s/tLzXYB74mPOG2H7aob3Vow)
+      - **Struct Array**  
+        - 让一行记录可以承载一个**业务实体**的所有结构化部分（文本/图片/patch/clip 等的标量 + 向量信息），突破传统“一行一向量”的限制。
+      - **MAX_SIM**  
+        在「向量列表 vs 向量列表」之间做语义级的最大匹配求和，实现：
+        - 语义优先、对顺序和长度不敏感；
+        - 对 query 的每个 token/patch 都有贡献；
+        - 非常适合 ColBERT、ColPali 等多向量模型。
     - [Support Streaming Service in Milvus](https://github.com/milvus-io/milvus/issues/33285)
       - 零磁盘架构（Zero-Disk Architecture） https://zhuanlan.zhihu.com/p/15809814733
   - Error Check list

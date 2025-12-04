@@ -236,8 +236,32 @@
     - **Continuous Backup（Time Machine）**
     - **Backup/Restore Framework + 技术插件**
     - **Continuous Restore（持续恢复演练与验证）**
-
-
+- [PG Waiting for Commit](https://www.postgresql.eu/events/pgconfeu2025/schedule/session/6990-waiting-for-commit/#slides)
+  - 提交延迟分析
+    - 理想情况（50µs 磁盘延迟，200µs 网络延迟）： 总延迟约 360µs（对比本地 50µs） ; 
+    - 云环境（500µs 磁盘延迟，500µs 跨可用区网络延迟）： 总延迟约 1,560µs（对比本地 500µs）
+  - 延迟的重要性
+    - 高争用工作负载受影响：5ms 提交等待 = 每秒仅 200 次更新
+    - 连接池受影响：每增加 1ms 延迟，每 1000 TPS 就需要多 1 个连接
+  - synchronous_commit 的级别
+    - off：仅靠"祈祷"模式
+    - local：可以在崩溃后恢复
+    - remote_write：可以在故障转移后恢复
+    - on：可以在崩溃和故障转移后恢复
+    - remote_apply：读写一致性
+  - 问题诊断方法
+    - 使用 pg_stat_statements 跟踪提交延迟
+    - 关注等待事件：
+      - Io/WalSync：同步 WAL 到本地磁盘
+      - LWLock/WALWrite：等待他人同步 WAL
+      - Ipc/SyncRep：等待备库确认
+    - 使用 pg_wait_sampling 获取高分辨率数据
+  - 解决方案
+    1. 购买更好的存储设备
+    2. 仲裁提交（Quorum Commit）：
+    - 使用多个副本隐藏尾部延迟
+    - 至少需要 2 个副本
+    - 配置示例：synchronous_standby_names = 'ANY 1 (node2, node3, node4)'
 
 
 

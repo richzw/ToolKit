@@ -1671,6 +1671,8 @@
       - 对量化张量的支持有限。ONNX 本身不支持量化张量，而是将它们分解为整数张量和比例因子张量。这可能导致在处理量化模型时质量下降。
       - 复杂架构可能需要为不支持的层使用操作符回退或自定义实现。这可能会在将模型转换为 ONNX 格式时导致性能损失。
 - [Claude Artifacts](https://simonwillison.net/2024/Oct/21/claude-artifacts/)
+  - [Claude soul doc](https://simonwillison.net/2025/Dec/2/claude-soul-document/)
+    - 训练 Claude，包括 SL（监督学习）
 - [Github Spark](https://github.blog/news-insights/product-news/bringing-developer-choice-to-copilot/)
   - Github Spark 和 Copilot 都将支持三种超强的代码模型：
     - Claude 3.5，擅长整个软件开发生命周期的编码任务——从初始设计到错误修复、维护到优化。
@@ -2078,7 +2080,9 @@
     - 2. DNN + Gaussian NLL（单峰高斯，输出 μ, σ）
     - 3. DNN + GMM（3-mode，高斯混合，输出各 mode 的 w, μ, σ + overall mean/std）
   - 损失函数：高斯 / 高斯混合负对数似然（NLL）。
-
+- [A Practical Approach to Verifying Code at Scale](https://alignment.openai.com/scaling-code-verification/)
+  - 自动代码审查被视为一种输出监控（output monitoring）
+  - 精确率（Precision）优先于召回率（Recall）
 
 
 
