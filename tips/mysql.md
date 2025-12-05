@@ -1171,8 +1171,10 @@
     - 显著缩短的 failover 时间与更高的集群可用性
     - 更强的数据一致性与对 errant GTID 的防护
     - 与传统异步方案几乎等同的读性能
-
-
+- [Mysql Full text search](https://mp.weixin.qq.com/s/u_XL26Ho8C0djTipsjAIFg)
+  - 简单搜索用 MySQL FULLTEXT 替代 LIKE '%xx%'，复杂搜索仍然建议上 ES
+  - InnoDB 从 **MySQL 5.6** 开始支持全文检索
+  - 全文索引只能用于 **InnoDB/MyISAM** 表的 **char、varchar、text** 类型列
 
 
 

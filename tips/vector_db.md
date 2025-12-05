@@ -820,6 +820,12 @@
           - WAND的核心思想是利用打分上界（Upper Bound Score）来提前跳过不会进入Top-K的文档，做到高效剪枝
   - Milvus 2.6
     - [Milvus 2.5到2.6升级官方手把手教程](https://mp.weixin.qq.com/s/cpe8WhP_I9PBKcAvRddstg)
+    - [R-Tree空间索引](https://mp.weixin.qq.com/s/neCqyfed0GzV4SeCTQpMdg)
+      - 将地理空间数据（Geometry）与向量检索（Vector Search）有机融合，使 AI 可以在理解语义的同时，理解空间
+      - 基于 R-Tree 的空间索引机制，Milvus 不仅支持高维向量相似搜索，还能执行高效的地理空间查询（如 st_contains、st_within、st_distance 等）
+      - Milvus 的 Geometry 类型不仅支持点（Point），还支持线（LineString）、多边形（Polygon）等复杂空间结构。
+        - Milvus 可以直接存储：商户位置（Point）、配送区域（Polygon）、无人车行驶轨迹（LineString），从单纯的向量数据库，升级为同时支持 空间数据 + 语义向量 的多模态数据库。
+      - 为了 R-Tree 索引提高效率，Milvus 是通过查询区域的 bounding box 与 R-Tree 索引快速筛选。对于用户传入的查询区域不规则时，R-Tree 索引会筛选出一些不符合条件的数据。
     - [IVF_RABITQ 索引](https://mp.weixin.qq.com/s/jx2Isz0zfcERri3EdXc6jg)
       - 融合了 RaBitQ、IVF 倒排索引、随机旋转变换（Random Rotation）以及后处理优化机制（refinement），在高效压缩和高精度检索之间取得更优平衡。
       - 关于 IVF、RaBitQ 以及精调过程（refinement）过程的一些底层配置参数说明：
