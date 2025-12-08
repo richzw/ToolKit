@@ -1210,6 +1210,34 @@
     - 存储后端（Spanner 替代 etcd），
     - 调度模型（Job-level + Kueue + Gang Scheduling），
     - 数据访问链路（GCS FUSE + 区域缓存）。
+- [Kubernetes Pod QoS 原理与实现](https://mp.weixin.qq.com/s/L-PO8RdXiCKUbphsjYlT2w)
+
+  | QoS 类别 | 判定条件 | 说明 |
+  |---------|---------|------|
+  | **Guaranteed** | 每个容器都设置 CPU/Memory 的 Request 和 Limit，且 Request = Limit | 最高优先级保障 |
+  | **Burstable** | 不满足 Guaranteed 条件，但至少有一个容器设置了 Request 或 Limit | 弹性资源需求 |
+  | **BestEffort** | 所有容器都未设置任何 CPU/Memory 的 Request 或 Limit | 无资源保障 |
+  - 只设置 Limit 未设置 Request 时，Kubernetes 会默认 Request = Limit，因此也算 Guaranteed。
+  - OOM Score Adj 配置
+
+   | QoS 类别 | OOM Score Adj | 说明 |
+   |---------|--------------|------|
+   | **Guaranteed** | `-997` | 几乎不会被 OOM Killer 选中 |
+   | **Burstable** | 动态计算 `[2, 999]` | 公式：`min(max(2, 1000 - (1000 * Request / Capacity)), 999)` |
+   | **BestEffort** | `1000` | 最大值，优先被杀 |
+
+  - 实践建议
+    - 核心生产业务：建议使用 Guaranteed，确保在 OOM/Eviction 时“最后才动你”。
+    - 大部分在线 Web/微服务：用 Burstable 更经济，合理设定 Request 以获得足够 CPU 权重与合适的 OOM 保护。
+    - BestEffort： 适合对可靠性不敏感、可随时被杀的任务；
+
+
+
+
+
+
+
+
 
 
 

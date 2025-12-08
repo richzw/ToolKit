@@ -395,7 +395,10 @@
   - Use Progressive Disclosure - don't tell Claude all the information you could possibly want it to know. Rather, tell it how to find important information so that it can find and use it, but only when it needs to to avoid bloating your context window or instruction count.
   - Claude is not a linter. Use linters and code formatters, and use other features like Hooks and Slash Commands as necessary.
   - CLAUDE.md is the highest leverage point of the harness, so avoid auto-generating it. You should carefully craft its contents for best results.
-
+- AI interview cheat
+  - Whisper偷听面试官，Tesseract偷拍屏幕题，Claude两秒写完代码加口语解释，骨传导耳机低声报答案，或者干脆用Cluely的透明浮窗，连共享屏幕都看不到。
+  - Anthropic Interviewer https://www.anthropic.com/research/anthropic-interviewer
+    - https://huggingface.co/datasets/Anthropic/AnthropicInterviewer
 
 
 

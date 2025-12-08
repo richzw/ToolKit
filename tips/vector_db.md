@@ -826,6 +826,24 @@
       - Milvus 的 Geometry 类型不仅支持点（Point），还支持线（LineString）、多边形（Polygon）等复杂空间结构。
         - Milvus 可以直接存储：商户位置（Point）、配送区域（Polygon）、无人车行驶轨迹（LineString），从单纯的向量数据库，升级为同时支持 空间数据 + 语义向量 的多模态数据库。
       - 为了 R-Tree 索引提高效率，Milvus 是通过查询区域的 bounding box 与 R-Tree 索引快速筛选。对于用户传入的查询区域不规则时，R-Tree 索引会筛选出一些不符合条件的数据。
+    - [AiSAQ索引将向量检索从内存卸载到磁盘，在内存涨价的大环境中，极大降低向量检索成本](https://mp.weixin.qq.com/s/2K6C8pM7WEcaobZkKk7pXQ)
+      - DiskANN 是大规模 disk-based ANNS 的代表方案（NeurIPS Big-ANN baseline），核心手段是 PQ 压缩 + SSD 存储。
+        - PQ 用于候选扩展
+          - 将原始向量用 Product Quantization 压缩成短编码（PQ code），距离在 PQ 空间近似计算。
+          - PQ 编码驻留在内存中，用于快速（近似）距离计算，从而降低对 SSD 随机 IO 的需求。
+          - 原始向量（full vector）主要用于最终精排和结果集构建。
+        - Full vector + neighbor list 邻近存储以减少 IO
+          - 搜索过程需要访问两类冷数据：
+            - 邻居列表（neighbor list）——用于扩展候选集。
+            - 原始向量（full vector）——用于精确距离计算/精排。
+          - DiskANN 在磁盘上将 neighbor list 与对应的 full vectors 尽量物理邻近/共置，一次随机读即可拿到扩展候选和精排所需的全部磁盘数据，减少随机 IO 次数。
+        - Beam Search 提升 SSD 利用率
+          - 图搜索是多轮迭代，如果每一轮只访问一个候选点，会导致 SSD 并行读带宽浪费。
+          - DiskANN 使用 beam search：每一轮从候选集中取出多个“当前最优点”，并行发起多条磁盘读请求，从而提高 SSD 带宽利用率、减少总迭代轮数。
+      - AiSAQ
+        - | **PQ 数据落盘** | 将 PQ 编码从 DRAM 迁移到磁盘 |
+        - | **邻近存储扩展** | PQ Codes + Full Vector + Neighbor List 一起存储 |
+        - | **`inline_pq` 参数** | 可调节磁盘用量与 IO 次数的平衡 |
     - [IVF_RABITQ 索引](https://mp.weixin.qq.com/s/jx2Isz0zfcERri3EdXc6jg)
       - 融合了 RaBitQ、IVF 倒排索引、随机旋转变换（Random Rotation）以及后处理优化机制（refinement），在高效压缩和高精度检索之间取得更优平衡。
       - 关于 IVF、RaBitQ 以及精调过程（refinement）过程的一些底层配置参数说明：

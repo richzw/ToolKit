@@ -81,18 +81,35 @@
   - https://drive.google.com/file/d/1QGJ-BrdiTGslS71sYH4OJoidsry3Ps9g/view
   - https://docs.google.com/presentation/d/16aaXLu40GugY-kOpqDU4e-S0hD1FmHcNyF0rRRnb1OU/edit?slide=id.p#slide=id.p
   - building production-ready AI applications through 6 core components:
-   - 𝗔𝗴𝗲𝗻𝘁𝘀: The decision-making brain that orchestrates information flow and adapts strategies dynamically
-   - 𝗤𝘂𝗲𝗿𝘆 𝗔𝘂𝗴𝗺𝗲𝗻𝘁𝗮𝘁𝗶𝗼𝗻: Techniques for transforming messy user requests into precise, machine-readable intent through rewriting, expansion, and decomposition
-   - 𝗥𝗲𝘁𝗿𝗶𝗲𝘃𝗮𝗹: Strategies for chunking and retrieving the perfect piece of information from your knowledge base (semantic chunking, late chunking, hierarchical approaches)
-   - 𝗣𝗿𝗼𝗺𝗽𝘁𝗶𝗻𝗴 𝗧𝗲𝗰𝗵𝗻𝗶𝗾𝘂𝗲𝘀: From Chain of Thought to ReAct frameworks - how to guide model reasoning effectively
-   - 𝗠𝗲𝗺𝗼𝗿𝘆: Architecting short-term and long-term memory systems that give your application a sense of history and the ability to learn
-   - 𝗧𝗼𝗼𝗹𝘀: Connecting LLMs to the outside world through function calling, the Model Context Protocol (MCP), and composable architectures
-- Context Offload
-  - 工具分成了 3 层：
-    - 第 1 层：函数调用 (Function Calling) 这是最基础的一层，只保留一小组固定的、原子化的函数，比如：读写文件、执行 Shell 命令、搜索文件等。
-    - 第 2 层：沙箱实用程序 (Sandbox Utilities) 这一层包含了一些更复杂的工具，Manus 在系统提示词里会直接告诉 LLM，在一个特定的文件夹里有很多预装的命令行工具。
-    - 第 3 层：代码包与 API (Packages and APIs)  LLM 实时编写 Python 代码，通过代码实现更复杂的功能。比如用户想查询某个 API 的数据，可以直接用 Python 写一个函数，fetch API 的数据，并解析成需要的格式。
-  - Manus 也是大量采用“智能体即工具 (agent as tool)”的模式。把子智能体当工具用，比如负责检索是一个子智能体，但是这个子智能体在主 Agent 看来就是一个工具
+    - 𝗔𝗴𝗲𝗻𝘁𝘀: The decision-making brain that orchestrates information flow and adapts strategies dynamically
+    - 𝗤𝘂𝗲𝗿𝘆 𝗔𝘂𝗴𝗺𝗲𝗻𝘁𝗮𝘁𝗶𝗼𝗻: Techniques for transforming messy user requests into precise, machine-readable intent through rewriting, expansion, and decomposition
+    - 𝗥𝗲𝘁𝗿𝗶𝗲𝘃𝗮𝗹: Strategies for chunking and retrieving the perfect piece of information from your knowledge base (semantic chunking, late chunking, hierarchical approaches)
+    - 𝗣𝗿𝗼𝗺𝗽𝘁𝗶𝗻𝗴 𝗧𝗲𝗰𝗵𝗻𝗶𝗾𝘂𝗲𝘀: From Chain of Thought to ReAct frameworks - how to guide model reasoning effectively
+    - 𝗠𝗲𝗺𝗼𝗿𝘆: Architecting short-term and long-term memory systems that give your application a sense of history and the ability to learn
+    - 𝗧𝗼𝗼𝗹𝘀: Connecting LLMs to the outside world through function calling, the Model Context Protocol (MCP), and composable architectures
+  - [Context Engineering for AI Agents: Part 2](https://www.philschmid.de/context-engineering-part-2)
+    - Context Engineering： 为 LLM 设计“合适的信息 + 合适的工具 + 合适的格式”，使其能高效完成任务的系统工程。包含四类操作：
+      - Context Offloading：把信息放到外部系统，而不是一直塞进上下文。
+      - Context Reduction：压缩历史（摘要/精简）。
+      - Context Retrieval：按需动态取回信息（检索/RAG 等）。
+      - Context Isolation：把不同任务/Agent 的上下文隔离开。
+    - Agent Harness： 包在模型外的“控制框架”，负责：
+      - 维护消息历史循环
+      - 执行工具调用（而不是由模型执行）
+      - 实现所有 Context Engineering 逻辑
+      - 模型只负责“推理 + 产出结构化工具调用”。
+    - Context Rot（上下文腐烂）： 上下文窗口没满，但模型性能开始明显下降的现象。
+      - 例如：1M token 上下文的模型，有效高质窗口可能 < 256k tokens。
+    - Context Pollution（上下文污染）： 上下文中充满无关、冗余或相互冲突的信息，使模型推理精度下降。
+    - Context Confusion（上下文混淆）：
+      - 模型分不清：
+      - 指令（system / developer / user）
+  - Context Offload
+    - 工具分成了 3 层：
+      - 第 1 层：函数调用 (Function Calling) 这是最基础的一层，只保留一小组固定的、原子化的函数，比如：读写文件、执行 Shell 命令、搜索文件等。
+      - 第 2 层：沙箱实用程序 (Sandbox Utilities) 这一层包含了一些更复杂的工具，Manus 在系统提示词里会直接告诉 LLM，在一个特定的文件夹里有很多预装的命令行工具。
+      - 第 3 层：代码包与 API (Packages and APIs)  LLM 实时编写 Python 代码，通过代码实现更复杂的功能。比如用户想查询某个 API 的数据，可以直接用 Python 写一个函数，fetch API 的数据，并解析成需要的格式。
+    - Manus 也是大量采用“智能体即工具 (agent as tool)”的模式。把子智能体当工具用，比如负责检索是一个子智能体，但是这个子智能体在主 Agent 看来就是一个工具
 - [Claude 的 Agent Skills ](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview)
   - Skills let you package specialized knowledge into reusable capabilities that Claude loads on demand as agents tackle more complex tasks
   - 本质上是一种“上下文卸载”，把冗长的技能信息移出上下文，按需加载

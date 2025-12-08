@@ -7,6 +7,28 @@
   - 对于更早的数据会进行压缩持久化变成 block 存放到磁盘中。
   - 对于 block 中的数据由于是不会变的，数据较为固定，所以每个 block 通过 index 来索引其中的数据，并且为了加快数据的查询引用倒排索引，便于快速定位到对应的 chunk。
 - [Prometheus TSDB](https://ganeshvernekar.com/blog/prometheus-tsdb-the-head-block/)
+  - 1. Head Block（内存块）
+    - Prometheus的TSDB吸引了很多新的贡献者，Head block是TSDB的内存部分，主要存储最近1-3小时的数据。
+    - 自Prometheus v2.19.0起，不再将所有chunk存储在内存中。当新chunk被切分时，满的chunk会被刷新到磁盘并进行memory-mapped，只在内存中保留引用。
+    - 索引以倒排索引形式存储在内存中。当Head block进行压缩创建持久化block时，Head会被截断以移除旧的chunk，并对索引进行垃圾回收。
+  - 2. WAL（预写日志）和Checkpoint
+     - WAL是数据库中事件的顺序日志。在写入/修改/删除数据之前，事件首先被追加到WAL中，然后再执行相应操作。如果程序崩溃，可以重放WAL中的事件来恢复数据。
+     - 在Prometheus中，WAL仅用于记录事件和启动时恢复内存状态，不参与其他读写操作。
+     - WAL记录分为三种类型：Series记录（序列的标签值）、Samples记录（序列引用和样本列表）、Tombstones记录（用于删除请求）。
+  - 3. Memory Mapping（内存映射）
+    - 当chunk"满"后会被刷到磁盘并进行memory-mapped，这有助于减少Head block的内存占用，同时加快WAL重放速度。
+    - 如果将chunk存储在内存中需要120到200字节，现在替换为24字节（引用、最小时间、最大时间各8字节）。实际场景中可以看到15-50%的内存占用减少。
+  - 4. Persistent Block（持久化块）及索引
+    - 当Head block数据达到chunkRange*3/2时，第一个chunkRange的数据会被转换为持久化block。默认从Head切分的第一个block跨度为2小时。
+    - 磁盘上的block是一个目录，包含固定时间范围的chunk和自己的索引。每个block有唯一的ULID标识。Block中的样本是不可变的，如要添加、删除或更新样本，必须重写整个block。
+    - Posting是系列ID的概念，来源于倒排索引术语。可以将序列视为文档，序列的标签-值对视为文档中的词。
+  - 查询系统
+     - Head block在内存中存储完整的标签-值对映射和所有postings列表，因此访问时无需特殊处理。
+     - Select([]matcher)查询帮助获取匹配matcher描述的序列的原始TSDB样本。matcher指定序列中应匹配的标签名-值组合。
+     - 获取matcher的postings时，不会一次性将所有条目的postings加载到内存。由于索引从磁盘进行memory-mapped，postings会被懒加载迭代和合并。样本迭代器也不是预先全部返回，而是通过迭代器逐个迭代序列。
+  - Compaction（压缩）和Retention（保留策略）
+    - Prometheus使用大压缩和小压缩两种过程。Head Compaction类似于将Head部分持久化到Chunks的过程，此时tombstones会从内存中实际删除。
+    - Compaction是block的合并，实现多个目标：回收标记删除使用的磁盘资源、合并分散在多个block中的重复信息、通过处理不同block间的数据重叠来提升查询处理速度。
 - [时序数据高基问题](https://mp.weixin.qq.com/s/baTvpUXuA594JDUVU0wL5Q)
   - 第一个有效的解法是垂直切分，大部分业界主流时序数据库或多或少都采用了类似方法，按照时间来切分索引，因为如果不做这个切分的话，随着时间的推进，索引会越来越膨胀，最后到内存放不下，如果按照时间切分，可以把旧的 index chunk 交换到磁盘甚至远程存储，起码写入是不会被影响到了。
   - 与垂直切分相对的，就是水平切分，用一个 sharding key，一般可以是查询谓词使用频率最高的一个或者几个 tag，按照这些 tag 的 value 来进行 range 或者 hash 切分，这样就相当于使用分布式的分而治之思想解决了单机上的瓶颈，代价就是如果查询条件不带 sharding key 的话通常是无法将算子下推，只能把数据捞到最上层去计算。

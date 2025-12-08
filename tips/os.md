@@ -1911,7 +1911,13 @@
   - /proc/self/mountinfo 是判断传播关系的唯一来源。
   - 容器场景下应显式设置 mountPropagation 或 --make-private / 避免意外传播。
   - 内核实现重点：propagate_mount() + peer group 链表 + MNT_* 标志
+- [Linux 内存 Watermark 工作机制详解](https://github.com/ForceInjection/linux-from-beginner-to-master/blob/main/kernel/memory_watermark.md)
 
+  | 水位线 | 公式 | 作用 |
+  |--------|------|------|
+  | **WMARK_MIN** | 由 `min_free_kbytes` 转换而来 | 最低水位，触发 direct reclaim/OOM |
+  | **WMARK_LOW** | `MIN + distance` | 中水位，唤醒 kswapd 异步回收 |
+  | **WMARK_HIGH** | `MIN + 2 * distance` | 高水位，kswapd 回收到此后休眠 |
 
 
 
