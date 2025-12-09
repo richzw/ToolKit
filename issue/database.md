@@ -262,14 +262,83 @@
     - 使用多个副本隐藏尾部延迟
     - 至少需要 2 个副本
     - 配置示例：synchronous_standby_names = 'ANY 1 (node2, node3, node4)'
-
-
-
-
-
-
-
-
+- Postgresql 18
+  - [EXPLAIN 新字段：Index Searches](https://www.pgmustard.com/blog/what-do-index-searches-in-explain-mean)
+    - Index Searches 是什么
+      - 在 **Postgres 18** 中，`EXPLAIN ANALYZE` 的索引相关算子（Index Scan / Index Only Scan / Bitmap Index Scan 等）新增一行：`Index Searches: N`。
+      - 这个数字表示：执行该节点时，对**同一棵索引树进行了多少次独立的索引下降（index descent）**。
+      - `Index Searches: 1` 是“普通情况”，只下降一次；`>1` 则意味着使用了多次下降的优化策略。
+    - Index Searches > 1 的两类优化
+      - 1. **IN/ANY 优化（Postgres 17 引入，18 中可见）**
+        - 对 `WHERE col IN (v1, v2, ...)` 这类条件，btree 可以对每个值做一次单独的索引搜索，而不是扫描整个区间。
+        - 在 Postgres 18 的 `EXPLAIN ANALYZE` 中，可以看到 `Index Searches` 等于 IN 列表中值的数量，比如 4。
+        - 以前只能通过时间、缓冲区读（buffers）推断是否用了优化，现在直接可见；统计视图中 `pg_stat_user_indexes.idx_scan` 也在计这些下降次数。 
+      - 2. **btree skip scan（Postgres 18 新增）**
+        - 针对多列索引 `(col1, col2)`，当只对 `col2` 有选择性过滤，而 `col1` 取值较少时，规划器可以对不同的 `col1` 值做多次索引下降，而不是从头到尾扫整棵索引。
+        - 例如：索引 `(four, unique1)`，查询 `four BETWEEN 1 AND 3 AND unique1 = 42` 时，`Index Searches: 3`，分别对应 four=1、2、3 的三次下降，比从 four=1 扫到 four=3 的整个范围要高效得多
+    - 多次 Index Searches 好还是坏？
+      - **理想情况**：有一个“完美匹配”的索引，只需一次下降（`Index Searches: 1`）就能读到最少的缓冲区（buffers），性能最好。
+      - 但为每个重要查询都建一个理想索引成本极高：
+        - 写入放大（更多索引要维护）；
+        - 可能失去原本未建索引列上的 HOT 更新机会；
+        - 额外索引会抢占 `shared_buffers` 空间。
+      - 因此：
+        - 对“普通”或不太重要的查询，多次 Index Searches 往往是利用现有索引的**自动优化**，是好事；
+        - 对**非常关键且愿意专门建索引的查询**，若看到 `Index Searches > 1`，通常说明**存在更优的索引设计（比如列顺序）**。
+    - 实用建议（作者观点）
+      1. **看到 Index Searches > 1 时**：
+        - 对关键查询，检查是否有更合适的索引设计（特别是列顺序）能把它降到 1。
+      2. **总体调优时**：
+        - 仍然把重心放在：行数、过滤比例、buffers、时间上，Index Searches 只是辅助信号。
+      3. **考虑升级到 Postgres 18**：
+        - 许多现有查询在不改 SQL、不改索引的情况下就能自动获益于 skip scan / 多次下降优化。
+        - 新优化可能让“同列不同顺序”的一些索引变得冗余，可以评估是否删掉部分重叠索引，而对读延迟影响仍可接受
+  - [Skip Scan - 摆脱最左索引限制](https://www.pgedge.com/blog/postgres-18-skip-scan-breaking-free-from-the-left-most-index-limitation)
+    - B-tree Skip Scan，它解决了多列 B-tree 索引长期以来的“必须从最左前缀列开始用起”的问题，并简要提到 RETURNING 子句的增强
+    - Skip Scan 能力，使即便缺失前导列的等值条件，也仍然可以利用多列索引
+      - 当查询按索引后面的列（如 customer_id、order_date）做条件过滤，而没有约束最左列（如 status）时：
+        - 优化器可以：
+        - 找出被省略前导列的所有不同取值（如 status 有 pending、active、shipped）。
+        - 把查询逻辑上等价为多个子查询的并集，每个子查询都带上一个具体的前导列值，然后使用现有的索引扫描机制。
+    - Skip Scan 在以下情况最有用：
+      - 前导列基数低（Low Cardinality）
+        - 省略的前导列（如 status、region）只有少数几个不同值（例如 3～5 个）。
+        - 优化器只需对少数前导值执行多次索引扫描，总代价仍远小于顺序扫描。
+        - 若前导列有成千上万种不同值，Skip Scan 成本会暴涨，收益大幅下降。
+      - 索引后面列上有等值条件
+        - 当前实现主要针对后续列存在等值条件的场景（如 customer_id = 123、product_category = 'Category_5'）
+- PG vs Mysql
+  - 索引与存储结构
+    - MySQL（默认指 InnoDB）
+      - 使用 聚簇索引（clustered index） 存储表数据：
+        - 主键索引的 B+ 树叶子节点中，存的是“主键值 + 整行记录（所有列）”。
+        - 因此通过主键查询时，只需一次 B+ 树查找即可拿到整行数据。
+      - 二级索引（secondary index）：
+        - 叶子节点存的是“二级索引键值 + 主键值”。
+        - 查询流程：先通过二级索引找到主键值，再到聚簇索引中根据主键值查找整行数据（第二次 B+ 树查找）。
+    - PostgreSQL
+      - 表是 堆组织表（heap organized table）：
+        - 表数据存放在堆中，物理上基本无序，不按主键或任何索引顺序排列。
+      - 所有 B+ 树索引本质上都是“二级索引”：
+        - 索引中存储的是“键值 + 元组位置（TID/c_tid）”。
+        - 通过索引查到 TID 后，再去堆中做一次“堆访问（heap fetch）”取出整行数据。
+      - 因为更新会产生新版本（MVCC），行在堆中的物理位置可能越来越分散。
+  - 主键类型对索引大小的影响
+    - MySQL（InnoDB）
+      - 所有二级索引的叶子记录中都存有主键值。
+      - 若主键使用 UUID 等“又长又随机”的类型：
+      - 所有二级索引都会变“胖”，占空间更大，读 I/O 也增加。
+    - PostgreSQL
+      - 二级索引中存的是 TID（指向堆的定位信息），大小固定，不随主键列类型变化。
+      - 因此主键是 UUID 对二级索引体积影响不大。
+  - 主键范围查询
+    - MySQL
+      在主键聚簇索引上：先查到起点 PK=1，然后沿叶子链表顺序扫描到 PK=3。
+      叶子节点本身包含完整行数据，顺序范围扫描特别高效。
+    - PostgreSQL
+      在主键 B+ 树索引（其实也是普通 btree 索引）上做范围扫描，得到一串 TID。
+      然后对这些 TID 逐个做堆访问，堆中的行可能分布在多个页面上，且更新较多时更分散。
+      对写频繁表，这是一个弱点；通过设置合适 FILLFACTOR（填充因子），预留页面空间，可增加在同一页面内作 HOT 更新的概率，减缓碎片
 
 
 

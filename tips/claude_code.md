@@ -399,10 +399,27 @@
   - Whisper偷听面试官，Tesseract偷拍屏幕题，Claude两秒写完代码加口语解释，骨传导耳机低声报答案，或者干脆用Cluely的透明浮窗，连共享屏幕都看不到。
   - Anthropic Interviewer https://www.anthropic.com/research/anthropic-interviewer
     - https://huggingface.co/datasets/Anthropic/AnthropicInterviewer
-
-
-
-
-
+- 后端代码，可以尝试用伪代码去提示词，试试TDD，先写测试代码，再去实现
+  - 先和 code agent 在 plan 模式下把业务用 plantuml/mermaid 用 uml 或者 ddd 的语言沟通明白。
+- [CC](https://blog.cosine.ren/post/my-claude-code-record-2)
+  - 新功能从 0 到 1
+    - 使用 Claude Code 的 Plan Mode，让模型只输出“变更计划（哪些文件、改动点、预期 diff）”，先不写代码。
+    - ClaudeCode 的 Plan Mode 会生成计划，并询问一些你可能没讲清楚的地方
+    - 补充并 Review 计划完毕后让他按计划生成代码，落到本地跑编译与最小样例。
+    - 再次要求模型自检：列出潜在失败场景、边界条件和建议测试用例。
+  - BugFix
+    - 喂给他报错日志/最小复现工程。
+    - 让模型列出“定位假说清单、验证步骤、最小改动方案”。
+    - 实现、自检
+  - 重构/迁移
+    - 同样 Plan Mode 描述重构需求，让其生成文档计划等
+    - 让模型先写 codemod，只在小部分上试跑。
+    - 观察 diff，定义切分点和随时可回滚的边界。
+    - 分批推进，并进行回归测试。
+  - 模型与工具的选型与切换
+    - 重要的架构设计/大重构：用强模型（质量优先）。
+    - 批量生成测试/样例：用便宜模型（成本优先）。
+    - 读 log / 写小脚本/摘要：用更快模型（速度优先）。
+    - 小模型可以用 Plan Mode 先生产 “变更计划 + 验收用例” 的 PRD，spec 驱动开发，而大模型负责实现。
 
 

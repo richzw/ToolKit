@@ -628,6 +628,18 @@
     • Practical UI（Adham Dannaway）
     • Refactoring UI
     • The Design Manual
+  - [10 Key Website Design Trends for 2025 and Beyond](https://onenine.com/website-design-trends/)
+    - Dark Mode Design（暗色模式设计）
+      - 使用暗背景与浅色文字，已从「可选」变为许多用户的默认期待。 技术要点：
+       - 避免纯黑 #000000 搭配纯白 #FFFFFF，用深灰（如 #121212）与偏暖白以减轻视觉疲劳，并满足 WCAG AA 4.5:1 对比度要求。
+       - 使用 CSS 媒体查询 prefers-color-scheme 自动根据系统浅色/深色偏好切换主题。
+       - 用 CSS 变量集中管理色板，只需在媒体查询内改变量值即可切换明/暗主题。
+    - Minimalist & Clean Design（极简与干净设计）
+      -「少即是多」，通过大量留白、有限配色、简洁排版，把注意力集中在核心内容上，同时提升加载速度与可读性
+    - Micro‑interactions & Animation（微交互与动画）
+      - 通过小而快的动画反馈，让界面「有生命感」并帮助用户理解系统状态
+    - Responsive & Mobile‑First Design（响应式与移动优先）
+      - 从最小屏幕开始设计，再向上渐进增强，以适应移动流量主导的现实，并符合搜索引擎的移动优先索引策略
 - [OpusClip 增长秘诀：如果每个阶段只让我选一件事做](https://mp.weixin.qq.com/s/Wf-rJGrZ0Oe2-vPc_2cvrA)
   - [Lessons from Growing a B2C](https://prison.josh.mn/lessons)
     - 极致的用户沟通与信任建设
@@ -662,7 +674,10 @@
     - 外链策略：大方链接竞争对手。B2B领域无绝对“最好”，目标是进入用户考虑范围；链接权威站提升自身文章权威性，看起来更中立。
 - [区块链技术与应用](https://mp.weixin.qq.com/s/q18mt9FHtr_gqw59UNgPFQ)
   - 从 ETH 历史与 PoS 架构、账户与状态模型、MPT 数据结构，到 PoS 共识细节（LMD‑GHOST + Casper FFG）、智能合约执行与 Gas 经济，再到 ERC‑20 代币及底层存储布局。
-
+- Test Methods
+  - Property-Based Testing (PBT) - 基于属性的测试
+  - Deterministic Simulation Testing (DST) - 确定性模拟测试
+  - Model-Based Testing (MBT) - 基于模型的测试
 
 
 
