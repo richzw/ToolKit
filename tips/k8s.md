@@ -315,6 +315,7 @@
     - GPU 类型的镜像，用于启动 Ray Cluster 的 Worker 节点
 - [Ray Flow Insight](https://mp.weixin.qq.com/s/KehYVdkdEC-9H7jaDMIlow)
 - [Ray Data分布式数据处理原理](https://mp.weixin.qq.com/s/FVAFt3SS52leW9ie5njfAQ)
+- [Ray deployed on SageMaker HyperPod with Amazon EKS orchestration](https://github.com/anyscale/terraform-kubernetes-anyscale-foundation-modules/tree/main/examples/aws/eks-hyperpod-new_cluster?utm_source=instagram&utm_medium=organicsocial&utm_campaign=reinvent&utm_content=github)
 - [Uber’s Journey to Ray on Kubernetes: Ray Setup](https://www.uber.com/en-HK/blog/ubers-journey-to-ray-on-kubernetes-ray-setup/?uclick_id=1285ecf2-fbc7-4421-a3e7-f3a120dea10a)
   - [Resource Management](https://www.uber.com/en-HK/blog/ubers-journey-to-ray-on-kubernetes-resource-management/)
 - [K8sGPT](https://github.com/k8sgpt-ai/k8sgpt)
@@ -1230,7 +1231,10 @@
     - 核心生产业务：建议使用 Guaranteed，确保在 OOM/Eviction 时“最后才动你”。
     - 大部分在线 Web/微服务：用 Burstable 更经济，合理设定 Request 以获得足够 CPU 权重与合适的 OOM 保护。
     - BestEffort： 适合对可靠性不敏感、可随时被杀的任务；
-
+- [集群 Etcd 拆分](https://mp.weixin.qq.com/s/mdrxKxmgdkZWqxP8T_xeCw)
+  - Etcd 拆分实践：将 Pods 等高频资源拆分到独立 Etcd 集群，配合自动化迁移流程，解决存储膨胀导致的性能衰减问题。
+  - 大规模 K8s 服务能力建设：通过 KoM 网关、CELL 化隔离、KCS 控制器框架、KubeSpeed/TKP/Lunettes 等自研能力，使控制面和容器交付既稳又快。
+  - 零侵入 API Server 内存优化：基于「按资源分组路由 + 按需启用 Watch Cache」的多 APIServer 架构，在不改业务接入方式的前提下，单集群 API Server 内存平均下降约 50%，Etcd CPU seconds 降低约 40%。
 
 
 

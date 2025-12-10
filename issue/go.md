@@ -1291,7 +1291,7 @@
     - 慢速 DoS 放大
     - ReadTimeout 过长导致“资源利用率倒挂
 - [runtime/secret](https://mp.weixin.qq.com/s/vN5_mlFkwtNWBPvKJaynIA)
-
+- [Using Docker to deal with cgo build complexity](https://www.dolthub.com/blog/2025-11-21-easy-cgo-builds-with-docker/)
 
 
 
