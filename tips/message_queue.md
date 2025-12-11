@@ -340,9 +340,23 @@
     - 消费	业务未处理完即提交 offset，进程崩溃
       - 消费端手动提交 + 业务幂等
 - [B站消息新架构升级](https://mp.weixin.qq.com/s/MhGLWaaH0MNDM-b0rU8XZQ)
-
-
-
+- [Kafka 性能调优：linger.ms 和 batch.size 的最佳实践](https://mp.weixin.qq.com/s/9jMm1560oqsRRlrl8TBCsw)
+  - Kafka 4.0 于 2025-03-18 正式发布，同时将 Producer 参数 linger.ms 的默认值从沿用多年的 0 ms 调整为 5 ms。
+  - linger.ms 与 batch.size 决定了 Producer 端 RecordBatch 的大小以及 ProduceRequest 的发送时机；两者并不是“越小延迟越低”，需要结合 Broker 串行处理模型 来综合权衡。
+  - Kafka Broker 对同一 TCP 连接上的请求采用“严格按序、单请求在处理”的模型：一次只处理一个请求，后续请求在队列中等待。
+  - 如果 Producer 频繁发送很多小的 ProduceRequest，这些请求会在 Broker 侧串行排队，整体平均生产延迟反而上升；适当增大 linger.ms 与 batch.size，在客户端侧攒批，把在途请求数控制得较低，更有利于降低延迟
+  - linger.ms 给出“时间上限”，batch.size 给出“空间上限”；任一先达到就触发发送。
+    - 增大两者值 ⇒
+      - 批更大 → 请求数更少 → Broker CPU 与网络开销降低，吞吐更高；
+      - 但记录在 Producer 端等待攒批的时间变长，单条消息的排队时间上升。
+    - 过小 ⇒
+      - 请求数量显著上升，Broker 端排队变多；
+      - 在单连接串行模型下，反而可能拉高平均生产延迟。
+  - 定向配置建议：
+    - linger.ms >= 服务端处理耗时。 
+    - batch.size >= （单个客户端最大写入吞吐量） * （linger.ms / 1000） / （Broker 数量）
+    - 建议将 batch.size 设置得尽可能大（例如 256K） 
+      - linger.ms 是基于服务端的平均生产延迟来设定的。一旦服务端出现性能抖动（Jitter），更大的 batch.size允许我们在单个 RecordBatch 中积攒更多数据，从而避免因为拆分成多个小请求发送而导致整体延迟升高
 
 
 

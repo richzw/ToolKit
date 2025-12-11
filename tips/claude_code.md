@@ -429,7 +429,9 @@
     - 任务拆得足够小（小函数、小类、小变更）；
     - 模型的每次输出都当作 PR（pull request）；
     - 由人类做严格的代码审查和测试。
-  - 
+- CC Attention
+  - Claude Code with --dangerously-skip-permissions
+  - Run on entire home directory. 
 
 
 
