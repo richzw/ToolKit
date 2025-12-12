@@ -916,11 +916,14 @@
           - Decay Function 允许用户在获取初步的搜索候选集之后，根据每个条目的时间戳信息，对其原始相关性得分进行调整。
         - 查询抽样 (Query Sampling)：允许从集合中抽取数据以评估搜索召回率和准确性，无需预先存在的基础事实数据集
       - 架构优化：
-        -  引入Tiered Storage数据冷热分层，平衡性能与成本；
+        -  引入Tiered Storage数据冷热分层，平衡性能与成本；https://mp.weixin.qq.com/s/82676CuW5hMh-tXt_Il8wQ
            - 这是一项标志性功能，允许您将热数据和冷数据分离，并在对象存储之上提供一个缓存层
            - 对于长时间未访问的冷数据，系统可基于 LRU 算法主动卸载，以腾出内存资源。
            - 同时保持热数据性能与 HNSW 或 DISKANN 类si
            - 主要特性包括延迟加载（Lazy Load）、部分加载（Partial Load）和基于 LRU 的缓存逐出（LRU-based Cache Eviction），实现“先元后数、按需拉取、自动回收”的高效流程。
+             - Lazy Load（延迟加载）：load 阶段只加载元数据。
+             - Partial Load（部分加载）：按字段 / 块 / segment 只加载“查询真正需要”的数据。
+             - LRU-based Cache Eviction（LRU 缓存淘汰）：按最近最少使用策略自动腾挪缓存
         - Streaming Service增强实时向量处理能力；
         - 支持100k Collection；
         - 采用Woodpecker云原生日志系统；

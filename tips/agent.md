@@ -295,8 +295,31 @@
     - 从范围极其明确、受控的子任务入手（narrow scope），而不是一开始就做“万能 Agent”。
     - 保持短链路 + 人类在环，优先确保每一步结果的可预测性与可审查性。
     - 在小范围、高可靠的场景中逐步积累员工信任，然后再扩展功能与自治程度。
-
-
+- [Agent in Production](https://randomarea.com/measuring-agents-in-production/)
+  - https://www.youtube.com/watch?v=TledrLrVUQI
+  - Agent = 模型 + 工具 + 循环（loop）
+  - - **Context Engineering 的范围更大**
+  - 现在 Agent 是 **多轮 API 调用 + 工具调用 + 记忆管理** 的系统，Context Engineering 需要考虑：
+    - System prompt / user message 的设计。
+    - 工具列表：有哪些工具？名字是什么？描述是什么？返回数据结构是什么？
+    - 记忆策略：上下文窗口满了之后怎么办？如何压缩（compaction）？
+    - 如何避免在长对话中质量下降（context rot）？
+    - 如何利用 prompt caching 降低成本和延迟？
+  - **System Prompt 的“金发姑娘区（Goldilocks Zone）”**
+    - **过于具体**的坏味道：
+      - prompt 像伪代码，充满 if-else，编号列表极长；
+    - **过于模糊**的问题：
+      - 三句空泛说明，模型不知道你要什么结果。
+    - 建议：
+      - 第一次上线时宁可**稍微模糊一点**，通过真实运行和用户反馈再逐步加入具体规则；这样能看出哪些新增指令真正起作用。
+  - **上下文窗口与 Context Rot**
+    - Claude API 会在超过最大 token（如 200K）时直接报错；但 **早在 50K–150K** token 区间，某些任务就会逐渐退化，这种现象被称为 **“context rot”**
+    - 因此：
+      - 不能只想着“窗口大就全塞进去”；
+      - 放入上下文的内容应 **高信号 / 低噪声**，避免无关细节干扰模型。
+  - **Prompt Caching 意识**
+    - 若每次调用中，system prompt + 工具描述 + 历史信息大部分保持不变，只是尾部追加少量新内容，底层可以对前缀做缓存，显著降低成本 & 延迟。
+    - 反之，频繁改写 system prompt / 工具列表，等于“打碎缓存”，浪费钱也变慢
 
 
 
