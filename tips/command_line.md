@@ -63,7 +63,36 @@
   - 除了隧道，ssh 还支持 chain，写在配置里非常简单，加一行 ProxyJump foo 的意思是这个 host 通过配置里的另一个 host foo 的隧道连接
   - ssh -w 可以创建tun，自己写脚本就可以建VPN了 proxycommand 非常强大，曾经用这个走squid 穿防火墙
     - authorized_keys的key前面是可以加配置的，比如限定from 的IP，给不给pty 
-
+- [grep组合](https://mp.weixin.qq.com/s/ZrGsGvccwMYPS9fvSJXFCQ)
+  - 捕获完整异常堆栈（事后分析）
+    - grep -A50 "NullPointerException" application.log | less
+    - 通过 -A N 输出匹配行后的 N 行，尽量覆盖堆栈深度；用 less 进行翻页与二次搜索。
+  - 实时监控异常 + 保留上下文（线上实时）
+    - tail -f application.log | grep -Ai30 "ERROR\|Exception"
+    - 将 tail -f 的实时输出交给 grep，并试图用 -A30 保留后续上下文，同时用 -i 忽略大小写，\| 组合多关键词。
+  - 不解压直接搜压缩历史日志
+    - zgrep -H -A50 "OutOfMemoryError" *.gz
+    - 通过 zgrep 直接在 .gz 中搜索，并用 -H 显示文件名便于溯源。
+  - 异常趋势统计（频次/排序）
+    - grep -c "ConnectionTimeout" *.log | sort -nr -t: -k2
+    - 用 grep -c 得到“每个文件匹配行数”，再按计数排序，用于发现异常在哪些文件/时间段更集中。
+  - 进阶参数与反向过滤
+    - “上下文矩阵”（图示）强调 -A/-B/-C 控制上下文范围
+    - grep -v "健康检查\|心跳" app.log | grep -A30 "异常"
+  - 生产实战进阶：关联分析/性能优化/正则选择
+    - grep -C10 "2023-11-15 14:30" app.log | grep -A20 "事务回滚"（按时间窗口找关联）
+    - grep -A40 "traceId:0a1b2c3d" service*.log（按 traceId 串联分布式链路）
+    - grep -m1000 "ERROR" large.log（限制匹配数量，避免刷屏/加快定位）
+    - grep --binary-files=text "异常" binary.log（把二进制当文本处理）
+    - grep -E "Timeout\|Reject\|Failure"（扩展正则）
+    - fgrep -f patterns.txt app.log（固定字符串匹配提升性能）
+  - 扩展工具链：wc/awk/sed 与组合题
+    - grep "ERROR" app.log | wc -l（计数）
+    - grep "Exception" app.log | awk -F':' '{print $4}' | sort | uniq | wc -l（统计“异常类型数量”的一种写法）
+    - awk '$9 != 200 {print $1}' access.log | sort | uniq -c | sort -nr | head -20（Nginx 非 200 的来源 IP TopN）
+    - sed -n '/2023-11-15 14:00:00/,/2023-11-15 14:10:00/p' app.log（按时间段截取）
+    - sed 's/\([0-9]\{3\}\)[0-9]\{4\}\([0-9]\{4\}\)/\1****\2/g' app.log（手机号脱敏）
+    - “每分钟超时数”的组合（grep+sed+sort+uniq）
 
 
 

@@ -219,7 +219,9 @@
     - 3. 生产者与消费者分离
       - 同样重要的是生产者和消费者之间的关注点分离。由于这些组件独立扩展，Netflix 可以根据流量模式或系统负载调整每个组件。
 - [ETL 到流式计算](https://mp.weixin.qq.com/s/vmZNxqYQLDDx-N5FDn1ajw)
-
+- [From Batch to Streaming: Accelerating Data Freshness in Uber’s Data Lake](https://www.uber.com/en-HK/blog/from-batch-to-streaming-accelerating-data-freshness-in-ubers-data-lake/)
+  - Uber 如何将数据湖的摄入（ingestion）从传统批处理（Spark batch）迁移到基于 Apache Flink 的流式处理，以显著提升数据新鲜度、降低成本，并在 PB 级规模上实现可运维、可扩展
+  - 
 
 
 

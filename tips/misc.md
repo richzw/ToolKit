@@ -678,7 +678,8 @@
   - Property-Based Testing (PBT) - 基于属性的测试
   - Deterministic Simulation Testing (DST) - 确定性模拟测试
   - Model-Based Testing (MBT) - 基于模型的测试
-
+- 真实 IP 暴露的真正原因：PTR 记录（反向解析）
+  - IP 之所以能被 Censys 等扫描到，很可能是因为 IP 反向解析（PTR rDNS） 暴露了域名； 给 Droplet 起的名字是一个 有效的 FQDN（例如 example.com）
 
 
 

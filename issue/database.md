@@ -339,6 +339,18 @@
       在主键 B+ 树索引（其实也是普通 btree 索引）上做范围扫描，得到一串 TID。
       然后对这些 TID 逐个做堆访问，堆中的行可能分布在多个页面上，且更新较多时更分散。
       对写频繁表，这是一个弱点；通过设置合适 FILLFACTOR（填充因子），预留页面空间，可增加在同一页面内作 HOT 更新的概率，减缓碎片
+- [PostgreSQL 19](https://mp.weixin.qq.com/s/Q9qEKwVDftyGjB4BgIdyJw)
+  - 并行 TID Range Scan（并行 ctid 范围扫描
+    - 什么是 Tid Range Scan（ctid 范围扫描）
+      - ctid 是 PostgreSQL 的系统列，表示元组（tuple）在堆表中的物理位置（页号 + 页内偏移）。
+      - Tid Range Scan 是一个专门的执行器节点：当 WHERE 子句中出现对 ctid 的“范围条件”时，规划器可生成 Tid Range Scan 路径，对指定的 TID/页面范围做更“定向”的堆扫描。
+    - Tid Range Scan 本身无法并行，因此在大表范围过滤查询里，规划器容易遇到冲突：
+      - Tid Range Scan：I/O 更精准（只读目标范围块），但不并行（CPU 并发差）。
+      - Parallel Seq Scan：CPU 可以并发，但会扫描范围外的块，I/O 浪费。
+    - PG19（master）修复：并行化 + chunk 衰减分配
+      - Tid Range Scan 允许并行化：把需要扫描的块范围像 Parallel Seq Scan 那样“分发”给 worker。
+      - chunk 分配采用“逐步衰减到 1 block”的策略：开始分大块减少共享状态/锁竞争；越接近结束 chunk 越小，避免只剩一个 worker 扫尾导致其他 worker 空转，达到更好的负载均衡
+
 
 
 
