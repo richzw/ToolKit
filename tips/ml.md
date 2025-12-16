@@ -132,6 +132,11 @@
     - 使用 Spread 调度策略，可将 Pod 尽量分散到不同的节点或者 GPU 卡上，当一个节点或者 GPU 卡出问题，并不影响其他节点或者 GPU 卡上的业务，保障高可用性
     - Binpack/Spread 双重调度可将节点和 GPU 卡不同层级的调度策略进行组合使用，灵活支撑不同场景下资源的使用情况
     - 多卡共享策略 - 单个容器可使用同一节点上的多张 GPU 卡共同提供算力和显存资源，打破同一个容器使用算力/显存局限于一张 GPU 卡的束缚，超过整卡资源可随心分配。
+- [Google TPU 101](https://mp.weixin.qq.com/s/0PqT8cCfFiQlnKfhIVWN6g)
+  - TPU 的核心计算单元：MXU + Systolic Array（文章回顾）
+    - TPU 的矩阵乘由 **MXU（Matrix Multiply Unit）**承载，底层是 systolic array（脉动阵列）：
+    - 阵列元素做 MAC（乘加）
+    - 数据沿行/列以固定节奏推进、在阵列内高复用
 - [Prompt Engineering Guide](https://www.promptingguide.ai/techniques/knowledge)
   - Q
     - Prompt 1: [Problem/question description] State the answer and then explain your reasoning.

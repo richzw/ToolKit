@@ -273,6 +273,14 @@
 - [认知偏差知识手册](https://s75w5y7vut.feishu.cn/docs/doccn3BatnScBJe7wD7K3S5poFf)
   - https://alanhg.github.io/cognitive-bias/
 - [设计原理](https://rpdc.xiaohongshu.com/52-design-principles)
+  - [How to Make Interfaces Clear, Pleasant, and Not Annoying](https://medium.muz.li/how-to-make-interfaces-clear-pleasant-and-not-annoying-b3cff61e030f)
+    - 首先要有**良好的构图（Composition）**。这不仅仅是把元素摆放整齐，而是要让它们之间形成一种视觉上的平衡，让布局在第一眼就能传达正确的信息。
+    - 接着是**层级（Hierarchy）**。层级是设计的秩序感，决定了用户先看到什么、后看到什么。好的界面永远有“主角”和“配角”，信息不会互相抢戏
+    - 第三个原则是**强调（Emphasis）**。设计要懂得取舍，有的元素必须被看到，有的则可以退后。强调不是“加粗一切”，而是通过字体、大小、颜色、留白等方式，巧妙地让关键内容自然突出。比如：
+      - **字体（Typography）**：用不同的字重、字号和样式引导视线。
+      - **位置（Positioning）**：重要的信息放在更高或更中心的位置。
+      - **留白（White space）**：空间越多，元素越突出。
+    - **节奏（Rhythm）**。它指的是有意图的重复。当界面元素在间距、样式或形状上形成节奏感时，用户的注意力会自然被引导，而不会感到混乱或疲惫。
 - inside .git
   - ![img.png](misc_git_1.png)
 - [vim cheat sheet](https://michael.peopleofhonoronly.com/vim/)

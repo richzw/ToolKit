@@ -350,7 +350,8 @@
     - PG19（master）修复：并行化 + chunk 衰减分配
       - Tid Range Scan 允许并行化：把需要扫描的块范围像 Parallel Seq Scan 那样“分发”给 worker。
       - chunk 分配采用“逐步衰减到 1 block”的策略：开始分大块减少共享状态/锁竞争；越接近结束 chunk 越小，避免只剩一个 worker 扫尾导致其他 worker 空转，达到更好的负载均衡
-
+- [SQLite3 如果突发断电、关机，数据到底会不会丢](https://mp.weixin.qq.com/s/Z7lv8WzuwIpYTATnY60QHw)
+  - SQLite 的断电安全与性能权衡，主要由一组 PRAGMA（尤其 journal_mode/synchronous/WAL checkpoint 相关）决定
 
 
 

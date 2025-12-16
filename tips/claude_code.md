@@ -375,6 +375,8 @@
     - 如何使用？
        - 安装完之后，Claude Code 会自动把插件里 skills/ 目录下的各个 Skill 注册进“可用 Skills”列表。
        - 你只需要“自然语言调用”即可，比如： “使用 PDF skill 从这个文档中提取表格：path/to/some-file.pdf” 不需要你手动 /skill xxx，也不需要写什么配置
+  - Codex CLI 里的 Skills：本地 ~/.codex/skills + --enable skills
+  - https://simonwillison.net/2025/Dec/12/openai-skills/
 - [Antigravity Grounded! Security Vulnerabilities in Google's Latest IDE](https://embracethered.com/blog/posts/2025/security-keeps-google-antigravity-grounded/)
   - 1. **谨慎启用 MCP 服务器与工具**
     - 默认禁用高风险工具（尤其是具有写、执行、外联能力的）。
@@ -432,7 +434,11 @@
 - CC Attention
   - Claude Code with --dangerously-skip-permissions
   - Run on entire home directory. 
-
+- [Vibe Engineering](https://forum.openai.com/public/videos/event-replay-vibe-engineering-with-openais-codex-2025-12-03)
+  - AI 不只是“帮你写代码”，而是参与到工程的全链路里，帮你更快做出能上线、能维护、能扩展的生产级软件。前提是：每一行要发到生产环境的代码，仍然必须由人来负责。
+  - 方法论：
+    - 让 AI 写可读的产物，而不只是可运行的代码。
+    - 并行化。Codex 提供的 “Best of N” 思路很像把一个问题同时交给四个候选工程师：让它们走不同路线，产出不同方案，然后人来选更符合目标、也更符合品味的那个。
 
 
 
