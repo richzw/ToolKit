@@ -482,6 +482,11 @@
       - BQ - Binary quantization - a quantization technique that converts each vector embedding to a binary representation
         - The tradeoff is that BQ is lossy. The binary representation by nature omits a significant amount of information, and as a result the distance calculation is not as accurate as the original vector embedding.
     - [向量索引选型](https://mp.weixin.qq.com/s/yJIHKfUOAtz4iWVHURri9g)
+    - [解码Milvus数据库的向量索引](https://mp.weixin.qq.com/s/hq1s5TA66mlFtJs-xe47gA)
+      - Milvus 向量索引的“解剖”：Data Structure + Quantization + Refiner
+        - Data Structure：数据的组织结构（决定“先看哪些候选”）。
+        - Quantization：量化/编码/压缩（决定“向量以何种形式存储、距离如何快速近似计算”）。
+        - Refiner：对候选结果做精炼/重排，以尽量维持召回率
     - Index type
       - FLAT：适用于需要 100% 召回率且数据规模相对较小（百万级）的向量相似性搜索应用。
       - IVF_FLAT：基于量化的索引，适用于追求查询准确性和查询速度之间理想平衡的场景（高速查询、要求高召回率）。

@@ -439,7 +439,11 @@
   - 方法论：
     - 让 AI 写可读的产物，而不只是可运行的代码。
     - 并行化。Codex 提供的 “Best of N” 思路很像把一个问题同时交给四个候选工程师：让它们走不同路线，产出不同方案，然后人来选更符合目标、也更符合品味的那个。
-
+- [Making Coding Agents Safe: Using LlamaIndex to Secure Filesystem Access](https://www.llamaindex.ai/blog/making-coding-agents-safe-using-llamaindex)
+  - 编码代理（coding agents）如何安全地访问文件系统”以及“如何让代理更好理解非结构化文档（PDF/Office/Google Docs 等
+    - 方案：用 AgentFS 把真实文件系统虚拟化隔离，再用 LlamaParse 把非结构化文件转成高质量文本，最后用 LlamaIndex Workflows 把整个流程“上安全带（harness）”并支持可恢复的人类介入
+  - 用“虚拟文件系统”替代真实文件系统访问;  AgentFS 的文件操作封装成“受控工具”，并强制代理只能用这些工具
+  - https://github.com/run-llama/agentfs-claude
 
 
 

@@ -1078,6 +1078,34 @@
     - ACK Range Validation 缺失：客户端可以回报并不存在的包号区间，服务器未做严格校验
     - Optimistic ACK 攻击：攻击者预测未来包号，提前伪造 ACK，使服务器误判 RTT 极低、带宽极高，从而 无限增大发包速率，形成放大式 DDoS
   - 服务器间歇性跳号（skip packet numbers），如果客户端 ACK 了被跳过的编号即可识破攻击 - Cloudflare 的动态 CWND-aware Skip 算法
+- [When TCP sockets refuse to die](https://blog.cloudflare.com/when-tcp-sockets-refuse-to-die/)
+  - 在网络已经“断了/对端已死”时，为什么 TCP 连接（socket）在内核里还能长时间停留不退出，导致服务端资源被占用
+  - 观测与方法：用 tcpdump + ss -o 看“包”和“内核定时器”
+  - TCP 在不同生命周期阶段的“死亡/超时”规则
+    - SYN-SENT：客户端发起连接但 SYN 被丢（connect() 卡住）
+    - SYN-RECV：服务端回了 SYN+ACK，但客户端后续包被丢（半连接
+  - ESTABLISHED 之后：为什么“空闲连接会永生”
+    - Idle ESTABLISHED：默认没有定时器 → 可以无限挂着
+    - 解决空闲永生：TCP keepalive 开启 SO_KEEPALIVE 并配置：
+      - TCP_KEEPIDLE：空闲多久后发第一探测包
+      - TCP_KEEPINTVL：探测包间隔
+      - TCP_KEEPCNT：失败多少次判定连接死亡
+  - 关键陷阱：TCP_USER_TIMEOUT 会“改写” keepalive 的语义
+    - TCP_USER_TIMEOUT 的定义：已发送的数据在多久内没有被 ACK，就强制断开连接。它本身对“完全空闲”的连接帮助不大，但它会影响 keepalive 失败时的判定方式
+    - 只有在 至少发出过一次探测包/重传后（内核里 icsk_probes_out > 0），TCP_USER_TIMEOUT 的检查才会触发
+    - 如果你希望 TCP_KEEPCNT 仍“有意义”，TCP_USER_TIMEOUT 应设置得略小于： TCP_KEEPIDLE + TCP_KEEPINTVL * TCP_KEEPCNT
+  - Zero-window ESTABLISHED：流控导致的“persist（窗口探测）”也可能永生
+  - 生产建议
+    - 开启 TCP keepalive（解决 idle ESTABLISHED 永生）
+    - 设置 TCP_USER_TIMEOUT ≈ TCP_KEEPIDLE + TCP_KEEPINTVL * TCP_KEEPCNT（并建议略小一些以免架空 TCP_KEEPCNT）
+    - 谨慎使用应用层超时：要探测 TCP 故障优先用 keepalive + user-timeout；若想节省资源/避免拖太久，额外做“发送缓冲 drain 速率”监控
+
+
+
+
+
+
+
 
 
 
