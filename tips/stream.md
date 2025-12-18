@@ -116,7 +116,12 @@
     - 预取机制（Prefetching）：查询规划阶段，RisingWave 分析扫描模式，提前加载所需块。例如查询需要 Blocks 1–10，系统会在返回 1 的同时在后台抓取 2 到 10。
   - 实时性与一致性: 每次写入都会触发事件，失效相关缓存块（内存和磁盘），物化视图增量更新，避免等待全量重算。冷数据快速驱逐，旧快照不会残留
   - 
-
+- [How Uber Indexes Streaming Data with Pull-Based Ingestion in OpenSearch](https://www.uber.com/en-HK/blog/how-uber-indexes-streaming-data-with-pull-based-ingestion-in-opensearch/)
+  - 为什么要 Pull-based（对比 Push-based 的痛点）
+    - 传统 Push-based（推送式） 写入：客户端通过 HTTP/gRPC 直接把文档写到搜索集群。规模化后会遇到：
+      - 写入尖峰（ingestion spikes）：超出集群吞吐就会被拒绝，请求重试/退避（backpressure）逻辑被迫下沉到每个客户端，运维复杂度大；
+      - 缺乏优先级控制：关键实时写入与低优先级批量写入在同一通道竞争，繁忙时关键数据可能被延迟；
+      - 数据回放（replay）复杂：快照恢复、迁移双写等场景需要重放写入，请求级重放工具链容易复杂且易错
 
 
 

@@ -1,4 +1,6 @@
 - [Agentic Design Patterns ](https://docs.google.com/document/d/1rsaK53T3Lg5KoGwvf8ukOUvbELRtH-V0LnOIFDxBryE/preview?tab=t.0)
+  - [agentic-architectures](https://github.com/FareedKhan-dev/all-agentic-architectures)
+    - This repository contains detailed implementations of 17+ state-of-the-art agentic architectures, built with LangChain and LangGraph
 - [Agents 2.0: From Shallow Loops to Deep Agents](https://www.philschmid.de/agents-2.0-deep-agents)
   - 显式规划（Explicit Planning）
     • 先用工具写出可持久化的 To-Do 列表／Markdown 计划，而不是在思维链里隐式规划。
@@ -320,6 +322,52 @@
   - **Prompt Caching 意识**
     - 若每次调用中，system prompt + 工具描述 + 历史信息大部分保持不变，只是尾部追加少量新内容，底层可以对前缀做缓存，显著降低成本 & 延迟。
     - 反之，频繁改写 system prompt / 工具列表，等于“打碎缓存”，浪费钱也变慢
+- [Breaking Down Context Engineering](https://www.newsletter.swirlai.com/p/breaking-down-context-engineering)
+  - 把更多内容塞进上下文窗口”并不等于更好，反而会出现几类典型问题
+    - Context Poisoning（上下文投毒）：幻觉/错误信息被写入上下文，后续步骤继续引用，错误被放大。
+    - Context Distraction（上下文分散注意）：信息太多，模型注意力被稀释，偏离关键任务。
+    - Context Confusion（上下文混淆）：无关或冗余内容影响判断，导致答非所问或推理偏航。
+    - Context Clash（上下文冲突）：上下文内部互相矛盾，模型难以一致地遵循。
+  -  Instructions / System Prompt（系统提示/系统指令）
+    - Alignment（对齐）：指令太短覆盖不全会跑偏；太长又会束缚能力/占用窗口。
+    - Prompt Injection（提示注入）风险：恶意用户输入可能诱导模型忽略系统指令。
+    - 系统规则 vs 用户需求冲突：既要合规拒答，又要尽量保持有用性
+  - User Prompt（用户提示）
+    - 真实场景通常是多轮对话、需要追问、或要外部信息支持。
+    - 一个问题往往要拆成多个步骤（检索→总结→格式化等），需要多次 agent turn 串联。
+    - 难点在于：正确理解真实意图、把请求拆成子任务并编排流程，还要用较全面的 eval suites（评测用例集） 做迭代验证
+  - Retrieved Context（检索上下文 / RAG 上下文）
+    - 在海量候选片段中“找对、选对”最相关信息。
+    - 上下文窗口有限，需要在“取少了缺关键事实”与“取多了产生噪声/触发混淆模式”之间做优化选择（从 N 个候选里挑最重要的）。
+    - 需要 hybrid retrieval（混合检索）、更好的排序/过滤、必要时对片段摘要/压缩。
+    - 语料准备是重数据工程问题：chunk（分块）、embedding（向量化）前预处理、避免片段丢失全局元数据/邻近语境
+  - State / Short-term Memory（状态 / 短期记忆）
+    - 长对话会超过窗口：要决定“记什么、忘什么”，否则要么爆 token，要么忘太多导致重复问答/重复调用工具。
+    - 常用技术：summarisation（摘要）、clipping（裁剪保留关键段）、context caching（上下文缓存）。
+    - context drift（上下文漂移）：多轮后早期关键约束被稀释，需要必要时“重新注入”关键指令/事实以保持轨道
+  - Long-term Memory（长期记忆）
+    - 相关性检索：积累数月信息后，必须只取与当前问题最相关的少量记忆。
+    - 一致性与更新：信息会过期（例如用户状态变化），陈旧记忆会损害可信度。
+    - 隐私与安全：长期存储个人数据需要防护。
+    - 拉取摘要也可能与其他指令冲突或太冗长，反而“压垮”上下文
+  - Tools（工具：定义与输出）
+    - 让模型稳定地产生正确的工具调用格式与参数。
+    - 工具输出可能很长：需要后处理（提取相关部分/摘要）再放回上下文。
+    - 多次工具调用时要维护状态与推理链路（文中提到类似 ReAct 的迭代“思考→调用→分析→继续”模式）。
+    - 工具失败/异常返回需要错误处理与安全兜底。
+    - 安全风险：从 URL/外部内容读取的工具输出可能携带“提示注入”或敏感信息，需要 guardrail。
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
