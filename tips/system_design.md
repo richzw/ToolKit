@@ -1366,10 +1366,24 @@
   - 电商风控中，“账号、IP、设备、地址、手机号、银行卡”等作为节点，登录、绑定、下单等行为作为边，属性如注册时间、IP 归属地等作为节点/边属性，构成风控图。
   - 黑产通过批量注册、多账号、多设备、代理 IP 等方式切断单点关联，传统规则（单维度阈值）难以识别“跨主体协同作弊”。
   - 图算法优势：从关系视角发现“团伙化、批量化、协同化”的作弊模式，尤其适用于账号关联、共用资源、团伙行为的识别。
-
-
-
-
+- [Revisiting the Outbox Pattern](https://www.morling.dev/blog/revisiting-the-outbox-pattern/)
+  - Outbox Pattern（发件箱模式）：在微服务架构中，让服务能够在一次本地数据库事务内既写入业务数据、又可靠地产生“要发给外部系统的事件/消息”，
+    - 随后再由异步组件把消息投递到 Kafka 等消息/流平台，从而避免“数据库写成功但消息没发出 / 消息发出但数据库回滚”导致的数据不一致问题
+  - Outbox Pattern 的做法是：把要发出的消息也作为数据库事务的一部分先写入本地 outbox 表；事务提交后，再由 outbox relay 异步把这些 outbox 事件发送到 Kafka
+    - Outbox Pattern 通常提供的是 最终一致性（eventual consistency）——写服务自己的数据库立刻可见，但对外通知是异步传播，存在延迟窗口
+  - 推荐 log-based CDC：通过“尾随数据库事务日志（例如 Postgres WAL）”来捕获 outbox 写入，这能保证事件顺序与事务提交顺序一致，并且避免轮询开销、降低延迟
+- [You Gotta Push If You Wanna Pull](https://www.morling.dev/blog/you-gotta-push-if-you-wanna-pull/)
+  - 想让用户“拉取（pull）查询”更快、更便宜，就需要系统持续地“推送（push）”增量计算结果——也就是用**增量物化（incremental materialization）**把昂贵查询的计算成本摊到数据变化的过程中
+  - Pull 查询：好用，但有结构性瓶颈
+    - 性能（Performance）：数据大/查询复杂时，临时计算代价过高、延迟过大
+    - 数据格式（Data format）：存储系统未必适合该类查询（例如 OLTP 的 Postgres 不擅长重分析）
+    - 数据形状（Data shape）：高度规范化导致多表 join 很重
+    - 数据位置（Data location）：数据不在最靠近用户/业务的地方（边缘节点、移动端等低延迟场景）
+  - Push 查询：用“增量”维护视图，而不是反复全量重算
+    - 它由源表变更触发，输出“结果集的增量变化”（新增/更新的结果），把成本分摊到每次小变更上，因此单次计算很快
+    - push 适合“delta 较小”的连续变化；如果遇到大规模变更（批量删除、历史数据回填 backfill 等），逐条触发大量状态更新的开销可能不划算，此时退回一次 pull 全量计算可能更合适。
+  - Push + Pull
+    - 最佳组合是：用 push 做增量计算 → 把增量结果写入支持 pull 的存储（表/索引/缓存）→ 用户再 pull 得到即时结果。
 
 
 

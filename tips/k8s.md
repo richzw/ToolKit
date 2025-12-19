@@ -1043,6 +1043,17 @@
         - 一旦设置了资源 request 或 limit，就不能通过原地调整将其删除，只能修改数值
     - [容器生命周期更新](https://mp.weixin.qq.com/s/XZx24EUy7YzrGlB1Enj5nw)
       - ContainerStopSignals 特性门控是 Kubernetes v1.33 新增的， 它将停止信号添加到了 Kubernetes API。这允许用户在容器规格中指定自定义的停止信号
+  - [1.35](https://mp.weixin.qq.com/s/faJ7SktLuaONbeFl9oYK1g)
+    - Stable（GA）：
+      - Pod 资源就地更新（In-place update of Pod resources）
+      - Service 流量分发：PreferSameNode / PreferSameZone
+      - Pod 更新跟踪：.metadata.generation + .status.observedGeneration
+      - TopologyManager：可配置 NUMA 节点限制
+    - Beta：Pod 证书（Pod certificates）实现工作负载身份与安全; 
+      - kubelet 生成密钥；
+      - 通过 PodCertificateRequest 请求证书；
+      - 将证书/密钥材料 写入 Pod 文件系统
+    - https://mp.weixin.qq.com/s/D2fddmIey1qEDu1TWia0MA
 - Alpha 版: kubectl 的新配置选项，使用 .kuberc 实现用户首选项
     - HorizontalPodAutoscaler 可配置容差
       - 为了避免在指标发生小波动时创建或删除副本， Kubernetes 应用了一种迟滞形式：仅当当前和期望的指标值差异超过 10% 时， 才改变副本数量
