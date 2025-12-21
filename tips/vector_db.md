@@ -849,6 +849,25 @@
         - | **PQ 数据落盘** | 将 PQ 编码从 DRAM 迁移到磁盘 |
         - | **邻近存储扩展** | PQ Codes + Full Vector + Neighbor List 一起存储 |
         - | **`inline_pq` 参数** | 可调节磁盘用量与 IO 次数的平衡 |
+      - [Introducing AISAQ in Milvus: Billion-Scale Vector Search Just Got 3,200× Cheaper on Memory](https://milvus.io/blog/introducing-aisaq-in-milvus-billion-scale-vector-search-got-3200-cheaper-on-memory.md)
+        - AISAQ vs DISKANN Architecture
+          - DISKANN
+            - **PQ codes in RAM**, vectors on disk
+          - AISAQ-Performance
+            - **All data colocated on disk**
+            - **Single I/O access**
+          - AISAQ-Scale
+            - **Separate PQ storage**
+            - **Caching for minimal redundancy**
+          - DISKANN（将大量索引放到 SSD 上以缓解内存压力），但 DISKANN 仍需要 DRAM 常驻一部分“搜索时高频用到的压缩表示”（如 PQ codes）
+            - DISKANN 将两者在 SSD 上 co-locate（共址/同页布局），尽量让一次 SSD 读取拿到两类数据，减少随机 I/O
+          - AISAQ：一种受 DISKANN 启发的 disk-based 向量索引，目标是把所有搜索关键数据都放到 SSD
+            - AISAQ：把 PQ codes 也从 DRAM 搬到 SSD，并重排磁盘布局
+            - 每个节点把 full vector + edge list + 邻居的 PQ codes 一起放在 SSD 上（共址
+            - 访问一个节点仍然“一次 SSD read”就拿到候选扩展与评估所需数据，因此运行时模式接近 DISKANN
+            - 代价：邻居 PQ 数据会在多个节点页中重复出现（冗余），使索引体积显著变大
+            - AISAQ 通过把所需 PQ codes 在一次 I/O 中取出并顺序存放 SSD 顺序读更快
+              数据连续更 cache-friendly，CPU 计算 PQ 距离更高效且更稳定
     - [IVF_RABITQ 索引](https://mp.weixin.qq.com/s/jx2Isz0zfcERri3EdXc6jg)
       - 融合了 RaBitQ、IVF 倒排索引、随机旋转变换（Random Rotation）以及后处理优化机制（refinement），在高效压缩和高精度检索之间取得更优平衡。
       - 关于 IVF、RaBitQ 以及精调过程（refinement）过程的一些底层配置参数说明：

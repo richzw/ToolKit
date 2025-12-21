@@ -356,7 +356,7 @@
     - 多次工具调用时要维护状态与推理链路（文中提到类似 ReAct 的迭代“思考→调用→分析→继续”模式）。
     - 工具失败/异常返回需要错误处理与安全兜底。
     - 安全风险：从 URL/外部内容读取的工具输出可能携带“提示注入”或敏感信息，需要 guardrail。
-
+- [agent skill](https://github.com/agentskills/agentskills)
 
 
 
