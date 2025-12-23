@@ -357,7 +357,8 @@
     - 工具失败/异常返回需要错误处理与安全兜底。
     - 安全风险：从 URL/外部内容读取的工具输出可能携带“提示注入”或敏感信息，需要 guardrail。
 - [agent skill](https://github.com/agentskills/agentskills)
-
+- [Multi-Agent Supervisor Architecture](https://www.databricks.com/blog/multi-agent-supervisor-architecture-orchestrating-enterprise-ai-scale)
+  - 
 
 
 

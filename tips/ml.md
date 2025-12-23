@@ -2088,8 +2088,9 @@
 - [A Practical Approach to Verifying Code at Scale](https://alignment.openai.com/scaling-code-verification/)
   - 自动代码审查被视为一种输出监控（output monitoring）
   - 精确率（Precision）优先于召回率（Recall）
-
-
+- [Introducing Bloom: an open source tool for automated behavioral evaluations](https://www.anthropic.com/research/bloom)
+  - Bloom：一个“agentic（代理式）”框架，用于自动生成并执行行为评估（behavioral evaluations）。研究者只需指定要测量的目标行为，Bloom 就会自动生成大量场景（scenarios），运行目标模型并量化该行为的出现频率与严重程度；
+  
 
 
 

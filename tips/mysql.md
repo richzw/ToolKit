@@ -1181,8 +1181,12 @@
     - 查询改写（中成本）：用更适合优化器的写法（EXISTS/IN、拆 OR、延迟关联、CTE 递归、LATERAL、临时表分解复杂 SQL、Keyset 分页等）。
     - 索引/存储结构（中高成本）：覆盖索引、函数/表达式索引、全文索引、空间索引、BRIN/GIN、分区、位图索引（特定数据库）等。
     - 架构与运维/参数（高成本&高风险）：分库分表、读写分离、物化视图、冷热分层、资源隔离、TTL、异步提交、并行扫描、Saga
-
-
+- [MySQL 8主从延迟如何降至0.2秒内](https://mp.weixin.qq.com/s/hc6yI9LoRUrjeU7odbZakg)
+  - “主从延迟”通常指：主库提交事务后，从库完成 拉取（I/O 线程）→写 relay log→SQL/Applier 应用→提交 的总耗时差。
+  - 并行复制的“三重加速”
+    - 基于 LOGICAL_CLOCK 的并行复制
+    - 主库 Binlog 组提交优化（group commit）
+    - 从库应用层面的优化（checkpoint / pending jobs）
 
 
 

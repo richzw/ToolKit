@@ -1292,11 +1292,26 @@
     - ReadTimeout 过长导致“资源利用率倒挂
 - [runtime/secret](https://mp.weixin.qq.com/s/vN5_mlFkwtNWBPvKJaynIA)
 - [Using Docker to deal with cgo build complexity](https://www.dolthub.com/blog/2025-11-21-easy-cgo-builds-with-docker/)
-
-
-
-
-
+- [Goroutine “气泡”宇宙——Go 并发模型的新维度](https://mp.weixin.qq.com/s/-9d1PHkrv9VfGnr1LjaUYg)
+  - goroutine bubbles 
+    - 是一类附加在 goroutine 上的临时状态，使其运行时行为与普通 goroutine 不同（例如：标签传播、虚拟时间、常量时序、机密擦除、合规豁免）
+    - runtime/pprof goroutine labels（SetGoroutineLabels / pprof.Do）
+    - SetGoroutineLabels(ctx)：把 ctx 里的 label 集合设置到当前 goroutine。 继承语义：新 goroutine 继承创建者 goroutine 的 labels。
+    - crypto/subtle.WithDataIndependentTiming（DIT 气泡）
+    - Go 1.26 引入 实验性 runtime/secret，需要 GOEXPERIMENT=runtimesecret  secret.Do(f)：执行 f，并尽可能及时擦除 f 使用过的临时存储
+- [Go 1.26 的“加密风暴](https://mp.weixin.qq.com/s/pQnPsc7hh93Fs7nDuqGc0A)
+  - Go 1.26 计划“废除” crypto 包中一系列密钥生成函数（如 rsa.GenerateKey）的 rand io.Reader 参数，使其在默认情况下强制使用 crypto/rand.Reader 作为唯一的熵源
+  - 对于 Hashicorp Vault 这样需要满足硬件安全模块 (HSM) 和 FIPS 合规性等严苛要求的项目而言，这无异于一场“釜底抽薪”。
+  - Hashicorp Vault（面向强合规/审计、HSM/PKCS#11 场景）与 Go 安全团队（以 Filippo Valsorda 为代表）之间的争论，呈现了两种目标的冲突：
+    - Vault：需要“可证明地来自 HSM 的熵/随机性”，以满足合规或客户审计清单
+    - Go 团队：希望标准库 API 默认安全、语义单一、减少被误用的自由度；合规“清单式需求”不应让上游库背负复杂性
+- [Compressing embedded files in Go](https://vincent.bernat.ch/en/blog/2025-go-embed-compressed)
+  - Go’s embed feature lets you bundle static assets into an executable, but it stores them uncompressed. This wastes space: a web interface with documentation can bloat your binary by dozens of megabytes.
+- [Analysis and Transformation Tools for Go Codebase Modernization](https://www.youtube.com/watch?v=_VePjjjV9JU)
+  - Modernizers 将继续作为官方维护的精品工具，帮助我们采纳语言的新特性。
+  - Auto-Inliner 将赋能所有库作者，以一种安全、自动化的方式推动生态系统的演进
+- [Gin is a very bad software library](https://eblog.fly.dev/ginbad.html#gin-is-a-very-bad-software-library)
+  
 
 
 

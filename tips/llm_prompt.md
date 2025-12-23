@@ -1999,10 +1999,15 @@
       - 一份 YAML 文件，只描述一个 spec。 一个 spec = Prompt 模板 + 模型 + 默认参数。
     - 6. 自适应期：在 spec 之上探索自动化的 Prompt / 参数优化（如结合 DSPy 思路）
   - Prompt 工程的本质，不只是 Prompt 写作技巧，而是用可度量、可迭代、可验证的工程方法，去管理这种对输入高度敏感、近似混沌的 LLM 系统，使其输出收敛为可预期、可复现的工程结果。
-
-
-
-
+- 生成既有质感，又能随意修改文字的完美 PPT https://x.com/dotey/status/2002582724280975530
+  - 大问题：生成的 Slides 是死图，文字不能改，内容不能动 - NotebookLM
+  - 核心思路是将“内容生成”与“视觉绘制”拆开：
+    - 1. 大脑 (Planner)：先用我的提示词模板，根据你的素材生成 Slides 大纲 + 对应的画图指令。
+    - 2. 画师 (Artist)：拿着画图指令，去用绘图工具（如 Nano Banana Pro）生成最终图片。
+  - Gemini Gem
+    - https://gemini.google.com/gem/63d2ec248f9c?usp=sharing
+  - Demo https://gemini.google.com/share/continue/bf834dc61a16
+- [一个 AI Agent 前端落地的真实复盘](https://baoyu.io/blog/ai-agent-frontend-rebirth-from-failure)
 
 
 
