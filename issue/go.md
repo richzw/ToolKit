@@ -1311,12 +1311,25 @@
   - Modernizers 将继续作为官方维护的精品工具，帮助我们采纳语言的新特性。
   - Auto-Inliner 将赋能所有库作者，以一种安全、自动化的方式推动生态系统的演进
 - [Gin is a very bad software library](https://eblog.fly.dev/ginbad.html#gin-is-a-very-bad-software-library)
-  
-
-
-
-
-
+- [OpenFeature 如何重塑 Go 应用的特性开关](https://mp.weixin.qq.com/s/dz77JIQyt6MBFSf5HB4cbw)
+  - Go 应用中的特性开关（Feature Flag）治理展开：
+    - 从最早用环境变量/配置文件硬编码开关导致的 “if-else 地狱”，
+    - 演进到引入专业特性开关系统（如 LaunchDarkly、Unleash、go-feature-flag）后又面临的 供应商锁定（Vendor Lock-in）。
+    - 解决思路是采用 OpenFeature：用一套供应商无关的标准 API，把业务代码与具体特性开关产品解耦，让“换后端 Provider”变成基础设施层的替换，而不是业务代码的大重构。
+  - Openfeature
+    - 核心概念：Evaluation API / Provider / Client / Evaluation Context
+    - Evaluation API：应用侧统一调用入口（例如取 boolean/string/object 等类型）。
+    - Provider：适配层（把标准化调用翻译成具体系统：LaunchDarkly、Unleash、go-feature-flag、flagd…）。
+    - Client：轻量客户端对象；在 Go SDK 中常用 NewClient("domain") 形成逻辑域（domain）隔离，用于多 Provider/多场景并存。
+    - Evaluation Context：评估上下文（targetingKey + attributes），用于按用户/环境命中规则（定向、灰度、实验
+- [Analysis and Transformation Tools for Go Codebase Modernization ](https://www.youtube.com/watch?v=_VePjjjV9JU)
+  - inline issue
+    - The "Order of Effects" Issue
+      - The most critical issue discussed is ensuring that the evaluation order of arguments is preserved during the transformation to prevent subtle bugs
+    - The Issue of Being "Too Safe" (Pedantry)
+    - The Comment Handling Issue
+      - Comments are not recorded as part of the Go syntax tree. 
+      - Consequently, when the inliner moves subtrees of code around during a transformation, it tends to misbehave with comments, either dropping them entirely or placing them incorrectly
 
 
 

@@ -396,6 +396,7 @@
       - 内存如何集成到模型中。
 - [Theory](https://mp.weixin.qq.com/s/oUe_Vw0vfMvXJ-w97dkK4w)
   - [The Little Book of Deep Learning](https://fleuret.org/francois/lbdl.html)
+  - [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/)
   - [Transformer模型之输入处理](https://mp.weixin.qq.com/s/ryjV4IVLbjUO-QVieOrW3A)
   - [Understanding neural networks through sparse circuits](https://openai.com/index/understanding-neural-networks-through-sparse-circuits/)
   - [Let’s Build the GPT Tokenizer: A Complete Guide to Tokenization in LLMs](https://www.fast.ai/posts/2025-10-16-karpathy-tokenizers)

@@ -239,7 +239,10 @@
 - [Alerting Best Practices](https://victoriametrics.com/blog/alerting-best-practices/)
   - 配置 vmalert 的 -external.url / -external.alert.source，使告警自带 “查看规则 / 一键静默 / Grafana 面板” 等可点击链接
 - [VictoriaLogs: What if logs management became simple and performant?](https://blog.ogenki.io/post/series/observability/logs/)
-
+- [Traces & Spans: Observability Basics You Should Know](https://last9.io/blog/traces-spans-observability-basics/)
+  - Trace：描述“一次请求”穿过整个分布式系统的端到端旅程（从用户触发到返回结果）。 
+  - Span：Trace 的组成单元；每个 Span 表示一次具体操作（如 DB 查询、RPC/API 调用、函数执行等），并通过**父子关系（嵌套）**表达调用链路结构。
+  - 文中用树状结构说明：一个 Trace 包含多个 Span，Span 记录时序信息与元数据，并可嵌套形成调用关系。
 
 
 

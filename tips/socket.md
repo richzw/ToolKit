@@ -817,6 +817,12 @@
     - TCP_NODELAY sends doesn't accumulate the logical packets before sending then as network packets, Nagle's algorithm does according the algorithm, and TCP_CORK does according to the application setting it.
     - A side effect of this is that Nagle's algorithm will send partial frames on an idle connection, TCP_CORK won't.
     - TCP_CORK is useful whenever the server knows the patterns of its bulk transfers. Which is just about 100% of the time with any kind of file serving.
+    - [It’s always TCP_NODELAY. Every damn time](https://brooker.co.za/blog/2024/05/09/nagle.html)
+      - 在排查分布式系统（distributed systems）延迟问题时，最先检查的往往是：是否启用了 TCP_NODELAY
+      - Nagle 算法当年要解决的问题：tiny packets 带来的极高开销
+      - 真正把延迟“放大成问题”的组合：Nagle + Delayed ACK
+      - 避免 tiny messages 的核心诉求仍真实存在，但已很大程度被推到了应用层（例如批量化、合并请求、合理的 framing/消息格式），而不是指望 Nagle 在 TCP 层“神奇修复”
+      - 延迟敏感系统应直接启用 TCP_NODELAY；甚至应成为默认
 - [从一次经历谈 TIME_WAIT 的那些事](https://coolshell.cn/articles/22263.html)
   - Issue
     - EaseProbe 是一个轻量独立的用来探活服务健康状况的小工具.不会设置 TCP 的 KeepAlive 重用链接，因为探活工具除了要探活所远端的服务，还要探活整个网络的情况，所以，每次探活都需要从新来过，这样才能捕捉得到整个链路的情况。
