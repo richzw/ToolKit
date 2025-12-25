@@ -955,6 +955,7 @@
         - N-gram 索引 (N-gram Index)：通过将数据拆分为更小的 token（例如 2-gram、3-gram）并对其构建索引来加速文本匹配和正则表达式
           - Ngram Index 被引入用来改造 LIKE 的执行方式，把“模糊匹配”变成“子串精确查找 + 小范围二次验证”，从而实现数量级的加速
           - https://mp.weixin.qq.com/s/7TJ9KW8-mvn689bR5hjCJw
+          - https://milvus.io/blog/milvus-ngram-index-faster-keyword-matching-and-like-queries-for-agent-workloads.md
         - Minhash：一种局部敏感哈希索引，专门用于大规模数据去重（例如 100 亿个向量），实现相似性去重而非精确哈希比较。这有助于识别和删除近似重复的内容
     - [Struct Array 如何让多向量检索返回完整实体](https://mp.weixin.qq.com/s/tLzXYB74mPOG2H7aob3Vow)
       - **Struct Array**  

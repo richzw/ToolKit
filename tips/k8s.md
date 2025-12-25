@@ -1247,7 +1247,7 @@
   - 大规模 K8s 服务能力建设：通过 KoM 网关、CELL 化隔离、KCS 控制器框架、KubeSpeed/TKP/Lunettes 等自研能力，使控制面和容器交付既稳又快。
   - 零侵入 API Server 内存优化：基于「按资源分组路由 + 按需启用 Watch Cache」的多 APIServer 架构，在不改业务接入方式的前提下，单集群 API Server 内存平均下降约 50%，Etcd CPU seconds 降低约 40%。
 - [K8s config best practice](https://kubernetes.io/blog/2025/11/25/configuration-good-practices/)
-
+- 开源后训练技术栈：Kubernetes + Ray + PyTorch + vLLM
 
 
 

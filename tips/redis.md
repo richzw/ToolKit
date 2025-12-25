@@ -683,4 +683,10 @@
       - Lettuce First Byte Latency: The time to receive the first byte from Redis.
       - Lettuce Completion Latency: The time to complete the entire request.
     • 最终通过在客户端对反序列化进行并行化，将 P99 延迟从 15ms 降至约 10ms，达到预期 SLA。
-
+- redis for MQ?
+  - Redis List：适合最简单队列；缺少可靠消费与多订阅能力。
+  - Pub/Sub：适合实时广播；可靠性弱，离线丢消息。
+  - Stream：具备阻塞读取、消费者组、ACK、可回放与一定持久化能力，是 Redis 里最接近“MQ”的方案。
+  - 但 Redis 做 MQ 仍绕不开两类核心矛盾：
+    - 中间件级别的可靠性上限（持久化策略、异步复制、故障切换窗口）
+    - 积压成本高（内存为主）

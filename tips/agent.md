@@ -357,6 +357,23 @@
     - 工具失败/异常返回需要错误处理与安全兜底。
     - 安全风险：从 URL/外部内容读取的工具输出可能携带“提示注入”或敏感信息，需要 guardrail。
 - [agent skill](https://github.com/agentskills/agentskills)
+  - AI代理（AI Agents）扩展能力时的两种主要路径：
+    - Skills（技能内化）：将各种能力（如制作PPT）直接写入主代理的提示词中，实现无缝集成，但容易导致提示词膨胀（“污染”），从而削弱主代理的推理能力。
+    - SubAgents（子代理）：将任务委托给外部专业子代理，主代理上下文保持干净，适合处理复杂子任务（如浏览器调试），但在信息传递过程中可能存在丢失风险。
+    - Skills 和 SubAgent 这两种模式可以结合
+      - 先展开再压缩（Expand then Compress）
+        - 主代理发现需要特定技能时，先临时加载（展开）完整Skills到上下文中，执行任务获取结果。随后，将从“加载Skills”到“获取结果”的整个过程进行压缩（summarize），只保留最终结论和关键摘要，丢弃中间细节
+      - 文件系统作为中间件（File System Middleware）
+      - SubAgent自动加载Skills（Subagents Auto-Load Skills
+      - 渐进披露 + 延迟加载（Progressive Disclosure with Lazy Loading）
+        - 主代理先只加载Skills的轻量元数据（名称、简介，占用少量token）。需要时才懒加载完整Skills说明。同时，对于复杂部分，委托给SubAgent（SubAgent可继承或单独加载Skills）。
+      - 主代理传递Skills上下文给SubAgent（Manual Context Passing）
+  - skills 重点在Prompt 发现&懒加载，改变当前 agent 能力，有当前完整上下文，我觉得适合的场景是当前任务复合程度不高的情况（载入多个 skills 就会出现性能下降问题），
+    - 比如主 Agent 是入口当做路由，然后通过 skills 载入场景能力，进入到 YouTube-summary，写 ppt 模式；
+    - sub-agent 也有发现过程，但重点是过程压缩，执行过程在当前 agent 之外，他对于当前 agent 就是一个 tool（function call），只有 req/res；
+  - sub-agent 除了现在 tool 之外，还可以通过文件系统，实现一点点 main/sub agent 双向通信，进一步压缩上下文。
+    - 主 agent 委托指令，用文档地址而不是直接写到指令中，sub agent 的返回内容也是一个 状态/交付物/决策点 以及一个过程记录的文档地址，主 agent 根据决策点判断载入哪些内容
+  - 在 claude code，可以在载入 skills并且完成 skills 的内容之后，让cc 把这个过程给总结到文档（可以固定成一个 slash command），然后 rewind 回滚到 skills 载入前的节点，说“我已经完成了，文档在 XXX”来实现；
 - [Multi-Agent Supervisor Architecture](https://www.databricks.com/blog/multi-agent-supervisor-architecture-orchestrating-enterprise-ai-scale)
 
 
