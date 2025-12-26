@@ -352,7 +352,19 @@
       - chunk 分配采用“逐步衰减到 1 block”的策略：开始分大块减少共享状态/锁竞争；越接近结束 chunk 越小，避免只剩一个 worker 扫尾导致其他 worker 空转，达到更好的负载均衡
 - [SQLite3 如果突发断电、关机，数据到底会不会丢](https://mp.weixin.qq.com/s/Z7lv8WzuwIpYTATnY60QHw)
   - SQLite 的断电安全与性能权衡，主要由一组 PRAGMA（尤其 journal_mode/synchronous/WAL checkpoint 相关）决定
-
+- [慢SQL说起：交易订单表如何做索引优化](https://mp.weixin.qq.com/s/sCBOvzUkX7O4fqGTVM68Uw)
+  - 非典型慢 SQL：分页 + 复合排序触发 filesort
+    - 因为 create_time desc, order_id asc 这组排序无法由“单一索引顺序”直接满足（作者给出的原因：create_time 在二级索引里，order_id 在主键索引里，跨索引无法用于复合排序）
+  - 去掉 order_id 排序的尝试与事故复盘：稳定分页的必要性
+    - 线上出现“订单重复/订单缺失”的舆情案例。
+      - 原因链路：
+        - 当排序 key（这里是 create_time）存在大量相同值时，filesort 的相同 key 行的相对顺序不保证稳定；
+        - 分页用 limit offset, size 时：
+          - 第 1 页与第 2 页分别执行各自的排序
+          - 如果两次排序对“create_time 相等的记录”内部顺序不同，则 offset 切片会出现重复/漏项
+      - 解决策略：在排序里加入唯一/更稳定的 tie-breaker
+        - order by create_time desc, order_id asc
+        - 由于二级索引叶子节点包含主键值（InnoDB 二级索引叶子通常带主键），加入 order_id 不一定引入额外回表，但会引入“更重的排序成本”（作者通过压测评估可接受）。
 
 
 

@@ -357,7 +357,7 @@
     - batch.size >= （单个客户端最大写入吞吐量） * （linger.ms / 1000） / （Broker 数量）
     - 建议将 batch.size 设置得尽可能大（例如 256K） 
       - linger.ms 是基于服务端的平均生产延迟来设定的。一旦服务端出现性能抖动（Jitter），更大的 batch.size允许我们在单个 RecordBatch 中积攒更多数据，从而避免因为拆分成多个小请求发送而导致整体延迟升高
-
+- [Write-Ahead Log（WAL）打造“更抗故障”的在线数据平台](https://netflixtechblog.com/building-a-resilient-data-platform-with-write-ahead-log-at-netflix-127b6712359a)
 
 
 

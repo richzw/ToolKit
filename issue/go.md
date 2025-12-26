@@ -1330,7 +1330,8 @@
     - The Comment Handling Issue
       - Comments are not recorded as part of the Go syntax tree. 
       - Consequently, when the inliner moves subtrees of code around during a transformation, it tends to misbehave with comments, either dropping them entirely or placing them incorrectly
-
+- [关键路径分析破解高并发延迟](https://www.youtube.com/watch?v=BayZ3k-QkFw)
+  - 关键路径分析算法以及合成火 焰图等高级功能，目前仍主要处于 Datadog 内部探索或商业产品阶段，尚未直接集成到标准的 go tool trace 中
 
 
 

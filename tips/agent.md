@@ -374,6 +374,7 @@
   - sub-agent 除了现在 tool 之外，还可以通过文件系统，实现一点点 main/sub agent 双向通信，进一步压缩上下文。
     - 主 agent 委托指令，用文档地址而不是直接写到指令中，sub agent 的返回内容也是一个 状态/交付物/决策点 以及一个过程记录的文档地址，主 agent 根据决策点判断载入哪些内容
   - 在 claude code，可以在载入 skills并且完成 skills 的内容之后，让cc 把这个过程给总结到文档（可以固定成一个 slash command），然后 rewind 回滚到 skills 载入前的节点，说“我已经完成了，文档在 XXX”来实现；
+  - [Agent Skills on opencode sample](https://opencode.ai/docs/skills/#override-per-agent)
 - [Multi-Agent Supervisor Architecture](https://www.databricks.com/blog/multi-agent-supervisor-architecture-orchestrating-enterprise-ai-scale)
 
 

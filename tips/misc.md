@@ -688,6 +688,47 @@
   - Model-Based Testing (MBT) - 基于模型的测试
 - 真实 IP 暴露的真正原因：PTR 记录（反向解析）
   - IP 之所以能被 Censys 等扫描到，很可能是因为 IP 反向解析（PTR rDNS） 暴露了域名； 给 Droplet 起的名字是一个 有效的 FQDN（例如 example.com）
+- [CSRF Protection without Tokens or Hidden Form Fields](https://blog.miguelgrinberg.com/post/csrf-protection-without-tokens-or-hidden-form-fields)
+  - CSRF（Cross-Site Request Forgery，跨站请求伪造）：攻击者诱导用户在已登录目标站点的前提下，从第三方站点发起“携带用户身份”的请求，导致用户在不知情时执行敏感操作
+  - 增加 CSRF 防护时，原本打算走“传统路线”（anti-CSRF token、double-submit cookie、隐藏表单字段等）
+    - Anti-CSRF Token（防 CSRF Token）：服务端为表单/请求生成随机值，要求客户端提交时一并带回；攻击者站点无法读取该 token，因此难以伪造有效请求
+    - Double-Submit Cookie（双提交 Cookie）：把 token 同时放在 Cookie 和请求参数/头里，服务端比较二者一致性来验证请求是“同一浏览器上下文”发出的（属于 token 方案的一类变体）
+    - Hidden Form Field（隐藏表单字段）：HTML 表单里用隐藏字段携带 token
+  - 一种更简化的“现代”方法：利用浏览器自动附加且 JavaScript 无法伪造的 Fetch Metadata 请求头（核心是 Sec-Fetch-Site）来判定请求是否跨站，从而在服务端直接拒绝跨站的状态变更请求
+    - Fetch Metadata（获取元数据）请求头：浏览器提供的一组请求头，用于描述请求的上下文/来源关系；本文使用的关键头是 Sec-Fetch-Site 用来标记请求与目标站点的关系（same-origin/same-site/cross-site/none
+    - 如果 Sec-Fetch-Site: cross-site，直接拒绝请求（尤其是对“会修改状态”的请求，如 POST/PUT/DELETE）。
+    - 这在思路上等价于：把 CSRF 的关键前提“攻击请求来自第三方站点”直接用浏览器提供的元数据识别出来
+    - 一种业界接受的折中：当 Sec-Fetch-Site 不存在时，使用更老、更普及、同样属于浏览器受限头的 Origin 作为回退判断依据
+- [Funny project](https://news.ycombinator.com/item?id=46307973)
+  - 
+  | 序号 | 项目名称                  | 基础介绍                                                                 | 网站                                      |
+  |------|---------------------------|--------------------------------------------------------------------------|-------------------------------------------|
+  | 1    | 纸上 “密室逃脱”           | 把密室逃脱做成了可以下载打印的 PDF 剧本。玩家在网上买完剧本自己打印、裁剪，再配上它的 App 就能在家里玩，可以当作线下聚会的小游戏。MRR 1000 美元。 | https://www.escape-team.com/             |
+  | 2    | 管理医院里的 Xbox         | 有个儿童医院希望在每个病房都配备一台 Xbox 游戏机，但管理所有 Xbox 非常麻烦。这个项目就是一套后台系统，让管理员能批量配置管理所有主机。MRR 6000 美元。 | https://coplay.io                        |
+  | 3    | 一次性的在线传真服务      | 解决那种偶尔需要发传真的需求，也不用注册登陆，按次付费，非常简单直接。MRR 500 美元。 | https://justfaxonline.com/en/            |
+  | 4    | 重复照片查找器            | 一款 macOS 应用，可以快速查找重复和视觉上相似的文件——对于摄影师和拥有大量本地存储文件的用户来说尤其有用。付费用户 100+。 | https://maheepk.net/projects/dedupx/     |
+  | 5    | 签到或打卡服务            | 团队负责人（教师、教练等）在地图上设置签到地点然后指定签到时间，每个参与者都使用手机上的应用程序自行“签到”，通过 GPS 判断是否真的到了现场。MRR 500 欧元。 | https://www.youhere.org/index.php/start/ |
+  | 6    | 打电话练习                | 给那些害怕打推销电话的人提供模拟实战练习，和 AI 进行对话，锻炼心态，特点是真的直接拨打电话，而不是一个假装电话的软件界面。MRR 500 美元。 | https://coldcallgym.com/                 |
+  | 7    | 给自家孩子“发工资”来省税  | 父母可以让孩子干点整理文件、拍产品图之类的活儿，然后在软件里记录工时和存证。这样不仅能把这笔钱作为业务成本抵税，还能帮孩子存入免税的退休账户（Roth IRA），这个角度很新奇。MRR 500 美元。 | https://trypixie.com/#how-it-works       |
+  | 8    | 把照片变成能打印的涂色页  | 把普通照片一键变成精美的黑白填色页，可以把自家的宠物、娃或者是旅行照片转成线稿，打印出来自己填色。 | https://dreamandcolor.com/               |
+  | 9    | 抓取 ebay 上的硬盘和存储卡| 抓取 ebay 上存储类硬件的信息，在表格里展示筛选，需要大量的正则表达式（200 多个表达式）来解析 eBay 商品标题和描述，盈利是靠链接佣金。MRR 400 到 600 美元。 | https://unli.xyz/digitalfilmstock/index.html<br>（另有相关网站: https://unli.xyz/diskprices/index.html） |
+  | 10   | 每日逻辑谜题              | 提供不同的谜题进行每日脑力锻炼，周一的谜题比较简单，到了周日会越来越难，盈利靠出售谜题包，而不是通过广告。 | https://cluesbysam.com/                  |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
