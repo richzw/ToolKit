@@ -464,10 +464,32 @@
     - 1. 小文件一次性载入;
     - 2. 大文件先读头部，然后分块顺序载入，或者基于 grep/抽象语法树，查找载入；
       - 无论哪种都会第一时间把头部载入，这样就能第一时间获取重要信息； claude skill的 md 也是这种策略，《金字塔原理》
+  - [本地 Claude Code 会话 → HTML 转录页](https://simonwillison.net/2025/Dec/25/claude-code-transcripts/) 
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
-
-
+- [Continuous Claude](https://github.com/parcadei/Continuous-Claude): 
+  - 解决 Claude Code 等 AI Coding Agent 在长会话中面临的一个痛点：上下文丢失与“遗忘”
+  -  原生机制：为了节省空间，Claude Code 会进行“压缩”，把之前的对话总结成摘要。
+    - 后果：这种压缩是有损的。经过几次压缩后，“摘要的摘要”会丢失大量细节（比如某个函数的具体参数、之前的调试结果），导致 AI 开始“胡言乱语”或重复错误
+  - Continuous-Claude 提出了一套类似人类工程师的工作流，用清晰的文档代替模糊的记忆。
+  -  Ledger（账本/工作日志）：
+     · 在当前会话中，它会实时记录“目标是什么”、“完成了什么”、“下一步做什么”。
+     · 当你感觉到上下文快满时，你可以直接输入 /clear 清空上下文。但不用担心，Claude Code 会自动加载这个“账本”，瞬间找回工作状态，而不是依赖那个模糊的摘要。
+  - Handoff（交接文档）：
+     · 当你结束一天的工作，或者一个 Agent 完成了它的任务时，系统会生成一份详细的 markdown 交接文档。
+     · 下一次启动（或下一个 Agent 接手）时，直接读取这份文档。这就像早班同事给晚班同事留了一份详细的交接条，确保无缝衔接。
+  - 设计了一套完整的 Agent 编排 和 工具执行 逻辑：
+    - A. 技能 vs 智能体
+      · 技能：在当前会话中快速执行的动作。比如“写个 Commit”、“查个文档”。
+      · Agent：当任务太复杂（比如“设计整个后端架构”），在当前窗口做会严重消耗 Token 时，系统会新开一个干净的上下文来运行 Agent。典型流程：Plan Agent (做计划) -> Validate Agent (验证/查资料) -> Implement Agent (执行代码)。
+    - B. MCP 代码执行 (Token 节省)
+      - 这是非常聪明的一点。通常 AI 运行工具会将工具的定义和结果塞满上下文。
+      - Continuous-Claude 的做法：它通过脚本在外部运行工具（如 Python 脚本），只把必要的结果返回给 AI。这极大地减少了 Token 的占用，防止上下文被工具调用的冗余信息“污染”。
+    - C. 钩子系统 (Hooks System)
+      - 它利用 Claude Code 的生命周期钩子（Hooks）实现了自动化：
+        · SessionStart：自动加载上次的“账本”和“交接文档”。
+        · PreCompact：在 Claude 试图压缩上下文之前，自动拦截并保存当前状态，防止信息丢失。
+        · StatusLine：在终端底部显示一个彩色的状态栏，实时告诉你 Token 用了多少，是否需要清理上下文了。
 
 
 

@@ -4,6 +4,7 @@
     - LLM from scratch book
   - [SITUATIONAL AWARENESS](https://situational-awareness.ai/)
   - [Mathematics for Computer Science](https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/)
+  - [Exploring Mathematics with Python](https://coe.psu.ac.th/ad/explore/)
   - [The Ultra-Scale Playbook: Training LLMs on GPU Clusters](https://huggingface.co/spaces/nanotron/ultrascale-playbook?section=high-level_overview)
   - [Top AI cheatsheet](https://www.aifire.co/p/top-ai-cheatsheets)
   - [Understanding Deep Learning](https://udlbook.github.io/udlbook/)
@@ -1283,6 +1284,11 @@
       - [vLLM核心技术PagedAttention原理](https://mp.weixin.qq.com/s?__biz=Mzg2NjcwNjcxNQ==&mid=2247485614&idx=1&sn=5600ea665d942b7ff290caded1e2252f&chksm=ce47fcdaf93075cc4582bfb15eb822840c332d56122df5b59bd8722426d07ac5b097cf032ba4&scene=21#wechat_redirect)
       - [Structured Decoding in vLLM: A Gentle Introduction](https://www.bentoml.com/blog/structured-decoding-in-vllm-a-gentle-introduction)
       - [零实现 vLLM](https://mp.weixin.qq.com/s/h1cFYDNxcHC30APcarF47A)
+      - [Chasing 100% Accuracy: A Deep Dive into Debugging Kimi K2's Tool-Calling on vLLM](https://blog.vllm.ai/2025/10/28/Kimi-K2-Accuracy.html)
+        - 如果你要在 vLLM 上获得更好的 Kimi K2 tool-calling 兼容性，应选用 chat template 已更新的 Kimi K2 模型版本：文章建议以特定 Hugging Face 提交（commit）之后的版本为准（更新是“按模型分别提交”的）
+        - 问题 1：vLLM 没传 add_generation_prompt=True，导致提示词被截断
+        - 问题 2：历史消息里 content: '' 被 vLLM“标准化”成 list，Jinja 模板渲染出错
+        - 问题 3：tool_call_id 解析器过于“死板”，遇到 search:2 直接崩掉
     - [vLLM eBay推理平台的工程实践](https://mp.weixin.qq.com/s/y7OkAy-_H0J12ngexVRkvg)
     - [vLLM 睡眠模式：零重载的模型切换](https://mp.weixin.qq.com/s/q_ilItR-i1PDQqP0JpEqpw)
       - 解决同一块 GPU 上多模型复用的“要么双倍显存、要么数十秒重载”难题，vLLM Sleep Mode 把模型切换时间压到亚秒级，同时首条推理也无需冷启动惩罚。
@@ -2091,8 +2097,16 @@
   - 精确率（Precision）优先于召回率（Recall）
 - [Introducing Bloom: an open source tool for automated behavioral evaluations](https://www.anthropic.com/research/bloom)
   - Bloom：一个“agentic（代理式）”框架，用于自动生成并执行行为评估（behavioral evaluations）。研究者只需指定要测量的目标行为，Bloom 就会自动生成大量场景（scenarios），运行目标模型并量化该行为的出现频率与严重程度；
-  
-
+- 大模型 API 的本质：把请求“展开成 Prompt（Token 序列）”，然后做补全（completion）。
+  - 所谓 chatbot、tool calling / function calling，本质都是在这个过程上做工程封装。 
+    - 一切都可以拆回成：Render → Completion → Parse
+      - (A) 展开（render）→ 得到最终 Prompt（文本/Token 序列）
+      - (B) 补全（completion）→ 模型续写下一段 Token
+      - (C) 解析（parse）→ 把续写还原成 assistant 文本 / tool_calls 等结构化结果
+    - Chat Completions（以及 function call / tool calling）看起来是这种“结构化请求”：
+    - messages：system/user/assistant 多轮（也包含 tool_calls 与 tool 的返回）
+    - tools / functions：工具定义 tool calling 的模式/约束：tool_choice、parallel tool calls 等
+    - 采样/停止参数：temperature、stop、max_tokens
 
 
 

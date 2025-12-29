@@ -1,4 +1,9 @@
-
+- Go Rules
+  - 第一性原理（First Principles）
+    - 推论一：并发必须是一等公民（goroutine / channel）
+    - 推论二：错误处理必须显式且强制（error 作为值 + 多返回值）
+    - 推论三：组合优于继承（struct/interface、embedding、隐式实现）
+    - 推论四：工具链要快（编译速度 + 内置工具：gofmt/go test/go doc/go mod 等）
 - [sync.Once](https://mp.weixin.qq.com/s/Eu6T5-4v82kdh-Url4O5_w)
   - `sync.Once`底层通过`defer`标记初始化完成，所以无论初始化是否成功都会标记初始化完成，即**不可重入**。
   - G1和G2同时执行时，G1执行失败后，G2不会执行初始化逻辑，因此需要double check。
@@ -18,8 +23,7 @@
       }
   }
   ```
-  
-  可重入且并发安全的sync.Once
+  - 可重入且并发安全的sync.Once
   ```go
   type IOnce struct {
    done uint32
@@ -44,25 +48,18 @@
     atomic.StoreUint32(&o.done, 1)
    }
   }
-  
   ```
 - [InterfaceSlice](https://github.com/golang/go/wiki/InterfaceSlice)
-  Given that you can assign a variable of any type to an interface{}, often people will try code like the following.
+  - Given that you can assign a variable of any type to an interface{}, often people will try code like the following.
   ```go
   var dataSlice []int = foo()
   var interfaceSlice []interface{} = dataSlice
   ```
-  
-  [This gets the error](https://mp.weixin.qq.com/s/rAIhapDHrA7jQVr_uvQpEg)
-  
+  - [This gets the error](https://mp.weixin.qq.com/s/rAIhapDHrA7jQVr_uvQpEg)
   `cannot use dataSlice (type []int) as type []interface { } in assignment`
-
-  A variable with type []interface{} has a specific memory layout, known at compile time.
-
-  Each interface{} takes up two words (one word for the type of what is contained, the other word for either the contained data or a pointer to it). As a consequence, a slice with length N and with type []interface{} is backed by a chunk of data that is N*2 words long.
-
-  This is different than the chunk of data backing a slice with type []MyType and the same length. Its chunk of data will be N*sizeof(MyType) words long.
-
+  - A variable with type []interface{} has a specific memory layout, known at compile time.
+  - Each interface{} takes up two words (one word for the type of what is contained, the other word for either the contained data or a pointer to it). As a consequence, a slice with length N and with type []interface{} is backed by a chunk of data that is N*2 words long.
+  - This is different than the chunk of data backing a slice with type []MyType and the same length. Its chunk of data will be N*sizeof(MyType) words long.
   - fix it
     ```go
     var dataSlice []int = foo()
@@ -75,7 +72,6 @@
   - 在使用 golang redigo pipeline 模式下，错误使用会引发乱序串读的问题。简单说，发了一组 pipeline命 令，但由于只发送而没有去解析接收结果，那么后面通过连接池重用该连接时，会拿到了上次的请求结果，乱序串读了。
   - 看源码可得知，Flush() 只是把buffer缓冲区的数据写到连接里，而没有从连接读取的过程。所以说，在redigo的pipeline里，有几次的写，就应该有几次的 Receive() 。Receive是从连接读缓冲区里读取解析数据。 receive() 是不可或缺的！ 不能多，也不能少，每个 send() 都对应一个 receive()。
   - 使用了 pipeline 批量确实有效的减少了时延，也减少了 redis 压力。不要再去使用 golang redigo 这个库了，请直接选择 go-redis 库。
-
 - [defer 坑过](https://mp.weixin.qq.com/s/1T6Z74Wri27Ap8skeJiyWQ)
   - case 1
      ```go
@@ -113,9 +109,7 @@
          fmt.Println("c = ", c())
      }
      ```
-  - case 2
-
-  defer 表达式的函数如果在 panic 后面，则这个函数无法被执行。
+  - case 2 defer 表达式的函数如果在 panic 后面，则这个函数无法被执行。
    ```go
    func main() {
        panic("a")
@@ -524,13 +518,11 @@
     - 公司之前 metrics 上报 client 都是基于 udp 的，大多数做的简单粗暴，就是一个 client，用户传什么就写什么
     - 本质上，就是在高成本的网络操作上套了一把大的写锁，同样在高并发场景下会导致大量的锁冲突，进而导致大量的 Goroutine 堆积和接口延迟
     - 和 UDP 网络 FD 一样有 writeLock，在系统打日志打得很多的情况下，这个 writeLock 会导致和 metrics 上报一样的问题。
-
 - Misc
   - 同学反馈 getty “在一个大量使用短链接的场景，XX 发现造成内存大量占用，因为大块的buffer被收集起来了，没有被释放”。
     - 通过定位，发现原因是 sync.Pool 把大量的 bytes.Buffer 对象缓存起来后没有释放。集团的同学简单粗暴地去掉了 sync.Pool 后，问题得以解决。复盘这个问题，其根因是 Go 1.13 对 sync.Pool 进行了优化：在 1.13 之前 pool 中每个对象的生命周期是两次 gc 之间的时间间隔，每次 gc 后 pool 中的对象会被释放掉，1.13 之后可以做到 pool 中每个对象在每次 gc 后不会一次将 pool 内对象全部回收。
     - 所以，Go 官方没有 ”修复“ sync.Pool 的这个 bug ，其上层的 dubbogo 还能稳定运行，当他们 ”修复“ 之后，上层的 dubbogo 运行反而出了问题。
   - Go 语言 另外一个比较著名的例子便是 `godebug=madvdontneed=1`。Go 1.12 对其内存分配算法做了改进：Go runtime 在释放内存时，使用了一个自认为更加高效的 MADV_FREE 而不是之前的 MADV_DONTNEED，其导致的后果是 Go 程序释放内存后，RSS 不会立刻下降。这影响了很多程序监控指标的准确性，在大家怨声载道的抱怨后，Go 1.16 又改回了默认的内存分配算法。
-
 - [线上偶现的panic问题](https://mp.weixin.qq.com/s/VOwlkkm_KC9FG_c2jQhcew)
   - panic 
     ```shell
