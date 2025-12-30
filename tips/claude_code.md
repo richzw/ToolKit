@@ -1,5 +1,33 @@
+- [AI 比你更"熟练"时，如何划定控制权的边界](https://mp.weixin.qq.com/s/ZaVuD8zslb_knCvcR2WCIA)
+  - 工欲善其事，必先利其器。然利器在手，当知进退，明取舍。善用者如庖丁解牛，游刃有余；不善用者如邯郸学步，反失其本
+  - R-C-V 三维评估模型：给 AI 划红线
+    - Risk（风险不对称性）、Context（语境封闭性） 和 Verification（验证成本）。
+    - 风险不对称性：搞砸了会翻车吗？
+      - 核心拷问： 如果 AI 搞砸了，后果是线性的还是指数级的？
+      - “可逆性”是自动化的前提。 哪怕 AI 的准确率高达 99.99%，只要剩下的 0.01% 会导致”炸毁系统”，那么控制权必须在人手中
+    - 语境封闭性：信息够用吗？
+      - 核心拷问： 解决这个问题所需的信息，是否都在 Prompt 的窗口里？
+      - AI 是局部最优的，人是全局最优的。 当任务需要”跳出当前窗口”去思考时，人绝不能离场。这不是”摆烂”，这是”破防”前的最后一道防线。
+    - 验证成本 vs. 生成成本：检查比写还累吗？
+      - 核心拷问： 检查 AI 的答案，是否比我自己做一遍更难？
+      - 如果验证 AI 产出的成本（包含隐性风险成本）高于从头手写的成本，那么所谓的”自动化”就是伪命题。
+  - 决策矩阵：你的行动指南
+    - Copilot Zone（低风险 + 封闭语境）：AI 的”舒适区”
+      典型场景： 正则表达式、SQL 查询优化、Boilerplate 代码、JSON 格式化、日志清洗脚本。
+    - Gatekeeper Zone（高风险 + 封闭语境）：AI 的”内测区”
+      典型场景： 核心支付逻辑、并发锁机制、自动驾驶的目标识别算法、医疗影像初筛。
+    -  Inspiration Zone（低风险 + 开放语境）：AI 的”公测区”
+       典型场景： 产品头脑风暴、UI 设计草图、文案初稿、测试用例的边缘场景发散。
+  - AI 给出的是概率最高的答案，而我们需要的是逻辑上正确的答案
+- 如何有效审查 AI 生成的代码？ Boris
+  - CC
+    - 1. 默认使用 Plan 模式。
+    - 2. 给 Claude 提供一种验证其输出结果的方法，比如单元测试、Claude Chrome 扩展程序，或者 iOS/Android 模拟器。
+    - 3. 使用 /code-review 来自动化大部分的代码审查工作。 对 Claude 生成的代码保持与人类写的代码相同的标准
+  - 让 AI 自己加日志，然后运行后把日志发回给 AI
+    - 比如在调试一个问题，先尝试让它修复，它没能修复，我就让它加上必要的日志, 代码中加上日志后再运行，重现 Bug，把运行后的日志发回给 Codex
 - [global agent guide](https://www.dzombak.com/blog/2025/08/getting-good-results-from-claude-code/)
-
+  ```
     # Development Guidelines
     
     ## Philosophy
@@ -152,7 +180,7 @@
     - Update plan documentation as you go
     - Learn from existing implementations
     - Stop after 3 failed attempts and reassess
-
+  ```
 
 - [ChatGPT 和 Claude 都有记忆功能，但两者实现原理截然不同](https://www.shloked.com/writing/claude-memory)
   - ChatGPT 的记忆模式是自动化、魔法般的个性记忆，不需要用户提醒，自动的悄悄记录用户的使用细节。
@@ -467,6 +495,14 @@
   - [本地 Claude Code 会话 → HTML 转录页](https://simonwillison.net/2025/Dec/25/claude-code-transcripts/) 
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
+  - [Agent Skill](https://mp.weixin.qq.com/s/p-I5lcd43d_6zu3rFIyW0Q)
+    - Agent Skills 更像一个操作手册，主要存在本地的文件里面，不需要调用外部接口，主要是用来告诉 AI 有哪些领域知识，然后教 AI 如何正确、高效地使用这些手，按照什么步骤去完成特定任务。
+    - Agent Skills 解决了 MCP 无法解决的三个核心问题
+      - 节省 token; 解决“会用工具但不懂业务”的问题（业务流程固化）
+    - Agent Skills 最核心的创新是渐进式披露（Progressive Disclosure）机制。AI 在使用 Agent Skills 的时候并没有将整个知识库加载到人工智能有限的上下文窗口中，而是以智能的、高效的层级方式加载信息
+      - 第一层：元数据（Metadata）：首先只看到每个可用Agent Skills的名称和描述，也就是 Frontmatter buff
+      - 第二层：技能主体（Instructions）：一旦确定了相关技能，AI 就会读取主 SKILL.md 文件。该文件包含执行任务的分步指令和核心逻辑
+      - 第三层：附加资源（Scripts & References）：如果说明中提到了其他文件（例如用于数据验证的 Python 脚本或报告模板），AI 会根据需要访问这些特定资源
 - [Continuous Claude](https://github.com/parcadei/Continuous-Claude): 
   - 解决 Claude Code 等 AI Coding Agent 在长会话中面临的一个痛点：上下文丢失与“遗忘”
   -  原生机制：为了节省空间，Claude Code 会进行“压缩”，把之前的对话总结成摘要。

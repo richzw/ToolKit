@@ -221,7 +221,15 @@
 - [ETL 到流式计算](https://mp.weixin.qq.com/s/vmZNxqYQLDDx-N5FDn1ajw)
 - [From Batch to Streaming: Accelerating Data Freshness in Uber’s Data Lake](https://www.uber.com/en-HK/blog/from-batch-to-streaming-accelerating-data-freshness-in-ubers-data-lake/)
   - Uber 如何将数据湖的摄入（ingestion）从传统批处理（Spark batch）迁移到基于 Apache Flink 的流式处理，以显著提升数据新鲜度、降低成本，并在 PB 级规模上实现可运维、可扩展
-  - 
+- [从 40 亿整数到 HBase：一个 Membership Test 问题的抽象与演化](https://mp.weixin.qq.com/s/2qgXoZjMD8twL0GioHIrBw)
+  - Bitmap 的使用限制、Bloom Filter 的误判原理、HBase 读取路径中过滤和索引的分工
+    - 理解 Bloom Filter 在 HBase 中的作用：主要是减少不必要的磁盘读写操作，而不是直接给出最终答案
+  - Bitmap 成立依赖的前提条件¶
+    - Key 是整数，且能直接作为下标或可无冲突映射成下标
+    - 值域有限且可控（能为“所有可能 key”分配 bit）
+    - 分布相对稠密（否则空间性价比差：空间随值域而非集合大小增长）
+    - 可分配连续内存（一次性大数组/位数组）
+  - Bloom Filter + 外存精查（HFile）允许假阳性，用于减少 IO/减少无谓查找
 
 
 

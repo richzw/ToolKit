@@ -1671,6 +1671,7 @@
       - • Glean（“筛选”阶段）：通过重新排序与过滤，剔除不相关部分，最大化精度。
   - [Manus Context Engineering](https://drive.google.com/file/d/1QGJ-BrdiTGslS71sYH4OJoidsry3Ps9g/view?pli=1)
     - https://www.youtube.com/watch?v=6_BcCthVvb8
+    - https://waytoagi.feishu.cn/wiki/HoHaw9muiiZCQxkKoQJclDO0nwb  Manus项目立项讨论
 - [Redefining Document Retrieval with Vision-Language Models](https://zilliz.com/blog/colpali-milvus-redefine-document-retrieval-with-vision-language-models?utm_source=x)
   - 传统检索流程痛点：
     • 需要进行 OCR、布局检测、段落/表格识别、文本切分与嵌入等诸多步骤，极其复杂且易出错。
