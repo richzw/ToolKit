@@ -315,9 +315,19 @@
     - 热轮询（while循环空转，CPU资源浪费大）
     - 冷轮询（yield_now让出时间片，有改进）
     - 条件变量配合互斥锁（效率高，适合条件同步，但已回到OS锁）
-
-
-
+- 特征对象（Trait Objects）
+  - Rust 的特征对象 (dyn Trait) ≈ C++ 的虚基类指针 (Base) ≈ Go 的 interface。
+  - 在 Rust 中，如果你想编写一个函数，或者定义一个容器（如 Vec），让它可以接受多种不同类型的数据，只要这些数据实现了同一个 Trait，你有两种选择：
+    - 泛型（Generics）：fn foo<T: Draw>(x: T)
+      - 这是编译期决定的。
+      - 编译器会为每个不同的类型生成不同的代码（单态化）。
+      - 缺点：你不能在一个 Vec 里同时存 u8 和 f64，因为 Vec 只能存一种类型。
+    - 特征对象（Trait Objects）：fn foo(x: &dyn Draw)
+      - 这是运行期决定的。
+      - “类型擦除”（Type Erasure）：编译器此时不再关心具体的类型是 u8 还是 f64，它只关心“这东西能 Draw”。
+      - 优点：你可以在一个 Vec<Box<dyn Draw>> 里混存 u8 和 f64。
+  - 特征对象（Trait Objects）实现的方式其实和 C++ 的虚表实现很像，比如当你把一个具体类型（如 &u8）转换成特征对象（&dyn Draw）时，Rust 会生成一个胖指针（Fat Pointer）
+  - 
 
 
 

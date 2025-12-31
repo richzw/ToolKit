@@ -365,8 +365,10 @@
       - 解决策略：在排序里加入唯一/更稳定的 tie-breaker
         - order by create_time desc, order_id asc
         - 由于二级索引叶子节点包含主键值（InnoDB 二级索引叶子通常带主键），加入 order_id 不一定引入额外回表，但会引入“更重的排序成本”（作者通过压测评估可接受）。
-
-
+- [Postgresql 约束底层](https://mp.weixin.qq.com/s/q4yHAWhO9Yeav4_DM5YyBA)
+  - 无论列/表约束、域约束、约束触发器，本质上都能用系统目录（尤其 pg_constraint，配合 pg_class/pg_type/pg_attribute）串起来理解。
+  - 外键“像触发器”并非比喻：在实现层面确实由系统触发器执行检查与联动动作，只是这些触发器被约束系统管理/关联
+- [Multiversion Concurrency Control (MVCC): A Practical Deep Dive](https://celerdata.com/glossary/multiversion-concurrency-control)
 
 
 

@@ -1174,6 +1174,7 @@
   - 适用范围与限制
     - • 仅在静态 CPU Manager 模式下生效；Best-Effort，若节点资源不足仍会跨 cache 分配。
     - • 与 NUMA / Topology Manager 等可联合使用，但需评估整体亲和策略。
+- [1.35: Introducing Workload Aware Scheduling](https://kubernetes.io/blog/2025/12/29/kubernetes-v1-35-introducing-workload-aware-scheduling/)
 - [Top Kubernetes (K8s) Troubleshooting Techniques](https://www.cncf.io/blog/2025/09/12/top-kubernetes-k8s-troubleshooting-techniques-part-1/)
   - https://www.cncf.io/blog/2025/09/19/top-kubernetes-k8s-troubleshooting-techniques-part-2/
   - kubectl top pods --all-namespaces --sort-by=cpu

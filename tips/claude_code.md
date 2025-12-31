@@ -526,9 +526,29 @@
         · SessionStart：自动加载上次的“账本”和“交接文档”。
         · PreCompact：在 Claude 试图压缩上下文之前，自动拦截并保存当前状态，防止信息丢失。
         · StatusLine：在终端底部显示一个彩色的状态栏，实时告诉你 Token 用了多少，是否需要清理上下文了。
+- [Claude Code power user customization: How to configure hooks](https://claude.com/blog/how-to-configure-hooks)
+  - Hook
+    - Hook 本质上是你编写的一段自定义 Shell 命令：当 Claude Code 会话内发生某个“事件”（例如即将写文件、你提交提示词等）时，Claude Code 会自动执行该命令
+    - Hook 在本地环境以你的用户权限运行，通过 stdin 接收事件信息（JSON），并通过退出码 + stdout把结果反馈给 Claude Code，从而在“不修改 Claude Code 本体”的情况下精确改变其行为
+  - Hook 主要解决三类摩擦
+    - 消除重复手工步骤：如每次写文件后自动跑 Prettier；反复执行 npm test 不再每次弹权限确认。
+    - 自动执行项目规则/护栏：如阻止危险命令、写入前校验路径、防止覆盖敏感文件。
+    - 动态注入上下文：会话启动时注入 git status、TODO；每次发问自动附加当前 sprint 上下文
+  - Hook 配置放在 JSON settings 文件中，文章强调有 三层：
+    - 项目级（可提交共享）：.claude/settings.json
+    - 用户级（全局生效）：~/.claude/settings.json
+    - 项目本地（个人配置，不想提交）：.claude/settings.local.json
 
-
-
+  | Hook 事件 | 触发时机 | 常见用途（文章示例/要点） |
+  |---|---|---|
+  | **PreToolUse** | Claude 选定要用某个工具后、工具执行前 | 阻止危险 Bash、校验写入路径、自动批准安全操作、甚至修改工具参数  |
+  | **PermissionRequest** | 将要弹出权限对话框之前 | 对 `npm test*` 之类高频命令自动批准；阻止访问敏感目录/文件  |
+  | **PostToolUse** | 工具成功执行后立刻触发 | 写/改文件后自动格式化（Prettier/Black/gofmt）、跑 lint、记录审计日志  |
+  | **PreCompact** | Claude 即将做“上下文压缩（compaction）”前 | 备份完整 transcript、提取关键决策/代码片段，避免压缩丢细节  |
+  | **SessionStart** | 会话开始或恢复时 | 把 `git status`、TODO、环境信息输出到 stdout 作为上下文注入  |
+  | **Stop** | Claude 完成响应并准备等待下一步输入时 | 做“是否真的完成”的检查；可强制继续（多步骤工作流/检查清单）  |
+  | **SubagentStop** | 子代理（subagent）完成时 | 验证子代理输出质量，决定 accept/reject，并触发后续动作  |
+  | **UserPromptSubmit** | 你提交 prompt 后、Claude 处理前 | 每次提问自动附加 sprint context、最近错误日志/测试结果；也可做 prompt 校验/拦截  |
 
 
 
