@@ -43,6 +43,7 @@
   - [Tools](https://www.thinkwithgoogle.com/tools/)
     - Find my audience
 - [Node.js Addon](https://mp.weixin.qq.com/s/6Qm5DpNWEyCBkI9Fh_Z0CA)
+  - [require(esm) in Node.js: from experiment to stability](https://joyeecheung.github.io/blog/2025/12/30/require-esm-in-node-js-from-experiment-to-stability/)
 - [P 和 NP](http://www.matrix67.com/blog/archives/7084#more-7084)
 - [搜索引擎]
   - 多模态语义理解技术在用户意图分析、向量召回、倒排召回以及相关性排序四个方面的业务实践。

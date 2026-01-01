@@ -1274,6 +1274,7 @@
       - Ollama 与 OpenWebUI
     - [Ollama 架构解析](https://blog.inoki.cc/2024/04/16/Ollama-cn/)
     - [vLLM 原理](https://mp.weixin.qq.com/s/JqubXK1VbMaShrJY20aKMg)
+      - [一文读懂 VLM 背后的视觉编码器](https://jina.ai/pdf/vision-encoder-survey.pdf)
       - LLM Model Serving 
       - 常规的LLM推理过程通常分为两个阶段：prefill和decode。通常会使用KV cache技术加速推理。
       - The core idea of vLLM (Virtual Large Language Model) is to optimize the serving and execution of LLMs by utilizing efficient memory management techniques.

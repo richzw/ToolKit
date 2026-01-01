@@ -390,7 +390,7 @@
   - Count-Min Sketch
     - Purpose: Finds the frequency of items in a large data stream.
     - 记“各出现几次，不能去重。”（每个出现了多少次，不管重复）- 哈希表+二维计数数组
-
+- [Concurrent Hash Table Designs](https://bluuewhale.github.io/posts/concurrent-hashmap-designs/)
 
 
 

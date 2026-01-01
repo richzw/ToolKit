@@ -358,8 +358,18 @@
     - 建议将 batch.size 设置得尽可能大（例如 256K） 
       - linger.ms 是基于服务端的平均生产延迟来设定的。一旦服务端出现性能抖动（Jitter），更大的 batch.size允许我们在单个 RecordBatch 中积攒更多数据，从而避免因为拆分成多个小请求发送而导致整体延迟升高
 - [Write-Ahead Log（WAL）打造“更抗故障”的在线数据平台](https://netflixtechblog.com/building-a-resilient-data-platform-with-write-ahead-log-at-netflix-127b6712359a)
-
-
+- [消息队列积压百万](https://mp.weixin.qq.com/s/RYyfpZrrX91QrU1Y5zXUbQ)
+  - 为什么“加机器”不够
+    - 现象链路：峰值流量 → 生产速率暴增 → 下游处理变慢（DB/RPC/锁等）→ 消费速率落后 → Consumer Lag 上升 → 用户侧“处理中”延迟。
+    - “加机器”的边界：在 Kafka 等分区模型下，消费并行度受 分区数上限约束；消费者数量超过分区数不再提升吞吐
+  - 根因解释：分区模型 + 消费组再均衡
+    - 核心规则：同一 Consumer Group 内，一个分区同一时刻只能分配给一个消费者实例，以保证该分区内的顺序消费与简化协调。
+    - Rebalance：
+      - 消费者加入/退出、心跳超时等会触发重分配；
+      - Coordinator 根据分配策略（Range/RoundRobin 等）分配分区。
+    - 并行度结论：
+      - 消费者数 < 分区数：部分消费者会承担多个分区；
+      - 消费者数 > 分区数：多出来的消费者会闲置（拿不到分区）
 
 
 
