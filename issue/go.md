@@ -1324,8 +1324,8 @@
       - Consequently, when the inliner moves subtrees of code around during a transformation, it tends to misbehave with comments, either dropping them entirely or placing them incorrectly
 - [关键路径分析破解高并发延迟](https://www.youtube.com/watch?v=BayZ3k-QkFw)
   - 关键路径分析算法以及合成火 焰图等高级功能，目前仍主要处于 Datadog 内部探索或商业产品阶段，尚未直接集成到标准的 go tool trace 中
-
-
+- [Go 生态应对供应链攻击的范式转移](https://mp.weixin.qq.com/s/NaLk7V6F9cuBC5Phz_ukJg)
+  - Google 开源 Capslock 的定位与能力分类 面向 Go 的静态分析工具，通过解析构建产物/构建结果相关信息，构建调用图以识别“触及系统边界”的能力
 
 
 

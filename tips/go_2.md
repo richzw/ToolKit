@@ -2442,6 +2442,13 @@
     - len 适用于网络传输、内存大小等底层需求。
     - for-range / rune 面向文本逻辑。
 - [Writing Better Go: Lessons from 10 Code Reviews](https://speakerdeck.com/konradreiche/writing-better-go-lessons-from-10-code-reviews)
+  - [Party of One for Code Review](https://tidyfirst.substack.com/p/party-of-one-for-code-review)
+    - 重生：代码审查的使命转移
+      - 健全性检查（Sanity Check）：对抗 AI“幻觉”
+      - 对抗结构性漂移（Structural Drift）：守护架构可操作性
+    - 新工具：用 AI 审 AI（以 CodeRabbit 等 AI Review 工具为例）
+      - 自动摘要与可视化
+      - 模式守护者（偏离检测）
 - [iota：设计缺陷还是“黑魔法”](https://mp.weixin.qq.com/s/bAX1vg81DPSfvEGs9DNkxg)
   - iota 似乎是一个失败的设计：
     - 隐式重复：如果一个常量声明没有赋值，编译器会自动重复上一行的表达式。这个规则本身就不那么广为人知。

@@ -1384,7 +1384,7 @@
     - push 适合“delta 较小”的连续变化；如果遇到大规模变更（批量删除、历史数据回填 backfill 等），逐条触发大量状态更新的开销可能不划算，此时退回一次 pull 全量计算可能更合适。
   - Push + Pull
     - 最佳组合是：用 push 做增量计算 → 把增量结果写入支持 pull 的存储（表/索引/缓存）→ 用户再 pull 得到即时结果。
-
+- [内容审核系统](https://mp.weixin.qq.com/s/Q-W-GMxW-ye4tSoaZTIMlg)
 
 
 

@@ -493,6 +493,7 @@
     - 2. 大文件先读头部，然后分块顺序载入，或者基于 grep/抽象语法树，查找载入；
       - 无论哪种都会第一时间把头部载入，这样就能第一时间获取重要信息； claude skill的 md 也是这种策略，《金字塔原理》
   - [本地 Claude Code 会话 → HTML 转录页](https://simonwillison.net/2025/Dec/25/claude-code-transcripts/) 
+  - Claude Code 中开启 --chrome 后模型对着屏幕一顿疯狂截图
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
   - [Agent Skill](https://mp.weixin.qq.com/s/p-I5lcd43d_6zu3rFIyW0Q)
