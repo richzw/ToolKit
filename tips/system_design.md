@@ -1385,9 +1385,25 @@
   - Push + Pull
     - 最佳组合是：用 push 做增量计算 → 把增量结果写入支持 pull 的存储（表/索引/缓存）→ 用户再 pull 得到即时结果。
 - [内容审核系统](https://mp.weixin.qq.com/s/Q-W-GMxW-ye4tSoaZTIMlg)
-
-
-
+  - 第一步：先建立自己的“黑名单”体系
+    ```
+    `keyword` VARCHAR(255) NOT NULL COMMENT '敏感词',
+    `type` ENUM('BLACK','WHITE','NORMAL') DEFAULT 'NORMAL' COMMENT '类型: 黑名单/白名单/普通',
+    `category` ENUM('PORN','POLITICS','TERROR','AD','INSULT','OTHER') DEFAULT 'OTHER' COMMENT '分类: 色情/涉政/涉恐/广告/辱骂等',
+    `source` ENUM('HUMAN','VENDOR','AUDIT') DEFAULT 'HUMAN' COMMENT '来源: 人工录入/机审回流/客服审核回流',
+    `status` TINYINT(1) DEFAULT 1 COMMENT '状态: 1启用 0停用',
+    `hit_count` BIGINT DEFAULT 0 COMMENT '命中次数(统计用)',
+    ```
+  - 引入 Trie + Aho-Corasick 自动机，实现高性能敏感词匹配
+    - 只用 Trie，匹配效率还行，但每次遇到不匹配字符时需要回溯，性能会有瓶颈。 AC 自动机在 Trie 的基础上引入了“失败指针”，让匹配可以“平移”而不是回溯，效率更高
+  - 引入机审回流机制，减少误判率
+    - 机审的误判率偏高
+    - 机审命中的内容不再直接信任，而是进入我们的本地回流队列，由运营/算法标注后再落地到敏感词库或白名单。
+    - 机审返回的状态：
+      - PASS→ 暂时放行，但如果机审返回了疑似高风险候选词，写入候选表，供客服确认；
+      - REVIEW → 机器认为可疑，直接写入候选表，由人工复核；
+      - REJECT → 机器判定违规，直接拦截，但仍写入候选表等待人工确认；
+    - api_sensitive_candidates 表，用来记录第三方机审命中的可疑词
 
 
 

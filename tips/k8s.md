@@ -1054,6 +1054,8 @@
       - 通过 PodCertificateRequest 请求证书；
       - 将证书/密钥材料 写入 Pod 文件系统
     - https://mp.weixin.qq.com/s/D2fddmIey1qEDu1TWia0MA
+    - [New level of efficiency with in-place Pod restart](https://kubernetes.io/blog/2026/01/02/kubernetes-v1-35-restart-all-containers/)
+      - 核心动作是 RestartAllContainers，并通过特性门控 RestartAllContainersOnContainerExits 启用
 - Alpha 版: kubectl 的新配置选项，使用 .kuberc 实现用户首选项
     - HorizontalPodAutoscaler 可配置容差
       - 为了避免在指标发生小波动时创建或删除副本， Kubernetes 应用了一种迟滞形式：仅当当前和期望的指标值差异超过 10% 时， 才改变副本数量

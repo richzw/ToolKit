@@ -376,7 +376,11 @@
   - 在 claude code，可以在载入 skills并且完成 skills 的内容之后，让cc 把这个过程给总结到文档（可以固定成一个 slash command），然后 rewind 回滚到 skills 载入前的节点，说“我已经完成了，文档在 XXX”来实现；
   - [Agent Skills on opencode sample](https://opencode.ai/docs/skills/#override-per-agent)
 - [Multi-Agent Supervisor Architecture](https://www.databricks.com/blog/multi-agent-supervisor-architecture-orchestrating-enterprise-ai-scale)
-
+- Context Engineer
+  - 问在 XX 业务场景下面，read_file, write_file 如何设计。如果真的只有读，写具体文件，就可以到此结束。
+    - 读，渐进式读，而且还要插入从根目录到文件所在每个目录的 http://claude.md(http://agent.md ；
+    - 写要看什么业务，如果是Code，要把改动之后的信息诊断加上。
+    - https://agents.md/
 
 
 
