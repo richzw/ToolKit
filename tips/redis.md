@@ -690,3 +690,5 @@
   - 但 Redis 做 MQ 仍绕不开两类核心矛盾：
     - 中间件级别的可靠性上限（持久化策略、异步复制、故障切换窗口）
     - 积压成本高（内存为主）
+- Valkey
+  - https://valkey.io/events/keyspace-beijing-2025/

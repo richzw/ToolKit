@@ -34,6 +34,7 @@
     - Softmax 将 logits 转为概率分布 (P(\text{token} = j))。
     - 根据该分布选择下一 token，续写模型输出。
   - [introduction-to-algorithms-and-machine-learning](https://www.justinmath.com/books/#introduction-to-algorithms-and-machine-learning)
+  - [2025 LLM Year](https://simonwillison.net/2025/Dec/31/the-year-in-llms/)
 - [LLM (ML) Job Interviews ](https://mimansajaiswal.github.io/posts/llm-ml-job-interviews-fall-2024-process/)
 - [基于趋势和季节性的时间序列预测](https://mp.weixin.qq.com/s/Ln4E9iZd3b3EZqeEjNNsag)
   - 时间序列模式

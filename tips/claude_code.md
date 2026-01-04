@@ -405,6 +405,7 @@
        - 你只需要“自然语言调用”即可，比如： “使用 PDF skill 从这个文档中提取表格：path/to/some-file.pdf” 不需要你手动 /skill xxx，也不需要写什么配置
   - Codex CLI 里的 Skills：本地 ~/.codex/skills + --enable skills
   - https://simonwillison.net/2025/Dec/12/openai-skills/
+  - [awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills)
 - [Antigravity Grounded! Security Vulnerabilities in Google's Latest IDE](https://embracethered.com/blog/posts/2025/security-keeps-google-antigravity-grounded/)
   - 1. **谨慎启用 MCP 服务器与工具**
     - 默认禁用高风险工具（尤其是具有写、执行、外联能力的）。
@@ -494,6 +495,27 @@
       - 无论哪种都会第一时间把头部载入，这样就能第一时间获取重要信息； claude skill的 md 也是这种策略，《金字塔原理》
   - [本地 Claude Code 会话 → HTML 转录页](https://simonwillison.net/2025/Dec/25/claude-code-transcripts/) 
   - Claude Code 中开启 --chrome 后模型对着屏幕一顿疯狂截图
+  - [Boris Cherny 公开了他的 CC 使用方法](https://x.com/bcherny/status/2007179832300581177)
+    - 复利思维和验证
+      - 复利思维体现在 CLAUDE. md 不是一次性写完的文档，而是团队在日常工作中持续积累的知识库。每次代码审查、每次发现问题，都在让这个文件变得更好。
+    - 多实例并行：同时运行 15-20 个 Claude
+      - 在终端和网页之间来回切换，用 & 符号把本地会话转到网页，或者用 --teleport 在两边传送。这种并行工作方式让他能同时推进多个任务。
+      - 在 http://claude.ai/code 网页版上跑 5 到 10 个任务。终端和网页可以互相“交接”：用&符号把本地会话转到网页，或者用--teleport 在两边来回切换。
+    - 模型选择：全程 Opus 4.5 with thinking
+    - 团队知识库：共享的 CLAUDE .md 文件
+    - 码审查集成：@.claude 标签触发改进
+    - Plan 模式：先规划再执行 大部分会话都从 Plan 模式开始（按两次 shift+tab 进入）
+    - 把每天重复做很多次的"内部循环"工作流都做成了 slash commands。这些命令保存在 .claude/commands/ 目录下，提交到 git
+    - 常用几个 subagents：code-simplifier 在 Claude 完成工作后简化代码，verify-app 包含了端到端测试 Claude Code 的详细指令。
+    - 用 PostToolUse hook 自动格式化 Claude 生成的代码
+    - 不用 --dangerously-skip-permissions。他用 /permissions 预先允许那些在他环境里确定安全的常见 bash 命令，避免不必要的权限提示。 这些配置大部分都保存在 .claude/settings.json 
+    - 长时间任务：后台代理和 Stop Hook
+      - 让 Claude 在完成时用后台代理验证工作
+      - 用 agent Stop hook 更确定性地做验证
+      - 用 ralph-wiggum 插件
+      - 在沙箱环境里用--permission-mode=dontAsk 或--dangerously-skip-permissions，让 Claude 不被权限确认打断，自己跑到底
+  - [Ralph Wiggum 插件：让 Claude Code “通宵干活”](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/ralph-wiggum)
+    - /ralph-loop "你的任务描述" --completion-promise "DONE" --max-iterations 50
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
   - [Agent Skill](https://mp.weixin.qq.com/s/p-I5lcd43d_6zu3rFIyW0Q)
@@ -551,8 +573,8 @@
   | **SubagentStop** | 子代理（subagent）完成时 | 验证子代理输出质量，决定 accept/reject，并触发后续动作  |
   | **UserPromptSubmit** | 你提交 prompt 后、Claude 处理前 | 每次提问自动附加 sprint context、最近错误日志/测试结果；也可做 prompt 校验/拦截  |
 
-
-
+- AI 时代的代码审核：写两遍，反而更快
+  - 先用最低成本把路趟一遍。第一版跑完，需求确认了，技术难点解决了，再来做设计，这时候你知道该设计什么、不该设计什么。少走很多弯路。
 
 
 

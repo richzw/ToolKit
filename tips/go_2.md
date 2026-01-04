@@ -2256,6 +2256,46 @@
           - omitempty 规则：若结果为 “空 JSON 值”（null, "", [], {}) 则省略。
           - time.Duration 默认报错，需通过格式化选项显式指定。
         -  v1 将内部重写为调用 v2
+      - [JSON evolution in Go: from v1 to v2](https://antonz.org/go-json-v2/)
+        - 写入/读取：MarshalWrite 与 UnmarshalRead（替代部分 Encoder/Decoder 场景）
+          - json.MarshalWrite(w, v)：直接写入 io.Writer
+          - json.UnmarshalRead(r, &v)：直接从 io.Reader 读取并解析
+          - MarshalWrite 不会像旧的 Encoder.Encode 那样自动追加换行。
+          - UnmarshalRead 会从 reader 一直读到 io.EOF；而旧的 Decoder.Decode 更像“每次只读一个 JSON 值”
+        - 真正的流式编解码：jsontext + MarshalEncode / UnmarshalDecode
+          - v2 把 Encoder / Decoder 类型移动到了新的 jsontext 包中（面向更底层的流式 token 操作），接口也发生显著变化
+          - 为了实现类似旧版“JSON 流（一个接一个对象）”的行为，v2 推荐组合使用：
+            - jsontext.Encoder + json.MarshalEncode(enc, v)
+            - jsontext.Decoder + json.UnmarshalDecode(dec, &v)
+        - v2 将大量“行为开关”收敛成 Options，并允许每个编解码函数传入任意多个选项
+          - FormatNilMapAsNull / FormatNilSliceAsNull：控制 nil map/slice 编码为 null 还是 {}/[]
+          - MatchCaseInsensitiveNames：字段名匹配是否忽略大小写
+          - Multiline：多行格式化输出
+          - OmitZeroStructFields：省略零值字段
+          - SpaceAfterColon / SpaceAfterComma：输出更“可读”的空格
+          - StringifyNumbers：数字类型编码为 JSON 字符串
+          - WithIndent / WithIndentPrefix：缩进控制（文章提到：MarshalIndent 被移除，改用这些选项实现）
+        - Tags：兼容旧 tag，并新增更强的字段控制能力
+          - case:ignore / case:strict：大小写处理策略
+          - format:template：按模板格式化字段（文章示例用在日期）
+          - inline：把嵌套结构体字段“提升”到父对象（类似扁平化）
+          - unknown：接收未知字段（catch-all），把输入 JSON 中未映射到结构体字段的键值收集到指定字段（常用 map[string]any）
+        - 自定义编解码：从 MarshalJSON 走向“真正流式”的 MarshalerTo/UnmarshalerFrom
+          - 更推荐的“流式接口”
+            - MarshalJSONTo(enc *jsontext.Encoder) error UnmarshalJSONFrom(dec *jsontext.Decoder) error
+            - 原因是它们能避免中间 []byte 构造，以 token/stream 方式读写，通常更快
+          - v2 引入了用函数构造自定义 marshal/unmarshal 的机制
+            - MarshalFunc / UnmarshalFunc：基于 []byte
+            - MarshalToFunc / UnmarshalFromFunc：基于 jsontext.Encoder/Decoder（更流式）
+        - 默认行为变化
+          - 编码（Marshaling）差异
+            - nil slice：v1 → null；v2 → []（可用 FormatNilSliceAsNull 改回）
+            - nil map：v1 → null；v2 → {}（可用 FormatNilMapAsNull 改回）
+            - [N]byte 数组：v1 → 数字数组；v2 → base64 字符串（可用 format:array / format:base64 tag 调整）
+            - UTF-8 合法性：v1 允许字符串中出现无效 UTF-8；v2 默认不允许（可用 AllowInvalidUTF8 调整
+          - 解码（Unmarshaling）差异
+            - 字段名匹配大小写：v1 默认不区分大小写；v2 默认严格区分大小写（可用 MatchCaseInsensitiveNames 或 case tag 调整）
+            - 对象中重复字段：v1 允许；v2 默认不允许（可用 AllowDuplicateNames 调整
   - 运行时与工具链新动向
     - Green Tea GC
     - Goroutine 泄漏检测 - 与 Uber 合作，将现有基于 GC 的“部分死锁”检测算法并入 runtime
