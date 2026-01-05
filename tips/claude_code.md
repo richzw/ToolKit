@@ -526,6 +526,18 @@
       - 第一层：元数据（Metadata）：首先只看到每个可用Agent Skills的名称和描述，也就是 Frontmatter buff
       - 第二层：技能主体（Instructions）：一旦确定了相关技能，AI 就会读取主 SKILL.md 文件。该文件包含执行任务的分步指令和核心逻辑
       - 第三层：附加资源（Scripts & References）：如果说明中提到了其他文件（例如用于数据验证的 Python 脚本或报告模板），AI 会根据需要访问这些特定资源
+  - [Agent Skills 实战](https://mp.weixin.qq.com/s/lcORy_qmfIv4CHl7tYL2-Q)
+    - 从零构建 pdf-translator Skill
+      - 目标：PDF → 提取文本 → 翻译 → 输出 Markdown
+      - 工程准备：目录结构与 Python 环境
+      - 编写 SKILL.md：Frontmatter（元数据）+ Instructions（步骤）
+      - 编写脚本工具：extract_text.py / generate_md.py
+      - 注册与验证：在 Claude 环境中加载 Skill 并执行
+    - Skills 是如何“运行”的
+      - 架构：Skill Meta-tool + Individual Skills；本质是 prompt/context 注入（prompt expansion）
+      - 决策：通过展示元数据让模型做推理选择（非硬编码路由的设想）
+      - 渐进式披露：先只暴露元数据，选中后再加载全文，降低上下文压力
+      - 并发与状态：Tools 倾向无状态可并发；Skills 修改上下文因此更“有状态”、并发需谨慎
 - [Continuous Claude](https://github.com/parcadei/Continuous-Claude): 
   - 解决 Claude Code 等 AI Coding Agent 在长会话中面临的一个痛点：上下文丢失与“遗忘”
   -  原生机制：为了节省空间，Claude Code 会进行“压缩”，把之前的对话总结成摘要。
@@ -573,8 +585,10 @@
   | **SubagentStop** | 子代理（subagent）完成时 | 验证子代理输出质量，决定 accept/reject，并触发后续动作  |
   | **UserPromptSubmit** | 你提交 prompt 后、Claude 处理前 | 每次提问自动附加 sprint context、最近错误日志/测试结果；也可做 prompt 校验/拦截  |
 
-- AI 时代的代码审核：写两遍，反而更快
-  - 先用最低成本把路趟一遍。第一版跑完，需求确认了，技术难点解决了，再来做设计，这时候你知道该设计什么、不该设计什么。少走很多弯路。
-
+- [AI code guild](https://github.com/automata/aicodeguide)
+  - AI 时代的代码审核：写两遍，反而更快
+    - 先用最低成本把路趟一遍。第一版跑完，需求确认了，技术难点解决了，再来做设计，这时候你知道该设计什么、不该设计什么。少走很多弯路。
+- [Claude Programmatic Tool Calling ]
+  - PTC：让模型不再“逐次发起工具调用”，而是一次性生成可执行代码（文中为 Python），由沙箱执行代码去完成多步工具编排与数据处理，最后再把精简结果交回模型/用户。
 
 

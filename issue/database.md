@@ -1,4 +1,6 @@
 - [The Internals of PostgreSQL](https://www.interdb.jp/pg/index.html)
+  - [PostgreSQL Mistakes and How to Avoid Them](https://www.manning.com/books/postgresql-mistakes-and-how-to-avoid-them)
+  - [Postgres Internals - Indexes, WAL, MVCC, Locks and Queries](https://gitlab.com/-/snippets/4918687)
 - Debug high CPU of Postgres
   - We recommend running an `ANALYZE VERBOSE` operation to refresh the `pg_statistic` table.
   - [How can I troubleshoot high CPU utilization for Amazon RDS or Amazon Aurora PostgreSQL](https://aws.amazon.com/premiumsupport/knowledge-center/rds-aurora-postgresql-high-cpu/)

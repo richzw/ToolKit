@@ -1251,8 +1251,13 @@
   - 零侵入 API Server 内存优化：基于「按资源分组路由 + 按需启用 Watch Cache」的多 APIServer 架构，在不改业务接入方式的前提下，单集群 API Server 内存平均下降约 50%，Etcd CPU seconds 降低约 40%。
 - [K8s config best practice](https://kubernetes.io/blog/2025/11/25/configuration-good-practices/)
 - 开源后训练技术栈：Kubernetes + Ray + PyTorch + vLLM
-
-
+- [Kubernetes迁移中令人抓狂的故障追踪](https://medium.com/pinterest-engineering/debugging-the-one-in-a-million-failure-migrating-pinterests-search-infrastructure-to-kubernetes-bef9af9dabf4)
+  - https://medium.com/pinterest-engineering/debugging-the-one-in-a-million-failure-migrating-pinterests-search-infrastructure-to-kubernetes-bef9af9dabf4
+  - 根因深度剖析：cAdvisor 的 WSS/Referenced 采集触发内核页表扫描
+  - 问题解决：关闭 cAdvisor 的 WSS（container_referenced_bytes）采集
+  - 资源隔离很难：CPU shielding 不是“绝对隔离”，旁路的系统行为仍可能干扰。 (scribe.rip)
+  - 缩小问题空间：先证明“不是 AMI / 不是 cgroup / 不是资源不足”，避免在错误方向深挖。 (scribe.rip)
+  - 黑盒手段同样有效：kill -STOP 逐个暂停进程，本质是对宿主机做“二分法/归因”，在复杂系统里非常实用。
 
 
 

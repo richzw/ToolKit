@@ -1982,6 +1982,7 @@
      - Anthropic 提供的自动优化工具
      - 使用高级提示工程技术自动改进提示词
      - 测试显示在多标签分类任务中准确率提高了 30%
+  - [Prompting best practices Claude 4](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-4-best-practices)
 - [GPT-5.1 Prompting Guide](https://cookbook.openai.com/examples/gpt-5/gpt-5-1_prompting_guide)
 - [Prompt 工程实战指南](https://mp.weixin.qq.com/s/a_Jxm5NsErP4RYx8DaxYqQ)
   - 误区不在“技巧”，而在“一次写对”的幻觉
