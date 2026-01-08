@@ -401,6 +401,8 @@
   - [The Little Book of Deep Learning](https://fleuret.org/francois/lbdl.html)
   - [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/)
   - [Transformer模型之输入处理](https://mp.weixin.qq.com/s/ryjV4IVLbjUO-QVieOrW3A)
+  - [nanochat miniseries v1](https://github.com/karpathy/nanochat/discussions/420)
+    -  “nanochat miniseries v1”：用“单一拨盘（single dial）”系统化地训练一组从小到大的预训练模型（family of models），并用 scaling laws（规模律） 让它们在给定算力预算下达到“compute-optimal（计算最优）”的训练配置
   - [Understanding neural networks through sparse circuits](https://openai.com/index/understanding-neural-networks-through-sparse-circuits/)
   - [Let’s Build the GPT Tokenizer: A Complete Guide to Tokenization in LLMs](https://www.fast.ai/posts/2025-10-16-karpathy-tokenizers)
   - [Transformer模型之Encoder-Decoder](https://mp.weixin.qq.com/s/MPFq_-Jqu0DC7QffSK4oNg)

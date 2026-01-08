@@ -290,6 +290,7 @@
 - [RESTful API and Event Guidelines](https://opensource.zalando.com/restful-api-guidelines/#_zalando_restful_api_and_event_guidelines)
 - [推荐资源冷启动实践](https://mp.weixin.qq.com/s/_3CkflIJtsyndBqHhm8w3Q)
 - [How to Write A GitHub README](https://www.daytona.io/dotfiles/how-to-write-4000-stars-github-readme-for-your-project)
+  - [Writing better release notes](https://simonwillison.net/2022/Jan/31/release-notes/)
 - [红包算法](https://mp.weixin.qq.com/s/7ffyl2_NtiUhtSTxaK6IOw)
   - 普通随机法，简单来说其实就是剩余值随机. shuffle一下随机数组，让看起来不那么递减明显。
   - 二倍均值：实际上就是，用剩下金额的两倍均值为最大区间进行随机，相对正态分布，区间相对合适。
@@ -718,8 +719,8 @@
 - [Hyrum's Law](https://www.hyrumslaw.com/)
   - 当一个 API 的用户足够多时，无论文档/契约（contract）承诺了什么，系统所有“可观察到的行为”都会被某些用户当成依赖；因此这些行为会反过来约束你对实现的修改空间
   - 这里的“可观察到的行为”不仅包括显式输出/返回值，还可能包括性能特征、边界行为、错误信息、时序、资源消耗模式等任何外部能感知到的表现
-
-
+- [CLAUDE CODE ON-THE-GO - Doom Coding ](https://github.com/rberg27/doom-coding)
+  - https://granda.org/en/2026/01/02/claude-code-on-the-go/
 
 
 

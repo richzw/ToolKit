@@ -518,6 +518,11 @@
     - /ralph-loop "你的任务描述" --completion-promise "DONE" --max-iterations 50
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
+  - A Claude agent SKILL is a structured, reusable package stored in your project's ".claude/skills/" folder. It combines the following.
+    - Precise instructions defining the agent's role and step-by-step process
+    - Reference files (style guides, examples, brand voice)
+    - Executable scripts (Python, Node.js, Bash) for reliable, deterministic actions
+  - [Avoid dependency hell for Claude SKILLs](https://x.com/juntao/status/2008945207946170471)
   - [Agent Skill](https://mp.weixin.qq.com/s/p-I5lcd43d_6zu3rFIyW0Q)
     - Agent Skills 更像一个操作手册，主要存在本地的文件里面，不需要调用外部接口，主要是用来告诉 AI 有哪些领域知识，然后教 AI 如何正确、高效地使用这些手，按照什么步骤去完成特定任务。
     - Agent Skills 解决了 MCP 无法解决的三个核心问题

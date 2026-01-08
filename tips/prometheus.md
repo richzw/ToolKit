@@ -243,9 +243,36 @@
   - Trace：描述“一次请求”穿过整个分布式系统的端到端旅程（从用户触发到返回结果）。 
   - Span：Trace 的组成单元；每个 Span 表示一次具体操作（如 DB 查询、RPC/API 调用、函数执行等），并通过**父子关系（嵌套）**表达调用链路结构。
   - 文中用树状结构说明：一个 Trace 包含多个 Span，Span 记录时序信息与元数据，并可嵌套形成调用关系。
-
-
-
+- [Outlier Identify]()
+  - https://archive.siam.org/meetings/sdm10/tutorial3.pdf
+  - Approach I: Graphical Methods
+    - Scatter Plot: Look for points far from the main cluster.
+    - Box Plot: Outliers appear as points outside the whiskers.
+  - Approach II: Statistical Methods
+    - IQR
+      - Q3+1.5（Q3-Q1） Q1-1.5（Q3-Q1）
+    - 3sigma算法 Z-score
+      - 3σ原则是指在正态分布的情况下，距离均值μ±3σ之内的数据占比约为99.73%，即在一组数据中，距离均值μ±3σ之内的数据占比约为99.73%。
+    - 观测指标的检测分为两步：
+      - 纵向，获取历史同一时刻30个点的观测值，通过3sigma算法来检测异常。
+      - 横向，zscore算法进行变点检测，横向获取某个时刻往前历史30个点的观测值。
+  - Approach III: Machine Learning Methods
+    - Isolation Forest: Isolates anomalies based on how easily a data point can be separated.
+    - Elliptic Envelope: Fits a multivariate Gaussian distribution to identify outliers.
+    - LOF (Local Outlier Factor): Detects density-based anomalies.
+    - SVM (Support Vector Machine): Learns a boundary to separate normal and outlier data.]
+  - [周期识别：从 FFT 到自适应识别](https://mp.weixin.qq.com/s/2clIxada0E3sSoN9OntmTg)
+    - 观点：算法域指标周期性更复杂（实验/任务调度导致周期变化），FFT 在噪声大时难直接得到精确周期。
+    - 落地：给定候选周期集合，通过计算“滞后 1 周期”的自相关验证匹配度Pearson相关系数；候选周期越大使用更长历史、相关性阈值可降低。
+  - 异常检测：改进型 IQR
+    - 面对流量激增产生的“随机突刺”以及低流量场景下的“零水位”常态，检测算法需要具备极高的鲁棒性。
+    - 认为错误数指标常见 正偏态/高峰度，3-Sigma 假设正态易造成误报。
+    - 基于四分位距（IQR）算法进行深度改进。通过动态调整比例系数与阈值边界，完美适配非正态分布的错误数指标，在确保灵敏度的同时显著降低了误报率。
+      - 使用 IQR（Q3-Q1）箱线规则识别异常，并做工程增强：
+        - 零基线自适应：大量为 0 时，排除 0 值计算基线，减少低流量误报。
+        - 双阈值约束：超过绝对错误数阈值必异常；或超过基线相对阈值必异常。
+        - 参数可调：Q 分位、IQR 系数（默认 1.5）、上下界等按场景微调。
+    - 同时结合周期识别，提升对周期序列“局部异常点”的捕捉。
 
 
 

@@ -1,6 +1,9 @@
 - [The Internals of PostgreSQL](https://www.interdb.jp/pg/index.html)
   - [PostgreSQL Mistakes and How to Avoid Them](https://www.manning.com/books/postgresql-mistakes-and-how-to-avoid-them)
   - [Postgres Internals - Indexes, WAL, MVCC, Locks and Queries](https://gitlab.com/-/snippets/4918687)
+  - [Postgres archs ](https://implnotes.pages.dev/postgres/logical_structure)
+  - [Postgres SQL Query Roadtrip: Overview](https://internals-for-interns.com/posts/sql-query-roadtrip-in-postgres/)
+    - PostgreSQL 执行一条 SQL 从文本到结果的全流程路线图：Parsing → Analysis → Rewriting → Planning → Execution
 - Debug high CPU of Postgres
   - We recommend running an `ANALYZE VERBOSE` operation to refresh the `pg_statistic` table.
   - [How can I troubleshoot high CPU utilization for Amazon RDS or Amazon Aurora PostgreSQL](https://aws.amazon.com/premiumsupport/knowledge-center/rds-aurora-postgresql-high-cpu/)
@@ -371,11 +374,23 @@
   - 无论列/表约束、域约束、约束触发器，本质上都能用系统目录（尤其 pg_constraint，配合 pg_class/pg_type/pg_attribute）串起来理解。
   - 外键“像触发器”并非比喻：在实现层面确实由系统触发器执行检查与联动动作，只是这些触发器被约束系统管理/关联
 - [Multiversion Concurrency Control (MVCC): A Practical Deep Dive](https://celerdata.com/glossary/multiversion-concurrency-control)
-
-
-
-
-
+- [Databases in 2025: A Year in Review](https://www.cs.cmu.edu/~pavlo/blog/2026/01/2025-databases-retrospective.html)
+  -  PostgreSQL v18
+    - 异步 I/O（asynchronous I/O）存储子系统：被描述为让 PostgreSQL 走向“降低对 OS page cache 依赖”的路径。
+    - Skip Scan 支持：允许查询在 多列 B+Tree 索引上，即使缺失“前导列（leading key / prefix）”也仍可能利用索引
+  - 列式文件格式（尤其是 Parquet）进入“新一轮格式战争
+    - Parquet 的“真正问题”：实现碎片化导致互操作性差
+- [Oracle、MySQL和PostgreSQL三大数据库执行计划的区别](https://mp.weixin.qq.com/s/26GoD8Xs5EYrIcqKs5I2rA)
+  - 干预方式不同
+    - PostgreSQL 只能通过对表进行分析来改变执行计划，不支持通过添加hint的方式干预执行计划
+    - Oracle 不仅可以通过对表进行收集统计来改变执行计划，而且支持通过添加hint的方式直接干预执行计划的生成
+    - MySQL 虽然支持类似Oracle的hint功能，但其优化器相对简单，对复杂查询的处理能力不如Oracle强大
+  - 缓存机制差异
+    - Oracle和SQL Server 会自动缓存执行计划，相同的SQL语句（甚至大小写不同都会被当作不同语句）可以重用执行计划，减少解析开销
+    - PostgreSQL 并不会自动缓存执行计划，每次执行SQL查询都会从头开始解析、优化生成执行计划。但它在预处理语句和PL/pgSQL函数中会缓存执行计划
+  - 查询效率特点
+    - PostgreSQL 在单条数据处理、空间查询和转换方面表现出色，支持很多方法函数
+    - MySQL 在简单查询和读写操作上表现良好，但在复杂查询和大数据量分析方面不如Oracle
 
 
 
