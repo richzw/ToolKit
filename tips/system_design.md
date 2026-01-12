@@ -1412,8 +1412,10 @@
       - REVIEW → 机器认为可疑，直接写入候选表，由人工复核；
       - REJECT → 机器判定违规，直接拦截，但仍写入候选表等待人工确认；
     - api_sensitive_candidates 表，用来记录第三方机审命中的可疑词
-
-
+- [UserName Lookup Arch](https://blog.algomaster.io/p/username-lookup-architecture)
+  - Level 2：加缓存（Redis/Memcached）
+  - Level 3：Bloom Filter（把绝大多数请求“挡在 DB 之外”）
+  - Level 4：用户名建议（Trie / Prefix Tree + 压缩
 
 
 

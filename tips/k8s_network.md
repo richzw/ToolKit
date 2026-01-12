@@ -446,7 +446,8 @@
     - 源地址散列调度算法：SH，与目标地址散列调度算法类似，但它是根据源地址散列算法进行静态分配固定的服务器资源。
     - 最短延迟调度：SED，最短的预期延迟调度算法将网络连接分配给具有最短的预期延迟的服务器。如果将请求发送到第 i 个服务器，则预期的延迟时间为（Ci +1）/ Ui，其中 Ci 是第 i 个服务器上的连接数，而 Ui 是第 i 个服务器的固定服务速率（权重） 。
     - 永不排队调度：NQ，从不队列调度算法采用两速模型。当有空闲服务器可用时，请求会发送到空闲服务器，而不是等待快速响应的服务器。如果没有可用的空闲服务器，则请求将被发送到服务器，以使其预期延迟最小化（最短预期延迟调度算法）
-
+  - least loaded round robin by vmauth 
+    - https://docs.victoriametrics.com/victoriametrics/vmauth/#generic-http-load-balancer
 - [Tunneling](https://wiki.linuxfoundation.org/networking/tunneling)
   - Tunneling is a way to transform data frames to allow them pass networks with incompatible address spaces or even incompatible protocols.
   - Linux kernel supports 3 tunnel types: 

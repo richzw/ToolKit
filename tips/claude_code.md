@@ -516,6 +516,8 @@
       - 在沙箱环境里用--permission-mode=dontAsk 或--dangerously-skip-permissions，让 Claude 不被权限确认打断，自己跑到底
   - [Ralph Wiggum 插件：让 Claude Code “通宵干活”](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/ralph-wiggum)
     - /ralph-loop "你的任务描述" --completion-promise "DONE" --max-iterations 50
+  - 跳过启动时候要求登录的限制没办法使用 Claude Code
+    - 在 ~/.claude.json 这个配置文件里面加上 "hasCompletedOnboarding": true
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
   - A Claude agent SKILL is a structured, reusable package stored in your project's ".claude/skills/" folder. It combines the following.
@@ -543,6 +545,7 @@
       - 决策：通过展示元数据让模型做推理选择（非硬编码路由的设想）
       - 渐进式披露：先只暴露元数据，选中后再加载全文，降低上下文压力
       - 并发与状态：Tools 倾向无状态可并发；Skills 修改上下文因此更“有状态”、并发需谨慎
+  - [Agent Skill on CC](https://x.com/wshuyi/article/2009451186039214388)
 - [Continuous Claude](https://github.com/parcadei/Continuous-Claude): 
   - 解决 Claude Code 等 AI Coding Agent 在长会话中面临的一个痛点：上下文丢失与“遗忘”
   -  原生机制：为了节省空间，Claude Code 会进行“压缩”，把之前的对话总结成摘要。
