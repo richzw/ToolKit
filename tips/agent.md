@@ -52,6 +52,7 @@
     - • 有明显里程碑 → 加记忆
     - • 并行探索 → 多代理
 - [Building agents with the Claude Agent SDK](https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk)
+  - [The Complete Guide to Building Agents with the Claude Agent SDK](https://x.com/dabit3/article/2009131298250428923)
 - [What Makes 5% of AI Agents Actually Work in Production](https://www.motivenotes.ai/p/what-makes-5-of-ai-agents-actually)
   - 现在大家都还在拼 prompt，只有少数人开始拼上下文结构。
     - prompt engineering 已经不是核心了，context engineering 才是下一阶段的主战场。给再聪明的大模型喂进去一堆乱七八糟的输入，它还是只会胡说八道。

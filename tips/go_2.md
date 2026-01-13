@@ -1,6 +1,30 @@
 
 - [The Things I Find Myself Repeating About Go](https://www.youtube.com/watch?v=RZe8ojn7goo)
   - https://mp.weixin.qq.com/s/vmOMjLNcWFxzHJZOSh8DaA
+- [VictoriaMetrics 教你写出最高效的 Go 代码](https://mp.weixin.qq.com/s/1svEokrz5C0FwBEA88YGqw)
+  - 日志系统的“自我保护” (Rate Limiting)
+    - 错误引发的“日志风暴”耗尽了磁盘 I/O。VictoriaMetrics 教我们的第一课是：日志也需要限流。
+  - 配置管理：Flag 的艺术
+    - 为每个配置项提供了清晰文档和合理默认值，并支持通过 lib/envflag 内部包从环境变量覆盖配置
+  - 内存管理
+    - sync.Pool 的高效对象复用模式
+    - sync.Pool 虽好，但它有两个缺点：它是 per-CPU 的，且在 GC 时会被清空。对于极大的对象（如超过 64KB 的缓冲区），这可能导致内存使用量的不可控膨胀。
+    - 用 Channel 当对象池，比 sync.Pool 更可控 - 需要严格控制大对象的总数量时，带缓冲的 Channel 是比 sync.Pool 更安全的选择。
+    - 切片复用的极致：[:0] 技巧
+      - buf = buf[:0]，该模式清空切片但保留和重用底层数组，避免重新分配新切片（包括底层数组）
+    - 三种精细的缓冲区调整策略 (lib/bytesutil)：
+      - ResizeWithCopyMayOverallocate：按 2 的幂次增长（减少未来扩容次数，空间换时间）。
+      - ResizeWithCopyNoOverallocate：精确分配（节省内存，时间换空间）。
+      - ResizeNoCopy...：扩容但不拷贝旧数据（用于完全覆盖写入场景，最快）
+  - 并发与锁
+    - 面对高并发，如何让多核 CPU 跑满而不互相打架
+    - 分片锁 (Sharding)：化整为零。 这是解决锁竞争的“银弹”
+    - 原子操作：无锁编程
+      - 对于简单的计数器和状态标志操作这种简单逻辑，VictoriaMetrics 大量使用 atomic 包替代 Mutex
+    - 本地化 Worker Pool：消除 CPU 间通信
+      - 通用的 Worker Pool 有一个全局任务队列，这会导致多个 CPU 核心竞争同一个锁，且任务在不同核心间切换会带来缓存失效。
+      - 本地化优先的 Worker Pool：每个 Worker 优先处理分配给自己的任务（通过独立的 Channel），只有在空闲时才去“帮助”其他 Worker。
+    - 并发度控制：Channel 作为信号量进行限流；使用带缓冲 Channel 作为信号量来实现限流。
 - [Evolving Your API ](https://www.youtube.com/watch?v=9Mb0yy8u-Gs)
   - 原则一：未来防护（Future-Proofing）
     - 缩小暴露面
@@ -673,6 +697,10 @@
     m3 := 1 - m - m
     fmt.Println(m3, m+m+m3)
     ```
+  - [Go 的“浮点数陷阱”将被填平](https://mp.weixin.qq.com/s/4fzB652789mFtGmgLut_Vg)
+    - 同一段 int64(f) 代码在 amd64 / arm64 / riscv / wasm 等平台可能得到完全不同的值（MaxInt、MinInt、0 等）
+    - Go 编译器团队提出统一语义——饱和转换（saturating conversion）
+    - “饱和转换”含义：当结果超出目标整数类型表示范围时，不回绕、不随机，直接钳制（clamp）到边界值
 - [Shallow copy and Deep copy in Go](https://echorand.me/posts/go-values-references-etc/)
   - Basic data types
     - When it comes to the basic types, numbers and strings, it is always deep copy.

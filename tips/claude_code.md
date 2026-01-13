@@ -19,6 +19,7 @@
     -  Inspiration Zone（低风险 + 开放语境）：AI 的”公测区”
        典型场景： 产品头脑风暴、UI 设计草图、文案初稿、测试用例的边缘场景发散。
   - AI 给出的是概率最高的答案，而我们需要的是逻辑上正确的答案
+- [A Software Library with No Code](https://www.dbreunig.com/2026/01/08/a-software-library-with-no-code.html)
 - 如何有效审查 AI 生成的代码？ Boris
   - CC
     - 1. 默认使用 Plan 模式。
@@ -518,6 +519,21 @@
     - /ralph-loop "你的任务描述" --completion-promise "DONE" --max-iterations 50
   - 跳过启动时候要求登录的限制没办法使用 Claude Code
     - 在 ~/.claude.json 这个配置文件里面加上 "hasCompletedOnboarding": true
+  - [The complete claude code tutorial](https://x.com/eyad_khrais/article/2010076957938188661)
+    - Think First
+      - Thinking first, then typing, produces dramatically better results than typing first and hoping Claude figures it out.
+      - click shift + tab twice, and you’re in plan mode
+    - CLAUDE.md
+      - Keep it short. Claude can only reliably follow around 150 to 200 instructions at a time, and Claude Code's system prompt already uses about 50 of those
+      - Tell it why, not just what.
+        - When you give it the reason behind an instruction, Claude implements it better than if you just tell it what to do.
+        - "Use TypeScript strict mode because we've had production bugs from implicit any types" is better.
+    - Context degrades at 30%, not 100%. Use external memory, scope conversations, and don't be afraid to clear and restart with the copy-paste reset trick.
+    - 模型分工
+      - Opus 4.5: 适合复杂推理、架构决策和制定计划。虽然慢且贵，但“脑子”最清楚。
+      - Sonnet 4.5: 适合具体执行、写模板代码和重构。速度快，性价比高。
+      - 建议方案： Opus 做计划，Sonnet 做执行。
+  - 
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
   - A Claude agent SKILL is a structured, reusable package stored in your project's ".claude/skills/" folder. It combines the following.
@@ -546,6 +562,13 @@
       - 渐进式披露：先只暴露元数据，选中后再加载全文，降低上下文压力
       - 并发与状态：Tools 倾向无状态可并发；Skills 修改上下文因此更“有状态”、并发需谨慎
   - [Agent Skill on CC](https://x.com/wshuyi/article/2009451186039214388)
+  - [存储体系](https://mp.weixin.qq.com/s/9OJnRhtWzz7MtwP9XRJxKA)
+    - 多项目隔离问题：路径编码的项目目录 + Session文件独立存储 → 不同项目数据物理隔离，无交叉干扰；
+    - 数据丢失问题：JSONL流式追加写入 + 每条消息实时持久化 → 崩溃时仅可能丢失最后一行未写入数据，损失最小化；
+    - 对话追溯问题：uuid+parentUuid消息链 + 完整消息类型（thinking/tool_use/summary） → 可回溯每一轮交互的上下文、工具调用逻辑；
+    - 操作不可撤销问题：file-history-snapshot前置备份 + 哈希存储原始内容 + 快捷键撤销 → 支持一键回滚代码修改，无风险；
+    - 配置灵活度问题：三级配置体系（全局→本地→项目） + 权限优先级（deny>ask>allow） → 兼顾统一管理与局部定制，同时保障安全；
+    - 功能扩展问题：plugins + skills三级架构 → 支持插件、Skill的灵活扩展，适配不同开发场景。
 - [Continuous Claude](https://github.com/parcadei/Continuous-Claude): 
   - 解决 Claude Code 等 AI Coding Agent 在长会话中面临的一个痛点：上下文丢失与“遗忘”
   -  原生机制：为了节省空间，Claude Code 会进行“压缩”，把之前的对话总结成摘要。
@@ -598,5 +621,8 @@
     - 先用最低成本把路趟一遍。第一版跑完，需求确认了，技术难点解决了，再来做设计，这时候你知道该设计什么、不该设计什么。少走很多弯路。
 - [Claude Programmatic Tool Calling ]
   - PTC：让模型不再“逐次发起工具调用”，而是一次性生成可执行代码（文中为 Python），由沙箱执行代码去完成多步工具编排与数据处理，最后再把精简结果交回模型/用户。
-
+- vibe coding 的核心技能是沟通能力，是你能不能把需求描述得足够具体、足够清晰，让 AI 没有猜测的空间
+  -  vibe coding 真正的价值：不是让你变成工程师，而是让你能自己解决自己的问题。
+  - 适合 vibe coding 的场景： 个人自动化工具、一次性脚本、快速验证想法的原型、不涉及敏感数据的内部工具
+  - 不适合的场景： 金融、医疗等需要高可靠性的系统；需要长期维护迭代的产品；多人协作的代码库；涉及用户隐私和安全的应用
 
