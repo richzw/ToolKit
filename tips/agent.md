@@ -401,12 +401,34 @@
     - Cursor 现在把集成终端的输出自动同步到本地文件系统。AI 可以直接"看到"你的终端历史，需要的话还能用 grep 搜索特定内容。
   - 上下文工程的核心可能不是"怎么塞更多信息"，而是"怎么让模型高效获取需要的信息"。随着模型能力提升，把主动权交给模型是一个趋势。
   - 简单抽象的力量。在技术领域，我们经常迷恋复杂精巧的设计。但文件这个例子提醒我们：那些经过时间检验的简单抽象，往往比看起来高级的新发明更耐用。
-
-
-
-
-
-
-
+- [Cursor Agent 最佳实践](https://cursor.com/cn/blog/agent-best-practices)
+  - Agent 框架（Agent harness）有三个核心部分
+    - 指令：引导 Agent 行为的系统提示词和规则
+    - 工具：文件编辑、代码库搜索、终端执行等能力
+    - 用户消息：你的提示词和后续指令
+  - 从规划开始
+    - 在 agent 输入框中按下 Shift+Tab 以切换 Plan 模式
+  - 管理上下文
+    - 让 agent 自行获取上下文; 
+  - Rules：为你的项目提供静态上下文; Skills：动态能力与工作流
+- [Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents)
+  - 评估对象不只是模型输出文本，而是“模型 + 代理框架（harness/scaffold）+ 工具调用 + 环境状态变化”共同产生的最终结果
+  - 评估策略：能力 vs. 回归 (Capability vs. Regression)
+    - Capability/Quality eval：问“能做什么”；起步应当通过率低，作为改进的爬坡目标。
+    - Regression eval：问“会不会退步”；应接近 100% 通过率，用来防回归。
+    - 当 capability 高通过率“饱和”后，可毕业为 regression 套件，持续跑以监控漂移
+  - Going from zero to one: a roadmap to great evals for agents
+    - 0. Start early
+    - 1. Start with what you already test manually
+    - 2. Write unambiguous tasks with reference solutions
+    - 3 Build balanced problem sets
+    - 4: Build a robust eval harness with a stable environment
+    - 5: Design graders thoughtfully
+    - 6: Check the transcripts
+    - 7: Monitor for capability eval saturation
+    -  8: Keep evaluation suites healthy long-term through open contribution and maintenance
+  - Swiss Cheese Model 用来解释多层防御体系
+    - 没有一种单一的测试方法是完美的，只有将多种不同类型的测试叠加在一起，才能有效拦截错误。
+    
 
 

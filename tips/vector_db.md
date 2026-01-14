@@ -151,6 +151,11 @@
       - [Faiss: The Missing Manual](https://www.pinecone.io/learn/series/faiss/)
     - 「ScaNN（Scalable Nearest Neighbors）」的主要创新在于各向异性向量量化。它将数据点量化为一个向量，使得它们的内积与原始距离尽可能相似，而不是选择最接近的量化质心点。
       - [blog](https://blog.research.google/2020/07/announcing-scann-efficient-vector.html) [Vector Search ANN 服务](https://cloud.google.com/vertex-ai/docs/matching-engine/ann-service-overview?hl=zh-cn)
+      - [ScaNN就是电商推荐的最优解](https://mp.weixin.qq.com/s/pcwpeqh2qqm78MApyM1T-w)
+      - 它框架上和IVFPQ非常相似，优点在于改善了PQ编码的一些细节，以及使用了高效的SIMD实现。
+        - 主要适用于一些中等精度（召回率要求不高，比如推荐系统）、高吞吐、内存成本敏感的场合，以更低的内存占用（1/16 倍原始数据）取得亮眼的QPS。
+        - IVFPQ在量化阶段用kmeans聚类中心来代替subvector，在此基础上ScaNN对其做了进一步改进
+        - https://medium.com/@kumon/similarity-search-scann-and-4-bit-pq-ab98766b32bd
       - ScaNN 算法的核心思想是使用一种称为 Product Quantization（PQ）的技术将高维向量压缩成多个低维向量，并使用这些低维向量进行相似性搜索。PQ 技术可以将高维向量划分成多个子向量，并对每个子向量进行量化，从而将高维向量压缩成多个低维向量。这样可以大大降低相似性搜索的计算复杂度，提高搜索效率。
       - ScaNN 算法还使用了一种称为 Clustering Graph（CG）的技术，将数据集划分成多个子集，并构建一个图来表示这些子集之间的相似性关系。这样可以将相似的向量聚集在一起，从而提高搜索效率。
       - ScaNN 算法的优点在于它可以在大规模数据集上进行高效的相似性搜索，同时具有较高的搜索准确率。ScaNN 算法还支持增量式更新，可以动态地添加和删除向量，从而适应数据集的变化。

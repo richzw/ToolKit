@@ -533,7 +533,21 @@
       - Opus 4.5: 适合复杂推理、架构决策和制定计划。虽然慢且贵，但“脑子”最清楚。
       - Sonnet 4.5: 适合具体执行、写模板代码和重构。速度快，性价比高。
       - 建议方案： Opus 做计划，Sonnet 做执行。
-  - 
+  - [The claude code tutorial level 2](https://x.com/eyad_khrais/article/2010810802023141688)
+    - Skills: Teaching Claude Your Specific Workflows
+      - Create a folder with a SKILL.md file: ~/.claude/skills/your-skill-name/SKILL.md
+      - Or for project-specific skills that you want to share with your team: .claude/skills/your-skill-name/SKILL.md
+    - Subagents: Parallel Processing With Isolated Context
+      - context degradation happens around 45% of your context window.
+      - Claude Code includes three built-in subagents
+        - Explore: A fast, read-only agent for searching and analyzing codebases. Claude delegates here when it needs to understand your code without making changes.
+        - Plan: A research agent used during plan mode to gather context before presenting a plan.
+        - General-purpose: A capable agent for complex, multi-step tasks requiring both exploration and action
+      - add a markdown file to ~/.claude/agents/ (user-level, available in all projects) or .claude/agents/ (project-level, shared with your team).
+    - MCP connectors eliminate context switching
+      - Command: claude mcp add --transport http <name> <url>
+    - Skills encode patterns, subagents handle subtasks, MCP connects services.
+  - [Advent of Claude: 31 Days of Claude Code](https://adocomplete.com/advent-of-claude-2025/)
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
   - A Claude agent SKILL is a structured, reusable package stored in your project's ".claude/skills/" folder. It combines the following.
@@ -553,7 +567,7 @@
     - 从零构建 pdf-translator Skill
       - 目标：PDF → 提取文本 → 翻译 → 输出 Markdown
       - 工程准备：目录结构与 Python 环境
-      - 编写 SKILL.md：Frontmatter（元数据）+ Instructions（步骤）
+      - 编写 SKILL.md：Frontmatter（元数据）+ Instruction（步骤）
       - 编写脚本工具：extract_text.py / generate_md.py
       - 注册与验证：在 Claude 环境中加载 Skill 并执行
     - Skills 是如何“运行”的
@@ -562,7 +576,8 @@
       - 渐进式披露：先只暴露元数据，选中后再加载全文，降低上下文压力
       - 并发与状态：Tools 倾向无状态可并发；Skills 修改上下文因此更“有状态”、并发需谨慎
   - [Agent Skill on CC](https://x.com/wshuyi/article/2009451186039214388)
-  - [存储体系](https://mp.weixin.qq.com/s/9OJnRhtWzz7MtwP9XRJxKA)
+  - [CC存储体系](https://mp.weixin.qq.com/s/9OJnRhtWzz7MtwP9XRJxKA)
+    - 传统的本地存储方案往往存在数据隔离性差、崩溃易丢数据、配置管理混乱、操作不可撤销等问题。
     - 多项目隔离问题：路径编码的项目目录 + Session文件独立存储 → 不同项目数据物理隔离，无交叉干扰；
     - 数据丢失问题：JSONL流式追加写入 + 每条消息实时持久化 → 崩溃时仅可能丢失最后一行未写入数据，损失最小化；
     - 对话追溯问题：uuid+parentUuid消息链 + 完整消息类型（thinking/tool_use/summary） → 可回溯每一轮交互的上下文、工具调用逻辑；
@@ -619,9 +634,6 @@
 - [AI code guild](https://github.com/automata/aicodeguide)
   - AI 时代的代码审核：写两遍，反而更快
     - 先用最低成本把路趟一遍。第一版跑完，需求确认了，技术难点解决了，再来做设计，这时候你知道该设计什么、不该设计什么。少走很多弯路。
-- [Claude Programmatic Tool Calling ]
-  - PTC：让模型不再“逐次发起工具调用”，而是一次性生成可执行代码（文中为 Python），由沙箱执行代码去完成多步工具编排与数据处理，最后再把精简结果交回模型/用户。
-- vibe coding 的核心技能是沟通能力，是你能不能把需求描述得足够具体、足够清晰，让 AI 没有猜测的空间
   -  vibe coding 真正的价值：不是让你变成工程师，而是让你能自己解决自己的问题。
   - 适合 vibe coding 的场景： 个人自动化工具、一次性脚本、快速验证想法的原型、不涉及敏感数据的内部工具
   - 不适合的场景： 金融、医疗等需要高可靠性的系统；需要长期维护迭代的产品；多人协作的代码库；涉及用户隐私和安全的应用

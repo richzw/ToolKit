@@ -1,4 +1,6 @@
-
+- [How Terminal work](https://how-terminals-work.vercel.app/)
+  - terminal emulator 只是“送原始字符到 pty”；是否触发信号取决于内核 pty/tty 层的标志位与前台进程组设置（tcsetpgrp 等）
+  - “EOF 不是信号（not a signal）” EOF 更像是输入流语义，在 TTY 上表现为特定模式下的 read() 行为，而非内核异步信号
 - [find 命令的 7 种用法](https://mp.weixin.qq.com/s/XS2KOhBeGeviusIqIBnxKg)
   - 如果你的 Linux 服务器上有一个名为 logs 的目录，如何删除该目录下最后一次访问时间超过一年的日志文件呢 `find . -type f -atime +365 -exec rm -rf {} \`
   - 按名称或正则表达式查找文件 `find ./yang/books -type f -name "*.pdf"`
