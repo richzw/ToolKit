@@ -1,3 +1,7 @@
+- AI Native 工作方式
+  - 人负责：观点、方向、判断、决策。 
+  - AI 负责：整理、结构化、补充细节、执行。 
+  - 工具负责：连接和沉淀（Obsidian、Claude Code）
 - [AI 比你更"熟练"时，如何划定控制权的边界](https://mp.weixin.qq.com/s/ZaVuD8zslb_knCvcR2WCIA)
   - 工欲善其事，必先利其器。然利器在手，当知进退，明取舍。善用者如庖丁解牛，游刃有余；不善用者如邯郸学步，反失其本
   - R-C-V 三维评估模型：给 AI 划红线
@@ -547,6 +551,7 @@
     - MCP connectors eliminate context switching
       - Command: claude mcp add --transport http <name> <url>
     - Skills encode patterns, subagents handle subtasks, MCP connects services.
+  - [How I Use Claude Code](https://x.com/ashpreetbedi/article/2011220028453241218)
   - [Advent of Claude: 31 Days of Claude Code](https://adocomplete.com/advent-of-claude-2025/)
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill

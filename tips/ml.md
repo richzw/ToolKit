@@ -544,6 +544,16 @@
        – 强化学习(RL)：on-policy、但奖励稀疏；
        – 监督微调 / 传统蒸馏(SFT)：off-policy、奖励密集；
        – 本文提出的 on-policy distillation：既 on-policy 又密集奖励，把二者优势结合起来
+  - [Engram: Conditional Memory via Scalable Lookup: A New Axis of Sparsity for Large Language Models](https://x.com/vista8/article/2010944015928320298)
+    - 「用计算模拟记忆」的方式，正是当前大语言模型的核心痛点; Engram 给AI装上了一本「字典」，让模型学会了「查」而不是「算」
+    - Engram模块的核心
+      - 条件记忆（Conditional Memory）：基于经典N-gram结构（一种统计语言模型），但进行了现代化改造，成为一个可扩展的查找机制。时间复杂度为O(1)，即常量级查询，非常高效。
+      - 新稀疏轴：作为Mixture-of-Experts（MoE）范式的补充，Engram引入“条件记忆”作为新的稀疏维度。将静态模式检索从神经计算中分离，分配给专用内存模块。
+      - 解耦设计：早期层处理静态知识检索（类似“记忆”），后期层专注于动态推理（类似“思考”）。实验显示，最优分配是75%容量用于动态推理，25%用于静态查找。
+      - 无限记忆潜力：通过外部存储和快速检索，实现模型知识容量的“无限”扩展，而不增加计算负担。
+    - Engram的核心思想就是：把查表的归查表，把计算的归计算
+      - MoE代表的是条件计算：根据输入内容，动态选择激活哪些专家进行计算
+      - Engram代表的是条件记忆：根据输入内容，静态查找预存储的知识向量
 - [Prompt](https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/)
   - `Prompt Engineering`, also known as `In-Context Prompting`, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes without updating the model weights.
   - `Instructed LM` (e.g. InstructGPT, natural instruction) finetunes a pretrained model with high-quality tuples of (task instruction, input, ground truth output) to make LM better understand user intention and follow instruction
