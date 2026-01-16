@@ -5,6 +5,8 @@
 - [Feeds, Feelings, and Focus:
   A Systematic Review and Meta-Analysis Examining the Cognitive and
   Mental Health Correlates of Short-Form Video Use](https://psycnet.apa.org/fulltext/2026-89350-001.html)
+- PolyMarket
+  - [Polymarket 链上数据完全指南](https://x.com/runes_leo/article/2011376375136207041)
 - [Effective learning: Twenty rules of formulating knowledge](https://www.supermemo.com/en/blog/twenty-rules-of-formulating-knowledge)
   - Understand it first.
   - See the whole picture, then learn the parts.

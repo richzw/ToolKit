@@ -4,6 +4,13 @@
     - 推论二：错误处理必须显式且强制（error 作为值 + 多返回值）
     - 推论三：组合优于继承（struct/interface、embedding、隐式实现）
     - 推论四：工具链要快（编译速度 + 内置工具：gofmt/go test/go doc/go mod 等）
+  - [Go 的哲学强调避免不必要的抽象](https://mp.weixin.qq.com/s/nIpQZikRALON0EuhZXaK8g)
+    - 编程本身就是建立在无数层抽象之上的。
+      - 泛型：这是对类型的抽象。虽然 Go 曾长期拒绝它，但在技术上它是必要的，否则我们将充斥着重复代码。
+      - 接口：这是对行为的抽象。io.Reader 让我们不必关心数据来自文件还是网络。
+      - 函数：这是对指令序列的抽象。没有它，我们只能写长长的 main 函数。
+      - 汇编语言：这是对机器码的抽象。
+    - 抽象是一种表示 (Representation)，但它是一种刻意移除被表示事物某些细节的表示
 - [sync.Once](https://mp.weixin.qq.com/s/Eu6T5-4v82kdh-Url4O5_w)
   - `sync.Once`底层通过`defer`标记初始化完成，所以无论初始化是否成功都会标记初始化完成，即**不可重入**。
   - G1和G2同时执行时，G1执行失败后，G2不会执行初始化逻辑，因此需要double check。
@@ -1335,6 +1342,36 @@
   - 关键路径分析算法以及合成火 焰图等高级功能，目前仍主要处于 Datadog 内部探索或商业产品阶段，尚未直接集成到标准的 go tool trace 中
 - [Go 生态应对供应链攻击的范式转移](https://mp.weixin.qq.com/s/NaLk7V6F9cuBC5Phz_ukJg)
   - Google 开源 Capslock 的定位与能力分类 面向 Go 的静态分析工具，通过解析构建产物/构建结果相关信息，构建调用图以识别“触及系统边界”的能力
+- [内存去哪儿了](https://mp.weixin.qq.com/s/TQyA4fXqTdj5XewChd37xw)
+  - https://x.com/0xlelouch_/status/2000485400884785320
+  - 我的服务内存又在缓慢增长了，pprof 显示不出明显的泄漏点……内存到底去哪儿了？
+    - Go 的状态，就是由 Go runtime 管理的内存，它要么在栈 (stack) 上，要么在堆 (heap) 上
+    - Goroutine 不拥有内存，引用 (References) 才拥有。 一个 Goroutine 的退出，并不会释放内存。
+  - 三大“内存锚点”
+    - “永生”的 Goroutine：被遗忘的循环
+    - Channel：不止传递数据，更持有引用
+    - context：被忽视的生命周期边界
+  - 诊断“三板斧”
+    - pprof (无可争议)：通过 import _ "net/http/pprof" 引入它，并重点关注
+    - Goroutine Dumps: 通过 curl http://localhost:6060/debug/pprof/goroutine?debug=2 获取所有 goroutine 的详细堆栈信息
+    - 灵魂三问 (The Ownership Question)
+      - 谁拥有这段内存？(Who owns this memory?)
+      - 它应该在什么时候消亡？(When should it die?)
+      - 是什么引用，让它得以存活？(What reference keeps it alive?)
+  - The leaks nobody admits to
+    - fire-and-forget goroutines
+    - channels without consumers
+    - contexts never canceled
+    - maps used as caches with no eviction
+    - closures capturing large objects
+    - background workers started per request
+  - Go 并没有隐藏内存，它暴露了责任。 GC 无法修复糟糕的所有权设计。
+    - 1. design goroutine lifecycles
+    - 2. cancel contexts
+    - 3. bound queues and channels
+    - 4. evict caches
+    - 5. look at pprof occasionally
+
 
 
 

@@ -231,9 +231,17 @@
     - sed -n '/2023-11-15 14:00:00/,/2023-11-15 14:10:00/p' app.log（按时间段截取）
     - sed 's/\([0-9]\{3\}\)[0-9]\{4\}\([0-9]\{4\}\)/\1****\2/g' app.log（手机号脱敏）
     - “每分钟超时数”的组合（grep+sed+sort+uniq）
-
-
-
+- [Linux Perf 性能分析工具](https://mp.weixin.qq.com/s/fdVAydAa9OL-dT0eqnovYg)
+  - 基于事件采样的原理，以性能事件为基础，支持针对处理器相关性能指标与操作系统相关性能指标的性能剖析。可用于性能瓶颈的查找与热点代码的定位。
+  - Perf 工作模式
+    - Counting Mode
+      - Counting Mode 将会精确统计一段时间内 CPU 相关硬件计数器数值的变化。
+      - 为了统计用户感兴趣的事件，Perf Tool 将设置性能控制相关的寄存器。这些寄存器的值将在监控周期结束后被读出。典型工具：Perf Stat。
+      - Perf Stat：分析性能。
+    - Sampling Mode
+      - Sampling Mode 将以定期采样方式获取性能数据。
+      - PMU 计数器将为某些特定事件配置溢出周期。当计数器溢出时，相关数据，如 IP、通用寄存器、EFLAG 将会被捕捉到。典型工具：Perf Record。
+      - Perf Record：记录一段时间内系统/进程的性能事件, 默认性能事件为 cycles ( CPU 周期数 )
 
 
 

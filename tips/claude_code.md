@@ -553,6 +553,10 @@
     - Skills encode patterns, subagents handle subtasks, MCP connects services.
   - [How I Use Claude Code](https://x.com/ashpreetbedi/article/2011220028453241218)
   - [Advent of Claude: 31 Days of Claude Code](https://adocomplete.com/advent-of-claude-2025/)
+  - Tool Search now in Claude Code
+    - https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool
+    - Claude Code detects when your MCP tool descriptions would use more than 10% of context
+    - When triggered, tools are loaded via search instead of preloaded
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
   - A Claude agent SKILL is a structured, reusable package stored in your project's ".claude/skills/" folder. It combines the following.
@@ -589,6 +593,9 @@
     - 操作不可撤销问题：file-history-snapshot前置备份 + 哈希存储原始内容 + 快捷键撤销 → 支持一键回滚代码修改，无风险；
     - 配置灵活度问题：三级配置体系（全局→本地→项目） + 权限优先级（deny>ask>allow） → 兼顾统一管理与局部定制，同时保障安全；
     - 功能扩展问题：plugins + skills三级架构 → 支持插件、Skill的灵活扩展，适配不同开发场景。
+  - [Skill Agent 自动给文章配图](https://x.com/dotey/article/2011907793520116215)
+    - 如果你已经有了 Claude Code 这样的 Agent，直接告诉 Agent： ``请帮我安装 github.com/JimLiu/baoyu-skills 中的 Skills``
+    - 如果你只需要配图技能，就告诉它： ``请帮我安装宝玉的这个文章配图技能：github.com/JimLiu/baoyu-skills/blob/main/skills/baoyu-article-illustrator/SKILL.md``
 - [Continuous Claude](https://github.com/parcadei/Continuous-Claude): 
   - 解决 Claude Code 等 AI Coding Agent 在长会话中面临的一个痛点：上下文丢失与“遗忘”
   -  原生机制：为了节省空间，Claude Code 会进行“压缩”，把之前的对话总结成摘要。
