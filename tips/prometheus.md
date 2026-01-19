@@ -273,8 +273,11 @@
         - 双阈值约束：超过绝对错误数阈值必异常；或超过基线相对阈值必异常。
         - 参数可调：Q 分位、IQR 系数（默认 1.5）、上下界等按场景微调。
     - 同时结合周期识别，提升对周期序列“局部异常点”的捕捉。
-
-
+- [VictoriaLogs Basics: What You Need to Know, with Examples & Visuals](https://victoriametrics.com/blog/victorialogs-architecture-basics/)
+  - VictoriaLogs 
+    - 一个**轻量、单二进制（single-binary）、零配置（zero-config）、无 Schema（schemaless）**的日志数据库，支持多种采集/协议接入、压缩落盘、内置 UI 查询、Grafana 可视化、并可与 vmalert 做“从日志到告警”
+    - 自动为所有日志字段建立索引
+  
 
 
 

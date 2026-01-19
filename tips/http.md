@@ -701,7 +701,7 @@
     - c. Nagle 算法规则：当待发数据小于 MSS 且之前的未确认数据存在时，需等 ACK 或超时（≈200 ms）后才能再发新包。这里 Server 的第 9、12 号包都是小包，因此 12 号包被 Nagle 延迟，正好形成 1 RTT 的额外等待。
   -  “TLS 1.3 1 RTT”只描述协议层逻辑，实际耗时仍受 TCP 机制影响。
   - 对时延敏感的场景（Web、RPC、游戏等）通常应关闭 Nagle
-
+- [HTTP RateLimit headers](https://dotat.at/@/2026-01-13-http-ratelimit.html)
 
 
 

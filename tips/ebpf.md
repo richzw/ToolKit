@@ -1,4 +1,4 @@
-
+- [ebpf party](https://ebpf.party/)
 - [eBPF/Ftrace 双剑合璧：no space left on device 无处遁形](https://mp.weixin.qq.com/s/VuD20JgMQlbf-RIeCGniaA)
 - [eBPF 经典入门指南](https://mp.weixin.qq.com/s/d6lOxtiEheegCduTpHXQew)
 - [eBPF Beginner Skill Path](https://labs.iximiuz.com/skill-paths/ebpf-beginner-skill-path-aa16c6e8)
@@ -136,7 +136,6 @@
   - 利用uprobe跟踪dispatch_command函数，记录开始时间和 sql 语句，然后在uretprobe中计算时间，打印 sql 语句和时间。通过TID做主键保存信息
 - [eBPF包丢哪里](https://mp.weixin.qq.com/s/JgJJ1FfeHtqz61eb1mNbzw)
   - 使用bpftrace跟踪 kfree_skb_reason
-
 
 
 
