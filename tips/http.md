@@ -702,7 +702,7 @@
   -  “TLS 1.3 1 RTT”只描述协议层逻辑，实际耗时仍受 TCP 机制影响。
   - 对时延敏感的场景（Web、RPC、游戏等）通常应关闭 Nagle
 - [HTTP RateLimit headers](https://dotat.at/@/2026-01-13-http-ratelimit.html)
-
+  - IETF 正在推进标准化的 HTTP 限流响应头：通过在成功响应或 429 Too Many Requests 响应里返回 RateLimit-* 信息，让客户端“预先调整行为”，减少触发限流错误的概率
 
 
 

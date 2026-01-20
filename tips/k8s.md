@@ -1258,7 +1258,17 @@
   - 资源隔离很难：CPU shielding 不是“绝对隔离”，旁路的系统行为仍可能干扰。 (scribe.rip)
   - 缩小问题空间：先证明“不是 AMI / 不是 cgroup / 不是资源不足”，避免在错误方向深挖。 (scribe.rip)
   - 黑盒手段同样有效：kill -STOP 逐个暂停进程，本质是对宿主机做“二分法/归因”，在复杂系统里非常实用。
-
+- [调试 K8s 网络问题：使用 Inspektor Gadget 的 tcpdump Gadget](https://mp.weixin.qq.com/s/PmLiM6w8pOYNTvLeEqkqwA)
+  - 传统在 K8s 里用 tcpdump 的痛点 ; eBPF 带来的改变：不改容器也能抓包
+    - 抓包思路：在数据包进入/经过内核网络栈的阶段进行捕获，并通过 ring buffer / perf buffer 等机制把数据送到用户态
+  - Inspektor Gadget 的 tcpdump gadget：抓包 + 自动附加 K8s 元数据
+  ```
+  kubectl gadget run tcpdump:latest \
+  --namespace production \
+  --podname backend-service-7d9c8f \
+  --pf "port 5432" \
+  -o pcap-ng > db-connections.pcapng
+  ```
 
 
 

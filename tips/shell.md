@@ -242,7 +242,9 @@
       - Sampling Mode 将以定期采样方式获取性能数据。
       - PMU 计数器将为某些特定事件配置溢出周期。当计数器溢出时，相关数据，如 IP、通用寄存器、EFLAG 将会被捕捉到。典型工具：Perf Record。
       - Perf Record：记录一段时间内系统/进程的性能事件, 默认性能事件为 cycles ( CPU 周期数 )
-
+- [tmux](https://x.com/tz_2022/article/2012624953053503541)
+  -  tmux new -A -s main (这行命令最骚，如果有叫 main 的房间就进去，没有就新建，极其无脑)
+  - 
 
 
 

@@ -11,6 +11,19 @@
       - 函数：这是对指令序列的抽象。没有它，我们只能写长长的 main 函数。
       - 汇编语言：这是对机器码的抽象。
     - 抽象是一种表示 (Representation)，但它是一种刻意移除被表示事物某些细节的表示
+  - [Cryptography Principles](https://go.googlesource.com/proposal/+/master/design/cryptography-principles.md)
+    - Secure（安全实现）：实现必须尽量无漏洞，并显式考虑侧信道防护。
+    - Safe（防误用）：默认安全；不安全操作要“显眼且需要显式确认”。
+      - TLS：
+         - crypto/tls.Config{ InsecureSkipVerify: true } 这种命名把风险直接写在代码里：
+         - 让“跳过证书校验”在 Code Review 中极其显眼
+         - 强化默认行为（默认校验证书链与主机名）是安全的
+      - RSA：
+        - Go 的 crypto/rsa 许多操作（加密/签名/盲化等）要求显式传入 io.Reader 随机源（典型用 crypto/rand.Reader）：
+        - 迫使调用者思考随机源质量
+        - 避免库内部“偷偷用不合适的伪随机”
+    - Practical（实用）：优先覆盖绝大多数工程需求，而非提供“密码学实验工具箱”。
+    - Modern（现代）：跟进成熟且广泛接受的新标准；逐步弱化/淘汰旧算法与旧用法。
 - [sync.Once](https://mp.weixin.qq.com/s/Eu6T5-4v82kdh-Url4O5_w)
   - `sync.Once`底层通过`defer`标记初始化完成，所以无论初始化是否成功都会标记初始化完成，即**不可重入**。
   - G1和G2同时执行时，G1执行失败后，G2不会执行初始化逻辑，因此需要double check。
@@ -1371,7 +1384,17 @@
     - 3. bound queues and channels
     - 4. evict caches
     - 5. look at pprof occasionally
-
+- [如何用 -toolexec 实现零侵入式自动插桩？](https://mp.weixin.qq.com/s/8zc-nuE4RERFCi7kSqUmmA)
+  - Orchestrion https://github.com/DataDog/orchestrion
+    - Orchestrion 工作流（核心机制）：拦截 compile（以及相关阶段），对 .go 文件做 AST 级改写/注入，再让编译器编译“被改写的临时源码”
+    - 解析 .go 文件并进行类型检查（依赖 -importcfg 提供的归档信息）
+    - 对 AST 进行注入/改写（其内部使用了装饰/保留格式的 AST 工具链，文档提到使用 dave/dst）
+    - 将改写后的源码写到 Go 工具链工作目录，并用 //line 指令尽量保持原始行号（便于栈追踪/定位）
+    - 若注入引入了新的编译期依赖：需要解析并更新 -importcfg，确保编译器能找到这些新 import 的归档文件
+    - 记录链接期依赖（例如由 //go:linkname 引入）并在后续 link 阶段补齐
+  - 背景与痛点：Go 做分布式追踪/可观测性时，手动埋点、Context 传递、样板代码与升级成本高，缺少 Java/Python 那种“零改代码”体验。
+  - 破局思路：利用 Go 工具链的 -toolexec 在编译期拦截工具调用，获得“改源码但不改仓库源码”的机会
+  - Orchestrion 引入了类似 AOP（面向切面编程） 的概念。通过 YAML 配置文件，你可以定义“切入点”（Join Points）和“建议”（Advice）
 
 
 

@@ -7,6 +7,7 @@
   Mental Health Correlates of Short-Form Video Use](https://psycnet.apa.org/fulltext/2026-89350-001.html)
 - PolyMarket
   - [Polymarket 链上数据完全指南](https://x.com/runes_leo/article/2011376375136207041)
+  - [Polymarket 流动性奖励漫谈](https://x.com/polymaster/article/2013074136856449283)
 - [Effective learning: Twenty rules of formulating knowledge](https://www.supermemo.com/en/blog/twenty-rules-of-formulating-knowledge)
   - Understand it first.
   - See the whole picture, then learn the parts.
@@ -36,6 +37,7 @@
   - 智能手机加速度传感器的采样频率在持续提升，足以覆盖人的语音的频段
 - 37% rule 和 Optimal Stop Theory
   - 选择一种策略，总计N个选项，拒绝前K个选项，从K+1个选项开始只要看到比前K个选项优的选项则选择；K为多少时我们的策略能选到最优解的概率最大？
+  - [Algorithms for Decision Making](https://drive.google.com/file/d/1drcYW3iJz4wnnCqjuVwQyc5a6eC7i6cu/view)
 - copilot-explorer
   - https://thakkarparth007.github.io/copilot-explorer/posts/copilot-internals
   - https://mp.weixin.qq.com/s/dtfLeEfcwbz3fb4mLROVYQ
