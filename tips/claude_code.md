@@ -650,3 +650,124 @@
   - 适合 vibe coding 的场景： 个人自动化工具、一次性脚本、快速验证想法的原型、不涉及敏感数据的内部工具
   - 不适合的场景： 金融、医疗等需要高可靠性的系统；需要长期维护迭代的产品；多人协作的代码库；涉及用户隐私和安全的应用
 
+- [Cursor 的进阶用法](https://x.com/xiaokedada/status/1833132309496885434?s=46)
+  - https://cursor101.com/zh
+  - 1. Set 5-10 clear project rules upfront so Cursor knows your structure and constraints. Try /generate rules for existing codebases.
+  - 2. Be specific in prompts. Spell out tech stack, behavior, and constraints like a mini spec.
+  - 3. Work file by file; generate, test, and review in small, focused chunks.
+  - 4. Write tests first, lock them, and generate code until all tests pass.
+  - 5. Always review AI output and hard‑fix anything that breaks, then tell Cursor to use them as examples.
+  - 6. Use @ file, @ folders, @ git to scope Cursor’s attention to the right parts of your codebase.
+  - 7. Keep design docs and checklists in .cursor/ so the agent has full context on what to do next.
+  - 8. If code is wrong, just write it yourself. Cursor learns faster from edits than explanations.
+  - 9. Use chat history to iterate on old prompts without starting over.
+  - 10. Choose models intentionally. Gemini for precision, Claude for breadth.
+  - 11. In new or unfamiliar stacks, paste in link to documentation. Make Cursor explain all errors and fixes line by line.
+  - 12.Let big projects index overnight and limit context scope to keep performance snappy.
+  - 指令Prompt
+    ```
+    你是一个优秀的技术架构师和优秀的程序员，在进行架构分析、功能模块分析，以及进行编码的时候，请遵循如下规则：
+    1. 分析问题和技术架构、代码模块组合等的时候请遵循“第一性原理”
+    2. 在编码的时候，请遵循 “DRY原则”、“KISS原则”、“SOLID原则”、“YAGNI原则”
+    3. 如果单独的类、函数或代码文件超过500行，请进行识别分解和分离，在识别、分解、分离的过程中请遵循以上原则
+    ```
+  - [Cursor AI编程神器：14个实用技巧](https://mp.weixin.qq.com/s/fGHyMzF9M5unuH7YNL1ADg)
+    - 通过MCP获取最新知识: Context7 - 提供丰富的上下文信息 ; DeepWiki - 深度维基知识库
+    - 善用.cursor/rules: 级联Cursor规则是一个强大的新功能，你可以组合多个规则文件
+    - 灵活使用忽略文件: .cursorignore - 完全不索引的文件; .cursorindexignore - 不索引但可以在聊天中用@引用的文件
+    - 掌握@符号的强大功能: @Files & Folders - 缩小上下文范围，帮助AI专注于相关文件 ; @git - 查看特定Git提交中发生的变化; @terminal - 访问日志和错误信息
+    - 在.cursor/mcp.json中配置你的MCP服务器
+    - 内联编辑功能
+    - Settings > General > Privacy Mode
+    - Homebrew安装最新版本的Cursor `brew install --cask --force cursor`
+  - [cursor的codebase indexing](https://mp.weixin.qq.com/s/fj-9rOPEq_eF05VLQizX1g)
+    - 什么是Merkle Tree 哈希树
+      - 高效验证 数据完整性保证 增量同步
+    - turbopuffer的serverless架构, 缓存/冷热策略，为Cursor实现了成本和性能的完美平衡。
+    - Merkle tree 负责本地变更检测和高效同步，turbopuffer 负责云端的向量存储与检索。
+  - [How I use Claude Code](https://www.reddit.com/r/ClaudeAI/comments/1lkfz1h/how_i_use_claude_code/)
+    - 1. 维护 CLAUDE[.]md 文件
+      - 建议为不同子目录（如测试、前端、后端）分别维护 CLAUDE[.]md，记录指令和上下文，便于 Claude 理解项目背景。
+    - 2. 善用内置命令
+      - ▫ Plan mode（shift+tab）：提升任务完成度和可靠性。
+      - ▫ Verbose mode（CTRL+R）：查看 Claude 当前的全部上下文。
+      - ▫ Bash mode（!前缀）：运行命令并将输出作为上下文。
+      - ▫ Escape 键：中断或回溯对话历史。
+    - 3. 并行运行多个实例: 前后端可分别用不同实例开发，提高效率，但复杂项目建议只用一个实例以减少环境配置麻烦。
+    - 4. 使用子代理（subagents: 让多个子代理从不同角度解决问题，主代理负责整合和比较结果。
+    - 5. 利用视觉输入: 支持拖拽截图，Claude Code 能理解视觉信息，适合调试 UI 或复现设计。
+    - 6. 优先选择 Claude 4 Opus: 高级订阅用户建议优先用 Opus，体验和能力更强。
+    - 7. 自定义项目专属 slash 命令: 在 `.claude/commands` 目录下编写常用任务、项目初始化、迁移等命令，提升自动化和复用性。
+    - 8. 使用 Extended Thinking: 输入 `think`、`think harder` 或 `ultrathink`，让 Claude 分配更多“思考预算”，适合复杂任务。
+    - 9. 文档化一切: 让 Claude 记录思路、任务、设计等到中间文档，便于后续追溯和上下文补充。
+    - 10. 频繁使用 Git 进行版本控制: Claude 可帮写 commit message，AI 辅助开发时更要重视版本管理。
+    - 11. 优化工作流
+      - ▫ 用 `--resume` 继续会话，保持上下文。
+      - ▫ 用 MCP 服务器或自建工具管理上下文。
+      - ▫ 用 GitHub CLI 获取上下文而非 fetch 工具。
+      - ▫ 用 ccusage 监控用量。
+    - 12. 追求快速反馈循环: 给模型提供验证机制，减少“奖励劫持”（AI 取巧而非真正解决问题）。
+    - 13. 集成到 IDE: 体验更像“结对编程”，Claude 可直接与 IDE 工具交互。
+    - 14. 消息排队: Claude 处理任务时可继续发送消息，排队等待处理。
+    - 15. 注意会话压缩与上下文长度 : 合理压缩对话，避免丢失重要上下文，建议在自然停顿点进行。
+    - 16. 自定义 PR 模板 : 不要用默认模板，针对项目定制更合适的 PR（pull request) 模板。
+  - [claude-code-cookbook](https://github.com/wasabeef/claude-code-cookbook/blob/main/README_zh.md)
+  - [Getting Good Results from Claude Code](https://www.dzombak.com/blog/2025/08/getting-good-results-from-claude-code/)
+    - Claude Code 新的 Learning mode 就是一个例子，你可以在启动Claude 后，输入 “/output-styles” 命令，选择 Learning 模式 “3. Learning” ，那么 Claude 就会只实现整体框架，留一个小模块让你自己实现。
+    - 可以选择“2. Explanatory”，Claude 会在工作过程中生成其决策过程的摘要，让你有机会更好地理解它在做什么
+  - [Claude Code 最佳实践](https://cc.deeptoai.com/docs/zh/best-practices/claude-code-best-practices)
+    - `claude --permission-mode bypassPermissions`
+    - `claude --dangerously-skip-permissions
+       codex --dangerously-bypass-approvals-and-sandbox`
+    - 在 ~/.claude/settings.json  加入下面的配置，就可以看你 Claude Code 的实时消耗了
+      ```
+      {
+        "statusLine": {
+          "type": "command",
+          "command": "bun x ccusage statusline", // Use "npx -y ccusage statusline" if you prefer npm
+          "padding": 0  // Optional: set to 0 to let status line go to edge
+        }
+      }
+      ```
+  - [Vibe Coding 有“最后一公里”知识幻觉](https://mp.weixin.qq.com/s/loRz_3N_N_fz58yFt_BanQ)
+    - Milvus Code Helper MCP 服务外，开发者还可以选择如 Context7、DeepWiki 等新兴工具来解决这类问题
+  - [Claude Code 如何做任务进度跟进](https://gist.github.com/richzw/ebeb0f8b39af64f2dd3a765aa4662150)
+    - 每一个新需求，让Claude Code帮你自动生成一个对应md文件， 该文件包含plan和progress
+    - Claude Code自带一个"内存版的todo list"，就是在面临新需求的时候， 它会自动拆解， 但是这个仅仅是用于更好的让用户查看当前进度，以及LLM自己保持前后一致性， 缺点是， 当前任务结束后用户并不好review。
+    - 如何review呢？ 就是让Claude Code建一个plan and progress的同步版本 md文件。
+      - 每次都要提醒一次吗？ 不用， 将prompt写入CLAUDE[.]md文件即可。 我一般都是放在 `docs/plan` 文件夹
+  - [Claude Code: Best practices for agentic coding](https://www.anthropic.com/engineering/claude-code-best-practices)
+  - [AI 写代码的深度体验](https://mp.weixin.qq.com/s/6dLnTlb0RfnLjrExa7j_zQ)
+  - [How Anthropic teams use Claude Code](https://www-cdn.anthropic.com/58284b19e702b49db9302d5b6f135ad8871e7658.pdf)
+  - [Claude Code Manual](https://docs.anthropic.com/zh-CN/docs/claude-code/overview)
+  - [A curated list of awesome commands, files, and workflows for Claude Code](https://github.com/hesreallyhim/awesome-claude-code)
+  - [claude-code-costs](https://github.com/philipp-spiess/claude-code-costs)
+    - 如果你使用 Claude Code 并且是 Claude Pro/Max 订阅想要知道如果是 API 得花了多少钱，订阅费花的值不值，可以试试这个命令：$ npx claude-code-costs
+  - [Claude Code 的自定义指令](https://docs.anthropic.com/en/docs/claude-code/slash-commands)
+    - Claude Code 现在可以添加自定义指令，也就是你输入 “/” 可以出来命令提示，这个 ultrathink-task 可以调用架构智能体
+    - https://www.reddit.com/r/ClaudeAI/comments/1lpvj7z/ultrathink_task_command/
+  - [Claude Code如何引爆全员生产力](https://mp.weixin.qq.com/s/TsDK6-aM0HU33CdSitging)
+  - 为了防止 claude code 习惯性代码过度膨胀，我的做法是使用一个 code-simplifie 的 sub agent ，要求每一个功能/todo之后都需要使 code-simplifie 优化代码。
+  - 用好 Coding Agent 的一个经验技巧，就是为 Agent 提供验证结果的方法，这样 Agent 就会自己去测试去修改，直到完成任务，不需要自己反复测试修改。
+    - 在用 Claude Code 或者 Copilot/Curosr 的 Agent mode，会在提示词中加一句类似的话：
+      Please write tests and verify the tests by running
+      `npx jest <testfilepath> -c './jest.config.ts' --no-coverage`
+  - Cursor vs Claude Code
+    - 用 Cursor 作为主要 IDE，享受熟悉的界面和顺滑的 Tab 补全；
+    - 遇到复杂问题/bug时，在 Cursor 的终端中启动 Claude Code；
+    - 让 Claude Code 负责思考和规划，Cursor 负责执行和微调；
+  - [How to build a Claude Code like agent](https://minusx.ai/blog/decoding-claude-code/)
+    - 1. Control Loop
+         1.1 Keep one main loop (with max one branch) and one message history
+         1.2 Use a smaller model for all sorts of things. All. The. Frickin. Time.
+    - 2. Prompts
+    -    2.1 Use claude.md pattern to collaborate on and remember user preferences
+    -    2.2 Use special XML Tags, Markdown, and lots of examples
+    - 3. Tools
+    -    3.1 LLM search >>> RAG based search
+    -    3.2 How to design good tools? (High vs Low level tools)
+    -    3.3 Let your agent manage its own todo list
+    - 4. Steerability
+    -    4.1 Tone and style
+    -    4.2 "PLEASE THIS IS IMPORTANT" is unfortunately still state of the art
+    -    4.3 Write the algorithm, with heuristics and examples

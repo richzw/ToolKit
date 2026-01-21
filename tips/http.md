@@ -703,10 +703,14 @@
   - 对时延敏感的场景（Web、RPC、游戏等）通常应关闭 Nagle
 - [HTTP RateLimit headers](https://dotat.at/@/2026-01-13-http-ratelimit.html)
   - IETF 正在推进标准化的 HTTP 限流响应头：通过在成功响应或 429 Too Many Requests 响应里返回 RateLimit-* 信息，让客户端“预先调整行为”，减少触发限流错误的概率
-
-
-
-
+- [a vulnerability in Cloudflare’s ACME validation](https://blog.cloudflare.com/acme-path-vulnerability/)
+  - The vulnerability was rooted in how our edge network processed requests destined for the ACME HTTP-01 challenge path (/.well-known/acme-challenge/*)
+  - ACME is a protocol used to automate the issuance, renewal, and revocation of SSL/TLS certificates. 
+  - HTTP-01 challenge：ACME 的一种域名控制权验证方式：CA 通过 HTTP（通常是 80 端口）访问固定路径，检查响应内容是否匹配
+  - Cloudflare 的修复是收紧“允许禁用安全能力”的条件：只有当请求匹配到该 hostname 对应的有效 ACME HTTP-01 challenge token、且 Cloudflare 确定要直接返回挑战响应时，才禁用那组安全功能；否则应继续按正常 WAF 流程评估
+- [What came first: the CNAME or the A record](https://blog.cloudflare.com/cname-a-record-order-dns-standards/)
+  - 原实现构造新列表并 CNAME 在前、A/AAAA 在后；优化后变为在已有 answer 列表后追加，导致 CNAME 有时出现在末尾（在 A/AAAA 之后）
+  - RFC 1034 使用了“递归响应可能以 CNAME 作为前缀（preface）”这类描述，但并未用后来的规范化术语（MUST/SHOULD）去强制顺序；同时 RFC 1034 明确说 RRset 内部顺序不重要、示例中也说 answer 区记录顺序差异不重要
 
 
 
