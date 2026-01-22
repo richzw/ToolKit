@@ -1099,7 +1099,11 @@
     - 开启 TCP keepalive（解决 idle ESTABLISHED 永生）
     - 设置 TCP_USER_TIMEOUT ≈ TCP_KEEPIDLE + TCP_KEEPINTVL * TCP_KEEPCNT（并建议略小一些以免架空 TCP_KEEPCNT）
     - 谨慎使用应用层超时：要探测 TCP 故障优先用 keepalive + user-timeout；若想节省资源/避免拖太久，额外做“发送缓冲 drain 速率”监控
-
+- [TCP协议存在那些缺陷](https://mp.weixin.qq.com/s/M4B0ReYfLrZjUv4dmL1XBw)
+  - TCP 吞吐率“优化不了”，瓶颈来自滑动窗口, 工程上仍可通过 BBR、pacing、TLP/RACK、GRO/LRO、拥塞控制参数、缓冲配置等提高吞吐
+  - 滑动窗口的本质问题：连续字节序列约束导致 HoL（队头阻塞）
+  - “流式抽象”是根因：TCP 的确认对象是字节而非分组，导致累积 ACK + GBN
+  - SACK 只是补丁：回归“选择性”的方向，但受 TCP Option 空间与字节 ACK 框架限制
 
 
 

@@ -395,6 +395,9 @@
   - [一份数据在NCCL/CUDA 框架中的旅程](https://mp.weixin.qq.com/s/LrUuKqcJYavAxbypSElLiQ)
     - 数据包“从 cudaMalloc 地址 → ncclSend → GPU kernel → (IPC 或网络) → ncclRecv → 目标内存”全过程
   - [How to Think About GPUs](https://jax-ml.github.io/scaling-book/gpus/)
+  - [Go with GPU](https://mp.weixin.qq.com/s/AqJwxiN_I5tLHLNOnbAFXQ)
+    - https://www.youtube.com/watch?v=d1R8BS-ccNk
+    - https://github.com/bigwhite/experiments/tree/master/go-gpu
 - [NeighborHash]
   - 场景
     - 只有导入没有commit，过程中没有一致性要求，只需要最终一致性，也就是一个在线分析处理 (OLAP) 系统。我们应用场景的特点是批量点查、无范围查询需求且查询命中率高

@@ -975,8 +975,11 @@
     - 群体相对策略优化（Group Relative Policy Optimization，GRPO）
       - RLHF 算法有 PPO（Proximal Policy Optimization）、DPO（Direct Preference Optimization）以及GRPO
       - DPO依赖于理论上的偏好模型，如Bradley-Terry模型，来测量奖励函数与经验偏好数据的对齐程度。它直接根据策略定义偏好损失，无需在训练过程中明确学习 Reward 模型。
+        - 停止做新菜，回看过去成功/失败，问‘我会怎么改’，用比较来更新决策
       - PPO算法采用Actor-Critic架构，需要 Policy 模型、Value 模型、 Reward 模型、 Reference 模型。 使用 Value 模型评估模型的预期总收益（模型回复的好坏）
+        - 请专家（buddy）试吃给反馈→改进→再试
       - GRPO可以算作是PPO的计算效率优化版本，在保持效果的同时，降低计算资源消耗
+        - 对同一个 prompt 一次生成一组（多条）答案，用组内均值/基线来算 advantage，从而不需要单独训练一个 value/critic 网络（所以常被称为 critic-free）
       - GRPO算法采用Actor-Critic架构，需要 Reward 模型、Reference 模型，但是删掉了 Value 模型。 不使用 Value 模型，而是使用一组 LLM 生成的针对同一上文输入的多次采样结果来做预期总收益的估计。
     - 多令牌预测（Multi-Token Prediction，MTP）
       - MTP 的核心思想是让模型一次性预测多个 token，以提升了模型的训练效率、生成质量和推理速度

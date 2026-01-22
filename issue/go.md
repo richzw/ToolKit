@@ -1395,6 +1395,6 @@
   - 背景与痛点：Go 做分布式追踪/可观测性时，手动埋点、Context 传递、样板代码与升级成本高，缺少 Java/Python 那种“零改代码”体验。
   - 破局思路：利用 Go 工具链的 -toolexec 在编译期拦截工具调用，获得“改源码但不改仓库源码”的机会
   - Orchestrion 引入了类似 AOP（面向切面编程） 的概念。通过 YAML 配置文件，你可以定义“切入点”（Join Points）和“建议”（Advice）
-
+- [Finding and Fixing a 50,000 Goroutine Leak](https://skoredin.pro/blog/golang/goroutine-leak-debugging)
 
 

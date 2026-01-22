@@ -356,6 +356,12 @@
   - 核心思想就是——信息分层设计哲学 - 细节分层 (LOD) 与 按需加载
     - LOD (Level of Detail)，即“细节层次”，是3D游戏渲染中的一项核心技术。它的基本思想是：一个物体离你越远，展示的细节就应该越少
     - LOD负责管理信息的精度，按需加载负责管理信息的时机。
+  - Claude Agent SKILL 是一个结构化的、可重用的包，存储在你项目的 .claude/skills/ 文件夹中。它结合了以下内容：
+    - 定义 Agent 角色和分步流程的精确指令
+    - 参考文件（风格指南、示例、品牌语气）
+    - 用于可靠、确定性操作的可执行脚本（Python, Node.js, Bash）
+  - 一些流行的 SKILLs 示例：前端审查; PDF 提取; Web 抓取
+  - [Docker Sandboxes 运行具有完全自主权的 Claude](https://mp.weixin.qq.com/s/H2Xhh2SJpKPp03tllfX-IQ)
 - [Claude Code 核心](https://mp.weixin.qq.com/s/7g5DugzATAIX1by4yAYtTg)
   - Agent（主战力） + MCP（能力扩展） + Slash（效率） + Hook（可控 / 自动化）
 - [How I Use Every Claude Code Feature](https://blog.sshh.io/p/how-i-use-every-claude-code-feature)
