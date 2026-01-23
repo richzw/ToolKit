@@ -1396,5 +1396,9 @@
   - 破局思路：利用 Go 工具链的 -toolexec 在编译期拦截工具调用，获得“改源码但不改仓库源码”的机会
   - Orchestrion 引入了类似 AOP（面向切面编程） 的概念。通过 YAML 配置文件，你可以定义“切入点”（Join Points）和“建议”（Advice）
 - [Finding and Fixing a 50,000 Goroutine Leak](https://skoredin.pro/blog/golang/goroutine-leak-debugging)
-
+- [Go Trace 工具揭示的性能真相](https://mp.weixin.qq.com/s/7ZEBgBBqGXat9eOPZKEOSw)
+  - https://www.youtube.com/watch?v=Gqo0oCfZSjg
+  - 一个“看似更优雅的并发设计（goroutine pool）反而更慢”的案例，并用 Go trace 工具逐层定位原因：性能下降并非因为 CPU 没吃满，而是 GC 的 pacing（调速）过度频繁介入
+  - 在某些工作负载下，给 GC 更大的内存空间（通过 GOGC 或更语义化的 GOMEMLIMIT）可以显著提升吞吐；
+  - 而 trace 的价值在于能看到 profiling 看不到的“没有发生的事”（比如多核未利用、GC 介入模式、调度形态等）
 

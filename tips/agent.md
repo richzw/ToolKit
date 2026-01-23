@@ -429,6 +429,34 @@
     -  8: Keep evaluation suites healthy long-term through open contribution and maintenance
   - Swiss Cheese Model 用来解释多层防御体系
     - 没有一种单一的测试方法是完美的，只有将多种不同类型的测试叠加在一起，才能有效拦截错误。
-    
+- [MCP vs Skill](https://x.com/dotey/article/2014025984895258934)
+  - 如果 AI Agent 是操作系统，MCP 就是 USB 协议，Skills 就是应用程序。
+  - MCP: 定义一套标准协议，让任何 AI 都能即插即用地连接任何工具。
+    - MCP 有一个严重的副作用：吃掉你的上下文窗口
+    - Claude Code 的解法：Tool Search
+  - Skills：渐进式披露(Progressive Disclosure）的操作手册
+    - 想象你招了个新员工。传统做法是入职第一天把公司所有流程文档、规章制度、操作手册全部打印出来堆在他桌上，这就是 MCP 的做法。
+    - 而 Skills 的做法是：先给一份简短的岗位说明，等他遇到具体问题时，再告诉他去翻哪本手册的哪一页。
+    - 第一层：元数据（启动时加载）
+    - 第二层：完整指令（相关时加载）
+    - 第三层：参考资料（需要时加载）
+    - Skills 还有一个很多人忽略的能力：它可以自带可执行脚本
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
