@@ -1669,9 +1669,21 @@
   - In NUMA setups, binary search struggles with large datasets under high concurrency
   - A single CPU timeslice might not finish the task and could jump to another NUMA node. 
   - Data migration between nodes consumes valuable cross-node memory bandwidth, leading to a throughput collapse.
-
-
-
+- [Scaling PostgreSQL to power 800 million ChatGPT users](https://openai.com/index/scaling-postgresql/)
+  - Issue
+    - 缓存层故障 → 大面积 cache miss → 读流量直打数据库。 
+    - 昂贵查询突增（例如多表 join）导致 CPU 饱和。
+    - 新功能上线触发 write storm。 
+    - 超时与重试会放大压力，形成恶性循环
+  - 减少 primary 压力：写入卸载 + 写治理
+  - 单点故障缓解：让“主库挂了仍可读” 
+    - 因为很多关键请求主要读，他们把关键读从 writer/primary 迁走到副本，使 primary 故障时仍可提供读服务（写会失败，但事故等级下降）
+    - primary 运行在 HA 模式 + hot standby，支持快速提升 standby 接管
+  - Workload Isolation：解决 noisy neighbor
+    - 将请求分为高/低优先级并路由到不同实例，避免低优先级/新功能的资源消耗拖垮关键路径
+  - 缓存：cache locking / leasing 防击穿
+    - 为避免热点 key 的并发 miss 把数据库打穿，实现 cache locking/leasing：同一 key miss 时只允许一个请求回源，其余等待缓存被填充
+    - SingleFlight
 
 
 

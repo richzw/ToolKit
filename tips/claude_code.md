@@ -565,8 +565,29 @@
     - https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool
     - Claude Code detects when your MCP tool descriptions would use more than 10% of context
     - When triggered, tools are loaded via search instead of preloaded
+  - Claude Code 避免上下文用满的经验
+    - 从原理上来说，你可以把 Claude Code 的上下文窗口想成一块“内存条”：快、顺手、但容量有限。
+      - 聊天当内存，文件当硬盘，Git 当时光机
+    - 关掉自动压缩，我喜欢自己控制上下文。自动压缩有时候会把你最在意的细节当噪音裁掉
+      - 中间结果存文件。你从我的 Skills 设计中也可以看得出来，我很喜欢保留中间文件，好处是新会话可以用，写作有 outline md、draft md
+    - 如果很长时间一个会话内任务没完成，我不压缩会话，让 Claude 总结一下：目标、进度、卡点、下一步、关键约束。我看一眼，手动改几个关键地方，新开会话继续。
+    - 用 Git。无论写代码还是写作，一个会话结束马上 commit。提示词也可以存进 prompts 目录，下次直接复用
+    - 卡住了多半是思路不对。这时候别在原会话硬扛，借助 Git 回滚到上一个靠谱快照，找到原始提示词，以及一些中间产生的关键文件，从头来
+  - [50 Claude Code Tips ](https://x.com/aiedge_/article/2014740607248564332)
+    - 
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
+  - [Skills｜从概念到实操的完整指南](https://mp.weixin.qq.com/s/Bl4ODUxvwO8pYu9nXVmjuQ)
+    - Skills 原理：沙盒 + 渐进式三层加载
+      - Level 1 元数据：name/description（YAML）常驻加载，用于“能不能被选中”的索引
+      - Level 2 说明文档：触发时用 bash 去读取 SKILL.md 正文进入上下文
+      - Level 3 资源与代码：更深资源/脚本按需读取或执行；脚本代码本身不进入上下文，从而节省 token
+    - Skill 可以包含三层内容：
+      第一层：元数据。 就是 name 和 description，告诉 Agent 这个 Skill 是干嘛的、什么时候该用。这部分在启动时就加载，但只占几十个 token。
+      第二层：指令。 SKILL.md 的主体内容，工作流程、最佳实践、注意事项。只有 Agent 判断需要用这个 Skill 时，才会读取这部分。
+      第三层：资源和代码。 附带的脚本、模板、参考文档。Agent 按需读取，用的时候才加载。
+    - Skills 调用逻辑：意图匹配 → 读取手册 → 按需执行 → 结果反馈
+  - [MCP vs Skills](https://x.com/dani_avila7/article/2014409635370041517)
   - A Claude agent SKILL is a structured, reusable package stored in your project's ".claude/skills/" folder. It combines the following.
     - Precise instructions defining the agent's role and step-by-step process
     - Reference files (style guides, examples, brand voice)

@@ -1,4 +1,4 @@
-
+- [A Complete End-to-End Guide to Apache Kafka](https://medium.com/techtrends-digest/a-complete-end-to-end-guide-to-apache-kafka-part-1-1010aab6d748)
 - [Kafka保证无消息丢失](https://mp.weixin.qq.com/s/XoSi3Cgp7ij-n9t4pvBoXQ)
 
   基于：https://github.com/Shopify/sarama
