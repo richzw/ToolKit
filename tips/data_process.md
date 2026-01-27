@@ -56,6 +56,14 @@
     - Variant 数据类型：面向半结构化数据的灵活建模
       - Variant = 半结构化数据的统一存储抽象 + 查询时结构化（shredding）。
       - 兼容多格式导入（JSON/CSV/XML），对真实业务杂乱数据友好
+  - [Databricks Lakehouse Data Modeling: Myths, Truths, and Best Practices](https://www.databricks.com/blog/databricks-lakehouse-data-modeling-myths-truths-and-best-practices)
+    - Delta Lake 提供 ACID、Schema Enforcement/Evolution、SQL 能力；关系建模是 Lakehouse 的基础
+    - 支持 PK/FK（信息型约束），可用于文档化、BI 工具识别，以及配合 RELY 做优化；但 默认不强制执行
+    - NOT NULL、CHECK 是可强制执行的约束（违反则事务失败）。同时可用 Monitoring / DQX 等做监控与规则化治理
+    - Unity Catalog Metric Views（预览）可集中定义指标、治理与复用，并可用 SQL 查询
+    - 星型/雪花模型适配 Delta 表；可结合 Time Travel 做 SCD；配合 Identity Columns 生成代理键、Liquid Clustering、物化视图等优化
+    - Photon + Databricks SQL（含 Serverless）面向分析型负载做了大量优化
+    - Medallion 是参考架构/组织方式，不是硬性规定；可按需要增删层或混合 Data Vault / 星型等
   - [Iceberg：湖仓一体的终极寻址设计，分层元数据+统计剪枝，跳过95%的无效文件](https://mp.weixin.qq.com/s/JGC2qDJvNqzyeZMpF97AuQ)
     - 它解决的是海量数据的复杂条件查询问题，核心痛点是：如何在数千个数据文件中，快速找到符合查询条件的少量文件，避免全量扫描
     - Iceberg的核心创新，是分层元数据+文件级统计信息

@@ -194,14 +194,12 @@
     - 两个检索工具：conversation_search（按关键词/主题跨全部历史查找、可多主题分别检索并汇总）与 recent_chats（按最近N次或特定时间窗口检索、可排序分页）。代价是会有可见延迟，但换来更强的可控性与可审计性
   - ChatGPT 走大众消费品路线：记忆默认开启、自动加载画像/摘要，追求“即刻个性化”和零等待，有利于规模化与留存；
   - Claude 面向开发者与专业工作流：用户理解并愿意显式触发工具（如搜索、长推理、记忆），更重视隐私与可预测性，记忆只是“按需调用”的工具之一
-
 - [Claude Code放弃代码索引，使用grep技术](https://mp.weixin.qq.com/s/Fa15GoM3_2CUnjdHQ3I7Nw)
   - Anthropic 在《Claude Code: Agent in Your Terminal》中披露：评估向量索引、传统索引后，实时的 “agentic search”(glob+grep) 在吞吐、延迟与资源占用上全面优于其他方案，于是放弃长期持久索引
   - VS
     - Cursor：代码切块→向量嵌入→远程 Turbopuffer；优点语义召回，缺点需要上传、异步更新。
     -  JetBrains IDE：PSI 树 + stub 索引；优势精确重构、类型检查，但初次/增量索引耗时。
     -  Claude Code：本地 glob/grep；零配置、即时可用、结果确定、完全离线。
-  
 - Tips
   - Small context
     Keep conversations small+focused. After 60k tokens, start a new conversation.
@@ -236,10 +234,26 @@
   - codex resume用来选择历史记录sessions
   - codex目前没有plan模式，可以/approvals选择read-only进行讨论，或者直接在提示词里要求codex进行plan，写到一个文档中
   - /review 命令很实用，在写完代码后让 codex review
-- Codex Prompt
-  - Make a pixel art game where I can walk around and talk to other villagers, and catch wild bugs
-  - Give me a work management platform that helps teams organize, track, and manage their projects and tasks. Give me the platform with a kanban board, not the landing page.
-  - Given this image as inspiration. Build a simple html page joke-site.html here that includes all the assets/javascript and content to implement a showcase version of this webapp. Delightful animations and a responsive design would be great but don't make things too busy
+  - Codex Prompt
+    - Make a pixel art game where I can walk around and talk to other villagers, and catch wild bugs
+    - Give me a work management platform that helps teams organize, track, and manage their projects and tasks. Give me the platform with a kanban board, not the landing page.
+    - Given this image as inspiration. Build a simple html page joke-site.html here that includes all the assets/javascript and content to implement a showcase version of this webapp. Delightful animations and a responsive design would be great but don't make things too busy
+  - Codex 当作“新入职的高级工程师” https://openai.com/index/shipping-sora-for-android-with-codex/
+    - Codex 需要人类补齐的部分（团队的“管理动作”）
+      - 不能凭空推断未告知的团队偏好：如架构风格、产品策略、真实用户行为、内部工程规范。
+      - 无法“运行/体验”App：比如滚动手感、交互流程是否顺畅等，仍要人类在真机上验收。
+      - 每个会话都要重新 onboarding（灌上下文）：需要清晰目标、约束、“我们团队怎么做事”。
+      - 深层架构判断仍会偏向“先跑起来”：可能把逻辑塞进 UI、或引入不必要的 ViewModel 等，需要人类把关长期可维护性。
+    - Codex 擅长的部分（团队把“产能”交出去的部分）
+      - 快速读懂大代码库、多语言迁移理解。
+      - 愿意写大量单元测试，覆盖面广，有助于防回归。
+      - 善于根据 CI 失败日志迭代修复；并行开多会话推进多个模块（“可并行、可丢弃的执行”）。
+      - 在设计讨论中提供新视角：例如为视频播放器做内存优化时，Codex 会去比较多个 SDK/方案，帮助降低最终内存占用
+  - [Unrolling the Codex agent loop](https://openai.com/index/unrolling-the-codex-agent-loop/)
+    - Codex 的本质是一个“编排器（harness）”：
+      - 它不断把“用户输入 + 环境信息 + 历史对话 + 工具输出”组装成 input 发送给模型；模型要么给出最终答复，要么发出 tool call；Codex 执行工具后把结果再喂回模型，直到模型输出最终的 assistant message 结束本轮
+    - Codex 通过 Responses API 的流式（SSE）事件接收模型输出（包括文本增量、输出项新增、完成事件等），并将与后续推理相关的输出项转为下一次请求的 input 项
+    - 为了性能与隐私/合规，Codex 倾向保持请求无状态（不依赖 previous_response_id），并依靠 prompt caching 与 **compaction（对话压缩）**解决“请求体变大”和“上下文窗口耗尽”的问题
 - Claude Code
   - 三种“权限模式”（强烈建议先用 Plan Mode）
     - Normal：每次改文件/跑命令都会询问是否允许。 
@@ -484,17 +498,6 @@
     - 方案：用 AgentFS 把真实文件系统虚拟化隔离，再用 LlamaParse 把非结构化文件转成高质量文本，最后用 LlamaIndex Workflows 把整个流程“上安全带（harness）”并支持可恢复的人类介入
   - 用“虚拟文件系统”替代真实文件系统访问;  AgentFS 的文件操作封装成“受控工具”，并强制代理只能用这些工具
   - https://github.com/run-llama/agentfs-claude
-- Codex 当作“新入职的高级工程师” https://openai.com/index/shipping-sora-for-android-with-codex/
-  - Codex 需要人类补齐的部分（团队的“管理动作”）
-    - 不能凭空推断未告知的团队偏好：如架构风格、产品策略、真实用户行为、内部工程规范。
-    - 无法“运行/体验”App：比如滚动手感、交互流程是否顺畅等，仍要人类在真机上验收。
-    - 每个会话都要重新 onboarding（灌上下文）：需要清晰目标、约束、“我们团队怎么做事”。
-    - 深层架构判断仍会偏向“先跑起来”：可能把逻辑塞进 UI、或引入不必要的 ViewModel 等，需要人类把关长期可维护性。
-  - Codex 擅长的部分（团队把“产能”交出去的部分）
-    - 快速读懂大代码库、多语言迁移理解。
-    - 愿意写大量单元测试，覆盖面广，有助于防回归。
-    - 善于根据 CI 失败日志迭代修复；并行开多会话推进多个模块（“可并行、可丢弃的执行”）。
-    - 在设计讨论中提供新视角：例如为视频播放器做内存优化时，Codex 会去比较多个 SDK/方案，帮助降低最终内存占用
 - CC
   - [The Shorthand Guide to Everything Claude Code](https://x.com/affaanmustafa/article/2012378465664745795)
     - https://github.com/affaan-m/everything-claude-code/tree/main
@@ -574,7 +577,8 @@
     - 用 Git。无论写代码还是写作，一个会话结束马上 commit。提示词也可以存进 prompts 目录，下次直接复用
     - 卡住了多半是思路不对。这时候别在原会话硬扛，借助 Git 回滚到上一个靠谱快照，找到原始提示词，以及一些中间产生的关键文件，从头来
   - [50 Claude Code Tips ](https://x.com/aiedge_/article/2014740607248564332)
-    - 
+    - Claude Skills Repo - A library of 80,000+ Claude Skills https:// skillsmp. com/
+    - Claude Skills Library - A cool website with plug-and-play Skills and more https:// mcpservers. org/claude-skills
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
   - [Skills｜从概念到实操的完整指南](https://mp.weixin.qq.com/s/Bl4ODUxvwO8pYu9nXVmjuQ)
@@ -587,7 +591,9 @@
       第二层：指令。 SKILL.md 的主体内容，工作流程、最佳实践、注意事项。只有 Agent 判断需要用这个 Skill 时，才会读取这部分。
       第三层：资源和代码。 附带的脚本、模板、参考文档。Agent 按需读取，用的时候才加载。
     - Skills 调用逻辑：意图匹配 → 读取手册 → 按需执行 → 结果反馈
+    - Skills 调用逻辑：意图匹配 → 读取手册 → 按需执行 → 结果反馈
   - [MCP vs Skills](https://x.com/dani_avila7/article/2014409635370041517)
+    - https://claude.com/blog/extending-claude-capabilities-with-skills-mcp-servers
   - A Claude agent SKILL is a structured, reusable package stored in your project's ".claude/skills/" folder. It combines the following.
     - Precise instructions defining the agent's role and step-by-step process
     - Reference files (style guides, examples, brand voice)
@@ -625,6 +631,36 @@
   - [Skill Agent 自动给文章配图](https://x.com/dotey/article/2011907793520116215)
     - 如果你已经有了 Claude Code 这样的 Agent，直接告诉 Agent： ``请帮我安装 github.com/JimLiu/baoyu-skills 中的 Skills``
     - 如果你只需要配图技能，就告诉它： ``请帮我安装宝玉的这个文章配图技能：github.com/JimLiu/baoyu-skills/blob/main/skills/baoyu-article-illustrator/SKILL.md``
+  - [agent skill来编排workflow](https://mp.weixin.qq.com/s/jxgfOWfnjfgi5lu57yto7w)
+    - Agent Skill 的核心理念：用模块化把复杂任务拆解成可编排 workflow
+    - Skill 的几种“玩法”
+      - skill 调用 skill（复用/分层）
+        ```
+        After all tasks complete and verified:
+        - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
+        - **REQUIRED SUB-SKILL:** Use finishing-a-development-branch skill
+        - Follow that skill to verify tests, present options, execute choice
+        ```
+      - skill 调用工具脚本（自动化执行）
+      - 生成可验证的中间输出（文件化、可追溯、可续跑）分析 → 创建文件 → 验证 → 执行 → 验证
+        ```
+        When this skill is invoked:
+
+        1. Create the `./input` directory if it doesn't exist
+        2. Get the user's input message (passed as arguments or prompt for it)
+        3. Generate a timestamp-based filename (format: `YYYY-MM-DD_HH-MM-SS.txt`)
+        4. Save the input to `./input/<timestamp>.txt`
+        5. Confirm the file has been saved with the full path
+        ```
+      - skill 调用 subagent（独立上下文、并行、专业化分工） Subagent 之间只传文件路径，不传内容，这条规则很重要
+      - 用 reference 外挂文档（减少上下文、提升聚焦）
+    - 常见 workflow pattern
+      - 清单模式（Checklist）
+      - 循环验证模式（validator loop）
+      - 条件工作流模式（if/else 分支）
+      - examples pattern（用输入输出示例约束行为）
+      - 模板 pattern（强约束输出结构）
+    - https://github.com/luozhiyun993/skill-workflow
 - [Continuous Claude](https://github.com/parcadei/Continuous-Claude): 
   - 解决 Claude Code 等 AI Coding Agent 在长会话中面临的一个痛点：上下文丢失与“遗忘”
   -  原生机制：为了节省空间，Claude Code 会进行“压缩”，把之前的对话总结成摘要。

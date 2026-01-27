@@ -1,6 +1,7 @@
 
 - [LeetCode summary](https://blog.algomooc.com/)
   - [LeetCode was HARD until I Learned these 20 Patterns ](https://x.com/ashishps_1/article/2012864271773016266)
+- [X (Twitter) For You 推荐算法深度技术解析](https://mp.weixin.qq.com/s/-EB5-4I7iE6WRA1Q721_QQ)
 - [第 N 个数](https://mp.weixin.qq.com/s/YaJ0nf7Y0juf6YTpVrV34g)
   - 给你一个整数 n ，请你在无限的整数序列 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, ...] 中找出并返回第 n 位上的数字
   - 思路

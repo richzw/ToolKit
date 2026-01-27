@@ -48,6 +48,9 @@
     - The default value of vacuum setting through `select * from pg_settings where name like '%autovacuum%'` - autovacuum_vacuum_scale_factor, 0.1 autovacuum_vacuum_threshold, 50
     - `ALTER TABLE users SET (autovacuum_vacuum_scale_factor = 0.01)`
     - To accelerate the vacuum process is that you could consider to increase the parameter: autovacuum_vacuum_cost_limit value
+  - [Using PostgreSQL as a Dead Letter Queue for Event-Driven Systems](https://www.diljitpr.net/blog-post-postgresql-dlq)
+    - 在事件驱动系统中处理失败事件（例如：下游 API 不可用、消费者崩溃、字段缺失/格式错误等）的方式：不把失败消息继续留在 Kafka 的 DLQ topic，而是直接落库到 PostgreSQL 的 DLQ 表，以获得更强的可观测性与可操作性（SQL 可查询、可按原因筛选、可批量/定向重试）
+    - 一个 DLQ retry scheduler，周期性扫描 PENDING 且“可重试”的事件，批量取出后重放；服务多实例部署时，用 ShedLock 确保同一时刻只有一个实例执行该定时任务，避免重复执行定时扫描逻辑
 - Expire
     ```sql
     CREATE TABLE realdata (
