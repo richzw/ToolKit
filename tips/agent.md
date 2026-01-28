@@ -441,10 +441,32 @@
     - 第二层：完整指令（相关时加载）
     - 第三层：参考资料（需要时加载）
     - Skills 还有一个很多人忽略的能力：它可以自带可执行脚本
-
-
-
-
+- [MCP Apps - Bringing UI Capabilities To MCP Clients](https://blog.modelcontextprotocol.io/posts/2026-01-26-mcp-apps/)
+- [How Clawdbot Remembers Everything](https://x.com/manthanguptaa/article/2015780646770323543)
+  - 记忆文件：`MEMORY.md` + `memory/*.md` + 会话转录
+  - 记忆工具
+    - **`memory_search`**：强制语义搜索 MEMORY.md 和 memory/*.md
+      - 参数：query、maxResults、minScore（默认 0.35）
+      - 使用 embedding 模型（text-embedding-3-small 等）
+      - 返回路径、行号、片段、分数
+    - **`memory_get`**：根据搜索结果读取具体行内容
+  - 写入规则由 AGENTS.md 提示驱动：
+    - 日常笔记 → 每日文件
+    - 持久事实/偏好 → MEMORY.md
+    - 经验教训 → AGENTS.md 或 TOOLS.md
+  - 记忆存储结构（双层系统）
+    - **Layer 1：每日日志**（`memory/YYYY-MM-DD.md`）
+      - 追加式笔记，按时间分段记录当天事件、决定、偏好等。
+    - **Layer 2：长期记忆**（`MEMORY.md`）
+      - 精炼的持久知识，包括用户偏好、重要决定、关键联系人等。
+  - 记忆索引机制
+  - 记忆搜索机制
+    - **混合搜索**（并行执行）：
+      - 向量搜索（语义相似度，权重 70%）
+      - BM25 关键字搜索（权重 30%）
+    - 最终分数：`0.7 * vectorScore + 0.3 * textScore`
+    - 过滤低分结果（默认 minScore 0.35）
+    - 支持概念搜索（如“数据库讨论”）和精确搜索（如具体名称/日期）
 
 
 

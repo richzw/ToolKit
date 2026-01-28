@@ -608,7 +608,7 @@
   - 这里的“可观察到的行为”不仅包括显式输出/返回值，还可能包括性能特征、边界行为、错误信息、时序、资源消耗模式等任何外部能感知到的表现
 - [CLAUDE CODE ON-THE-GO - Doom Coding ](https://github.com/rberg27/doom-coding)
   - https://granda.org/en/2026/01/02/claude-code-on-the-go/
-
+- [路由器](https://mao.fan/)
 
 
 

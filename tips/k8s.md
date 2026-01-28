@@ -1056,6 +1056,10 @@
     - https://mp.weixin.qq.com/s/D2fddmIey1qEDu1TWia0MA
     - [New level of efficiency with in-place Pod restart](https://kubernetes.io/blog/2026/01/02/kubernetes-v1-35-restart-all-containers/)
       - 核心动作是 RestartAllContainers，并通过特性门控 RestartAllContainersOnContainerExits 启用
+    - [In-Place Pod Resize](https://mp.weixin.qq.com/s/Ol_0DQ8iCvIde5cqDw64Kw)
+      - In-Place Pod Resize） 是 Kubernetes 的一项革命性特性，允许直接修改正在运行的 Pod 的 CPU 和内存资源配置，而无需重建 Pod
+      - CPU 以及 memory （需要重启）
+      - Pod 的 QoS（服务质量）类调整有严格要求，调整后必须保持原有 QoS 类不变
 - Alpha 版: kubectl 的新配置选项，使用 .kuberc 实现用户首选项
     - HorizontalPodAutoscaler 可配置容差
       - 为了避免在指标发生小波动时创建或删除副本， Kubernetes 应用了一种迟滞形式：仅当当前和期望的指标值差异超过 10% 时， 才改变副本数量

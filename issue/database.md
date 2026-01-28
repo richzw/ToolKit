@@ -401,7 +401,17 @@
   - Sharding
     - 一般指“把同一张逻辑表的数据，拆到多个数据库实例/多台机器上”
     - Sharding：跨库/跨机把数据“拆家”，更偏“水平扩展 + 吞吐/容量上限”
-
+- [Scaling PostgreSQL to Millions of Queries Per Second: Lessons from OpenAI](https://www.rajkumarsamra.me/blog/scaling-postgresql-to-millions-of-queries-per-second)
+  - Single-primary PostgreSQL can scale much further than conventional wisdom suggests—if you optimize relentlessly and understand your workload patterns.
+  - Write load is the real bottleneck, not read scalability. Minimize writes on the primary through workload migration, application optimization, and lazy writes.
+  - Query optimization is non-negotiable. One expensive query can bring down your service. Review ORM-generated SQL, break down complex joins, and configure proper timeouts.
+  - Connection pooling is essential. PgBouncer isn't optional at scale—it's a requirement. Co-locate it with your application to minimize latency.
+  - Cache-miss storms are real. Implement cache locking/leasing to prevent multiple requests from hitting the database for the same missing key.
+  - Workload isolation prevents noisy neighbors. Separate high-priority and low-priority workloads onto different instances.
+  - Rate limiting at multiple layers prevents cascading failures from traffic spikes or retry storms.
+  - Schema changes require extreme caution. Only lightweight operations, strict timeouts, and rate-limited backfills.
+  - Cascading replication is the path to scaling beyond 50+ replicas, but requires careful operational planning.
+  - Partnership with your database provider matters for achieving reliable failover and exploring new features.
 
 
 
