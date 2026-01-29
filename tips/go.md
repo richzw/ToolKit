@@ -1869,6 +1869,16 @@
       - 无锁编程
       - 对象窃取机制
       - 垃圾回收时的新旧对象交替使用，类似分代垃圾回收的设计理念
+  - sync.Pool is a CPU optimization
+    - The goal of using sync.Pool is to cache temporary, already-allocated objects for reuse, which reduces pressure on both the memory allocator and the garbage collector, since these operations use CPU:
+      - Heap allocations for the memory allocator: uses CPU to find space for the object, update allocator metadata, possibly zero the memory, etc.
+      - GC scanning, marking, and sweeping work: uses CPU because the GC is doing real work over memory and metadata.
+  - sync.Pool can make things worse with []byte and *bytes.Buffer if you use it the "obvious" way
+    - 1. A []byte grows to handle a large input, and that growth allocates a large backing array.
+    - 2. You put that []byte into a sync.Pool.
+    - 3. Later, a small operation calls Get and receives that same object. It only needs a little space, so it sets the length small.
+    - 4. However, making the length small does not make the backing array small. The capacity, and the large backing array, remain.
+    - 5. The small operation puts it back. Now the pool still contains an object that "looks empty" but still owns a huge backing array.
   - [Defects of sync.Pool](https://github.com/bytedance/gopkg/tree/develop/lang/syncx)
     - Get/Put func is unbalanced on P.
        - Usually Get and Put are not fired on the same goroutine, which will result in a difference in the fired times of Get and Put on each P. The difference part will trigger the steal operation(using CAS).

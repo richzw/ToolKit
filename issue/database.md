@@ -4,6 +4,7 @@
   - [Postgres archs ](https://implnotes.pages.dev/postgres/logical_structure)
   - [Postgres SQL Query Roadtrip: Overview](https://internals-for-interns.com/posts/sql-query-roadtrip-in-postgres/)
     - PostgreSQL 执行一条 SQL 从文本到结果的全流程路线图：Parsing → Analysis → Rewriting → Planning → Execution
+  - [Introduction to PostgreSQL Indexes](https://dlt.github.io/blog/posts/introduction-to-postgresql-indexes/)
 - Debug high CPU of Postgres
   - We recommend running an `ANALYZE VERBOSE` operation to refresh the `pg_statistic` table.
   - [How can I troubleshoot high CPU utilization for Amazon RDS or Amazon Aurora PostgreSQL](https://aws.amazon.com/premiumsupport/knowledge-center/rds-aurora-postgresql-high-cpu/)
@@ -412,10 +413,45 @@
   - Schema changes require extreme caution. Only lightweight operations, strict timeouts, and rate-limited backfills.
   - Cascading replication is the path to scaling beyond 50+ replicas, but requires careful operational planning.
   - Partnership with your database provider matters for achieving reliable failover and exploring new features.
-
-
-
-
+- [Unused Indexes In PostgreSQL: Risks, Detection, And Safe Removal](https://stormatics.tech/blogs/unused-indexes-in-postgresql-risks-detection-and-safe-removal)
+  - Why Unused Large Indexes Become a Long-Term Problem
+    - Slower INSERT, UPDATE, And DELETE Operations
+    - Increased Vacuum And Autovacuum Overhead
+    - Longer Maintenance Windows
+    - Disk Space Waste And Cache Pollution
+  - How To Safely Drop Unused Indexes In PostgreSQL
+    - Check When System Statistics Were Last Reset
+      ```
+      SELECT
+         datname,
+         stats_reset
+      FROM pg_stat_database
+      WHERE datname = current_database();
+      ```
+    - Check Whether The Index Backs Any Constraint
+      ```
+      SELECT
+          i.relname AS index_name,
+        c.conname AS constraint_name,
+        c.contype AS constraint_type,
+        c.conrelid::regclass AS table_name
+      FROM pg_constraint c
+      JOIN pg_class i ON i.oid = c.conindid
+      WHERE i.relname = '<IDX_NAME>';
+      ```
+    - Check Index Usage Statistics
+      ```
+      SELECT
+           s.indexrelname AS index_name,
+        s.relname AS table_name,
+        s.idx_scan,
+        s.idx_tup_read,
+        s.idx_tup_fetch
+      FROM pg_stat_user_indexes s
+      WHERE s.indexrelname = '<IDX_NAME>';
+      ```
+    -  Rollback Preparation `SELECT pg_get_indexdef('<IDX_NAME>'::regclass) AS create_index_sql;`
+    - Using DROP INDEX CONCURRENTLY `DROP INDEX CONCURRENTLY <IDX_NAME>;`
 
 
 

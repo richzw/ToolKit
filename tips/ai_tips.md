@@ -1,4 +1,7 @@
 - Tips
+  - [Sam Altman 与开发者的一小时](https://x.com/dotey/article/2016153776713863599)
+    - 给你一个去年这个时候一个人两周都做不到的任务，然后看你 10 分钟或 20 分钟做完
+    - 变得高能动性（high agency）、善于产生想法、非常有韧性、非常能适应快速变化的世界
   - AI is the fastest way to forget how to code and how to think.
     - If AI is doing the thinking for you, your skills are getting worse... fast.
     - If AI is helping you think better, you’re still learning.
