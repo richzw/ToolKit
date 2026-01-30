@@ -1910,7 +1910,6 @@
       - Frame sizes are predictable
       - Allocation frequency is high
       - Objects are short-lived
-    -
 - [瞬间高并发，goroutine执行结束后的资源占用问题](https://mp.weixin.qq.com/s/iBo-j4990paKb3Pb7Xk-2w)
   - p.CPUPercent() && p.MemoryPercent(), 借助github.com/shirou/gopsutil这个库，每隔5s打印一下当前程序的CPU和内存使用信息
   - goroutine已经执行结束后，GC的耗时明显增加，CPU和内存使用更是大幅上涨

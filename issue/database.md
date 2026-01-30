@@ -5,6 +5,7 @@
   - [Postgres SQL Query Roadtrip: Overview](https://internals-for-interns.com/posts/sql-query-roadtrip-in-postgres/)
     - PostgreSQL 执行一条 SQL 从文本到结果的全流程路线图：Parsing → Analysis → Rewriting → Planning → Execution
   - [Introduction to PostgreSQL Indexes](https://dlt.github.io/blog/posts/introduction-to-postgresql-indexes/)
+  - [Postgres Locks Explained](https://postgreslocksexplained.com/)
 - Debug high CPU of Postgres
   - We recommend running an `ANALYZE VERBOSE` operation to refresh the `pg_statistic` table.
   - [How can I troubleshoot high CPU utilization for Amazon RDS or Amazon Aurora PostgreSQL](https://aws.amazon.com/premiumsupport/knowledge-center/rds-aurora-postgresql-high-cpu/)

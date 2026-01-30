@@ -41,7 +41,19 @@
     - iPhone手机使用Gemini app无法访问，百思不得其解
     - 研究发现把Google Analytics的统计域名加入代理手机就正常了
       - DOMAIN-SUFFIX,http://app-analytics-services.com,Proxy
-
+- 安全指南
+  - [Clawdbot 安全指南](https://x.com/katherineq1212/article/2016043617098363114)
+    - 第一层：网络层防护
+      - 本地部署：默认 localhost:8080，只在本地可访问
+      - 远程访问：用 Tailscale 建立虚拟局域网，或者 SSH 隧道转发
+      - 如果必须公网暴露：配置防火墙白名单（只允许你的 IP），加上强认证
+    - 认证层防护
+      - 配对模式（Pairing）：最推荐。你需要先在本地和机器人"握手"，双方交换密钥，之后只有配对成功的设备能控制它
+      - Token 模式：次推荐。设置一个长随机字符串作为 token，每次请求都要带上。但 token 可能被泄露，需要定期更换
+    - 工具权限层 - 最小权限原则 来配置
+      - 沙箱模式：把工具限制在特定目录，比如 ~/clawdbot-sandbox
+      - 工具分级：不同 agent 不同权限。比如"代码助手"只能访问 ~/code，"系统管理员"才能执行系统命令
+      - 禁用高风险工具：如果不需要浏览器控制，直接禁用
 
 
 

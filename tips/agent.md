@@ -460,6 +460,9 @@
     - **Layer 2：长期记忆**（`MEMORY.md`）
       - 精炼的持久知识，包括用户偏好、重要决定、关键联系人等。
   - 记忆索引机制
+    - sqlite-vec is a SQLite extension that enables vector similarity search directly in SQLite, no external vector database required
+    - FTS5 is SQLite’s built-in full-text search engine that powers the BM25 keyword matching.
+    - Together, they allow Clawdbot to run hybrid search (semantic + keyword) from a single lightweight database file
   - 记忆搜索机制
     - **混合搜索**（并行执行）：
       - 向量搜索（语义相似度，权重 70%）
@@ -467,7 +470,11 @@
     - 最终分数：`0.7 * vectorScore + 0.3 * textScore`
     - 过滤低分结果（默认 minScore 0.35）
     - 支持概念搜索（如“数据库讨论”）和精确搜索（如具体名称/日期）
-
+- [Context Management for Deep Agents](https://www.blog.langchain.com/context-management-for-deepagents/)
+  - Deep Agents implements three main compression techniques, triggered at different frequencies:
+    - Offloading large tool results: We offload large tool responses to the filesystem whenever they occur.
+    - Offloading large tool inputs: When the context size crosses a threshold, we offload old write/edit arguments from tool calls to the filesystem.
+    - Summarization: When the context size crosses the threshold, and there is no more context eligible for offloading, we perform a summarization step to compress the message history.
 
 
 
