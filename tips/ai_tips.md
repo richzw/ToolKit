@@ -16,6 +16,12 @@
     - Ask it to review, not generate
     - Ask it to explain errors you already hit
     - Ask it to challenge your assumptions
+  - [MoltBot（Clawdbot）之父的20条AI哲学](https://mp.weixin.qq.com/s/OeJNz-1FmGrfzqFJxEcjVg)
+    - 用AI写代码应该是genuinely fun，不是苦差事。如果你觉得痛苦，可能方法不对
+    - 我不是'架构师'，我是builder。AI时代属于端到端塑造产品的人，不是画图纸甩锅的人  系统性思维
+    - 有经验的程序员试一次prompt失败就放弃AI，就像弹一次吉他就说自己没天赋。工具是乐器，需要练习
+    - Prompt是可以学的技能，不是噱头。理解模型行为是新的技术素养 - 精通需要时间和挫折
+    - 如何思考问题（你的prompt）比生成的代码更能显示你的工程判断力
 - [AI Era, 保留“认知摩擦”是你最后的护城河？](https://mp.weixin.qq.com/s/0-ygACSXvpG8XSSE4JR-Hw)
   - 背景判断：AI 时代的“知识通胀”
     - 获取答案/产出内容的成本极低，带来“顺滑”的工作流，但也引发思维能力的退化风险。
@@ -54,10 +60,34 @@
       - 沙箱模式：把工具限制在特定目录，比如 ~/clawdbot-sandbox
       - 工具分级：不同 agent 不同权限。比如"代码助手"只能访问 ~/code，"系统管理员"才能执行系统命令
       - 禁用高风险工具：如果不需要浏览器控制，直接禁用
-
-
-
-
+- [Moltbot 底层架构](https://mp.weixin.qq.com/s/9ddNSmqZzWKO7XXz_y0_tg)
+  - 设计哲学
+    - 主权 AI（Sovereign AI）与 OS-as-Surface（操作系统即界面
+    - 一个长期运行的 Gateway 控制面，用 WebSocket 控制平面协议把多消息渠道、多客户端、多设备节点与工具生态统一编排
+    - 内部通过 **Agent Loop（Pi Runtime）**完成消息→上下文→工具调用→行动/回复→持久化的闭环；并通过 ACP/A2UI 等协议向 IDE 与生成式 UI 扩展，同时用权限、沙箱、配对策略构建纵深防御
+  - Gateway (网关)。它不仅仅是一个简单的消息转发器，而是一个功能完备的控制平面 (Control Plane)，负责协调分布式的节点、管理异构的通信信道，并维护系统的全局状态。
+    - Gateway 采用经典的 Hub-and-Spoke (轮辐式) 网络拓扑结构
+      - Hub (Gateway 进程): 通常运行在用户的核心计算设备上（如 Mac Studio 或 Linux 服务器），监听默认端口 18789
+      - Spokes (客户端与节点): 所有的交互表面——无论是 WhatsApp/Telegram 的消息轮询进程
+  - 采用全双工的 WebSocket (WS) 协议作为核心通信机制
+    - 协议握手与认证 (Handshake & Auth)： 
+      - 令牌验证：在握手阶段，客户端必须提供预先生成的 auth token。这个 Token 是在系统初始化的“孵化 (Hatching)” 阶段生成的，并存储在受保护的配置文件中。
+      - 设备配对 (Pairing Flow): 对于无法直接复制 Token 的移动设备，Moltbot 实现了一套类似蓝牙配对的流程。
+      - TLS Pinning: 为了防御中间人攻击 (MitM)，特别是在公共 Wi-Fi 环境下使用 Tailscale 穿透时，移动节点实现了 TLS Pinning，强制验证 Gateway 证书的指纹，确保通信链路的绝对私密性。
+    - 连接建立后，Gateway 协议定义了一套能力发现机制。客户端不会被动等待，而是主动声明其作为“节点 (Node)” 的能力
+  - 远程访问与 Tailscale 集成
+    - Tailscale Serve: Gateway 可以通过 Tailscale Serve 暴露在用户的私有 Tailnet 网络中。这意味着 Gateway 依然绑定在安全的 Loopback 接口上，但通过 Tailscale 的虚拟网卡被远程设备访问。
+    - Tailscale Funnel: 对于必须通过公网访问的场景（例如接收 GitHub Webhook 回调），Gateway 支持 Tailscale Funnel，将其安全地通过 HTTPS 暴露给公网，同时支持基于密码的访问控制。
+  - Agent Loop: Pi Runtime 采用了 RPC (Remote Procedure Call) 模式与 Gateway 通信。
+    - 进程隔离: Pi Runtime 作为一个独立的进程运行，通过 RPC 接口与 Gateway 交换数据
+    - 块流式传输 (Block Streaming): 与传统的“一次性生成”不同，Pi Runtime 支持块流式传输
+  - 引入了 Thinking Levels (思考层级) 的概念，允许用户动态调整 Agent 的认知深度
+  - 长上下文遗忘 (Context Amnesia) 是所有基于 LLM 的 Agent 面临的共同难题。Moltbot 通过 Adaptive Compaction Safeguard 机制，在架构层面解决这一问题
+    - 动态分块 (Adaptive Chunking): 当任务上下文接近模型窗口限制时，系统会自动将大型任务拆解为更小的原子单元。
+    - 递归摘要: 系统会对历史对话进行递归式的摘要处理，保留关键的决策节点和事实信息，同时丢弃冗余的对话噪音。
+    - 内存刷写 (Memory Flush): 在执行压缩之前，Agent 会触发 before_compaction 钩子，提示模型将当前上下文中的重要信息写入长期存储（如 memory/ 目录下的 Markdown 文件），确保关键知识不会因压缩而丢失
+  - Moltbot 的 Session 模型原生支持 Agent-to-Agent (A2A) 通信，这是实现复杂工作流的关键。
+  - https://x.com/hesamation/article/2017038553058857413
 
 
 

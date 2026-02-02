@@ -453,7 +453,10 @@
       ```
     -  Rollback Preparation `SELECT pg_get_indexdef('<IDX_NAME>'::regclass) AS create_index_sql;`
     - Using DROP INDEX CONCURRENTLY `DROP INDEX CONCURRENTLY <IDX_NAME>;`
-
+- [执行计划跑偏](https://mp.weixin.qq.com/s/TaEWY3Uq417GHN79kLBN7A)
+  - 不能仅凭最终 total_cost 判断优化器是否会选择某条路径。
+    - PostgreSQL 在生成执行计划的过程中，会在各个规划阶段用 add_path 对候选 Path 做“去留决策”，其中会用到带 1% 模糊因子（fuzz factor）的成本比较。
+    - 当两条路径 cost 很接近时（差异 < 1%），可能因为进一步比较 startup_cost 而淘汰掉整体更快的 Hash Join 路径，最终选择了 Nested Loop，导致性能灾难。
 
 
 

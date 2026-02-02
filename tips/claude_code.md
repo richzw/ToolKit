@@ -579,6 +579,12 @@
   - [50 Claude Code Tips ](https://x.com/aiedge_/article/2014740607248564332)
     - Claude Skills Repo - A library of 80,000+ Claude Skills https:// skillsmp. com/
     - Claude Skills Library - A cool website with plug-and-play Skills and more https:// mcpservers. org/claude-skills
+  - Claude Code 官方项目中 CLAUDE md 文件也就大约 2.5k tokens：
+    - 常用 Bash 指令：让 AI 知道如何像开发者一样操作命令行。
+    - 代码风格规范 (Code Style Conventions)：确保 AI 写的代码符合团队编码标准。
+    - UI 与内容设计准则：指导 AI 如何设计界面和编写文案。
+    - 核心技术实现流程：教 AI 如何处理状态管理 (State Management)、日志记录 (Logging)、错误处理 (Error Handling)、功能门控 (Gating，即控制特定功能的开启与关闭) 以及调试 (Debugging)。
+    - 代码合并请求 (Pull Request) 模板：规范提交代码时的文档格式。
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
   - [Skills｜从概念到实操的完整指南](https://mp.weixin.qq.com/s/Bl4ODUxvwO8pYu9nXVmjuQ)
@@ -661,6 +667,12 @@
       - examples pattern（用输入输出示例约束行为）
       - 模板 pattern（强约束输出结构）
     - https://github.com/luozhiyun993/skill-workflow
+  - [AGENTS.md outperforms skills in our agent evals](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals)
+    - Agent Skills（skills）：一种把说明、工具、脚本、参考资料打包成“按需调用”的能力包（open standard）
+    - AGENTS.md：放在仓库根目录的 Markdown 文件，为 agent 提供每轮对话都常驻的项目上下文（类似 Claude Code 的 CLAUDE.md）
+    - Skills 最大的问题：触发不稳定、并且“提示词很脆”
+    - Compress aggressively. You don't need full docs in context. An index pointing to retrievable files works just as well.
+    - Test with evals. Build evals targeting APIs not in training data. That's where doc access matters most.
 - [Continuous Claude](https://github.com/parcadei/Continuous-Claude): 
   - 解决 Claude Code 等 AI Coding Agent 在长会话中面临的一个痛点：上下文丢失与“遗忘”
   -  原生机制：为了节省空间，Claude Code 会进行“压缩”，把之前的对话总结成摘要。
@@ -822,17 +834,17 @@
     - 遇到复杂问题/bug时，在 Cursor 的终端中启动 Claude Code；
     - 让 Claude Code 负责思考和规划，Cursor 负责执行和微调；
   - [How to build a Claude Code like agent](https://minusx.ai/blog/decoding-claude-code/)
-    - 1. Control Loop
-         1.1 Keep one main loop (with max one branch) and one message history
-         1.2 Use a smaller model for all sorts of things. All. The. Frickin. Time.
-    - 2. Prompts
-    -    2.1 Use claude.md pattern to collaborate on and remember user preferences
-    -    2.2 Use special XML Tags, Markdown, and lots of examples
-    - 3. Tools
-    -    3.1 LLM search >>> RAG based search
-    -    3.2 How to design good tools? (High vs Low level tools)
-    -    3.3 Let your agent manage its own todo list
-    - 4. Steerability
-    -    4.1 Tone and style
-    -    4.2 "PLEASE THIS IS IMPORTANT" is unfortunately still state of the art
-    -    4.3 Write the algorithm, with heuristics and examples
+    - Control Loop
+      - Keep one main loop (with max one branch) and one message history
+      - Use a smaller model for all sorts of things. All. The. Frickin. Time.
+    - Prompts
+      - Use claude.md pattern to collaborate on and remember user preferences
+      - Use special XML Tags, Markdown, and lots of examples
+    - Tools
+      - LLM search >>> RAG based search
+      - How to design good tools? (High vs Low level tools)
+      - Let your agent manage its own todo list
+    - Steerability
+      - Tone and style
+      - "PLEASE THIS IS IMPORTANT" is unfortunately still state of the art
+      - Write the algorithm, with heuristics and examples

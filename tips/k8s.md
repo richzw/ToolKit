@@ -475,6 +475,14 @@
   - [CPUShares 管理 Cgroup](https://mp.weixin.qq.com/s/heqCb-E0yi-uxE1bkLgRgw)
   - [手动管理 Cgroup](https://mp.weixin.qq.com/s/rr6vHPIqEqtfm-xOaE4jpw)
   - [使用 systemd 管理 Cgroup](https://mp.weixin.qq.com/s/77qF0bY9neZrPDeFLOgy5w)
+  - [New Conversion from cgroup v1 CPU Shares to v2 CPU Weight](https://kubernetes.io/blog/2026/01/30/new-cgroup-v1-to-v2-cpu-conversion-formula/)
+    - 在 cgroup v2 环境下，把 cgroup v1 的 cpu.shares（OCI 里仍用该概念表达“CPU 相对权重/份额”）转换为 cgroup v2 的 cpu.weight 时
+      - OCI 运行时（如 runc/crun）将采用一个新的非线性（对数域二次）转换公式，以修复旧线性公式带来的 CPU 优先级偏移 与 低配额场景粒度过差 的问题
+    - cgroup v1：常用 cpu.shares 表示相对 CPU 份额（权重）。systemd 文档给出的允许范围是 [2, 262144]，默认 1024
+    - cgroup v2：使用 cpu.weight 表示权重，范围 [1, 10000]，默认 100
+    - 旧公式: cpu.weight = 1 + ((cpu.shares - 2) * 9999) / 262142
+    - 新公式为: 令 L = log2(cpu.shares)  cpu.weight = ceil( 10^( L^2/612 + 125L/612 - 7/34 ) )
+    - 落地方式：不在 Kubernetes 内实现，而在 OCI 运行时实现；升级运行时才会生效
 - [Cluster Autoscaler 批处理作业的节点]()
   - 场景
     - 客户有自己的任务分发平台，不同计算任务通过任务平台下发到 Kubernetes 集群中，每批计算任务对应一堆的 Pod
