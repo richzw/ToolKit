@@ -48,7 +48,7 @@
     - 研究发现把Google Analytics的统计域名加入代理手机就正常了
       - DOMAIN-SUFFIX,http://app-analytics-services.com,Proxy
 - 安全指南
-  - [Clawdbot 安全指南](https://x.com/katherineq1212/article/2016043617098363114)
+  - [OpenClaw 安全指南](https://x.com/katherineq1212/article/2016043617098363114)
     - 第一层：网络层防护
       - 本地部署：默认 localhost:8080，只在本地可访问
       - 远程访问：用 Tailscale 建立虚拟局域网，或者 SSH 隧道转发
@@ -60,7 +60,7 @@
       - 沙箱模式：把工具限制在特定目录，比如 ~/clawdbot-sandbox
       - 工具分级：不同 agent 不同权限。比如"代码助手"只能访问 ~/code，"系统管理员"才能执行系统命令
       - 禁用高风险工具：如果不需要浏览器控制，直接禁用
-- [Moltbot 底层架构](https://mp.weixin.qq.com/s/9ddNSmqZzWKO7XXz_y0_tg)
+- [OpenClaw 底层架构](https://mp.weixin.qq.com/s/9ddNSmqZzWKO7XXz_y0_tg)
   - 设计哲学
     - 主权 AI（Sovereign AI）与 OS-as-Surface（操作系统即界面
     - 一个长期运行的 Gateway 控制面，用 WebSocket 控制平面协议把多消息渠道、多客户端、多设备节点与工具生态统一编排
@@ -88,7 +88,17 @@
     - 内存刷写 (Memory Flush): 在执行压缩之前，Agent 会触发 before_compaction 钩子，提示模型将当前上下文中的重要信息写入长期存储（如 memory/ 目录下的 Markdown 文件），确保关键知识不会因压缩而丢失
   - Moltbot 的 Session 模型原生支持 Agent-to-Agent (A2A) 通信，这是实现复杂工作流的关键。
   - https://x.com/hesamation/article/2017038553058857413
-
+  - [Running OpenClaw in Docker](https://til.simonwillison.net/llms/openclaw-docker)
+- AI 编程
+  - 人定义问题 → AI 提供多个方案 → 人选择方向 → AI 执行编码 → 人审阅验收。
+  - 试错成本： 快速失败，快速构建——这就是氛围编程对创新最大的贡献
+  - 一方面，AI 的脑容量超过任何资深工程师；另一方面，不给它正确的指引，它就像个新人一样瞎搞；能力越强的工程师，AI 给他的提效越大
+  - 如果说 AI 是执行者，那谁来确保它不跑偏？答案是规格文档 (spec) - 用另一个 AI（比如 Codex）去做代码审查——注意最好用A家的模型开发，用B家的模型审查
+  - 有几件事是共通的：
+    - 保持好奇心。 遇到一个有意思的东西，就去刨根问底——它底层究竟是怎么实现的？以前维持这种好奇心的代价很高，你得一行行读文档、读代码、反复尝试
+    - 学会学习。 软件开发的迭代速度会越来越快，智能体随时可能抛出你不懂的概念、框架、依赖
+    - 不要追逐表面，要抓住实质。 光 SDD 这件事，GitHub 上排名很高的框架就不下十种，而且还会层出不穷。
+    - 对质量的敬畏。 我们对底层逻辑的掌握不能丢弃。好的工程师，遇到一个新系统时永远会问：它底层是怎么实现的？这种刨根问底的好奇心，这种对根本原理的执着追求，是 AI 时代工程师最宝贵的品质
 
 
 

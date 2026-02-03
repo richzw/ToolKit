@@ -569,6 +569,7 @@
     - 标题优化：别用“Best CRM”，改成“Best CRM for small creative teams”。避免自夸，精准长尾高转化词，吸引目标用户。
     - 内容添加：客观事实基础上，融入个人直接体验（如使用心得）。提升独特性，满足“Information Gain”标准（信息增益），易被AI推荐。
     - 外链策略：大方链接竞争对手。B2B领域无绝对“最好”，目标是进入用户考虑范围；链接权威站提升自身文章权威性，看起来更中立。
+  - [Reddit 做 SEO](https://x.com/daluoseo/article/2017465316050407779)
 - [区块链技术与应用](https://mp.weixin.qq.com/s/q18mt9FHtr_gqw59UNgPFQ)
   - 从 ETH 历史与 PoS 架构、账户与状态模型、MPT 数据结构，到 PoS 共识细节（LMD‑GHOST + Casper FFG）、智能合约执行与 Gas 经济，再到 ERC‑20 代币及底层存储布局。
 - Test Methods

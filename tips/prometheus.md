@@ -277,8 +277,8 @@
   - VictoriaLogs 
     - 一个**轻量、单二进制（single-binary）、零配置（zero-config）、无 Schema（schemaless）**的日志数据库，支持多种采集/协议接入、压缩落盘、内置 UI 查询、Grafana 可视化、并可与 vmalert 做“从日志到告警”
     - 自动为所有日志字段建立索引
+- [Go Runtime Metrics: CPU, GC, Memory, Scheduler](https://x.com/func25/article/2017211954558042128)
   
-
 
 
 

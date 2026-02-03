@@ -501,6 +501,38 @@
 - CC
   - [The Shorthand Guide to Everything Claude Code](https://x.com/affaanmustafa/article/2012378465664745795)
     - https://github.com/affaan-m/everything-claude-code/tree/main
+  - [Tips](https://x.com/bcherny/status/2017742759218794768)
+    - Do more in parallel
+      - Spin up 3–5 git worktrees at once, each running its own Claude session in parallel.
+      - name their worktrees and set up shell aliases (za, zb, zc) so they can hop between them in one keystroke
+    - Start every complex task in plan mode. Pour your energy into the plan so Claude can 1-shot the implementation.
+    - Invest in your http://CLAUDE.md. 
+      - After every correction, end with: "Update your http://CLAUDE.md so you don't make that mistake again." Claude is eerily good at writing rules for itself.
+    - Create your own skills and commit them to git. Reuse across every project. Tips from the team:
+      - If you do something more than once a day, turn it into a skill or command
+      - Build a /techdebt slash command and run it at the end of every session to find and kill duplicated code
+      - Set up a slash command that syncs 7 days of Slack, GDrive, Asana, and GitHub into one context dump
+      - Build analytics-engineer-style agents that write dbt models, review code, and test changes in dev
+      - [Extend Claude with skills](https://code.claude.com/docs/en/skills#extend-claude-with-skills)
+    - Claude fixes most bugs by itself. Here's how we do it:
+      - Enable the Slack MCP, then paste a Slack bug thread into Claude and just say "fix." Zero context switching required.
+    -  Level up your prompting
+      - a. Challenge Claude. Say "Grill me on these changes and don't make a PR until I pass your test." Make Claude be your reviewer.  Or, say "Prove to me this works" and have Claude diff behavior between main and your feature branch
+      - b. After a mediocre fix, say: "Knowing everything you know now, scrap this and implement the elegant solution"
+      - c. Write detailed specs and reduce ambiguity before handing work off. The more specific you are, the better the output
+    - Use subagents
+      - Append "use subagents" to any request where you want Claude to throw more compute at the problem
+      - Offload individual tasks to subagents to keep your main agent's context window clean and focused
+      - Route permission requests to Opus 4.5 via a hook — let it scan for attacks and auto-approve the safe ones
+    - Use Claude for data & analytics
+      - Ask Claude Code to use the "bq" CLI to pull and analyze metrics on the fly. 
+      - We have a BigQuery skill checked into the codebase, and everyone on the team uses it for anlytics queries directly in Claude Code
+    - Learning with Claude - few tips from the team to use Claude Code for learning:
+      - Enable the "Explanatory" or "Learning" output style in /config to have Claude explain the *why* behind its changes
+      - Have Claude generate a visual HTML presentation explaining unfamiliar code. It makes surprisingly good slides!
+      - Ask Claude to draw ASCII diagrams of new protocols and codebases to help you understand them
+      - Build a spaced-repetition learning skill: you explain your understanding, Claude asks follow-ups to fill gaps, stores the result
+  - [How to Use Codex from Claude Code](https://gist.github.com/antirez/2e07727fb37e7301247e568b6634beff)
   - ClaudeCode开发http://laper.ai 的最核心技巧：
     - 根目录主md强调任何功能、架构、写法更新必须在工作结束后更新相关目录的子文档。
     - 每个，我是说每个，每个文件夹中都有一个极简的架构说明（3行以内），下面写下每个文件的名字、地位、功能。文件开头声明：一旦我所属的文件夹有所变化，请更新我。
