@@ -249,9 +249,20 @@
 - [tmux](https://x.com/tz_2022/article/2012624953053503541)
   -  tmux new -A -s main (这行命令最骚，如果有叫 main 的房间就进去，没有就新建，极其无脑)
   - 
-
-
-
+- top 展示的是“现象”，不是“根因”；在多核时代，必须结合 CPU 核数、load 含义、内存字段的真实语义来判断是否异常
+  - top 的 %CPU = 使用的 CPU 核心数 × 100%
+  - load average 表示“正在运行 + 等待 CPU 的进程数”，要与核数对比
+    - Linux 的 load average 统计的是可运行队列长度的平均值，通常包含：
+      - R：正在运行或可运行（running/runnable）的任务
+      - D：不可中断睡眠（uninterruptible sleep），常见于等待 I/O（磁盘、NFS 等）
+      - 因此 load 高可能是 CPU 压力，也可能是 I/O 阻塞导致的任务堆积。
+      - 经验判断：load 与 “逻辑 CPU 数” 同量级时，才可能接近满载（仍需结合 %Cpu、iowait、runnable 等进一步判断）
+  - id 是CPU 空闲时间占比（总体/平均视图），表示在采样窗口中 CPU 仍有空闲。
+    - 高 id 与某进程高 %CPU 同时出现并不矛盾：例如 16 核中某进程占用 12 核，剩余 4 核仍可能较空闲；或采样窗口/调度分布造成平均值差异
+  - VIRT 是虚拟地址空间，RES 才是物理内存占用；MySQL VIRT 很大可能正常（buffer pool、mmap、malloc 预留等）
+  - free Linux 会用空闲内存做缓存；真正要看 avail Mem
+    - free（或 top 中的 free）小，往往是因为页面缓存（page cache）/buffer 被充分利用。
+    - available 是内核估算的“在不触发严重回收/不影响系统的情况下可用内存”，比单看 free 更接近真实可用量
 
 
 

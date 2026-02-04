@@ -6,6 +6,14 @@
     - PostgreSQL 执行一条 SQL 从文本到结果的全流程路线图：Parsing → Analysis → Rewriting → Planning → Execution
   - [Introduction to PostgreSQL Indexes](https://dlt.github.io/blog/posts/introduction-to-postgresql-indexes/)
   - [Postgres Locks Explained](https://postgreslocksexplained.com/)
+  - [Life Altering Postgresql Patterns](https://mccue.dev/pages/3-11-25-life-altering-postgresql-patterns)
+    - Use UUID primary keys
+    - Give everything created_at and updated_at
+    - on update restrict on delete restrict
+    - Use schemas 
+    - Enum Tables
+    - Mechanically name join tables
+    - Almost always soft delete
 - Debug high CPU of Postgres
   - We recommend running an `ANALYZE VERBOSE` operation to refresh the `pg_statistic` table.
   - [How can I troubleshoot high CPU utilization for Amazon RDS or Amazon Aurora PostgreSQL](https://aws.amazon.com/premiumsupport/knowledge-center/rds-aurora-postgresql-high-cpu/)

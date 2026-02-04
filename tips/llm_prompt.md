@@ -1633,6 +1633,7 @@
       - Llama：需精确指令，但可控性高（适合工程场景）
   - 提示工程=20%技术+80%领域知识，成功企业需深耕垂直场景，将用户工作流转化为提示语言
   - https://www.youtube.com/watch?v=DL82mGde6wo
+- [Claude Code Prompts ](https://x.com/aiedge_/article/2018356670070718614)
 - [Claude Code - Ultrathink Task ]
   ```
   ## Usage
