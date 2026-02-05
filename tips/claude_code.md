@@ -233,6 +233,7 @@
   - codex --dangerously-bypass-approvals-and-sandbox 全自动跑
   - codex resume用来选择历史记录sessions
   - codex目前没有plan模式，可以/approvals选择read-only进行讨论，或者直接在提示词里要求codex进行plan，写到一个文档中
+  - [Unlocking the Codex harness](https://openai.com/index/unlocking-the-codex-harness/)
   - /review 命令很实用，在写完代码后让 codex review
   - Codex Prompt
     - Make a pixel art game where I can walk around and talk to other villagers, and catch wild bugs
@@ -255,6 +256,7 @@
     - Codex 通过 Responses API 的流式（SSE）事件接收模型输出（包括文本增量、输出项新增、完成事件等），并将与后续推理相关的输出项转为下一次请求的 input 项
     - 为了性能与隐私/合规，Codex 倾向保持请求无状态（不依赖 previous_response_id），并依靠 prompt caching 与 **compaction（对话压缩）**解决“请求体变大”和“上下文窗口耗尽”的问题
 - Claude Code
+  - [Ultimate Claude Starter Pack](https://x.com/aiedge_/article/2019153204869738897)
   - 三种“权限模式”（强烈建议先用 Plan Mode）
     - Normal：每次改文件/跑命令都会询问是否允许。 
     - Auto-accept：本会话内自动接受变更（原型阶段可用，谨慎）。 
@@ -505,9 +507,21 @@
     - Do more in parallel
       - Spin up 3–5 git worktrees at once, each running its own Claude session in parallel.
       - name their worktrees and set up shell aliases (za, zb, zc) so they can hop between them in one keystroke
+      - Git worktree 是什么？ 让你在同一个仓库里同时打开多个分支的工作目录，不用来回切换。命令大概是 git worktree add ../feature-a feature-a
     - Start every complex task in plan mode. Pour your energy into the plan so Claude can 1-shot the implementation.
+      - 让一个 Claude 写计划，另开一个 Claude 以“高级工程师”的身份审核这个计划。让 AI 审 AI
+      - 事情一旦跑偏，立刻回到 Plan Mode 重新规划。不要硬推，不要让 Claude 在错误的方向上越走越远。
     - Invest in your http://CLAUDE.md. 
       - After every correction, end with: "Update your http://CLAUDE.md so you don't make that mistake again." Claude is eerily good at writing rules for itself.
+      -  prompt 可以是：“Update your CLAUDE.md so you don't make that mistake again.”
+      - 更系统：他为每个项目/任务维护一个 notes 目录，每次 PR 后更新。然后在 CLAUDE.md 里指向这些 notes，相当于给 Claude 建了一个持续更新的知识库。
+      - CLAUDE MD 不建议放太多内容，只会适得其反，只放最重要的 AI 没训练过的内容，更多的内容作为文件链接按需读取。
+      - Claude Code 官方项目中 CLAUDE md 文件也就大约 2.5k tokens：
+        - 常用 Bash 指令：让 AI 知道如何像开发者一样操作命令行。
+        - 代码风格规范 (Code Style Conventions)：确保 AI 写的代码符合团队编码标准。
+        - UI 与内容设计准则：指导 AI 如何设计界面和编写文案。
+        - 核心技术实现流程：教 AI 如何处理状态管理 (State Management)、日志记录 (Logging)、错误处理 (Error Handling)、功能门控 (Gating，即控制特定功能的开启与关闭) 以及调试 (Debugging)。
+        - 代码合并请求 (Pull Request) 模板：规范提交代码时的文档格式。
     - Create your own skills and commit them to git. Reuse across every project. Tips from the team:
       - If you do something more than once a day, turn it into a skill or command
       - Build a /techdebt slash command and run it at the end of every session to find and kill duplicated code
@@ -516,12 +530,15 @@
       - [Extend Claude with skills](https://code.claude.com/docs/en/skills#extend-claude-with-skills)
     - Claude fixes most bugs by itself. Here's how we do it:
       - Enable the Slack MCP, then paste a Slack bug thread into Claude and just say "fix." Zero context switching required.
+      - /techdebt：在每次 session 结束时运行，让 Claude 检查并清理重复代码
     -  Level up your prompting
-      - a. Challenge Claude. Say "Grill me on these changes and don't make a PR until I pass your test." Make Claude be your reviewer.  Or, say "Prove to me this works" and have Claude diff behavior between main and your feature branch
+      - a. Challenge Claude. Say "Grill me on these changes and don't make a PR until I pass your test." Make Claude be your reviewer.  
+        - Or, say "Prove to me this works" and have Claude diff behavior between main and your feature branch
       - b. After a mediocre fix, say: "Knowing everything you know now, scrap this and implement the elegant solution"
       - c. Write detailed specs and reduce ambiguity before handing work off. The more specific you are, the better the output
     - Use subagents
       - Append "use subagents" to any request where you want Claude to throw more compute at the problem
+        -  在任何请求后面加上“use subagents”。Claude 会自动把任务拆分给多个 Subagents 并行处理，相当于让它“开更多的线程”来解决问题。
       - Offload individual tasks to subagents to keep your main agent's context window clean and focused
       - Route permission requests to Opus 4.5 via a hook — let it scan for attacks and auto-approve the safe ones
     - Use Claude for data & analytics

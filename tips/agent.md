@@ -1,6 +1,16 @@
 - [Agentic Design Patterns ](https://docs.google.com/document/d/1rsaK53T3Lg5KoGwvf8ukOUvbELRtH-V0LnOIFDxBryE/preview?tab=t.0)
   - [agentic-architectures](https://github.com/FareedKhan-dev/all-agentic-architectures)
     - This repository contains detailed implementations of 17+ state-of-the-art agentic architectures, built with LangChain and LangGraph
+  - [The Agentic AI Handbook: Production-Ready Patterns](https://www.nibzard.com/agentic-handbook)
+    - 把“能跑的 Agent Demo”变成“可上线、可审计、可控、可验证”的生产系统，强调“模式（patterns）不是提示词小技巧，而是**循环（loop）+约束（constraints）+检查（checks）+可观测（observability）**的工程结构”
+    - Orchestration & Control（编排与控制）：决定做什么、何时停、如何恢复（如 Plan-Then-Execute、Inversion of Control、LATS、Tree of Thoughts…）
+    - Tool Use & Environment（工具与环境）：如何与外部系统交互而不“搞乱现场”（如 Progressive Tool Discovery、LLM-Friendly API、Egress Lockdown…）
+    - Context & Memory（上下文与记忆）：在上下文窗口限制下仍保持 grounded（如 Curated Code Context、Episodic Memory Retrieval…）
+    - Feedback Loops（反馈回路）：用迭代与检查提升质量（如 Reflection Loop、Coding Agent CI Feedback Loop…）
+    - UX & Collaboration（体验与协作）：人和 Agent 如何共享控制权（Spectrum of Control、Abstracted Code Representation…）
+    - Reliability & Eval（可靠性与评测）：证明在工作、并防回归（Workflow Evals with Mocked Tools…）
+    - Learning & Adaptation（学习与适应）：系统如何随时间改进（Skill Library Evolution、Agent RFT…）
+    - Security & Safety（安全）：避免变成数据泄露/事故制造机（Lethal Trifecta、PII Tokenization…）
 - [Agents 2.0: From Shallow Loops to Deep Agents](https://www.philschmid.de/agents-2.0-deep-agents)
   - 显式规划（Explicit Planning）
     • 先用工具写出可持久化的 To-Do 列表／Markdown 计划，而不是在思维链里隐式规划。
