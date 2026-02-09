@@ -1106,6 +1106,15 @@
   - SACK 只是补丁：回归“选择性”的方向，但受 TCP Option 空间与字节 ACK 框架限制
 - 内网穿透配置
   - ngrok / localtunnel
+  - Tailscale + Termius + tmux
+    ```
+    tmux new -s fastapi        # 创建会话
+    uvicorn main:app --reload  # 启动服务
+    tmux detach                # 断开但保持运行
+    tmux attach -t fastapi     # 下次连回来
+    ```
+    - Ctrl+b d 快捷键可能被 Warp 拦截，直接敲 tmux detach 命令就行。
+    - Termius：手机上的 SSH 客户端
 
 
 

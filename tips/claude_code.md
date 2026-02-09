@@ -24,169 +24,8 @@
        典型场景： 产品头脑风暴、UI 设计草图、文案初稿、测试用例的边缘场景发散。
   - AI 给出的是概率最高的答案，而我们需要的是逻辑上正确的答案
 - [A Software Library with No Code](https://www.dbreunig.com/2026/01/08/a-software-library-with-no-code.html)
-- 如何有效审查 AI 生成的代码？ Boris
-  - CC
-    - 1. 默认使用 Plan 模式。
-    - 2. 给 Claude 提供一种验证其输出结果的方法，比如单元测试、Claude Chrome 扩展程序，或者 iOS/Android 模拟器。
-    - 3. 使用 /code-review 来自动化大部分的代码审查工作。 对 Claude 生成的代码保持与人类写的代码相同的标准
-  - 让 AI 自己加日志，然后运行后把日志发回给 AI
-    - 比如在调试一个问题，先尝试让它修复，它没能修复，我就让它加上必要的日志, 代码中加上日志后再运行，重现 Bug，把运行后的日志发回给 Codex
 - [global agent guide](https://www.dzombak.com/blog/2025/08/getting-good-results-from-claude-code/)
-  ```
-    # Development Guidelines
-    
-    ## Philosophy
-    
-    ### Core Beliefs
-    
-    - **Incremental progress over big bangs** - Small changes that compile and pass tests
-    - **Learning from existing code** - Study and plan before implementing
-    - **Pragmatic over dogmatic** - Adapt to project reality
-    - **Clear intent over clever code** - Be boring and obvious
-    
-    ### Simplicity Means
-    
-    - Single responsibility per function/class
-    - Avoid premature abstractions
-    - No clever tricks - choose the boring solution
-    - If you need to explain it, it's too complex
-    
-    ## Process
-    
-    ### 1. Planning & Staging
-    
-    Break complex work into 3-5 stages. Document in `IMPLEMENTATION_PLAN.md`:
-    
-    ```markdown
-    ## Stage N: [Name]
-    **Goal**: [Specific deliverable]
-    **Success Criteria**: [Testable outcomes]
-    **Tests**: [Specific test cases]
-    **Status**: [Not Started|In Progress|Complete]
-    ```
-    - Update status as you progress
-    - Remove file when all stages are done
-    
-    ### 2. Implementation Flow
-    
-    1. **Understand** - Study existing patterns in codebase
-    2. **Test** - Write test first (red)
-    3. **Implement** - Minimal code to pass (green)
-    4. **Refactor** - Clean up with tests passing
-    5. **Commit** - With clear message linking to plan
-    
-    ### 3. When Stuck (After 3 Attempts)
-    
-    **CRITICAL**: Maximum 3 attempts per issue, then STOP.
-    
-    1. **Document what failed**:
-        - What you tried
-        - Specific error messages
-        - Why you think it failed
-    
-    2. **Research alternatives**:
-        - Find 2-3 similar implementations
-        - Note different approaches used
-    
-    3. **Question fundamentals**:
-        - Is this the right abstraction level?
-        - Can this be split into smaller problems?
-        - Is there a simpler approach entirely?
-    
-    4. **Try different angle**:
-        - Different library/framework feature?
-        - Different architectural pattern?
-        - Remove abstraction instead of adding?
-    
-    ## Technical Standards
-    
-    ### Architecture Principles
-    
-    - **Composition over inheritance** - Use dependency injection
-    - **Interfaces over singletons** - Enable testing and flexibility
-    - **Explicit over implicit** - Clear data flow and dependencies
-    - **Test-driven when possible** - Never disable tests, fix them
-    
-    ### Code Quality
-    
-    - **Every commit must**:
-        - Compile successfully
-        - Pass all existing tests
-        - Include tests for new functionality
-        - Follow project formatting/linting
-    
-    - **Before committing**:
-        - Run formatters/linters
-        - Self-review changes
-        - Ensure commit message explains "why"
-    
-    ### Error Handling
-    
-    - Fail fast with descriptive messages
-    - Include context for debugging
-    - Handle errors at appropriate level
-    - Never silently swallow exceptions
-    
-    ## Decision Framework
-    
-    When multiple valid approaches exist, choose based on:
-    
-    1. **Testability** - Can I easily test this?
-    2. **Readability** - Will someone understand this in 6 months?
-    3. **Consistency** - Does this match project patterns?
-    4. **Simplicity** - Is this the simplest solution that works?
-    5. **Reversibility** - How hard to change later?
-    
-    ## Project Integration
-    
-    ### Learning the Codebase
-    
-    - Find 3 similar features/components
-    - Identify common patterns and conventions
-    - Use same libraries/utilities when possible
-    - Follow existing test patterns
-    
-    ### Tooling
-    
-    - Use project's existing build system
-    - Use project's test framework
-    - Use project's formatter/linter settings
-    - Don't introduce new tools without strong justification
-    
-    ## Quality Gates
-    
-    ### Definition of Done
-    
-    - [ ] Tests written and passing
-    - [ ] Code follows project conventions
-    - [ ] No linter/formatter warnings
-    - [ ] Commit messages are clear
-    - [ ] Implementation matches plan
-    - [ ] No TODOs without issue numbers
-    
-    ### Test Guidelines
-    
-    - Test behavior, not implementation
-    - One assertion per test when possible
-    - Clear test names describing scenario
-    - Use existing test utilities/helpers
-    - Tests should be deterministic
-    
-    ## Important Reminders
-    
-    **NEVER**:
-    - Use `--no-verify` to bypass commit hooks
-    - Disable tests instead of fixing them
-    - Commit code that doesn't compile
-    - Make assumptions - verify with existing code
-    
-    **ALWAYS**:
-    - Commit working code incrementally
-    - Update plan documentation as you go
-    - Learn from existing implementations
-    - Stop after 3 failed attempts and reassess
-  ```
-
+ 
 - [ChatGPT 和 Claude 都有记忆功能，但两者实现原理截然不同](https://www.shloked.com/writing/claude-memory)
   - ChatGPT 的记忆模式是自动化、魔法般的个性记忆，不需要用户提醒，自动的悄悄记录用户的使用细节。
   - Claude的记忆模式是基于检索的，每次新开对话，都没有任何任何历史记忆，只有当你明确告诉 Claude 需要用到某条记忆内容，它才会从真实的历史记录中精准提取信息。
@@ -229,6 +68,8 @@
     - Ask Claude to review your prompts for effectiveness
     - A prompting tip: have Claude ask you 2 important clarifying questions before it starts
     - Use sub-agents or /new when you want a fresh take, not biased by the conversation so far
+  - [Claude Code Tips](https://agenticcoding.substack.com/p/32-claude-code-tips-from-basics-to)
+    - 
 - Codex
   - codex --dangerously-bypass-approvals-and-sandbox 全自动跑
   - codex resume用来选择历史记录sessions
@@ -397,6 +238,17 @@
     - Use slash commands as simple, personal shortcuts, not as a replacement for building a more intuitive CLAUDE.md and better-tooled agent.
   - Custom subagents are a brittle solution. Give your main agent the context (in CLAUDE.md) and let it use its own Task/Explore(...) feature to manage delegation.
   - Use claude --resume and claude --continue to restart sessions and uncover buried historical context
+- [CLAUDE.md Masterclass: From Start to Pro-Level User with Hooks & Subagents](https://newsletter.claudecodemasterclass.com/p/claudemd-masterclass-from-start-to)
+  - CLAUDE.md 的定位：不是 README，而是“配置/规则层
+    - 当成“默认操作系统设置”，放跨任务稳定的内容（命令、约束、边界、流程），而不是一次性任务细节。官方 Best Practices 也强调“保持短、且只放广泛适用的规则”
+  - Claude Code 会把 CLAUDE.md 包在一段 <system-reminder> 里，提醒模型“这些上下文可能无关；除非高度相关否则忽略”，所以写得越杂越容易被忽略
+  - CLAUDE.md 的层级与加载规则（全局/项目/目录按需
+    - 在多个位置放 CLAUDE.md；根部给全局规则，子目录放局部规则；Claude 访问子目录文件时才按需加载对应的嵌套 CLAUDE.md
+  - “好用的 CLAUDE.md”的结构：回答 WHAT / WHY / HOW
+    - 用清晰分区（项目背景、技术栈、关键目录、常用命令、标准、工作流、注意事项），让 Claude 快速上手且不误改
+  - /init 生成 starter 配置，并明确提到用 # 来积累你反复重复的指令
+  - 别让 Claude 反复“人工检查格式”；应把 lint/test 等放到 hook 或 pre-commit 自动执行，CLAUDE.md 只描述规则存在即可
+  - 把高频通用规则放 CLAUDE.md；低频/任务型内容挪到独立文档，需要时再让 Claude 去读，避免主文件膨胀
 - Claude Code 驱动任务执行 + Codex 深度代码分析与生成 https://github.com/Pluviobyte/Claude-Codex
   - 多agent协作 https://github.com/jeanchristophe13v/codex-mcp-async
     - 一个Claude Code作为orchestrator 同时调用gemini-cli看文档，调用2个codex做规划，最后再调用几个cc去执行
@@ -501,6 +353,15 @@
   - 用“虚拟文件系统”替代真实文件系统访问;  AgentFS 的文件操作封装成“受控工具”，并强制代理只能用这些工具
   - https://github.com/run-llama/agentfs-claude
 - CC
+  - AgentsTeams
+    - settings.json
+      ```
+        "env": {
+         "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+        }
+      ```
+      只需用自然语言告诉Claude创建智能体团队并描述任务结构即可
+  - [Deep Dive: How Claude Code's /insights Command Works](https://www.zolkos.com/2026/02/04/deep-dive-how-claude-codes-insights-command-works.html)
   - [The Shorthand Guide to Everything Claude Code](https://x.com/affaanmustafa/article/2012378465664745795)
     - https://github.com/affaan-m/everything-claude-code/tree/main
   - [Tips](https://x.com/bcherny/status/2017742759218794768)
