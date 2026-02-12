@@ -2114,6 +2114,9 @@
   - Try rsc.io/script for your own script-based test cases.
   - Improve your tests over time.
   - Aim for continuous deployment.
+  - [testing/nettest](https://mp.weixin.qq.com/s/_vPSVrjiWtl4HeI4ESJfvw)
+    - 这是一个完全在内存中运行，但行为上高度仿真真实网络栈（支持缓冲、异步、错误注入）的实现。
+    -  testing/synctest 包，旨在通过虚拟时钟解决并发测试中的时间依赖问题。然而，synctest 难以接管真实的系统网络调用。
 - [Go运行时的并发原语](https://mp.weixin.qq.com/s/Lhw_VFL8UHD9edfbKt_QjQ)
   - gopark会将 goroutine 放到等待队列中，从调度器的运行队列中移出去，等待被唤醒。
   - goready会将 goroutine 放到可运行队列中，加入到调度器的运行队列，等待被调度。

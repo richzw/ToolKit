@@ -1377,6 +1377,7 @@
         - 降低TTFT
         - 降低TPOT
         - 提升吞吐
+      - [KV Caching in LLMs, Clearly Explained ](https://x.com/akshay_pachaar/article/2020840784782913605)
     - Paged Attention
       - 主要针对KV Cache在内存管理上的优化，提升资源利用率
       - 优化点 - 提升吞吐

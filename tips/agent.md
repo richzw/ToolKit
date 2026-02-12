@@ -485,11 +485,51 @@
     - Offloading large tool results: We offload large tool responses to the filesystem whenever they occur.
     - Offloading large tool inputs: When the context size crosses a threshold, we offload old write/edit arguments from tool calls to the filesystem.
     - Summarization: When the context size crosses the threshold, and there is no more context eligible for offloading, we perform a summarization step to compress the message history.
-
-
-
-
-
+- [Pi Monorepo](https://github.com/badlogic/pi-mono)
+  - pi 的 agent loop 只提供四个工具: read, write, edit, bash; 其他所有的能力都依赖于 skills
+- [Chunk size is query-dependent: a simple multi-scale approach to RAG retrieval](https://www.ai21.com/blog/query-dependent-chunking/)
+  - RAG 分块存在经典权衡：
+    - 小 chunk：细节更“尖锐”，但上下文不足；
+    - 大 chunk：上下文更完整，但具体事实更易被稀释/被表示压缩
+  - chunk大小从来没有通用最优解，而是和查询强相关
+  - 构建多尺寸chunk并对索引结果排序
+    - 预处理时做多个尺寸的chunk，并为其建索引，推理时并行查询所有索引，最后用倒数排名融合（RRF） 整合所有查询结果，得到最终文档排名
+    - RRF provides robustness: By aggregating multiple rank signals across chunk sizes, we typically match or exceed the best individual configuration
+  - https://github.com/AI21Labs/multi-window-chunk-size/blob/master/multi-window-chunk-size.ipynb
+- [Code Agent](https://github.com/yan5xu/code-relay/tree/main)
+  - 上下文不够？结构化存储 + 按需加载，关键节点保存状态，下次精确恢复。
+    - HANDOFF 替代 compress — 解决上下文丢失
+    - 主动让 agent 写一份结构化的交接文档 — 已经完成了什么、正在做什么、下一步做什么、有什么坑要注意。然后开新会话，agent 读取 HANDOFF，直接恢复上下文继续工作。
+  - 单个 agent 能力有限？多 agent 协作，主 agent 编排，sub-agent 执行，通过外部存储传递信息。
+    - Sub-Agent 拓展上下文窗口 — 单个 agent 做不完的事，拆给多个做。
+    - 主 agent 只做规划和决策，具体的重活委托给 sub-agent，结果通过 workspace 文件传回来。
+    - 本质上是用文件系统做信息中转，把单个上下文窗口扩容成了多个。
+  - 并发冲突？隔离执行环境，每个任务独立空间，互不干扰。
+    - Worktree 隔离并发 — 多个任务同时进行，互不干扰。
+    - 每个任务在独立的 git worktree 中开发。主仓库始终干净，多个 agent 或多个任务可以并行，不会互相污染代码。做完清理 worktree 就行。
+  - HANDOFF 解决时间轴上的连续性，Sub-Agent 解决单次会话的容量限制，Worktree 解决并发隔离。
+  - 工程方案
+    - 给 agent 自验证的能力。 搭好本地测试环境，让它能跑单元测试、跑 build、跑 lint、自己确认代码是否正确
+    - 给 agent 获取信息的能力。 这个变化最大。我给 agent 写了一份日志查询手册，告诉它怎么用 aws logs CLI 查 CloudWatch 日志 — 按 Pod 名过滤、按模块过滤、按错误级别过滤。
+    - 给 agent 完整的 CLI 工具链。 现在几乎所有云平台都有 CLI — AWS CLI、GCP gcloud、Cloudflare wrangler。Agent 完全可以完成从写代码到部署上线的一条龙操作
+    - SCOPE 控制 — 限制 Agent 的写入范围
+      - 本地文件模式下，每个任务有一个 SCOPE.yml，白名单指定 agent 可以写哪些文件：
+    - Boot Sequence — Agent 自举
+      - 每次打开项目，agent 按固定顺序加载配置：工作协议 → 开发流程 → 资源索引 → 任务状态
+- [The two patterns by which agents connect sandboxes](https://x.com/hwchase17/article/2021261552222158955)
+  - There are two architecture patterns for integrating agents with sandboxes:
+     - Pattern 1 (Agent IN Sandbox): Agent runs inside the sandbox, you communicate with it over the network. 
+       - Benefits: mirrors local development, tight coupling between agent and environment.
+     - Pattern 2 (Sandbox as Tool): Agent runs locally/on your server, calls sandbox remotely for execution. 
+       - Benefits: easy to update agent logic, API keys stay outside sandbox, cleaner separation of concerns
+  - Choose Pattern 1 when:
+    - The agent and execution environment are tightly coupled (for example, the agent needs persistent access to specific libraries or complex environment state)
+    - You want production to mirror local development closely
+    - Your provider's SDK handles the communication layer for you
+  - Choose Pattern 2 when:
+    - You need to iterate quickly on agent logic during development
+    - You want to keep API keys outside the sandbox
+    - You prefer cleaner separation between agent state and execution environment
 
 
 

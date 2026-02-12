@@ -120,9 +120,13 @@
         - 近邻图方法，如 [Hierarchical Navigable Small World (HNSW)](https://towardsdatascience.com/similarity-search-part-4-hierarchical-navigable-small-world-hnsw-2aad4fe87d37)
           - HNSW利用图结构，其中每个节点都是数据中的一个向量，通过一系列层次来确保快速访问。每一层都是原始数据的一个子集，上层的数据点数量比下层少。
           - HNSW 提供了查询速度和精确度之间的良好平衡，适用于大型和高维数据集。但它需要更多的内存，构建索引的过程可能较慢。
+          - 𝐀𝐜𝐜𝐮𝐫𝐚𝐜𝐲 𝐯𝐬. 𝐬𝐩𝐞𝐞𝐝 𝐯𝐬. 𝐦𝐞𝐦𝐨𝐫𝐲. 𝐍𝐨 𝐟𝐫𝐞𝐞 𝐥𝐮𝐧𝐜𝐡 — 𝐛𝐮𝐭 𝐇𝐍𝐒𝐖 𝐠𝐢𝐯𝐞𝐬 𝐲𝐨𝐮 𝐭𝐡𝐞 𝐤𝐧𝐨𝐛𝐬 𝐭𝐨 𝐟𝐢𝐧𝐝 𝐲𝐨𝐮𝐫 𝐛𝐚𝐥𝐚𝐧𝐜𝐞
           - M: The number of edges per element during the graph creation in each layer. A higher M value generally results in better search accuracy, but it comes at the cost of slower index-building time.
+            - 𝐌 — max connections per node. Higher = better recall, more memory.
           - efConstruction: The number of neighbors considered to find the nearest neighbor at each layer during graph creation. The more neighbors considered, the better the index quality, but the slower the index building time will be.
+            - 𝐞𝐟𝐂𝐨𝐧𝐬𝐭𝐫𝐮𝐜𝐭𝐢𝐨𝐧 — effort during build. More = better graph. Slower build.
           - efSearch: The number of nearest neighbors to consider during the vector search process. The higher the efSearch, the higher the recall, but the searching process will be slower.
+            -  𝐞𝐟 — effort during search. More = accurate. Slower queries.
           - M：NSW图中每个元素的边数。较高的M值通常会对应更好的搜索精度，但代价是更慢的索引构建时间。
           - efConstruction：构建索引时的动态候选列表大小。一般来说，候选队列越长，索引质量越好，索引构建时间也就会越长。
           - efSearch：搜索阶段的动态候选列表的大小。一般来说，efSearch越高，召回率越高，但是搜索过程会比较慢。

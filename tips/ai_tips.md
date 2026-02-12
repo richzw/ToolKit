@@ -89,6 +89,7 @@
   - Moltbot 的 Session 模型原生支持 Agent-to-Agent (A2A) 通信，这是实现复杂工作流的关键。
   - https://x.com/hesamation/article/2017038553058857413
   - [Running OpenClaw in Docker](https://til.simonwillison.net/llms/openclaw-docker)
+  - [Soul.md](https://soul.md/)
 - AI 编程
   - 人定义问题 → AI 提供多个方案 → 人选择方向 → AI 执行编码 → 人审阅验收。
   - 试错成本： 快速失败，快速构建——这就是氛围编程对创新最大的贡献
