@@ -2,6 +2,9 @@
   - [Anthropic's Prompt Engineering Interactive Tutorial](https://github.com/anthropics/prompt-eng-interactive-tutorial)
   - [ Prompt Engineering Interactive Tutorial](https://docs.google.com/spreadsheets/d/1jIxjzUWG-6xBVIa2ay6yDpLyeuOh_hR_ZB75a47KX_E/edit?gid=869808629#gid=869808629)
   - [OpenAI Prompt Hack](https://academy.openai.com/public/tags/prompt-packs-6849a0f98c613939acef841c)
+- [Socratic prompting]
+  - Instead of telling the AI what to produce, you ask questions that force it to think through the problem
+  - `"Ask me 10 questions about how to build a SaaS strategy for [insert idea], I want these questions to collect all the necessary context for you to build an incredible project."`
 - [Prompt Engineering Tool](https://www.aifire.co/p/prompt-engineering-tools?utm_source=www.aifire.co&utm_medium=newsletter&utm_campaign=10-years-meta-s-ai-journey-from-facebook-s-ai-labs)
 - Meta Prompt
   ```shell

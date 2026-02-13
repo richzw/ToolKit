@@ -69,7 +69,7 @@
     - A prompting tip: have Claude ask you 2 important clarifying questions before it starts
     - Use sub-agents or /new when you want a fresh take, not biased by the conversation so far
   - [Claude Code Tips](https://agenticcoding.substack.com/p/32-claude-code-tips-from-basics-to)
-    - 
+    - https://github.com/ykdojo/claude-code-tips
 - Codex
   - codex --dangerously-bypass-approvals-and-sandbox 全自动跑
   - codex resume用来选择历史记录sessions
@@ -339,9 +339,6 @@
     - 任务拆得足够小（小函数、小类、小变更）；
     - 模型的每次输出都当作 PR（pull request）；
     - 由人类做严格的代码审查和测试。
-- CC Attention
-  - Claude Code with --dangerously-skip-permissions
-  - Run on entire home directory. 
 - [Vibe Engineering](https://forum.openai.com/public/videos/event-replay-vibe-engineering-with-openais-codex-2025-12-03)
   - AI 不只是“帮你写代码”，而是参与到工程的全链路里，帮你更快做出能上线、能维护、能扩展的生产级软件。前提是：每一行要发到生产环境的代码，仍然必须由人来负责。
   - 方法论：
@@ -361,6 +358,12 @@
         }
       ```
       只需用自然语言告诉Claude创建智能体团队并描述任务结构即可
+  - [Config](https://x.com/bcherny/status/2021701636075458648)
+    - https://code.claude.com/docs/en/settings
+    - Pre-approve common permissions /permissions
+    - Enable Sandbox /sandbox
+    - /keybindings
+    -  Use output styles: explanatory or learning
   - [Deep Dive: How Claude Code's /insights Command Works](https://www.zolkos.com/2026/02/04/deep-dive-how-claude-codes-insights-command-works.html)
   - [The Shorthand Guide to Everything Claude Code](https://x.com/affaanmustafa/article/2012378465664745795)
     - https://github.com/affaan-m/everything-claude-code/tree/main
@@ -410,6 +413,9 @@
       - Have Claude generate a visual HTML presentation explaining unfamiliar code. It makes surprisingly good slides!
       - Ask Claude to draw ASCII diagrams of new protocols and codebases to help you understand them
       - Build a spaced-repetition learning skill: you explain your understanding, Claude asks follow-ups to fill gaps, stores the result
+    - 记录解决方案
+      - AI很擅长写文档。项目下放个docs目录，在某个子目录专门保存这些方案
+      - 在当前会话（可以 claude --resume 找到），让它帮你记录到一个markdown文档
   - [How to Use Codex from Claude Code](https://gist.github.com/antirez/2e07727fb37e7301247e568b6634beff)
   - ClaudeCode开发http://laper.ai 的最核心技巧：
     - 根目录主md强调任何功能、架构、写法更新必须在工作结束后更新相关目录的子文档。
@@ -497,6 +503,7 @@
     - 代码合并请求 (Pull Request) 模板：规范提交代码时的文档格式。
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
+    - Use the Skill Creator to build me a Skill for [X]
   - [Skills｜从概念到实操的完整指南](https://mp.weixin.qq.com/s/Bl4ODUxvwO8pYu9nXVmjuQ)
     - Skills 原理：沙盒 + 渐进式三层加载
       - Level 1 元数据：name/description（YAML）常驻加载，用于“能不能被选中”的索引
@@ -758,3 +765,30 @@
       - Tone and style
       - "PLEASE THIS IS IMPORTANT" is unfortunately still state of the art
       - Write the algorithm, with heuristics and examples
+  - [How I Use Claude Code](https://boristane.com/blog/how-i-use-claude-code/)
+    - One core principle: never let Claude write code until you’ve reviewed and approved a written plan. 
+    - 调研 -> 计划 -> 标注 -> 实施 -> 反馈
+      - Research
+        - read this folder in depth, understand how it works deeply, what it does and all its specificities.
+        - when that’s done, write a detailed report of your learnings and findings in research.md
+      - Planning
+        - I want to build a new feature <name and description> that extends the system to perform <business outcome>. 
+        - write a detailed plan.md document outlining how to implement this. include code snippets
+      - The Todo List
+        - add a detailed todo list to the plan, with all the phases and individual tasks necessary to complete the plan - don’t implement yet
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

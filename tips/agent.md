@@ -530,9 +530,28 @@
     - You need to iterate quickly on agent logic during development
     - You want to keep API keys outside the sandbox
     - You prefer cleaner separation between agent state and execution environment
-
-
-
+- CLI、MCP、Skills：给 Agent 开门的三种方式
+  - CLI：命令行工具对 Agent 天然友好，参数明确、输出结构化、自带帮助文档
+  - MCP：优势在于标准化和权限管控。一个 MCP 接口写好，所有支持 MCP 的 Agent 都能用
+  - Agent Skills：不需要改代码，由用户或社区编写一组指令文件教 Agent 怎么用你的软件
+- [Shell + Skills + Compaction: Tips for long-running agents that do real work](https://developers.openai.com/blog/skills-shell-tips)
+  - 把 “how” 写进 skills（流程/模板/护栏），用 shell 做 “do”（安装/运行/写产物），靠 compaction 保障长跑续航；先本地迭代，后托管容器；联网默认最小 allowlist，认证用 domain_secrets。
+    - Skills reduce prompt spaghetti by moving stable procedures and examples into a reusable bundle.
+    - Shell provides a full execution environment, letting you install code, run scripts, and write outputs.
+    - Compaction preserves continuity on long runs, so the same workflow can keep executing without manual context surgery.
+  - Tips and tricks
+    - Write skill descriptions like routing logic (not marketing copy)
+      - Skills  include a short “Use when vs. don’t use when and the outputs and success criteria” block directly in the description, and keep it concrete 
+    -  Add negative examples and edge cases to reduce misfires
+      - writing a few explicit “Don’t call this skill when…” cases (and what to do instead). This helps the model route more cleanly
+    - Put templates and examples inside the skill (they’re basically free when unused)
+    - Design for long runs early with container reuse and compaction
+    -  When you need determinism, explicitly tell the model to use the skill - “Use the <skill name> skill.”
+    - Treat skills plus networking as a high-risk combo (design for containment)
+      - Combining skills with open network access creates a high-risk path for data exfiltration
+    -  Use domain_secrets for authenticated calls (avoid credential leakage)
+      - If an allowed domain needs auth headers, use domain_secrets so the model never sees raw credentials.
+      - At runtime, the model sees placeholders (for example, $API_KEY)
 
 
 

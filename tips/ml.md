@@ -2126,7 +2126,7 @@
     - messages：system/user/assistant 多轮（也包含 tool_calls 与 tool 的返回）
     - tools / functions：工具定义 tool calling 的模式/约束：tool_choice、parallel tool calls 等
     - 采样/停止参数：temperature、stop、max_tokens
-
+- [Embedding Inversion via Conditional Masked Diffusion](https://github.com/jina-ai/embedding-inversion-demo)
 
 
 

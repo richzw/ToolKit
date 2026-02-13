@@ -23,6 +23,16 @@
                       - Modify the graph by removing some short connections and adding some long-range edges to speed up the traversal of the graph.
         - 构建索引和内存资源是否充足
             - 性能优先，选择 HNSW 索引
+  - [ETCD 排障指南](https://mp.weixin.qq.com/s/_OrH-e5OTiHB3GiGcLX7vQ)
+    - ETCD 的问题大多集中在：时间、网络、磁盘、负载、存储膨胀。
+    - 先看“是否频繁选主（leader change）”
+      - 时间同步是否异常（NTP/Chrony 漂移）
+    - 查时间同步：节点时钟是否一致
+    - 查磁盘 I/O：是否 SSD、是否独盘、固定时段是否被备份抢占
+    - 查网络质量：节点间抖动/丢包/跨地域链路
+    - 查负载模式：是否有超大 list、Lease 高频写
+    - 查 db_size：是否需要 compact/defrag
+    - etcd 稳定性的核心是：低抖动网络 + 稳定时间同步 + 可预测磁盘 I/O + 合理请求模型。
 - [Milvus 2.0 数据插入与持久化](https://mp.weixin.qq.com/s/D0xdD9mqDgxFvNY19hvDgQ)
   - 删数据逻辑
     - 调用delete删除一条已存在的数据时，它只是在某个segment里把某条数据标记为deleted，但是这个segment的数据此时仍然是一个整体，那条被删的数在内存里仍然占着空间。
