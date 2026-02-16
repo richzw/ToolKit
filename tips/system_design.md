@@ -1275,6 +1275,22 @@
   - 高吞吐方案：客户端 Batch-Reporting
     • 客户端本地乐观放行并计数，每 ~100 ms 把 (outstandingHits, rejectedHits) 作为批量报告发给服务端；服务端返回 rejectTilTimestamp + rejectionRate。
     • 批量上报将“尖峰请求”摊平成近似常量 QPS，单次限流调用几乎零延迟，尾延迟可提升 10
+  - [Uber’s Rate Limiting System](https://www.uber.com/en-HK/blog/ubers-rate-limiting-system/)
+    - GRL（Global Rate Limiter）：全局限流执行系统，直接集成到 service mesh 的数据面代理中，让“限流发生在请求到达目的服务之前”，并且做到“按调用方/按接口（procedure）配置、无需改业务代码”
+    - GRL 的核心是一个三层层级式控制系统（hot path 本地化，控制面聚合协调）
+      - Rate-limit clients（数据面，service mesh 里的本地代理）
+        - 本地对每个请求做放行/丢弃
+        - 向 zone aggregator 上报“本机每秒请求计数”
+      - Aggregators（按 Zone）
+        - 汇总 zone 内所有客户端上报，形成 zone 级使用量
+        - 向上汇报给 controller，并向下发指令
+      - Controllers（按 Region / Global）
+        - 汇总 zone 数据，计算全局利用率
+        - 生成并下发“丢弃比例（drop ratio）指令”
+    - 为解决“各实例各自为政”的不公平，他们引入 drop-by-ratio：当某个 bucket 的全局聚合 RPS 超过 limit 时，所有该调用方实例按照同一丢弃概率进行随机丢弃，从而把“超额”均匀摊到所有实例
+    - 控制面驱动的“纯概率丢弃”模型（弃用 token bucket）: GRL 彻底弃用 token bucket，统一为一种模型：控制面每秒聚合计算、下发 drop ratio；数据面只做轻量随机采样丢弃
+      - 在网络拥塞控制/队列管理中，也存在“概率丢弃”用于避免同步拥塞、改善公平性（如 RED 会在拥塞前以概率方式提前丢包）。
+      - GRL 的目标不同（限额执行而非队列管理），但“用概率丢弃实现更平滑/更公平的削峰”在思想上是相通的
 - [Heartbeats in Distributed Systems](https://arpitbhayani.me/blogs/heartbeats-in-distributed-systems)
   - 心跳间隔（Heartbeat Interval）
     - 大多数系统使用 1-10 秒的间隔

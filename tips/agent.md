@@ -552,7 +552,7 @@
     -  Use domain_secrets for authenticated calls (avoid credential leakage)
       - If an allowed domain needs auth headers, use domain_secrets so the model never sees raw credentials.
       - At runtime, the model sees placeholders (for example, $API_KEY)
-
+  - https://x.com/dotey/article/2022074016656191809
 
 
 
