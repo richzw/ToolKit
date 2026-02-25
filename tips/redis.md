@@ -692,3 +692,40 @@
     - 积压成本高（内存为主）
 - Valkey
   - https://valkey.io/events/keyspace-beijing-2025/
+- [如何正确预估redis写入容量](https://mp.weixin.qq.com/s/0KHb0Iz6_caV4Y_Xgvd-aQ)
+  - Redis 的顶层存储核心是用全局字典（Global Dict，也叫 Keyspace）来管理所有的数据，Dict 采用的是双哈希表结构来保存数据主要是用来做渐进式 rehash
+  - 哈希表其实就是一张大 bucket 数组，每个 bucket 是 dictEntry
+    - Key（键）：始终是一个指向 SDS (Simple Dynamic String) 结构的指针 SDS 结构与不同编码（int/embstr/raw）
+    - Value（值）：始终是一个 redisObject 结构体（或其指针）, 一个 redisObject 固定占用 16 字节
+  - 容量估算的关键变量：jemalloc 的 Size Class 与内部碎片
+  - 实例估算：存储 SET "key" "value"
+    - dictEntry: 24 字节。
+    - Key ("key"):
+      - 长度为 3，计算：3(Header) + 3(Data) + 1(\0) = 7 字节。
+      - jemalloc 向上取整为 8 字节。
+    - Value ("value"):
+      - 长度为 5，采用 EMBSTR 编码。
+      - 计算：16(robj) + 3(Header) + 5(Data) + 1(\0) = 25 字节。
+      - jemalloc 向上取整为 32 字节。
+    - 总计：24 + 8 + 32 = 64 字节。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -504,16 +504,16 @@
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
     - Use the Skill Creator to build me a Skill for [X]
+    - "Use the skill-creator skill to help me build a skill for [your use case]"
   - [Skills｜从概念到实操的完整指南](https://mp.weixin.qq.com/s/Bl4ODUxvwO8pYu9nXVmjuQ)
     - Skills 原理：沙盒 + 渐进式三层加载
       - Level 1 元数据：name/description（YAML）常驻加载，用于“能不能被选中”的索引
       - Level 2 说明文档：触发时用 bash 去读取 SKILL.md 正文进入上下文
       - Level 3 资源与代码：更深资源/脚本按需读取或执行；脚本代码本身不进入上下文，从而节省 token
     - Skill 可以包含三层内容：
-      第一层：元数据。 就是 name 和 description，告诉 Agent 这个 Skill 是干嘛的、什么时候该用。这部分在启动时就加载，但只占几十个 token。
-      第二层：指令。 SKILL.md 的主体内容，工作流程、最佳实践、注意事项。只有 Agent 判断需要用这个 Skill 时，才会读取这部分。
-      第三层：资源和代码。 附带的脚本、模板、参考文档。Agent 按需读取，用的时候才加载。
-    - Skills 调用逻辑：意图匹配 → 读取手册 → 按需执行 → 结果反馈
+      - 第一层：元数据。 就是 name 和 description，告诉 Agent 这个 Skill 是干嘛的、什么时候该用。这部分在启动时就加载，但只占几十个 token。
+      - 第二层：指令。 SKILL.md 的主体内容，工作流程、最佳实践、注意事项。只有 Agent 判断需要用这个 Skill 时，才会读取这部分。
+      - 第三层：资源和代码。 附带的脚本、模板、参考文档。Agent 按需读取，用的时候才加载。
     - Skills 调用逻辑：意图匹配 → 读取手册 → 按需执行 → 结果反馈
   - [MCP vs Skills](https://x.com/dani_avila7/article/2014409635370041517)
     - https://claude.com/blog/extending-claude-capabilities-with-skills-mcp-servers
@@ -776,7 +776,8 @@
         - write a detailed plan.md document outlining how to implement this. include code snippets
       - The Todo List
         - add a detailed todo list to the plan, with all the phases and individual tasks necessary to complete the plan - don’t implement yet
-    
+- [Prompt auto-caching with Claude](https://x.com/RLanceMartin/article/2024573404888911886)
+  - `"cache_control":  {"type": "ephemeral"} `
 
 
 

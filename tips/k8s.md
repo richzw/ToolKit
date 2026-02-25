@@ -1024,6 +1024,43 @@
     - 读缓存：在频繁的对于 Kubernetes 资源的【读】操作上，我们还可以借助 Clusterpedia 等工具，减轻对 API Server 以及 ETCD 的直接压力
     - 隔离方法：如果遥测服务对 API Server 压力非常大且是必须的，也可以考虑单独部署一个API Server来提供服务，这样也是有效减少爆炸半径的方案
     - 常见的性能瓶颈在 ETCD，API Server 可以通过 --etcd-servers-overrides 支持对 ETCD 进行切分。通常来说 /events （事件） ， /leases（节点心跳等） 都是比较适合放在单独的 ETCD 里面，减小其他资源访问的 ETCD 压力。
+  - [CoreDNS 常见问题和排障](https://mp.weixin.qq.com/s/yxG0HMhAAriq_dHbefl5gw)
+     ## 1. Application Layer
+     - High-frequency DNS queries?
+     - Local caching disabled?
+     ## 2. Pod Layer
+     - dnsPolicy / dnsConfig settings
+      ```
+      kubectl exec -it <pod> -- cat /etc/resolv.conf
+      kubectl exec -it <pod> -- cat /etc/hosts
+      kubectl exec -it <pod> -- nslookup kubernetes.default.svc.cluster.local
+      kubectl exec -it <pod> -- nslookup example.com
+      ```
+     - HostNetwork / HostAliases?
+     ## 3. Node Layer
+     - /etc/resolv.conf consistency?
+     - OS-specific DNS issues?
+     ## 4. CoreDNS Layer
+     - Corefile: forward / cache settings
+     - CoreDNS replica count?
+       ```
+       kubectl get deploy -n kube-system -l k8s-app=kube-dns
+       kubectl get pods   -n kube-system -l k8s-app=kube-dns -o wide
+       kubectl get svc    -n kube-system kube-dns -o wide
+       kubectl get ep     -n kube-system kube-dns
+       kubectl logs -n kube-system deploy/coredns --tail=200
+       kubectl get cm -n kube-system coredns -o yaml
+       ```
+     ## 5. Upstream DNS Layer
+     - Forward upstream health?
+     - External DNS latency / errors?
+     ## 6. Network Layer
+     - Pod → Kube-dns (ClusterIP) → CoreDNS
+     - CNI / kube-proxy issues?
+     - 如果只是少数高压节点偶发超时，优先评估 NodeLocal DNSCache 与 DNS autoscaler
+     - coredns 默认会用 CNI 分配的网络，且 dns 一般走 clusterIP，这些受到 kube-proxy 和 CNI 的影响，很多故障分析需要先排除 CNI/ClusterIP 本身网络故障的情况
+     - 有些 Linux 发行版本（比如 Ubuntu）默认使用一个本地的 DNS 解析器（systemd-resolved）。 systemd-resolved 会用一个存根文件（Stub File）来覆盖 /etc/resolv.conf 内容， 从而可能在上游服务器中解析域名产生转发环（forwarding loop）
+       - 可以通过手动指定 kubelet 的 --resolv-conf 标志为正确的 resolv.conf（如果是 systemd-resolved， 则这个文件路径为 /run/systemd/resolve/resolv.conf）来解决。
 - K8s 1.32
   -  [QueueingHint 的调度上下文元素](https://mp.weixin.qq.com/s/41XdPwW8wqh0MDs901eGpw)
     - QueueingHint 改进 Pod 调度重试
