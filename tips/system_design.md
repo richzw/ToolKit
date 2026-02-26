@@ -1444,8 +1444,10 @@
   - Level 2：加缓存（Redis/Memcached）
   - Level 3：Bloom Filter（把绝大多数请求“挡在 DB 之外”）
   - Level 4：用户名建议（Trie / Prefix Tree + 压缩
-
-
+- [How to build a distributed queue in a single JSON file on object storage](https://turbopuffer.com/blog/object-storage-queue)
+  - 把一个分布式作业队列压缩成 对象存储（object storage）上的单个 JSON 文件（如 queue.json），
+  - 并通过 CAS（compare-and-set）条件写、group commit（组提交/批量提交） 与 无状态 broker 实现可扩展与高可用
+  - 该队列用于 WAL 落盘后的异步索引通知，不在写入主链路上
 
 
 
