@@ -92,6 +92,10 @@
   - [Soul.md](https://soul.md/)
   - [OpenClaw’s Memory Is Broken](https://blog.dailydoseofds.com/p/openclaws-memory-is-broken-heres)
   - [OpenClaw 10 Insanely Powerful Prompts](https://x.com/aiedge_/article/2026344383210271059)
+  - [A Security-First Guide to Running OpenClaw](https://ai.ethereum.foundation/blog/openclaw-security-guide)
+- [OpenClaw Sample]
+  - [ClaudeCode+ OpenClaw + Simple math](https://x.com/noisyb0y1/article/2026616786771120439)
+  - [OpenClaw + Codex/ClaudeCode Agent Swarm](https://x.com/elvissun/article/2025920521871716562)
 - AI 编程
   - 人定义问题 → AI 提供多个方案 → 人选择方向 → AI 执行编码 → 人审阅验收。
   - 试错成本： 快速失败，快速构建——这就是氛围编程对创新最大的贡献
@@ -116,5 +120,5 @@
         - 会在哪里坏？ 现实里有断网、超时、脏数据、权限问题、并发冲突（多件事同时发生导致的问题）。有工程思维的人写代码时，脑子里一直在跑这些故障场景。
         - 怎么证明没坏？ 证明不是自信，是验证：测试、日志（程序运行的记录）、监控、可复现。你能给出一套让别人也信服的验证方式，这才叫"工程"。
     - 怎么培养工程思维: 先拆分、先跑通、常复盘
-
+- [Claude Cowork](https://x.com/heynavtoor/article/2026717574776631556)
 

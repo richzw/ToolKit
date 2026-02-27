@@ -723,6 +723,9 @@
         }
       }
       ```
+    - 第一，Plan先行。写任何代码之前，先把整件事的来龙去脉想清楚。构建系统分几层，依赖关系是什么样的，该从哪一层开始动手，这些都要捋明白
+    - 第二，定义约束。这是最关键的一步，所谓约束，就是明确“什么叫做完了”。代码写完根本不算完，满足所有预设的约束条件，才叫真正的完成。
+    - Review测试，不review代码。我会自己写测试用例，也会让Claude生成，但我审查的核心是测试
   - [Vibe Coding 有“最后一公里”知识幻觉](https://mp.weixin.qq.com/s/loRz_3N_N_fz58yFt_BanQ)
     - Milvus Code Helper MCP 服务外，开发者还可以选择如 Context7、DeepWiki 等新兴工具来解决这类问题
   - [Claude Code 如何做任务进度跟进](https://gist.github.com/richzw/ebeb0f8b39af64f2dd3a765aa4662150)

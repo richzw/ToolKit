@@ -2,6 +2,12 @@
 - [LeetCode summary](https://blog.algomooc.com/)
   - [LeetCode was HARD until I Learned these 20 Patterns ](https://x.com/ashishps_1/article/2012864271773016266)
 - [X (Twitter) For You 推荐算法深度技术解析](https://mp.weixin.qq.com/s/-EB5-4I7iE6WRA1Q721_QQ)
+  - [The Algorithm That Powers Your X (Twitter) Post](https://blog.bytebytego.com/p/the-algorithm-that-powers-your-x)
+    - 从**关注网络内内容（in-network）与网络外内容（out-of-network）**分别召回候选，再合并、过滤、打分、排序，最终返回给客户端
+    - Retrieval：Two-Tower / 双塔召回 + 相似度检索
+      - 机制：User Tower 产出用户 embedding，Candidate Tower 产出帖子 embedding；用 dot product 做相似度，取 top-K。
+    - Ranking：Grok-based Transformer + “候选隔离”（Candidate Isolation）
+      - 模型：用 Grok-based transformer 预测你对每条候选帖的多种互动概率（like/reply/repost/click…）
 - [第 N 个数](https://mp.weixin.qq.com/s/YaJ0nf7Y0juf6YTpVrV34g)
   - 给你一个整数 n ，请你在无限的整数序列 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, ...] 中找出并返回第 n 位上的数字
   - 思路
