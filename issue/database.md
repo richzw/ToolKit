@@ -465,6 +465,26 @@
   - 不能仅凭最终 total_cost 判断优化器是否会选择某条路径。
     - PostgreSQL 在生成执行计划的过程中，会在各个规划阶段用 add_path 对候选 Path 做“去留决策”，其中会用到带 1% 模糊因子（fuzz factor）的成本比较。
     - 当两条路径 cost 很接近时（差异 < 1%），可能因为进一步比较 startup_cost 而淘汰掉整体更快的 Hash Join 路径，最终选择了 Nested Loop，导致性能灾难。
+- [PostgreSQL 读取效率](https://www.pgmustard.com/blog/read-efficiency-issues-in-postgres-queries)
+  - PostgreSQL 数据库中由于 MVCC（多版本并发控制）机制引发的“读取效率”下降问题
+    - 查询变慢不仅是因为缺乏索引，很多时候是因为数据膨胀（Bloat）和数据局部性（Data Locality）变差，导致数据库为了获取少量数据而不得不读取大量的数据页（Buffers）
+    - PostgreSQL 在维护并发一致性时，会在堆（heap）和索引中保留多个旧版本行，这些额外的数据占用空间，俗称 bloat（膨胀）。
+    - 即使不是 bloat，行的“**数据局部性（data locality）”**变差也会导致查询读很多不必要的页面。数据局部性指的是需要读取的行是否彼此接近在少数页上；如果散布在很多页上，读取成本会很高
+    - 如何通过监控执行计划、调整 autovacuum、使用 HOT 更新（结合 fillfactor）、以及利用 pg_repack 或 REINDEX 等工具来预防和修复这些问题的系统性方案。
+    - 结合 EXPLAIN (ANALYZE, BUFFERS …) 来查看真实执行计划中的 buffer 读数。如果某个查询读了异常多的页面，那就可能有 bloat 或数据局部性差的问题
+  - 检测并修复 bloat
+    • 通过 REINDEX 修复严重膨胀的索引（可用 CONCURRENTLY 避免锁表）。
+    • 使用像 pg_repack / pg_squeeze 这类扩展工具在不阻塞的情况下清理膨胀。
+  - 改善数据局部性
+    • 如果可能，给批量插入的数据指定合适的顺序，使物理布局和查询顺序一致。
+    • 使用表 分区（如按时间分区），旧数据一般稳定不再更新；可对不常更新的分区做重排。
+    • CLUSTER 表或使用工具（如 pg_repack）强制按索引物理排序，但必须注意锁、可用性。
+  - 适当的索引策略
+    • 对关键查询增加 覆盖索引（covering index），支持尽可能做 Index Only Scan，减少对堆的访问。
+  - 预防措施：
+    - 确保 autovacuum 正常启用。
+    - 避免长事务等阻塞 autovacuum。
+    - 调优 autovacuum 执行频率。
 
 
 

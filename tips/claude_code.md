@@ -501,6 +501,14 @@
     - UI 与内容设计准则：指导 AI 如何设计界面和编写文案。
     - 核心技术实现流程：教 AI 如何处理状态管理 (State Management)、日志记录 (Logging)、错误处理 (Error Handling)、功能门控 (Gating，即控制特定功能的开启与关闭) 以及调试 (Debugging)。
     - 代码合并请求 (Pull Request) 模板：规范提交代码时的文档格式。
+  - [Memory](https://code.claude.com/docs/en/memory)
+    - Auto memory: Claude automatically saves useful context like project patterns, key commands, and your preferences. This persists across sessions.
+    - CLAUDE.md files: Markdown files you write and maintain with instructions, rules, and preferences for Claude to follow.
+    - 新增的 http://Memory.md 则相反，是 Claude 自己维护的"笔记本"
+    - 每个项目的记忆存储在本地目录 ~/.claude/projects/ 下，会话启动时自动加载 http://MEMORY.md 的前 200 行，更详细的内容按需读取
+    - // ~/.claude/settings.json { "autoMemoryEnabled": false }
+    - export CLAUDE_CODE_DISABLE_AUTO_MEMORY=1  # Force off
+    - CLAUDE.md files can import additional files using @path/to/import syntax. 
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
     - Use the Skill Creator to build me a Skill for [X]

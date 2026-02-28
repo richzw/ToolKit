@@ -430,6 +430,17 @@
   - 它基于著名的 "An O(ND) Difference Algorithm and its Variations" (Myers, 1986) 算法 
   - 这个算法通常用于 比较两个序列（如两个文本文件或字符串） 找出它们的最小编辑距离（即最少修改几步能把一个变成另一个）
   - 利用动态规划+对角线追踪大大加速
+- [We deserve a better streams API for JavaScript](https://blog.cloudflare.com/a-better-web-streams-api/)
+  - Web Streams API 的现状与问题
+    - 过度繁琐的操作： 读取流需要获取 reader、锁定流、手动循环读取 value 和 done，最后还要释放锁。
+    - 锁模型（Locking）缺陷： 这种手动锁管理极易出错。如果开发者忘记调用 releaseLock()，流就会被永久锁定，导致后续操作崩溃。
+    - BYOB（自带缓冲区）极其复杂： BYOB 原意是优化性能，但其 API 极其晦涩且难以正确实现，导致大多数开发者根本不用，反而增加了实现者的负担。
+    - 背压（Backpressure）机制失效： 虽然标准支持背压，但在实际应用（如 tee() 操作）中，如果一个消费者读取慢，数据会在内存中无限堆积，导致内存泄漏或崩溃。
+    - 性能瓶颈： 由于过度依赖 Promise 和复杂的对象分配，原生 Web Streams 在某些场景下比老旧的 Node.js Streams 慢 10 倍甚至更多
+  - 设计原则（Proof of Concept）
+    - 流即迭代（Streams are Iterables）： 可读流就是一个 AsyncIterable<Uint8Array[]>。直接用 for await...of 消费，没有 reader 和手动锁。
+    - 拉取式转换（Pull-through Transforms）： 转换逻辑只有在消费者“拉取”数据时才执行。这意味着没有预先计算，没有隐式缓冲，从根本上解决了背压导致的内存膨胀。
+    - 显式且严格的背压： 默认情况下，如果缓冲区满了，写入操作会报错而非静默累积。开发者必须显式选择处理策略（阻塞、丢弃旧数据或丢弃新数据）。
 - [抽样](https://mp.weixin.qq.com/s/CF46ZBaGFSN0tT0C46C0_g)
   - 采样
     -  简单随机抽样：就像抽奖一样，每个人都有平等的机会被抽中。这是最公平但也最"朴素"的抽样方法。想象一 个巨大的彩票桶，所有号码平等地翻滚着。
