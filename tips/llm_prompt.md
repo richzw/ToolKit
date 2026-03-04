@@ -4,6 +4,16 @@
   - [OpenAI Prompt Hack](https://academy.openai.com/public/tags/prompt-packs-6849a0f98c613939acef841c)
 - [Socratic prompting]
   - Instead of telling the AI what to produce, you ask questions that force it to think through the problem
+  - WHY IT WORKS
+    - LLMs are trained on massive reasoning datasets.
+    - Questions activate deeper reasoning modes.
+    - More context produces higher quality output.
+  - HOW TO USE IT
+    - Prompt:  
+      "Ask me 10 questions about building a SaaS strategy for [idea]. Collect all necessary context."
+    - Answer the questions fully.
+    - Ask it to generate 10 more.
+    - Repeat 2 to 3 rounds.
   - `"Ask me 10 questions about how to build a SaaS strategy for [insert idea], I want these questions to collect all the necessary context for you to build an incredible project."`
 - [Prompt Engineering Tool](https://www.aifire.co/p/prompt-engineering-tools?utm_source=www.aifire.co&utm_medium=newsletter&utm_campaign=10-years-meta-s-ai-journey-from-facebook-s-ai-labs)
 - Meta Prompt

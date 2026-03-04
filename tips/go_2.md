@@ -2324,6 +2324,9 @@
           - 解码（Unmarshaling）差异
             - 字段名匹配大小写：v1 默认不区分大小写；v2 默认严格区分大小写（可用 MatchCaseInsensitiveNames 或 case tag 调整）
             - 对象中重复字段：v1 允许；v2 默认不允许（可用 AllowDuplicateNames 调整
+  - Go 1.26
+    - [Allocating on the Stack](https://go.dev/blog/allocation-optimizations)
+      - 栈分配不仅更快，有时是“免费”的，而且不增加 GC 负担，同时更有利于缓存利用（cache-friendly）
   - 运行时与工具链新动向
     - Green Tea GC
     - Goroutine 泄漏检测 - 与 Uber 合作，将现有基于 GC 的“部分死锁”检测算法并入 runtime
@@ -2529,7 +2532,6 @@
   - https://www.youtube.com/watch?v=YnyeAQblUyA
   - 默认启用后量子混合密钥交换：升级 Go 即自动获得更强的 TLS 安全性。
   - 纯 Go FIPS 模块：合规性开关由运维/配置决定，对开发体验几乎无感
-
 
 
 

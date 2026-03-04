@@ -164,6 +164,7 @@
     - Parquet 是“磁盘存储格式”，专为数据仓库和大数据存储设计，注重压缩比和 IO 优化。
     - Arrow 的数据结构在 CPU 内部采用紧凑的向量化内存布局，支持 O(1) 随机访问；Parquet 采用分块、分段及字典等多种编码策略，读取时一般批量加载。
   - 数据批量从 Parquet 读取后用 Arrow 表达，再进行内存分析计算；分析结果可再转回 Parquet 持久存储。
+  - [Hardwood: A New Parser for Apache Parquet](https://www.morling.dev/blog/hardwood-new-parser-for-apache-parquet/)
 - [存储、数仓、指标设计](https://mp.weixin.qq.com/s/1K5WfHxQT7kmh4YzRldwrA)
   - 数据架构的演进，本质是在以下维度间权衡：**批流统一、延迟、成本、复杂度、治理能力**
     - MPP 架构（大规模并行处理）

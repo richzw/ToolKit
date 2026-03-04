@@ -96,6 +96,7 @@
 - [OpenClaw Sample]
   - [ClaudeCode+ OpenClaw + Simple math](https://x.com/noisyb0y1/article/2026616786771120439)
   - [OpenClaw + Codex/ClaudeCode Agent Swarm](https://x.com/elvissun/article/2025920521871716562)
+- [OpenClaw新手完整学习路径](https://x.com/ai_jasonyu/article/2026455606970954087)
 - AI 编程
   - 人定义问题 → AI 提供多个方案 → 人选择方向 → AI 执行编码 → 人审阅验收。
   - 试错成本： 快速失败，快速构建——这就是氛围编程对创新最大的贡献
@@ -121,4 +122,6 @@
         - 怎么证明没坏？ 证明不是自信，是验证：测试、日志（程序运行的记录）、监控、可复现。你能给出一套让别人也信服的验证方式，这才叫"工程"。
     - 怎么培养工程思维: 先拆分、先跑通、常复盘
 - [Claude Cowork](https://x.com/heynavtoor/article/2026717574776631556)
-
+  - [17 Best Practices That Make Claude Cowork 100x More Powerful](https://x.com/heynavtoor/article/2028148844891152554)
+- [AI Interview Coach](https://www.lennysnewsletter.com/p/how-to-use-ai-in-your-next-job-interview)
+  - noamseg/interview-coach-skill

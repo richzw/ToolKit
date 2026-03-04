@@ -463,6 +463,11 @@
     - 客户端和服务端互通数据，当服务进程挂了时，UDP 客户端不能立马感知关闭状态，只有当再次发数据时才会被对方系统回应 icmp ECONNREFUSE 异常报文，客户端才能感知对方挂了。)
   - [UDP sockets](https://blog.cloudflare.com/everything-you-ever-wanted-to-know-about-udp-sockets-but-were-afraid-to-ask-part-1)
     - ![img.png](socket_udp.png)
+  - [UDP accept](https://sortix.org/os-test/udp/#accept)
+    - 大多数系统（如 Linux, macOS, Solaris, AIX, Sortix, NetBSD 等）返回错误码 ENOTSUP (Operation not supported) 或类似含义的错误。这被认为是“正确”的行为，因为 UDP 不支持 accept
+    - 广播地址绑定： 绑定到 255.255.255.255 是否应该失败？
+    - 连接到零地址： connect 到 0.0.0.0 是否等同于连接到回环地址（loopback）？
+    - 端口 0 的处理： 发送数据到端口 0 或绑定到端口 0 的行为。
 - [WebSocket 1M](https://github.com/eranyanay/1m-go-websockets)
   - Resource limit
     - The kernel enforces the soft limit for the corresponding resource
@@ -1177,6 +1182,28 @@
   - NIC 状态： ip -s link show dev eth0 ； ethtool -S eth0
   - 网络栈计数器： nstat -a | grep -E 'InErrors|OutErrors|InNoRoutes|InOctets|OutOctets'
   - 路径 MTU： tracepath 192.0.2.10（依赖 IPv4 Type 3 Code 4 / IPv6 Type 2 ICMP）
+- [The inner workings of TCP zero-copy](https://blog.tohojo.dk/2026/02/the-inner-workings-of-tcp-zero-copy.html)
+  - Zero-copy（零拷贝）：尽量避免“用户态缓冲区 ↔ 内核缓冲区”的额外 memcpy；通常通过 pin 页 + DMA scatter-gather / header split 等实现
+  - 发送侧零拷贝（TX）：
+    - 应用在 sendmsg() 等发送调用中使用 MSG_ZEROCOPY，内核尽量避免把用户态 payload 再拷贝到内核缓冲区，而是“pin 住”用户页并直接用于发送；完成后通过通知机制告知用户缓冲区可复用
+  - 接收侧零拷贝（RX）更复杂：
+    - 要让 NIC 把 payload DMA 进应用提供的内存，同时又让内核能处理 TCP/IP 头部，通常依赖 header/data split（头/数分离）、以及把特定流量导入指定硬件 RX 队列（flow steering / RSS）
+  - 设备内存（dma-buf）零拷贝：
+    - 可把 payload 直接落到 GPU/SSD 等设备导出的 dma-buf 中；接收通过 MSG_SOCK_DEVMEM + recvmsg() 获取 cmsg 描述落点；发送侧同样复用 MSG_ZEROCOPY 的“发送完成通知”语义
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

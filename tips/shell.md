@@ -248,7 +248,6 @@
       - Perf Record：记录一段时间内系统/进程的性能事件, 默认性能事件为 cycles ( CPU 周期数 )
 - [tmux](https://x.com/tz_2022/article/2012624953053503541)
   -  tmux new -A -s main (这行命令最骚，如果有叫 main 的房间就进去，没有就新建，极其无脑)
-  - 
 - top 展示的是“现象”，不是“根因”；在多核时代，必须结合 CPU 核数、load 含义、内存字段的真实语义来判断是否异常
   - top 的 %CPU = 使用的 CPU 核心数 × 100%
   - load average 表示“正在运行 + 等待 CPU 的进程数”，要与核数对比

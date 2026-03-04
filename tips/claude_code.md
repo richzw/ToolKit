@@ -509,6 +509,12 @@
     - // ~/.claude/settings.json { "autoMemoryEnabled": false }
     - export CLAUDE_CODE_DISABLE_AUTO_MEMORY=1  # Force off
     - CLAUDE.md files can import additional files using @path/to/import syntax. 
+  - [ Context Mode 来节省上下文 token](https://mksg.lu/blog/context-mode)
+    - 在 Claude Code 和外部工具输出之间再添加一层，核心目标是防止原始大块数据进入上下文窗口，实现高达 98% 的上下文节省
+    - 主要的实现原理：
+      1 沙箱隔离执行，每个工具调用在独立的子进程中运行，支持 10 种语言运行时（JS、Python 等），只把 stdout 结果返回，原始输出数据留在沙箱内不进上下文。
+      2 知识库 + 精简输出：使用 SQLite FTS5 虚拟表 + BM25 排名 + Porter stemming 对 Markdown 内容建索引，模型需要时再精准拉取代码块，而不是塞摘要或全文。
+    - /plugin marketplace add mksglu/claude-context-mode ： /plugin install context-mode@claude-context-mode ：claude mcp add context-mode -- npx -y context-mode
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
     - Use the Skill Creator to build me a Skill for [X]
