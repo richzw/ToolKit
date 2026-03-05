@@ -519,6 +519,33 @@
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
     - Use the Skill Creator to build me a Skill for [X]
     - "Use the skill-creator skill to help me build a skill for [your use case]"
+  - [Improving skill-creator: Test, measure, and refine Agent Skills](https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills)
+    - 将软件开发的测试、基准、迭代实践引入 Agent Skills 创作，且完全无需用户写代码
+    - Skills 的两种本质类型 
+      - 能力提升型
+        - 模型原本“做不到”或“做不稳定”的事，通过 Skills 注入特定技巧、模式来稳定输出。典型例子是文档创建 Skills（如 PDF 处理）
+        - 典型例子是文档创建 Skills（如 PDF 处理）。
+          测试重点：监控模型通用能力是否已追上或超越 Skills，一旦基线模型无需 Skills 即可通过 evals，该 Skills 即可“退休”
+      - 偏好编码型
+        - 模型每一步都能做，但需要按团队特定流程严格排序。
+        - 例子：按固定标准审查 NDA、按公司模板生成周报。
+          测试重点：验证 Skills 是否忠实还原真实工作流，而非模型的“自由发挥”
+    - skill-creator 核心新功能
+      - Evals ~ Skills 的“单元测试”(非常重要！)
+        - · 用户只需提供：测试提示词、“好输出应该是什么样子”的描述。
+        - · skill-creator 自动运行 Skills，判断是否达标
+      - Benchmark 模式 ~ 标准化、可追踪的性能仪表盘
+        - 支持批量运行同一组 evals，输出指标包括：
+        · 通过率
+        · 执行时间
+        · Token 消耗
+      - 多智能体并行 + 比较智能体
+        · 多智能体支持：每个 eval 在独立干净的上下文中并行运行，避免上下文污染和顺序依赖，大幅提速。
+        · 比较智能体：盲测模式，同时运行“Skills A vs Skills B”或“有 Skills vs 无 Skills”，由第三方智能体在不知情的情况下客观打分，消除主观偏差。
+      - 触发描述智能调优
+        - 随着 Skills 库扩大，描述过宽会导致误触发，过窄则永不触发。skill-creator 现可：
+        · 分析当前描述 vs 历史样本提示
+        · 建议优化文字，同时降低假阳性和假阴性
   - [Skills｜从概念到实操的完整指南](https://mp.weixin.qq.com/s/Bl4ODUxvwO8pYu9nXVmjuQ)
     - Skills 原理：沙盒 + 渐进式三层加载
       - Level 1 元数据：name/description（YAML）常驻加载，用于“能不能被选中”的索引

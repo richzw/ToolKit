@@ -1409,4 +1409,14 @@
     - 性能降低的根源不在于工作池逻辑本身，而在于默认的内存限制
     - 如果通过 GOGC 或 GOMEMLIMIT 参数给程序分配更多的内存空间（例如从 13 MiB 增加到 40-70 MiB），让 GC “放松”下来，程序的执行速度会显著提升，甚至超过扇出模式
   - 而 trace 的价值在于能看到 profiling 看不到的“没有发生的事”（比如多核未利用、GC 介入模式、调度形态等）
-
+- [包管理是基础设施，但背后隐藏着极其复杂的深水区](https://mp.weixin.qq.com/s/M5d3m9iWC_xeX4xKgxnEpg)
+  - 包管理为何是“棘手问题”（Wicked Problem）
+  - 解决方案与问题定义同源（如 Lockfile 重新定义了安装）。
+  - 没有绝对对错，只有主观上的好坏（SemVer 的困境与海勒姆定律）。
+  - 不可逆的后果与巨大的试错代价（无推倒重来的机会，如 left-pad 事件）。
+  - 利益相关者诉求的根本冲突（平台、安全人员、库作者、企业用户的目标互斥）。
+  - 命名空间之战：四大模式的安全与便利博弈
+    - 扁平命名空间（RubyGems, PyPI, Rust crates.io）
+    - 作用域命名空间（npm, PHP Packagist）
+    - 层级命名空间（Java Maven Central）
+    - 基于 URL 的标识符（Go, SwiftPM）

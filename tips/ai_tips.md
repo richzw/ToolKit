@@ -125,3 +125,24 @@
   - [17 Best Practices That Make Claude Cowork 100x More Powerful](https://x.com/heynavtoor/article/2028148844891152554)
 - [AI Interview Coach](https://www.lennysnewsletter.com/p/how-to-use-ai-in-your-next-job-interview)
   - noamseg/interview-coach-skill
+- [Don't waste your time taking the new Anthropic Claude courses](https://x.com/aiedge_/status/2028998889148465550?s=46)
+  - Prompt for OpenClaw to actually execute this:
+    ```
+    "Go to [https://anthropic.skilljar.com].
+    Take the entire course autonomously - navigate each lesson, read all content, and complete any exercises.
+    As you go, extract everything worth knowing: key concepts, best practices, techniques, frameworks, and any prompting patterns taught.
+    
+    When complete, synthesize everything into a single http://SKILL.md file using this structure:
+    ---
+    name: [course-topic]
+    description: [one sentence on when to trigger this skill]
+    ---
+    
+    # [Course Topic] — Condensed Skill Guide
+    
+    ## Core Concepts
+    ## Key Techniques
+    ## Best Practices
+    ## Prompting Patterns
+    ## Common Mistakes to Avoid
+    ```

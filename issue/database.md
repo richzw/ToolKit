@@ -485,6 +485,12 @@
     - 确保 autovacuum 正常启用。
     - 避免长事务等阻塞 autovacuum。
     - 调优 autovacuum 执行频率。
+- PG explain
+  - 执行计划的核心要素
+    - 扫描操作：包括Seq Scan（顺序扫描）和Index Scan（索引扫描），决定了数据库如何读取表中的数据。
+    - 连接操作：如Nested Loop（嵌套循环连接）、Hash Join（哈希连接）和Merge Join（合并连接），它们影响多表查询的性能。
+    - 排序和聚合操作：例如Sort（排序）和Aggregate（聚合），这些操作会影响查询的执行时间，尤其在处理大数据集时。
+
 
 
 
