@@ -1194,7 +1194,14 @@
   - 自增 id=2147483647，这是有符号 INT 的最大值。
     - 结论：AUTO_INCREMENT 再生成新值会失败，导致插入失败
   - 改 BIGINT UNSIGNED + 监控进度
-
+- [MySQL并行复制竟然比单线程慢](https://mp.weixin.qq.com/s/iAuHub8r7Rzqhj2_Dk8drg)
+  - 问题现象：并行复制延迟持续增大，且越追越慢
+  - 排查过程：确认不是主库写入量导致，而是从库重放阶段异常
+  - 关键发现：从库错误日志大量 Lock wait timeout，并集中在同一张表的 INSERT/DELETE
+  - 复现对比：并行重放（8 workers）比单线程（1 worker）慢 4 倍以上
+  - 根因分析：并行重放 + replica_preserve_commit_order=ON 触发“提交顺序约束”导致等待环路
+  - 更深层原因：RC 下仍出现 GAP 锁，源于 DELETE 产生的 delete-marked 记录 + 唯一索引重复键检查
+  - 优化方案：应用侧改造索引/写法，数据库侧关闭 preserve commit order
 
 
 

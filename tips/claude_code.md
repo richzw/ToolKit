@@ -350,6 +350,27 @@
   - 用“虚拟文件系统”替代真实文件系统访问;  AgentFS 的文件操作封装成“受控工具”，并强制代理只能用这些工具
   - https://github.com/run-llama/agentfs-claude
 - CC
+  - Tips
+    - Creates polished Word documents, PDFs, and slide decks instantly.
+      "Read /mnt/skills/public/docx/SKILL.md and create a report on X"
+    - Production-grade UI with no generic AI aesthetics.
+      "Read /mnt/skills/public/frontend-design/SKILL.md and build me a dashboard"
+    - Reads, writes, cleans, and formats Excel files.
+      "Read /mnt/skills/public/xlsx/SKILL.md and process this data"
+    - Scroll-stopping copy tuned to your brand voice.
+      "Read /mnt/skills/user/hook-writing/SKILL.md and write hooks for X"
+    - Long-form content that sounds like you, not a bot.
+      "Read /mnt/skills/user/article-writer/SKILL.md and write an article on X"
+    - Create custom integrations with external APIs.
+      "Read /mnt/skills/examples/mcp-builder/SKILL.md and build an MCP for X"
+    - Turns high-performing tweets into Reels or Shorts scripts.
+      "Read /mnt/skills/user/tweet-to-short/SKILL.md and convert this tweet"
+    - Meta skill that builds and optimizes new skills automatically.
+      "Read /mnt/skills/examples/skill-creator/SKILL.md and create a skill for X"
+    - Embed a live Claude model inside interactive web apps.
+      "Build a React artifact that calls the Anthropic API to do X"
+    - Prevents Claude from hallucinating its own capabilities.
+      "Read /mnt/skills/public/product-self-knowledge/SKILL.md before answering questions about Claude"
   - AgentsTeams
     - settings.json
       ```
