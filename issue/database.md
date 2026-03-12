@@ -490,10 +490,28 @@
     - 扫描操作：包括Seq Scan（顺序扫描）和Index Scan（索引扫描），决定了数据库如何读取表中的数据。
     - 连接操作：如Nested Loop（嵌套循环连接）、Hash Join（哈希连接）和Merge Join（合并连接），它们影响多表查询的性能。
     - 排序和聚合操作：例如Sort（排序）和Aggregate（聚合），这些操作会影响查询的执行时间，尤其在处理大数据集时。
-
-
-
-
+- [PostgreSQL 联表加锁](https://mp.weixin.qq.com/s/Kd6C_KZJaSliPmS9rntXgQ)
+  - 问题现象：外键有效、NOT NULL 的联表查询却返回空结果
+  - 复现模型：owner / car 两表、外键 car.owner_id → owner.id
+  - 并发流程：两个会话对同一 car 做“查询+加锁+校验+更新”
+  - 异常表现：第二会话阻塞后返回 0 行（INNER JOIN），或返回“car 有值、owner 为 NULL”（LEFT JOIN）
+  - 根因分析：Read Committed + 行锁等待触发 EvalPlanQual（EPQ）导致“局部重评估”
+    - Read Committed 语义要点：
+      - 每条语句使用“语句开始时的快照”读取已提交数据；
+      - 但当尝试更新/加锁某行时，如果该行被并发更新，会等待并在锁释放后取新版本并执行 EPQ 检查。
+    - 在 JOIN 查询中：
+      - 锁节点（LockRows）位于 JOIN 之后（原文 EXPLAIN 也展示了这种计划形态）
+      - 导致：JOIN 过程中用到的关联键可能在等待后变化，从而出现“JOIN 结果在锁释放后不一致/消失”。
+  - CTE/子查询前移锁（推荐）
+    CTE：
+    WITH c AS (
+    SELECT * FROM car WHERE id = 1 FOR NO KEY UPDATE
+    )
+    SELECT * FROM c JOIN owner ON c.owner_id = owner.id;
+    - 或子查询等价写法：
+    SELECT *
+    FROM (SELECT * FROM car WHERE id=1 FOR NO KEY UPDATE) c
+    JOIN owner ON c.owner_id = owner.id;
 
 
 

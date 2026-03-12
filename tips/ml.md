@@ -2111,6 +2111,8 @@
     - 2. DNN + Gaussian NLL（单峰高斯，输出 μ, σ）
     - 3. DNN + GMM（3-mode，高斯混合，输出各 mode 的 w, μ, σ + overall mean/std）
   - 损失函数：高斯 / 高斯混合负对数似然（NLL）。
+- [Transforming Ads Personalization with Sequential Modeling and Hetero-MMoE at Uber](https://www.uber.com/en-EG/blog/transforming-ads-personalization/)
+  - 通过**序列建模（Sequential Modeling）和异构混合专家模型（Hetero-MMoE）**来升级其广告个性化推荐系统
 - [A Practical Approach to Verifying Code at Scale](https://alignment.openai.com/scaling-code-verification/)
   - 自动代码审查被视为一种输出监控（output monitoring）
   - 精确率（Precision）优先于召回率（Recall）

@@ -66,6 +66,7 @@
    return orDone
   }
   ```
+  - https://x.com/atharvaxdevs/article/2030558932708544860
   - Test
 
   大量并发chan场景下， 反射使用内存更多些，但速度更快

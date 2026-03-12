@@ -621,7 +621,7 @@
 - [CLAUDE CODE ON-THE-GO - Doom Coding ](https://github.com/rberg27/doom-coding)
   - https://granda.org/en/2026/01/02/claude-code-on-the-go/
 - [路由器](https://mao.fan/)
-
+- [Crawl entire websites with a single API call using Browser Rendering](https://developers.cloudflare.com/changelog/post/2026-03-10-br-crawl-endpoint/)
 
 
 

@@ -146,3 +146,5 @@
     ## Prompting Patterns
     ## Common Mistakes to Avoid
     ```
+- [The Anatomy of an Agent Harness](https://x.com/vtrivedy10/article/2031408954517971368)
+
