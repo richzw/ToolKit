@@ -788,6 +788,7 @@
   - [Generative Agents: Interactive Simulacra of Human Behavior](https://github.com/joonspk-research/generative_agents)
 - Models
   - [M3E Models](https://huggingface.co/moka-ai/m3e-base)
+  - [LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture-gallery/)
   - [DeepSeek-OCR](https://mp.weixin.qq.com/s/We8GNJTQKluEF-xtI1_iJA)
     - 传统长上下文瓶颈
       • 对文本序列做自注意力，计算复杂度 O(n²)。1000 → 10000 token 时算量 ×100，易 GPU 爆显存、超时。

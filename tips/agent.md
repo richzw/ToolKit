@@ -554,7 +554,8 @@
       - At runtime, the model sees placeholders (for example, $API_KEY)
   - https://x.com/dotey/article/2022074016656191809
 - [You don’t know what your agent will do until it’s in production](https://www.langchain.com/conceptual-guides/production-monitoring)
-
+- Chrome 146原生支持MCP
+  - 只需在chrome://inspect里开一个开关（chrome://inspect/#remote-debugging），你的AI Agent就能直接控制当前正在运行的浏览器会话。注意，是当前会话，不是新建一个。
 
 
 

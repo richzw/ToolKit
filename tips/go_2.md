@@ -2327,6 +2327,8 @@
   - Go 1.26
     - [Allocating on the Stack](https://go.dev/blog/allocation-optimizations)
       - 栈分配不仅更快，有时是“免费”的，而且不增加 GC 负担，同时更有利于缓存利用（cache-friendly）
+    - [//go:fix inline and the source-level inliner](https://go.dev/blog/inliner)
+      - 传统的内联（Inlining）是编译器在生成机器码时的一种优化手段（将函数调用替换为函数体）。而源码级内联是通过 go fix 工具直接修改你的 .go 源代码文件，将某些函数调用替换为该函数的实现代码。
   - 运行时与工具链新动向
     - Green Tea GC
     - Goroutine 泄漏检测 - 与 Uber 合作，将现有基于 GC 的“部分死锁”检测算法并入 runtime
@@ -2532,7 +2534,11 @@
   - https://www.youtube.com/watch?v=YnyeAQblUyA
   - 默认启用后量子混合密钥交换：升级 Go 即自动获得更强的 TLS 安全性。
   - 纯 Go FIPS 模块：合规性开关由运维/配置决定，对开发体验几乎无感
-
+- [Undefined Behavior](https://groups.google.com/g/golang-nuts/c/MB1QmhDd_Rk)
+  - Go does have undefined behavior: if your program has a race condition, the behaviour is undefined.
+  - 在 Rust 中，编译器借用检查器（Borrow Checker）会在编译期阻止数据竞争，因此 Rust 可以自豪地宣称“无数据竞争”。但 Go 选择了更简单的并发模型，允许 Goroutine 共享内存
+  - 未定义（UB）：可能导致 Crash、数据损坏、安全漏洞（如数据竞争）。零容忍。
+  - 未指明/实现定义：不同版本或平台可能表现不同（如 Map 顺序）。不要依赖它
 
 
 

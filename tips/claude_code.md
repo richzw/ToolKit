@@ -350,6 +350,7 @@
   - 用“虚拟文件系统”替代真实文件系统访问;  AgentFS 的文件操作封装成“受控工具”，并强制代理只能用这些工具
   - https://github.com/run-llama/agentfs-claude
 - CC
+  - [Learn Claude Code](https://learn.shareai.run/en/s01/)
   - Tips
     - Creates polished Word documents, PDFs, and slide decks instantly.
       "Read /mnt/skills/public/docx/SKILL.md and create a report on X"
@@ -371,6 +372,13 @@
       "Build a React artifact that calls the Anthropic API to do X"
     - Prevents Claude from hallucinating its own capabilities.
       "Read /mnt/skills/public/product-self-knowledge/SKILL.md before answering questions about Claude"
+  - /btw 在不破坏 claude code 单 Loop 简洁性的前提下，通过"降级调用"（无工具、单次响应）实现轻量级的侧信道交互
+    - /btw 被明确定位为 sub-agent 的"逆运算"：
+    - 主 Loop 是"有上下文 + 有工具"的完整 Agent；/btw 和 sub-agent 分别是它在两个维度上的降维投影。
+    - Claude Code 使用一套统一的 `<system-reminder>` XML 标签机制来动态修改模型行为
+    - system reminder 是作为 user 角色消息中的额外 text content block 注入的，而不是修改 system prompt。
+      - API 层： 通过设置 tool_choice: "none" 或省略 tools 数组，从 API 层面彻底阻断工具调用
+      - Prompt 层： System reminder 中明确指示"you have NO tools available"，从模型行为层面强化约束
   - AgentsTeams
     - settings.json
       ```
@@ -652,6 +660,21 @@
     - Skills 最大的问题：触发不稳定、并且“提示词很脆”
     - Compress aggressively. You don't need full docs in context. An index pointing to retrievable files works just as well.
     - Test with evals. Build evals targeting APIs not in training data. That's where doc access matters most.
+  - [Skill Issue: Harness Engineering for Coding Agents](https://www.humanlayer.dev/blog/skill-issue-harness-engineering-for-coding-agents)
+    - 提示词是“告诉模型做什么”，而外壳（Harness）是“为模型提供行动的基础设施”。
+    - “Skill Issue” 的真相
+      - 上下文是稀缺资源： 给 AI 太多的指令会占用它的思考空间（上下文窗口），导致它忽视关键约束或产生幻觉。
+      - 指令腐烂： 手写的大型规则文件（如 CLAUDE.md）很容易过时，AI 无法判断哪些规则仍然有效，最终变成“有毒的诱饵”。
+    - 为了让 AI 智能体更高效，作者提出了以下几点关键策略：
+      - 子智能体（Sub-agents）作为“上下文防火墙”：
+        - 不要让一个主智能体处理所有事情。通过子智能体处理具体子任务（如研究、代码重构、测试），并在任务结束后将结果压缩返回。
+        - 这可以防止中间过程的噪声积累，保持主线程逻辑的清晰。
+      - 渐进式披露（Progressive Disclosure）：
+        - 不要一开始就给 AI 全部的代码或指令。只有在 AI 表现出需要时，才动态地注入相关的上下文或工具。
+      - 强化自验证（Self-verification）：
+         - 外壳应当强制 AI 在提交代码前运行测试、检查类型或进行静态分析。模型往往倾向于相信自己的第一直觉，外壳需要通过反馈循环（Feedback Loops）纠正它。
+      - 简短且通用的规则文件：
+        - 如果使用 CLAUDE.md 类似的指令文件，内容应保持精简（Less is More），只包含最核心的架构决策和技术栈信息，避免细枝末节的条件规则。
 - [Continuous Claude](https://github.com/parcadei/Continuous-Claude): 
   - 解决 Claude Code 等 AI Coding Agent 在长会话中面临的一个痛点：上下文丢失与“遗忘”
   -  原生机制：为了节省空间，Claude Code 会进行“压缩”，把之前的对话总结成摘要。
