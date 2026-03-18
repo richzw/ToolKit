@@ -96,6 +96,26 @@
       - 它不断把“用户输入 + 环境信息 + 历史对话 + 工具输出”组装成 input 发送给模型；模型要么给出最终答复，要么发出 tool call；Codex 执行工具后把结果再喂回模型，直到模型输出最终的 assistant message 结束本轮
     - Codex 通过 Responses API 的流式（SSE）事件接收模型输出（包括文本增量、输出项新增、完成事件等），并将与后续推理相关的输出项转为下一次请求的 input 项
     - 为了性能与隐私/合规，Codex 倾向保持请求无状态（不依赖 previous_response_id），并依靠 prompt caching 与 **compaction（对话压缩）**解决“请求体变大”和“上下文窗口耗尽”的问题
+  - [How to run subagents in Codex](https://x.com/emanueledpt/article/2033651724603240688)
+    - Example prompt:
+      "Review this branch with parallel subagents. Spawn one for security risks, one for test gaps, one for maintainability. Wait for all three, then summarize."
+    - 𝗴𝗽𝘁-𝟱.𝟰 — For your main agent and anything requiring deep reasoning. Complex logic, ambiguous tasks, security analysis.
+    - 𝗴𝗽𝘁-𝟱.𝟯-𝗰𝗼𝗱𝗲𝘅-𝘀𝗽𝗮𝗿𝗸 — Optimized for speed. Exploration, scanning, quick summaries. Use this for your worker agents.
+    -  If you need something custom and deterministic, define your own agent in a TOML file:
+       name = "security-reviewer"
+       description = "Scans for security vulnerabilities"
+       developer_instructions = "Focus only on security risks. Report findings clearly."
+       model = "gpt-5.3-codex-spark"
+       model_reasoning_effort = "high"
+       Drop it in .codex/agents/ in your project (or ~/.codex/agents/ for personal use). Codex picks it up automatically.
+    - 𝗕𝗲𝘀𝘁 𝘂𝘀𝗲 𝗰𝗮𝘀𝗲𝘀
+      → Code review — one agent per concern (security, performance, readability)
+      → Bug triage — one agent per reported bug, all running at the same time
+      → Large codebase exploration — split the repo, each agent scans a section
+      → Test coverage — one writes tests, another checks edge cases, another validates
+      → Documentation — agents scan different modules and generate docs in parallel
+      → Refactoring — agents analyze different patterns across your codebase at once
+    - 
 - Claude Code
   - [Ultimate Claude Starter Pack](https://x.com/aiedge_/article/2019153204869738897)
   - 三种“权限模式”（强烈建议先用 Plan Mode）
@@ -866,7 +886,19 @@
         - add a detailed todo list to the plan, with all the phases and individual tasks necessary to complete the plan - don’t implement yet
 - [Prompt auto-caching with Claude](https://x.com/RLanceMartin/article/2024573404888911886)
   - `"cache_control":  {"type": "ephemeral"} `
-
+- [Agent Talks To Agent]
+  - Multi-agent 到底在解决什么问题
+    - Centralized 架构在可并行的任务上能提升 80.9%。多个 agent 专注分工，每个 agent 的 context 里只有跟自己任务相关的信息，不互相干扰，结果更好
+    - Multi-agent 真正适合三种场景：任务太大，一个 context window 装不下；需要专注分工，不同任务的上下文互不干扰；以及纯粹为了并行加速
+  - agent 的生命周期和归属
+    - 每个 agent 实例是单线程的，同一时间只做一件事。技术上，LLM 本身就是单线程的，一次只能处理一个 context
+    - 从 agent 的生命周期短于主 agent，且只归属于一个主 agent。
+    - 同一个主 agent 可以重用同一个从 agent，但每次服务新任务时必须清空上下文，保证隔离。
+    - 从 agent 不跨主 agent 共享，任务结束就销毁。
+  - https://github.com/risingwavelabs/stream0
+    - 每个 agent 一个 inbox
+    - 存储用 SQLite 或 Postgres，一张表存所有消息。接口是纯 HTTP，任何语言写的 agent，curl 一下就能接，不需要安装客户端库。消息类型只有四种：question、answer、done、failed
+  - Sub-agent 解决"怎么做事"，Team agent 解决"怎么协作"，Stream0 解决"怎么通信"
 
 
 

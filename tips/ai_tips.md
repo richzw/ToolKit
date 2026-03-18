@@ -147,4 +147,37 @@
     ## Common Mistakes to Avoid
     ```
 - [The Anatomy of an Agent Harness](https://x.com/vtrivedy10/article/2031408954517971368)
+- [Chrome MCP]
+  - 开启远程调试
+    - Chrome 地址栏输入： chrome://inspect/#remote-debugging 勾选 Allow remote debugging，同意弹窗。
+  - 添加工具到 Claude Code/Codex
+     # Claude Code
+     claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest --autoConnect
+     # Codex
+     codex mcp add chrome-devtools -- npx chrome-devtools-mcp@latest
+  - 重启 Claude Code/Codex，直接下指令
+    - 「打开 Twitter 后台，列出过去 7 天我发的帖（按点赞排序），删掉点赞 <10 的，先给我看列表确认」
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
