@@ -1420,3 +1420,10 @@
     - 作用域命名空间（npm, PHP Packagist）
     - 层级命名空间（Java Maven Central）
     - 基于 URL 的标识符（Go, SwiftPM）
+- [How we reduced the size of our Agent Go binaries by up to 77%](https://www.datadoghq.com/blog/engineering/agent-go-binaries/)
+  - go-size-analyzer: 用于可视化 Go 二进制文件的组成，查看各个包占用的空间比例。
+  - goda: 用于分析依赖图（Dependency Graph），追踪某个庞大的库到底是被谁引入的。
+  - whydeadcode: 一个专门的辅助工具，配合链接器的 -dumpdep 参数使用，解释为什么某些代码没有被死代码消除算法删掉。
+
+
+

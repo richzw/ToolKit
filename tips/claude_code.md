@@ -371,6 +371,34 @@
   - https://github.com/run-llama/agentfs-claude
 - CC
   - [Learn Claude Code](https://learn.shareai.run/en/s01/)
+  - [Lessons from Building Claude Code: How We Use Skills ](https://x.com/trq212/status/2033949937936085378)
+    - Skills 不只是 Markdown 文件
+      - Skills 是一个文件夹，里面可以放脚本、资源文件、数据，甚至注册钩子函数。 代理可以发现这些内容，读取它们，执行脚本，在特定时机触发钩子
+    - 九种 Skills 类型
+      - 库与 API 参考
+        - 解释怎么用某个库、CLI 或 SDK。可以是内部库，也可以是 Claude 经常搞错的常用库。 通常包含一个代码片段文件夹，加上一份"别踩这些坑"的清单
+      - 产品验证
+        - 描述怎么测试或验证代码是否正常工作。通常配合 Playwright、tmux 这些工具。
+      - 数据获取与分析
+        - 连接你的数据和监控栈。可能包含带凭据的数据获取库、仪表盘 ID、常见工作流说明
+      - 自动化重复的业务流程。比如创建 Jira ticket、发 Slack 通知、更新文档
+      - 生成项目或组件的初始代码结构。包含模板文件和生成脚本
+      - 帮助审查代码质量、安全性、性能。可能包含 linter 配置、审查清单、自动化检查脚本。
+      - 运行手册 - 处理生产环境问题的操作指南。通常是"如果 X 发生了，做 Y"的格式
+      - 基础设施运维 - 管理云资源、容器、网络配置。包含 Terraform 脚本、Kubernetes 配置、监控设置。
+    -  Skills 的最佳实践
+      - 写明 Gotchas - 把常见错误和陷阱明确列出来。Claude 会认真读这些内容，避免重复犯错。
+      - 利用文件系统做渐进式披露 - 不要把所有信息都塞在一个 Markdown 文件里
+      - 存脚本和辅助库 - 把可复用的脚本放在 Skill 里
+      - 使用稳定存储做记忆 - Skills 可以访问 `${CLAUDE_PLUGIN_DATA}` 目录，这是一个持久化存储位置。
+      - 按需钩子保护危险操作 - 对于可能造成破坏的操作（删除数据、部署到生产环境），使用按需钩子（on-demand hooks）
+      - 用 PreToolUse 做度量 - 可以注册 PreToolUse 钩子来记录 Skill 的使用情况
+      - 把 Skills 放在 `./.claude/skills` 目录下，跟代码一起提交
+    - Samples
+      - commit-helper 帮助写符合团队规范的 Git 提交信息。 包含提交信息模板、常见类型（feat/fix/docs）的说明、以及检查提交信息格式的脚本。
+      - api-docs 内部 API 的完整文档和使用示例
+      - pr-reviewer 自动化代码审查流程。 会检查代码风格、测试覆盖率、安全问题，生成审查评论
+      - incident-response 生产环境事故响应流程。 包含排查清单、常用命令、通知模板、事后总结模板
   - Tips
     - Creates polished Word documents, PDFs, and slide decks instantly.
       "Read /mnt/skills/public/docx/SKILL.md and create a report on X"

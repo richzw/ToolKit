@@ -512,9 +512,18 @@
     SELECT *
     FROM (SELECT * FROM car WHERE id=1 FOR NO KEY UPDATE) c
     JOIN owner ON c.owner_id = owner.id;
-
-
-
+- MySQL vs Aurora vs PolarDB
+  - MySQL
+    - 写放大严重：由于需要维护 Redo Log、Binlog、Double-write Buffer 以及落盘脏页，一份逻辑写入对应多次磁盘 I/O。
+    - 架构瓶颈：主从复制依赖 Binlog 逻辑回放，导致从库延迟难以彻底消除。
+  - Aurora：日志即数据库 (Log is the Database)
+    - 核心逻辑：将存储层“智能化”。计算节点只下发 Redo Log，不再刷脏页。数据页是 redo log 的物化结果
+      - 只发送 redo log 到存储层 ； 存储层负责 page reconstruction ；计算节点无本地数据页
+    - 收益：消灭了 Double-write 和脏页网络传输，将性能提升与崩溃恢复速度做到了极致
+  - PolarDB：共享存储 (Shared Storage)
+    - 核心逻辑：基于分布式文件系统（PolarFS）实现主从共享物理数据。
+      - 共享存储 ； compute 无本地数据副本 ； replica 直接读共享存储
+    - 收益：从库无需存储冗余数据，降低了存储成本，简化了复制模型。
 
 
 
