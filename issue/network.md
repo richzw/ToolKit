@@ -1115,9 +1115,20 @@
     ```
     - Ctrl+b d 快捷键可能被 Warp 拦截，直接敲 tmux detach 命令就行。
     - Termius：手机上的 SSH 客户端
-
-
-
+- [Linux 测网速/排查网络](https://mp.weixin.qq.com/s/hwSDXMtTvqStKqqcho6mfA)
+  - 先用系统自带命令做连通性/延迟判断，再用 speedtest-cli 做标准化外网测速，用 iperf3 做两端链路带宽压测，配合 iftop/nload/nethogs/bmon 做实时监控与定位，最后用 vnstat 做长期流量统计
+  - 入门级：系统自带命令测速/诊断
+    - 1.1 ping：快速诊断网络健康（延迟/丢包）
+    - 1.2 curl/wget：通过下载文件估算下载速度
+  - 进阶级：专业测速工具
+    - 2.1 speedtest-cli：命令行标准化测速（下载/上传/延迟）
+    - 2.2 iperf3：两台机器间带宽/性能压测
+    - 2.3 iftop：按连接/主机实时查看流量占用
+    - 2.4 nload：图形化（ASCII）实时流量曲线
+  - 专家级：深度网络分析/长期观测
+    - 3.1 nethogs：按进程定位流量来源
+    - 3.2 bmon：更丰富的带宽监控与统计展示
+    - 3.3 vnstat：后台守护记录历史流量、生成日/月统计
 
 
 

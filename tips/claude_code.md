@@ -399,6 +399,12 @@
       - api-docs 内部 API 的完整文档和使用示例
       - pr-reviewer 自动化代码审查流程。 会检查代码风格、测试覆盖率、安全问题，生成审查评论
       - incident-response 生产环境事故响应流程。 包含排查清单、常用命令、通知模板、事后总结模板
+    - On Demand Hooks
+      - /careful — 通过 PreToolUse 匹配器拦截 Bash 中的 rm -rf、DROP TABLE、force-push、kubectl delete
+      - /freeze — 阻止对特定目录之外的任何 Edit/Write 操作。在调试时特别有用：“我想加日志但老是不小心'修'了不相关的代码”
+    - 分享 Skills：
+      - 把 Skills 提交到你的代码仓库中（放在 ./.claude/skills 下）
+      - 做成插件，搭建一个 Claude Code 插件市场（Plugin Marketplace）
   - Tips
     - Creates polished Word documents, PDFs, and slide decks instantly.
       "Read /mnt/skills/public/docx/SKILL.md and create a report on X"

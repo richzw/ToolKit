@@ -2291,7 +2291,30 @@
     - 尽量提供双形态 API：([]byte, io.Reader)。encoding/json 即是范例。
     - “Peek-aware” 代码模板： if p, ok := r.(interface{ Peek(int)([]byte,error) }); ok { … } else { r = bufio.NewReader(r) }
     - 标准库对 bytes.Buffer/Reader/strings.Reader 的“特殊通道”是官方认可的性能优化手段，大胆使用
-
+- [Best Practices for Secure Error Handling in Go](https://blog.jetbrains.com/go/2026/03/02/secure-go-error-handling-best-practices/)
+  ```
+  type SafeError struct {
+    // Machine-readable code for clients (e.g., "RESOURCE_NOT_FOUND")
+    Code string 
+    // Human-readable message safe for public consumption
+    UserMsg string 
+    // The raw, upstream error (DO NOT expose this via API)
+    Internal error 
+    // Context map for structured logging (sanitized)
+    Metadata map[string]string
+  }
+  // Error satisfies the stdlib interface.
+  // CRITICAL: This returns the SAFE message, not the internal one.
+  // This prevents accidental leaks if the error is printed directly to an HTTP response.
+  func (e *SafeError) Error() string {
+    return e.UserMsg
+  }
+  // LogString returns the detailed string for your SRE team.
+  func (e *SafeError) LogString() string {
+    return fmt.Sprintf("Code: %s | Msg: %s | Cause: %v | Meta: %v",
+                        e.Code, e.UserMsg, e.Internal, e.Metadata)
+  }
+  ```
 
 
 
