@@ -24,8 +24,6 @@
        典型场景： 产品头脑风暴、UI 设计草图、文案初稿、测试用例的边缘场景发散。
   - AI 给出的是概率最高的答案，而我们需要的是逻辑上正确的答案
 - [A Software Library with No Code](https://www.dbreunig.com/2026/01/08/a-software-library-with-no-code.html)
-- [global agent guide](https://www.dzombak.com/blog/2025/08/getting-good-results-from-claude-code/)
- 
 - [ChatGPT 和 Claude 都有记忆功能，但两者实现原理截然不同](https://www.shloked.com/writing/claude-memory)
   - ChatGPT 的记忆模式是自动化、魔法般的个性记忆，不需要用户提醒，自动的悄悄记录用户的使用细节。
   - Claude的记忆模式是基于检索的，每次新开对话，都没有任何任何历史记忆，只有当你明确告诉 Claude 需要用到某条记忆内容，它才会从真实的历史记录中精准提取信息。
@@ -75,6 +73,12 @@
   - codex resume用来选择历史记录sessions
   - codex目前没有plan模式，可以/approvals选择read-only进行讨论，或者直接在提示词里要求codex进行plan，写到一个文档中
   - [Unlocking the Codex harness](https://openai.com/index/unlocking-the-codex-harness/)
+  - Codex 自定义指令
+    ```
+    "When communicating your results back to me, explain what you did and what happened in plain, clear English. Avoid jargon, technical implementation details, and code-speak in your final responses. Write as if you're explaining to a smart person who isn't looking at the code. Your actual work (how you think, plan, write code, debug, and solve problems) should stay fully technical and rigorous. This only applies to how you talk to me about it.
+     Before reporting back to me, if at all possible, verify your own work. Don't just write code and assume it's done. Actually test it using the tools available to you. If possible, run it, check the output, and confirm it does what was asked. If you're building something visual like a web app, view the pages, click through the flows, and check that things render and behave correctly. If you're writing a script, run it against real or representative input and inspect the results. If there are edge cases you can simulate, try them.
+     Define finishing criteria for yourself before you start: what does "done" look like for this task? Use that as your checklist before you come back to me. If something fails or looks off, fix it and re-test. Don't just flag it and hand it back. The goal is to keep me out of the loop on iteration. I want to receive finished, working results, not a first draft that needs me to spot-check it. Only come back to me when you've confirmed things work, or when you've genuinely hit a wall that requires my input."
+    ```
   - /review 命令很实用，在写完代码后让 codex review
   - Codex Prompt
     - Make a pixel art game where I can walk around and talk to other villagers, and catch wild bugs
@@ -371,6 +375,7 @@
   - https://github.com/run-llama/agentfs-claude
 - CC
   - [Learn Claude Code](https://learn.shareai.run/en/s01/)
+  - [System Prompt](https://cchistory.mariozechner.at/)
   - [Lessons from Building Claude Code: How We Use Skills ](https://x.com/trq212/status/2033949937936085378)
     - Skills 不只是 Markdown 文件
       - Skills 是一个文件夹，里面可以放脚本、资源文件、数据，甚至注册钩子函数。 代理可以发现这些内容，读取它们，执行脚本，在特定时机触发钩子
@@ -388,9 +393,10 @@
       - 基础设施运维 - 管理云资源、容器、网络配置。包含 Terraform 脚本、Kubernetes 配置、监控设置。
     -  Skills 的最佳实践
       - 写明 Gotchas - 把常见错误和陷阱明确列出来。Claude 会认真读这些内容，避免重复犯错。
-      - 利用文件系统做渐进式披露 - 不要把所有信息都塞在一个 Markdown 文件里
-      - 存脚本和辅助库 - 把可复用的脚本放在 Skill 里
-      - 使用稳定存储做记忆 - Skills 可以访问 `${CLAUDE_PLUGIN_DATA}` 目录，这是一个持久化存储位置。
+      - 专注 delta（独特知识）：别重复 Claude 已知的内容，只写“Claude 容易踩坑的地方”
+      - 利用文件系统做渐进式披露 - 不要把所有信息都塞在一个 Markdown 文件里 存脚本和辅助库 - 把可复用的脚本放在 Skill 里
+      - 避免过度约束：给信息和灵活性，不要“railroad” Claude（让它自己决策）
+      - 使用稳定存储做记忆 - Skills 可以访问 `${CLAUDE_PLUGIN_DATA}` 目录，这是一个持久化存储位置。用日志/JSON 文件记录历史（存到 ~/.claude），让下次运行自动对比变化
       - 按需钩子保护危险操作 - 对于可能造成破坏的操作（删除数据、部署到生产环境），使用按需钩子（on-demand hooks）
       - 用 PreToolUse 做度量 - 可以注册 PreToolUse 钩子来记录 Skill 的使用情况
       - 把 Skills 放在 `./.claude/skills` 目录下，跟代码一起提交
@@ -405,6 +411,15 @@
     - 分享 Skills：
       - 把 Skills 提交到你的代码仓库中（放在 ./.claude/skills 下）
       - 做成插件，搭建一个 Claude Code 插件市场（Plugin Marketplace）
+  - [Push events into a running session with channels](https://code.claude.com/docs/en/channels)
+  - [Getting Claude to Actually Read Your CLAUDE.md](https://www.hlyr.dev/blog/stop-claude-from-ignoring-your-claude-md)
+    - Claude 不是不读 CLAUDE.md，而是只在“觉得相关”的时候才用它
+    -  你写得越泛、越长、越模糊，它越容易忽略
+    -  解决方法不是“写更多规则”，而是让规则“按条件触发”
+      - Conditional <important if> blocks
+      - Claude更擅长执行**“明确触发条件”**的指令 比“你自己判断什么时候用”更可靠
+    - Don't wrap everything.
+    - Make conditions specific. <important if="you are writing code"> matches almost everything and defeats the purpose.
   - Tips
     - Creates polished Word documents, PDFs, and slide decks instantly.
       "Read /mnt/skills/public/docx/SKILL.md and create a report on X"
@@ -426,6 +441,17 @@
       "Build a React artifact that calls the Anthropic API to do X"
     - Prevents Claude from hallucinating its own capabilities.
       "Read /mnt/skills/public/product-self-knowledge/SKILL.md before answering questions about Claude"
+    - 两个 .claude https://x.com/akshay_pachaar/article/2035341800739877091
+      - 文件夹项目级（项目根目录/.claude/）：团队共享，必须提交 Git，所有人规则一致。
+      - 全局级（~/.claude/）：个人专属，存放跨项目偏好、会话历史、自动记忆。
+    - CLAUDE.md
+      - Claude 启动时第一个读取并注入系统提示，全程生效。  推荐写：构建/测试命令、架构决策、编码规范、命名习惯、常见陷阱。  
+      - 禁止写：linter 已有的规则、过长理论说明（控制在 200 行以内）。  
+      - 支持子目录版（文件夹级规则）和全局版（~/.claude/CLAUDE.md）。  
+      - 个人覆盖：CLAUDE.local.md（自动 gitignore）。
+    - rules/ 文件夹（模块化规则）
+      - 把巨型 CLAUDE.md 拆成多个专题文件（如 testing.md、api-conventions.md）。
+      - 支持 YAML frontmatter 设置路径作用域（只在特定文件夹生效），团队维护超方便。
   - /btw 在不破坏 claude code 单 Loop 简洁性的前提下，通过"降级调用"（无工具、单次响应）实现轻量级的侧信道交互
     - /btw 被明确定位为 sub-agent 的"逆运算"：
     - 主 Loop 是"有上下文 + 有工具"的完整 Agent；/btw 和 sub-agent 分别是它在两个维度上的降维投影。
