@@ -60,6 +60,14 @@
       - 沙箱模式：把工具限制在特定目录，比如 ~/clawdbot-sandbox
       - 工具分级：不同 agent 不同权限。比如"代码助手"只能访问 ~/code，"系统管理员"才能执行系统命令
       - 禁用高风险工具：如果不需要浏览器控制，直接禁用
+  - [Anatomy of a perfect Openclaw setup](https://x.com/coreyganim/article/2036070952987988290)
+    - 核心配置双层架构
+      - 用户工作区（~/clawd/）： 控制中心，存放个人身份、技能、记忆和私密信息。这是定制化的核心。
+      - 全局安装目录： 存放核心文档、内置技能和默认行为。通常只在更新软件时变动
+    - 技能与记忆
+      - skills/ 文件夹： 存放可重复使用的特定工作流。每个技能都有一个 SKILL.md，通过 YAML 前置配置（Frontmatter）定义何时触发（如：会议准备、社交媒体发帖）。
+      - memory/ 文件夹： 长期记忆库。存放每日日志（YYYY-MM-DD.md）和持久的事实、决定。没有它，AI 每次对话都像失忆。
+      - .secrets/ 文件夹： 存放敏感的 API Key 和凭证。务必加入 .gitignore，防止泄露。
 - [OpenClaw 底层架构](https://mp.weixin.qq.com/s/9ddNSmqZzWKO7XXz_y0_tg)
   - 设计哲学
     - 主权 AI（Sovereign AI）与 OS-as-Surface（操作系统即界面

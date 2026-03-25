@@ -376,6 +376,7 @@
 - CC
   - [Learn Claude Code](https://learn.shareai.run/en/s01/)
   - [System Prompt](https://cchistory.mariozechner.at/)
+  - ![img.png](cc_folder.png)
   - [Lessons from Building Claude Code: How We Use Skills ](https://x.com/trq212/status/2033949937936085378)
     - Skills 不只是 Markdown 文件
       - Skills 是一个文件夹，里面可以放脚本、资源文件、数据，甚至注册钩子函数。 代理可以发现这些内容，读取它们，执行脚本，在特定时机触发钩子
@@ -452,6 +453,9 @@
     - rules/ 文件夹（模块化规则）
       - 把巨型 CLAUDE.md 拆成多个专题文件（如 testing.md、api-conventions.md）。
       - 支持 YAML frontmatter 设置路径作用域（只在特定文件夹生效），团队维护超方便。
+    - alias cc='claude --dangerously-skip-permissions'
+    - Esc：立即停止当前操作; Esc+Esc（或 /rewind）：打开检查点菜单，可恢复代码、对话或两者
+    - 
   - /btw 在不破坏 claude code 单 Loop 简洁性的前提下，通过"降级调用"（无工具、单次响应）实现轻量级的侧信道交互
     - /btw 被明确定位为 sub-agent 的"逆运算"：
     - 主 Loop 是"有上下文 + 有工具"的完整 Agent；/btw 和 sub-agent 分别是它在两个维度上的降维投影。
@@ -459,6 +463,13 @@
     - system reminder 是作为 user 角色消息中的额外 text content block 注入的，而不是修改 system prompt。
       - API 层： 通过设置 tool_choice: "none" 或省略 tools 数组，从 API 层面彻底阻断工具调用
       - Prompt 层： System reminder 中明确指示"you have NO tools available"，从模型行为层面强化约束
+  - [CC 语音 + plan.md + 并行会话](https://x.com/mvanhorn/article/2035857346602340637)
+    - 有想法第一步永远是 /ce:plan，不是写代码 /ce:plan 会同时启动多个研究Agent
+      - /plugin marketplace add EveryInc/compound-engineering-plugin
+    - 用Monologue或WhisperFlow，把语音直接打进Claude Code。
+    - ~/.claude/settings.json 开启“Dangerously skip permissions”（allow所有必要权限 + skipDangerousModePermissionPrompt:true），彻底无确认模式。  
+    - 加Stop Hook：任务结束自动播放afplay声音提醒（走开后回来听声就行）。  
+    - Zed编辑器开启500ms自动保存 → Claude实时看到你改动，感觉像Google Docs双人协作。
   - AgentsTeams
     - settings.json
       ```

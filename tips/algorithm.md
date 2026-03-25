@@ -695,7 +695,9 @@
     - 接着对减后的 IBF 执行“解码 (decode)”操作，通过称为“peeling”的迭代过程，逐步识别出哪些单元格只含单个元素（count = ±1），并据此推断出差异集合，达到高概率获取所有缺失和多余的元素的目的。
 - SipHash
   - SipHash 是一种面向快速哈希和消息认证的伪随机函数（PRF，Pseudo-Random Function） 常常用于在需要高效且安全的场景下进行哈希计算或消息认证码
-
+  - SipHash 是一种专门为哈希表（hash table）设计的加密级哈希函数，核心目标不是“抗碰撞到极致”，而是——防止哈希碰撞攻击（Hash DoS） 带密钥的、轻量级、安全哈希函数
+  - Hash Collision DoS 攻击 - 攻击者可以构造大量 key 导致 hash table 退化成链表
+- [finding all regex matches has always been O(n²). even in the engines built to prevent it](https://iev.ee/blog/the-quadratic-problem-nobody-fixed/)
 
 
 
