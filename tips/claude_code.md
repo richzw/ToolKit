@@ -374,6 +374,7 @@
   - 用“虚拟文件系统”替代真实文件系统访问;  AgentFS 的文件操作封装成“受控工具”，并强制代理只能用这些工具
   - https://github.com/run-llama/agentfs-claude
 - CC
+  - [Claude Code Cheat Sheet](https://cc.storyfox.cz/)
   - [Learn Claude Code](https://learn.shareai.run/en/s01/)
   - [System Prompt](https://cchistory.mariozechner.at/)
   - ![img.png](cc_folder.png)
@@ -421,6 +422,7 @@
       - Claude更擅长执行**“明确触发条件”**的指令 比“你自己判断什么时候用”更可靠
     - Don't wrap everything.
     - Make conditions specific. <important if="you are writing code"> matches almost everything and defeats the purpose.
+  - claude --enable-auto-mode replace --dangerously-skip-permissions
   - Tips
     - Creates polished Word documents, PDFs, and slide decks instantly.
       "Read /mnt/skills/public/docx/SKILL.md and create a report on X"

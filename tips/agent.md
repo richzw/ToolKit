@@ -480,6 +480,7 @@
     - 最终分数：`0.7 * vectorScore + 0.3 * textScore`
     - 过滤低分结果（默认 minScore 0.35）
     - 支持概念搜索（如“数据库讨论”）和精确搜索（如具体名称/日期）
+- [为 AI Agent 构建记忆系统](https://nowledge.co/zh/blog/building-memory-systems-for-ai-agents)
 - [Context Management for Deep Agents](https://www.blog.langchain.com/context-management-for-deepagents/)
   - Deep Agents implements three main compression techniques, triggered at different frequencies:
     - Offloading large tool results: We offload large tool responses to the filesystem whenever they occur.
