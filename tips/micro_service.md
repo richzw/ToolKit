@@ -304,6 +304,7 @@
     - Proxy Protocol
       - Proxy Protocol是 Haproxy 实现的一个四层源地址保留方案。它的原理特别简单，Proxy 在与后端 Server 建立 TCP 连接后，在发送实际应用数据之前，首先发送一个Proxy Protocol协议头(包括客户端源 IP/端口、目标IP/端口等信息)。这样，后端 server 通过解析协议头获取真实的客户端源 IP 地址。
 - [CDC](https://mp.weixin.qq.com/s/kzRf6zMDfElrN-VKXfo_Cw)
+  - https://podostack.com/p/change-data-capture-cdc-intro
   - Change Data Capture[1] 简称 CDC, 用于异构数据同步，将 database 的数据同步到第三方，这里的 DB 可以是 MySQL, PG, Mongo 等等一切数据源，英文技术圈称之为 Single Source OF True (SSOT), 目标称为 Derived Data Systems。
     ![img.png](micro_service_cdc.png)
     - alibaba canal

@@ -217,6 +217,11 @@
       - 结构化扩展：当 SKILL.md 过长就拆分文件；互斥上下文放不同路径减少 token；把脚本既当工具也当文档。
       - 代理视角调试：观察 Claude 何时触发技能、是否走偏，并反复迭代 name/description。
       - 与 Claude 协同：让它把成功步骤、常见错误写回 Skill 以自我改进
+  - Skills 2.0
+    - Built-in Evals and Testing
+    - A/B testing allows you to compare two versions of the same Skill against identical prompts.
+    - Trigger Optimization
+      - Skills 2.0 includes an automated process that rewrites and tests different versions of your Skill's description until it finds one that triggers reliably.
 - 在 Claude Code 中配置 GLM 4.6 的方法
   ```
   {
@@ -335,26 +340,6 @@
     - https://huggingface.co/datasets/Anthropic/AnthropicInterviewer
 - 后端代码，可以尝试用伪代码去提示词，试试TDD，先写测试代码，再去实现
   - 先和 code agent 在 plan 模式下把业务用 plantuml/mermaid 用 uml 或者 ddd 的语言沟通明白。
-- [CC](https://blog.cosine.ren/post/my-claude-code-record-2)
-  - 新功能从 0 到 1
-    - 使用 Claude Code 的 Plan Mode，让模型只输出“变更计划（哪些文件、改动点、预期 diff）”，先不写代码。
-    - ClaudeCode 的 Plan Mode 会生成计划，并询问一些你可能没讲清楚的地方
-    - 补充并 Review 计划完毕后让他按计划生成代码，落到本地跑编译与最小样例。
-    - 再次要求模型自检：列出潜在失败场景、边界条件和建议测试用例。
-  - BugFix
-    - 喂给他报错日志/最小复现工程。
-    - 让模型列出“定位假说清单、验证步骤、最小改动方案”。
-    - 实现、自检
-  - 重构/迁移
-    - 同样 Plan Mode 描述重构需求，让其生成文档计划等
-    - 让模型先写 codemod，只在小部分上试跑。
-    - 观察 diff，定义切分点和随时可回滚的边界。
-    - 分批推进，并进行回归测试。
-  - 模型与工具的选型与切换
-    - 重要的架构设计/大重构：用强模型（质量优先）。
-    - 批量生成测试/样例：用便宜模型（成本优先）。
-    - 读 log / 写小脚本/摘要：用更快模型（速度优先）。
-    - 小模型可以用 Plan Mode 先生产 “变更计划 + 验收用例” 的 PRD，spec 驱动开发，而大模型负责实现。
 - [Martin Fowler警告：大模型正将编程拖入“非确定性深渊”](https://mp.weixin.qq.com/s/7PSQ3CsPuu-BPd3ck36-sw)
   - AI 的核心变化：不是抽象层级，而是“非确定性”
     - 传统软件大多是确定性的：同样输入 → 同样输出。
@@ -423,6 +408,7 @@
     - Don't wrap everything.
     - Make conditions specific. <important if="you are writing code"> matches almost everything and defeats the purpose.
   - claude --enable-auto-mode replace --dangerously-skip-permissions
+    - https://www.anthropic.com/engineering/claude-code-auto-mode
   - Tips
     - Creates polished Word documents, PDFs, and slide decks instantly.
       "Read /mnt/skills/public/docx/SKILL.md and create a report on X"
@@ -457,7 +443,40 @@
       - 支持 YAML frontmatter 设置路径作用域（只在特定文件夹生效），团队维护超方便。
     - alias cc='claude --dangerously-skip-permissions'
     - Esc：立即停止当前操作; Esc+Esc（或 /rewind）：打开检查点菜单，可恢复代码、对话或两者
-    - 
+    - Give Claude a way to check its own work - Playwright MCP server 实现浏览器交互验证
+    - Install a code intelligence plugin for your language
+      ```
+      /plugin install typescript-lsp@claude-plugins-official
+      /plugin install pyright-lsp@claude-plugins-official
+      /plugin install rust-analyzer-lsp@claude-plugins-official
+      /plugin install gopls-lsp@claude-plugins-official
+      ```
+    - 优先使用 CLI 而非 MCP ; 复杂推理用 ultrathink
+    - Use @imports to keep CLAUDE.md lean
+    - After Claude makes a mistake, say "Update your CLAUDE.md so this doesn't happen again"
+    -  Allowlist safe commands with /permissions
+    - Use /sandbox when you want Claude to work freely
+    - 输出风格：/config 选 Explanatory / Concise / Technical，或在 ~/.claude/output-styles/ 自定义
+    - Always manually review auth, payments, and data mutations
+    - Use /branch to try a different approach without losing your current one
+    - Let Claude interview you when you can't fully spec a feature
+      ```
+      I want to build [brief description]. Interview me in detail
+      using the AskUserQuestion tool. Ask about technical implementation,
+      edge cases, concerns, and tradeoffs. Don't ask obvious questions.
+      Keep interviewing until we've covered everything,
+      then write a complete spec to SPEC.md.
+      ```
+    - Have one Claude write, another Claude review
+    - Review PRs conversationally
+      ```
+      "Walk me through the riskiest change in this PR." "What would break if this runs concurrently?" "Is the error handling consistent with the rest of the codebase?"
+      ```
+    - Name and color-code your sessions /rename + /color red
+    - Play a sound when Claude finishes - hook `"/usr/bin/afplay /System/Library/Sounds/Glass.aiff"`
+    - Edit plans with Ctrl+G 
+    - Background long-running tasks with Ctrl+B
+    - Stop interpreting bugs for Claude. Paste the raw data
   - /btw 在不破坏 claude code 单 Loop 简洁性的前提下，通过"降级调用"（无工具、单次响应）实现轻量级的侧信道交互
     - /btw 被明确定位为 sub-agent 的"逆运算"：
     - 主 Loop 是"有上下文 + 有工具"的完整 Agent；/btw 和 sub-agent 分别是它在两个维度上的降维投影。

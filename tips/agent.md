@@ -261,6 +261,11 @@
         - 进行增量式进展（incremental progress）
         - 留下结构化更新（structured updates）
         - 在会话结束时将环境保持在干净状态
+  - Harness design for long-running application development
+    - Planner（规划者）：制定高层蓝图。
+    - Generator（生成者）：编写代码，实现 UI。
+    - Evaluator（评估者）：通过浏览器工具（如 Playwright）观察运行中的 App，根据“设计感、独创性、工艺、功能性”四个维度进行严苛打分。
+    - 结果： 这种类似 GAN（生成对抗网络）的闭环让 AI 能在 6 小时内自主开发出功能完备的复古游戏。
 - [How agents can use filesystems for context engineering](https://blog.langchain.com/how-agents-can-use-filesystems-for-context-engineering/)
   - 上下文工程 = 在有限窗口中精确选取“刚好够”的信息，常见失败模式有：缺信息、检索不到、过多无用信息，或不会随时间更新。
   - 文件系统作为统一上下文层：
@@ -480,6 +485,20 @@
     - 最终分数：`0.7 * vectorScore + 0.3 * textScore`
     - 过滤低分结果（默认 minScore 0.35）
     - 支持概念搜索（如“数据库讨论”）和精确搜索（如具体名称/日期）
+  - [Hermes Agent's Memory System](https://x.com/manthanguptaa/article/2034849672985288957)
+    -  Layer 1：Frozen Prompt Memory（热内存）
+      - 仅存放在 ~/.hermes/memories/ 下的两个文件：MEMORY.md（系统级持久事实）
+      - USER.md（用户偏好、环境事实、 recurring corrections、stable conventions）
+    - Layer 2：session_search（情景回忆 / Episodic Recall）所有历史会话存于 ~/.hermes/state.db（SQLite）
+      - 当模型需要回忆“上周讨论过什么”时，不查 MEMORY.md，而是调用 session_search 工具
+      - 热内存极小 + 冷历史按需搜索 + 总结后返回，远比每次把完整历史塞进提示更省 token 和成本
+    - Layer 3：Compression 前的 Memory Flush（压缩前记忆刷新）
+      - 压缩前注入一条合成指令：“请把任何值得永久保留的事实写入 MEMORY.md / USER.md”
+    - Layer 4：Skills（程序性记忆 / Procedural Memory）路径：~/.hermes/skills/
+      - 作用：保存可复用的工作流（非事实，而是“How to do things”）。
+      - 发现非平凡工作流、修复疑难问题、优化方法时，可保存为 skill。
+    - Layer 5：可选 Honcho 层（深度用户建模）hybrid 模式 默认开启。
+      - 功能：跨会话用户建模、跨设备/平台连续性、语义搜索、LLM 生成的用户/AI 画像
 - [为 AI Agent 构建记忆系统](https://nowledge.co/zh/blog/building-memory-systems-for-ai-agents)
 - [Context Management for Deep Agents](https://www.blog.langchain.com/context-management-for-deepagents/)
   - Deep Agents implements three main compression techniques, triggered at different frequencies:
