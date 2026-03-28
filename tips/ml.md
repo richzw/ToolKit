@@ -100,7 +100,6 @@
         - 这是第二类错误：实际有区别，但是实际结果表示没有区别，我们得到不显著的结果因此无法拒绝原假设，认为实验组和对照组没有区别，发生的概率用 𝜷 表示。
   - ![img.png](ml_abtest.png)
   - [Beyond A/B Testing: Part 2 – When A/B Tests Struggle with Ranking & Recommendations](https://bananimohapatra.substack.com/p/beyond-ab-testing-part-2-when-ab)
-  
 - [特征重要性分析的常用方法](https://mp.weixin.qq.com/s/GQIjypyqw4LaSrkDivi23g)
   - 特征重要性分析可以识别并关注最具信息量的特征，从而带来以下几个优势：
     - 改进的模型性能
@@ -2130,8 +2129,16 @@
     - tools / functions：工具定义 tool calling 的模式/约束：tool_choice、parallel tool calls 等
     - 采样/停止参数：temperature、stop、max_tokens
 - [Embedding Inversion via Conditional Masked Diffusion](https://github.com/jina-ai/embedding-inversion-demo)
-
-
+- [From "Reasoning" Thinking to "Agentic" Thinking ](https://x.com/JustinLin610/article/2037116325210829168)
+  - OpenAI's o1 showed that "thinking" could be a first-class capability, something you train for and expose to users
+  - DeepSeek-R1 proved that reasoning-style post-training could be reproduced and scaled outside the original labs. 
+  - Agentic thinking: thinking in order to act, while interacting with an environment, and continuously updating plans based on feedback from the world.
+    - Agentic thinking has to handle several things that pure reasoning models can mostly avoid:
+    - Deciding when to stop thinking and take an action
+    - Choosing which tool to invoke and in what order
+    - Incorporating noisy or partial observations from the environment
+    - Revising plans after failures
+    - Maintaining coherence across many turns and many tool calls
 
 
 

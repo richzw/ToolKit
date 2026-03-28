@@ -991,8 +991,8 @@
     - 每个 agent 一个 inbox
     - 存储用 SQLite 或 Postgres，一张表存所有消息。接口是纯 HTTP，任何语言写的 agent，curl 一下就能接，不需要安装客户端库。消息类型只有四种：question、answer、done、failed
   - Sub-agent 解决"怎么做事"，Team agent 解决"怎么协作"，Stream0 解决"怎么通信"
-
-
+- [Agent-to-agent pair programming](https://axeldelafosse.com/blog/agent-to-agent-pair-programming)
+  - 
 
 
 

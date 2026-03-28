@@ -499,6 +499,8 @@
       - 发现非平凡工作流、修复疑难问题、优化方法时，可保存为 skill。
     - Layer 5：可选 Honcho 层（深度用户建模）hybrid 模式 默认开启。
       - 功能：跨会话用户建模、跨设备/平台连续性、语义搜索、LLM 生成的用户/AI 画像
+  - [The state of AI memory systems](https://x.com/yoheinakajima/article/2037201711937577319)
+    - AI 记忆领域已形成清晰共识：混合存储（向量 + 图）、时序感知、主动记忆整合 是高性能系统的三大支柱
 - [为 AI Agent 构建记忆系统](https://nowledge.co/zh/blog/building-memory-systems-for-ai-agents)
 - [Context Management for Deep Agents](https://www.blog.langchain.com/context-management-for-deepagents/)
   - Deep Agents implements three main compression techniques, triggered at different frequencies:
@@ -576,6 +578,33 @@
 - [You don’t know what your agent will do until it’s in production](https://www.langchain.com/conceptual-guides/production-monitoring)
 - Chrome 146原生支持MCP
   - 只需在chrome://inspect里开一个开关（chrome://inspect/#remote-debugging），你的AI Agent就能直接控制当前正在运行的浏览器会话。注意，是当前会话，不是新建一个。
+- [Context-1 的 20B 参数检索子代理（retrieval subagent）](https://www.trychroma.com/research/context-1)
+  - 它不是直接回答问题的模型，而是专门负责：把复杂问题拆成子查询、反复检索文档、在上下文快满时主动删掉噪声文档，最后把排序后的支持文档交给下游推理模型
+  - 把多跳搜索单独做成一个小而专用的搜索代理，并通过自编辑上下文（self-editing context）、合成任务生成+验证、SFT+RL（CISPO/RLVR）训练来降低 agentic search 的成本与延迟
+  - 搜索子代理：它接到用户问题后，不直接生成长答案，而是返回最相关的支持文档集合，把“搜索”和“回答”分层。这个架构思路与近两年的 agentic search / subagent 方向一致
+  - Context-1 的 agent harness 提供了 4 个工具：
+    - search_corpus(query)：BM25 + dense retrieval 混合检索，用 RRF（Reciprocal Rank Fusion） 融合，再 rerank；
+    - grep_corpus(pattern)：正则查找；
+    - read_document(doc_id)：按文档 ID 读全文；
+    - prune_chunks(chunk_ids)：把指定 chunk 从当前上下文里删掉
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

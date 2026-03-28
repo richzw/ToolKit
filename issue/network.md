@@ -459,6 +459,9 @@
   - We run strace dig google.com and we see that dig correctly calls sendmsg() and recvmsg() but that the latter times out.
   -  dropwatch, a tool that shows you where in the kernel a packet is dropped.
   - net.core.rmem_default is how you set the default receive buffer size for UDP packets. A common value is something around 200KiB, but if your server receives a lot of UDP packets you might want to increase the buffer size. If the buffer is full when a new packet arrives, because the application was not fast enough to consume them, then you will lose packets. The customer was running an application to collect metrics that were sent as UDP packets, so they had correctly increased the buffer to ensure they didn’t lose any data points. And they had set this value to the highest value possible: 2^31 - 1 (if you try and set it to 2^31 the kernel returns “INVALID ARGUMENT”).
+- [Doom over DNS](https://github.com/resumex/doom-over-dns)
+  - DNS 会被用作文件系统
+  - 利用 DNS 的 TXT 记录可以存储任意文本的特性，将游戏的所有数据（包括 WAD 游戏资源文件和 .NET 游戏引擎 DLL）进行压缩、切片，并存储在 Cloudflare 等 DNS 提供商的记录中。
 - [CPU高负载引发内核探索之旅](https://mp.weixin.qq.com/s/QRuB25pqX61uZYaLsb3JRg)
   - 问题起源
     - 值班期间，运维同学偶然发现一台机器CPU消耗异常，从监控视图上看出现较多毛刺。而属于同一集群的其他机器在同一时间段CPU消耗相对稳定。
