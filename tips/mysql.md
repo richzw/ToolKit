@@ -1202,7 +1202,13 @@
   - 根因分析：并行重放 + replica_preserve_commit_order=ON 触发“提交顺序约束”导致等待环路
   - 更深层原因：RC 下仍出现 GAP 锁，源于 DELETE 产生的 delete-marked 记录 + 唯一索引重复键检查
   - 优化方案：应用侧改造索引/写法，数据库侧关闭 preserve commit order
-
+- 磁盘 98% 告警，定位到 MySQL 数据目录中的超大文件 ibtmp1
+  - ibtmp1 是什么：InnoDB 临时表空间文件，默认可自动扩展且不自动缩小
+  - 处理（“驱魔”三步）：重启清空 → 配置上限 → 排查制造临时表的 SQL
+  - 常见触发“Using temporary”的 SQL 模式与 EXPLAIN 特征
+    - GROUP BY 用到无索引字段 
+    - GROUP BY 与 ORDER BY 字段不一致
+    - DISTINCT + ORDER BY 字段不匹配
 
 
 

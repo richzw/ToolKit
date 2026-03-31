@@ -155,14 +155,6 @@
     - 如果Claude写的代码总是无法通过，可以在 CLAUDE.md 加了“请务必测试”；
     - /init 生出的 CLAUDE.md 太多废话，浪费 token，可以简要讲一下，我现在的不到 10 行。
     - 需要第二次纠正 AI 的就放进 CLAUDE.md；
-- Claude Code 连续工作 8 小时的问题
-  - 本质上就是一个 Manager 监控 Worker 干活。
-    - Worker 要有 TODO List，并且 Agents/Claude Code MD 要有引导，这样每次固定提示词（continue）能继续任务
-    - Worker 要开子进程避免上下文爆掉
-    - Manager 去管理 Worker 干活要开子 Agent，避免 Manager 的上下文爆掉
-  - Claude Code 有个特别的工具叫 Task tool，本质就是一个子 Agent，它可以有独立的上下文，所以哪怕它用了很多token，但也不会占用多少主Agent的上下文空间
-  - claude code 支持 hook，理论上来说可以借助 hook 来自动化
-    - claude code完成一个任务后，会写到一个完成文件，然后脚本里有监控流程，出现这个文件n秒后自动close claude，然后由脚本进行下一次task
 - Claude Code 发布 v2.0 了，升级了 UI 界面，推出了全新的VS Code扩展插件。
   - 还有一个实用的新功能：检查点（checkpoints）。通过它，你可以快速撤销Claude刚刚做出的修改，只需轻松按下Esc+Esc快捷键，或者输入指令/rewind即可实现。
   - Sonnet 4.5模型，发现它有个非常明显的进步，那就是在压缩对话上下文（compacting conversations）方面，比其他用过的模型都要强不少。
@@ -222,19 +214,6 @@
     - A/B testing allows you to compare two versions of the same Skill against identical prompts.
     - Trigger Optimization
       - Skills 2.0 includes an automated process that rewrites and tests different versions of your Skill's description until it finds one that triggers reliably.
-- 在 Claude Code 中配置 GLM 4.6 的方法
-  ```
-  {
-  "env": {
-  "ANTHROPIC_AUTH_TOKEN": "your_zai_api_key",
-  "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
-  "API_TIMEOUT_MS": "3000000",
-  "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
-  "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-4.6",
-  "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-4.6"
-  }
-  }
-  ```
 - [Claude Agent Skills: A First Principles Deep Dive](https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/)
   - Skills 不是可执行代码：不跑 Python/JS、不起 HTTP server；本质是“注入式指令”
   - 技能（skills）= Prompt 模板 + 对话上下文注入 + 执行环境修改。它们本质上是一段 Markdown（SKILL.md）而非可执行代码，通过“Skill”元工具在运行时注入到 Claude 的上下文中
@@ -314,19 +293,6 @@
   - Codex CLI 里的 Skills：本地 ~/.codex/skills + --enable skills
   - https://simonwillison.net/2025/Dec/12/openai-skills/
   - [awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills)
-- [Antigravity Grounded! Security Vulnerabilities in Google's Latest IDE](https://embracethered.com/blog/posts/2025/security-keeps-google-antigravity-grounded/)
-  - 1. **谨慎启用 MCP 服务器与工具**
-    - 默认禁用高风险工具（尤其是具有写、执行、外联能力的）。
-    - 根据实际业务需求最小化工具权限范围。
-  - 2. **尽可能增加 Human in the Loop**
-    - 在 Antigravity 中关闭或减少自动执行（Auto-Execute）：
-      - 关闭终端命令的自动执行；
-      - 对敏感命令、外联操作、文件读写等启用手动审批。
-    - 使用“终端命令白名单”功能，只允许 AI 执行预先审核过的一小部分命令。
-  - 3. **针对隐藏 Unicode 指令进行检测**
-    - 在 CI/CD 中增加对 Unicode Tag Characters 等不可见字符的扫描，自动阻断或告警。
-    - 不要仅依赖人工代码审查来应对提示注入，**视觉上看不到的东西需要自动化工具**来发现。
-- [从「写代码」到「验代码 ](https://yousali.com/posts/20251124-how-to-coding-with-ai/)
 - [Writing a good CLAUDE.md](https://www.humanlayer.dev/blog/writing-a-good-claude-md)
   - CLAUDE.md is for onboarding Claude into your codebase. It should define your project's WHY, WHAT, and HOW.
   - Less (instructions) is more. While you shouldn't omit necessary instructions, you should include as few instructions as reasonably possible in the file.
@@ -444,7 +410,7 @@
     - alias cc='claude --dangerously-skip-permissions'
     - Esc：立即停止当前操作; Esc+Esc（或 /rewind）：打开检查点菜单，可恢复代码、对话或两者
     - Give Claude a way to check its own work - Playwright MCP server 实现浏览器交互验证
-    - Install a code intelligence plugin for your language
+    - [Install a code intelligence plugin for your language](https://x.com/codevolutionweb/article/2034683638382506063)
       ```
       /plugin install typescript-lsp@claude-plugins-official
       /plugin install pyright-lsp@claude-plugins-official
@@ -477,6 +443,22 @@
     - Edit plans with Ctrl+G 
     - Background long-running tasks with Ctrl+B
     - Stop interpreting bugs for Claude. Paste the raw data
+    - 在终端运行 `claude --teleport` 或输入 `/teleport`，可以把云端会话拉到本地继续。反过来，用 `/remote-control` 可以从手机或网页远程控制本地正在运行的会话。
+    - /loop and /schedule Use these to schedule Claude to run automatically at a set interval, for up to a week at a time.
+      - /loop 5m /babysit, to auto-address code review, auto-rebase, and shepherd my PRs to production
+      - /loop 30m /slack-feedback, to automatically put up PRs for Slack feedback every 30 mins
+    - Hooks（钩子）可以在 Claude 运行过程中的特定节点自动执行预设逻辑：
+      - SessionStart：每次启动时动态加载上下文
+      - PreToolUse：每次执行 bash 命令前记录日志
+      - PermissionRequest：把权限请求发到 WhatsApp，远程批准或拒绝
+      - Stop：Claude 停下来时自动催它继续
+    - Chrome 扩展 https://code.claude.com/docs/en/chrome
+    - /batch：大规模并行修改
+      - /batch 先和你沟通需求，然后把任务扇出给多个工作树代理并行执行，数量可以是几十个、几百个甚至上千个
+    - --add-dir：跨仓库工作
+    - --agent：自定义代理
+      - 在 `.claude/agents` 目录下定义代理，用 `claude --agent=<名字>` 启动。可以给代理设定专属的系统提示词和工具集。
+    - /voice：语音编程
   - /btw 在不破坏 claude code 单 Loop 简洁性的前提下，通过"降级调用"（无工具、单次响应）实现轻量级的侧信道交互
     - /btw 被明确定位为 sub-agent 的"逆运算"：
     - 主 Loop 是"有上下文 + 有工具"的完整 Agent；/btw 和 sub-agent 分别是它在两个维度上的降维投影。
