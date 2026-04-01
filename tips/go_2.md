@@ -1,4 +1,7 @@
-
+- [Go Package Recommendations for Production Server Development](https://www.winterjung.dev/en/golang-pkgs-for-production-server/)
+  - groupcache 本地 + 分布式缓存
+  - strings.Builder with the .Grow() method, or strings.Join(), is the fastest and most memory-efficient approach in all scenarios.
+  - In fixed-argument scenarios, concatenating with + is also perfectly adequate.
 - [The Things I Find Myself Repeating About Go](https://www.youtube.com/watch?v=RZe8ojn7goo)
   - https://mp.weixin.qq.com/s/vmOMjLNcWFxzHJZOSh8DaA
 - [VictoriaMetrics 教你写出最高效的 Go 代码](https://mp.weixin.qq.com/s/1svEokrz5C0FwBEA88YGqw)

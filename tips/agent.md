@@ -587,8 +587,12 @@
     - grep_corpus(pattern)：正则查找；
     - read_document(doc_id)：按文档 ID 读全文；
     - prune_chunks(chunk_ids)：把指定 chunk 从当前上下文里删掉
-
-
+- 超长上下文（Long-Context）并不等同于更强的 AI 能力
+  - 上下文工程（Context Engineering）
+  - 子代理（Sub-agents）隔离： 通过 Agent 或 Task 工具将复杂任务拆解给子代理。子代理只携带高度相关的上下文，充当“上下文防火墙”，防止主模型的上下文腐烂（Context Rot）。
+  - 主动压缩与回压： 不要等到窗口满了才处理。HumanLayer 建议在达到 100k Token（即使对于 1M 窗口的模型也仅占 10%）时就触发上下文预警，强迫模型或用户进行清理。
+  - 渐进式披露（Progressive Disclosure）： 仅在需要时才读取相关文件，保持上下文的小巧和聚焦。
+- [Agent of Chaos](https://agentsofchaos.baulab.info/report.html)
 
 
 

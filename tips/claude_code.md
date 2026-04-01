@@ -40,7 +40,7 @@
 - Tips
   - Small context
     Keep conversations small+focused. After 60k tokens, start a new conversation.
-  - CLAUDE.md files 
+  - CLAUDE.md files - `curl -o CLAUDE.md https://raw.githubusercontent.com/drona23/claude-token-efficient/main/CLAUDE.md `
     - Use CLAUDE.md to tell Claude how you want it to interact with you
     - Use CLAUDE.md to tell Claude what kind of code you want it to produce
     - Use per-directory CLAUDE.md files to describe sub-components.
@@ -327,6 +327,7 @@
 - CC
   - [Claude Code Cheat Sheet](https://cc.storyfox.cz/)
   - [Learn Claude Code](https://learn.shareai.run/en/s01/)
+    - https://claude.nagdy.me/learn/
   - [System Prompt](https://cchistory.mariozechner.at/)
   - ![img.png](cc_folder.png)
   - [Lessons from Building Claude Code: How We Use Skills ](https://x.com/trq212/status/2033949937936085378)
@@ -459,6 +460,15 @@
     - --agent：自定义代理
       - 在 `.claude/agents` 目录下定义代理，用 `claude --agent=<名字>` 启动。可以给代理设定专属的系统提示词和工具集。
     - /voice：语音编程
+    - codex plugin
+      ```
+      /plugin marketplace add openai/codex-plugin-cc
+      /plugin install codex@openai-codex
+      /codex:setup
+      ```
+      - /codex:review runs the standard read-only Codex review.
+      - /codex:adversarial-review runs a steerable challenge review. Use it when you want Codex to question the implementation, not just inspect it.
+      - /codex:rescue hands a task to Codex directly.
   - /btw 在不破坏 claude code 单 Loop 简洁性的前提下，通过"降级调用"（无工具、单次响应）实现轻量级的侧信道交互
     - /btw 被明确定位为 sub-agent 的"逆运算"：
     - 主 Loop 是"有上下文 + 有工具"的完整 Agent；/btw 和 sub-agent 分别是它在两个维度上的降维投影。

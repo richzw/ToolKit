@@ -628,7 +628,15 @@
   - https://granda.org/en/2026/01/02/claude-code-on-the-go/
 - [路由器](https://mao.fan/)
 - [Crawl entire websites with a single API call using Browser Rendering](https://developers.cloudflare.com/changelog/post/2026-03-10-br-crawl-endpoint/)
-
+- [Cloudflare Client-Side Security](https://blog.cloudflare.com/client-side-security-open-to-everyone/)
+  - Cloudflare 把“浏览器侧安全”从企业专属能力，变成所有网站都能用的基础设施
+  - Client-Side Security Advanced（原 Page Shield 增值包）向自选（Self-serve）客户开放
+  - GNN + LLM 双重检测架构
+    - 图神经网络（GNN）
+      - 负责初步筛选。它通过分析代码的**抽象语法树（AST）**来识别恶意意图，能有效识别混淆后的代码。
+      - GNN 具有极高的召回率（Catch more）
+    - 大语言模型（LLM）
+      - 当 GNN 发现可疑脚本时，会将其交给托管在 Cloudflare Workers AI 上的开源 LLM（如 gpt-oss-120b）进行二次诊断。
 
 
 
