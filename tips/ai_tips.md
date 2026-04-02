@@ -157,6 +157,15 @@
     ```
 - [The Anatomy of an Agent Harness](https://x.com/vtrivedy10/article/2031408954517971368)
   - [Harness or not](https://mp.weixin.qq.com/s/IRzob4KDezebLWLqLWRZ-Q)
+  - [Harness Engineer](https://mp.weixin.qq.com/s/4ZklKsa_hmySF3CuFujeSA)
+    - 每个 Agent 任务的执行结构拆解为三个核心模块 :规划器（Planner）; 规划器（Planner）; 检查器（Checker）
+      - 执行器与检查器的协作，借鉴了**生成对抗网络（GAN）**的核心思路：两个角色互相施压、反复博弈，倒逼输出质量不断提升
+      - 两者反复博弈，生成器越来越会"骗"，判别器越来越"精明"。一句话：造假者和打假者互卷，卷出以假乱真的 AI。
+    - 消融工程（Ablation Engineering）
+      - 消融实验: 把系统里的某个模块"拿掉/关掉"，看整体性能掉多少，以此判断这个模块是关键组件还是冗余包袱。
+    - Harness 是一个随着模型进化不断"做减法"的过程——约束越少，模型的聪明度释放越彻底。
+    - Harness Engineering 是一套通过「规划 → 执行 → 检查」闭环驾驭 AI Agent 的工程框架：
+      - 短期靠 GAN 对抗机制保障输出下限，长期靠消融工程逐步释放模型真实能力、拔高系统智力上限。
 - [Chrome MCP]
   - 开启远程调试
     - Chrome 地址栏输入： chrome://inspect/#remote-debugging 勾选 Allow remote debugging，同意弹窗。

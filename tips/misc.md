@@ -637,7 +637,10 @@
       - GNN 具有极高的召回率（Catch more）
     - 大语言模型（LLM）
       - 当 GNN 发现可疑脚本时，会将其交给托管在 Cloudflare Workers AI 上的开源 LLM（如 gpt-oss-120b）进行二次诊断。
-
+- github repo
+  - fork
+  - settings - Leave fork network
+  - settings - Change repository visibility - private
 
 
 

@@ -460,6 +460,7 @@
     - --agent：自定义代理
       - 在 `.claude/agents` 目录下定义代理，用 `claude --agent=<名字>` 启动。可以给代理设定专属的系统提示词和工具集。
     - /voice：语音编程
+    - /web-setup in a local `claude` session to use your local GitHub credentials on the web
     - codex plugin
       ```
       /plugin marketplace add openai/codex-plugin-cc
@@ -648,6 +649,63 @@
       1 沙箱隔离执行，每个工具调用在独立的子进程中运行，支持 10 种语言运行时（JS、Python 等），只把 stdout 结果返回，原始输出数据留在沙箱内不进上下文。
       2 知识库 + 精简输出：使用 SQLite FTS5 虚拟表 + BM25 排名 + Porter stemming 对 Markdown 内容建索引，模型需要时再精准拉取代码块，而不是塞摘要或全文。
     - /plugin marketplace add mksglu/claude-context-mode ： /plugin install context-mode@claude-context-mode ：claude mcp add context-mode -- npx -y context-mode
+  - [Claude Code Source code]
+    - [Claude Code Unpack]https://ccunpacked.dev/)
+    - [三层反蒸馏机制](https://yage.ai/share/claude-code-engineering-cost-20260331.html)
+      - 第一层：往输出里掺假。API 返回结果时，服务端会混入一些虚假的工具调用数据
+      - 第二层：把推理过程藏起来
+        - API 服务端把模型在工具调用之间生成的文本缓存并替换为摘要，附带加密签名。客户端在后续请求中发回签名摘要，服务端再还原原文。
+      - 第三层：协议隔离。Claude Code 用一种新的 JSON 协议格式跟 API 通信，带独立的版本标记
+    - 缓存
+      - Claude Code 的 prompt caching 是成本和延迟的关键优化。服务端缓存了之前请求的 prompt 前缀，后续请求如果前缀完全匹配就能复用。
+      - sticky-on latch 机制: 一旦某个 beta header 在会话中首次发送，即使用户后来关掉了对应功能，header 仍然继续发送。
+    - Memory
+      - https://x.com/mem0ai/article/2039041449854124229
+      - 所有记忆以纯 Markdown 文件形式保存在本地：~/.claude/projects/<你的项目名>/memory/
+      - 每个项目独立文件夹，记忆跨会话持久化
+      - 200 行上限 + 25KB 上限。
+        - 超过后系统静默截断（只保留前 200 行），并在文件末尾加一条警告，
+      - User memories：你的角色、偏好、沟通风格（仅自己可见）
+      - Feedback memories：你给过的纠正、验证方法、不要做的事
+      - Project memories：代码无法直接推导的上下文（deadline、架构决策等）
+      - Reference memories：外部系统指针（如 Bug 跟踪、Slack 频道）
+      - https://mp.weixin.qq.com/s/bZmZB0YxRqhMYyQhF-c5zA
+      -  记忆功能全景概述
+        - 个人记忆 (Private)：存放在 ~/.claude/projects/<project>/memory/，跨会话持久化，不共享。
+        - 团队记忆 (Team)：存放在 ~/.claude/projects/<project>/memory/team/，随项目共享。
+        - 临时记忆 (Auto)：存放在 .../memory/logs/，单次会话生成，生命周期短。
+        - 路径隔离：<project> 为 Git 根目录转义名。支持环境变量或 settings.json 重定向私有路径，且防路径穿越。
+      - 记忆系统分层架构设计
+        - 存储边界：通过 teamMemPrompts.ts 中的 Prompt，明确告知 LLM 个人记忆和团队记忆的作用域与不同物理路径。
+        - 解耦设计 (两步保存法)：memdir.ts 定义。
+          - 第一步写入带 Frontmatter（包含 name, description, type）的 Markdown 实体文件；
+          - 第二步在索引文件 ENTRYPOINT_NAME 中追加一行指针（格式：- [Title](file.md) — hook，限制在150字符内）。LLM 初始只读索引。
+      - 核心代码模块剖析
+        - 生命周期 (src/memdir/)：memoryTypes.ts 定义文件结构；memoryAge.ts 计算文件最后修改时间(mtimeMs)，若超过一天则向 LLM 注入 <system-reminder> 提示其可能过时。
+        - 自动提取 (src/services/extractMemories/)：prompts.ts 指导 LLM 按语义主题（非时间线）组织记忆，写入前需检查并更新已有记忆，避免重复。
+        - 关联检索 (findRelevantMemories.ts)：用户输入后触发 startRelevantMemoryPrefetch，使用小模型（Side Query）扫描文件元数据，筛选出最多 5 个相关实体文件挂载到主上下文，并过滤已加载文件。
+        - 内置技能 (src/skills/bundled/remember.ts)：注册 /remember 技能。执行 4 步：收集（各级 Markdown 文件） -> 智能分类提拔（往 CLAUDE.md 或 CLAUDE.local.md 转移） -> 识别清理（查重查旧） -> 生成交互报告（需用户显式批准才可修改）。
+      - 记忆管理中的防劣化机制
+        - 防漂移 (memoryTypes.ts)：TRUSTING_RECALL_SECTION 指令强制要求 LLM：如果记忆提到文件需检查文件是否存在，提到函数需用 grep 搜索，不能盲目信任历史切片。
+        - 一致性校验：依靠 /remember 技能充当“垃圾回收器”，大模型比对自动化日志、项目级配置与用户级配置，提出合并/删除建议。
+    - [用户输入](https://x.com/yukerx/article/2038959908968919297)
+      → 动态组装 7 层系统提示词
+      → 注入 Git 状态、项目约定、历史记忆
+      → 42 个工具各自附带使用手册
+      → LLM 决定使用哪个工具
+      → 9 层安全审查（AST 解析、ML 分类器、沙箱检查...）
+      → 权限竞争解析（本地键盘 / IDE / Hook / AI 分类器 同时竞争）
+      → 200ms 防误触延迟
+      → 执行工具
+      → 结果流式返回
+      → 上下文接近极限？→ 三层压缩（微压缩 → 自动压缩 → 完全压缩）
+      → 需要并行？→ 生成子 Agent 蜂群
+      → 循环直到任务完成
+    - 安全架构
+      - 身份绑定（人-账户-组织-设备-会话的信任链）
+      - 动作级授权（将每次 Tool Use 作为独立授权单元）
+      - 高风险语义审查（对 Bash 等命令进行 AST 级别的结构化多阶段校验）
+      - 意图判断（引入基于上下文的分类器，剥离模型自我辩护，核对真实授权）
 - Skill
   - 跟Claude聊天沟通把一个事情做完， 然后说一句“请把上面的推特写作方法写成Skill
     - Use the Skill Creator to build me a Skill for [X]
