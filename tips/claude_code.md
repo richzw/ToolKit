@@ -461,6 +461,7 @@
       - 在 `.claude/agents` 目录下定义代理，用 `claude --agent=<名字>` 启动。可以给代理设定专属的系统提示词和工具集。
     - /voice：语音编程
     - /web-setup in a local `claude` session to use your local GitHub credentials on the web
+    - Claude Code 终端全屏渲染模式 CLAUDE_CODE_NO_FLICKER=1 claude
     - codex plugin
       ```
       /plugin marketplace add openai/codex-plugin-cc

@@ -501,6 +501,25 @@
       - 功能：跨会话用户建模、跨设备/平台连续性、语义搜索、LLM 生成的用户/AI 画像
   - [The state of AI memory systems](https://x.com/yoheinakajima/article/2037201711937577319)
     - AI 记忆领域已形成清晰共识：混合存储（向量 + 图）、时序感知、主动记忆整合 是高性能系统的三大支柱
+  - Claude Code Memory
+    - Tulving 老爷子在 1972 年提出了记忆系统的框架设计
+      - 情境记忆（episodic memory），我干了啥，用来记录过去；
+      - 语义记忆（semantic memory），我知道啥，用来提炼规律；
+      - 以及程序化记忆（procedural memory），我会做啥，用来决定行动。
+    - 记忆之间是存在相关性的
+      - 我经历的事情（情景记忆）会慢慢遗忘细节，储存在脑海中的是提炼后的规律和知识，也就是压缩成了语义记忆
+      - 我知道的东西又会逐渐内化为行动的指引，变成一种“知道怎么做”的能力，这就是程序化记忆
+      - 程序化记忆反过来又会指导行动，从而产生新的经历。三者构成了一个不断循环的过程：经历 → 知识 → 技能 → 新的经历
+    - Claude Code Memory 在这几块都有对应的实践
+      - 每轮次的对话它会以 jsonl 格式做储存，这是情境记忆；同时在对话过程中还会有 SessionMemory 做实时蒸馏，相当于一边发生一边做初步整理。
+      - 每轮次结束后，它会 fork 出一个子 Agent（extractMemories）去提取值得持久化的内容，写入带 YAML 头的 MD 文件，这一层对应语义记忆
+      -  autoDream 机制，会在后台做整合和修剪，把碎片化的内容重新组织、合并、更新，这一步很像记忆的巩固过程。
+      - 程序化记忆 一个 feedback 的记忆类型，不仅记录了不要做什么（用户的纠正），还会记录哪些做法是对的（用户的确认），这些都是经验化的技能记录
+    - 不足
+      - 不支持语义化召回（用 LLM 扫 metadata 代替向量检索，上限 200 个文件）、遗忘策略比较粗（24 小时 or 5 轮对话触发整合）、无关联网络（记忆是孤立文件），等等。
+    - OpenClaw Memory
+      - 不追求全量记忆，而是优先解决“记忆什么时候该被用”。它把记忆拆成了三层：全局层、工作区层、任务层，逐层收敛，只在必要的时候才把上下文拉进来
+      - 在 OpenClaw 眼里，记忆不是资产，正确使用记忆的能力才是。所以它的设计更侧重于重建临时的记忆网络。
 - [为 AI Agent 构建记忆系统](https://nowledge.co/zh/blog/building-memory-systems-for-ai-agents)
 - [Context Management for Deep Agents](https://www.blog.langchain.com/context-management-for-deepagents/)
   - Deep Agents implements three main compression techniques, triggered at different frequencies:

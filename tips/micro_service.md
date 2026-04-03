@@ -358,7 +358,9 @@
       - 热点事件问题
         - 当发现队列阻塞，根据处理耗时和出现频率自动分析和统计出最热的key，将这些key转发到独立的热点队列中去，然后启动处理线程从新的热点队列中消费数据，隔离热点，避免其他视频受到影响。
       - ![img.png](micro_service_cqrs_sample.png)
-
+  - [Replication redefined: How we built a low-latency, multi-tenant data replication platform](https://www.datadoghq.com/blog/engineering/cdc-replication-search/)
+    -  多租户 CDC/复制平台，底座主要由 PostgreSQL logical replication / logical decoding、Debezium、Kafka、Kafka Connect、Schema Registry、Temporal 组成
+    - 把“查询数据库”改成“把数据库变更实时复制成搜索/消费友好的事件流”，再通过自动化编排、Schema 治理和可插拔转换能力，把单个 CDC 项目做成平台能力
 - [负载均衡](https://mp.weixin.qq.com/s/RFjTDNsGiqkMNnkjVus5Zw)
   - 负载均衡的主要作用
     - 高并发：负载均衡通过算法调整负载，尽力均匀的分配应用集群中各节点的工作量，以此提高应用集群的并发处理能力（吞吐量）。

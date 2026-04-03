@@ -524,7 +524,16 @@
     - 核心逻辑：基于分布式文件系统（PolarFS）实现主从共享物理数据。
       - 共享存储 ； compute 无本地数据副本 ； replica 直接读共享存储
     - 收益：从库无需存储冗余数据，降低了存储成本，简化了复制模型。
-
+- [2MB 的 PostgreSQL work_mem，如何吃掉 2TB 内存](https://mp.weixin.qq.com/s/inEfI61mjMLpSrEXAZFRYA)
+  - 即使 work_mem=2MB，PostgreSQL 仍可能因单个后端进程在一次查询生命周期内持续累积内存而吃掉巨量内存，最终触发 OOM killer
+    - work_mem限制的是单次排序/哈希操作的内存阈值，但并不等价于单条查询/单个会话的内存上限；
+    - 而 PostgreSQL 的 Memory Context 机制往往在查询结束才批量释放，若查询结构导致大量短生命周期的分配被挂在长生命周期上下文上，就会出现“看似每次不大，但总量爆炸”的效果
+  - 排查利器：pg_log_backend_memory_contexts(pid) 输出后端内存上下文树
+  - 日志线索：ExecutorState / HashTableContext 占用异常、chunks 数量巨大
+  -  4 种方式规避此类内存溢出问题
+    - 优化统计信息：若查询规划器低估了行计数，会做出错误的磁盘溢出决策。需定期执行ANALYZE命令，检查pg_stats和pg_statistic视图
+    - 设置查询超时：无法限制内存占用，但可通过statement_timeout参数终止运行时间过长的查询，避免内存持续累积导致宕机
+    - 利用pg_log_backend_memory_contexts监控：掌握该函数的用法后，可在内存出现异常时及时调用，在 OOM killer 触发前定位内存占用异常的根源，提前排查问题。
 
 
 
