@@ -166,6 +166,14 @@
     - Harness 是一个随着模型进化不断"做减法"的过程——约束越少，模型的聪明度释放越彻底。
     - Harness Engineering 是一套通过「规划 → 执行 → 检查」闭环驾驭 AI Agent 的工程框架：
       - 短期靠 GAN 对抗机制保障输出下限，长期靠消融工程逐步释放模型真实能力、拔高系统智力上限。
+  - [harness engineering 的本质是让 AI 构建软件变得 scalable，而 scalability 有三个独立的维度](https://yage.ai/share/harness-engineering-scalability-20260330.html)
+    - 地基
+      - 人类的核心工作从写代码转向了设计 agent 的工作环境。
+      - 知识必须版本化、可发现、存在于 repo 中
+      - 约束比指令有效
+    - 时间 Scalability：让一个 Agent 连续跑几小时
+    - 空间 Scalability：让几百个 Agent 并行工作
+    - 交互 Scalability：让人用最少的介入 steer 大量 Agent 工作
 - [Chrome MCP]
   - 开启远程调试
     - Chrome 地址栏输入： chrome://inspect/#remote-debugging 勾选 Allow remote debugging，同意弹窗。

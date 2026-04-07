@@ -2,6 +2,27 @@
   - 人负责：观点、方向、判断、决策。 
   - AI 负责：整理、结构化、补充细节、执行。 
   - 工具负责：连接和沉淀（Obsidian、Claude Code）
+- [Harnessing Claude’s intelligence](https://claude.com/blog/harnessing-claudes-intelligence)
+  - Use what Claude knows
+    - Agent Skills, programmatic tool calling, and the memory tool are all built from the bash and text editor tools.
+  - Ask ‘what can I stop doing?’
+    - Let Claude orchestrate its own actions - Claude 能够亲自编写代码，来控制工具的调用并串联它们之间的逻辑。
+    - Let Claude manage its own context  - Skills and subagents
+    - Let Claude persist its own context
+      - 压缩 (compaction) 技术允许 Claude 自己对过去的上下文进行浓缩总结
+      - 引入记忆文件夹 (memory folder) 则是另一种妙招。它允许 Claude 像记笔记一样，把重要的上下文写成文件存起来，需要的时候再去读取翻看
+    - 谨慎设定边界 (Set boundaries carefully)
+      - 巧妙设计上下文工程 (Context Engineering)，让缓存命中率拉满
+        - 静态内容在前，动态内容在后 安排请求顺序时，将稳定的内容（如系统提示词、工具列表）放在最前面
+        - 用消息来更新 如果需要提醒模型，请在消息末尾追加一个 <system-reminder>，而不是去修改原始的提示词
+        - 别中途换模型 避免在同一个会话中切换不同的模型。缓存是跟着特定模型走的；一旦切换，缓存全盘作废
+          - 需要一个更便宜的模型处理简单任务，请使用子智能体。
+        - 谨慎管理工具 工具列表位于缓存的头部。因此，增加或删除任何一个工具都会使其失效。
+          - 对于动态发现新工具的场景，请使用 工具搜索 (tool search) 功能，这只会向后追加内容而不会破坏缓存
+      - 利用声明式工具打造 UX、可观测性与安全边界
+        - 对于像调用外部 API 这种泼水难收的操作，你可以设置一道门槛，强制要求“用户确认”后才能放行。
+        - 对于像 edit（编辑）这样的写入工具，你可以内置一个“文件陈旧度检查”，防止 Claude 稀里糊涂地覆盖掉别人刚刚修改过的文件。
+  - AI 界著名的“苦涩的教训 (the Bitter Lesson)”：过度依赖人类经验的手工规则，最终往往会拖累模型自身依靠算力进化出的能力 
 - [AI 比你更"熟练"时，如何划定控制权的边界](https://mp.weixin.qq.com/s/ZaVuD8zslb_knCvcR2WCIA)
   - 工欲善其事，必先利其器。然利器在手，当知进退，明取舍。善用者如庖丁解牛，游刃有余；不善用者如邯郸学步，反失其本
   - R-C-V 三维评估模型：给 AI 划红线
@@ -660,6 +681,12 @@
     - 缓存
       - Claude Code 的 prompt caching 是成本和延迟的关键优化。服务端缓存了之前请求的 prompt 前缀，后续请求如果前缀完全匹配就能复用。
       - sticky-on latch 机制: 一旦某个 beta header 在会话中首次发送，即使用户后来关掉了对应功能，header 仍然继续发送。
+      - [Lessons from Building Claude Code: Prompt Caching Is Everything](https://x.com/trq212/article/2024574133011673516)
+        - 用 Messages 更新信息：不要修改系统提示（会打破缓存），而是在下一条用户消息或 Tool Result 中插入 <system-reminder> 标签（如更新日期、文件变更）。
+        - 绝不在会话中途切换模型：缓存是模型专属的。切换模型（如 Opus → Haiku）会完全重建缓存，比继续用 Opus 还贵。推荐用 Subagent + Handoff 消息实现模型切换。
+        - 绝不在会话中途增删 Tools：这是最常见的缓存杀手。解决办法：用 EnterPlanMode / ExitPlanMode 等 Tool 来模拟状态切换（保持 Tool 定义不变）。
+        - Tool Search + defer_loading：只发轻量 Tool Stub（名称+defer_loading:true），真正需要时才加载完整 Schema。
+        - Compaction（上下文压缩）必须“缓存安全”: 正确做法：复用父会话完全相同的系统提示、Tools、上下文，只在末尾追加压缩指令 → 几乎 100% 命中父缓存。
     - Memory
       - https://x.com/mem0ai/article/2039041449854124229
       - 所有记忆以纯 Markdown 文件形式保存在本地：~/.claude/projects/<你的项目名>/memory/

@@ -612,8 +612,8 @@
   - 主动压缩与回压： 不要等到窗口满了才处理。HumanLayer 建议在达到 100k Token（即使对于 1M 窗口的模型也仅占 10%）时就触发上下文预警，强迫模型或用户进行清理。
   - 渐进式披露（Progressive Disclosure）： 仅在需要时才读取相关文件，保持上下文的小巧和聚焦。
 - [Agent of Chaos](https://agentsofchaos.baulab.info/report.html)
-
-
+- [How My Agents Self-Heal in Production](https://x.com/vishsuresh_/article/2039748786290037038)
+  
 
 
 

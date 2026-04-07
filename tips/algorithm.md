@@ -698,8 +698,19 @@
   - SipHash 是一种专门为哈希表（hash table）设计的加密级哈希函数，核心目标不是“抗碰撞到极致”，而是——防止哈希碰撞攻击（Hash DoS） 带密钥的、轻量级、安全哈希函数
   - Hash Collision DoS 攻击 - 攻击者可以构造大量 key 导致 hash table 退化成链表
 - [finding all regex matches has always been O(n²). even in the engines built to prevent it](https://iev.ee/blog/the-quadratic-problem-nobody-fixed/)
-
-
+- [Maze Classification](https://www.astrolog.org/labyrnth/algrithm.htm)
+  - 迷宫生成算法 (Creation Algorithms)详细对比了多种生成“完美迷宫”的算法及其特性：
+    - 递归回溯法 (Recursive Backtracker)： 路径长且弯曲，死胡同少。
+    - Kruskal 算法： 随机移除墙壁直至连通，产生很多短的死胡同。
+    - Prim 算法： 类似于 Kruskal，但生成的迷宫具有放射状特征。
+    - Aldous-Broder & Wilson 算法： 基于随机游走，能生成统计意义上完全随机（Uniform）的迷宫。
+    - 递归分割法 (Recursive Division)： 不断画线分割空间，风格独特。
+    - Eller 算法： 逐行生成，内存占用极低，理论上可以生成无限长的迷宫。
+  - 迷宫求解算法 (Solving Algorithms) 解开迷宫的常见策略：
+    - 右手定则 (Wall Follower)： 只要墙壁连通，顺着一面墙走。
+    - Pledge 算法： 改进后的顺墙走，能解决有回路或非简单连通的情况。
+    - 死胡同填充法 (Dead-end Filling)： 填满所有死胡同，剩下的就是通往终点的路。
+    - 广度优先搜索 (BFS)： 寻找最短路径的最快计算机算法。
 
 
 
