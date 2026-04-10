@@ -1566,6 +1566,7 @@
     - 办法是增加一层转发层，用户将多轮请求携带同样的标识id并发送给转发层，转发层感知集群信息并匹配标识id和下游机器。
   - [KV Cache产生背景及技术细节](https://mp.weixin.qq.com/s/IIhu1qTDogp3GVJPYnrZ5g)
     - KV Cache 是大模型推理性能优化的一个常用技术，该技术可以在不影响任何计算精度的前提下，通过空间换时间的思想，提高推理性能
+    - [KV Cache 压缩技术详解](https://mp.weixin.qq.com/s/1YNUPn0toIsJGsn4GfAiLw)
   - 投机采样方法
     - 投机采样的设计基于两点认知：
       - 在模型推理中，token生成的难度有差别，有部分token生成难度低，用小参数草稿模型（下简称小模型）也能够比较好的生成；

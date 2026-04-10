@@ -453,6 +453,8 @@
       - 初始化iterator的时候有个batch_size参数，如果缓存里的结果集仍然小于batch_size，它就会再次执行search(半径继续往外扩)来获取更多的结果集
     - 多列向量查询
       - 2.4版本的多列向量查询是先分别计算每个子查询的结果，再把子结果rerank。根据topk再做reranking。不是简单的取交集，有 fusion 策略的
+      - Rank-based fusion (RRF): Ignore scores, compare positions
+      - Weighted combination: Tune: 40% keyword, 60% semantic
     - 索引中做向量相似性检索
       - 本质上都是通过预先对向量数据的分布做了一个统计，然后在搜索的时候仅计算很小的范围就能找到绝大部分结果。不管是hnsw还是ivf，搜索的时候都只计算很小一部分数据就能找到结果
       - 那如果加上过滤条件，把一大批数据都排除在计算之外，那么本来要搜索的那小范围里也会有向量被排除在外，就凑不出足够的结果

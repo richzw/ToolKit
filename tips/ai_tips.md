@@ -174,6 +174,10 @@
     - 时间 Scalability：让一个 Agent 连续跑几小时
     - 空间 Scalability：让几百个 Agent 并行工作
     - 交互 Scalability：让人用最少的介入 steer 大量 Agent 工作
+  - [Better Harness: A Recipe for Harness Hill-Climbing with Evals](https://x.com/vtrivedy10/article/2041927488918413589)
+    - 经典 ML：model + training data + gradient descent → better model
+    - Agent 世界：harness + evals + harness engineering → better agent
+    - https://github.com/langchain-ai/deepagents/tree/main/examples/better-harness
 - [Chrome MCP]
   - 开启远程调试
     - Chrome 地址栏输入： chrome://inspect/#remote-debugging 勾选 Allow remote debugging，同意弹窗。

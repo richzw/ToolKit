@@ -492,6 +492,7 @@
       - /codex:review runs the standard read-only Codex review.
       - /codex:adversarial-review runs a steerable challenge review. Use it when you want Codex to question the implementation, not just inspect it.
       - /codex:rescue hands a task to Codex directly.
+  - /autofix-pr now lets you kick off autofix straight from the command line
   - /btw 在不破坏 claude code 单 Loop 简洁性的前提下，通过"降级调用"（无工具、单次响应）实现轻量级的侧信道交互
     - /btw 被明确定位为 sub-agent 的"逆运算"：
     - 主 Loop 是"有上下文 + 有工具"的完整 Agent；/btw 和 sub-agent 分别是它在两个维度上的降维投影。
@@ -1071,10 +1072,27 @@
   - Sub-agent 解决"怎么做事"，Team agent 解决"怎么协作"，Stream0 解决"怎么通信"
 - [Agent-to-agent pair programming](https://axeldelafosse.com/blog/agent-to-agent-pair-programming)
   - 
-
-
-
-
+- 如何避免「隐形 token 消耗」
+  - 头号杀手：Subagents（子代理）
+    - 每启动一个 subagent（包括 Task 工具、Plan/Explore 代理、自定义子任务），都会单独计为一个新 session。
+    - 它们不共享主上下文，每个子代理独立消耗大量 tokens（动辄几十万甚至上百万）。
+    - Tips：
+      - 只在真正需要并行/复杂分解时用 subagent。      
+      - 让子代理用更便宜的模型（如 Haiku），而非默认 Opus。      
+      - 完成后及时 /compact 或结束 session
+  - 自动化后台任务（Cron / Recurring Scripts）
+    - 一个每 5 分钟跑一次的「监控脚本」，看似每次只用几千 tokens，但一天下来就爆炸。
+    - 部署 watcher、自动 deploy 脚本、自定义 harness（Hermes、Pi agent 等）最容易中招。
+  - 频繁上下文切换：在多个项目间跳来跳去，每次切换都会重新加载大量历史。
+  - 长会话未 compact：历史越长，每次新消息都要重新处理全部上下文，消耗呈指数级增长。
+  - npx claude-token-analyzer 或 npx cc-lens（可视化仪表盘，更直观）
+    - https://gist.github.com/kieranklaassen/7b2ebb39cbbb78cc2831497605d76cc6
+  - 好习惯：
+     - 养成用 /compact 总结会话。    
+     - 用 /memory 或 CLAUDE.md 管理长期知识，减少重复读取文件。    
+     - 简单任务切换到 Haiku 模型。    
+     - 关闭不必要的后台 cron / watcher。    
+     - 不同任务开新 session，避免历史膨胀。
 
 
 

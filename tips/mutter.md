@@ -12,8 +12,7 @@
     - 浏览器层（Layer 1）： 检查 WebGL 渲染器、屏幕分辨率、硬件并发数、字体渲染尺寸等。
     - Cloudflare 网络层（Layer 2）： 检查地理位置、IP 地址等由 Cloudflare 边缘节点注入的头部信息，确保请求确实经过了 Cloudflare 网络。
     - 应用状态层（Layer 3）： 验证 React 组件的加载和初始化状态，这是区分高级爬虫与真人的关键。
-
-
+- [App Store Price](https://app.vbr.me/)
 
 
 

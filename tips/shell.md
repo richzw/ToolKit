@@ -262,7 +262,12 @@
   - free Linux 会用空闲内存做缓存；真正要看 avail Mem
     - free（或 top 中的 free）小，往往是因为页面缓存（page cache）/buffer 被充分利用。
     - available 是内核估算的“在不触发严重回收/不影响系统的情况下可用内存”，比单看 free 更接近真实可用量
-
+- [SSH certificates: the better SSH experience](https://jpmens.net/2026/04/03/ssh-certificates-the-better-ssh-experience/)
+  - 传统 SSH 密钥的局限性 (Static Keys)
+    - 管理成本高： 传统模式需要将每个用户的公钥手动（或通过自动化工具）分发到所有目标服务器的 authorized_keys 文件中。
+    - 清理困难： 当员工离职或密钥丢失时，从成百上千台服务器中彻底删除特定的公钥非常繁琐且容易遗漏。
+    - 缺乏过期机制： 传统密钥通常永久有效，增加了长期被盗用的风险。
+    - TOFU 问题： 首次连接服务器时，用户必须手动确认主机指纹（Trust On First Use），这不仅体验差，还容易遭受中间人攻击
 
 
 
